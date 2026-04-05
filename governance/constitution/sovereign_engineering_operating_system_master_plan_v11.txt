@@ -1,0 +1,3652 @@
+# SOVEREIGN ENGINEERING OPERATING SYSTEM
+## Implementation Constitution and Roadmap
+### Kernel + Project OS + Multi-Vendor Capability Strategy
+**Version:** Integrated Architecture Baseline v11
+
+---
+
+## 0. Executive Definition
+
+This system is not a chat assistant.  
+It is not a prompt wrapper.  
+It is not an IDE plugin bundle.  
+It is not a terminal toy.  
+It is not “one strong model does everything.”  
+It is not merely a coding tool.
+
+It is a **Sovereign Engineering Operating System** whose kernel governs truth, legality, approvals, replay claims, recovery, and side-effect authority across the full lifecycle of engineering work.
+
+Its constitutional rules are:
+
+1. The system owns truth.
+2. The system owns state transitions.
+3. The system owns approvals, permissions, and side-effect authority.
+4. The system owns replay claims, audit evidence, and recovery guarantees.
+5. Models are bounded cognitive workers, not sources of truth.
+6. Cloud vendors, plugins, tools, runners, and model APIs are subordinate execution resources, never hidden authority channels.
+7. The system is local-first in authority, evidence, and recoverability, even when later phases admit remote execution surfaces.
+8. Coding is one lane of the system, not the identity of the system.
+
+**One-line rule**
+
+Models may think, search, explain, compare, plan, and generate.  
+Only the system may define truth, mutate state, approve effects, seal revisions, record evidence, classify replay fidelity, and claim recoverability.
+
+**Practical translation**
+
+- Intelligence is replaceable.
+- Authority is not.
+- Workers are replaceable.
+- Truth is not.
+- Coding is one lane.
+- Governance is permanent.
+- Evidence is mandatory.
+- Replay claims are bounded by captured reality, not desire.
+
+This system is not defined as “an AI that writes code.”  
+It is defined as a sovereign engineering operating system that plans, designs, implements, validates, reviews, governs, audits, replays, recovers, releases, and evolves software projects end-to-end.
+
+This document is the governing implementation constitution and execution roadmap for the system.
+
+---
+
+## 1. Primary Mission
+
+Primary mission:
+
+Build a local-first, state-sovereign engineering operating system that can survive real software engineering conditions and govern the full lifecycle of work:
+
+- requirement interpretation
+- project planning
+- architecture design
+- implementation
+- validation
+- review
+- approval
+- side-effect control
+- release gating
+- audit
+- replay
+- recovery
+- long-term evolution
+
+This system is not optimized for demo throughput.  
+It is optimized for control, correctness, survivability, and project-scale execution.
+
+Success does not mean “the model sounds smart.”  
+Success means:
+
+- repository truth is system-owned
+- revisions are legal and recoverable
+- model proposals cannot bypass validation or approval
+- side effects are capability-gated and policy-gated
+- context construction is deterministic within declared limits
+- replay claims are honest
+- audit evidence explains why something happened
+- crash recovery returns to a known legal sealed state
+- retries and budgets cannot run unbounded
+- validation catches real mistakes
+- large repositories remain operable through incremental invalidation
+- project work can be orchestrated across multiple lanes without surrendering kernel sovereignty
+- temporary substrates are replaced only when justified by measured failure data
+- irreversible effects require stronger evidence, stronger authority, and stronger audit than reversible effects
+
+Secondary mission:
+
+Turn frontier models into interchangeable workers under one authority model.  
+The objective is not to worship any vendor.  
+The objective is to subordinate multiple strong vendor capabilities to one sovereign kernel.
+
+**Failure definition**
+
+The system is considered failed if any of the following occur:
+
+- truth can be silently mutated outside kernel authority
+- approval can time-travel across drift or concurrency races
+- replay labels exaggerate what evidence supports
+- validation can be bypassed or faked
+- side effects can begin without valid capability and policy checks
+- crash recovery invents sealed truth that never crossed a legal durability boundary
+- audit queries cannot reconstruct why a material action happened
+- temporary execution convenience becomes a permanent hidden authority channel
+- model outputs are treated as truth-bearing without governed artifact conversion
+
+---
+
+## 2. Scope Boundary
+
+### 2.1 Current first-class scope
+
+The current kernel **constitutionally covers**:
+
+- text-first repositories
+- source code
+- dependency manifests
+- build manifests
+- configuration files
+- workspace metadata
+- tests
+- scripts
+- explicitly allowed generated text artifacts
+
+### 2.2 Current guaranteed focus
+
+Within the current scope, the system is intended to provide:
+
+- truth sovereignty
+- revision legality
+- deterministic context construction within declared replay limits
+- build-aware validation
+- governed side effects
+- approval-bound execution
+- evidence-backed auditability
+- explicit replay levels
+- drift reconciliation
+- budget and retry control
+- local-first heavy-load governance
+- secret and telemetry sovereignty
+- bounded future expansion through explicit extension tracks
+
+### 2.3 Current non-goals
+
+This version does not claim native kernel support for:
+
+- binary-first artifacts
+- graph-first artifacts
+- engine-hosted domains
+- DCC semantics
+- Unreal / Blender / Houdini / ComfyUI-native graphs
+- unconditional cross-platform numerical equivalence
+- cloud re-query as exact replay
+- unconstrained distributed multi-user execution from day one
+- unconstrained plugin-defined authority
+- uncontrolled remote state mutation
+- silent delegation of truth or approval to vendor infrastructure
+
+### 2.4 Expansion rule
+
+Expansion is permitted only through bounded extension surfaces.
+
+Two expansion classes exist:
+
+**A. Engineering-layer expansion**
+
+Examples:
+- planning
+- release operations
+- backlog orchestration
+- repo intelligence
+- workflow automation
+- async project execution
+- route benchmarking and lane arbitration
+
+These may be added above the kernel through stable artifact contracts.
+
+**B. Domain-layer expansion**
+
+Examples:
+- engine-hosted artifacts
+- graph-native domains
+- external stateful compute hosts
+- domain-specific scene graphs
+- external long-lived daemons that hold non-text state
+
+These require a separate Domain Adapter Track and may not be smuggled into the current kernel by implication.
+
+### 2.5 Domain Adapter Track minimum
+
+Any future domain adapter must include:
+
+- Domain Adapter Contract
+- Domain State Proxy / Bidirectional IR
+- Graph Topology Type Checker
+- Persistent Daemon Execution Model
+- Flush & Persist Contract
+- External Stateful Host Recovery Contract
+- Synchronous Compute Barrier
+- Adapter-Specific Provenance Policy
+- Adapter-Specific Replay Policy
+- Adapter Admission Rules
+- Invariant Preservation Rules
+- Extension Governance Rules
+
+---
+
+## 3. Core Design Doctrine
+
+### 3.1 Truth sovereignty
+
+No prompt, model memory, runner output, plugin, tool side effect, or cloud API result may define truth.  
+Only the kernel does.
+
+### 3.2 Default deny
+
+No revision seal, external side effect, outbound network action, high-privilege tool use, or sensitive evidence export occurs without explicit capability and policy authorization.
+
+### 3.3 Explicit replay honesty
+
+The system never claims a replay level beyond what captured evidence physically supports.  
+A persuasive rerun is not exact replay.  
+A semantically similar outcome is not exact replay.  
+A cloud re-query is not exact replay.
+
+### 3.4 Evidence first
+
+Important actions must be reconstructable from evidence, not inferred after the fact.  
+If the system cannot prove why an action occurred, the system must classify that action as insufficiently evidenced.
+
+### 3.5 Safety and liveness
+
+The system must prevent corruption and runaway behavior while still making bounded progress under admitted load.  
+No safety mechanism is acceptable if it silently invents truth.  
+No liveness mechanism is acceptable if it silently bypasses authority.
+
+### 3.6 Controlled cognition
+
+Workers are bounded proposal engines, not authorities.  
+Workers may propose, compare, search, summarize, and generate.  
+They may not self-authorize, self-approve, self-seal, self-classify replay, or self-grant capability.
+
+### 3.7 Enterprise code sovereignty
+
+Telemetry, replay bundles, evaluation corpora, and debug exports must not become covert code exfiltration channels.  
+The system must treat proprietary code, manifests, internal topology, and evidence artifacts as controlled material.
+
+### 3.8 Local-first heavy-load awareness
+
+The system must explicitly govern:
+
+- memory pressure
+- swap onset
+- disk growth
+- cache pollution
+- hostile APIs
+- queue starvation
+- long-runner suspension
+- workstation collapse
+
+### 3.9 Monotonic causality
+
+Causal order is defined by logical sequence, not wall-clock.  
+Wall-clock time is metadata, not authority.  
+If causality is ambiguous, the system must fail closed rather than invent a legal ordering.
+
+### 3.10 No new constitutional rules without physical evidence
+
+After this document, new top-level rules are legitimate only if driven by:
+
+- implementation failures
+- replay breaks
+- benchmark collapses
+- governance incidents
+- recovery ambiguities
+- authority boundary violations
+
+### 3.11 Authority locality
+
+Authority must remain local to the kernel even when workers, tools, runners, or future remote execution surfaces are distributed.  
+A distributed worker surface does not imply distributed sovereignty.
+
+### 3.12 Explicit downgrade discipline
+
+When guarantees weaken, the system must downgrade its claim language, artifact class, replay class, or approval admissibility rather than hiding degradation behind polished output.
+
+### 3.13 Minimality at the hot path
+
+The system must aggressively distinguish hot-path authority logic from cold-path analysis logic.  
+Authority checks, revision legality checks, approval barrier checks, and capability validation belong to hot-path governance and must not be bloated by project-scale analysis, narrative summaries, or batch intelligence layers.
+
+### 3.14 Replacement-by-evidence doctrine
+
+Temporary substrates, temporary validators, temporary runners, and temporary replay paths are allowed.  
+They are not weaknesses if honestly declared.  
+They become weaknesses only if preserved without evidence-based review.
+
+---
+
+## 4. System Shape
+
+The system has two major bands:
+
+**A. Sovereign Kernel**  
+**B. Engineering Capability Band**
+
+### 4.1 Sovereign Kernel planes
+
+1. Truth Plane
+2. Validation Plane
+3. Execution Plane
+4. Control Plane
+5. Context Plane
+6. Evidence Plane
+7. Learning Plane
+8. Periphery Plane
+
+### 4.2 Engineering Capability Band
+
+1. Planning Lane
+2. Architecture Lane
+3. Coding Lane
+4. Validation Lane
+5. Review Lane
+6. Async Backlog Lane
+7. Repo Intelligence Lane
+8. Release / Operations Lane
+
+### 4.3 Shape rule
+
+The kernel owns truth, authority, and admissibility.  
+The capability band consumes kernel contracts and produces governed proposals.  
+No lane may silently bypass a plane.  
+No plane may silently delegate sovereignty upward or outward.
+
+### 4.4 Plane semantics
+
+**Truth Plane** — owns durable truth, revision legality, causality, snapshot identity, and recovery eligibility.  
+**Validation Plane** — determines whether a proposed mutation is legally admissible before truth changes.  
+**Execution Plane** — performs effects but does not define truth or approve itself.  
+**Control Plane** — owns approvals, capabilities, budgets, retries, drift handling, taint posture, scheduling, and route governance.  
+**Context Plane** — constructs bounded, deterministic, provenance-rich context for workers and reviewers.  
+**Evidence Plane** — proves what happened and what can honestly be claimed.  
+**Learning Plane** — learns only on governed evidence and never bypasses provenance.  
+**Periphery Plane** — provides user-facing and ecosystem-facing surfaces without seizing sovereignty.
+
+### 4.5 Lane semantics
+
+**Planning Lane** — turns ambiguous goals into executable project structure.  
+**Architecture Lane** — makes structural design decisions before implementation emission.  
+**Coding Lane** — performs implementation work under governed mutation rules.  
+**Validation Lane** — runs legality, coherence, and regression checks.  
+**Review Lane** — renders cognitive and risk legibility for approval and audit.  
+**Async Backlog Lane** — executes deferred or long-tail work under the same kernel governance model.  
+**Repo Intelligence Lane** — maps repository structure, technical debt, and dependency topology.  
+**Release / Operations Lane** — governs release readiness, rollback readiness, and environment-sensitive execution consequences.
+
+---
+
+## 5. Hardware and Deployment Baseline
+
+Primary baseline:
+
+- Apple MacBook Pro with M5 Max
+- 64 GB unified memory
+- 2 TB internal storage
+- optional external SSD expansion
+- local-first preferred
+- single-user or small-team initial mode
+
+Implications:
+
+- medium-to-large text-first repositories are feasible locally
+- strict working-set discipline is mandatory under simultaneous inference + validation
+- disk growth must be governed from day one
+- macOS-specific isolation strategy must be explicit for validation quarantine
+- cross-platform bit-identical replay is not assumed
+- remote collaboration requires a later persistence and coordination strategy
+
+### 5.1 Baseline hardware rule
+
+The machine is not an abstraction layer. Its memory ceiling, storage profile, process behavior, filesystem semantics, and local sandbox limitations shape the implementation.
+
+### 5.2 Local-first execution consequences
+
+- the system must tolerate medium and large local repository indexing
+- the system must distinguish foreground latency from background indexing and validation load
+- the system must explicitly budget memory for simultaneous context construction, validation, and worker execution
+- the system must suspend or degrade non-critical lanes under pressure before the workstation collapses
+
+### 5.3 Anti-swap posture
+
+The system must treat swap onset as a governance event, not a purely operating system concern.
+
+### 5.4 Disk governance
+
+The system must govern artifact store growth, replay retention, evidence retention, quarantine churn, worktree duplication, benchmark corpus growth, and failure bundle retention.
+
+### 5.5 Platform-specificity rule
+
+The baseline platform is macOS on Apple Silicon.  
+Validation isolation strategy, filesystem assumptions, replay exactness, and toolchain fingerprinting must remain explicit.
+
+---
+
+## 6. Capability Model
+
+This system is not only “for writing code.”  
+It is for the engineering lifecycle.
+
+### 6.1 Planning Lane
+
+**Purpose** — convert ambiguous goals into executable engineering graphs.
+
+**Functions**
+
+- PRD/spec decomposition
+- task graph construction
+- milestone sequencing
+- dependency ordering
+- blocker identification
+- acceptance criteria drafting
+- effort/risk classification
+- backlog shaping
+
+### 6.2 Architecture Lane
+
+**Purpose** — decide how the system should be built before code is emitted.
+
+**Functions**
+
+- module boundary design
+- interface contract drafting
+- state machine design
+- migration path evaluation
+- extensibility impact review
+- failure mode analysis
+- data flow review
+- permission boundary review
+
+### 6.3 Coding Lane
+
+**Purpose** — perform actual implementation work.
+
+**Functions**
+
+- patch generation
+- multi-file editing
+- refactoring
+- test generation
+- migration writing
+- configuration edits
+- manifest edits
+- tool execution
+
+### 6.4 Validation Lane
+
+**Purpose** — determine whether a proposed change is actually valid.
+
+**Functions**
+
+- syntax validation
+- semantic validation
+- build graph validation
+- patch-shape legality
+- incremental invalidation
+- multi-file patch coherence
+- regression checks
+- side-effect legality review
+
+### 6.5 Review Lane
+
+**Purpose** — render a proposed change cognitively reviewable and risk-legible.
+
+**Functions**
+
+- semantic impact summary
+- blast radius summary
+- breaking-change detection
+- policy violation summary
+- review artifact generation
+- reject/revert consequence rendering
+- approval pre-checks
+
+### 6.6 Async Backlog Lane
+
+**Purpose** — handle long-tail work outside the foreground interaction loop.
+
+**Functions**
+
+- issue backlog execution
+- docs updates
+- test expansion
+- dependency upgrades
+- low-priority cleanup
+- routine refactors
+- chore PR drafting
+
+### 6.7 Repo Intelligence Lane
+
+**Purpose** — understand the repository at whole-system scale.
+
+**Functions**
+
+- architecture map
+- dependency map
+- build graph map
+- symbol frontier extraction
+- technical debt map
+- coupling hotspots
+- context frontier generation
+
+### 6.8 Release / Operations Lane
+
+**Purpose** — govern release readiness and operational consequences.
+
+**Functions**
+
+- release gate evaluation
+- rollback readiness
+- environment diff checks
+- config drift analysis
+- incident triage support
+- observability coverage review
+- deployment checklist generation
+
+### 6.9 Lane authority rule
+
+No lane may self-approve, self-upgrade replay claims, self-classify a side-effect class beyond governed proposal scope, mutate truth directly, or escape artifact conversion.
+
+---
+
+## 7. Unified Artifact Contract
+
+All lanes and all workers must emit kernel-governed artifacts. No vendor-specific output is authoritative until converted into system artifacts.
+
+### 7.1 Material artifact set
+
+- ProjectArtifact
+- EpicArtifact
+- TaskArtifact
+- IntentArtifact
+- Revision
+- SnapshotRoot
+- JournalEntry
+- ContextArtifact
+- InferenceArtifact
+- PatchProposal
+- ValidationReceipt
+- BuildReceipt
+- SemanticReceipt
+- ReviewArtifact
+- ApprovalArtifact
+- CapabilityToken
+- ReplayAnchor
+- AuditRecord
+- FailureBundle
+- BudgetRecord
+- TaintRecord
+- ReleaseGateRecord
+- DriftEventRecord
+- MemoryItem
+
+### 7.2 Artifact classes
+
+**Truth-bearing artifacts** — Revision, SnapshotRoot, JournalEntry  
+**Authority-bearing artifacts** — ApprovalArtifact, CapabilityToken  
+**Execution-bearing artifacts** — PatchProposal, BuildReceipt, SemanticReceipt, ValidationReceipt  
+**Evidence-bearing artifacts** — ContextArtifact, InferenceArtifact, ReviewArtifact, ReplayAnchor, AuditRecord, FailureBundle  
+**Governance-bearing artifacts** — BudgetRecord, TaintRecord, ReleaseGateRecord, DriftEventRecord  
+**Memory and continuity artifacts** — MemoryItem
+
+### 7.3 Artifact conversion rule
+
+Worker output must pass through governed artifact conversion before it gains load-bearing meaning. Artifact conversion must assign stable identity, causal references, version tuple binding, provenance, taint posture, admissibility class, and retention class.
+
+### 7.4 Artifact causality rule
+
+Every material artifact must be causally linkable.
+
+### 7.5 Artifact admissibility rule
+
+Artifact existence is not artifact authority.
+
+### 7.6 Artifact retention rule
+
+Every artifact must declare or inherit a retention class:
+
+- ephemeral
+- operational
+- audit-critical
+- replay-critical
+- incident-critical
+- legal-hold
+- truth-critical
+
+### 7.7 Artifact equivalence rule
+
+Rendered convenience is not artifact equivalence.
+
+---
+
+## 8. Identity and Versioning
+
+### 8.1 Required IDs
+
+The system must carry end-to-end IDs for at least:
+
+- project_id
+- epic_id
+- task_id
+- turn_id
+- intent_id
+- step_id
+- revision_id
+- snapshot_root_id
+- journal_entry_id
+- context_artifact_id
+- inference_artifact_id
+- patch_proposal_id
+- validation_receipt_id
+- build_receipt_id
+- semantic_receipt_id
+- review_artifact_id
+- approval_id
+- replay_anchor_id
+- replay_run_id
+- capability_token_id
+- audit_record_id
+- failure_bundle_id
+- budget_record_id
+- taint_record_id
+- release_gate_id
+- drift_event_id
+- worker_run_id
+- quarantine_run_id
+- memory_item_id
+
+### 8.2 Version tuple
+
+Every material action must bind to a version tuple including at minimum:
+
+- kernel_schema_version
+- journal_schema_version
+- execution_policy_version
+- approval_policy_version
+- replay_policy_version
+- memory_policy_version
+- packing_policy_version
+- toolchain_policy_version
+- scrubbing_policy_version
+- retry_policy_version
+- taint_policy_version
+- scheduling_policy_version
+- anti_swap_policy_version
+- diagnostic_adapter_version
+- review_render_policy_version
+- feature_flag_set
+- capability_policy_version
+- retention_policy_version
+
+### 8.3 Version drift rule
+
+Version drift is a governance event.
+
+---
+
+## 9. State Models
+
+### 9.1 Revision lifecycle
+
+States:
+- pending
+- sealed
+- abandoned
+
+Legal transitions:
+- pending -> sealed
+- pending -> abandoned
+
+### 9.2 Intent lifecycle
+
+States:
+- proposed
+- pending_validation
+- awaiting_approval
+- approved
+- rejected
+- expired
+- rebasing
+- revalidated
+- executable
+- compensated
+- rejected_conflict
+- exhausted
+- stalled
+- aborted_by_budget
+
+### 9.3 Approval lifecycle
+
+States:
+- pending
+- approved
+- rejected
+- expired
+- invalidated
+
+### 9.4 Replay lifecycle
+
+States:
+- requested
+- loading_evidence
+- binding_anchor
+- executing
+- completed
+- degraded
+- failed
+- unreplayable
+
+### 9.5 Project task lifecycle
+
+States:
+- drafted
+- admitted
+- routed
+- active
+- blocked
+- awaiting_review
+- awaiting_approval
+- released
+- compensated
+- archived
+
+### 9.6 Worker run lifecycle
+
+States:
+- created
+- scheduled
+- running
+- completed
+- failed
+- cancelled
+- tainted
+- superseded
+
+Legal transitions:
+- created -> scheduled
+- scheduled -> running
+- running -> completed
+- running -> failed
+- running -> cancelled
+- running -> tainted
+- any non-terminal state -> superseded
+
+### 9.7 Quarantine run lifecycle
+
+States:
+- prepared
+- entered
+- executing
+- exited_clean
+- exited_failed
+- exited_tainted
+- preserved_for_forensics
+- destroyed
+
+Legal transitions:
+- prepared -> entered
+- entered -> executing
+- executing -> exited_clean
+- executing -> exited_failed
+- executing -> exited_tainted
+- exited_failed -> preserved_for_forensics
+- exited_tainted -> preserved_for_forensics
+- exited_clean -> destroyed
+- preserved_for_forensics -> destroyed
+
+### 9.8 Budget lifecycle
+
+States:
+- allocated
+- active
+- nearing_limit
+- exceeded
+- suspended
+- replenished
+- closed
+
+Legal transitions:
+- allocated -> active
+- active -> nearing_limit
+- nearing_limit -> exceeded
+- nearing_limit -> replenished
+- exceeded -> suspended
+- suspended -> replenished
+- replenished -> active
+- active -> closed
+- suspended -> closed
+
+### 9.9 Taint lifecycle
+
+States:
+- clean
+- suspected
+- tainted
+- downgraded
+- quarantined
+- cleared_by_policy
+- archived
+
+Legal transitions:
+- clean -> suspected
+- suspected -> tainted
+- suspected -> downgraded
+- tainted -> quarantined
+- downgraded -> quarantined
+- quarantined -> cleared_by_policy
+- cleared_by_policy -> archived
+- tainted -> archived
+- downgraded -> archived
+
+---
+
+## 10. Truth Plane
+
+Purpose: define truth, durability, causal order, and revision legality.
+
+Load-bearing responsibilities:
+
+- define legal revision state
+- govern snapshot identity
+- govern journal order
+- govern durability boundary
+- govern recovery admissibility
+- reject silent truth mutation
+- expose only sealed truth as current authoritative state
+
+Failure posture:
+
+- fail closed on corruption ambiguity
+- fail closed on seal ambiguity
+- downgrade replay claims if truth continuity breaks
+- never infer sealed truth from incomplete writes
+
+Provenance posture:
+
+- every truth mutation must bind to causality and version tuple
+- truth visibility must follow legal ordering, not output convenience
+
+---
+
+## 11. Validation Plane
+
+Purpose: determine whether a proposed mutation is legal before truth changes.
+
+Load-bearing responsibilities:
+
+- parseability and structural legality
+- semantic admissibility
+- build graph admissibility
+- patch-shape legality
+- multi-file coherence
+- incremental invalidation
+- quarantine enforcement for execution-bearing validation
+
+Downgrade posture:
+
+- insufficient validation never upgrades to admissibility
+- partial validation cannot impersonate full validation
+- invalidated receipts must propagate downstream invalidation
+
+Taint posture:
+
+- untrusted validation-time execution may taint receipts and downstream review
+- quarantine ambiguity must fail closed or mark results tainted
+
+---
+
+## 12. Execution Plane
+
+Purpose: perform effects without defining truth.
+
+Load-bearing responsibilities:
+
+- dispatch governed effects
+- separate effect execution from truth mutation
+- enforce side-effect class routing
+- preserve enough evidence to reconstruct effect start and effect outcome
+- prevent runners from becoming hidden truth channels
+
+Failure posture:
+
+- raw side effects are forbidden
+- ambiguous side-effect start on irreversible paths must fail closed or require manual resolution
+- crash during effect execution must not be silently rewritten into completed success
+
+Evidence posture:
+
+- effect initiation and effect outcome must be reconstructable for all material effects
+- irreversible effects require stronger evidence than reversible internal effects
+
+---
+
+## 13. Control Plane
+
+Purpose: own authority, approvals, budgets, retries, drift, taint, scheduling, and review rendering.
+
+Load-bearing responsibilities:
+
+- capability issuance and validation
+- approval gating
+- atomic approval barrier
+- budget governance
+- retry governance
+- drift reconciliation
+- taint propagation control
+- scheduler fairness
+- route governance
+
+Failure posture:
+
+- uncertainty in authority resolves fail closed
+- expired or drifted approvals cannot retain execution power
+- budget exhaustion may suspend progress but may not authorize unsafe shortcuts
+
+---
+
+## 14. Context Plane
+
+Purpose: construct bounded, deterministic, provenance-rich working context.
+
+Load-bearing responsibilities:
+
+- repo graph
+- symbol frontier
+- candidate file set
+- deterministic packing
+- truncation recording
+- deferred retrieval recording
+- provenance preservation
+- taint capture
+
+Replay posture:
+
+- context may support semantic replay without supporting exact replay
+- missing provenance or truncation metadata forces downgrade
+
+Drift posture:
+
+- context rooted in drifted truth may become invalid for approval or replay
+- stale context may survive as evidence but not as live authority input
+
+---
+
+## 15. Evidence Plane
+
+Purpose: prove what happened.
+
+Load-bearing responsibilities:
+
+- telemetry capture
+- diagnostics ledger
+- replay corpus
+- failure corpus
+- audit query layer
+- proof registry
+- compaction governance
+
+Failure posture:
+
+- evidence gaps force downgrade or refusal of stronger claims
+- retention violation is a governance failure, not a storage inconvenience
+
+Replay posture:
+
+- evidence availability governs replay admissibility
+- missing evidence must surface as degraded replay or unreplayable classification
+
+---
+
+## 16. Learning Plane
+
+Purpose: let the system learn only on governed evidence.
+
+Load-bearing responsibilities:
+
+- memory storage
+- retrieval governance
+- epoch awareness
+- provenance binding
+- decay discipline
+- reuse without silent authority leakage
+
+Taint posture:
+
+- tainted or degraded evidence must influence memory trust class
+- learning from ungoverned evidence is forbidden
+
+---
+
+## 17. Periphery Plane
+
+Purpose: connect user-facing and ecosystem-facing surfaces without surrendering sovereignty.
+
+Load-bearing responsibilities:
+
+- CLI and IDE bridge surfaces
+- Git integration surfaces
+- dashboard and control tower surfaces
+- remote adapter surfaces
+- domain adapter presentation surfaces
+
+Boundary posture:
+
+- periphery never owns truth
+- periphery never approves side effects
+- periphery may render, request, and display; it may not silently reclassify authority
+
+Failure posture:
+
+- UI or integration ambiguity may not change kernel legality
+- convenience features may be denied if they weaken governance guarantees
+
+---
+
+## 18. Multi-Vendor Capability Strategy
+
+This system should use multiple frontier AI systems as bounded, replaceable workers.  
+It should not depend on any single vendor for system authority.
+
+### 18.1 Core rule
+
+The system may leverage the strengths of Claude-like, GPT/Codex-like, and Gemini/Jules-like products.  
+It may not surrender truth, approval, replay, audit, or recovery authority to any of them.
+
+### 18.2 Worker profiles
+
+At minimum:
+
+- planner_profile
+- repo_mapper_profile
+- patcher_profile
+- reviewer_profile
+- async_backlog_profile
+- test_generator_profile
+- refactor_profile
+- release_guard_profile
+- architecture_profile
+
+### 18.3 Routing rule
+
+Route by capability shape, not by vendor loyalty.  
+Workers remain replaceable.  
+Kernel authority remains singular.
+
+---
+
+## 19. Implementation-Grade Definition
+
+A document or subsystem may be called implementation-grade only if all are true:
+
+- core contracts have formal bodies, not only headings
+- frozen schemas exist at field level for core artifacts
+- invariant -> enforcement point -> acceptance test bindings are explicit
+- replay classes have admission criteria and downgrade rules
+- atomic approval barrier has concurrency semantics
+- validation quarantine has platform-specific execution rules
+- capability security has a defined trust boundary and threat model
+- context completeness rules are explicit
+- retention and pinning rules are explicit
+- failure reactions are specified, not implied
+- audit evidence requirements are explicit per critical action
+
+Until those conditions are satisfied, the system remains an implementation constitution and roadmap, not a fully signed implementation-grade contract set.
+
+
+### 19.1 Capability Security Trust Boundary and Threat Model
+
+Capability security is implementation-grade only if the trust boundary and minimum threat model are explicit, durable, auditable, and enforced at effect time rather than inferred from worker intent.
+
+#### Trusted components
+
+The following components are trusted to participate directly in capability issuance, verification, revocation, and enforcement:
+
+- Sovereign kernel authority path
+- Capability authority
+- Policy registry and policy evaluation path
+- Durable journal / evidence write path used to record issuance, consumption, revocation, and rejection
+- Cryptographic verification path used to validate token integrity
+- Atomic approval barrier when the capability class requires prior approval
+- Drift reconciliation path when drift can invalidate previously legal authority
+
+Trusted does not mean infallible. It means these components are part of the system's authority boundary and must therefore be hardened, audited, and version-bound.
+
+#### Conditionally trusted components
+
+The following components may participate in execution but are not allowed to redefine authority:
+
+- Isolated validation runners
+- Worktree runners
+- Diagnostic runners
+- Replay runners
+- Approved local tool wrappers
+- Local storage substrates admitted by current policy
+
+These components are conditionally trusted only within the scope explicitly granted to them. They may execute, observe, or transport capability-bearing state, but they may not widen scope, mint new authority, or silently preserve authority across drift.
+
+#### Untrusted or non-authoritative components
+
+The following components are never authoritative even when they are useful:
+
+- Frontier model workers
+- Raw prompt outputs
+- Plugins before capability verification
+- External tool outputs before governed ingestion
+- Repository text, retrieved web text, and user-provided free text before artifact conversion
+- Any token-shaped value not validated by the kernel
+- Remote services that return "permission granted" style responses without local capability validation
+- Render layers, dashboards, or UIs that display approval-like state without durable backing artifacts
+
+These components may propose, suggest, or request. They may not authorize.
+
+#### Security principle
+
+Authority must be created only by the capability authority, scoped only by policy, verified only by trusted kernel paths, and consumed only at a legally admissible effect boundary.
+
+No worker, plugin, runner, tool, or remote service may acquire, preserve, widen, replay, or reclassify authority outside this path.
+
+If the system cannot prove that a capability is valid, in-scope, unrevoked, unexpired, admissible for the requested effect class, and still legal under current drift state, the effect must not begin.
+
+#### Minimum threat model
+
+The minimum threat model explicitly includes the following classes of failure or abuse:
+
+1. **Compromised worker output**  
+   A worker may emit forged capability-like data, malformed authority requests, or outputs that attempt to bypass approval or policy.
+
+2. **Stolen token**  
+   A previously issued token may be copied from logs, memory, temporary files, runner state, or external traces.
+
+3. **Replay of consumed token**  
+   A single-use token may be resubmitted after legal consumption in an attempt to execute a second effect.
+
+4. **Cross-worktree or cross-task leakage**  
+   A token issued for one task, root, or worktree may be reused in another scope.
+
+5. **Runner compromise or runner overreach**  
+   A validation runner, diagnostic runner, or tool wrapper may attempt to persist tokens, exfiltrate secrets, or widen its own execution rights.
+
+6. **Drift-after-issuance abuse**  
+   A token that was legal at issuance time may be used after root drift, task supersession, policy drift, or approval invalidation.
+
+7. **Secret-bearing escalation**  
+   A token that permits ordinary execution may be abused to reach secret-bearing, network-bearing, or irreversible-effect paths.
+
+8. **Partial crash ambiguity**  
+   The system may crash after token validation but before durable consumption, or after partial effect start but before durable recording.
+
+9. **Revocation race**  
+   A token may be presented concurrently with a revocation event, drift event, or barrier invalidation event.
+
+10. **Version incompatibility abuse**  
+    A token issued under one policy or schema version may be replayed under another in hopes of inheriting stale semantics.
+
+11. **UI or render-layer authority illusion**  
+    A user-facing layer may appear to show legal approval or capability state even though no durable authority artifact exists.
+
+12. **Historical evidence misread as live authority**  
+    Replay, audit, or forensic artifacts may be mistaken for current executable privilege.
+
+This threat model is minimum, not exhaustive. Any newly discovered exploit path that can widen or preserve authority outside kernel rules must be added to the formal threat model before the system can continue to claim implementation-grade status.
+
+#### Security invariants
+
+The capability system must enforce at least the following invariants:
+
+- **INV-CAP-ONLY-KERNEL-ISSUED**  
+  Only the capability authority may issue valid capability tokens.
+
+- **INV-CAP-VERIFY-BEFORE-EFFECT**  
+  Capability structure, signature or MAC, scope, expiry, revocation state, and bound identifiers must all be verified before any effect begins.
+
+- **INV-CAP-NO-SCOPE-WIDENING**  
+  Scope may not be widened by worker output, runner context, or UI state.
+
+- **INV-CAP-SINGLE-USE-MEANS-SINGLE-USE**  
+  Consumed single-use tokens can never be legally accepted again.
+
+- **INV-CAP-NO-DRIFT-CARRYOVER**  
+  Root-bound, task-bound, and policy-bound authority may not survive unauthorized drift.
+
+- **INV-CAP-REVOCATION-WINS**  
+  A revoked token is invalid even if every other validation property would otherwise pass.
+
+- **INV-CAP-HISTORY-IS-NOT-LIVE-AUTHORITY**  
+  Historical capability evidence may support audit or replay classification, but it may not silently reconstitute live execution privilege.
+
+- **INV-CAP-NO-CROSS-CLASS-ESCALATION**  
+  Ordinary execution privilege may not be treated as secret-bearing, network-bearing, approval-bearing, or irreversible-effect privilege without fresh issuance under the correct class.
+
+- **INV-CAP-CRASH-AMBIGUITY-FAILS-CLOSED**  
+  If crash state leaves authority consumption or effect start ambiguous, the system must resolve in favor of denying further authority until legal state is re-established.
+
+- **INV-CAP-UI-STATE-IS-NOT-AUTHORITY**  
+  Rendered approval or status indicators are informational only unless backed by durable authority artifacts.
+
+#### Failure posture
+
+The failure posture is fail-closed.
+
+If the system cannot prove all of the following at effect time:
+
+- capability integrity
+- issuer legitimacy
+- scope legality
+- expiry admissibility
+- non-revocation
+- non-consumption where applicable
+- task/root binding admissibility
+- compatibility with current policy and drift state
+- correct effect-class authorization
+
+then the requested effect must not begin.
+
+Failure handling must include, where applicable:
+
+- capability rejection
+- token revocation or quarantine
+- audit record emission
+- taint escalation on suspicious abuse
+- barrier invalidation when approval-backing conditions no longer hold
+- replay downgrade if capability history can no longer justify prior replay claims
+- incident escalation if authority ambiguity cannot be resolved automatically
+
+The system may never trade authority certainty for convenience, worker momentum, or UI smoothness.
+
+---
+
+## 20. Reference System Principles
+
+The system should learn from world-class open engineering systems by absorbing principles, not by collapsing into their repository shapes.
+
+### 20.1 Postgres principles
+
+- WAL-first durability thinking
+- recovery discipline
+- correctness-before-expansion
+- schema and migration seriousness
+- boring, load-bearing state logic
+
+### 20.2 Redis principles
+
+- hot-path simplicity
+- minimal core
+- module/core separation
+- operational bluntness
+
+### 20.3 Kubernetes principles
+
+- controller decomposition
+- reconciliation loops
+- desired vs observed state
+- work queue and backoff discipline
+- orchestration under partial failure
+
+### 20.4 React principles
+
+- lane model
+- scheduler and priority thinking
+- interruptibility
+- reconciler mentality
+
+### 20.5 V8 principles
+
+- tiered execution
+- deoptimization and fallback discipline
+- handle and lifetime awareness
+- hot-path vs cold-path separation
+- environment-bound correctness
+
+---
+
+## 21. Project Operating System Layer
+
+This system is not only an AI Coding OS.  
+It is also a Project OS above the kernel.
+
+Core project structures:
+
+- Project Registry
+- Epic Registry
+- Milestone Registry
+- Task Graph
+- Lane Registry
+- Worktree Registry
+- Review Queue
+- Approval Queue
+- Failure Queue
+- Release Queue
+- Audit Queue
+
+### 21.1 Planning model
+
+Every project should be decomposable into:
+
+- goals
+- constraints
+- milestones
+- dependency graph
+- risk graph
+- acceptance graph
+- release graph
+
+### 21.2 Multi-lane runtime
+
+At minimum support:
+
+- foreground coding lane
+- parallel patch lane
+- async backlog lane
+- repo intelligence lane
+- review lane
+- release / operations lane
+
+### 21.3 Worktree isolation
+
+Parallel work must run in:
+
+- isolated worktrees
+- bounded sandboxes
+- lane-specific execution scopes
+
+Promotion to truth occurs only after:
+validation -> review -> approval -> seal
+
+### 21.4 Cross-task arbitration
+
+When tasks conflict:
+
+- higher-priority release blockers win
+- stale tasks are rebased or rejected
+- incompatible worktrees cannot merge silently
+- approvals do not time-travel across task generations
+
+---
+
+## 22. Core Contract Bodies
+
+### 22.1 WAL Durability and Recovery Contract
+
+**Purpose**  
+Define the minimum durable truth spine for revisions, journal entries, and recovery.
+
+**Scope**  
+Applies to all truth-bearing mutations, seal operations, journal persistence, and crash recovery behavior.
+
+**Preconditions**
+
+- a valid originating intent exists
+- the mutation has passed required validation gates
+- the target root revision is current and legal
+- the system is not in a recovery-blocked or corruption-blocked state
+
+**Required fields**
+
+- wal_frame_id
+- logical_sequence
+- frame_type
+- kernel_schema_version
+- journal_schema_version
+- revision_id
+- parent_revision_id
+- snapshot_root_id
+- payload_hash
+- payload_length
+- checksum
+- committed_flag
+- timestamp_metadata
+- causality_ref
+
+**Legal rules**
+
+- every truth-bearing mutation must be representable in WAL
+- logical_sequence must be strictly monotonic
+- fsync discipline must be declared by operation type
+- seal may not be acknowledged before the durability boundary
+- partial writes must be detectable by checksum and frame completeness rules
+- dirty-tail corruption may be truncated only when all preceding frames form a legal sealed history
+- mid-segment corruption must halt automatic recovery
+
+**Failure reactions**
+
+- truncate tail and recover
+- halt recovery and require operator intervention
+- downgrade replay claims if evidence continuity breaks
+- invalidate approvals touching corrupted regions
+- emit FailureBundle and AuditRecord
+
+**Acceptance criteria**
+
+- crash before seal never produces a sealed revision
+- dirty-tail damage truncates safely
+- mid-segment corruption halts recovery
+- logical-sequence discontinuity is detected
+- recovery returns the last legal sealed state, not the last partially written state
+
+### 22.2 Seal Transaction Ordering Contract
+
+**Purpose**  
+Define the exact ordering, atomicity, and crash semantics of revision sealing.
+
+**Scope**  
+Applies to every transition from pending revision to sealed revision.
+
+**Preconditions**
+
+- originating intent is executable
+- current root matches the validated root
+- required validation receipts are valid
+- approval, if required, is valid and not expired
+- barrier checks have passed
+
+**Required checks**
+
+- snapshot candidate exists
+- journal prepare entry exists
+- WAL mutation/seal frames exist
+- durability boundary is crossed before visibility
+
+**Ordering rules**
+
+1. prepare seal metadata
+2. write pending mutation payload
+3. persist snapshot root candidate
+4. append journal prepare entry
+5. append WAL mutation and seal frames
+6. cross durability boundary
+7. transition revision state from pending to sealed
+8. append final seal confirmation entry
+9. expose sealed revision as current truth
+
+**Failure reactions**
+
+- reject seal
+- roll back pending transition
+- mark revision abandoned
+- emit FailureBundle
+- require manual intervention if ambiguity cannot be resolved from durable evidence
+
+**Acceptance criteria**
+
+- no revision becomes visible as sealed before durability
+- recovery never produces duplicate seals
+- crash in each ordering window yields deterministic classification
+
+### 22.3 Atomic Approval Barrier Contract
+
+**Purpose**  
+Prevent approval time-travel across root drift, receipt drift, context drift, policy drift, and concurrent execution races.
+
+**Scope**  
+Applies whenever a reviewed change is converted into executable authority.
+
+**Preconditions**
+
+- ApprovalArtifact exists
+- ApprovalArtifact references a known root revision
+- associated ContextArtifact exists
+- required validation receipts exist
+- the task has not been superseded or invalidated
+
+**Required checks**
+
+- current_root == originating_root
+- context_artifact still valid
+- semantic/build receipts still valid
+- no out-of-band drift invalidates reviewed state
+- no policy drift invalidates approval legality
+- no conflicting seal has superseded the task generation
+
+**Legal rules**
+
+- barrier entry must acquire a revision fence or equivalent serialization guard
+- no seal on the same affected root/task generation may commit between successful barrier verification and execution start
+- competing approvals on the same task generation must resolve deterministically
+- if serialization cannot be established, barrier evaluation must fail closed
+
+**Failure reactions**
+
+- invalidate approval
+- invalidate receipts
+- force re-review
+- emit DriftEventRecord
+- emit FailureBundle on barrier crash ambiguity
+
+**Acceptance criteria**
+
+- approval cannot execute across root drift
+- approval cannot execute across receipt drift
+- concurrent conflicting approval cannot silently pass
+- crash at barrier never produces ambiguous “maybe executed” truth without evidence
+
+### 22.4 Validation Quarantine Enforcement Contract
+
+**Purpose**  
+Prevent build logic, generators, hooks, or untrusted validation-time execution from contaminating host truth, caches, secrets, or network state.
+
+**Scope**  
+Applies to all validation-time execution that is not purely static.
+
+**Preconditions**
+
+- validation action is classified as requiring quarantine
+- required capability exists
+- quarantine policy allows the runner type
+- target repository slice is known
+
+**Required checks**
+
+- network-off
+- host read-only exposure
+- isolated caches
+- disposable filesystem layer
+- bounded resources
+- secret isolation
+- explicit audit entry on enter and exit
+
+**Legal rules**
+
+- per-run disposable workspace must be created
+- cache namespace must be isolated
+- environment variables must be scrubbed against an allowlist
+- secrets must be absent unless explicitly admitted by secret-bearing capability
+- teardown must remove disposable workspace and isolated caches unless preserved for forensics
+
+**Failure reactions**
+
+- abort validation
+- mark ValidationReceipt invalid
+- mark worker or runner tainted if contamination cannot be ruled out
+- emit FailureBundle for host pollution risk
+- invalidate downstream review if quarantine guarantee was violated
+
+**Acceptance criteria**
+
+- untrusted build logic cannot modify host dependency cache
+- network-disabled runs cannot reach outbound endpoints
+- disposable workspace is removed or pinned according to policy
+- secret-scrubbed runs expose no ambient credentials
+
+### 22.5 Replay Fidelity Contract
+
+**Purpose**  
+Define honest replay classes, admissibility rules, downgrade rules, and divergence reporting.
+
+**Scope**  
+Applies to any replay claim emitted by the system.
+
+**Preconditions**
+
+- replay request identifies a root revision or replay anchor
+- required evidence closure is discoverable
+- requested replay class is known to policy
+
+**Required checks**
+
+- truth evidence completeness
+- context completeness
+- inference artifact availability
+- environment capture level
+- nondeterminism tolerance class
+- divergence reporting path
+
+**Legal rules**
+
+Replay classes:
+- exact replay
+- diagnostic replay
+- semantic replay
+- degraded replay
+- unreplayable
+
+Exact replay requires all of the following:
+- durable truth state fully captured
+- environment class captured to required precision
+- historical inference artifacts present, or an approved exact-execution proof bundle demonstrating operational equivalence under the same deterministic input surface, the same admissible environment fingerprint class, the same policy version class, and the same replay-class adjudication standard
+- no unresolved nondeterminism beyond allowed tolerance
+
+The phrase “equivalence” may not mean similarity, plausibility, or semantically acceptable rerun.  
+Equivalence is admissible only when the proof bundle is attached, auditable, and explicitly accepted by replay policy.
+
+Cloud re-query is never exact replay.  
+Incomplete environment capture is never exact replay.  
+Missing historical inference artifacts forces downgrade unless the proof bundle described above is present and admissible.
+
+**Failure reactions**
+
+- downgrade replay class
+- refuse replay
+- emit replay divergence record
+- emit audit note explaining downgrade reason
+
+**Acceptance criteria**
+
+- cloud re-query without historical inference artifacts cannot be labeled exact replay
+- missing evidence forces downgrade or refusal
+- replay classification is auditable after the fact
+- equivalence substitution without proof bundle is rejected
+
+### 22.6 Capability Token Lifecycle Contract
+
+**Purpose**  
+Define how capabilities are issued, scoped, validated, consumed, revoked, audited, and prevented from becoming a replay or privilege-escalation channel.
+
+**Scope**  
+Applies to every capability-bearing action, including repository reads, snapshot reads, patch proposal, diagnostics, worktree spawning, generator execution, secret use, network access, and external side effects.
+
+**Preconditions**
+
+- subject_identity is known
+- issuing authority is trusted under active policy
+- requested capability is declared in the capability registry
+- requested scope is representable as a bounded scope_hash
+- requested action is not forbidden by policy
+
+**Required fields**
+
+- capability_token_id
+- subject_identity
+- capability_name
+- scope_hash
+- issued_at
+- expires_at
+- issuer_identity
+- token_mac_or_signature
+- version_tuple_hash
+- single_use_flag
+
+**Validation rules**
+
+Before effect execution, the kernel must verify:
+
+- token structure is schema-valid
+- MAC or signature verifies successfully
+- token is within issued_at / expires_at bounds
+- token is not revoked
+- token is not already consumed if single_use_flag is true
+- capability_name is authorized for the requested action class
+- scope_hash covers the requested target and no more than allowed
+- bound_task_id, if present, matches current task
+- bound_root_revision_id, if present, matches current root
+- version_tuple_hash is admissible under active policy
+
+**Failure reactions**
+
+- reject capability use
+- revoke token
+- mark token invalid
+- fail closed on verification error
+- emit FailureBundle on ambiguous consumption race
+- taint worker or runner if privilege abuse is suspected
+
+**Acceptance criteria**
+
+- unsigned or invalidly signed token is rejected
+- expired token is rejected
+- revoked token is rejected
+- single-use token cannot be consumed twice
+- concurrent double-consume resolves deterministically with exactly one winner
+- root-bound tokens cannot execute across root drift
+- replay cannot silently reuse historical consumed authority
+
+### 22.7 Context Artifact Completeness Contract
+
+**Purpose**  
+Define when a ContextArtifact is complete enough to support governed execution and replay claims.
+
+**Scope**  
+Applies to every context artifact used for patch generation, review, approval, or replay.
+
+**Preconditions**
+
+- root revision is known
+- repo graph version is known
+- symbol index version is known
+- packing policy is known
+
+**Required fields**
+
+- context_artifact_id
+- task_id
+- root_revision_id
+- repo_graph_version
+- symbol_index_version
+- candidate_file_ids
+- symbol_frontier_ids
+- memory_item_ids
+- packing_policy_version
+- hard_budget_tokens
+- effective_budget_tokens
+- actual_tokens
+- truncation_reason
+- deferred_retrieval_items
+- provenance_refs
+- taint_set
+- content_hash
+- created_at
+
+**Completeness rules**
+
+- provenance_refs must cover admitted memory items and retrieved external sources
+- truncation_reason must be explicit whenever candidate set exceeds effective budget
+- deferred_retrieval_items must be explicit whenever staged retrieval is used
+- missing provenance or truncation metadata forces downgrade for replay and approval admissibility
+
+**Failure reactions**
+
+- invalidate context artifact
+- force repack
+- downgrade replay claims
+- invalidate downstream approval if material completeness is broken
+
+**Acceptance criteria**
+
+- context artifacts missing memory provenance are downgraded
+- truncated context without explicit truncation record is rejected
+- deferred retrieval without record is rejected for replay purposes
+
+### 22.8 GC Pinning Reference Graph Contract
+
+**Purpose**  
+Prevent compaction or garbage collection from destroying artifacts required for truth, audit, replay, approval, incident response, or legal hold.
+
+**Scope**  
+Applies to all managed artifacts in evidence, replay, audit, and retention stores.
+
+**Preconditions**
+
+- active pinning sources are enumerable
+- artifact identity is stable
+- retention policy is active
+
+**Required fields**
+
+- pin_id
+- source_artifact_id
+- target_artifact_id
+- pin_reason
+- created_at
+- expires_at or retention_class
+- legal_hold_flag
+- replay_critical_flag
+- audit_critical_flag
+
+**Reference-graph rules**
+
+- every pinnable artifact must have stable identity
+- every pin must record its source and reason
+- GC must traverse reference closure from all active pins
+- no artifact inside active pin closure may be deleted or compacted into evidence loss
+- equivalent compaction is allowed only when replay and audit semantics are preserved and policy permits it
+
+**Failure reactions**
+
+- abort GC cycle
+- emit retention-violation FailureBundle
+- mark replay or audit guarantees degraded if loss already occurred
+- require operator intervention for illegal compaction
+
+**Acceptance criteria**
+
+- replay-critical artifacts remain present while referenced by active replay anchors
+- legal-hold artifacts are never deleted
+- approval-linked artifacts remain until approval expiry and retention release
+- GC decisions are auditable after the fact
+
+### 22.9 Inter-Plane Interface Contract
+
+**Purpose**  
+Define the allowed crossings between adjacent planes and prevent silent authority leakage.
+
+**Scope**  
+Applies to every plane-to-plane call.
+
+**Preconditions**
+
+- caller plane and callee plane are known
+- requested operation is named
+- required capabilities are present
+
+**Required checks**
+
+- allowed operation exists for that adjacent pair
+- capability class is sufficient
+- mutation legality is declared
+- produced journal or audit entries are declared
+
+**Legal rules**
+
+Minimum adjacent pairs:
+- Truth <-> Validation
+- Validation <-> Execution
+- Execution <-> Control
+- Control <-> Context
+- Context <-> Evidence
+- Evidence <-> Learning
+- Kernel <-> Periphery
+
+Cross-plane calls not declared by policy are forbidden.
+
+**Failure reactions**
+
+- reject call
+- emit contract-violation record
+- taint caller if unauthorized crossing is attempted
+
+**Acceptance criteria**
+
+- undeclared plane crossing is rejected
+- missing capability rejects crossing
+- every legal crossing produces the required audit trace
+
+### 22.10 Invariant Enforcement Binding Contract
+
+**Purpose**  
+Force every critical invariant to bind to a runtime enforcement point, acceptance test, and failure reaction.
+
+**Scope**  
+Applies to every invariant admitted into the governing registry.
+
+**Preconditions**
+
+- invariant has stable ID
+- enforcement module is known
+- enforcement point is known
+- acceptance test mapping exists
+
+**Required fields**
+
+- invariant_id
+- invariant_statement
+- enforcement_module
+- enforcement_point
+- proof_strategy or runtime_assertion
+- acceptance_test_ids
+- failure_reaction
+- audit_query_proof
+
+**Legal rules**
+
+- an invariant not bound in this form is advisory, not load-bearing
+- every load-bearing contract must map to one or more invariants
+- every invariant must map to at least one acceptance test or explicit proof procedure
+
+**Failure reactions**
+
+- block promotion to implementation-grade
+- mark affected contract incomplete
+- emit audit note for unbound invariant
+
+**Acceptance criteria**
+
+- every registered invariant has a binding record
+- no load-bearing invariant remains unbound
+- invariant queries can show module, point, test, and reaction
+
+### 22.11 Taint Propagation Graph Contract
+
+**Purpose**  
+Define how taint moves across artifacts, workers, receipts, reviews, approvals, and replay records.
+
+**Scope**  
+Applies to all taint-carrying or taint-sensitive artifacts.
+
+**Preconditions**
+
+- taint class is known
+- propagation path is known
+- clearing policy is known if clearing is requested
+
+**Required classes**
+
+- untrusted_text
+- untrusted_tool_output
+- policy_degraded
+- security_suspect
+- replay_degraded
+- quarantine_breach_suspect
+
+**Propagation rules**
+
+- taint propagation must be explicit
+- taint may not be silently cleared
+- taint clearing requires policy-authorized journaled action
+- reviews, approvals, and replay claims must surface material taint
+
+**Failure reactions**
+
+- downgrade trust class
+- force human review
+- block promotion to higher replay claim
+- emit taint transition record
+
+**Acceptance criteria**
+
+- taint-bearing artifacts propagate taint to dependent governance surfaces
+- silent taint clearing is rejected
+- taint transitions are auditable after the fact
+
+### 22.12 Incremental Validation Scope Contract
+
+**Purpose**  
+Define when receipt reuse is legal and when revalidation must expand.
+
+**Scope**  
+Applies to receipt reuse, invalidation, and incremental recomputation.
+
+**Preconditions**
+
+- dependency invalidation model is known
+- symbol frontier is known
+- prior receipts exist
+
+**Required checks**
+
+- dependency invalidation scope
+- receipt reuse conditions
+- symbol frontier update rules
+- manifest and build graph change detection
+
+**Legal rules**
+
+- receipt reuse is legal only when invalidation boundary proves non-impact
+- manifest changes may widen scope
+- build graph changes may widen scope
+- policy drift may invalidate prior receipt admissibility
+
+**Failure reactions**
+
+- reject receipt reuse
+- widen revalidation scope
+- invalidate approval if approved receipts are no longer admissible
+
+**Acceptance criteria**
+
+- non-impacting edits preserve eligible receipt reuse
+- impacting edits force widened validation
+- invalid reuse attempts are rejected
+
+### 22.13 Multi-File Patch Coherence Contract
+
+**Purpose**  
+Prevent logically partial or cross-file-incoherent changes from being admitted as valid patches.
+
+**Scope**  
+Applies to all patch groups spanning more than one file or manifest relation.
+
+**Preconditions**
+
+- patch group has stable identity
+- affected files are known
+- manifest or build references are known when applicable
+
+**Required checks**
+
+- atomic patch grouping
+- cross-file reference checking
+- partial-apply rejection
+- manifest/code coherence
+- merge conflict interaction
+
+**Legal rules**
+
+- patch groups must be atomic at the coherence layer
+- cross-file references must remain resolvable
+- manifest/code coherence must be preserved
+- partial application is forbidden
+
+**Failure reactions**
+
+- reject patch group
+- force regrouping
+- mark review invalid if reviewed patch hash no longer corresponds to a coherent patch group
+
+**Acceptance criteria**
+
+- cross-file incoherence is detected
+- partial-apply attempts are rejected
+- manifest/code mismatches invalidate admissibility
+
+### 22.14 Review Surface Governance Contract
+
+**Purpose**  
+Ensure review summaries remain legible, accountable, and not manipulable by the same worker whose work is under review.
+
+**Scope**  
+Applies to all review artifacts and review-rendering operations.
+
+**Preconditions**
+
+- review subject is known
+- diff hash is known
+- rendering provenance is known
+
+**Required fields or checks**
+
+- diff hash
+- semantic impact hash
+- risk rendering provenance
+- reviewer identity or reviewer route
+- disclosure flag for AI-generated summary
+
+**Legal rules**
+
+- review summaries may be AI-generated only under disclosure policy
+- same-worker self-summary may be forbidden or flagged by policy
+- high-risk changes may require secondary summarization
+- approval may not rely on concealed review provenance
+
+**Failure reactions**
+
+- flag review artifact
+- require secondary review generation
+- block approval if governance policy requires dual rendering
+
+**Acceptance criteria**
+
+- self-summary on forbidden route is rejected or flagged
+- high-risk changes trigger required secondary review path
+- review provenance remains auditable
+
+### 22.15 Benchmark and Routing Contract
+
+**Purpose**  
+Make worker routing measurable rather than intuitive.
+
+**Scope**  
+Applies to route selection, fallback, rerouting, and lane-specific worker assignment.
+
+**Preconditions**
+
+- benchmark classes exist
+- routing policy is versioned
+- worker profile is known
+
+**Required benchmark classes**
+
+- task-type benchmarks
+- repo-scale benchmarks
+- review-quality benchmarks
+- long-task stability benchmarks
+- cost-to-resolution benchmarks
+
+**Routing rules**
+
+- routing policy must be explicit and versioned
+- fallback triggers must be measurable
+- route changes must be auditable
+- no vendor route may bypass capability or approval rules
+
+**Failure reactions**
+
+- reroute worker
+- downgrade lane
+- halt route if failure threshold is crossed
+- emit routing degradation record
+
+**Acceptance criteria**
+
+- routing decision shows benchmark basis
+- fallback triggers activate when thresholds are crossed
+- worker route cannot bypass kernel governance
+
+---
+
+## 23. Field-Level Frozen Schema Pack
+
+### 23.1 Revision
+
+**Required fields**
+- revision_id
+- parent_revision_id
+- project_id
+- task_id
+- state
+- root_hash
+- snapshot_root_id
+- intent_id
+- originating_context_artifact_id
+- approval_id
+- logical_sequence_at_seal
+- version_tuple_hash
+- taint_set
+- created_at
+- sealed_at
+
+**Optional fields**
+- abandonment_reason
+- recovery_note
+
+**Invalidation semantics**
+- sealed revisions are immutable
+- pending revisions may be abandoned
+- revision parent cannot change after creation
+
+**Retention class**
+- truth-critical
+- replay-relevant
+- audit-relevant
+
+**Replay relevance**
+- required for exact and semantic replay lineage
+
+**Drift consequences**
+- root drift invalidates approvals and receipts bound to earlier root state
+
+**Taint / trust interaction**
+- taint_set may downgrade replay or approval surfaces without weakening revision identity
+
+### 23.2 JournalEntry
+
+**Required fields**
+- journal_entry_id
+- logical_sequence
+- entry_type
+- revision_id
+- parent_revision_id
+- project_id
+- task_id
+- causality_ref
+- payload_hash
+- version_tuple_hash
+- taint_set
+- created_at
+
+**Optional fields**
+- barrier_status
+- replay_class
+- failure_bundle_id
+- drift_event_id
+
+**Invalidation semantics**
+- journal entries are immutable once durably appended
+- corrupted entries may be excluded from trustable replay after recovery classification
+
+**Retention class**
+- truth-critical
+- audit-critical
+
+**Replay relevance**
+- required for exact causal reconstruction
+
+**Drift consequences**
+- journal continuity break forces replay downgrade or refusal
+
+**Taint / trust interaction**
+- taint may affect admissible interpretations, never sequence identity
+
+### 23.3 SnapshotRoot
+
+**Required fields**
+- snapshot_root_id
+- revision_id
+- root_hash
+- file_manifest_hash
+- artifact_manifest_hash
+- parent_snapshot_root_id
+- version_tuple_hash
+- created_at
+
+**Optional fields**
+- storage_locator
+- compaction_generation
+
+**Invalidation semantics**
+- immutable after durable publication
+- may be superseded, never rewritten
+
+**Retention class**
+- truth-critical
+- replay-relevant
+
+**Replay relevance**
+- required for root-state reconstruction
+
+**Drift consequences**
+- drifted roots create new lineage, not mutation of prior root
+
+**Taint / trust interaction**
+- taint may annotate provenance, not alter snapshot identity
+
+### 23.4 ContextArtifact
+
+**Required fields**
+- context_artifact_id
+- task_id
+- root_revision_id
+- repo_graph_version
+- symbol_index_version
+- candidate_file_ids
+- symbol_frontier_ids
+- memory_item_ids
+- packing_policy_version
+- hard_budget_tokens
+- effective_budget_tokens
+- actual_tokens
+- truncation_reason
+- deferred_retrieval_items
+- provenance_refs
+- taint_set
+- content_hash
+- created_at
+
+**Optional fields**
+- context_class
+- replay_class_hint
+
+**Invalidation semantics**
+- root drift may invalidate approval use
+- policy drift may invalidate admissibility for strong replay claims
+
+**Retention class**
+- operational
+- replay-relevant
+- audit-relevant
+
+**Replay relevance**
+- required for semantic replay
+- insufficient for exact replay without additional evidence closure
+
+**Drift consequences**
+- stale context may remain evidence, not live authority input
+
+**Taint / trust interaction**
+- taint_set must propagate to review and replay surfaces
+
+### 23.5 InferenceArtifact
+
+**Required fields**
+- inference_artifact_id
+- task_id
+- root_revision_id
+- context_artifact_id
+- worker_run_id
+- worker_profile
+- model_route_id
+- output_hash
+- provenance_refs
+- taint_set
+- created_at
+
+**Optional fields**
+- token_usage
+- latency_ms
+- fallback_route_id
+
+**Invalidation semantics**
+- root drift or context invalidation may downgrade downstream use
+
+**Retention class**
+- operational
+- audit-relevant
+- replay-relevant
+
+**Replay relevance**
+- historical inference artifacts are required for strongest replay classes unless exact-equivalence proof bundle is admitted
+
+**Drift consequences**
+- drift may invalidate approval linkage derived from this inference
+
+**Taint / trust interaction**
+- model-route taint and context taint must both propagate
+
+### 23.6 PatchProposal
+
+**Required fields**
+- patch_proposal_id
+- task_id
+- root_revision_id
+- inference_artifact_id
+- target_file_ids
+- patch_group_hash
+- side_effect_class_proposal
+- capability_requirements
+- taint_set
+- created_at
+
+**Optional fields**
+- manifest_touch_flag
+- multi_file_group_id
+- rationale_hash
+
+**Invalidation semantics**
+- root drift invalidates live applicability
+- receipt drift may invalidate approval readiness
+
+**Retention class**
+- operational
+- audit-relevant
+- review-relevant
+
+**Replay relevance**
+- supports semantic reconstruction of proposed change path
+
+**Drift consequences**
+- drift requires rebase, rejection, or regeneration
+
+**Taint / trust interaction**
+- tainted proposals may not silently escalate to high-risk side-effect classes
+
+### 23.7 ValidationReceipt
+
+**Required fields**
+- validation_receipt_id
+- task_id
+- root_revision_id
+- receipt_type
+- validator_identity
+- validator_version
+- input_hash
+- result
+- diagnostics_hash
+- taint_set
+- created_at
+
+**Optional fields**
+- invalidated_at
+- invalidation_reason
+
+**Invalidation semantics**
+- root drift or validator-policy drift may invalidate receipt reuse
+
+**Retention class**
+- audit-relevant
+- approval-relevant
+
+**Replay relevance**
+- supports semantic and diagnostic replay
+
+**Drift consequences**
+- invalidated receipts break approval continuity
+
+**Taint / trust interaction**
+- quarantine or runner taint may downgrade receipt trust class
+
+### 23.8 BuildReceipt
+
+**Required fields**
+- build_receipt_id
+- task_id
+- root_revision_id
+- build_graph_version
+- toolchain_fingerprint
+- input_hash
+- result
+- diagnostics_hash
+- taint_set
+- created_at
+
+**Optional fields**
+- invalidated_at
+- invalidation_reason
+
+**Invalidation semantics**
+- build graph drift, toolchain drift, or root drift may invalidate reuse
+
+**Retention class**
+- audit-relevant
+- approval-relevant
+
+**Replay relevance**
+- supports diagnostic replay and approval provenance
+
+**Drift consequences**
+- environment drift may force downgrade from exact to diagnostic replay
+
+**Taint / trust interaction**
+- runner taint or quarantine breach taint downgrades trust class
+
+### 23.9 SemanticReceipt
+
+**Required fields**
+- semantic_receipt_id
+- task_id
+- root_revision_id
+- analyzer_identity
+- analyzer_version
+- input_hash
+- result
+- diagnostics_hash
+- taint_set
+- created_at
+
+**Optional fields**
+- invalidated_at
+- invalidation_reason
+
+**Invalidation semantics**
+- semantic analyzer drift or root drift may invalidate reuse
+
+**Retention class**
+- audit-relevant
+- approval-relevant
+
+**Replay relevance**
+- supports semantic replay classification and review provenance
+
+**Drift consequences**
+- analyzer drift may require re-validation before approval
+
+**Taint / trust interaction**
+- taint propagates into approval and review surfaces
+
+### 23.10 ReviewArtifact
+
+**Required fields**
+- review_artifact_id
+- task_id
+- root_revision_id
+- patch_proposal_id
+- diff_hash
+- semantic_impact_hash
+- risk_class
+- rendering_provenance
+- taint_set
+- created_at
+
+**Optional fields**
+- secondary_review_id
+- self_summary_flag
+
+**Invalidation semantics**
+- root drift, patch-group drift, or receipt invalidation may invalidate review
+
+**Retention class**
+- audit-relevant
+- approval-relevant
+
+**Replay relevance**
+- supports semantic and diagnostic replay of decision context
+
+**Drift consequences**
+- review may not survive material drift without re-render and re-review
+
+**Taint / trust interaction**
+- self-summary taint or route taint must be surfaced
+
+### 23.11 ApprovalArtifact
+
+**Required fields**
+- approval_id
+- task_id
+- originating_root_revision_id
+- reviewed_patch_hash
+- reviewed_context_artifact_id
+- required_receipt_ids
+- approval_scope
+- approver_identity
+- approval_state
+- policy_version
+- created_at
+- expires_at
+
+**Optional fields**
+- invalidated_at
+- invalidation_reason
+- conflict_group_id
+
+**Invalidation semantics**
+- root drift, receipt drift, context drift, policy drift, or conflict may invalidate approval
+
+**Retention class**
+- authority-bearing
+- audit-critical
+
+**Replay relevance**
+- required for replay of approved mutation paths
+
+**Drift consequences**
+- invalidated approval cannot retain execution authority
+
+**Taint / trust interaction**
+- taint may downgrade admissibility or require renewed human review
+
+### 23.12 ReplayAnchor
+
+**Required fields**
+- replay_anchor_id
+- root_revision_id
+- project_id
+- task_id
+- replay_class_claim
+- required_artifact_ids
+- version_tuple_hash
+- environment_fingerprint_hash
+- created_at
+
+**Optional fields**
+- degradation_reason
+- unreplayable_reason
+
+**Invalidation semantics**
+- evidence loss or environment mismatch may invalidate stronger replay claims
+
+**Retention class**
+- replay-critical
+- GC-pinning source
+
+**Replay relevance**
+- primary anchor for replay admissibility classification
+
+**Drift consequences**
+- new drift does not mutate historical replay anchor but may change live claimability under new policy
+
+**Taint / trust interaction**
+- taint must degrade replay claims when relevant
+
+### 23.13 CapabilityToken
+
+**Required fields**
+- capability_token_id
+- subject_identity
+- capability_name
+- scope_hash
+- issued_at
+- expires_at
+- issuer_identity
+- token_mac_or_signature
+- version_tuple_hash
+- single_use_flag
+
+**Optional fields**
+- consumed_at
+- revoked_at
+- revocation_reason
+- bound_task_id
+- bound_root_revision_id
+
+**Invalidation semantics**
+- expired, revoked, or consumed single-use tokens are invalid
+- drift on bound root or task may invalidate token use
+
+**Retention class**
+- authority-bearing
+- audit-critical
+
+**Replay relevance**
+- supports audit and diagnostic reconstruction, never live privilege carry-forward
+
+**Drift consequences**
+- task or root drift may force rejection or re-issuance
+
+**Taint / trust interaction**
+- suspicious token use may taint worker, runner, or route
+
+### 23.14 AuditRecord
+
+**Required fields**
+- audit_record_id
+- task_id
+- root_revision_id
+- record_type
+- causality_ref
+- actor_identity
+- artifact_refs
+- version_tuple_hash
+- taint_set
+- created_at
+
+**Optional fields**
+- failure_bundle_id
+- replay_anchor_id
+- approval_id
+
+**Invalidation semantics**
+- audit records are append-only; trust class may degrade if supporting evidence is lost
+
+**Retention class**
+- audit-critical
+
+**Replay relevance**
+- required for diagnostic replay and governance reconstruction
+
+**Drift consequences**
+- later drift may not rewrite prior audit facts; it may only add new audit facts
+
+**Taint / trust interaction**
+- taint status must remain visible; silent taint stripping is forbidden
+
+### 23.15 FailureBundle
+
+**Required fields**
+- failure_bundle_id
+- task_id
+- root_revision_id
+- failure_class
+- cause_hash
+- evidence_refs
+- taint_set
+- created_at
+
+**Optional fields**
+- incident_id
+- retained_for_forensics_flag
+- recovery_action_ref
+
+**Invalidation semantics**
+- append-only after publication; classification may be superseded only by linked later record
+
+**Retention class**
+- incident-critical
+- audit-critical
+
+**Replay relevance**
+- supports diagnostic replay and postmortem classification
+
+**Drift consequences**
+- drift may add related bundles; it may not erase prior failure evidence
+
+**Taint / trust interaction**
+- taint class must remain preserved for security or replay analysis
+
+### 23.16 BudgetRecord
+
+**Required fields**
+- budget_record_id
+- task_id
+- budget_class
+- allocated_amount
+- consumed_amount
+- remaining_amount
+- budget_state
+- created_at
+
+**Optional fields**
+- suspended_at
+- replenished_at
+- close_reason
+
+**Invalidation semantics**
+- superseded only by later budget record under same budget lineage
+
+**Retention class**
+- operational
+- audit-relevant
+
+**Replay relevance**
+- supports route and suspension explanations
+
+**Drift consequences**
+- budget policy drift may change future admissibility, not prior consumption facts
+
+**Taint / trust interaction**
+- tainted route or runner may force stricter budget posture
+
+### 23.17 TaintRecord
+
+**Required fields**
+- taint_record_id
+- subject_id
+- taint_class
+- taint_state
+- source_ref
+- created_at
+
+**Optional fields**
+- cleared_at
+- clearing_identity
+- clearing_reason
+
+**Invalidation semantics**
+- taint history is append-only; clearing creates new state, not deletion of prior taint
+
+**Retention class**
+- audit-relevant
+- governance-relevant
+
+**Replay relevance**
+- supports replay claim downgrades and review trust reconstruction
+
+**Drift consequences**
+- policy drift may change how taint is interpreted, not whether it occurred
+
+**Taint / trust interaction**
+- this schema is itself a taint-bearing governance object; silent clearing is forbidden
+
+### 23.18 ReleaseGateRecord
+
+**Required fields**
+- release_gate_id
+- task_id
+- gate_class
+- decision
+- decision_basis_hash
+- created_at
+
+**Optional fields**
+- blocking_ref
+- rollback_readiness_ref
+
+**Invalidation semantics**
+- release decisions may be superseded by later gate records under drift or new evidence
+
+**Retention class**
+- operational
+- audit-relevant
+
+**Replay relevance**
+- supports release decision reconstruction
+
+**Drift consequences**
+- environment drift may invalidate prior release readiness
+
+**Taint / trust interaction**
+- tainted evidence may downgrade release confidence or require renewed gating
+
+### 23.19 DriftEventRecord
+
+**Required fields**
+- drift_event_id
+- task_id
+- root_revision_id
+- drift_class
+- detected_at
+- affected_artifact_ids
+- consequence_class
+
+**Optional fields**
+- approval_id
+- replay_anchor_id
+- required_reconciliation_action
+
+**Invalidation semantics**
+- append-only; subsequent reconciliation emits new records rather than mutating prior event
+
+**Retention class**
+- audit-relevant
+- replay-relevant
+
+**Replay relevance**
+- supports explanation of invalidations, downgrades, and reroute decisions
+
+**Drift consequences**
+- drift event may invalidate approval, receipts, context, capability, or route selection
+
+**Taint / trust interaction**
+- drift linked to tainted surfaces must preserve taint association
+
+### 23.20 MemoryItem
+
+**Required fields**
+- memory_item_id
+- memory_class
+- provenance_refs
+- trust_class
+- content_hash
+- created_at
+
+**Optional fields**
+- decay_epoch
+- invalidated_at
+- invalidation_reason
+
+**Invalidation semantics**
+- policy drift, provenance loss, or taint escalation may invalidate reuse
+
+**Retention class**
+- operational
+- replay-relevant when admitted into context provenance
+
+**Replay relevance**
+- memory use must be visible in context provenance for semantic replay
+
+**Drift consequences**
+- stale or invalid memory may force context downgrade or repack
+
+**Taint / trust interaction**
+- tainted memory may remain retrievable only under downgraded trust handling
+
+---
+
+## 24. Acceptance Matrix and Full Invariant Registry
+
+### 24.1 Acceptance Matrix
+
+- **AT-001** stale handle never resolves a live object
+- **AT-002** handle slot reuse always bumps generation
+- **AT-003** sealed revision is immutable
+- **AT-004** historical read isolation after delete still works
+- **AT-005** journal logical sequence is strictly monotonic
+- **AT-006** dirty-tail WAL damage truncates safely
+- **AT-007** mid-segment WAL corruption halts recovery
+- **AT-008** approval root drift aborts execution
+- **AT-009** final synchronous file-truth mismatch aborts seal
+- **AT-010** validation cannot pollute host dependency cache
+- **AT-011** quarantine blocks untrusted build logic from host execution
+- **AT-012** anti-swap watermark suspends low-priority work before collapse
+- **AT-013** replay claim above captured evidence is rejected
+- **AT-014** scrubbed export leaks no secret or proprietary identifiers
+- **AT-015** encrypted debug vault reconstructs scrubbed local crash scene
+- **AT-016** multi-file patch coherence rejects partial application
+- **AT-017** incremental invalidation revalidates only affected graph slice
+- **AT-018** consumed capability token cannot be reused
+- **AT-019** replay anchor pins required evidence from GC
+- **AT-020** same-worker review summary is flagged or prohibited by policy
+- **AT-021** route benchmark fallback triggers when lane-specific quality drops below threshold
+- **AT-022** async backlog lane cannot bypass approval on high-risk effects
+- **AT-023** worker run cannot transition directly from created to completed
+- **AT-024** worker taint propagates to dependent review and replay surfaces
+- **AT-025** quarantine run preserved for forensics cannot be silently destroyed
+- **AT-026** budget nearing_limit produces policy-visible governance signal
+- **AT-027** exceeded budget suspends or downgrades work without granting unsafe shortcuts
+- **AT-028** taint clearing without policy record is rejected
+- **AT-029** periphery cannot mutate truth directly
+- **AT-030** periphery cannot upgrade approval state
+- **AT-031** route change emits audit trace and routing degradation record when threshold crossed
+- **AT-032** exact replay claim rejects uncertified equivalence substitution
+- **AT-033** audit records remain append-only under later drift
+- **AT-034** FailureBundle retains forensic references under legal hold
+- **AT-035** DriftEventRecord invalidates affected approvals when consequence_class demands it
+
+### 24.2 Full Invariant Registry
+
+- **INV-001**  
+  **invariant_statement:** Stale handles never resolve live objects.  
+  **enforcement_module:** handle authority  
+  **enforcement_point:** handle resolution path  
+  **acceptance_test_ids:** AT-001, AT-002  
+  **failure_reaction:** reject stale handle resolution  
+  **audit_query_proof:** handle resolution audit trace
+
+- **INV-002**  
+  **invariant_statement:** Sealed revisions are immutable.  
+  **enforcement_module:** revision manager  
+  **enforcement_point:** post-seal mutation gate  
+  **acceptance_test_ids:** AT-003  
+  **failure_reaction:** reject mutation and emit audit record  
+  **audit_query_proof:** revision immutability audit trace
+
+- **INV-003**  
+  **invariant_statement:** Historical reads never leak latest-state truth.  
+  **enforcement_module:** truth plane  
+  **enforcement_point:** historical snapshot read path  
+  **acceptance_test_ids:** AT-004  
+  **failure_reaction:** reject read and emit FailureBundle  
+  **audit_query_proof:** historical read isolation trace
+
+- **INV-004**  
+  **invariant_statement:** Journal logical sequence is strictly monotonic.  
+  **enforcement_module:** journal and WAL  
+  **enforcement_point:** append path  
+  **acceptance_test_ids:** AT-005, AT-006, AT-007  
+  **failure_reaction:** halt append or recover with truncation rules  
+  **audit_query_proof:** journal sequence continuity query
+
+- **INV-005**  
+  **invariant_statement:** No revision becomes sealed before durability boundary is crossed.  
+  **enforcement_module:** seal ordering  
+  **enforcement_point:** seal transition path  
+  **acceptance_test_ids:** AT-006, AT-009  
+  **failure_reaction:** reject seal or recover as unsealed  
+  **audit_query_proof:** seal durability trace
+
+- **INV-006**  
+  **invariant_statement:** Approval cannot time-travel across root drift.  
+  **enforcement_module:** approval barrier  
+  **enforcement_point:** barrier evaluation  
+  **acceptance_test_ids:** AT-008  
+  **failure_reaction:** invalidate approval  
+  **audit_query_proof:** drift-linked approval invalidation query
+
+- **INV-007**  
+  **invariant_statement:** Approval cannot execute across invalidated receipts.  
+  **enforcement_module:** approval barrier  
+  **enforcement_point:** receipt admissibility check  
+  **acceptance_test_ids:** AT-008, AT-017  
+  **failure_reaction:** reject execution and require re-validation  
+  **audit_query_proof:** receipt invalidation trace
+
+- **INV-008**  
+  **invariant_statement:** Validation-time execution cannot pollute host truth or caches.  
+  **enforcement_module:** validation quarantine  
+  **enforcement_point:** runner enter/exit verification  
+  **acceptance_test_ids:** AT-010, AT-011  
+  **failure_reaction:** invalidate receipt and emit FailureBundle  
+  **audit_query_proof:** quarantine pollution query
+
+- **INV-009**  
+  **invariant_statement:** Raw side effects are forbidden.  
+  **enforcement_module:** execution plane  
+  **enforcement_point:** side-effect dispatch gate  
+  **acceptance_test_ids:** AT-022  
+  **failure_reaction:** reject dispatch and emit audit record  
+  **audit_query_proof:** side-effect class dispatch trace
+
+- **INV-010**  
+  **invariant_statement:** Replay claims may not exceed captured evidence.  
+  **enforcement_module:** replay classifier  
+  **enforcement_point:** replay admission path  
+  **acceptance_test_ids:** AT-013, AT-032  
+  **failure_reaction:** downgrade or refuse replay  
+  **audit_query_proof:** replay class decision record
+
+- **INV-011**  
+  **invariant_statement:** Uncertified equivalence substitution is never exact replay.  
+  **enforcement_module:** replay classifier  
+  **enforcement_point:** exact replay claim path  
+  **acceptance_test_ids:** AT-032  
+  **failure_reaction:** reject exact replay claim  
+  **audit_query_proof:** equivalence proof-bundle check trace
+
+- **INV-012**  
+  **invariant_statement:** Single-use capability tokens may not be reused.  
+  **enforcement_module:** capability authority  
+  **enforcement_point:** token consumption gate  
+  **acceptance_test_ids:** AT-018  
+  **failure_reaction:** reject token reuse and taint caller if suspicious  
+  **audit_query_proof:** token lifecycle trace
+
+- **INV-013**  
+  **invariant_statement:** Revoked or expired capability tokens are never admissible.  
+  **enforcement_module:** capability authority  
+  **enforcement_point:** token validation path  
+  **acceptance_test_ids:** AT-018  
+  **failure_reaction:** reject token and emit audit note  
+  **audit_query_proof:** token revocation and expiry query
+
+- **INV-014**  
+  **invariant_statement:** Replay anchors pin required evidence from GC.  
+  **enforcement_module:** GC controller  
+  **enforcement_point:** retention traversal  
+  **acceptance_test_ids:** AT-019  
+  **failure_reaction:** abort GC cycle  
+  **audit_query_proof:** GC pin closure query
+
+- **INV-015**  
+  **invariant_statement:** Review provenance may not be concealed.  
+  **enforcement_module:** review governance  
+  **enforcement_point:** review artifact publication  
+  **acceptance_test_ids:** AT-020  
+  **failure_reaction:** block approval or require secondary review  
+  **audit_query_proof:** review provenance trace
+
+- **INV-016**  
+  **invariant_statement:** Multi-file patch groups may not be partially applied.  
+  **enforcement_module:** patch coherence engine  
+  **enforcement_point:** patch-group admissibility path  
+  **acceptance_test_ids:** AT-016  
+  **failure_reaction:** reject patch group  
+  **audit_query_proof:** coherence rejection record
+
+- **INV-017**  
+  **invariant_statement:** Receipt reuse is legal only across proven non-impacting change boundaries.  
+  **enforcement_module:** incremental validation scope  
+  **enforcement_point:** receipt reuse check  
+  **acceptance_test_ids:** AT-017  
+  **failure_reaction:** widen validation scope  
+  **audit_query_proof:** receipt reuse decision trace
+
+- **INV-018**  
+  **invariant_statement:** Worker runs follow legal lifecycle transitions.  
+  **enforcement_module:** worker runner  
+  **enforcement_point:** worker state transition handler  
+  **acceptance_test_ids:** AT-023  
+  **failure_reaction:** reject illegal transition and taint run if needed  
+  **audit_query_proof:** worker run lifecycle trace
+
+- **INV-019**  
+  **invariant_statement:** Worker taint propagates to dependent governance surfaces.  
+  **enforcement_module:** taint propagation graph  
+  **enforcement_point:** taint transition handler  
+  **acceptance_test_ids:** AT-024  
+  **failure_reaction:** downgrade review and replay surfaces  
+  **audit_query_proof:** taint propagation query
+
+- **INV-020**  
+  **invariant_statement:** Quarantine runs preserved for forensics may not be silently destroyed.  
+  **enforcement_module:** quarantine runner  
+  **enforcement_point:** teardown path  
+  **acceptance_test_ids:** AT-025  
+  **failure_reaction:** block destruction and emit incident note  
+  **audit_query_proof:** quarantine retention trace
+
+- **INV-021**  
+  **invariant_statement:** Budget thresholds must produce visible governance actions.  
+  **enforcement_module:** budget governor  
+  **enforcement_point:** budget transition handler  
+  **acceptance_test_ids:** AT-026, AT-027  
+  **failure_reaction:** suspend or downgrade work  
+  **audit_query_proof:** budget lifecycle query
+
+- **INV-022**  
+  **invariant_statement:** Taint may not be silently cleared.  
+  **enforcement_module:** taint propagation graph  
+  **enforcement_point:** taint clearing path  
+  **acceptance_test_ids:** AT-028  
+  **failure_reaction:** reject clear and emit audit record  
+  **audit_query_proof:** taint clearing trace
+
+- **INV-023**  
+  **invariant_statement:** Periphery surfaces may not mutate truth directly.  
+  **enforcement_module:** periphery boundary control  
+  **enforcement_point:** periphery request gate  
+  **acceptance_test_ids:** AT-029  
+  **failure_reaction:** reject mutation request  
+  **audit_query_proof:** periphery mutation denial trace
+
+- **INV-024**  
+  **invariant_statement:** Periphery surfaces may not upgrade approval state.  
+  **enforcement_module:** periphery boundary control  
+  **enforcement_point:** approval update gate  
+  **acceptance_test_ids:** AT-030  
+  **failure_reaction:** reject state change  
+  **audit_query_proof:** periphery approval denial trace
+
+- **INV-025**  
+  **invariant_statement:** Worker routing may not bypass capability or approval governance.  
+  **enforcement_module:** routing policy engine  
+  **enforcement_point:** route selection and fallback path  
+  **acceptance_test_ids:** AT-021, AT-031  
+  **failure_reaction:** reroute or halt route  
+  **audit_query_proof:** routing decision trace
+
+- **INV-026**  
+  **invariant_statement:** Audit records are append-only.  
+  **enforcement_module:** evidence plane  
+  **enforcement_point:** audit append path  
+  **acceptance_test_ids:** AT-033  
+  **failure_reaction:** reject rewrite and emit FailureBundle  
+  **audit_query_proof:** audit append-only query
+
+- **INV-027**  
+  **invariant_statement:** Failure bundles retain forensic references under legal hold.  
+  **enforcement_module:** evidence retention controller  
+  **enforcement_point:** retention release path  
+  **acceptance_test_ids:** AT-034  
+  **failure_reaction:** block retention release  
+  **audit_query_proof:** legal-hold retention trace
+
+- **INV-028**  
+  **invariant_statement:** Drift events invalidate affected authority surfaces when policy requires it.  
+  **enforcement_module:** drift reconciler  
+  **enforcement_point:** drift consequence handler  
+  **acceptance_test_ids:** AT-035  
+  **failure_reaction:** invalidate approval or route and emit reconciliation record  
+  **audit_query_proof:** drift consequence query
+
+---
+
+
+
+### 24.3 Execution Layering Rule
+
+The system distinguishes between:
+
+- the **Final Target Architecture**
+- the **Current Execution Doctrine**
+
+These are not competing systems.
+They are two lawful readings of the same governing document at different stages of implementation maturity.
+
+The Final Target Architecture defines the full constitutional surface the system may eventually grow into while preserving sovereignty, governance, replay honesty, auditability, recoverability, and policy control.
+
+The Current Execution Doctrine defines the narrower execution discipline that is lawful, signable, and honest under the current maturity stage and current hardware baseline.
+
+Therefore the current-stage sign-off surface is intentionally narrower than the full constitutional surface.
+
+Current-stage sign-off must concentrate first on one governed path:
+
+Context -> Inference -> PatchProposal -> Validation -> Review -> Approval -> Revision Seal -> Evidence
+
+This rule means:
+
+- the kernel core remains the load-bearing sign-off center
+- broader orchestration shell behavior remains constitutionally valid but is not automatically a current-stage sign-off blocker
+- outer orchestration breadth may expand later only after proof, audit, recovery, and replay discipline have already been established on the narrow signable path
+- no future breadth claim may be back-projected into present-stage sign-off language
+
+Current-stage sign-off therefore proves the system by depth before breadth, by closure before convenience, and by governed mutation before orchestration richness.
+
+---
+
+## 25. Implementation Philosophy
+
+This section defines the correct implementation philosophy for the **current stage** of the system.
+
+It must be read together with Section 24.3.
+
+The system expresses two truths at once:
+
+- the **Final Target Architecture** may eventually become broader, stronger, and more capable than the currently admitted execution surface
+- the **Current Execution Doctrine** must remain narrower, harder, and explicitly tied to the present maturity stage and current hardware baseline
+
+The current implementation philosophy is therefore:
+
+- constitution first
+- execution doctrine narrower than constitutional ceiling
+- tracer bullet before broad capability claims
+- substrate-backed kernel before ideology-driven custom internals
+- honest temporary guarantees before stronger permanent guarantees
+- evidence-driven hardening before scope widening
+- self-built mechanisms only when justified by real failure data, replay breakage, benchmark pressure, or contract mismatch
+- present-stage discipline before future-stage breadth
+- proof density before orchestration breadth
+- acceptance density before shell sophistication
+- invariant enforcement density before surface multiplication
+- recovery proof and audit closure before richer product behavior
+
+The system must not confuse:
+
+- what it is constitutionally allowed to become later
+
+with
+
+- what it is allowed to build, claim, prove, and operate honestly now
+
+### 25.1 Kernel core and orchestration shell
+
+For the current stage, the implementation philosophy distinguishes sharply between:
+
+**Kernel core**
+- truth
+- approval
+- replay
+- audit
+- recovery
+- capability
+- taint
+- drift
+- retention
+- authority
+
+**Outer orchestration shell**
+- broader Project OS behavior
+- richer lane orchestration
+- wider routing sophistication
+- product-shell ergonomics
+- future operational dashboards
+- broader command-center behavior
+- later shell-level experience layers
+
+The kernel core is sign-off critical.
+The outer orchestration shell is constitutionally real, but not all of it is current-stage sign-off critical.
+
+Current-stage rule:
+
+- outer orchestration surfaces may exist in the constitution without becoming immediate sign-off blockers
+- they become sign-off blockers only where they directly touch kernel authority, truth mutation, replay claims, audit closure, recovery guarantees, capability use, taint flow, drift handling, or retention guarantees
+
+### 25.2 Narrow current-stage sign-off surface
+
+For the current stage, the system must prove one governed path first:
+
+Context -> Inference -> PatchProposal -> Validation -> Review -> Approval -> Revision Seal -> Evidence
+
+This path is the first signable surface.
+It is not the only constitutional surface.
+It is the first surface that must be proven to closure before wider orchestration claims are admitted.
+
+Current-stage interpretation:
+
+- narrower execution today preserves stronger architecture tomorrow
+- stage-bound narrowness is not weakness; it is anti-fantasy discipline
+- current hardware limits are first-class governance inputs
+- proof comes before broadening
+- new breadth must be admitted by evidence, not by desire
+- richer shell behavior is not a substitute for kernel proof
+- present-stage maturity is measured by governed closure, not by feature breadth
+
+Phase order therefore defines logical dependency order, not monolithic implementation order.  
+Current execution order is vertical and evidence-driven because that is the correct doctrine for the current stage.  
+That doctrine is binding **now**, without being the permanent metaphysical ceiling of the system.
+
+---
+
+## 26. Tracer Bullet and Vertical Slice Strategy
+
+This section defines the tracer-bullet doctrine for the **current execution stage**, not the permanent upper bound of the system.
+
+The first serious implementation window must produce one real tracer-bullet vertical slice crossing:
+
+- truth
+- validation
+- execution
+- control
+- context
+- evidence
+
+The goal is not architectural theatrics.  
+The goal is to produce:
+
+- one real governed mutation path
+- one real rejection path
+- one real replay classification path
+- one real failure corpus
+- one real recovery basis for future hardening
+
+The current tracer-bullet doctrine is intentionally narrow.
+
+For the current stage and current hardware baseline, the first vertical slice must include:
+
+- a durable truth slice
+- one language only
+- one patch class only
+- one worker profile
+- one review path
+- one approval path
+- one revision seal path
+- one evidence capture path
+
+The current-stage signable path is:
+
+Context -> Inference -> PatchProposal -> Validation -> Review -> Approval -> Revision Seal -> Evidence
+
+This path is mandatory because it is the first path that proves:
+
+- context construction is governed
+- inference is artifactized rather than trusted raw
+- patch intent becomes a governed proposal
+- validation is real, not decorative
+- review has an admissible artifact form
+- approval is serialized and drift-aware
+- revision sealing crosses lawful durability boundaries
+- evidence closure is preserved for replay, audit, and recovery
+
+The point is not that the system can never support more languages, broader domain surfaces, richer runners, or stronger distributed execution later.  
+The point is that the system may not **claim or operationalize** that broader surface before the current stage has produced evidence that the kernel, contracts, and governance model can actually carry it.
+
+Current-stage tracer-bullet rules:
+
+- start narrow
+- cross all required governance planes
+- produce governed artifacts, not demos
+- bind every material action to evidence
+- classify replay honestly
+- leave reconstructable failure state
+- preserve upgrade paths without pretending they already exist
+- prefer the narrowest signable path over the broadest impressive path
+
+Current-stage non-blocker rule:
+
+The absence of richer orchestration-shell behavior does not fail the tracer bullet by itself.  
+The tracer bullet fails only if the governed kernel path cannot be proven, audited, recovered, or replay-classified honestly.
+
+Success condition:
+
+- one real patch proposal completes the full governed lifecycle
+- one invalid mutation path is rejected with evidence
+- one replay claim is classified honestly
+- one failure path leaves reconstructable evidence
+- the resulting slice is strong enough to support the first hardening loop
+
+Non-confusion rule:
+
+The tracer bullet is the current execution doorway into the architecture.  
+It is **not** the permanent size limit of the architecture.
+
+---
+
+## 27. Substrate Strategy for Early Stages
+
+Current-stage implementation must prefer mature, measurable, local-first substrates before custom internalization.
+
+Allowed early truth substrate:
+
+- SQLite with WAL mode
+
+Not recommended as first truth substrate:
+
+- Redis
+
+Current-stage substrate doctrine:
+
+- mature substrates are allowed when they preserve honest sovereignty boundaries
+- mature substrates do not weaken sovereignty if authority, replay, audit, recovery, and policy control remain in the kernel
+- mature substrates are preferable to premature custom internalization when they allow faster proof, better measurement, and lower ambiguity
+- substrate-backed execution is lawful only if the document does not overclaim final-grade guarantees
+- substrate choice must remain visible in audit, replay, and sign-off language
+
+Current-stage preference rules:
+
+- prefer mature local persistence before custom truth-internalization
+- prefer measurable local runners before speculative shell complexity
+- prefer known failure modes before handcrafted complexity with unknown failure surfaces
+- prefer honest substrate-backed implementation order before ideology-driven “build everything ourselves first”
+
+Rules:
+
+- temporary substrates must be declared as temporary
+- temporary substrates may not be described in final-language terms
+- replay exactness may not be claimed from uncertified equivalence or incomplete environment capture
+- replacement of temporary substrate must be justified by failure data, replay breakage, benchmark pressure, or contract mismatch
+- internalization is required only when evidence shows the substrate ceiling has been reached in a load-bearing way
+
+---
+
+## 28. Hardening Loop
+
+This section defines the hardening doctrine for the **current execution stage**.
+
+Hardening is the disciplined process by which the system moves from:
+
+- narrow but honest governed execution
+
+to
+
+- broader but still governed execution
+
+It is not feature inflation.
+It is not surface-area vanity.
+It is the controlled promotion path from tracer-bullet reality toward a stronger final architecture.
+
+For the current stage, hardening order is:
+
+1. Atomic Approval Barrier
+2. Validation Quarantine
+3. Replay Fidelity Honesty
+4. Multi-File Patch Coherence
+5. Incremental Invalidation
+6. GC Pinning
+7. Scheduler Fairness
+8. Project Lanes
+9. Worker Routing Benchmark Discipline
+
+Each hardening step must produce:
+
+- proof obligations
+- failure tests
+- acceptance criteria
+- audit query demonstrations
+
+Current-stage strength is defined less by breadth and more by:
+
+- proof density
+- acceptance density
+- invariant enforcement density
+- replay honesty
+- audit closure
+- failure corpus quality
+- recovery proof quality
+
+Promotion rule:
+
+A broader execution surface may be admitted only after the relevant hardening obligations are met.  
+Examples:
+
+- broader mutation classes require stronger coherence and invalidation proof
+- broader runner classes require stronger quarantine and taint governance
+- broader replay claims require stronger evidence and environment capture
+- broader routing latitude requires benchmarked fallback and route-governance proof
+- broader shell orchestration requires proof that it does not weaken kernel authority surfaces
+
+Kernel-first hardening rule:
+
+Current-stage hardening must first strengthen the kernel core, including:
+
+- truth legality
+- approval serialization
+- replay honesty
+- audit closure
+- recovery proof
+- capability safety
+- taint propagation
+- drift consequences
+- retention and pinning guarantees
+
+Outer orchestration shell refinement may proceed in parallel only where it does not displace those kernel-first hardening priorities.
+
+Current-stage interpretation:
+
+- hardening is the bridge between narrow present execution and broader future architecture
+- present-stage hardening does not deny future strength; it earns it
+- no capability broadening is legal merely because the constitutional architecture could someday support it
+- every new breadth claim must be purchased with evidence
+- shell sophistication without proof density does not count as maturity
+
+Therefore hardening remains stage-bound, evidence-bound, and hardware-honest.  
+It is the correct doctrine for **now**, while keeping the final target architecture open to later strengthening.
+
+---
+
+## 29. Multi-Vendor Worker Routing and Strength Complementation
+
+Use multiple vendors as replaceable workers.  
+Do not depend on any of them for authority.
+
+Claude-like strengths may be used for:
+- terminal-native execution
+- repo-local deep work
+- focused patching
+- tool loop discipline
+
+Codex-like strengths may be used for:
+- multi-task supervision
+- isolated worktrees
+- long-running execution
+- command-center style orchestration
+
+Gemini/Jules-like strengths may be used for:
+- large-context repo analysis
+- async backlog execution
+- issue-to-PR flow
+- high-level repo mapping
+
+Strengths are complementary at the worker layer.  
+Authority remains singular at the kernel layer.
+
+---
+
+---
+
+## 30. Execution Roadmap
+
+This section defines the **current execution roadmap** under the current maturity stage and current hardware baseline.
+
+It must not be read as a second competing constitution.
+It must not be read as a permanent ceiling on the architecture.
+It is the stage-bound operating path by which the current system advances honestly from narrow governed execution toward the broader final target architecture.
+
+### 30.1 Roadmap interpretation
+
+The roadmap expresses two simultaneous truths:
+
+- the constitutional architecture may ultimately become stronger and broader than the currently admitted execution surface
+- the present roadmap is intentionally narrower because current execution must remain tied to proof, recovery, auditability, and current hardware reality
+
+Therefore the roadmap is:
+
+- present-stage binding
+- future-stage revisable by evidence
+- broader only after promotion conditions are satisfied
+- never broader merely because the architecture text allows it in principle
+
+### 30.2 Phase 1 — Tracer Bullet Vertical Slice
+
+Produce one real end-to-end governed mutation lifecycle across the minimum required planes.
+
+Current-stage constraint:
+
+- narrow language surface
+- narrow patch surface
+- narrow worker surface
+- one honest end-to-end governed slice
+
+Mandatory current-stage signable path:
+
+Context -> Inference -> PatchProposal -> Validation -> Review -> Approval -> Revision Seal -> Evidence
+
+Current-stage sign-off concentration rule:
+
+Implementation and proof should concentrate on this path first.  
+A current-stage sign-off claim is strongest when this path is proven to closure before broader orchestration-shell behavior is treated as required maturity.
+
+Future implication:
+
+This phase does not limit the final architecture.
+It defines the correct current doorway into it.
+
+### 30.3 Phase 2 — Slice Hardening
+
+Strengthen the first vertical slice until it becomes a trustworthy governed path.
+
+Current-stage goal:
+
+turn one working slice into one defensible slice.
+
+Current-stage proof target:
+
+- stronger barrier proof
+- stronger quarantine proof
+- stronger replay proof
+- stronger failure corpus
+- stronger recovery proof
+- stronger acceptance density
+
+Promotion condition:
+
+broader execution is forbidden until hardening evidence exists.
+
+### 30.4 Phase 3 — Kernel Internalization
+
+Replace temporary substrates only where real failure data, contract mismatch, benchmark pressure, replay breakage, or governance requirements justify replacement.
+
+Current-stage rule:
+
+do not internalize for ideology.
+Internalize because the evidence says the substrate ceiling has been reached.
+
+Mature-substrate rule:
+
+early truth persistence, runner strategy, and local execution may lawfully rely on mature local-first substrates, provided sovereignty, audit, replay honesty, recovery posture, and authority control remain explicit and truthful.
+
+Future implication:
+
+internalization is a strengthening move, not a ritual of architectural purity.
+
+### 30.5 Phase 4 — Project OS Expansion
+
+Expand from a governed coding slice into a governed project operating system.
+
+Current-stage rule:
+
+project-scale expansion remains subordinate to the same kernel authority, replay, approval, and evidence rules validated earlier.
+
+Outer-shell non-blocker rule:
+
+broader Project OS orchestration, richer lane behavior, and broader product-shell sophistication are constitutionally real but are not automatic current-stage sign-off blockers unless they directly affect:
+
+- truth mutation
+- approval state
+- replay claims
+- audit closure
+- recovery guarantees
+- capability enforcement
+- taint propagation
+- drift handling
+- retention or pinning guarantees
+
+Future implication:
+
+project breadth may grow, but only on top of already-governed core surfaces.
+
+### 30.6 Phase 5 — Multi-Vendor Capability Routing
+
+Introduce multiple worker profiles and route them under one sovereign kernel.
+
+Current-stage rule:
+
+worker diversity is admitted only after route governance, fallback logic, and benchmark evidence exist.
+
+Current-stage maturity signal:
+
+routing sophistication is not counted as maturity unless:
+
+- benchmark discipline exists
+- reroute behavior is auditable
+- fallback is governed
+- kernel authority remains singular
+
+Future implication:
+
+multi-vendor breadth is a governed strength multiplier, not a shortcut around kernel maturity.
+
+### 30.7 Phase 6 — Controlled Broadening Toward Final Target Architecture
+
+Expand only after recovery, replay honesty, approval barrier, quarantine, GC pinning, incremental validation, and routing benchmarks are proven.
+
+Broaden only where evidence now justifies it.  
+Possible later admissions may include:
+
+- wider language coverage
+- richer runner classes
+- broader project orchestration
+- stronger domain adapters
+- carefully governed remote execution surfaces
+- stronger distributed coordination under preserved kernel sovereignty
+
+Current-stage rule:
+
+none of these are admitted early merely because the final target architecture could eventually contain them.
+
+### 30.8 Final roadmap rule
+
+Implementation order is vertical and evidence-driven, not monolithic and horizontal.
+
+Current execution doctrine is intentionally narrower than final target architecture.  
+That is not a contradiction.  
+It is the correct staging discipline for building a stronger system without lying about what already exists.
+
+Current-stage sign-off surface is narrower than the full constitutional surface.  
+The system proves itself first through one governed kernel path and only later through broader orchestration breadth.
+
+---
+
+## 31. Sign-Off Rule
+
+This system is signable only when all are true:
+
+- core contracts are formal and load-bearing
+- field-level frozen schemas exist for core artifacts
+- replay honesty is enforced
+- capability, approval, and side-effect authority remain governed
+- context completeness is explicit
+- retention and pinning are explicit
+- invariant bindings exist and pass acceptance coverage
+- no new top-level rules were added without physical failure evidence
+
+Additional sign-off conditions:
+
+- full invariant registry exists
+- core schema semantics are uniformly thick across authority, replay, audit, failure, drift, and taint surfaces
+- no plane-level summary contradicts any contract body
+- no summary language impersonates a formal contract, schema, or invariant registry
+
+Current-stage sign-off rule:
+
+The current-stage sign-off surface is narrower than the full constitutional surface.  
+The first required signable surface is the governed path:
+
+Context -> Inference -> PatchProposal -> Validation -> Review -> Approval -> Revision Seal -> Evidence
+
+Broader orchestration-shell richness, routing sophistication, and product-shell breadth do not become current-stage sign-off blockers unless they directly weaken or distort kernel authority surfaces.
+
+Full constitutional breadth remains part of the governing architecture.  
+Current-stage sign-off proves the narrow path first, then broadens by evidence.
+
+---
+
+## 32. Final Plain Statement
+
+Do not make this system broader by making the kernel weaker.
+
+The correct shape is:
+
+- a deep kernel
+- a wide capability band
+- replaceable workers
+- sovereign truth
+- hard approvals
+- honest replay
+- recoverable state
+- provable evidence
+- bounded budgets
+- multi-lane engineering execution
+- clean-room multi-vendor capability distillation
+- project-scale orchestration above the kernel
+
+The wrong shape is:
+
+- one giant agent
+- shallow governance
+- fuzzy truth
+- fake replay
+- optional approval
+- unbounded retries
+- uncontrolled extensions
+- vendor dependency at the authority layer
+- architecture slogans instead of contracts
+- polluted code replication instead of clean-room system design
+
+This system should be defined as:
+
+A sovereign engineering operating system whose kernel governs truth, validation, execution, approvals, replay, audit, recovery, and policy, and whose outer lanes plan, design, implement, review, release, and evolve software projects end-to-end, while using multiple frontier AI systems only as replaceable, capability-routed workers under one controlled authority model.
+
+That is the complete plan.
