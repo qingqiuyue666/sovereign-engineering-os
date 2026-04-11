@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:seos:v11-slice1:audit_record",
+  "artifact_type": "AuditRecord",
+  "schema_version": "v11-slice1",
+  "source_ref": "v11 §23.14",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "audit_record_id",
+    "task_id",
+    "root_revision_id",
+    "record_type",
+    "causality_ref",
+    "actor_identity",
+    "artifact_refs",
+    "version_tuple_hash",
+    "taint_set",
+    "created_at"
+  ],
+  "properties": {
+    "audit_record_id": {"type": "string", "minLength": 1},
+    "task_id": {"type": "string"},
+    "root_revision_id": {"type": ["string", "null"]},
+    "record_type": {"type": "string", "minLength": 1},
+    "causality_ref": {"type": ["string", "null"]},
+    "actor_identity": {"type": "string"},
+    "artifact_refs": {"type": "array", "items": {"type": "string"}},
+    "version_tuple_hash": {"type": "string", "minLength": 1},
+    "taint_set": {"type": "array", "items": {"type": "string"}},
+    "created_at": {"type": "string", "format": "date-time"},
+    "payload": {"type": "object"},
+    "failure_bundle_id": {"type": "string"},
+    "replay_anchor_id": {"type": "string"},
+    "approval_id": {"type": "string"}
+  }
+}

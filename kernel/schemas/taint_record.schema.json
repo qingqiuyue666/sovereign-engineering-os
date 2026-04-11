@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:seos:v11-slice1:taint_record",
+  "artifact_type": "TaintRecord",
+  "schema_version": "v11-slice1",
+  "source_ref": "v11 §23.17",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "taint_record_id",
+    "subject_id",
+    "taint_class",
+    "taint_state",
+    "source_ref",
+    "created_at"
+  ],
+  "properties": {
+    "taint_record_id": {"type": "string", "minLength": 1},
+    "subject_id": {"type": "string", "minLength": 1},
+    "taint_class": {
+      "type": "string",
+      "enum": [
+        "untrusted_text",
+        "untrusted_tool_output",
+        "policy_degraded",
+        "security_suspect",
+        "replay_degraded",
+        "quarantine_breach_suspect"
+      ]
+    },
+    "taint_state": {
+      "type": "string",
+      "enum": [
+        "clean",
+        "suspected",
+        "tainted",
+        "downgraded",
+        "quarantined",
+        "cleared_by_policy",
+        "archived"
+      ]
+    },
+    "source_ref": {"type": "string", "minLength": 1},
+    "created_at": {"type": "string", "format": "date-time"},
+    "cleared_at": {"type": "string", "format": "date-time"},
+    "clearing_identity": {"type": "string"},
+    "clearing_reason": {"type": "string"}
+  }
+}

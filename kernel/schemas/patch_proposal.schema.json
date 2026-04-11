@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:seos:v11-slice1:patch_proposal",
+  "artifact_type": "PatchProposal",
+  "schema_version": "v11-slice1",
+  "source_ref": "v11 §23.6",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "patch_proposal_id",
+    "task_id",
+    "root_revision_id",
+    "inference_artifact_id",
+    "target_file_ids",
+    "patch_group_hash",
+    "side_effect_class_proposal",
+    "capability_requirements",
+    "taint_set",
+    "created_at",
+    "version_tuple_hash"
+  ],
+  "properties": {
+    "patch_proposal_id": {"type": "string", "minLength": 1},
+    "task_id": {"type": "string", "minLength": 1},
+    "root_revision_id": {"type": "string", "minLength": 1},
+    "inference_artifact_id": {"type": "string", "minLength": 1},
+    "target_file_ids": {
+      "type": "array",
+      "items": {"type": "string"},
+      "minItems": 1,
+      "maxItems": 1,
+      "description": "Phase-1 narrowing: single-file text substitution only. Foundation §1, §D-004."
+    },
+    "patch_group_hash": {"type": "string", "minLength": 1},
+    "side_effect_class_proposal": {"type": "string"},
+    "capability_requirements": {"type": "array", "items": {"type": "string"}},
+    "taint_set": {"type": "array", "items": {"type": "string"}},
+    "created_at": {"type": "string", "format": "date-time"},
+    "version_tuple_hash": {"type": "string", "minLength": 1},
+    "manifest_touch_flag": {"type": "boolean"},
+    "multi_file_group_id": {"type": "string"},
+    "rationale_hash": {"type": "string"}
+  }
+}

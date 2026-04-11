@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:seos:v11-slice1:journal_entry",
+  "artifact_type": "JournalEntry",
+  "schema_version": "v11-slice1",
+  "source_ref": "v11 §23.2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "journal_entry_id",
+    "logical_sequence",
+    "entry_type",
+    "revision_id",
+    "parent_revision_id",
+    "project_id",
+    "task_id",
+    "causality_ref",
+    "payload_hash",
+    "version_tuple_hash",
+    "taint_set",
+    "created_at"
+  ],
+  "properties": {
+    "journal_entry_id": {"type": "string"},
+    "logical_sequence": {"type": "integer", "minimum": 0},
+    "entry_type": {"type": "string"},
+    "revision_id": {"type": "string"},
+    "parent_revision_id": {"type": ["string", "null"]},
+    "project_id": {"type": "string"},
+    "task_id": {"type": "string"},
+    "causality_ref": {"type": ["string", "null"]},
+    "payload_hash": {"type": "string"},
+    "version_tuple_hash": {"type": "string"},
+    "taint_set": {"type": "array", "items": {"type": "string"}},
+    "created_at": {"type": "string", "format": "date-time"},
+    "barrier_status": {"type": "string"},
+    "replay_class": {"type": "string"},
+    "failure_bundle_id": {"type": "string"},
+    "drift_event_id": {"type": "string"}
+  }
+}

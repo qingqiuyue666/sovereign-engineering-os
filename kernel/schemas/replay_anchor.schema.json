@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:seos:v11-slice1:replay_anchor",
+  "artifact_type": "ReplayAnchor",
+  "schema_version": "v11-slice1",
+  "source_ref": "v11 §23.12",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "replay_anchor_id",
+    "root_revision_id",
+    "project_id",
+    "task_id",
+    "replay_class_claim",
+    "required_artifact_ids",
+    "version_tuple_hash",
+    "environment_fingerprint_hash",
+    "created_at"
+  ],
+  "properties": {
+    "replay_anchor_id": {"type": "string", "minLength": 1},
+    "root_revision_id": {"type": "string", "minLength": 1},
+    "project_id": {"type": "string", "minLength": 1},
+    "task_id": {"type": "string", "minLength": 1},
+    "replay_class_claim": {
+      "type": "string",
+      "enum": ["exact", "diagnostic", "semantic", "degraded", "unreplayable"]
+    },
+    "required_artifact_ids": {"type": "array", "items": {"type": "string"}},
+    "version_tuple_hash": {"type": "string", "minLength": 1},
+    "environment_fingerprint_hash": {"type": "string", "minLength": 1},
+    "created_at": {"type": "string", "format": "date-time"},
+    "degradation_reason": {"type": "string"},
+    "unreplayable_reason": {"type": "string"}
+  }
+}

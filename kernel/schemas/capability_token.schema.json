@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:seos:v11-slice1:capability_token",
+  "artifact_type": "CapabilityToken",
+  "schema_version": "v11-slice1",
+  "source_ref": "v11 §23.13",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "capability_token_id",
+    "subject_identity",
+    "capability_name",
+    "scope_hash",
+    "issued_at",
+    "expires_at",
+    "issuer_identity",
+    "token_mac_or_signature",
+    "version_tuple_hash",
+    "single_use_flag"
+  ],
+  "properties": {
+    "capability_token_id": {"type": "string", "minLength": 1},
+    "subject_identity": {"type": "string", "minLength": 1},
+    "capability_name": {"type": "string", "minLength": 1},
+    "scope_hash": {"type": "string", "minLength": 1},
+    "issued_at": {"type": "string", "format": "date-time"},
+    "expires_at": {"type": "string", "format": "date-time"},
+    "issuer_identity": {"type": "string", "minLength": 1},
+    "token_mac_or_signature": {"type": "string", "minLength": 1},
+    "version_tuple_hash": {"type": "string", "minLength": 1},
+    "single_use_flag": {"type": "boolean"},
+    "consumed_at": {"type": "string", "format": "date-time"},
+    "revoked_at": {"type": "string", "format": "date-time"},
+    "revocation_reason": {"type": "string"},
+    "bound_task_id": {"type": "string"},
+    "bound_root_revision_id": {"type": "string"}
+  }
+}

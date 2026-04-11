@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:seos:v11-slice1:drift_event_record",
+  "artifact_type": "DriftEventRecord",
+  "schema_version": "v11-slice1",
+  "source_ref": "v11 §23.19",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "drift_event_id",
+    "task_id",
+    "root_revision_id",
+    "drift_class",
+    "detected_at",
+    "affected_artifact_ids",
+    "consequence_class"
+  ],
+  "properties": {
+    "drift_event_id": {"type": "string", "minLength": 1},
+    "task_id": {"type": "string"},
+    "root_revision_id": {"type": ["string", "null"]},
+    "drift_class": {"type": "string"},
+    "detected_at": {"type": "string", "format": "date-time"},
+    "affected_artifact_ids": {"type": "array", "items": {"type": "string"}},
+    "consequence_class": {"type": "string"},
+    "approval_id": {"type": "string"},
+    "replay_anchor_id": {"type": "string"},
+    "required_reconciliation_action": {"type": "string"}
+  }
+}
