@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:seos:v11-slice1:snapshot_root",
+  "artifact_type": "SnapshotRoot",
+  "schema_version": "v11-slice1",
+  "source_ref": "v11 §23.3",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "snapshot_root_id",
+    "revision_id",
+    "root_hash",
+    "file_manifest_hash",
+    "artifact_manifest_hash",
+    "parent_snapshot_root_id",
+    "version_tuple_hash",
+    "created_at"
+  ],
+  "properties": {
+    "snapshot_root_id": {"type": "string"},
+    "revision_id": {"type": "string"},
+    "root_hash": {"type": "string"},
+    "file_manifest_hash": {"type": "string"},
+    "artifact_manifest_hash": {"type": "string"},
+    "parent_snapshot_root_id": {"type": ["string", "null"]},
+    "version_tuple_hash": {"type": "string"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "storage_locator": {"type": "string"},
+    "compaction_generation": {"type": "integer"}
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:seos:v11-slice1:approval_artifact",
+  "artifact_type": "ApprovalArtifact",
+  "schema_version": "v11-slice1",
+  "source_ref": "v11 §23.11",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "approval_id",
+    "task_id",
+    "originating_root_revision_id",
+    "reviewed_patch_hash",
+    "reviewed_context_artifact_id",
+    "required_receipt_ids",
+    "approval_scope",
+    "approver_identity",
+    "approval_state",
+    "policy_version",
+    "created_at",
+    "expires_at",
+    "version_tuple_hash"
+  ],
+  "properties": {
+    "approval_id": {"type": "string", "minLength": 1},
+    "task_id": {"type": "string", "minLength": 1},
+    "originating_root_revision_id": {"type": "string", "minLength": 1},
+    "reviewed_patch_hash": {"type": "string", "minLength": 1},
+    "reviewed_context_artifact_id": {"type": "string", "minLength": 1},
+    "required_receipt_ids": {"type": "array", "items": {"type": "string"}},
+    "approval_scope": {"type": "string"},
+    "approver_identity": {"type": "string"},
+    "approval_state": {
+      "type": "string",
+      "enum": ["pending", "approved", "rejected", "expired", "invalidated"]
+    },
+    "policy_version": {"type": "string"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "expires_at": {"type": "string", "format": "date-time"},
+    "version_tuple_hash": {"type": "string", "minLength": 1},
+    "invalidated_at": {"type": "string", "format": "date-time"},
+    "invalidation_reason": {"type": "string"},
+    "conflict_group_id": {"type": "string"}
+  }
+}

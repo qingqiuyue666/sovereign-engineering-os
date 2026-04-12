@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:seos:v11-slice1:inference_artifact",
+  "artifact_type": "InferenceArtifact",
+  "schema_version": "v11-slice1",
+  "source_ref": "v11 §23.5",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "inference_artifact_id",
+    "task_id",
+    "root_revision_id",
+    "context_artifact_id",
+    "worker_run_id",
+    "worker_profile",
+    "model_route_id",
+    "output_hash",
+    "provenance_refs",
+    "taint_set",
+    "created_at",
+    "version_tuple_hash"
+  ],
+  "properties": {
+    "inference_artifact_id": {"type": "string", "minLength": 1},
+    "task_id": {"type": "string", "minLength": 1},
+    "root_revision_id": {"type": "string", "minLength": 1},
+    "context_artifact_id": {"type": "string", "minLength": 1},
+    "worker_run_id": {"type": "string", "minLength": 1},
+    "worker_profile": {"type": "string", "minLength": 1},
+    "model_route_id": {"type": "string", "minLength": 1},
+    "output_hash": {"type": "string", "minLength": 1},
+    "provenance_refs": {"type": "array", "items": {"type": "string"}},
+    "taint_set": {"type": "array", "items": {"type": "string"}},
+    "created_at": {"type": "string", "format": "date-time"},
+    "version_tuple_hash": {"type": "string", "minLength": 1},
+    "token_usage": {"type": "object"},
+    "latency_ms": {"type": "integer", "minimum": 0},
+    "fallback_route_id": {"type": "string"}
+  }
+}

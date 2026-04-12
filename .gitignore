@@ -1,0 +1,28 @@
+# Python build artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtualenvs / tool caches
+.venv/
+venv/
+.env/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.tox/
+
+# SQLite runtime files (no durable state in git; kernel governance truth lives in the DB)
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+*.swp

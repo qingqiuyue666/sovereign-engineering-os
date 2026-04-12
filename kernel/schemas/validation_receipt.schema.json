@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:seos:v11-slice1:validation_receipt",
+  "artifact_type": "ValidationReceipt",
+  "schema_version": "v11-slice1",
+  "source_ref": "v11 §23.7",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "validation_receipt_id",
+    "task_id",
+    "root_revision_id",
+    "receipt_type",
+    "validator_identity",
+    "validator_version",
+    "input_hash",
+    "result",
+    "diagnostics_hash",
+    "taint_set",
+    "created_at",
+    "version_tuple_hash"
+  ],
+  "properties": {
+    "validation_receipt_id": {"type": "string", "minLength": 1},
+    "task_id": {"type": "string", "minLength": 1},
+    "root_revision_id": {"type": "string", "minLength": 1},
+    "receipt_type": {"type": "string"},
+    "validator_identity": {"type": "string"},
+    "validator_version": {"type": "string"},
+    "input_hash": {"type": "string"},
+    "result": {"type": "string", "enum": ["pass", "fail", "quarantined"]},
+    "diagnostics_hash": {"type": "string"},
+    "taint_set": {"type": "array", "items": {"type": "string"}},
+    "created_at": {"type": "string", "format": "date-time"},
+    "version_tuple_hash": {"type": "string", "minLength": 1},
+    "invalidated_at": {"type": "string", "format": "date-time"},
+    "invalidation_reason": {"type": "string"}
+  }
+}

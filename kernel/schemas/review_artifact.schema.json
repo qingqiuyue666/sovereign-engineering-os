@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:seos:v11-slice1:review_artifact",
+  "artifact_type": "ReviewArtifact",
+  "schema_version": "v11-slice1",
+  "source_ref": "v11 §23.10",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "review_artifact_id",
+    "task_id",
+    "root_revision_id",
+    "patch_proposal_id",
+    "diff_hash",
+    "semantic_impact_hash",
+    "risk_class",
+    "rendering_provenance",
+    "taint_set",
+    "created_at",
+    "version_tuple_hash"
+  ],
+  "properties": {
+    "review_artifact_id": {"type": "string", "minLength": 1},
+    "task_id": {"type": "string", "minLength": 1},
+    "root_revision_id": {"type": "string", "minLength": 1},
+    "patch_proposal_id": {"type": "string", "minLength": 1},
+    "diff_hash": {"type": "string", "minLength": 1},
+    "semantic_impact_hash": {"type": "string"},
+    "risk_class": {"type": "string"},
+    "rendering_provenance": {
+      "type": "object",
+      "required": ["renderer_id", "renderer_version", "self_summary_flag"],
+      "properties": {
+        "renderer_id": {"type": "string"},
+        "renderer_version": {"type": "string"},
+        "self_summary_flag": {"type": "boolean"}
+      }
+    },
+    "taint_set": {"type": "array", "items": {"type": "string"}},
+    "created_at": {"type": "string", "format": "date-time"},
+    "version_tuple_hash": {"type": "string", "minLength": 1},
+    "secondary_review_id": {"type": "string"},
+    "self_summary_flag": {"type": "boolean"}
+  }
+}

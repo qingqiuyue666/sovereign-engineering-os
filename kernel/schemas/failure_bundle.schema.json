@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:seos:v11-slice1:failure_bundle",
+  "artifact_type": "FailureBundle",
+  "schema_version": "v11-slice1",
+  "source_ref": "v11 §23.15",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "failure_bundle_id",
+    "task_id",
+    "root_revision_id",
+    "failure_class",
+    "cause_hash",
+    "evidence_refs",
+    "taint_set",
+    "created_at"
+  ],
+  "properties": {
+    "failure_bundle_id": {"type": "string", "minLength": 1},
+    "task_id": {"type": "string"},
+    "root_revision_id": {"type": ["string", "null"]},
+    "failure_class": {"type": "string"},
+    "cause_hash": {"type": "string"},
+    "evidence_refs": {"type": "array", "items": {"type": "string"}},
+    "taint_set": {"type": "array", "items": {"type": "string"}},
+    "created_at": {"type": "string", "format": "date-time"},
+    "incident_id": {"type": "string"},
+    "retained_for_forensics_flag": {"type": "boolean"},
+    "recovery_action_ref": {"type": "string"}
+  }
+}
