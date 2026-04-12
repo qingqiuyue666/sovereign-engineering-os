@@ -295,6 +295,20 @@ class IntentAnchorRepository:
 # ---------------------------------------------------------------------------
 
 
+def _row_to_dict(row: sqlite3.Row | None) -> dict[str, Any] | None:
+    if row is None:
+        return None
+    return {k: row[k] for k in row.keys()}
+
+
+def _unjsonify(value: Any) -> Any:
+    if value is None:
+        return None
+    if isinstance(value, (dict, list)):
+        return value
+    return json.loads(value)
+
+
 class ContextArtifactRepository:
     def __init__(self, conn: sqlite3.Connection) -> None:
         self._conn = conn
@@ -334,6 +348,34 @@ class ContextArtifactRepository:
             ),
         )
 
+    def fetch(self, context_artifact_id: str) -> dict[str, Any] | None:
+        row = self._conn.execute(
+            "SELECT * FROM context_artifacts WHERE context_artifact_id = ?;",
+            (context_artifact_id,),
+        ).fetchone()
+        d = _row_to_dict(row)
+        if d is None:
+            return None
+        d["candidate_file_ids"] = _unjsonify(d.get("candidate_file_ids")) or []
+        d["symbol_frontier_ids"] = _unjsonify(d.get("symbol_frontier_ids")) or []
+        d["memory_item_ids"] = _unjsonify(d.get("memory_item_ids")) or []
+        d["deferred_retrieval_items"] = _unjsonify(
+            d.get("deferred_retrieval_items")
+        ) or []
+        d["provenance_refs"] = _unjsonify(d.get("provenance_refs")) or []
+        d["taint_set"] = _unjsonify(d.get("taint_set_json")) or []
+        return d
+
+    def exists_for(self, task_id: str, root_revision_id: str) -> bool:
+        row = self._conn.execute(
+            """
+            SELECT 1 FROM context_artifacts
+             WHERE task_id = ? AND root_revision_id = ? LIMIT 1;
+            """,
+            (task_id, root_revision_id),
+        ).fetchone()
+        return row is not None
+
 
 class InferenceArtifactRepository:
     def __init__(self, conn: sqlite3.Connection) -> None:
@@ -365,6 +407,423 @@ class InferenceArtifactRepository:
                 _jsonify(artifact.get("token_usage", {})),
                 artifact.get("latency_ms"),
                 artifact.get("fallback_route_id"),
+            ),
+        )
+
+    def fetch(self, inference_artifact_id: str) -> dict[str, Any] | None:
+        row = self._conn.execute(
+            "SELECT * FROM inference_artifacts WHERE inference_artifact_id = ?;",
+            (inference_artifact_id,),
+        ).fetchone()
+        d = _row_to_dict(row)
+        if d is None:
+            return None
+        d["provenance_refs"] = _unjsonify(d.get("provenance_refs")) or []
+        d["taint_set"] = _unjsonify(d.get("taint_set_json")) or []
+        d["token_usage"] = _unjsonify(d.get("token_usage_json")) or {}
+        return d
+
+    def exists_for(self, task_id: str, root_revision_id: str) -> bool:
+        row = self._conn.execute(
+            """
+            SELECT 1 FROM inference_artifacts
+             WHERE task_id = ? AND root_revision_id = ? LIMIT 1;
+            """,
+            (task_id, root_revision_id),
+        ).fetchone()
+        return row is not None
+
+
+# ---------------------------------------------------------------------------
+# PatchProposal / ValidationReceipt / ReviewArtifact / ApprovalArtifact
+# ---------------------------------------------------------------------------
+
+
+class PatchProposalRepository:
+    def __init__(self, conn: sqlite3.Connection) -> None:
+        self._conn = conn
+
+    def insert(self, artifact: Mapping[str, Any]) -> None:
+        self._conn.execute(
+            """
+            INSERT INTO patch_proposals (
+              patch_proposal_id, task_id, root_revision_id, inference_artifact_id,
+              target_file_ids, patch_group_hash, side_effect_class_proposal,
+              capability_requirements, taint_set_json, created_at, version_tuple_hash
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            """,
+            (
+                artifact["patch_proposal_id"],
+                artifact["task_id"],
+                artifact["root_revision_id"],
+                artifact["inference_artifact_id"],
+                _jsonify(artifact["target_file_ids"]),
+                artifact["patch_group_hash"],
+                artifact["side_effect_class_proposal"],
+                _jsonify(artifact["capability_requirements"]),
+                _jsonify(artifact["taint_set"]),
+                artifact["created_at"],
+                artifact["version_tuple_hash"],
+            ),
+        )
+
+    def fetch(self, patch_proposal_id: str) -> dict[str, Any] | None:
+        row = self._conn.execute(
+            "SELECT * FROM patch_proposals WHERE patch_proposal_id = ?;",
+            (patch_proposal_id,),
+        ).fetchone()
+        d = _row_to_dict(row)
+        if d is None:
+            return None
+        d["target_file_ids"] = _unjsonify(d.get("target_file_ids")) or []
+        d["capability_requirements"] = _unjsonify(
+            d.get("capability_requirements")
+        ) or []
+        d["taint_set"] = _unjsonify(d.get("taint_set_json")) or []
+        return d
+
+
+class ValidationReceiptRepository:
+    def __init__(self, conn: sqlite3.Connection) -> None:
+        self._conn = conn
+
+    def insert(self, artifact: Mapping[str, Any]) -> None:
+        self._conn.execute(
+            """
+            INSERT INTO validation_receipts (
+              validation_receipt_id, task_id, root_revision_id, receipt_type,
+              validator_identity, validator_version, input_hash, result,
+              diagnostics_hash, taint_set_json, created_at, version_tuple_hash,
+              invalidated_at, invalidation_reason
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            """,
+            (
+                artifact["validation_receipt_id"],
+                artifact["task_id"],
+                artifact["root_revision_id"],
+                artifact["receipt_type"],
+                artifact["validator_identity"],
+                artifact["validator_version"],
+                artifact["input_hash"],
+                artifact["result"],
+                artifact["diagnostics_hash"],
+                _jsonify(artifact["taint_set"]),
+                artifact["created_at"],
+                artifact["version_tuple_hash"],
+                artifact.get("invalidated_at"),
+                artifact.get("invalidation_reason"),
+            ),
+        )
+
+    def fetch(self, validation_receipt_id: str) -> dict[str, Any] | None:
+        row = self._conn.execute(
+            "SELECT * FROM validation_receipts WHERE validation_receipt_id = ?;",
+            (validation_receipt_id,),
+        ).fetchone()
+        d = _row_to_dict(row)
+        if d is None:
+            return None
+        d["taint_set"] = _unjsonify(d.get("taint_set_json")) or []
+        return d
+
+
+class ReviewArtifactRepository:
+    def __init__(self, conn: sqlite3.Connection) -> None:
+        self._conn = conn
+
+    def insert(self, artifact: Mapping[str, Any]) -> None:
+        self._conn.execute(
+            """
+            INSERT INTO review_artifacts (
+              review_artifact_id, task_id, root_revision_id, patch_proposal_id,
+              diff_hash, semantic_impact_hash, risk_class, rendering_provenance,
+              taint_set_json, created_at, version_tuple_hash
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            """,
+            (
+                artifact["review_artifact_id"],
+                artifact["task_id"],
+                artifact["root_revision_id"],
+                artifact["patch_proposal_id"],
+                artifact["diff_hash"],
+                artifact.get("semantic_impact_hash"),
+                artifact["risk_class"],
+                _jsonify(artifact["rendering_provenance"]),
+                _jsonify(artifact["taint_set"]),
+                artifact["created_at"],
+                artifact["version_tuple_hash"],
+            ),
+        )
+
+    def fetch(self, review_artifact_id: str) -> dict[str, Any] | None:
+        row = self._conn.execute(
+            "SELECT * FROM review_artifacts WHERE review_artifact_id = ?;",
+            (review_artifact_id,),
+        ).fetchone()
+        d = _row_to_dict(row)
+        if d is None:
+            return None
+        d["rendering_provenance"] = _unjsonify(d.get("rendering_provenance")) or {}
+        d["taint_set"] = _unjsonify(d.get("taint_set_json")) or []
+        return d
+
+
+class ApprovalArtifactRepository:
+    def __init__(self, conn: sqlite3.Connection) -> None:
+        self._conn = conn
+
+    def insert(self, artifact: Mapping[str, Any]) -> None:
+        self._conn.execute(
+            """
+            INSERT INTO approval_artifacts (
+              approval_id, task_id, originating_root_revision_id,
+              reviewed_patch_hash, reviewed_context_artifact_id,
+              required_receipt_ids, approval_scope, approver_identity,
+              approval_state, policy_version, created_at, expires_at,
+              version_tuple_hash, invalidated_at, invalidation_reason,
+              conflict_group_id
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            """,
+            (
+                artifact["approval_id"],
+                artifact["task_id"],
+                artifact["originating_root_revision_id"],
+                artifact["reviewed_patch_hash"],
+                artifact["reviewed_context_artifact_id"],
+                _jsonify(artifact["required_receipt_ids"]),
+                artifact["approval_scope"],
+                artifact["approver_identity"],
+                artifact["approval_state"],
+                artifact["policy_version"],
+                artifact["created_at"],
+                artifact["expires_at"],
+                artifact["version_tuple_hash"],
+                artifact.get("invalidated_at"),
+                artifact.get("invalidation_reason"),
+                artifact.get("conflict_group_id"),
+            ),
+        )
+
+    def fetch(self, approval_id: str) -> dict[str, Any] | None:
+        row = self._conn.execute(
+            "SELECT * FROM approval_artifacts WHERE approval_id = ?;",
+            (approval_id,),
+        ).fetchone()
+        d = _row_to_dict(row)
+        if d is None:
+            return None
+        d["required_receipt_ids"] = _unjsonify(d.get("required_receipt_ids")) or []
+        return d
+
+    def mark_state(
+        self, *, approval_id: str, new_state: str
+    ) -> None:
+        # Approval state is an on-row mutation per §23.11; the invariant
+        # that's load-bearing is that this transition is audit-logged at
+        # the service layer and that a passing barrier was evaluated.
+        self._conn.execute(
+            """
+            UPDATE approval_artifacts
+               SET approval_state = ?
+             WHERE approval_id = ?;
+            """,
+            (new_state, approval_id),
+        )
+
+
+# ---------------------------------------------------------------------------
+# Revision / JournalEntry / SnapshotRoot (truth spine)
+# ---------------------------------------------------------------------------
+
+
+class RevisionRepository:
+    def __init__(self, conn: sqlite3.Connection) -> None:
+        self._conn = conn
+
+    def insert_pending(self, artifact: Mapping[str, Any]) -> None:
+        self._conn.execute(
+            """
+            INSERT INTO revisions (
+              revision_id, parent_revision_id, project_id, task_id, state,
+              root_hash, snapshot_root_id, intent_id,
+              originating_context_artifact_id, approval_id,
+              logical_sequence_at_seal, version_tuple_hash, taint_set_json,
+              created_at, sealed_at, abandonment_reason, recovery_note
+            ) VALUES (?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL, NULL);
+            """,
+            (
+                artifact["revision_id"],
+                artifact.get("parent_revision_id"),
+                artifact["project_id"],
+                artifact["task_id"],
+                artifact["root_hash"],
+                artifact["snapshot_root_id"],
+                artifact["intent_id"],
+                artifact["originating_context_artifact_id"],
+                artifact.get("approval_id"),
+                artifact.get("logical_sequence_at_seal"),
+                artifact["version_tuple_hash"],
+                _jsonify(artifact.get("taint_set", [])),
+                artifact["created_at"],
+            ),
+        )
+
+    def transition_to_sealed(
+        self,
+        *,
+        revision_id: str,
+        sealed_at: str,
+        logical_sequence_at_seal: int,
+        approval_id: str,
+    ) -> None:
+        # This is the §22.2 step 7: transition revision state from
+        # pending to sealed. It is the only legal mutation of a
+        # revisions row other than the initial pending insert; sealed
+        # rows are immutable by trigger.
+        cur = self._conn.cursor()
+        cur.execute(
+            """
+            UPDATE revisions
+               SET state = 'sealed',
+                   sealed_at = ?,
+                   logical_sequence_at_seal = ?,
+                   approval_id = ?
+             WHERE revision_id = ? AND state = 'pending';
+            """,
+            (sealed_at, logical_sequence_at_seal, approval_id, revision_id),
+        )
+        if cur.rowcount != 1:
+            raise RuntimeError(
+                f"revision {revision_id!r} could not transition pending->sealed "
+                f"(rowcount={cur.rowcount})"
+            )
+
+    def fetch(self, revision_id: str) -> dict[str, Any] | None:
+        row = self._conn.execute(
+            "SELECT * FROM revisions WHERE revision_id = ?;",
+            (revision_id,),
+        ).fetchone()
+        d = _row_to_dict(row)
+        if d is None:
+            return None
+        d["taint_set"] = _unjsonify(d.get("taint_set_json")) or []
+        return d
+
+    def has_sealed(self, revision_id: str) -> bool:
+        row = self._conn.execute(
+            "SELECT 1 FROM revisions WHERE revision_id = ? AND state = 'sealed';",
+            (revision_id,),
+        ).fetchone()
+        return row is not None
+
+
+class SnapshotRootRepository:
+    def __init__(self, conn: sqlite3.Connection) -> None:
+        self._conn = conn
+
+    def insert(self, artifact: Mapping[str, Any]) -> None:
+        self._conn.execute(
+            """
+            INSERT INTO snapshot_roots (
+              snapshot_root_id, revision_id, root_hash, file_manifest_hash,
+              artifact_manifest_hash, parent_snapshot_root_id,
+              version_tuple_hash, created_at, storage_locator,
+              compaction_generation
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            """,
+            (
+                artifact["snapshot_root_id"],
+                artifact["revision_id"],
+                artifact["root_hash"],
+                artifact["file_manifest_hash"],
+                artifact["artifact_manifest_hash"],
+                artifact.get("parent_snapshot_root_id"),
+                artifact["version_tuple_hash"],
+                artifact["created_at"],
+                artifact.get("storage_locator"),
+                artifact.get("compaction_generation"),
+            ),
+        )
+
+
+class JournalEntryRepository:
+    """Append-only journal writer.
+
+    INV-004: logical_sequence is strictly monotonic. The UNIQUE index on
+    `logical_sequence` enforces this at the SQL layer. We allocate the
+    next sequence inside the same transaction to keep atomicity.
+    """
+
+    def __init__(self, conn: sqlite3.Connection) -> None:
+        self._conn = conn
+
+    def append(self, *, artifact: Mapping[str, Any]) -> int:
+        cur = self._conn.cursor()
+        row = cur.execute(
+            "SELECT COALESCE(MAX(logical_sequence), 0) FROM journal_entries;"
+        ).fetchone()
+        next_seq = int(row[0]) + 1
+        cur.execute(
+            """
+            INSERT INTO journal_entries (
+              journal_entry_id, logical_sequence, entry_type, revision_id,
+              parent_revision_id, project_id, task_id, causality_ref,
+              payload_hash, version_tuple_hash, taint_set_json, created_at,
+              barrier_status, replay_class, failure_bundle_id, drift_event_id
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            """,
+            (
+                artifact["journal_entry_id"],
+                next_seq,
+                artifact["entry_type"],
+                artifact["revision_id"],
+                artifact.get("parent_revision_id"),
+                artifact["project_id"],
+                artifact["task_id"],
+                artifact.get("causality_ref"),
+                artifact["payload_hash"],
+                artifact["version_tuple_hash"],
+                _jsonify(artifact.get("taint_set", [])),
+                artifact["created_at"],
+                artifact.get("barrier_status"),
+                artifact.get("replay_class"),
+                artifact.get("failure_bundle_id"),
+                artifact.get("drift_event_id"),
+            ),
+        )
+        return next_seq
+
+
+# ---------------------------------------------------------------------------
+# FailureBundle (append-only)
+# ---------------------------------------------------------------------------
+
+
+class FailureBundleRepository:
+    def __init__(self, conn: sqlite3.Connection) -> None:
+        self._conn = conn
+
+    def append(self, *, artifact: Mapping[str, Any]) -> None:
+        self._conn.execute(
+            """
+            INSERT INTO failure_bundles (
+              failure_bundle_id, task_id, root_revision_id, failure_class,
+              cause_hash, evidence_refs, taint_set_json, created_at,
+              incident_id, retained_for_forensics_flag, recovery_action_ref
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            """,
+            (
+                artifact["failure_bundle_id"],
+                artifact.get("task_id"),
+                artifact.get("root_revision_id"),
+                artifact["failure_class"],
+                artifact["cause_hash"],
+                _jsonify(artifact.get("evidence_refs", [])),
+                _jsonify(artifact.get("taint_set", [])),
+                artifact["created_at"],
+                artifact.get("incident_id"),
+                1 if artifact.get("retained_for_forensics_flag") else 0,
+                artifact.get("recovery_action_ref"),
             ),
         )
 

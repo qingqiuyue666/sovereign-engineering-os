@@ -343,8 +343,13 @@ class SignablePathOrchestrator:
         state = self._get_task(task_id)
         self._advance(state, Stage.APPROVAL)
         review_id = state.artifact_ids[Stage.REVIEW]
+        receipt_id = state.artifact_ids[Stage.VALIDATION]
+        context_id = state.artifact_ids[Stage.CONTEXT]
         approval_id = self._approval.evaluate_barrier(
-            task_id=task_id, review_artifact_id=review_id
+            task_id=task_id,
+            review_artifact_id=review_id,
+            required_receipt_ids=[receipt_id],
+            reviewed_context_artifact_id=context_id,
         )
         state.artifact_ids[Stage.APPROVAL] = approval_id
         self._audit.append(
@@ -359,8 +364,12 @@ class SignablePathOrchestrator:
         state = self._get_task(task_id)
         self._advance(state, Stage.REVISION_SEAL)
         approval_id = state.artifact_ids[Stage.APPROVAL]
+        context_id = state.artifact_ids[Stage.CONTEXT]
         revision_id = self._seal.seal_revision(
-            task_id=task_id, approval_id=approval_id
+            task_id=task_id,
+            approval_id=approval_id,
+            context_artifact_id=context_id,
+            intent_id=state.intent_anchor.intent_id,
         )
         state.artifact_ids[Stage.REVISION_SEAL] = revision_id
         self._audit.append(
