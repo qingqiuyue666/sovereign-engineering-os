@@ -145,3 +145,12 @@ invariants:
     acceptance_test_ids:
       - "AT-035"
     failure_reaction: "BarrierVerdict(passes=False); specific reason_code for each drift class"
+
+  - invariant_id: INV-029
+    title: "Frozen schema keyword enforcement coverage"
+    enforcement_module: "kernel/schemas/validator.py"
+    enforcement_point: "validate_artifact() keyword checks (type, enum, minLength, minimum, minItems, maxItems, additionalProperties, items, nested required/properties, nullable types)"
+    acceptance_test_ids:
+      - "test_schema_validation_depth"
+      - "test_schema_keyword_coverage_gate"
+    failure_reaction: "SchemaValidationError raised; coverage gate test failure blocks merge"

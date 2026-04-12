@@ -210,3 +210,18 @@ deltas:
       - "INV-026"
       - "INV-028"
     status: bound
+
+  - delta_id: D-011
+    title: "Schema-validation keyword enforcement test coverage and coverage gate"
+    constitution_refs:
+      - "§22.7"
+      - "§22.10"
+      - "§24.2"
+    module_refs:
+      - "kernel/schemas/validator.py"
+      - "tests/schemas/test_schema_validation_depth.py"
+      - "tests/schemas/test_schema_keyword_coverage_gate.py"
+    acceptance_refs: []
+    invariant_refs:
+      - "INV-029"
+    status: bound
