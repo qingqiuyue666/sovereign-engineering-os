@@ -209,7 +209,7 @@ class ReplayClassifier:
         `kernel/schemas/replay_anchor.schema.json` and is ready to be
         persisted via `ReplayAnchorRepository.insert`.
         """
-        return {
+        anchor: dict = {
             "replay_anchor_id": replay_anchor_id,
             "root_revision_id": request.root_revision_id,
             "project_id": request.project_id,
@@ -219,6 +219,11 @@ class ReplayClassifier:
             "version_tuple_hash": version_tuple_hash,
             "environment_fingerprint_hash": request.environment_fingerprint_hash,
             "created_at": _now_iso(),
-            "degradation_reason": classification.degradation_reason,
-            "unreplayable_reason": classification.unreplayable_reason,
         }
+        # Optional fields: only include when non-None (schema declares
+        # these as type: string, not nullable).
+        if classification.degradation_reason is not None:
+            anchor["degradation_reason"] = classification.degradation_reason
+        if classification.unreplayable_reason is not None:
+            anchor["unreplayable_reason"] = classification.unreplayable_reason
+        return anchor

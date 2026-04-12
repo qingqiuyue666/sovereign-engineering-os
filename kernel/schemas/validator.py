@@ -7,9 +7,10 @@ Constitutional anchors:
 - Foundation Section 3.4 (runtime enforcement: ingress + pre-persist)
 
 This validator deepens the previous required-field-only checks by also
-verifying types, enum values, string constraints, integer constraints,
-array constraints, and nullable-type patterns found in the frozen
-JSON Schema files.
+verifying types, enum values, const values, string constraints, integer
+constraints, array constraints (including item-level type checks),
+nullable-type patterns, additionalProperties rejection, and nested
+object recursion found in the frozen JSON Schema files.
 
 Honest posture:
 - This is NOT a full JSON Schema draft-2020-12 validator. It does not
@@ -17,8 +18,10 @@ Honest posture:
   composition. Full draft-2020-12 validation remains a hardening-stage
   item gated on admitting an external dependency (e.g. jsonschema).
 - What it does check: required fields, type (string/integer/boolean/
-  array/object/null), enum, minLength, minimum, minItems, maxItems,
-  format presence (not format correctness), and nullable union types.
+  array/object/null), enum, const, minLength, minimum, minItems,
+  maxItems, additionalProperties (when false), nested object recursion
+  (required + properties), array item schemas, format presence (not
+  format correctness), and nullable union types.
 - Every validation failure is fail-closed: the caller receives a
   SchemaValidationError with all violations listed, not just the first.
 """
@@ -110,6 +113,12 @@ def _check_field(
     if value is None:
         return
 
+    # Const check.
+    if "const" in field_schema and value != field_schema["const"]:
+        violations.append(
+            f"{field_path}: value {value!r} does not match const {field_schema['const']!r}"
+        )
+
     # Enum check.
     enum_values = field_schema.get("enum")
     if enum_values is not None and value not in enum_values:
@@ -145,6 +154,38 @@ def _check_field(
             violations.append(
                 f"{field_path}: array length {len(value)} > maxItems {max_items}"
             )
+        # Item-level validation.
+        items_schema = field_schema.get("items")
+        if items_schema is not None:
+            for idx, item in enumerate(value):
+                item_path = f"{field_path}[{idx}]"
+                _check_field(item, items_schema, item_path, violations)
+
+    # Nested object recursion: validate required fields and properties
+    # within nested objects (e.g., review_artifact.rendering_provenance).
+    if isinstance(value, dict) and type_spec == "object":
+        nested_properties = field_schema.get("properties", {})
+        nested_required = field_schema.get("required", [])
+        for req_field in nested_required:
+            if req_field not in value:
+                violations.append(
+                    f"{field_path}: missing required field: {req_field}"
+                )
+        for nested_name, nested_value in value.items():
+            if nested_name in nested_properties:
+                _check_field(
+                    nested_value,
+                    nested_properties[nested_name],
+                    f"{field_path}.{nested_name}",
+                    violations,
+                )
+        # additionalProperties enforcement on nested objects.
+        if field_schema.get("additionalProperties") is False:
+            extra = set(value.keys()) - set(nested_properties.keys())
+            for extra_field in sorted(extra):
+                violations.append(
+                    f"{field_path}: additional property not allowed: {extra_field}"
+                )
 
 
 def validate_artifact(
@@ -161,9 +202,6 @@ def validate_artifact(
     violations: list[str] = []
     properties = schema.get("properties", {})
     required = schema.get("required", [])
-    artifact_type = schema.get("properties", {}).get(
-        "artifact_type", {}
-    ).get("const", "unknown")
 
     # Check required fields.
     for field_name in required:
@@ -175,6 +213,15 @@ def validate_artifact(
         if field_name in properties:
             field_schema = properties[field_name]
             _check_field(value, field_schema, field_name, violations)
+
+    # additionalProperties enforcement: reject fields not declared in
+    # the schema's properties when additionalProperties is false.
+    if schema.get("additionalProperties") is False:
+        extra = set(artifact.keys()) - set(properties.keys())
+        for extra_field in sorted(extra):
+            violations.append(
+                f"additional property not allowed: {extra_field}"
+            )
 
     return violations
 

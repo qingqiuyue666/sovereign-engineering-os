@@ -45,6 +45,8 @@ from kernel.replay.replay_classifier import (
     ReplayClass,
     ReplayClassifier,
 )
+from kernel.schemas import load_schema
+from kernel.schemas.validator import validate_artifact
 from kernel.stores.sqlite.repositories import (
     ContextArtifactRepository,
     InferenceArtifactRepository,
@@ -53,6 +55,8 @@ from kernel.stores.sqlite.repositories import (
 )
 from kernel.version.version_tuple import compose_version_tuple_hash
 from validation.quarantine.runner_adapter import QUARANTINE_HARDWARE_ENVELOPE
+
+_REPLAY_ANCHOR_SCHEMA = load_schema("replay_anchor")
 
 
 class EvidenceClosureRejected(Exception):
@@ -186,6 +190,14 @@ class EvidenceService:
             replay_anchor_id=replay_anchor_id,
             version_tuple_hash=vt_hash,
         )
+
+        # Ingress validation (foundation §3.4): validate before persist.
+        violations = validate_artifact(anchor, _REPLAY_ANCHOR_SCHEMA)
+        if violations:
+            raise EvidenceClosureRejected(
+                f"replay anchor schema validation failed: "
+                f"{'; '.join(violations[:5])}"
+            )
 
         self._anchor_repo.insert(anchor)
 
