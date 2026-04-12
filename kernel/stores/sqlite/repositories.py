@@ -526,6 +526,60 @@ class ValidationReceiptRepository:
         d["taint_set"] = _unjsonify(d.get("taint_set_json")) or []
         return d
 
+    def list_active_for_task_root(
+        self, task_id: str, root_revision_id: str
+    ) -> list[dict[str, Any]]:
+        """Return live (non-invalidated) receipts bound to a (task, root).
+
+        Phase-1 incremental invalidation (AT-017 / INV-017): callers use
+        this to identify receipts whose upstream patch hash may have
+        drifted.
+        """
+        rows = self._conn.execute(
+            """
+            SELECT * FROM validation_receipts
+             WHERE task_id = ?
+               AND root_revision_id = ?
+               AND invalidated_at IS NULL;
+            """,
+            (task_id, root_revision_id),
+        ).fetchall()
+        out: list[dict[str, Any]] = []
+        for r in rows:
+            d = _row_to_dict(r)
+            if d is None:
+                continue
+            d["taint_set"] = _unjsonify(d.get("taint_set_json")) or []
+            out.append(d)
+        return out
+
+    def mark_invalidated(
+        self,
+        *,
+        validation_receipt_id: str,
+        invalidation_reason: str,
+        invalidated_at: str | None = None,
+    ) -> bool:
+        """Mark a receipt invalidated. Returns True iff exactly one row updated.
+
+        Idempotent by design: a row already invalidated is not
+        re-mutated, and rowcount will be zero (the caller must treat that
+        as "no-op"). Callers must emit the audit/drift record only on a
+        `True` return to avoid duplicate evidence emission.
+        """
+        ts = invalidated_at or _iso_now()
+        cur = self._conn.cursor()
+        cur.execute(
+            """
+            UPDATE validation_receipts
+               SET invalidated_at = ?, invalidation_reason = ?
+             WHERE validation_receipt_id = ?
+               AND invalidated_at IS NULL;
+            """,
+            (ts, invalidation_reason, validation_receipt_id),
+        )
+        return cur.rowcount == 1
+
 
 class ReviewArtifactRepository:
     def __init__(self, conn: sqlite3.Connection) -> None:
@@ -629,6 +683,69 @@ class ApprovalArtifactRepository:
             """,
             (new_state, approval_id),
         )
+
+    def list_live_referencing_receipt(
+        self, validation_receipt_id: str
+    ) -> list[dict[str, Any]]:
+        """Return non-invalidated approvals whose required_receipt_ids
+        contains the given validation_receipt_id.
+
+        Phase-1 incremental invalidation cascade (AT-017 / INV-017): when
+        a receipt is invalidated, every approval gated on it must be
+        invalidated too. Narrow-path approvals carry at most a handful of
+        required receipt ids; we filter in-process after a SQL LIKE
+        pre-filter to keep the query index-friendly but correct.
+        """
+        # The pre-filter catches the JSON-encoded form; the in-process
+        # list check is the correctness guarantee.
+        like_needle = f"%{validation_receipt_id}%"
+        rows = self._conn.execute(
+            """
+            SELECT * FROM approval_artifacts
+             WHERE required_receipt_ids LIKE ?
+               AND invalidated_at IS NULL;
+            """,
+            (like_needle,),
+        ).fetchall()
+        out: list[dict[str, Any]] = []
+        for r in rows:
+            d = _row_to_dict(r)
+            if d is None:
+                continue
+            ids = _unjsonify(d.get("required_receipt_ids")) or []
+            if validation_receipt_id in ids:
+                d["required_receipt_ids"] = list(ids)
+                out.append(d)
+        return out
+
+    def mark_invalidated(
+        self,
+        *,
+        approval_id: str,
+        invalidation_reason: str,
+        invalidated_at: str | None = None,
+    ) -> bool:
+        """Mark an approval invalidated. Returns True iff exactly one row updated.
+
+        Sets `approval_state='invalidated'` atomically with
+        `invalidated_at`/`invalidation_reason`. The WHERE clause excludes
+        rows that are already invalidated so cascade callers are
+        idempotent and emit evidence exactly once.
+        """
+        ts = invalidated_at or _iso_now()
+        cur = self._conn.cursor()
+        cur.execute(
+            """
+            UPDATE approval_artifacts
+               SET approval_state = 'invalidated',
+                   invalidated_at = ?,
+                   invalidation_reason = ?
+             WHERE approval_id = ?
+               AND invalidated_at IS NULL;
+            """,
+            (ts, invalidation_reason, approval_id),
+        )
+        return cur.rowcount == 1
 
 
 # ---------------------------------------------------------------------------
@@ -824,6 +941,42 @@ class FailureBundleRepository:
                 artifact.get("incident_id"),
                 1 if artifact.get("retained_for_forensics_flag") else 0,
                 artifact.get("recovery_action_ref"),
+            ),
+        )
+
+
+class DriftEventRecordRepository:
+    """Append-only drift event record writer (§23.19).
+
+    Drift events are emitted when governing upstream inputs for a
+    current-path artifact change underneath it (upstream patch drift,
+    receipt invalidation cascade, etc.). The SQL trigger enforces
+    append-only (no UPDATE, no DELETE); this adapter exposes only insert.
+    """
+
+    def __init__(self, conn: sqlite3.Connection) -> None:
+        self._conn = conn
+
+    def insert(self, record: Mapping[str, Any]) -> None:
+        self._conn.execute(
+            """
+            INSERT INTO drift_event_records (
+              drift_event_id, task_id, root_revision_id, drift_class,
+              detected_at, affected_artifact_ids, consequence_class,
+              approval_id, replay_anchor_id, required_reconciliation_action
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            """,
+            (
+                record["drift_event_id"],
+                record.get("task_id"),
+                record.get("root_revision_id"),
+                record["drift_class"],
+                record["detected_at"],
+                _jsonify(list(record["affected_artifact_ids"])),
+                record["consequence_class"],
+                record.get("approval_id"),
+                record.get("replay_anchor_id"),
+                record.get("required_reconciliation_action"),
             ),
         )
 

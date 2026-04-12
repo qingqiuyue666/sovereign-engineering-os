@@ -74,12 +74,20 @@ class PatchProposalService:
         inference_reader: InferenceArtifactRepository,
         audit_ledger: Any,
         version_tuple_overrides: Mapping[str, Any] | None = None,
+        invalidation_service: Any | None = None,
     ) -> None:
         self._repo = repository
         self._inference_reader = inference_reader
         self._audit = audit_ledger
         self._vt_overrides = dict(version_tuple_overrides or {})
         self._schema = load_schema("patch_proposal")
+        # Optional incremental-invalidation enforcement hook. When
+        # present, a newly-persisted proposal triggers invalidation of
+        # any live validation receipts whose upstream patch hash has
+        # drifted (AT-017 / INV-017, phase-1 minimum honest scope). When
+        # absent, behavior is unchanged — existing tracer-bullet paths
+        # with a single proposal per task observe no difference.
+        self._invalidation = invalidation_service
 
     def propose(
         self,
@@ -166,6 +174,22 @@ class PatchProposalService:
                 "side_effect_class_proposal": req.side_effect_class_proposal,
             },
         )
+
+        # Incremental invalidation enforcement (AT-017 / INV-017).
+        # A newly-persisted proposal is the only upstream drift trigger
+        # the narrow phase-1 path exposes; if a receipt already exists
+        # for the same (task_id, root_revision_id) bound to a different
+        # patch hash, it is now stale and must be marked invalidated
+        # (with cascade to gated approvals). See
+        # `kernel/services/invalidation_service.py` for the rule set.
+        if self._invalidation is not None:
+            self._invalidation.on_new_patch_proposal(
+                task_id=task_id,
+                root_revision_id=artifact["root_revision_id"],
+                new_patch_group_hash=patch_group_hash,
+                new_patch_proposal_id=artifact["patch_proposal_id"],
+            )
+
         return artifact["patch_proposal_id"]
 
     def _coerce_request(

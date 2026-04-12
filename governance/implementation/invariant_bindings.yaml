@@ -105,6 +105,14 @@ invariants:
       - "AT-016"
     failure_reaction: "PatchProposalRejected on multi-file or manifest touch"
 
+  - invariant_id: INV-017
+    title: "Incremental invalidation (stale artifacts cannot silently remain admissible)"
+    enforcement_module: "kernel/services/invalidation_service.py"
+    enforcement_point: "on_new_patch_proposal() + invalidate_receipt() cascade"
+    acceptance_test_ids:
+      - "AT-017"
+    failure_reaction: "ValidationReceipt.invalidated_at set; ApprovalArtifact.approval_state='invalidated'; DriftEventRecord emitted; AuditRecord appended"
+
   - invariant_id: INV-018
     title: "Worker/stage transition legality"
     enforcement_module: "kernel/lifecycle/stage_types.py"
