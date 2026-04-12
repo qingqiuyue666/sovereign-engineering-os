@@ -30,11 +30,15 @@ from kernel.contracts.capability_rules import (
     VerificationContext,
     verify_token,
 )
+from kernel.schemas import load_schema
+from kernel.schemas.validator import validate_artifact
 from kernel.stores.sqlite.repositories import (
     CapabilityConsumeResult,
     CapabilityRepository,
 )
 from kernel.version.version_tuple import compose_version_tuple_hash
+
+_CAPABILITY_TOKEN_SCHEMA = load_schema("capability_token")
 
 
 class CapabilityDenied(Exception):
@@ -81,7 +85,7 @@ class CapabilityService:
         `capability_rules.verify_token_structure` and must be non-empty;
         real crypto verification is a hardening-stage item.
         """
-        token = {
+        token: dict[str, Any] = {
             "capability_token_id": f"cap-{uuid4().hex}",
             "subject_identity": subject_identity,
             "capability_name": capability_name,
@@ -92,9 +96,21 @@ class CapabilityService:
             "token_mac_or_signature": "kernel:phase1",
             "version_tuple_hash": compose_version_tuple_hash(self._vt_overrides),
             "single_use_flag": bool(single_use),
-            "bound_task_id": bound_task_id,
-            "bound_root_revision_id": bound_root_revision_id,
         }
+        # Optional fields: only include when non-None (schema declares
+        # these as type: string, not nullable).
+        if bound_task_id is not None:
+            token["bound_task_id"] = bound_task_id
+        if bound_root_revision_id is not None:
+            token["bound_root_revision_id"] = bound_root_revision_id
+        # Ingress validation (foundation §3.4): validate before persist.
+        violations = validate_artifact(token, _CAPABILITY_TOKEN_SCHEMA)
+        if violations:
+            raise CapabilityDenied(
+                f"capability token schema validation failed: "
+                f"{'; '.join(violations[:5])}"
+            )
+
         self._repo.insert(token)
         self._audit.append(
             record_type="capability_token_issued",

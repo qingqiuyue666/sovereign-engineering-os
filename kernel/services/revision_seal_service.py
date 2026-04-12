@@ -45,6 +45,8 @@ from kernel.contracts.seal_ordering import (
     SealPreconditions,
     SealStep,
 )
+from kernel.schemas import load_schema
+from kernel.schemas.validator import validate_artifact
 from kernel.stores.sqlite.repositories import (
     ApprovalArtifactRepository,
     JournalEntryRepository,
@@ -54,9 +56,36 @@ from kernel.stores.sqlite.repositories import (
 )
 from kernel.version.version_tuple import compose_version_tuple_hash
 
+_REVISION_SCHEMA = load_schema("revision")
+_SNAPSHOT_ROOT_SCHEMA = load_schema("snapshot_root")
+_JOURNAL_ENTRY_SCHEMA = load_schema("journal_entry")
+
 
 class SealRejected(Exception):
     """Fail-closed rejection of a seal attempt."""
+
+
+def _validate_or_reject(
+    artifact: Mapping[str, Any],
+    schema: Mapping[str, Any],
+    label: str,
+) -> None:
+    """Validate an artifact and raise SealRejected on violation.
+
+    Ingress validation (foundation §3.4): every artifact is checked
+    against its frozen schema before persistence.
+
+    Note on JournalEntry.logical_sequence: the service supplies a
+    placeholder value (0) that satisfies type/minimum checks. The actual
+    monotonic sequence is assigned atomically by the repository layer
+    (INV-004 enforcement point). This is documented, not silent.
+    """
+    violations = validate_artifact(artifact, schema)
+    if violations:
+        raise SealRejected(
+            f"{label} schema validation failed: "
+            f"{'; '.join(violations[:5])}"
+        )
 
 
 def _now_iso() -> str:
@@ -174,75 +203,80 @@ class RevisionSealService:
 
         # Step 2: write pending mutation payload (insert pending revision)
         seal_log.record(SealStep.WRITE_PENDING_PAYLOAD)
-        self._revision_repo.insert_pending(
-            {
-                "revision_id": revision_id,
-                "parent_revision_id": parent_revision_id,
-                "project_id": self._project_id,
-                "task_id": task_id,
-                "root_hash": root_hash,
-                "snapshot_root_id": snapshot_root_id,
-                "intent_id": effective_intent_id,
-                "originating_context_artifact_id": reviewed_context,
-                "approval_id": approval_id,
-                "logical_sequence_at_seal": 0,  # will be set at step 7
-                "version_tuple_hash": vt_hash,
-                "taint_set": [],
-                "created_at": now,
-            }
-        )
+        revision_artifact = {
+            "revision_id": revision_id,
+            "parent_revision_id": parent_revision_id,
+            "project_id": self._project_id,
+            "task_id": task_id,
+            "state": "pending",
+            "root_hash": root_hash,
+            "snapshot_root_id": snapshot_root_id,
+            "intent_id": effective_intent_id,
+            "originating_context_artifact_id": reviewed_context,
+            "approval_id": approval_id,
+            "logical_sequence_at_seal": 0,  # will be set at step 7
+            "version_tuple_hash": vt_hash,
+            "taint_set": [],
+            "created_at": now,
+            "sealed_at": None,  # nullable; set at step 7
+        }
+        # Ingress validation (foundation §3.4): validate before persist.
+        _validate_or_reject(revision_artifact, _REVISION_SCHEMA, "Revision")
+        self._revision_repo.insert_pending(revision_artifact)
 
         # Step 3: persist snapshot root candidate
         seal_log.record(SealStep.PERSIST_SNAPSHOT_ROOT)
-        self._snapshot_repo.insert(
-            {
-                "snapshot_root_id": snapshot_root_id,
-                "revision_id": revision_id,
-                "root_hash": root_hash,
-                "file_manifest_hash": file_manifest_hash,
-                "artifact_manifest_hash": artifact_manifest_hash,
-                "parent_snapshot_root_id": None,
-                "version_tuple_hash": vt_hash,
-                "created_at": now,
-            }
-        )
+        snapshot_artifact = {
+            "snapshot_root_id": snapshot_root_id,
+            "revision_id": revision_id,
+            "root_hash": root_hash,
+            "file_manifest_hash": file_manifest_hash,
+            "artifact_manifest_hash": artifact_manifest_hash,
+            "parent_snapshot_root_id": None,
+            "version_tuple_hash": vt_hash,
+            "created_at": now,
+        }
+        _validate_or_reject(snapshot_artifact, _SNAPSHOT_ROOT_SCHEMA, "SnapshotRoot")
+        self._snapshot_repo.insert(snapshot_artifact)
 
         # Step 4: append journal prepare entry
         seal_log.record(SealStep.JOURNAL_PREPARE_ENTRY)
-        prepare_seq = self._journal_repo.append(
-            artifact={
-                "journal_entry_id": f"je-{uuid4().hex}",
-                "entry_type": "seal_prepare",
-                "revision_id": revision_id,
-                "parent_revision_id": parent_revision_id,
-                "project_id": self._project_id,
-                "task_id": task_id,
-                "causality_ref": approval_id,
-                "payload_hash": root_hash,
-                "version_tuple_hash": vt_hash,
-                "taint_set": [],
-                "created_at": now,
-                "barrier_status": "passed",
-            }
-        )
+        prepare_je = {
+            "journal_entry_id": f"je-{uuid4().hex}",
+            "logical_sequence": 0,  # placeholder; actual value assigned by repo
+            "entry_type": "seal_prepare",
+            "revision_id": revision_id,
+            "parent_revision_id": parent_revision_id,
+            "project_id": self._project_id,
+            "task_id": task_id,
+            "causality_ref": approval_id,
+            "payload_hash": root_hash,
+            "version_tuple_hash": vt_hash,
+            "taint_set": [],
+            "created_at": now,
+            "barrier_status": "passed",
+        }
+        _validate_or_reject(prepare_je, _JOURNAL_ENTRY_SCHEMA, "JournalEntry")
+        prepare_seq = self._journal_repo.append(artifact=prepare_je)
 
         # Step 5: append WAL mutation and seal frames
         seal_log.record(SealStep.WAL_MUTATION_AND_SEAL)
-        mutation_seq = self._journal_repo.append(
-            artifact={
-                "journal_entry_id": f"je-{uuid4().hex}",
-                "entry_type": "seal_mutation",
-                "revision_id": revision_id,
-                "parent_revision_id": parent_revision_id,
-                "project_id": self._project_id,
-                "task_id": task_id,
-                "causality_ref": approval_id,
-                "payload_hash": root_hash,
-                "version_tuple_hash": vt_hash,
-                "taint_set": [],
-                "created_at": _now_iso(),
-            }
-        )
+        mutation_je = {
+            "journal_entry_id": f"je-{uuid4().hex}",
+            "logical_sequence": 0,  # placeholder; actual value assigned by repo
+            "entry_type": "seal_mutation",
+            "revision_id": revision_id,
+            "parent_revision_id": parent_revision_id,
+            "project_id": self._project_id,
+            "task_id": task_id,
+            "causality_ref": approval_id,
+            "payload_hash": root_hash,
+            "version_tuple_hash": vt_hash,
+            "taint_set": [],
+            "created_at": _now_iso(),
+        }
+        _validate_or_reject(mutation_je, _JOURNAL_ENTRY_SCHEMA, "JournalEntry")
+        mutation_seq = self._journal_repo.append(artifact=mutation_je)
 
         # Step 6: cross durability boundary (SQLite COMMIT is deferred
         # to after step 9; in phase-1 the entire nine-step runs within
@@ -262,22 +296,23 @@ class RevisionSealService:
 
         # Step 8: append seal confirmation journal entry
         seal_log.record(SealStep.JOURNAL_SEAL_CONFIRM)
-        confirm_seq = self._journal_repo.append(
-            artifact={
-                "journal_entry_id": f"je-{uuid4().hex}",
-                "entry_type": "seal_confirmed",
-                "revision_id": revision_id,
-                "parent_revision_id": parent_revision_id,
-                "project_id": self._project_id,
-                "task_id": task_id,
-                "causality_ref": approval_id,
-                "payload_hash": root_hash,
-                "version_tuple_hash": vt_hash,
-                "taint_set": [],
-                "created_at": _now_iso(),
-                "barrier_status": "sealed",
-            }
-        )
+        confirm_je = {
+            "journal_entry_id": f"je-{uuid4().hex}",
+            "logical_sequence": 0,  # placeholder; actual value assigned by repo
+            "entry_type": "seal_confirmed",
+            "revision_id": revision_id,
+            "parent_revision_id": parent_revision_id,
+            "project_id": self._project_id,
+            "task_id": task_id,
+            "causality_ref": approval_id,
+            "payload_hash": root_hash,
+            "version_tuple_hash": vt_hash,
+            "taint_set": [],
+            "created_at": _now_iso(),
+            "barrier_status": "sealed",
+        }
+        _validate_or_reject(confirm_je, _JOURNAL_ENTRY_SCHEMA, "JournalEntry")
+        confirm_seq = self._journal_repo.append(artifact=confirm_je)
 
         # Step 9: expose sealed revision as current truth
         seal_log.record(SealStep.EXPOSE_AS_CURRENT)
