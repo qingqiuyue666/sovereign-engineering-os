@@ -37,6 +37,7 @@ from typing import Any, Mapping, Sequence
 from uuid import uuid4
 
 from kernel.schemas import load_schema
+from kernel.schemas.validator import validate_artifact
 from kernel.stores.sqlite.repositories import ContextArtifactRepository
 from kernel.version.version_tuple import compose_version_tuple_hash
 
@@ -169,14 +170,15 @@ class ContextService:
             "version_tuple_hash": compose_version_tuple_hash(self._vt_overrides),
         }
 
-        # Minimal ingress validation: required-field presence. Full JSON
-        # Schema draft-2020-12 validation is the hardening-stage
-        # replacement once a schema validator dependency is admitted.
-        for field_name in self._schema["required"]:
-            if field_name not in payload:
-                raise ContextArtifactRejected(
-                    f"context artifact missing required field: {field_name}"
-                )
+        # Ingress validation: required fields + type/enum/constraint checks
+        # from the frozen schema (foundation §3.4). Full JSON Schema
+        # draft-2020-12 validation remains a hardening-stage item.
+        violations = validate_artifact(payload, self._schema)
+        if violations:
+            raise ContextArtifactRejected(
+                f"context artifact schema validation failed: "
+                f"{'; '.join(violations[:5])}"
+            )
 
         self._repo.insert(payload)
 

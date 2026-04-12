@@ -47,6 +47,7 @@ from typing import Any, Mapping, Protocol
 from uuid import uuid4
 
 from kernel.schemas import load_schema
+from kernel.schemas.validator import validate_artifact
 from kernel.stores.sqlite.repositories import InferenceArtifactRepository
 from kernel.version.version_tuple import compose_version_tuple_hash
 
@@ -303,11 +304,12 @@ class InferenceService:
             "latency_ms": parsed["latency_ms"],
         }
 
-        for field_name in self._schema["required"]:
-            if field_name not in artifact:
-                raise ModelIntegrationViolation(
-                    f"inference artifact missing required field: {field_name}"
-                )
+        violations = validate_artifact(artifact, self._schema)
+        if violations:
+            raise ModelIntegrationViolation(
+                f"inference artifact schema validation failed: "
+                f"{'; '.join(violations[:5])}"
+            )
 
         self._repo.insert(artifact)
 
