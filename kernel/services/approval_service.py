@@ -45,6 +45,7 @@ from kernel.contracts.barrier_rules import (
     evaluate_barrier,
 )
 from kernel.schemas import load_schema
+from kernel.schemas.validator import validate_artifact
 from kernel.stores.sqlite.repositories import (
     ApprovalArtifactRepository,
     PatchProposalRepository,
@@ -222,11 +223,12 @@ class ApprovalService:
             "version_tuple_hash": compose_version_tuple_hash(self._vt_overrides),
         }
 
-        for field_name in self._schema["required"]:
-            if field_name not in artifact:
-                raise ApprovalRejected(
-                    f"approval artifact missing required field: {field_name}"
-                )
+        violations = validate_artifact(artifact, self._schema)
+        if violations:
+            raise ApprovalRejected(
+                f"approval artifact schema validation failed: "
+                f"{'; '.join(violations[:5])}"
+            )
 
         self._repo.insert(artifact)
 

@@ -1,0 +1,278 @@
+# Contracts Index: machine-readable C22/C23/C24/C31 extraction index
+#
+# Source-of-truth: v11 Sections 22, 23, 24, 31
+# Extraction basis: foundation Section 4.1-4.5
+# Format spec: foundation Section 4.1 (contracts_index.yaml)
+#
+# Each entry maps a constitutional contract to its required fields,
+# checks, legal rules, failure reactions, and acceptance/invariant refs.
+# Scope: contracts directly load-bearing on the first signable path.
+
+---
+
+contracts:
+
+  - contract_id: C22.1
+    purpose: "WAL durability and recovery contract"
+    required_fields:
+      - "journal_mode=WAL"
+      - "synchronous>=NORMAL"
+      - "busy_timeout>0"
+    required_checks:
+      - "WAL mode enforced at connection open"
+      - "Journal sequence continuity classification"
+      - "Crash-window state classification"
+    legal_rules:
+      - "No pre-durable sealed visibility"
+      - "Deterministic recovery classification"
+      - "Journal entries are append-only"
+    failure_reactions:
+      - "WalState classification emitted"
+      - "Recovery classification drives seal-state resolution"
+    acceptance_refs:
+      - "AT-006"
+      - "AT-007"
+      - "AT-009"
+    invariant_refs:
+      - "INV-004"
+      - "INV-005"
+
+  - contract_id: C22.2
+    purpose: "Seal transaction ordering contract"
+    required_fields:
+      - "SealStep enum (9 steps)"
+      - "SealExecutionLog"
+      - "SealPreconditions"
+    required_checks:
+      - "Nine-step ordered execution (PREPARE_METADATA through EXPOSE_AS_CURRENT)"
+      - "Precondition assertion before step 1"
+      - "ensure_complete after step 9"
+    legal_rules:
+      - "Steps must proceed in exact canonical order"
+      - "Incomplete sequences must be detected"
+      - "Out-of-order steps must be rejected"
+    failure_reactions:
+      - "SealOrderingViolation raised"
+      - "SealRejected at service layer"
+    acceptance_refs:
+      - "AT-006"
+      - "AT-007"
+      - "AT-009"
+    invariant_refs:
+      - "INV-004"
+      - "INV-005"
+
+  - contract_id: C22.3
+    purpose: "Atomic approval barrier contract"
+    required_fields:
+      - "BarrierInputs (11 comparison fields)"
+      - "BarrierVerdict (passes, reason_code, detail)"
+    required_checks:
+      - "approval_state validity"
+      - "Expiry check"
+      - "Task supersession check"
+      - "Root drift check"
+      - "Context drift check"
+      - "Receipt drift check"
+      - "Receipt admissibility (pass result only)"
+      - "Policy drift check"
+    legal_rules:
+      - "No approval time-travel across drift"
+      - "Deterministic fail-closed on any drift"
+      - "Stable reason codes for audit binding"
+    failure_reactions:
+      - "BarrierVerdict(passes=False) with specific reason_code"
+      - "ApprovalBarrierFailed at service layer"
+      - "DriftEventRecord emission"
+    acceptance_refs:
+      - "AT-008"
+      - "AT-035"
+    invariant_refs:
+      - "INV-006"
+      - "INV-007"
+      - "INV-028"
+
+  - contract_id: C22.4
+    purpose: "Validation quarantine enforcement contract"
+    required_fields:
+      - "QuarantineRun envelope"
+      - "QuarantineProposal admissibility"
+      - "ReceiptTrust classification"
+    required_checks:
+      - "Guarantee level >= BOUNDED_QUARANTINE"
+      - "Requested policy keys satisfied"
+      - "No secret-bearing proposals"
+      - "Host pollution detection"
+      - "Env-scrub violation detection"
+      - "Network attempt detection"
+    legal_rules:
+      - "Quarantine uncertainty forces taint propagation"
+      - "Breach suspicion forces receipt trust downgrade"
+      - "Phase-1 posture: bounded quarantine (not container-equivalent)"
+    failure_reactions:
+      - "Receipt result='quarantined'"
+      - "Taint quarantine_breach_suspect or policy_degraded propagated"
+      - "QuarantineAdmissibilityError on rejected proposals"
+    acceptance_refs:
+      - "AT-010"
+      - "AT-011"
+    invariant_refs:
+      - "INV-008"
+
+  - contract_id: C22.5
+    purpose: "Replay fidelity contract"
+    required_fields:
+      - "ReplayClaimRequest"
+      - "ReplayClassification"
+      - "ReplayAnchor (§23.12)"
+    required_checks:
+      - "Sealed revision presence"
+      - "Context artifact presence"
+      - "Inference artifact presence"
+      - "Equivalence proof bundle admission (phase-1: not admitted)"
+    legal_rules:
+      - "Claims may not exceed captured evidence"
+      - "Uncertified equivalence is never exact replay"
+      - "Downgrade is honest and deterministic"
+    failure_reactions:
+      - "Replay class downgraded"
+      - "degradation_reason or unreplayable_reason recorded"
+    acceptance_refs:
+      - "AT-013"
+    invariant_refs:
+      - "INV-010"
+      - "INV-011"
+
+  - contract_id: C22.6
+    purpose: "Capability token lifecycle contract"
+    required_fields:
+      - "CapabilityToken (§23.13)"
+      - "VerificationContext"
+      - "CAPABILITY_REGISTRY"
+    required_checks:
+      - "Token structure presence"
+      - "Issuer trust"
+      - "Registry admission"
+      - "Action-class mapping"
+      - "Time bounds"
+      - "Revocation check"
+      - "Single-use consumed check"
+      - "Task/root binding"
+      - "MAC/signature presence"
+    legal_rules:
+      - "Default deny: no effect without valid capability"
+      - "Single-use tokens consumed exactly once"
+      - "Concurrent double-consume: deterministic one-winner"
+    failure_reactions:
+      - "CapabilityVerificationError raised"
+      - "CapabilityDenied at service layer"
+      - "CapabilityConsumeResult(winner=False) for losers"
+    acceptance_refs:
+      - "AT-018"
+    invariant_refs:
+      - "INV-012"
+      - "INV-013"
+
+  - contract_id: C22.7
+    purpose: "Context artifact completeness contract"
+    required_fields:
+      - "ContextArtifact (§23.4)"
+      - "All 19 required fields per schema"
+    required_checks:
+      - "Required field presence"
+      - "Truncation reason explicit when budget exceeded"
+      - "Memory items empty in phase-1"
+      - "Provenance refs cover admitted sources"
+    legal_rules:
+      - "No silent content dropping"
+      - "Deferred retrieval items explicit"
+      - "Budget policy declared"
+    failure_reactions:
+      - "ContextArtifactRejected raised"
+    acceptance_refs:
+      - "AT-013"
+    invariant_refs: []
+
+  - contract_id: C22.10
+    purpose: "Invariant enforcement binding contract"
+    required_fields:
+      - "invariant_bindings.yaml entries"
+      - "SignoffGate check results"
+    required_checks:
+      - "Each load-bearing invariant maps to enforcement module"
+      - "Each enforcement point has acceptance test coverage"
+      - "Invariant coverage non-zero and passing"
+    legal_rules:
+      - "Block release candidate if any load-bearing invariant lacks test binding"
+      - "Invariant-to-test coverage must be mechanically auditable"
+    failure_reactions:
+      - "SignoffReport failing checks"
+    acceptance_refs: []
+    invariant_refs: []
+
+  - contract_id: C22.11
+    purpose: "Taint propagation graph contract"
+    required_fields:
+      - "TaintRecord (§23.17)"
+      - "taint_class vocabulary"
+      - "taint_state vocabulary"
+    required_checks:
+      - "Taint transitions durably recorded"
+      - "No silent taint clearing (append-only)"
+      - "Taint propagated to downstream artifacts"
+    legal_rules:
+      - "Clearing requires new record, not in-place update"
+      - "Taint visibility through evidence path queries"
+    failure_reactions:
+      - "SQL RAISE(ABORT) on UPDATE/DELETE"
+      - "Taint propagated on quarantine breach or policy degradation"
+    acceptance_refs:
+      - "AT-024"
+      - "AT-028"
+    invariant_refs:
+      - "INV-019"
+      - "INV-022"
+
+  - contract_id: C22.13
+    purpose: "Multi-file patch coherence contract (phase-1 narrowed)"
+    required_fields:
+      - "PatchProposal (§23.6)"
+      - "target_file_ids"
+      - "patch_group_hash"
+      - "manifest_touch_flag"
+    required_checks:
+      - "Atomic patch grouping"
+      - "Phase-1: exactly one target file"
+      - "Phase-1: manifest_touch_flag=False"
+    legal_rules:
+      - "Multi-file proposals rejected in phase-1"
+      - "Manifest edits rejected in phase-1"
+    failure_reactions:
+      - "PatchProposalRejected raised"
+    acceptance_refs:
+      - "AT-016"
+    invariant_refs:
+      - "INV-016"
+
+  - contract_id: C22.14
+    purpose: "Review surface governance contract"
+    required_fields:
+      - "ReviewArtifact (§23.10)"
+      - "rendering_provenance (renderer_id, renderer_version, self_summary_flag)"
+      - "diff_hash"
+      - "semantic_impact_hash"
+      - "risk_class"
+    required_checks:
+      - "Rendering provenance present and complete"
+      - "Self-summary flag disclosure"
+      - "Diff hash deterministic"
+      - "Upstream taint surfaced"
+    legal_rules:
+      - "Self-summary must be flagged (phase-1: admissible but disclosed)"
+      - "Review provenance auditable"
+    failure_reactions:
+      - "ReviewRejected raised"
+    acceptance_refs:
+      - "AT-020"
+    invariant_refs:
+      - "INV-015"

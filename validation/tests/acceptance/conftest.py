@@ -1,0 +1,320 @@
+"""
+Shared fixtures for acceptance tests.
+
+All acceptance tests share the same database bootstrap and service
+wiring pattern. This conftest provides reusable helpers so each test
+file stays focused on its specific AT-ID obligation.
+
+Constitutional reference: foundation Section 5 (Acceptance Test Plan).
+"""
+
+from __future__ import annotations
+
+import sys
+import os
+from datetime import datetime, timedelta, timezone
+from typing import Any, Mapping
+from uuid import uuid4
+
+# Ensure repo root is on the path.
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")))
+
+from kernel.stores.sqlite.wal_recovery import open_connection, apply_migrations
+from kernel.stores.sqlite.repositories import (
+    AuditRepository,
+    CapabilityRepository,
+    ContextArtifactRepository,
+    InferenceArtifactRepository,
+    IntentAnchorRepository,
+    PatchProposalRepository,
+    ValidationReceiptRepository,
+    ReviewArtifactRepository,
+    ApprovalArtifactRepository,
+    RevisionRepository,
+    SnapshotRootRepository,
+    JournalEntryRepository,
+    ReplayAnchorRepository,
+    TaintRepository,
+)
+from kernel.evidence.append_only_ledger import AppendOnlyLedger
+from kernel.services.capability_service import CapabilityService
+from kernel.services.context_service import ContextService
+from kernel.services.inference_service import (
+    InferenceService,
+    InferencePolicy,
+    ModelAdapter,
+)
+from kernel.services.patch_proposal_service import PatchProposalService
+from kernel.services.validation_service import ValidationService
+from kernel.services.review_service import ReviewService
+from kernel.services.approval_service import ApprovalService
+from kernel.services.revision_seal_service import RevisionSealService
+from kernel.services.evidence_service import EvidenceService
+from kernel.lifecycle.signable_path_orchestrator import SignablePathOrchestrator
+from kernel.lifecycle.stage_types import Stage
+
+
+class FakeModelAdapter:
+    """Deterministic ModelAdapter for acceptance tests."""
+
+    def invoke(
+        self,
+        *,
+        prompt_envelope: Mapping[str, Any],
+        policy: InferencePolicy,
+    ) -> Mapping[str, Any]:
+        return {
+            "output_text": "acceptance-test output text",
+            "token_usage": {"input": 100, "output": 20},
+            "latency_ms": 42,
+            "model_route_id": "fake-model-v1",
+        }
+
+
+class AcceptanceHarness:
+    """Fully-wired acceptance test harness.
+
+    Creates an in-memory SQLite database, applies migrations, and wires
+    all kernel services and the orchestrator. Tests use this to drive
+    the narrow signable path end-to-end.
+    """
+
+    def __init__(self, actor_identity: str = "acceptance_test") -> None:
+        self.conn = open_connection(":memory:")
+        apply_migrations(self.conn)
+
+        # Repositories.
+        self.audit_repo = AuditRepository(self.conn)
+        self.cap_repo = CapabilityRepository(self.conn)
+        self.ctx_repo = ContextArtifactRepository(self.conn)
+        self.inf_repo = InferenceArtifactRepository(self.conn)
+        self.intent_repo = IntentAnchorRepository(self.conn)
+        self.pp_repo = PatchProposalRepository(self.conn)
+        self.vr_repo = ValidationReceiptRepository(self.conn)
+        self.rv_repo = ReviewArtifactRepository(self.conn)
+        self.ap_repo = ApprovalArtifactRepository(self.conn)
+        self.rev_repo = RevisionRepository(self.conn)
+        self.snap_repo = SnapshotRootRepository(self.conn)
+        self.je_repo = JournalEntryRepository(self.conn)
+        self.ra_repo = ReplayAnchorRepository(self.conn)
+        self.taint_repo = TaintRepository(self.conn)
+
+        # Audit ledger.
+        self.audit_ledger = AppendOnlyLedger(
+            repository=self.audit_repo,
+            actor_identity=actor_identity,
+        )
+
+        # Services.
+        self.cap_svc = CapabilityService(
+            repository=self.cap_repo,
+            audit_ledger=self.audit_ledger,
+        )
+        self.ctx_svc = ContextService(
+            repository=self.ctx_repo,
+            audit_ledger=self.audit_ledger,
+        )
+        self.inf_svc = InferenceService(
+            repository=self.inf_repo,
+            audit_ledger=self.audit_ledger,
+            context_reader=self.ctx_repo,
+            adapter=FakeModelAdapter(),
+            policy=InferencePolicy(),
+        )
+        self.pp_svc = PatchProposalService(
+            repository=self.pp_repo,
+            inference_reader=self.inf_repo,
+            audit_ledger=self.audit_ledger,
+        )
+        self.val_svc = ValidationService(
+            repository=self.vr_repo,
+            patch_reader=self.pp_repo,
+            audit_ledger=self.audit_ledger,
+        )
+        self.rev_svc = ReviewService(
+            repository=self.rv_repo,
+            patch_reader=self.pp_repo,
+            receipt_reader=self.vr_repo,
+            audit_ledger=self.audit_ledger,
+        )
+        self.ap_svc = ApprovalService(
+            repository=self.ap_repo,
+            patch_reader=self.pp_repo,
+            receipt_reader=self.vr_repo,
+            review_reader=self.rv_repo,
+            audit_ledger=self.audit_ledger,
+        )
+        self.seal_svc = RevisionSealService(
+            revision_repo=self.rev_repo,
+            snapshot_repo=self.snap_repo,
+            journal_repo=self.je_repo,
+            approval_repo=self.ap_repo,
+            patch_reader=self.pp_repo,
+            approval_service=self.ap_svc,
+            audit_ledger=self.audit_ledger,
+        )
+        self.evidence_svc = EvidenceService(
+            replay_anchor_repo=self.ra_repo,
+            revision_repo=self.rev_repo,
+            context_repo=self.ctx_repo,
+            inference_repo=self.inf_repo,
+            audit_ledger=self.audit_ledger,
+        )
+
+        # Orchestrator.
+        self.orch = SignablePathOrchestrator(
+            capability_service=self.cap_svc,
+            context_service=self.ctx_svc,
+            inference_service=self.inf_svc,
+            patch_proposal_service=self.pp_svc,
+            validation_service=self.val_svc,
+            review_service=self.rev_svc,
+            approval_service=self.ap_svc,
+            revision_seal_service=self.seal_svc,
+            evidence_service=self.evidence_svc,
+            audit_ledger=self.audit_ledger,
+        )
+
+    def close(self) -> None:
+        self.conn.close()
+
+    def issue_capability(
+        self,
+        name: str,
+        task_id: str,
+        *,
+        single_use: bool = True,
+        ttl_hours: int = 1,
+    ) -> dict[str, Any]:
+        now = datetime.now(timezone.utc)
+        return self.cap_svc.issue_token(
+            subject_identity="acceptance_test",
+            capability_name=name,
+            scope_hash="scope:acceptance",
+            issued_at=now.isoformat(),
+            expires_at=(now + timedelta(hours=ttl_hours)).isoformat(),
+            single_use=single_use,
+            bound_task_id=task_id,
+        )
+
+    def run_full_happy_path(self, task_id: str | None = None) -> dict[str, str]:
+        """Run the full eight-stage signable path, returning artifact IDs."""
+        task_id = task_id or f"task-{uuid4().hex[:8]}"
+        intent_id = f"intent-{uuid4().hex[:8]}"
+        root_rev_id = "rev-genesis-000"
+
+        cap_ctx = self.issue_capability("read_repository_snapshot", task_id)
+        ctx_id = self.orch.admit_context(
+            task_id=task_id,
+            intent_id=intent_id,
+            capability_token=cap_ctx,
+            root_revision_id=root_rev_id,
+            request={
+                "repo_graph_version": "1.0",
+                "symbol_index_version": "1.0",
+                "candidate_file_ids": ["src/main.py"],
+                "symbol_frontier_ids": ["main"],
+                "packing_policy_version": "phase1_budget_policy_v1",
+                "actual_tokens": 500,
+            },
+        )
+
+        cap_inf = self.issue_capability("invoke_inference", task_id)
+        inf_id = self.orch.admit_inference(
+            task_id=task_id,
+            capability_token=cap_inf,
+            worker_profile="acceptance_worker",
+            model_route_id="fake-model-v1",
+        )
+
+        pp_id = self.orch.admit_patch_proposal(task_id=task_id)
+        vr_id = self.orch.admit_validation(task_id=task_id)
+        rv_id = self.orch.admit_review(task_id=task_id)
+        ap_id = self.orch.admit_approval(task_id=task_id)
+        rev_id = self.orch.admit_revision_seal(task_id=task_id)
+        ra_id = self.orch.admit_evidence(task_id=task_id)
+
+        return {
+            "task_id": task_id,
+            "intent_id": intent_id,
+            "root_revision_id": root_rev_id,
+            "context_artifact_id": ctx_id,
+            "inference_artifact_id": inf_id,
+            "patch_proposal_id": pp_id,
+            "validation_receipt_id": vr_id,
+            "review_artifact_id": rv_id,
+            "approval_id": ap_id,
+            "revision_id": rev_id,
+            "replay_anchor_id": ra_id,
+        }
+
+    def run_through_stage(self, task_id: str, target_stage: Stage) -> dict[str, str]:
+        """Run the signable path up to (and including) the target stage."""
+        intent_id = f"intent-{uuid4().hex[:8]}"
+        root_rev_id = "rev-genesis-000"
+        ids: dict[str, str] = {
+            "task_id": task_id,
+            "intent_id": intent_id,
+            "root_revision_id": root_rev_id,
+        }
+
+        stage_order = [
+            Stage.CONTEXT, Stage.INFERENCE, Stage.PATCH_PROPOSAL,
+            Stage.VALIDATION, Stage.REVIEW, Stage.APPROVAL,
+            Stage.REVISION_SEAL, Stage.EVIDENCE,
+        ]
+
+        for stage in stage_order:
+            if stage == Stage.CONTEXT:
+                cap = self.issue_capability("read_repository_snapshot", task_id)
+                ids["context_artifact_id"] = self.orch.admit_context(
+                    task_id=task_id,
+                    intent_id=intent_id,
+                    capability_token=cap,
+                    root_revision_id=root_rev_id,
+                    request={
+                        "repo_graph_version": "1.0",
+                        "symbol_index_version": "1.0",
+                        "candidate_file_ids": ["src/main.py"],
+                        "symbol_frontier_ids": ["main"],
+                        "packing_policy_version": "phase1_budget_policy_v1",
+                        "actual_tokens": 500,
+                    },
+                )
+            elif stage == Stage.INFERENCE:
+                cap = self.issue_capability("invoke_inference", task_id)
+                ids["inference_artifact_id"] = self.orch.admit_inference(
+                    task_id=task_id,
+                    capability_token=cap,
+                    worker_profile="acceptance_worker",
+                    model_route_id="fake-model-v1",
+                )
+            elif stage == Stage.PATCH_PROPOSAL:
+                ids["patch_proposal_id"] = self.orch.admit_patch_proposal(
+                    task_id=task_id,
+                )
+            elif stage == Stage.VALIDATION:
+                ids["validation_receipt_id"] = self.orch.admit_validation(
+                    task_id=task_id,
+                )
+            elif stage == Stage.REVIEW:
+                ids["review_artifact_id"] = self.orch.admit_review(
+                    task_id=task_id,
+                )
+            elif stage == Stage.APPROVAL:
+                ids["approval_id"] = self.orch.admit_approval(
+                    task_id=task_id,
+                )
+            elif stage == Stage.REVISION_SEAL:
+                ids["revision_id"] = self.orch.admit_revision_seal(
+                    task_id=task_id,
+                )
+            elif stage == Stage.EVIDENCE:
+                ids["replay_anchor_id"] = self.orch.admit_evidence(
+                    task_id=task_id,
+                )
+
+            if stage == target_stage:
+                break
+
+        return ids

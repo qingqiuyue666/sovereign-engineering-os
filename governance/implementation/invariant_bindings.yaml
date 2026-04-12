@@ -1,0 +1,147 @@
+# Invariant Bindings: first-slice invariant -> module -> enforcement point -> test IDs
+#
+# Source-of-truth: v11 Section 24.2
+# Extraction basis: foundation Section 4.4 and Section 5.2
+# Format spec: foundation Section 4.1 (invariant_bindings.yaml)
+#
+# Each entry maps a constitutional invariant to the exact enforcement
+# module, the enforcement point (function/trigger), the acceptance test
+# IDs that prove it, and the failure reaction.
+
+---
+
+invariants:
+
+  - invariant_id: INV-004
+    title: "Journal entries are immutable (append-only)"
+    enforcement_module: "kernel/stores/sqlite/migrations/0001_core_signable_path.sql"
+    enforcement_point: "journal_entries_append_only_update, journal_entries_append_only_delete triggers"
+    acceptance_test_ids:
+      - "AT-006"
+      - "AT-007"
+    failure_reaction: "RAISE(ABORT) at SQL layer; SealOrderingViolation at application layer"
+
+  - invariant_id: INV-005
+    title: "Sealed revisions are immutable"
+    enforcement_module: "kernel/stores/sqlite/migrations/0001_core_signable_path.sql"
+    enforcement_point: "revisions_sealed_immutable_update, revisions_sealed_immutable_delete triggers"
+    acceptance_test_ids:
+      - "AT-006"
+      - "AT-007"
+      - "AT-009"
+    failure_reaction: "RAISE(ABORT) at SQL layer; prevents state='sealed' rows from UPDATE or DELETE"
+
+  - invariant_id: INV-006
+    title: "No approval time-travel across root drift"
+    enforcement_module: "kernel/contracts/barrier_rules.py"
+    enforcement_point: "evaluate_barrier() -> REASON_ROOT_DRIFT check"
+    acceptance_test_ids:
+      - "AT-008"
+      - "AT-035"
+    failure_reaction: "BarrierVerdict(passes=False, reason_code=root_drift); ApprovalBarrierFailed raised"
+
+  - invariant_id: INV-007
+    title: "Concurrent approval serialization: one-winner rule"
+    enforcement_module: "kernel/contracts/barrier_rules.py"
+    enforcement_point: "evaluate_barrier() full rule set; SQLite transaction serialization"
+    acceptance_test_ids:
+      - "AT-008"
+    failure_reaction: "Deterministic one-winner; loser gets fail-closed BarrierVerdict"
+
+  - invariant_id: INV-008
+    title: "Validation cannot pollute host truth"
+    enforcement_module: "kernel/contracts/quarantine_rules.py"
+    enforcement_point: "classify_admissibility(); classify_receipt_trust()"
+    acceptance_test_ids:
+      - "AT-010"
+      - "AT-011"
+    failure_reaction: "Receipt result='quarantined'; taint quarantine_breach_suspect propagated"
+
+  - invariant_id: INV-010
+    title: "Replay claims may not exceed captured evidence"
+    enforcement_module: "kernel/replay/replay_classifier.py"
+    enforcement_point: "ReplayClassifier.classify() downgrade logic"
+    acceptance_test_ids:
+      - "AT-013"
+    failure_reaction: "Replay class downgraded or UNREPLAYABLE; degradation_reason recorded"
+
+  - invariant_id: INV-011
+    title: "Uncertified equivalence is never exact replay"
+    enforcement_module: "kernel/replay/replay_classifier.py"
+    enforcement_point: "ReplayClassifier.classify() EXACT admission gate"
+    acceptance_test_ids:
+      - "AT-013"
+    failure_reaction: "EXACT replay refused; downgraded to DIAGNOSTIC or lower"
+
+  - invariant_id: INV-012
+    title: "Single-use capability token consumed exactly once"
+    enforcement_module: "kernel/stores/sqlite/repositories.py"
+    enforcement_point: "CapabilityRepository.atomic_consume() WHERE consumed_at IS NULL"
+    acceptance_test_ids:
+      - "AT-018"
+    failure_reaction: "CapabilityConsumeResult(winner=False, reason='already_consumed')"
+
+  - invariant_id: INV-013
+    title: "Capability admissibility checked before effect"
+    enforcement_module: "kernel/contracts/capability_rules.py"
+    enforcement_point: "verify_token() 9-step pre-consume verification"
+    acceptance_test_ids:
+      - "AT-018"
+    failure_reaction: "CapabilityVerificationError raised; CapabilityDenied at service layer"
+
+  - invariant_id: INV-015
+    title: "Review provenance is auditable"
+    enforcement_module: "kernel/services/review_service.py"
+    enforcement_point: "render_review() rendering_provenance composition"
+    acceptance_test_ids:
+      - "AT-020"
+    failure_reaction: "ReviewRejected on missing provenance; self_summary_flag mandatory"
+
+  - invariant_id: INV-016
+    title: "Patch coherence (phase-1 single-file narrowing)"
+    enforcement_module: "kernel/services/patch_proposal_service.py"
+    enforcement_point: "propose() target_file_ids length check and manifest_touch_flag check"
+    acceptance_test_ids:
+      - "AT-016"
+    failure_reaction: "PatchProposalRejected on multi-file or manifest touch"
+
+  - invariant_id: INV-018
+    title: "Worker/stage transition legality"
+    enforcement_module: "kernel/lifecycle/stage_types.py"
+    enforcement_point: "assert_legal_transition(); LEGAL_TRANSITIONS mapping"
+    acceptance_test_ids:
+      - "AT-023"
+    failure_reaction: "IllegalStageTransition raised; OrchestratorRejected at orchestrator layer"
+
+  - invariant_id: INV-019
+    title: "Taint propagation is durable and auditable"
+    enforcement_module: "kernel/stores/sqlite/repositories.py"
+    enforcement_point: "TaintRepository.append()"
+    acceptance_test_ids:
+      - "AT-024"
+    failure_reaction: "Append-only SQL trigger prevents UPDATE/DELETE on taint_records"
+
+  - invariant_id: INV-022
+    title: "No silent taint clearing (clearing requires new record)"
+    enforcement_module: "kernel/stores/sqlite/migrations/0001_core_signable_path.sql"
+    enforcement_point: "taint_records_append_only_update, taint_records_append_only_delete triggers"
+    acceptance_test_ids:
+      - "AT-024"
+      - "AT-028"
+    failure_reaction: "RAISE(ABORT) at SQL layer; clearing requires explicit new TaintRecord insertion"
+
+  - invariant_id: INV-026
+    title: "Audit records are append-only"
+    enforcement_module: "kernel/stores/sqlite/migrations/0001_core_signable_path.sql"
+    enforcement_point: "audit_records_append_only_update, audit_records_append_only_delete triggers"
+    acceptance_test_ids:
+      - "AT-033"
+    failure_reaction: "RAISE(ABORT) at SQL layer; LedgerViolation at application layer"
+
+  - invariant_id: INV-028
+    title: "Drift consequence invalidation"
+    enforcement_module: "kernel/contracts/barrier_rules.py"
+    enforcement_point: "evaluate_barrier() receipt_drift, receipt_invalidated, policy_drift checks"
+    acceptance_test_ids:
+      - "AT-035"
+    failure_reaction: "BarrierVerdict(passes=False); specific reason_code for each drift class"

@@ -1,0 +1,212 @@
+# Delta Register: v11 -> first buildable baseline
+#
+# Source-of-truth: governance/constitution/sovereign_engineering_operating_system_master_plan_v11.txt
+# Extraction basis: governance/implementation/v11_narrow_path_implementation_foundation.md Section 1
+# Format spec: foundation Section 4.1 (delta_register.yaml)
+#
+# Each delta_id maps a gap between the constitution and the first
+# narrow signable path implementation. Status tracks whether the
+# implementation is bound (code + tests exist) or still planned.
+
+---
+
+deltas:
+
+  - delta_id: D-001
+    title: "Lifecycle scaffolding for eight-stage signable path"
+    constitution_refs:
+      - "§24.3"
+      - "§25.2"
+      - "§30.2"
+      - "§31"
+    module_refs:
+      - "kernel/lifecycle/signable_path_orchestrator.py"
+      - "kernel/lifecycle/stage_types.py"
+    acceptance_refs:
+      - "AT-023"
+    invariant_refs:
+      - "INV-018"
+    status: bound
+
+  - delta_id: D-002
+    title: "ContextArtifact schema and completeness checks"
+    constitution_refs:
+      - "§22.7"
+      - "§23.4"
+      - "§31"
+    module_refs:
+      - "kernel/services/context_service.py"
+      - "kernel/schemas/context_artifact.schema.json"
+    acceptance_refs:
+      - "AT-013"
+    invariant_refs: []
+    status: bound
+
+  - delta_id: D-003
+    title: "InferenceArtifact creation with immutable provenance linkage"
+    constitution_refs:
+      - "§23.5"
+      - "§24.3"
+      - "§26"
+    module_refs:
+      - "kernel/services/inference_service.py"
+      - "kernel/schemas/inference_artifact.schema.json"
+    acceptance_refs:
+      - "AT-013"
+    invariant_refs: []
+    status: bound
+
+  - delta_id: D-004
+    title: "PatchProposal schema and minimal coherence gate"
+    constitution_refs:
+      - "§23.6"
+      - "§22.13"
+      - "§26"
+    module_refs:
+      - "kernel/services/patch_proposal_service.py"
+      - "kernel/schemas/patch_proposal.schema.json"
+    acceptance_refs:
+      - "AT-016"
+    invariant_refs:
+      - "INV-016"
+    status: bound
+
+  - delta_id: D-005
+    title: "Validation quarantine with receipt issuance and fail-closed policy"
+    constitution_refs:
+      - "§22.4"
+      - "§23.7"
+      - "§23.8"
+      - "§23.9"
+      - "§24.2"
+      - "§31"
+    module_refs:
+      - "kernel/services/validation_service.py"
+      - "kernel/contracts/quarantine_rules.py"
+      - "validation/quarantine/runner_adapter.py"
+      - "kernel/schemas/validation_receipt.schema.json"
+    acceptance_refs:
+      - "AT-010"
+      - "AT-011"
+    invariant_refs:
+      - "INV-008"
+    status: bound
+
+  - delta_id: D-006
+    title: "ReviewArtifact with provenance disclosure and deterministic diff hash"
+    constitution_refs:
+      - "§22.14"
+      - "§23.10"
+      - "§24.2"
+      - "§26"
+    module_refs:
+      - "kernel/services/review_service.py"
+      - "kernel/schemas/review_artifact.schema.json"
+    acceptance_refs:
+      - "AT-020"
+    invariant_refs:
+      - "INV-015"
+    status: bound
+
+  - delta_id: D-007
+    title: "Approval barrier with drift detection and deterministic fail-closed"
+    constitution_refs:
+      - "§22.3"
+      - "§23.11"
+      - "§24.2"
+      - "§31"
+    module_refs:
+      - "kernel/services/approval_service.py"
+      - "kernel/contracts/barrier_rules.py"
+      - "kernel/schemas/approval_artifact.schema.json"
+    acceptance_refs:
+      - "AT-008"
+      - "AT-035"
+    invariant_refs:
+      - "INV-006"
+      - "INV-007"
+      - "INV-028"
+    status: bound
+
+  - delta_id: D-008
+    title: "Seal transaction ordering with WAL durability and crash classification"
+    constitution_refs:
+      - "§22.1"
+      - "§22.2"
+      - "§23.1"
+      - "§23.2"
+      - "§23.3"
+      - "§24.2"
+      - "§27"
+    module_refs:
+      - "kernel/services/revision_seal_service.py"
+      - "kernel/contracts/seal_ordering.py"
+      - "kernel/stores/sqlite/wal_recovery.py"
+      - "kernel/stores/sqlite/migrations/0001_core_signable_path.sql"
+      - "kernel/schemas/revision.schema.json"
+      - "kernel/schemas/journal_entry.schema.json"
+      - "kernel/schemas/snapshot_root.schema.json"
+    acceptance_refs:
+      - "AT-006"
+      - "AT-007"
+      - "AT-009"
+    invariant_refs:
+      - "INV-004"
+      - "INV-005"
+    status: bound
+
+  - delta_id: D-009
+    title: "Append-only evidence ledger with full path traceability"
+    constitution_refs:
+      - "§15"
+      - "§23.14"
+      - "§24.2"
+      - "§31"
+    module_refs:
+      - "kernel/evidence/append_only_ledger.py"
+      - "kernel/services/evidence_service.py"
+      - "kernel/replay/replay_classifier.py"
+      - "kernel/schemas/audit_record.schema.json"
+      - "kernel/schemas/replay_anchor.schema.json"
+    acceptance_refs:
+      - "AT-013"
+      - "AT-015"
+      - "AT-033"
+    invariant_refs:
+      - "INV-010"
+      - "INV-011"
+      - "INV-026"
+    status: bound
+
+  - delta_id: D-010
+    title: "Invariant-binding registry for first-slice invariants"
+    constitution_refs:
+      - "§22.10"
+      - "§24.1"
+      - "§24.2"
+      - "§31"
+    module_refs:
+      - "governance/implementation/invariant_bindings.yaml"
+      - "kernel/lifecycle/signoff_gate.py"
+    acceptance_refs:
+      - "AT-018"
+      - "AT-024"
+      - "AT-028"
+    invariant_refs:
+      - "INV-004"
+      - "INV-005"
+      - "INV-006"
+      - "INV-007"
+      - "INV-008"
+      - "INV-010"
+      - "INV-011"
+      - "INV-012"
+      - "INV-013"
+      - "INV-015"
+      - "INV-016"
+      - "INV-018"
+      - "INV-019"
+      - "INV-022"
+      - "INV-026"
+      - "INV-028"
+    status: bound
