@@ -1,0 +1,159 @@
+package: replay_claim_taxonomy
+status: design_only
+authorizes_implementation: false
+constitution_changes: none
+implementation_foundation_changes: none
+new_at_ids: none
+new_inv_ids: none
+schema_changes: none
+contract_changes: none
+receipt_shape_changes: none
+runtime_module_changes: none
+
+baseline_refs:
+  - governance/constitution/sovereign_engineering_operating_system_master_plan_v11.txt
+  - governance/implementation/v11_narrow_path_implementation_foundation.md
+  - governance/design/phase2_substrate/
+  - governance/design/phase2_promotion_gate/
+  - governance/design/external_execution_admission_boundary/
+  - kernel/replay/replay_classifier.py
+  - kernel/schemas/replay_anchor.schema.json
+
+permitted_claim_classes:
+  - exact
+  - diagnostic
+  - semantic
+  - degraded
+  - unreplayable
+
+closure:
+  size: 5
+  source_of_truth:
+    - kernel/schemas/replay_anchor.schema.json (replay_class_claim.enum)
+    - kernel/replay/replay_classifier.py (ReplayClass enum)
+  new_class_additions_in_this_package: none
+  renames_in_this_package: none
+  reorderings_in_this_package: none
+
+scope_in:
+  - exact_claim_class_set
+  - per_class_definitions
+  - per_class_admission_evidence
+  - downgrade_paths_between_classes
+  - automatic_lowering_conditions
+  - relationship_to_replay_classifier
+  - relationship_to_replay_anchor
+  - relationship_to_evidence_service
+  - relationship_to_audit_binding
+  - relationship_to_external_execution_admission_boundary
+  - forbidden_claims_and_invalid_combinations
+  - unresolved_blockers_vs_recorded_risks
+  - review_readiness_statement
+
+scope_out:
+  - production_runtime_code
+  - kernel_module_changes
+  - schema_or_contract_or_receipt_shape_changes
+  - test_changes
+  - ui_dashboards_project_shell
+  - plugins_extensions
+  - distributed_execution_runtime
+  - multi_vendor_routing_breadth
+  - release_packaging_notarization_breadth
+  - new_constitutional_rules
+  - new_at_or_inv_identifiers
+  - new_design_directories_outside_this_package
+
+files:
+  - path: governance/design/replay_claim_taxonomy/README.md
+    purpose: package index, scope lock, non-scope, review-readiness
+  - path: governance/design/replay_claim_taxonomy/manifest.yaml
+    purpose: machine-readable scope, file list, taxonomy closure (this file)
+  - path: governance/design/replay_claim_taxonomy/00_taxonomy_principles.md
+    purpose: decision model, default-deny-on-raise, closure invariant, constitutional anchors
+    constitution_anchors: [3.1, 3.2, 3.3, 3.10, 3.12, 22.5, 23.12, 23.19, 24.2, 31]
+  - path: governance/design/replay_claim_taxonomy/01_claim_classes.md
+    purpose: the exact five permitted claim classes; closure statement; source-of-truth pin
+    constitution_anchors: [3.10, 22.5, 23.12, 24.2]
+  - path: governance/design/replay_claim_taxonomy/02_claim_class_definitions.md
+    purpose: exact definition of each claim class
+    constitution_anchors: [3.2, 3.3, 3.12, 22.5, 23.12, 24.2]
+  - path: governance/design/replay_claim_taxonomy/03_admission_evidence_per_class.md
+    purpose: exact admission evidence required for each claim class
+    constitution_anchors: [3.3, 7.3, 22.5, 23.7, 23.12, 23.17, 23.19, 24.2]
+  - path: governance/design/replay_claim_taxonomy/04_downgrade_paths.md
+    purpose: exact permitted downgrade transitions between claim classes
+    constitution_anchors: [3.12, 22.5, 23.19, 24.2]
+  - path: governance/design/replay_claim_taxonomy/05_automatic_lowering_conditions.md
+    purpose: exact evidence-shortfall and detection conditions that force automatic downgrade
+    constitution_anchors: [3.3, 3.12, 22.5, 22.11, 23.12, 23.17, 23.19, 24.2]
+  - path: governance/design/replay_claim_taxonomy/06_relationship_to_existing_surfaces.md
+    purpose: classifier/anchor/evidence-service/audit-binding/external-boundary integration
+    constitution_anchors: [3.1, 3.2, 3.3, 3.11, 22.1, 22.5, 22.10, 23.12, 23.14, 23.19, 27, 28, 31]
+  - path: governance/design/replay_claim_taxonomy/07_forbidden_claims_and_invalid_combinations.md
+    purpose: class names and combinations that are never admissible
+    constitution_anchors: [3.1, 3.10, 3.12, 22.5, 23.12, 24.2]
+  - path: governance/design/replay_claim_taxonomy/08_unresolved_blockers_vs_recorded_risks.md
+    purpose: separate true blockers from recorded semantic risks; honest residuals
+    constitution_anchors: [3.10, 3.14, 27, 31]
+  - path: governance/design/replay_claim_taxonomy/09_review_readiness_statement.md
+    purpose: honest statement of what this package is and is not review-ready for
+    constitution_anchors: [3.10, 31]
+
+taxonomy_rule:
+  governing_sections: [3.10, 3.12, 22.5, 23.12, 24.2]
+  default: no_raise_without_evidence
+  closure: exactly_five_classes
+  silence_is_lowering_not_raising: true
+  rule: |
+    Exactly five claim classes exist: exact, diagnostic, semantic,
+    degraded, unreplayable. The set is closed. A sixth class is a
+    constitutional change, not a design edit. Any claim is admitted at
+    the highest class whose per-class evidence in 03 is fully and
+    honestly present, and at no higher class. Any evidence shortfall in
+    05 forces automatic lowering per the transitions in 04. Silent
+    raise, silent hold, and silent rename are forbidden per 07. The
+    host-side replay_classifier is the sole decider of class; no
+    executor, validator, or caller may override a classifier decision.
+
+ingress_rule:
+  governing_sections: [3.2, 3.3, 3.12, 22.5, 23.12]
+  rule: |
+    A ReplayAnchor is minted at the single classifier-decided class
+    with the populated degradation_reason or unreplayable_reason string
+    required by 03. An anchor at exact with a non-empty
+    degradation_reason is invalid per 07. A class claim written into a
+    ReplayAnchor is final for that revision; upgrading a class requires
+    a new anchor on a new revision with new evidence, never a rewrite.
+
+relationship_rule:
+  governing_sections: [3.11, 22.5, 22.10, 23.12, 23.14, 31]
+  rule: |
+    The classifier is the sole author of replay_class_claim. The
+    evidence service is the sole source of truth for artifact presence
+    used by the classifier. The audit binding is the sole source of
+    truth for environment_fingerprint and version_tuple_hash bound into
+    the anchor. External executors never author any class; their
+    contributions are candidate material per
+    external_execution_admission_boundary/05, and the classifier
+    decides the class host-side after ingress.
+
+review_readiness:
+  as_design_package: true
+  as_implementation_authorization: false
+  as_schema_or_enum_change: false
+  as_substrate_admission: false
+  as_executor_admission: false
+  as_constitutional_change: false
+
+unresolved_blockers: none
+
+recorded_risks:
+  - class_label_pressure_when_external_executor_is_present
+  - degraded_vs_diagnostic_overlap_under_partial_evidence
+  - unreplayable_vs_absent_anchor_distinction_in_review_UX
+  - semantic_class_drift_when_validator_policy_changes
+  - equivalence_proof_bundle_posture_under_phase2
+  - environment_fingerprint_field_pressure_under_shim_policy_variants
+  - taint_propagated_candidate_with_clean_classifier_intent
+  - audit_durable_incomplete_pair_treated_as_unreplayable
