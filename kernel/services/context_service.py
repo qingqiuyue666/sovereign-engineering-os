@@ -82,10 +82,28 @@ class ContextService:
         repository: ContextArtifactRepository,
         audit_ledger: Any,
         version_tuple_overrides: Mapping[str, Any] | None = None,
+        hard_budget_tokens: int | None = None,
+        effective_budget_tokens: int | None = None,
     ) -> None:
         self._repo = repository
         self._audit = audit_ledger
         self._vt_overrides = dict(version_tuple_overrides or {})
+        # Phase-1 static budget policy values are constructor-overridable
+        # so the orchestrator's runtime budget allocation (AT-027) can
+        # be exercised end-to-end in tests without forking a parallel
+        # budget surface. The default remains `phase1_budget_policy_v1`.
+        self._hard_budget_tokens = int(
+            hard_budget_tokens if hard_budget_tokens is not None
+            else PHASE1_HARD_BUDGET_TOKENS
+        )
+        self._effective_budget_tokens = int(
+            effective_budget_tokens if effective_budget_tokens is not None
+            else PHASE1_EFFECTIVE_BUDGET_TOKENS
+        )
+        if self._effective_budget_tokens > self._hard_budget_tokens:
+            raise ValueError(
+                "effective_budget_tokens must be <= hard_budget_tokens"
+            )
         # Load the frozen schema once so ingress validation can check
         # structural shape before persistence (foundation §3.4).
         self._schema = load_schema("context_artifact")
@@ -116,9 +134,11 @@ class ContextService:
                 taint_set=tuple(request.get("taint_set", ())),
             )
 
-        # Phase-1 budget policy derivation.
-        hard_budget = PHASE1_HARD_BUDGET_TOKENS
-        effective_budget = PHASE1_EFFECTIVE_BUDGET_TOKENS
+        # Phase-1 budget policy derivation. Values are taken from the
+        # service-instance policy (constructor overridable for tests
+        # exercising AT-027 budget exhaustion via the real runtime path).
+        hard_budget = self._hard_budget_tokens
+        effective_budget = self._effective_budget_tokens
 
         # §22.7 completeness rules:
         # - truncation_reason MUST be explicit whenever candidate set

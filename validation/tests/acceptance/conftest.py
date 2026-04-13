@@ -44,6 +44,7 @@ from kernel.services.inference_service import (
     InferencePolicy,
     ModelAdapter,
 )
+from kernel.services.budget_governor import BudgetGovernor
 from kernel.services.patch_proposal_service import PatchProposalService
 from kernel.services.validation_service import ValidationService
 from kernel.services.review_service import ReviewService
@@ -79,7 +80,13 @@ class AcceptanceHarness:
     the narrow signable path end-to-end.
     """
 
-    def __init__(self, actor_identity: str = "acceptance_test") -> None:
+    def __init__(
+        self,
+        actor_identity: str = "acceptance_test",
+        *,
+        inference_policy: InferencePolicy | None = None,
+        default_hard_budget_tokens: int = 96_000,
+    ) -> None:
         self.conn = open_connection(":memory:")
         apply_migrations(self.conn)
 
@@ -110,16 +117,37 @@ class AcceptanceHarness:
             repository=self.cap_repo,
             audit_ledger=self.audit_ledger,
         )
+        # AT-027 / INV-021: the phase-1 static budget policy values on
+        # `ContextService` are constructor-overridable, so the
+        # orchestrator's runtime allocation (which reads
+        # `hard_budget_tokens` off the persisted ContextArtifact) picks
+        # up the same number tests want to drive without forking a
+        # parallel budget surface.
         self.ctx_svc = ContextService(
             repository=self.ctx_repo,
             audit_ledger=self.audit_ledger,
+            hard_budget_tokens=default_hard_budget_tokens,
+            effective_budget_tokens=min(
+                default_hard_budget_tokens,
+                # 96k effective is the phase-1 default; clamp to the
+                # tighter hard budget when tests pick a smaller one.
+                96_000 if default_hard_budget_tokens >= 96_000 else default_hard_budget_tokens,
+            ),
+        )
+        # Per-task token-budget governor, wired into the inference
+        # boundary. The orchestrator (not this harness) is responsible
+        # for calling `allocate` at `admit_context`.
+        self.budget_governor = BudgetGovernor(
+            audit_ledger=self.audit_ledger,
+            default_hard_budget_tokens=default_hard_budget_tokens,
         )
         self.inf_svc = InferenceService(
             repository=self.inf_repo,
             audit_ledger=self.audit_ledger,
             context_reader=self.ctx_repo,
             adapter=FakeModelAdapter(),
-            policy=InferencePolicy(),
+            policy=inference_policy or InferencePolicy(),
+            budget_governor=self.budget_governor,
         )
         self.pp_svc = PatchProposalService(
             repository=self.pp_repo,
@@ -161,7 +189,9 @@ class AcceptanceHarness:
             audit_ledger=self.audit_ledger,
         )
 
-        # Orchestrator.
+        # Orchestrator. The budget governor and context repository are
+        # passed in so the orchestrator can perform real runtime budget
+        # allocation at `admit_context` (AT-027 / INV-021).
         self.orch = SignablePathOrchestrator(
             capability_service=self.cap_svc,
             context_service=self.ctx_svc,
@@ -173,6 +203,8 @@ class AcceptanceHarness:
             revision_seal_service=self.seal_svc,
             evidence_service=self.evidence_svc,
             audit_ledger=self.audit_ledger,
+            budget_governor=self.budget_governor,
+            context_repository=self.ctx_repo,
         )
 
     def close(self) -> None:
@@ -203,6 +235,10 @@ class AcceptanceHarness:
         intent_id = f"intent-{uuid4().hex[:8]}"
         root_rev_id = "rev-genesis-000"
 
+        # NOTE: budget allocation happens inside `admit_context` via the
+        # orchestrator (AT-027 / INV-021). The harness intentionally
+        # does NOT pre-seed budget state, so AT-027 tests exercise the
+        # real runtime path.
         cap_ctx = self.issue_capability("read_repository_snapshot", task_id)
         ctx_id = self.orch.admit_context(
             task_id=task_id,
@@ -257,6 +293,7 @@ class AcceptanceHarness:
             "intent_id": intent_id,
             "root_revision_id": root_rev_id,
         }
+        # See `run_full_happy_path` re: runtime budget allocation.
 
         stage_order = [
             Stage.CONTEXT, Stage.INFERENCE, Stage.PATCH_PROPOSAL,
