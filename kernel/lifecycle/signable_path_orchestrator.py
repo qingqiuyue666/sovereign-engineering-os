@@ -108,6 +108,8 @@ class SignablePathOrchestrator:
         revision_seal_service: Any,
         evidence_service: Any,
         audit_ledger: Any,
+        budget_governor: Any | None = None,
+        context_repository: Any | None = None,
     ) -> None:
         # The orchestrator holds references only; it does not own policy.
         self._capability = capability_service
@@ -120,6 +122,17 @@ class SignablePathOrchestrator:
         self._seal = revision_seal_service
         self._evidence = evidence_service
         self._audit = audit_ledger
+        # AT-027 / INV-021 wiring. The orchestrator allocates a per-task
+        # budget envelope at `admit_context`, reading the realized
+        # phase-1 static policy values off the just-persisted
+        # ContextArtifact via `context_repository`. Both are optional
+        # so existing tracer-bullet tests that hand-build the
+        # orchestrator without budget governance continue to compile;
+        # in that case `admit_inference` proceeds without governance
+        # enforcement (the InferenceService also accepts a None
+        # governor).
+        self._budget = budget_governor
+        self._ctx_repo = context_repository
         self._tasks: dict[str, TaskLifecycleState] = {}
 
     # ------------------------------------------------------------------
@@ -225,6 +238,31 @@ class SignablePathOrchestrator:
             request=request,
             intent_anchor=anchor,
         )
+
+        # AT-027 / INV-021 runtime allocation: bind the budget envelope
+        # to the same `hard_budget_tokens` the ContextArtifact records
+        # under `phase1_budget_policy_v1`. This is the single real
+        # runtime point at which a task acquires its governed budget;
+        # it must not be pre-seeded by callers / harnesses. Allocation
+        # happens after the context artifact is persisted so the
+        # governance value comes from the durable artifact, not from
+        # an unaudited request mapping.
+        if self._budget is not None:
+            if self._ctx_repo is None:
+                raise OrchestratorRejected(
+                    "budget_governor wired without context_repository; "
+                    "cannot read hard_budget_tokens off the persisted "
+                    "ContextArtifact (AT-027 wiring is incomplete)"
+                )
+            ctx_row = self._ctx_repo.fetch(artifact_id)
+            if ctx_row is None:
+                raise OrchestratorRejected(
+                    f"context artifact {artifact_id} missing after persistence"
+                )
+            self._budget.allocate(
+                task_id=task_id,
+                hard_budget_tokens=int(ctx_row["hard_budget_tokens"]),
+            )
 
         state = TaskLifecycleState(
             task_id=task_id,

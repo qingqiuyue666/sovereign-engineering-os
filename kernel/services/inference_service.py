@@ -48,6 +48,7 @@ from uuid import uuid4
 
 from kernel.schemas import load_schema
 from kernel.schemas.validator import validate_artifact
+from kernel.services.budget_governor import BudgetExhausted, BudgetGovernor
 from kernel.stores.sqlite.repositories import InferenceArtifactRepository
 from kernel.version.version_tuple import compose_version_tuple_hash
 
@@ -58,6 +59,21 @@ class ModelIntegrationViolation(Exception):
 
 class InferenceFailure(Exception):
     """Raised when model invocation fails under governed conditions."""
+
+
+class InferenceBudgetExhausted(InferenceFailure):
+    """Raised when the BudgetGovernor refuses an inference (AT-027 / INV-021).
+
+    Carries the governance reason string so callers / tests can assert
+    which AT-027 case fired (`budget_would_be_exceeded`,
+    `budget_already_suspended`, `budget_already_exceeded`,
+    `budget_exceeded_during_inference`).
+    """
+
+    def __init__(self, *, reason: str, detail: str) -> None:
+        super().__init__(f"{reason}: {detail}")
+        self.reason = reason
+        self.detail = detail
 
 
 @dataclass(frozen=True)
@@ -120,6 +136,21 @@ def _output_hash(output_text: str) -> str:
     return "sha256:" + hashlib.sha256(output_text.encode("utf-8")).hexdigest()
 
 
+def _actual_total_tokens(token_usage: Mapping[str, Any]) -> int:
+    """Derive a conservative total-token count from a parsed token_usage.
+
+    Phase-1 adapters report `{"input": int, "output": int}` shapes.
+    Unknown shapes fall back to 0 rather than silently under-count; the
+    governor is still responsible for admissibility. This helper is
+    intentionally narrow and only used for budget accounting.
+    """
+    total = 0
+    for value in token_usage.values():
+        if isinstance(value, int):
+            total += max(0, value)
+    return total
+
+
 class InferenceService:
     def __init__(
         self,
@@ -130,6 +161,7 @@ class InferenceService:
         adapter: ModelAdapter | None = None,
         policy: InferencePolicy | None = None,
         version_tuple_overrides: Mapping[str, Any] | None = None,
+        budget_governor: BudgetGovernor | None = None,
     ) -> None:
         self._repo = repository
         self._audit = audit_ledger
@@ -138,6 +170,11 @@ class InferenceService:
         self._policy = policy or InferencePolicy()
         self._vt_overrides = dict(version_tuple_overrides or {})
         self._schema = load_schema("inference_artifact")
+        # Optional budget governor (AT-027 / INV-021). When wired, the
+        # service refuses adapter invocation on budget exhaustion and
+        # refuses to persist inference artifacts whose actual token
+        # usage pushes past the task's hard budget.
+        self._budget: BudgetGovernor | None = budget_governor
 
     # ------------------------------------------------------------------
     # governed prompt construction
@@ -261,6 +298,29 @@ class InferenceService:
 
         envelope = self._build_prompt_envelope(context_artifact=context_artifact)
 
+        # AT-027 pre-flight: budget admissibility check. If the governor
+        # refuses, we emit a FailureBundle-equivalent audit record and
+        # raise InferenceBudgetExhausted BEFORE the adapter is invoked
+        # and BEFORE any InferenceArtifact is persisted. This is the
+        # fail-closed "no unsafe shortcut" surface.
+        if self._budget is not None:
+            try:
+                self._budget.assert_admissible(
+                    task_id=task_id,
+                    projected_tokens=self._policy.max_output_tokens,
+                )
+            except BudgetExhausted as be:
+                self._emit_failure_bundle(
+                    task_id=task_id,
+                    root_revision_id=context_artifact["root_revision_id"],
+                    context_artifact_id=context_artifact_id,
+                    failure_class=be.reason,
+                    detail=be.detail,
+                )
+                raise InferenceBudgetExhausted(
+                    reason=be.reason, detail=be.detail
+                ) from be
+
         try:
             raw = self._adapter.invoke(
                 prompt_envelope=envelope, policy=self._policy
@@ -285,6 +345,31 @@ class InferenceService:
             raise InferenceFailure(str(exc)) from exc
 
         parsed = self._parse_response(raw)
+
+        # AT-027 post-flight: record actual consumption against the
+        # task's budget. If the governor detects that the reported
+        # actual tokens push total consumption past the hard budget,
+        # it transitions the budget to exceeded -> suspended, emits
+        # audit evidence, and raises. We refuse to persist the
+        # InferenceArtifact in that case (no unsafe shortcut).
+        if self._budget is not None:
+            actual = _actual_total_tokens(parsed["token_usage"])
+            try:
+                self._budget.record_consumption(
+                    task_id=task_id,
+                    actual_tokens=actual,
+                )
+            except BudgetExhausted as be:
+                self._emit_failure_bundle(
+                    task_id=task_id,
+                    root_revision_id=context_artifact["root_revision_id"],
+                    context_artifact_id=context_artifact_id,
+                    failure_class=be.reason,
+                    detail=be.detail,
+                )
+                raise InferenceBudgetExhausted(
+                    reason=be.reason, detail=be.detail
+                ) from be
 
         worker_run_id = f"wrun-{uuid4().hex}"
         artifact = {
