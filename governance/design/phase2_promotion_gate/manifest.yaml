@@ -1,0 +1,99 @@
+package: phase2_promotion_gate
+status: design_only
+authorizes_implementation: false
+constitution_changes: none
+implementation_foundation_changes: none
+new_at_ids: none
+new_inv_ids: none
+schema_changes: none
+contract_changes: none
+
+baseline_refs:
+  - governance/constitution/sovereign_engineering_operating_system_master_plan_v11.txt
+  - governance/implementation/v11_narrow_path_implementation_foundation.md
+  - governance/design/phase2_substrate/
+
+scope_in:
+  - phase2_design_to_implementation_prerequisites
+  - execution_substrate_entry_criteria_per_candidate
+  - rust_downshift_entry_criteria_per_candidate
+  - replay_determinism_audit_binding_evidence_bar
+  - tla_plus_admission_targets_and_preconditions
+  - explicit_non_admission_conditions
+  - unresolved_blockers_vs_recorded_risks
+
+scope_out:
+  - production_runtime_code
+  - ui_dashboards_project_shell
+  - plugins_extensions
+  - distributed_execution_cluster_coordination
+  - multi_vendor_routing_breadth
+  - release_packaging_notarization_breadth
+  - new_constitutional_rules
+  - new_at_or_inv_identifiers
+  - new_schema_or_receipt_shapes
+
+files:
+  - path: governance/design/phase2_promotion_gate/README.md
+    purpose: package index, scope lock, non-scope, review-readiness
+  - path: governance/design/phase2_promotion_gate/00_promotion_gate_principles.md
+    purpose: decision model, default-deny posture, constitutional anchors
+    constitution_anchors: [3.1, 3.3, 3.10, 3.12, 3.13, 3.14, 27, 28, 31]
+  - path: governance/design/phase2_promotion_gate/01_phase2_design_to_implementation_prerequisites.md
+    purpose: phase-wide prerequisites to leave the design shelf
+    constitution_anchors: [3.10, 3.14, 27, 28, 30.3, 30.4, 31]
+  - path: governance/design/phase2_promotion_gate/02_execution_substrate_entry_criteria.md
+    purpose: per-substrate entry criteria for A (Apple VM), B (Wasmtime/WASI), C (Linux/KVM sidecar or remote)
+    constitution_anchors: [5, 5.2, 5.4, 5.5, 22.1, 22.4, 22.6, 22.11, 27, 29]
+  - path: governance/design/phase2_promotion_gate/03_rust_downshift_entry_criteria.md
+    purpose: per-candidate entry criteria for R-1 through R-6
+    constitution_anchors: [3.13, 3.14, 27, 28, 31]
+  - path: governance/design/phase2_promotion_gate/04_replay_determinism_audit_binding_evidence.md
+    purpose: exact replay/determinism/audit-binding evidence required before any substrate promotion
+    constitution_anchors: [3.3, 3.12, 22.1, 22.2, 22.5, 23.12, 31]
+  - path: governance/design/phase2_promotion_gate/05_tla_plus_admission_targets_and_preconditions.md
+    purpose: TLA+ admission targets and preconditions per substrate
+    constitution_anchors: [3.4, 22.1, 22.2, 22.3, 22.5, 22.6, 22.11, 9.6, 9.7, 31]
+  - path: governance/design/phase2_promotion_gate/06_explicit_non_admission_conditions.md
+    purpose: conditions under which phase-2 implementation is forbidden even if roadmap looks attractive
+    constitution_anchors: [3.1, 3.10, 3.12, 3.13, 3.14, 27, 31]
+  - path: governance/design/phase2_promotion_gate/07_unresolved_blockers_vs_recorded_risks.md
+    purpose: separate true blockers from recorded risks; closure status
+    constitution_anchors: [3.10, 3.14, 27, 31]
+
+promotion_rule:
+  governing_sections: [27, 28, 3.14, 31]
+  default: deny
+  scope: per_candidate
+  silence_is_not_admission: true
+  rule: |
+    No phase-2 substrate candidate (execution substrate, Rust
+    downshift, TLA+ spec, or clonefile-backed phantom workspace)
+    is admitted to implementation unless the specific gate defined
+    in this package is closed with the named evidence artifacts and
+    an explicit sign-off record. Absent a closure record for a
+    candidate, that candidate is not admitted, regardless of how
+    attractive the roadmap or the calendar looks.
+
+reversibility_policy:
+  governing_sections: [3.14, 31]
+  rule: |
+    For every admission that is hard to reverse (audit ledger wiring,
+    capability broker code paths, canonical-byte composition
+    semantics), the promotion gate additionally requires a named
+    rollback path and a pre-registered failure record that would
+    trigger that rollback.
+
+review_readiness:
+  as_design_package: true
+  as_implementation_authorization: false
+
+unresolved_blockers: none
+recorded_risks:
+  - bit_identical_replay_across_apple_silicon_variants
+  - apfs_clonefile_semantics_under_concurrent_churn
+  - capability_broker_host_guest_wire_format_and_reaper
+  - wasi_prng_and_clock_shim_canonicalization
+  - disk_budget_accounting_for_clone_divergence
+  - code_signing_and_notarization_for_vm_guest_images
+  - physical_location_of_tla_plus_specs
