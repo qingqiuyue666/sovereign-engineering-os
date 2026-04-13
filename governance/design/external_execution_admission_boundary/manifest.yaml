@@ -1,0 +1,163 @@
+package: external_execution_admission_boundary
+status: design_only
+authorizes_implementation: false
+constitution_changes: none
+implementation_foundation_changes: none
+new_at_ids: none
+new_inv_ids: none
+schema_changes: none
+contract_changes: none
+receipt_shape_changes: none
+runtime_module_changes: none
+
+baseline_refs:
+  - governance/constitution/sovereign_engineering_operating_system_master_plan_v11.txt
+  - governance/implementation/v11_narrow_path_implementation_foundation.md
+  - governance/design/phase2_substrate/
+  - governance/design/phase2_promotion_gate/
+
+executors_in_scope:
+  - wasmtime_wasi_sandbox
+  - apple_virtualization_framework_guest
+  - linux_kvm_sidecar_or_remote_worker
+  - apfs_clonefile_phantom_workspace_helper
+
+scope_in:
+  - authority_vs_non_authority_split
+  - host_guest_capability_broker_boundary
+  - quarantine_and_execution_admission_rules
+  - allowed_io_surfaces_and_forbidden_mutation_surfaces
+  - result_ingress_rules_candidate_vs_admitted_truth
+  - audit_binding_and_replay_minimum_per_executor
+  - dependency_relationship_to_phase2_promotion_gate
+  - explicit_non_admission_conditions
+  - unresolved_blockers_vs_recorded_risks
+
+scope_out:
+  - production_runtime_code
+  - kernel_module_changes
+  - schema_or_contract_or_receipt_shape_changes
+  - test_changes
+  - ui_dashboards_project_shell
+  - plugins_extensions
+  - distributed_execution_runtime
+  - cluster_coordination_or_remote_sync_protocols
+  - multi_vendor_routing_breadth
+  - benchmark_or_fairness_breadth
+  - release_packaging_notarization_breadth
+  - new_constitutional_rules
+  - new_at_or_inv_identifiers
+  - new_design_directories_outside_this_package
+
+files:
+  - path: governance/design/external_execution_admission_boundary/README.md
+    purpose: package index, scope lock, non-scope, review-readiness
+  - path: governance/design/external_execution_admission_boundary/manifest.yaml
+    purpose: machine-readable scope and file list (this file)
+  - path: governance/design/external_execution_admission_boundary/00_admission_boundary_principles.md
+    purpose: decision model, default-deny posture, constitutional anchors, honesty rules
+    constitution_anchors: [3.1, 3.2, 3.3, 3.10, 3.11, 3.12, 3.13, 3.14, 27, 28, 29, 31]
+  - path: governance/design/external_execution_admission_boundary/01_authority_vs_non_authority_split.md
+    purpose: exact authority-surface inventory and bounded-executor surface; the eight authority responsibilities that never move
+    constitution_anchors: [3.1, 3.11, 3.13, 22.1, 22.2, 22.3, 22.5, 22.6, 22.10, 23.11, 23.12, 23.13, 23.14, 27]
+  - path: governance/design/external_execution_admission_boundary/02_host_guest_capability_broker_boundary.md
+    purpose: exact wire/lifecycle/reaper boundary of the host-side capability broker; what it issues, what it never issues
+    constitution_anchors: [3.1, 3.11, 22.1, 22.6, 22.10, 23.13, 23.14]
+  - path: governance/design/external_execution_admission_boundary/03_quarantine_execution_admission_rules.md
+    purpose: pre-execution admission, capability-binding, enter/exit AuditRecord pair, refusal classes
+    constitution_anchors: [3.2, 22.1, 22.4, 22.6, 22.11, 23.14, 23.17, 9.6, 9.7]
+  - path: governance/design/external_execution_admission_boundary/04_allowed_io_and_forbidden_mutation_surfaces.md
+    purpose: enumerated allowed I/O surfaces (read-only, scoped, ephemeral) and forbidden mutation surfaces (truth, audit, capability mint, etc.)
+    constitution_anchors: [3.1, 3.2, 3.11, 22.4, 22.6, 22.8, 22.10, 22.11, 22.13]
+  - path: governance/design/external_execution_admission_boundary/05_result_ingress_rules.md
+    purpose: candidate material vs admitted truth; reject/downgrade/defer rules; ingress invariants
+    constitution_anchors: [3.2, 3.3, 3.12, 7.3, 7.5, 22.4, 22.5, 22.10, 22.11, 23.7, 23.12, 23.15, 23.17, 23.19]
+  - path: governance/design/external_execution_admission_boundary/06_audit_binding_and_replay_minimum.md
+    purpose: minimum audit binding and replay evidence required from any external executor before its outputs are admissible
+    constitution_anchors: [3.3, 3.12, 22.1, 22.5, 22.10, 23.12, 23.14, 23.19, 31]
+  - path: governance/design/external_execution_admission_boundary/07_dependency_on_phase2_promotion_gate.md
+    purpose: exact relationship to phase2_promotion_gate; how the two packages compose; what each owns; what overrides what
+    constitution_anchors: [3.10, 3.14, 27, 28, 31]
+  - path: governance/design/external_execution_admission_boundary/08_explicit_non_admission_conditions.md
+    purpose: automatic denials regardless of how attractive the proposal is
+    constitution_anchors: [3.1, 3.2, 3.10, 3.11, 3.12, 3.13, 3.14, 27, 31]
+  - path: governance/design/external_execution_admission_boundary/09_unresolved_blockers_vs_recorded_risks.md
+    purpose: separate true blockers from recorded risks; closure status; honest residuals
+    constitution_anchors: [3.10, 3.14, 27, 31]
+
+boundary_rule:
+  governing_sections: [3.1, 3.11, 27, 31]
+  default: deny
+  scope: per_call_per_executor
+  silence_is_not_admission: true
+  rule: |
+    No call, byte, or signal crosses the host/executor boundary unless
+    an explicit rule in this package admits it. No future executor —
+    of any substrate shape (Wasmtime/WASI, Apple Virtualization.framework,
+    Linux/KVM sidecar or remote worker, or APFS clonefile-backed
+    phantom workspace) — may acquire any of the eight authority
+    responsibilities enumerated in 01. The Python control plane is
+    the sole authority surface; an executor is, by construction, a
+    bounded, capability-gated, audit-bracketed, replay-classified
+    consumer of host-issued effect handles whose outputs enter the
+    eight-stage signable path only as candidate material that the host
+    re-validates host-side.
+
+result_ingress_rule:
+  governing_sections: [3.2, 3.3, 3.12, 7.3, 7.5, 22.5]
+  default: candidate_material_until_host_admitted
+  rule: |
+    Bytes returned by any external executor are candidate material.
+    They become admitted truth only after host-side re-validation,
+    schema conformance, capability-token reconciliation, taint-graph
+    intake, and replay classification (with explicit downgrade where
+    any dimension is unsatisfied). Failure of any ingress invariant
+    is a reject; partial satisfaction is a downgrade with
+    DriftEventRecord; ambiguity is a defer. There is no implicit
+    promotion path.
+
+audit_and_replay_minimum:
+  governing_sections: [22.1, 22.5, 23.12, 23.14, 23.19, 31]
+  rule: |
+    Every external executor invocation requires a paired
+    AuditRecord(enter) and AuditRecord(exit) authored host-side, with
+    the executor identity, version, base-image/engine hash, capability
+    token id consumed, declared time/random/scheduler shim policy,
+    exit class, bytes-returned digest, and downgrade flag and reason
+    where applicable. ReplayAnchor is minted host-side only after the
+    exit record is durable and the executor's contributions are
+    re-validated host-side. No executor writes to the audit ledger;
+    no executor mints ReplayAnchor; no executor authors any field of
+    a CapabilityToken, ApprovalArtifact, Revision, SnapshotRoot, or
+    DriftEventRecord.
+
+reversibility_policy:
+  governing_sections: [3.14, 27, 31]
+  rule: |
+    Honoring this boundary is a precondition to any per-candidate
+    admission via phase2_promotion_gate. A future admission PR must
+    name, in addition to the existing per-candidate evidence, the
+    specific clauses of this boundary it conforms to and the specific
+    boundary clause whose violation would demote the executor back
+    to defer-pending-evidence. Boundary nonconformance is itself a
+    sufficient demotion trigger.
+
+review_readiness:
+  as_design_package: true
+  as_implementation_authorization: false
+  as_substrate_admission: false
+  as_constitutional_change: false
+
+unresolved_blockers: none
+
+recorded_risks:
+  - host_side_broker_wire_format_under_crash_window
+  - reaper_correctness_for_orphaned_effect_handles
+  - candidate_byte_buffer_size_governance_under_5_4
+  - clonefile_divergence_attribution_for_phantom_workspaces
+  - canonical_environment_fingerprint_field_uses_for_executor_identity
+  - replay_class_label_pressure_when_executor_is_present
+  - sidecar_partition_silence_classified_as_exited_failed
+  - apple_silicon_micro_architectural_variance_residual
+  - wasi_preopens_minimization_review_burden
+  - taint_graph_attribution_for_executor_returned_bytes
