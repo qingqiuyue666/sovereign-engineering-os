@@ -1,0 +1,64 @@
+package: phase2_substrate_design
+status: design_only
+authorizes_implementation: false
+constitution_changes: none
+implementation_foundation_changes: none
+
+baseline_refs:
+  - governance/constitution/sovereign_engineering_operating_system_master_plan_v11.txt
+  - governance/implementation/v11_narrow_path_implementation_foundation.md
+
+scope_in:
+  - future_execution_substrate_on_darwin
+  - python_control_plane_module_inventory
+  - rust_downshift_candidate_inventory
+  - replay_substrate_boundaries
+  - apfs_clonefile_phantom_workspace_layer
+  - tla_plus_modeling_target_inventory
+  - open_questions_and_blocker_audit
+
+scope_out:
+  - production_runtime_code
+  - ui_dashboards_project_shell
+  - plugins_extensions
+  - distributed_execution_cluster_coordination
+  - multi_vendor_routing_breadth
+  - release_packaging_notarization_breadth
+  - new_constitutional_rules
+
+files:
+  - path: governance/design/phase2_substrate/README.md
+    purpose: package index, scope lock, non-scope, review-readiness
+  - path: governance/design/phase2_substrate/01_execution_substrate_choices.md
+    purpose: Apple Virtualization.framework / Wasmtime-WASI / Linux-KVM sidecar ownership
+    constitution_anchors: [22.4, 22.6, 22.11, 5.5, 27]
+  - path: governance/design/phase2_substrate/02_python_control_plane_modules.md
+    purpose: modules that must remain Python control-plane in Phase 2
+    constitution_anchors: [3.13, 27, 31]
+  - path: governance/design/phase2_substrate/03_rust_downshift_candidates.md
+    purpose: first candidate modules for Rust downshift, with evidence bars
+    constitution_anchors: [3.14, 27, 28]
+  - path: governance/design/phase2_substrate/04_replay_substrate_boundaries.md
+    purpose: time / randomness / external worker determinism / audit binding
+    constitution_anchors: [3.3, 3.12, 22.5, 23.12, 31]
+  - path: governance/design/phase2_substrate/05_apfs_clonefile_phantom_workspace.md
+    purpose: APFS clonefile / phantom workspace as a candidate substrate layer
+    constitution_anchors: [5, 5.4, 5.5, 22.4, 27]
+  - path: governance/design/phase2_substrate/06_tla_plus_modeling_targets.md
+    purpose: concurrency/state-machine surfaces worth future TLA+ modeling
+    constitution_anchors: [22.1, 22.2, 22.3, 22.5, 22.6, 22.11, 9.6, 9.7]
+  - path: governance/design/phase2_substrate/07_open_questions_and_blockers.md
+    purpose: ambiguity audit; explicit "no true blockers" statement
+    constitution_anchors: [3.10, 3.14, 27, 31]
+
+review_readiness:
+  as_design_package: true
+  as_implementation_authorization: false
+
+promotion_rule:
+  governing_sections: [27, 28, 3.14]
+  rule: |
+    Promotion of any candidate in this package from "design" to
+    "admitted substrate" requires the evidence bar named in the
+    candidate's section to be met. No promotion is admitted on
+    aesthetic, ideological, or roadmap-anticipation grounds.
