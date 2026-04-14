@@ -398,18 +398,34 @@ class InferenceService:
 
         self._repo.insert(artifact)
 
+        # Honest replay-claim posture recording.
+        #
+        # If the adapter declares a `replay_ceiling` attribute (for
+        # example, real-provider adapters that cannot host-deterministically
+        # reproduce output declare `replay_ceiling = "semantic"`), record
+        # it on the audit payload. Absence of the attribute is equivalent
+        # to the phase-1 default (caller/evidence-driven classification).
+        # This is intentionally additive and does not change the replay
+        # classifier's admission logic; it surfaces the honest upper bound
+        # to downstream evidence consumers.
+        adapter_ceiling = getattr(self._adapter, "replay_ceiling", None)
+
+        audit_payload: dict[str, Any] = {
+            "worker_profile": worker_profile,
+            "model_route_id": artifact["model_route_id"],
+            "policy": {
+                "max_output_tokens": self._policy.max_output_tokens,
+                "timeout_seconds": self._policy.timeout_seconds,
+                "max_retries": self._policy.max_retries,
+            },
+        }
+        if isinstance(adapter_ceiling, str) and adapter_ceiling:
+            audit_payload["replay_ceiling"] = adapter_ceiling
+
         self._audit.append(
             record_type="inference_artifact_created",
             task_id=task_id,
             artifact_refs=[artifact["inference_artifact_id"], context_artifact_id],
-            payload={
-                "worker_profile": worker_profile,
-                "model_route_id": artifact["model_route_id"],
-                "policy": {
-                    "max_output_tokens": self._policy.max_output_tokens,
-                    "timeout_seconds": self._policy.timeout_seconds,
-                    "max_retries": self._policy.max_retries,
-                },
-            },
+            payload=audit_payload,
         )
         return artifact["inference_artifact_id"]
