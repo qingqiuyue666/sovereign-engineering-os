@@ -5,16 +5,21 @@ a verifiable single-file code fix.
 Constitutional anchors:
 - v11 §22.9 (inter-plane interface discipline; the adapter boundary is
   the only admissible real-model entry point).
-- v11 §23.5 InferenceArtifact — this tracer does NOT persist an
-  InferenceArtifact because it is an out-of-band ignition probe, not a
-  signable-path invocation. It emits audit-only evidence.
+- v11 §23.5 InferenceArtifact — this tracer is primarily an out-of-band
+  ignition probe that emits audit-only evidence. When (and only when) a
+  ``RealFixNarrowPathRecorder`` is injected, a verified-pass result is
+  additionally persisted as one authority-bearing ``InferenceArtifact``
+  row on the narrow-path surface. Every non-verified outcome remains
+  tracer-local; no row is written for adapter failure, unparseable
+  output, exec error, or semantic verification failure.
 - v11 §23.15 FailureBundle linkage — adapter-normalized failures are
   surfaced as explicit ``real_fix_adapter_failure`` audit records that
   carry the adapter's failure class tag.
 - governance/design/replay_claim_taxonomy/02_claim_class_definitions.md §3
   — ``semantic`` is the honest replay ceiling for real-provider output.
-  Every audit record emitted by this tracer carries
-  ``replay_ceiling == "semantic"``.
+  Every audit record emitted by this tracer (including the narrow-path
+  ``inference_artifact_created`` event when recording is configured)
+  carries ``replay_ceiling == "semantic"``.
 
 Scope lock (this is a tracer, not a feature):
 - ONE minimal, deterministic, single-file fix task at a time. A task is
@@ -98,6 +103,12 @@ class RealFixResult:
     latency_ms: int = 0
     replay_ceiling: str = "semantic"
     first_failing_case_index: int = -1
+    # Populated on ``real_fix_verified_pass`` when a
+    # ``RealFixNarrowPathRecorder`` is injected. Empty string in every
+    # other outcome and whenever no recorder is configured. This is the
+    # authority-bearing narrow-path id callers use to locate the
+    # persisted ``InferenceArtifact`` row.
+    inference_artifact_id: str = ""
     extra: Mapping[str, Any] = field(default_factory=dict)
 
 
@@ -201,6 +212,9 @@ class RealFixTracer:
         adapter: Any,
         audit_ledger: Any,
         policy: InferencePolicy | None = None,
+        narrow_path_recorder: Any | None = None,
+        worker_profile: str = "real_fix_tracer",
+        model_route_id: str = "anthropic:real-fix:v1",
     ) -> None:
         self._adapter = adapter
         self._audit = audit_ledger
@@ -209,6 +223,16 @@ class RealFixTracer:
             timeout_seconds=60.0,
             max_retries=0,
         )
+        # Optional narrow-path promotion. When absent (the default), the
+        # tracer preserves bit-identical legacy behavior: audit-only,
+        # tracer-scoped evidence. When present, a verified-pass result
+        # is additionally persisted as one authority-bearing
+        # InferenceArtifact row via the recorder's single-purpose
+        # helper. No failure outcome is ever admitted for narrow-path
+        # recording; fail-closed by outcome class.
+        self._recorder = narrow_path_recorder
+        self._worker_profile = worker_profile
+        self._model_route_id = model_route_id
 
     # ------------------------------------------------------------------
 
@@ -405,19 +429,12 @@ class RealFixTracer:
                     replay_ceiling=self._replay_ceiling(),
                 )
 
-        # All cases passed.
-        self._emit(
-            record_type="real_fix_verified_pass",
-            task_id=task.task_id,
-            payload={
-                "function_name": task.function_name,
-                "output_hash": fixed_hash,
-                "cases_passed": len(task.verification_cases),
-                "latency_ms": latency_ms,
-                "completed_at": _now_iso(),
-            },
-        )
-        return RealFixResult(
+        # All cases passed. Build the verified result first so the
+        # optional narrow-path recorder can consume it. The recorder is
+        # the ONLY way an authority-bearing InferenceArtifact row is
+        # produced by this tracer; if no recorder is injected the
+        # behavior is bit-identical to the prior audit-only posture.
+        verified_result = RealFixResult(
             verified=True,
             outcome="real_fix_verified_pass",
             fixed_source=fixed,
@@ -425,6 +442,54 @@ class RealFixTracer:
             latency_ms=latency_ms,
             replay_ceiling=self._replay_ceiling(),
         )
+
+        narrow_path_inference_id = ""
+        if self._recorder is not None:
+            # Fail-closed: any recorder exception propagates. We do NOT
+            # silently fall back to audit-only on recorder failure —
+            # that would be a silent downgrade of the narrow-path
+            # surface promise. The caller is responsible for repair.
+            record = self._recorder.record(
+                task=task,
+                result=verified_result,
+                worker_profile=self._worker_profile,
+                model_route_id=self._model_route_id,
+            )
+            narrow_path_inference_id = record.inference_artifact_id
+
+        # The tracer-local verified_pass audit still fires. When a
+        # narrow-path record was produced, cross-reference its id so an
+        # auditor reading the tracer event chain can walk straight to
+        # the authority-bearing row.
+        verified_payload: dict[str, Any] = {
+            "function_name": task.function_name,
+            "output_hash": fixed_hash,
+            "cases_passed": len(task.verification_cases),
+            "latency_ms": latency_ms,
+            "completed_at": _now_iso(),
+        }
+        if narrow_path_inference_id:
+            verified_payload["inference_artifact_id"] = narrow_path_inference_id
+        self._emit(
+            record_type="real_fix_verified_pass",
+            task_id=task.task_id,
+            payload=verified_payload,
+        )
+
+        if narrow_path_inference_id:
+            # Return a result carrying the narrow-path id. We rebuild
+            # the frozen dataclass because ``replace`` on a third party
+            # import is avoided here; the fields are few.
+            return RealFixResult(
+                verified=True,
+                outcome="real_fix_verified_pass",
+                fixed_source=fixed,
+                output_hash=fixed_hash,
+                latency_ms=latency_ms,
+                replay_ceiling=verified_result.replay_ceiling,
+                inference_artifact_id=narrow_path_inference_id,
+            )
+        return verified_result
 
 
 # ---------------------------------------------------------------------------
