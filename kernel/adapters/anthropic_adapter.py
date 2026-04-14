@@ -190,24 +190,46 @@ class AnthropicMessagesAdapter:
         """Build the Messages API request body from the governed envelope.
 
         The envelope is the typed prompt shape produced by
-        `InferenceService._build_prompt_envelope`. We convert it to a
-        deterministic JSON string that names every governed input
-        (context_artifact_id, root_revision_id, packing_policy_version,
-        candidate_file_ids, symbol_frontier_ids, taint_set). The model
-        is told this is a phase-1 ignition tracer and asked to
-        acknowledge. This keeps the real-model surface minimal and
-        auditable.
+        `InferenceService._build_prompt_envelope` or by the narrow
+        real-fix tracer (`kernel.tracers.real_fix_tracer`). We convert
+        it to a deterministic JSON string that names every governed
+        input.
+
+        Two prompt modes are admitted:
+
+        1. Ignition mode (default, when envelope has no ``fix_task`` key):
+           the model is told this is a phase-1 ignition tracer and asked
+           to acknowledge. This keeps the real-model surface minimal and
+           auditable.
+
+        2. Fix-task mode (when envelope carries a ``fix_task`` mapping):
+           the model is asked to repair a single broken Python source
+           string and emit exactly one fenced Python code block. This
+           mode is used by the real-fix tracer only. The envelope's
+           governed fields are still carried verbatim so audit sees the
+           full prompt shape.
+
+        The fix-task mode is additive and does not change the ignition
+        prompt when ``fix_task`` is absent.
         """
         # Deterministic serialization of the governed envelope so the
         # prompt content is a function of the envelope only.
         envelope_json = json.dumps(
             dict(prompt_envelope), sort_keys=True, separators=(",", ":")
         )
-        user_content = (
-            "Phase-1 ignition tracer. Governed prompt envelope follows.\n"
-            "Acknowledge receipt and summarize the envelope in one sentence.\n"
-            "Envelope:\n" + envelope_json
-        )
+
+        fix_task = prompt_envelope.get("fix_task")
+        if isinstance(fix_task, Mapping):
+            user_content = self._build_fix_task_user_content(
+                fix_task=fix_task, envelope_json=envelope_json
+            )
+        else:
+            user_content = (
+                "Phase-1 ignition tracer. Governed prompt envelope follows.\n"
+                "Acknowledge receipt and summarize the envelope in one sentence.\n"
+                "Envelope:\n" + envelope_json
+            )
+
         payload = {
             "model": self._model_route_id,
             "max_tokens": int(policy.max_output_tokens),
@@ -216,6 +238,43 @@ class AnthropicMessagesAdapter:
             ],
         }
         return json.dumps(payload).encode("utf-8")
+
+    @staticmethod
+    def _build_fix_task_user_content(
+        *,
+        fix_task: Mapping[str, Any],
+        envelope_json: str,
+    ) -> str:
+        """Build the real-fix-tracer user content.
+
+        The fix-task shape (produced by ``kernel.tracers.real_fix_tracer``):
+        - ``broken_source``  str  the single-file Python source to repair
+        - ``instruction``    str  a one-line human instruction
+        - ``function_name``  str  the single function the caller will verify
+        - ``language``       str  always ``"python"`` in phase-1
+
+        The prompt is intentionally strict about output shape so that
+        extraction is deterministic and reviewable by inspection.
+        """
+        broken = str(fix_task.get("broken_source", ""))
+        instruction = str(fix_task.get("instruction", ""))
+        function_name = str(fix_task.get("function_name", ""))
+        return (
+            "Phase-1 real-fix tracer. Governed prompt envelope follows.\n"
+            "Repair the single Python source below so it satisfies the "
+            "instruction.\n"
+            "Output exactly one fenced Python code block containing the "
+            "complete fixed source.\n"
+            "The fixed source MUST define the function "
+            f"`{function_name}` at module scope.\n"
+            "Do not include commentary outside the code block.\n"
+            f"Instruction: {instruction}\n"
+            "Broken source:\n"
+            "```python\n"
+            f"{broken}\n"
+            "```\n"
+            "Envelope:\n" + envelope_json
+        )
 
     # ------------------------------------------------------------------
     # response parsing
