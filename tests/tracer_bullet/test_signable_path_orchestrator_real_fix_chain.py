@@ -541,6 +541,148 @@ class SignablePathOrchestratorRealFixChainTest(unittest.TestCase):
         # Nothing was produced.
         self.assertEqual(self._count("inference_artifacts"), 0)
 
+    # ------------------------------------------------------------------
+    # Bridge into the eight-stage authority-bearing lifecycle frame.
+    # ------------------------------------------------------------------
+
+    def test_run_real_fix_chain_enters_eight_stage_frame(self) -> None:
+        """A completed real-fix chain drives the eight-stage lifecycle
+        state frame end-to-end: the in-memory ``TaskLifecycleState`` is
+        populated with every stage's authority-bearing artifact id,
+        ``stage_entered`` audit records are emitted for every stage in
+        causal order, and ``signable_path_sealed`` marks the terminal
+        state. The chain's durable authority and the eight-stage frame
+        are no longer disjoint surfaces.
+        """
+        from kernel.lifecycle.stage_types import Stage
+
+        task_id = f"fix-{uuid4().hex[:8]}"
+
+        def transport(*_a, **_k):
+            return _TransportResponse(200, _messages_body(CORRECT_ADD_BLOCK))
+
+        task = make_add_fix_task(task_id=task_id)
+        orch = self._orchestrator(self._tracer(transport))
+
+        outcome = orch.run_real_fix_chain(task)
+
+        # Terminal state is SEALED — the eight-stage lifecycle frame
+        # reflects the chain's real authority-bearing terminal state.
+        self.assertEqual(orch.current_stage(task_id), Stage.SEALED)
+
+        # Every stage's artifact id is bound on the in-memory frame.
+        state = orch._tasks[task_id]
+        self.assertEqual(
+            state.artifact_ids[Stage.CONTEXT], outcome.context_artifact_id
+        )
+        self.assertEqual(
+            state.artifact_ids[Stage.INFERENCE], outcome.inference_artifact_id
+        )
+        self.assertEqual(
+            state.artifact_ids[Stage.PATCH_PROPOSAL],
+            outcome.patch_proposal_id,
+        )
+        self.assertEqual(
+            state.artifact_ids[Stage.VALIDATION],
+            outcome.validation_receipt_id,
+        )
+        self.assertEqual(
+            state.artifact_ids[Stage.REVIEW], outcome.review_artifact_id
+        )
+        self.assertEqual(
+            state.artifact_ids[Stage.APPROVAL],
+            outcome.approval_artifact_id,
+        )
+        self.assertEqual(
+            state.artifact_ids[Stage.REVISION_SEAL], outcome.revision_id
+        )
+        self.assertEqual(
+            state.artifact_ids[Stage.EVIDENCE], outcome.replay_anchor_id
+        )
+
+        # The intent-anchor audit record is emitted exactly once per
+        # real-fix chain invocation, matching the eight-stage
+        # ``admit_context`` admission pattern.
+        types = self._audit_types()
+        self.assertEqual(types.count("intent_anchor_created"), 1)
+
+        # ``stage_entered`` audit rows name every stage in causal order.
+        stage_order = [
+            Stage.CONTEXT.value,
+            Stage.INFERENCE.value,
+            Stage.PATCH_PROPOSAL.value,
+            Stage.VALIDATION.value,
+            Stage.REVIEW.value,
+            Stage.APPROVAL.value,
+            Stage.REVISION_SEAL.value,
+            Stage.EVIDENCE.value,
+        ]
+        rows = self.conn.execute(
+            "SELECT payload_json FROM audit_records "
+            "WHERE record_type = 'stage_entered' "
+            "ORDER BY sequence;"
+        ).fetchall()
+        stages_in_order = [json.loads(r[0])["stage"] for r in rows]
+        self.assertEqual(stages_in_order, stage_order)
+
+        # ``signable_path_sealed`` marks the terminal; emitted exactly
+        # once; its ``artifact_refs`` enumerates the frame's ids.
+        sealed_rows = self.conn.execute(
+            "SELECT payload_json FROM audit_records "
+            "WHERE record_type = 'signable_path_sealed';"
+        ).fetchall()
+        self.assertEqual(len(sealed_rows), 1)
+        self.assertEqual(
+            json.loads(sealed_rows[0][0])["stage"], Stage.SEALED.value
+        )
+
+        # Causal ordering: every ``stage_entered`` for a given stage
+        # precedes that stage's bridge attestation (when applicable)
+        # except CONTEXT (no bridge) and INFERENCE (tracer records it),
+        # and ``signable_path_sealed`` precedes ``real_fix_chain_completed``.
+        def idx(record_type: str) -> int:
+            return types.index(record_type)
+
+        self.assertLess(idx("stage_entered"), idx("real_fix_attempt_started"))
+        self.assertLess(
+            idx("real_fix_validation_bridge_attested"),
+            idx("real_fix_review_bridge_attested"),
+        )
+        self.assertLess(
+            idx("signable_path_sealed"), idx("real_fix_chain_completed")
+        )
+
+    def test_unverified_leaves_frame_at_context(self) -> None:
+        """On unverified tracer outcome, the eight-stage lifecycle frame
+        remains at ``Stage.CONTEXT`` (the only stage that was actually
+        earned by a real ContextArtifact). No downstream stage is
+        entered without a bridge-produced authority-bearing artifact to
+        bind to it. The task remains abandonable — fail-closed.
+        """
+        from kernel.lifecycle.stage_types import Stage
+
+        task_id = f"fix-{uuid4().hex[:8]}"
+
+        def transport(*_a, **_k):
+            return _TransportResponse(200, _messages_body(BROKEN_ADD_BLOCK))
+
+        task = make_add_fix_task(task_id=task_id)
+        orch = self._orchestrator(self._tracer(transport))
+
+        result = orch.run_real_fix_chain(task)
+
+        self.assertFalse(getattr(result, "verified", False))
+        self.assertEqual(orch.current_stage(task_id), Stage.CONTEXT)
+
+        # The frame is abandonable from CONTEXT.
+        orch.abandon(task_id=task_id, reason="tracer_unverified")
+        self.assertEqual(orch.current_stage(task_id), Stage.ABANDONED)
+
+        types = self._audit_types()
+        self.assertIn("stage_entered", types)
+        self.assertNotIn("signable_path_sealed", types)
+        self.assertIn("task_abandoned", types)
+
 
 if __name__ == "__main__":
     unittest.main()

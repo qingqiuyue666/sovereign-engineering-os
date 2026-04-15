@@ -632,23 +632,57 @@ class SignablePathOrchestrator:
             truncation_reason=None,
             taint_set=(),
         )
-        # Narrow intent anchor for the real-fix admission surface. Not
-        # a new top-level artifact; mirrors the shape used by
-        # ``admit_context`` so downstream services that read the anchor
-        # see a consistent envelope. No audit record is emitted here
-        # (the orchestrator wrapper + the service's own
-        # ``context_artifact_created`` event are the authority).
-        rf_intent_anchor = IntentCausalAnchor(
-            intent_id=f"real-fix::intent::{task_id}",
+        # Narrow intent anchor for the real-fix admission surface. Reuses
+        # the same ``_emit_intent_anchor`` helper the eight-stage
+        # ``admit_context`` uses so the ``intent_anchor_created`` audit
+        # record is emitted exactly once per real-fix chain invocation.
+        # This is the single hop that brings the real-fix chain's entry
+        # onto the real eight-stage authority-bearing lifecycle surface.
+        rf_intent_anchor = self._emit_intent_anchor(
             task_id=task_id,
-            state="admitted",
-            created_at=self._now_iso(),
+            intent_id=f"real-fix::intent::{task_id}",
         )
         rf_context_artifact_id = self._context.build_context_artifact(
             task_id=task_id,
             root_revision_id=rf_root_revision_id,
             request=rf_context_request,
             intent_anchor=rf_intent_anchor,
+        )
+
+        # --- eight-stage lifecycle frame entry ----------------------------
+        # The real-fix chain's real ContextArtifact IS the eight-stage
+        # signable path's CONTEXT admission. Populate the in-memory task
+        # state machine exactly as ``admit_context`` would, and emit the
+        # same ``stage_entered`` audit record. From this point forward,
+        # every bridge outcome is recorded as its corresponding
+        # ``Stage`` admission via ``_advance`` + ``stage_entered``,
+        # finally advancing ``EVIDENCE -> SEALED`` at closure. The
+        # lifecycle frame therefore reflects the true authority-bearing
+        # state of the chain, not a disjoint surface.
+        #
+        # Fail-closed properties preserved:
+        # - ``_advance`` already audits any illegal transition via
+        #   ``illegal_stage_transition_rejected`` before raising.
+        # - On unverified tracer outcome (early return below), the frame
+        #   remains at ``Stage.CONTEXT``; the caller may later
+        #   ``abandon()``. No downstream stage is entered without an
+        #   authority-bearing artifact to bind to it.
+        # - The ``context_artifact_created`` audit record (emitted by
+        #   ``ContextService`` above) already precedes this
+        #   ``stage_entered`` record, matching the eight-stage admission
+        #   audit order.
+        state = TaskLifecycleState(
+            task_id=task_id,
+            intent_anchor=rf_intent_anchor,
+            current_stage=Stage.CONTEXT,
+        )
+        state.artifact_ids[Stage.CONTEXT] = rf_context_artifact_id
+        self._tasks[task_id] = state
+        self._audit.append(
+            record_type="stage_entered",
+            task_id=task_id,
+            artifact_refs=[rf_context_artifact_id],
+            payload={"stage": Stage.CONTEXT.value},
         )
 
         # --- 1/7: tracer + recorder ---------------------------------------
@@ -703,34 +737,112 @@ class SignablePathOrchestrator:
             replay_ceiling=getattr(result, "replay_ceiling", "") or "semantic",
         )
 
+        # The tracer + recorder produced the authority-bearing
+        # ``InferenceArtifact`` row; advance the eight-stage frame to
+        # match and emit the ``stage_entered`` record the eight-stage
+        # surface would have emitted for this admission.
+        self._advance(state, Stage.INFERENCE)
+        state.artifact_ids[Stage.INFERENCE] = inference_artifact_id
+        self._audit.append(
+            record_type="stage_entered",
+            task_id=task_id,
+            artifact_refs=[inference_artifact_id],
+            payload={"stage": Stage.INFERENCE.value},
+        )
+
         # --- 2/7: patch projection ----------------------------------------
         projection = self._rf_projector.project(
             task=task, result=result, record=record
+        )
+        self._advance(state, Stage.PATCH_PROPOSAL)
+        state.artifact_ids[Stage.PATCH_PROPOSAL] = projection.patch_proposal_id
+        self._audit.append(
+            record_type="stage_entered",
+            task_id=task_id,
+            artifact_refs=[projection.patch_proposal_id],
+            payload={"stage": Stage.PATCH_PROPOSAL.value},
         )
 
         # --- 3/7: validation bridge ---------------------------------------
         validation_outcome = self._rf_validation_bridge.bridge(
             projection=projection
         )
+        self._advance(state, Stage.VALIDATION)
+        state.artifact_ids[Stage.VALIDATION] = (
+            validation_outcome.validation_receipt_id
+        )
+        self._audit.append(
+            record_type="stage_entered",
+            task_id=task_id,
+            artifact_refs=[validation_outcome.validation_receipt_id],
+            payload={"stage": Stage.VALIDATION.value},
+        )
 
         # --- 4/7: review bridge -------------------------------------------
         review_outcome = self._rf_review_bridge.bridge(
             outcome=validation_outcome
+        )
+        self._advance(state, Stage.REVIEW)
+        state.artifact_ids[Stage.REVIEW] = review_outcome.review_artifact_id
+        self._audit.append(
+            record_type="stage_entered",
+            task_id=task_id,
+            artifact_refs=[review_outcome.review_artifact_id],
+            payload={"stage": Stage.REVIEW.value},
         )
 
         # --- 5/7: approval bridge -----------------------------------------
         approval_outcome = self._rf_approval_bridge.bridge(
             outcome=review_outcome
         )
+        self._advance(state, Stage.APPROVAL)
+        state.artifact_ids[Stage.APPROVAL] = (
+            approval_outcome.approval_artifact_id
+        )
+        self._audit.append(
+            record_type="stage_entered",
+            task_id=task_id,
+            artifact_refs=[approval_outcome.approval_artifact_id],
+            payload={"stage": Stage.APPROVAL.value},
+        )
 
         # --- 6/7: revision-seal bridge ------------------------------------
         seal_outcome = self._rf_revision_seal_bridge.bridge(
             outcome=approval_outcome
         )
+        self._advance(state, Stage.REVISION_SEAL)
+        state.artifact_ids[Stage.REVISION_SEAL] = seal_outcome.revision_id
+        self._audit.append(
+            record_type="stage_entered",
+            task_id=task_id,
+            artifact_refs=[seal_outcome.revision_id],
+            payload={"stage": Stage.REVISION_SEAL.value},
+        )
 
         # --- 7/7: evidence-closure bridge ---------------------------------
         closure_outcome = self._rf_evidence_closure_bridge.bridge(
             outcome=seal_outcome
+        )
+        self._advance(state, Stage.EVIDENCE)
+        state.artifact_ids[Stage.EVIDENCE] = closure_outcome.replay_anchor_id
+        self._audit.append(
+            record_type="stage_entered",
+            task_id=task_id,
+            artifact_refs=[closure_outcome.replay_anchor_id],
+            payload={"stage": Stage.EVIDENCE.value},
+        )
+        # EVIDENCE -> SEALED is the only terminal success transition on
+        # the eight-stage path; emit the same ``signable_path_sealed``
+        # record ``admit_evidence`` emits so the authority-bearing
+        # terminal state is marked identically regardless of whether the
+        # chain was driven by the eight-stage admission surface or the
+        # real-fix chain entrypoint.
+        self._advance(state, Stage.SEALED)
+        self._audit.append(
+            record_type="signable_path_sealed",
+            task_id=task_id,
+            artifact_refs=list(state.artifact_ids.values()),
+            payload={"stage": Stage.SEALED.value},
         )
 
         # Wrapper audit: one record that names every id a reviewer needs
