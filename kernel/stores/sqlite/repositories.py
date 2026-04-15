@@ -862,6 +862,13 @@ class SnapshotRootRepository:
             ),
         )
 
+    def fetch(self, snapshot_root_id: str) -> dict[str, Any] | None:
+        row = self._conn.execute(
+            "SELECT * FROM snapshot_roots WHERE snapshot_root_id = ?;",
+            (snapshot_root_id,),
+        ).fetchone()
+        return _row_to_dict(row)
+
 
 class JournalEntryRepository:
     """Append-only journal writer.
@@ -1009,3 +1016,16 @@ class ReplayAnchorRepository:
                 anchor.get("unreplayable_reason"),
             ),
         )
+
+    def fetch(self, replay_anchor_id: str) -> dict[str, Any] | None:
+        row = self._conn.execute(
+            "SELECT * FROM replay_anchors WHERE replay_anchor_id = ?;",
+            (replay_anchor_id,),
+        ).fetchone()
+        d = _row_to_dict(row)
+        if d is None:
+            return None
+        d["required_artifact_ids"] = (
+            _unjsonify(d.get("required_artifact_ids")) or []
+        )
+        return d
