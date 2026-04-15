@@ -122,6 +122,21 @@ class SignablePathOrchestrator:
         budget_governor: Any | None = None,
         context_repository: Any | None = None,
         # ------------------------------------------------------------------
+        # Durable intent-anchor persistence (optional; AUDIT-003 / §22.1).
+        #
+        # When wired, ``_emit_intent_anchor`` persists one row into
+        # ``intent_anchor_records`` BEFORE emitting the
+        # ``intent_anchor_created`` audit record. This promotes the
+        # originating intent from an audit-payload-only label to a
+        # durable authority-bearing row that §22.1 WAL preconditions
+        # and §23.1 ``Revision.intent_id`` can consult on recovery.
+        # When absent, ``_emit_intent_anchor`` falls back to the
+        # prior audit-only behavior so existing tracer-bullet tests
+        # that hand-build the orchestrator without the repository
+        # continue to compile unchanged.
+        # ------------------------------------------------------------------
+        intent_anchor_repository: Any | None = None,
+        # ------------------------------------------------------------------
         # Narrow real-fix bridge-chain wirings (all optional; all-or-nothing).
         #
         # These reuse the already-merged bridges exactly as they exist.
@@ -162,6 +177,11 @@ class SignablePathOrchestrator:
         # governor).
         self._budget = budget_governor
         self._ctx_repo = context_repository
+        # Durable intent-anchor writer (AUDIT-003 / §22.1). Held as a
+        # reference only; persistence happens inside ``_emit_intent_anchor``
+        # strictly before the audit record is emitted so the audit remains
+        # an attestation over a durable row rather than the source of truth.
+        self._intent_repo = intent_anchor_repository
         self._tasks: dict[str, TaskLifecycleState] = {}
 
         # Narrow real-fix bridge-chain wirings. Held as references only;
@@ -189,6 +209,21 @@ class SignablePathOrchestrator:
             state="admitted",
             created_at=self._now_iso(),
         )
+        # AUDIT-003 / §22.1 durable persistence of the originating intent.
+        # When the intent-anchor repository is wired, mint the durable
+        # ``intent_anchor_records`` row BEFORE emitting the
+        # ``intent_anchor_created`` audit record. Order is load-bearing:
+        # the audit attests over an already-durable row rather than
+        # acting as the source of truth. Any persistence exception
+        # bubbles up unchanged (fail-closed) and the audit record is
+        # not emitted, so a failed mint never leaves an audit claim
+        # without a durable row behind it.
+        if self._intent_repo is not None:
+            self._intent_repo.insert(
+                intent_id=intent_id,
+                task_id=task_id,
+                state=anchor.state,
+            )
         # Append an audit note recording the anchor's creation. The audit
         # ledger is append-only (INV-026); this call must never silently
         # fall through on failure.

@@ -205,6 +205,7 @@ class AcceptanceHarness:
             audit_ledger=self.audit_ledger,
             budget_governor=self.budget_governor,
             context_repository=self.ctx_repo,
+            intent_anchor_repository=self.intent_repo,
         )
 
     def close(self) -> None:
