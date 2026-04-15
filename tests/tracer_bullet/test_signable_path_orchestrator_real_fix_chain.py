@@ -56,6 +56,7 @@ from kernel.lifecycle.signable_path_orchestrator import (
     SignablePathOrchestrator,
 )
 from kernel.services.approval_service import ApprovalService
+from kernel.services.context_service import ContextService
 from kernel.services.evidence_service import EvidenceService
 from kernel.services.review_service import ReviewService
 from kernel.services.revision_seal_service import RevisionSealService
@@ -134,6 +135,15 @@ class SignablePathOrchestratorRealFixChainTest(unittest.TestCase):
         )
         self.recorder = RealFixNarrowPathRecorder(
             repository=self.inference_repo,
+            audit_ledger=self.ledger,
+        )
+        # The real-fix chain entrypoint now mints one authority-bearing
+        # ``ContextArtifact`` row via the already-wired ``ContextService``
+        # before dispatching the tracer. The other seven eight-stage
+        # services remain unreachable — ``run_real_fix_chain`` must not
+        # touch any of them.
+        self.context_service = ContextService(
+            repository=self.context_repo,
             audit_ledger=self.ledger,
         )
         self.projector = RealFixPatchProjector(
@@ -239,7 +249,7 @@ class SignablePathOrchestratorRealFixChainTest(unittest.TestCase):
         dummy = _Unreachable()
         return SignablePathOrchestrator(
             capability_service=dummy,
-            context_service=dummy,
+            context_service=self.context_service,
             inference_service=dummy,
             patch_proposal_service=dummy,
             validation_service=dummy,
@@ -285,6 +295,10 @@ class SignablePathOrchestratorRealFixChainTest(unittest.TestCase):
 
         # One and only one row of each kind produced by the chain.
         self.assertIsInstance(outcome, RealFixEvidenceClosureBridgeOutcome)
+        # One real ContextArtifact row is now minted by the chain before
+        # the tracer dispatches. This is the authority-bearing upgrade
+        # from the prior tracer-scoped synthetic id.
+        self.assertEqual(self._count("context_artifacts"), 1)
         self.assertEqual(self._count("inference_artifacts"), 1)
         self.assertEqual(self._count("patch_proposals"), 1)
         self.assertEqual(self._count("validation_receipts"), 1)
@@ -314,9 +328,31 @@ class SignablePathOrchestratorRealFixChainTest(unittest.TestCase):
         self.assertTrue(outcome.revision_id.startswith("rev-"))
         self.assertTrue(outcome.replay_anchor_id.startswith("ra-"))
         self.assertEqual(outcome.task_id, task_id)
+        # ``root_revision_id`` remains the clearly-labelled
+        # ``real-fix::root::<task_id>`` form — no ``Revision`` row is
+        # minted for the real-fix chain in this increment. The label is
+        # now the ``root_revision_id`` field of a real persisted
+        # ``ContextArtifact`` row (verified below).
         self.assertEqual(outcome.root_revision_id, f"real-fix::root::{task_id}")
+        # ``context_artifact_id`` is no longer synthetic: it now names a
+        # real ``ContextArtifact`` row minted via ``ContextService``.
+        self.assertTrue(outcome.context_artifact_id.startswith("ctx-"))
+        ctx_row = self.context_repo.fetch(outcome.context_artifact_id)
+        self.assertIsNotNone(ctx_row)
+        self.assertEqual(ctx_row["task_id"], task_id)
         self.assertEqual(
-            outcome.context_artifact_id, f"real-fix::context::{task_id}"
+            ctx_row["root_revision_id"], f"real-fix::root::{task_id}"
+        )
+        # The persisted ``InferenceArtifact`` row points at the real
+        # ``ContextArtifact`` id (not the prior synthetic label) so the
+        # downstream bridges propagate the authority-bearing id.
+        inf_row = self.inference_repo.fetch(outcome.inference_artifact_id)
+        self.assertIsNotNone(inf_row)
+        self.assertEqual(
+            inf_row["context_artifact_id"], outcome.context_artifact_id
+        )
+        self.assertEqual(
+            inf_row["root_revision_id"], f"real-fix::root::{task_id}"
         )
 
         # End-to-end audit chain: every bridge attestation is present and
@@ -325,6 +361,7 @@ class SignablePathOrchestratorRealFixChainTest(unittest.TestCase):
         # service records are present alongside.
         types = self._audit_types()
         for required in (
+            "context_artifact_created",
             "real_fix_attempt_started",
             "inference_artifact_created",
             "real_fix_verified_pass",

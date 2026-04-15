@@ -97,11 +97,21 @@ class RealFixNarrowPathRecorder:
     - the ``worker_profile`` / ``model_route_id`` strings the tracer used
 
     The recorder synthesizes ``context_artifact_id`` and
-    ``root_revision_id`` as ``real-fix::<task_id>`` identifiers. This is
-    reviewable by inspection: the ids are clearly labelled as tracer-
-    scoped and are not claimed to point at a full ContextArtifact row.
-    Upgrading the recorder to consume a real ContextArtifact is a later
-    increment once the full upstream signable-path frame is wired.
+    ``root_revision_id`` as ``real-fix::<task_id>`` identifiers when the
+    caller supplies no overrides. This is reviewable by inspection: the
+    ids are clearly labelled as tracer-scoped and are not claimed to
+    point at a full ContextArtifact row.
+
+    Callers that have already minted a real ContextArtifact row for
+    this task (today: ``SignablePathOrchestrator.run_real_fix_chain``
+    via the already-wired ``ContextService``) may pass
+    ``context_artifact_id`` and/or ``root_revision_id`` overrides to
+    ``.record(...)``. When supplied, the recorder writes the overrides
+    verbatim into the persisted ``InferenceArtifact`` row so every
+    downstream bridge (which reads ``context_artifact_id`` off that
+    row) propagates the authority-bearing id without any other change.
+    Non-empty string values are required when overrides are supplied;
+    ``None`` preserves the synthetic-label fallback exactly.
     """
 
     def __init__(
@@ -125,6 +135,8 @@ class RealFixNarrowPathRecorder:
         result: Any,
         worker_profile: str,
         model_route_id: str,
+        context_artifact_id: str | None = None,
+        root_revision_id: str | None = None,
     ) -> RealFixNarrowPathRecord:
         """Insert one InferenceArtifact row and emit one audit record.
 
@@ -132,6 +144,14 @@ class RealFixNarrowPathRecorder:
         verified pass. In that case no row is persisted and no audit
         event is appended — the tracer's existing failure-class audit
         records remain the sole evidence.
+
+        ``context_artifact_id`` / ``root_revision_id`` overrides bind
+        the persisted InferenceArtifact row to an authority-bearing id
+        minted upstream (e.g. a real ContextArtifact row produced by
+        ``ContextService``). When an override is ``None`` the recorder
+        falls back to the tracer-scoped synthetic label. Empty-string
+        overrides are rejected fail-closed — supplying an override is a
+        positive assertion that an authority-bearing id exists.
         """
         outcome = getattr(result, "outcome", None)
         if outcome != "real_fix_verified_pass" or not getattr(result, "verified", False):
@@ -148,12 +168,27 @@ class RealFixNarrowPathRecorder:
         if not isinstance(task_id, str) or not task_id:
             raise RealFixRecorderRejected("task is missing task_id")
 
-        # Synthetic ids are labelled `real-fix::<task_id>` so a reviewer
-        # can see at a glance that these are tracer-scoped, not drawn
-        # from a full signable-path frame. They satisfy the non-empty
-        # string schema constraint honestly.
-        context_artifact_id = f"real-fix::context::{task_id}"
-        root_revision_id = f"real-fix::root::{task_id}"
+        # When the caller supplies an authority-bearing id (e.g. a real
+        # ContextArtifact row minted by ``ContextService`` upstream of
+        # the tracer dispatch) use it verbatim. Otherwise fall back to
+        # the tracer-scoped synthetic label `real-fix::<task_id>`: this
+        # label is reviewable by inspection and satisfies the non-empty
+        # string schema constraint honestly. Empty-string overrides are
+        # rejected fail-closed — an override must be a real id.
+        if context_artifact_id is not None:
+            if not isinstance(context_artifact_id, str) or not context_artifact_id:
+                raise RealFixRecorderRejected(
+                    "context_artifact_id override must be a non-empty string"
+                )
+        else:
+            context_artifact_id = f"real-fix::context::{task_id}"
+        if root_revision_id is not None:
+            if not isinstance(root_revision_id, str) or not root_revision_id:
+                raise RealFixRecorderRejected(
+                    "root_revision_id override must be a non-empty string"
+                )
+        else:
+            root_revision_id = f"real-fix::root::{task_id}"
 
         ceiling = getattr(result, "replay_ceiling", "") or "semantic"
 

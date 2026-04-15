@@ -288,12 +288,29 @@ class RealFixTracer:
 
     # ------------------------------------------------------------------
 
-    def run(self, task: RealFixTask) -> RealFixResult:
+    def run(
+        self,
+        task: RealFixTask,
+        *,
+        context_artifact_id: str | None = None,
+        root_revision_id: str | None = None,
+    ) -> RealFixResult:
         """Invoke the adapter once, verify, and emit evidence.
 
         Returns a ``RealFixResult``. Always returns; never silently
         downgrades. Adapter failures are normalized to
         ``real_fix_adapter_failure`` with the class tag preserved.
+
+        ``context_artifact_id`` / ``root_revision_id`` are optional
+        authority-bearing overrides forwarded to the narrow-path
+        recorder when (and only when) a ``narrow_path_recorder`` is
+        injected and the result is ``real_fix_verified_pass``. A caller
+        that has already minted a real ``ContextArtifact`` row (today:
+        ``SignablePathOrchestrator.run_real_fix_chain`` via the
+        already-wired ``ContextService``) uses these to bind the
+        persisted ``InferenceArtifact`` row to the real id instead of
+        the synthetic tracer-scoped label. Default ``None`` preserves
+        bit-identical legacy behavior (synthetic labels).
         """
         envelope = self._build_envelope(task)
 
@@ -454,6 +471,8 @@ class RealFixTracer:
                 result=verified_result,
                 worker_profile=self._worker_profile,
                 model_route_id=self._model_route_id,
+                context_artifact_id=context_artifact_id,
+                root_revision_id=root_revision_id,
             )
             narrow_path_inference_id = record.inference_artifact_id
 

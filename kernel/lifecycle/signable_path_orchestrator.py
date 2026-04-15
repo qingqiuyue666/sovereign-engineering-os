@@ -588,6 +588,69 @@ class SignablePathOrchestrator:
                 "signable-path frame; real-fix chain refuses to overlay"
             )
 
+        # --- 0/7: real ContextArtifact admission --------------------------
+        # Mint one authority-bearing ``ContextArtifact`` row via the
+        # already-wired ``ContextService`` before dispatching the
+        # tracer. This replaces the prior tracer-scoped synthetic
+        # ``real-fix::context::<task_id>`` identifier with a real
+        # persisted ``ctx-<hex>`` id. The id is threaded into the
+        # recorder via ``tracer.run(...)`` overrides so the
+        # ``InferenceArtifact`` row and every downstream bridge carry
+        # the real id unchanged (the bridges read it off the persisted
+        # InferenceArtifact row; no bridge code needs to change).
+        #
+        # The ``root_revision_id`` remains the clearly-labelled
+        # ``real-fix::root::<task_id>`` form: no ``Revision`` row is
+        # minted in this increment (that would be phase-2 runtime work).
+        # The label is now the ``root_revision_id`` field of a real
+        # persisted ``ContextArtifact`` row, which is an honest upgrade
+        # without claiming a Revision row that does not exist.
+        #
+        # Any ``ContextService`` rejection bubbles up unchanged
+        # (fail-closed). The tracer is not dispatched on rejection, so
+        # no adapter cost is incurred for a malformed admission request.
+        #
+        # This step does NOT enter the eight-stage task lifecycle state
+        # machine: no ``_tasks`` entry is created, no ``Stage.CONTEXT``
+        # transition is recorded, no ``admit_context`` is called. The
+        # orchestrator uses ``ContextService`` directly as a service
+        # dependency. The existing overlay guard above continues to
+        # refuse any task id that has already entered the eight-stage
+        # frame.
+        from kernel.services.context_service import ContextRequest
+
+        rf_root_revision_id = f"real-fix::root::{task_id}"
+        rf_context_request = ContextRequest(
+            repo_graph_version="real_fix_tracer_v1",
+            symbol_index_version="real_fix_tracer_v1",
+            candidate_file_ids=(),
+            symbol_frontier_ids=(),
+            packing_policy_version="real_fix_tracer_v1",
+            actual_tokens=0,
+            provenance_refs=(),
+            deferred_retrieval_items=(),
+            truncation_reason=None,
+            taint_set=(),
+        )
+        # Narrow intent anchor for the real-fix admission surface. Not
+        # a new top-level artifact; mirrors the shape used by
+        # ``admit_context`` so downstream services that read the anchor
+        # see a consistent envelope. No audit record is emitted here
+        # (the orchestrator wrapper + the service's own
+        # ``context_artifact_created`` event are the authority).
+        rf_intent_anchor = IntentCausalAnchor(
+            intent_id=f"real-fix::intent::{task_id}",
+            task_id=task_id,
+            state="admitted",
+            created_at=self._now_iso(),
+        )
+        rf_context_artifact_id = self._context.build_context_artifact(
+            task_id=task_id,
+            root_revision_id=rf_root_revision_id,
+            request=rf_context_request,
+            intent_anchor=rf_intent_anchor,
+        )
+
         # --- 1/7: tracer + recorder ---------------------------------------
         # The tracer owns the adapter boundary and (when configured with
         # the recorder) produces exactly one authority-bearing
@@ -595,7 +658,17 @@ class SignablePathOrchestrator:
         # already emits every audit record the narrow path requires
         # (attempt started, failure class on reject, verified_pass on
         # success) and propagates the honest replay ceiling.
-        result = self._rf_tracer.run(task)
+        #
+        # Overrides bind the ``InferenceArtifact`` row's
+        # ``context_artifact_id`` to the real ContextArtifact minted
+        # above and the ``root_revision_id`` to the labelled
+        # ``real-fix::root::<task_id>`` form (matching the
+        # ContextArtifact row's own ``root_revision_id``).
+        result = self._rf_tracer.run(
+            task,
+            context_artifact_id=rf_context_artifact_id,
+            root_revision_id=rf_root_revision_id,
+        )
         if not getattr(result, "verified", False) or \
                 getattr(result, "outcome", "") != "real_fix_verified_pass":
             # Fail-closed by outcome class: the tracer's own failure-
@@ -616,16 +689,16 @@ class SignablePathOrchestrator:
         # The recorder's returned ``RealFixNarrowPathRecord`` carries
         # ``context_artifact_id`` / ``root_revision_id`` / ``output_hash``
         # / ``replay_ceiling``. We reconstruct the equivalent record
-        # shape for the projector from the tracer surface + synthetic
-        # narrow-path ids that match the recorder's labelling exactly.
-        # This keeps the orchestrator from having to hold a second
-        # reference to the recorder itself.
+        # shape for the projector from the tracer surface + the
+        # authority-bearing ids the recorder was instructed to use via
+        # the tracer overrides. This keeps the orchestrator from having
+        # to hold a second reference to the recorder itself.
         from kernel.lifecycle.real_fix_recorder import RealFixNarrowPathRecord
 
         record = RealFixNarrowPathRecord(
             inference_artifact_id=inference_artifact_id,
-            context_artifact_id=f"real-fix::context::{task_id}",
-            root_revision_id=f"real-fix::root::{task_id}",
+            context_artifact_id=rf_context_artifact_id,
+            root_revision_id=rf_root_revision_id,
             output_hash=getattr(result, "output_hash", ""),
             replay_ceiling=getattr(result, "replay_ceiling", "") or "semantic",
         )
