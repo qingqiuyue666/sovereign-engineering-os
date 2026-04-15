@@ -192,6 +192,7 @@ class TestHappyPathContextToEvidence(unittest.TestCase):
             revision_seal_service=self.seal_svc,
             evidence_service=self.evidence_svc,
             audit_ledger=self.audit_ledger,
+            intent_anchor_repository=self.intent_repo,
         )
 
     def tearDown(self) -> None:
@@ -320,6 +321,19 @@ class TestHappyPathContextToEvidence(unittest.TestCase):
 
         # No taint on the happy path.
         self.assertEqual(receipt.get("taint_set", []), [])
+
+        # Durable intent-anchor row exists (AUDIT-003 / §22.1). Revision
+        # ``intent_id`` now references a row in ``intent_anchor_records``
+        # rather than an audit-payload-only label.
+        intent_rows = self.conn.execute(
+            "SELECT intent_id, task_id, state "
+            "FROM intent_anchor_records WHERE task_id = ?;",
+            (task_id,),
+        ).fetchall()
+        self.assertEqual(len(intent_rows), 1)
+        self.assertEqual(intent_rows[0]["intent_id"], intent_id)
+        self.assertEqual(intent_rows[0]["state"], "admitted")
+        self.assertEqual(rev["intent_id"], intent_id)
 
 
 class TestIllegalTransitionRejected(unittest.TestCase):

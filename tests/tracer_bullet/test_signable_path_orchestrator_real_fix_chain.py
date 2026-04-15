@@ -66,6 +66,7 @@ from kernel.stores.sqlite.repositories import (
     AuditRepository,
     ContextArtifactRepository,
     InferenceArtifactRepository,
+    IntentAnchorRepository,
     JournalEntryRepository,
     PatchProposalRepository,
     ReplayAnchorRepository,
@@ -129,6 +130,7 @@ class SignablePathOrchestratorRealFixChainTest(unittest.TestCase):
         self.snapshot_repo = SnapshotRootRepository(self.conn)
         self.journal_repo = JournalEntryRepository(self.conn)
         self.replay_anchor_repo = ReplayAnchorRepository(self.conn)
+        self.intent_repo = IntentAnchorRepository(self.conn)
         self.ledger = AppendOnlyLedger(
             repository=self.audit_repo,
             actor_identity="orchestrator_real_fix_chain_test",
@@ -265,6 +267,7 @@ class SignablePathOrchestratorRealFixChainTest(unittest.TestCase):
             real_fix_approval_bridge=self.approval_bridge,
             real_fix_revision_seal_bridge=self.seal_bridge,
             real_fix_evidence_closure_bridge=self.evidence_bridge,
+            intent_anchor_repository=self.intent_repo,
         )
 
     def _count(self, table: str) -> int:
@@ -651,6 +654,78 @@ class SignablePathOrchestratorRealFixChainTest(unittest.TestCase):
         self.assertLess(
             idx("signable_path_sealed"), idx("real_fix_chain_completed")
         )
+
+    # ------------------------------------------------------------------
+    # Durable intent-anchor row (AUDIT-003 / §22.1): the real-fix chain
+    # mints a row into ``intent_anchor_records`` before emitting the
+    # ``intent_anchor_created`` audit record. This promotes the
+    # originating intent from an audit-payload-only label to a durable
+    # authority-bearing row, making ``Revision.intent_id`` reference a
+    # row that replay / recovery / §22.1 preconditions can consult.
+    # ------------------------------------------------------------------
+
+    def test_run_real_fix_chain_persists_durable_intent_anchor_row(self) -> None:
+        task_id = f"fix-{uuid4().hex[:8]}"
+
+        def transport(*_a, **_k):
+            return _TransportResponse(200, _messages_body(CORRECT_ADD_BLOCK))
+
+        task = make_add_fix_task(task_id=task_id)
+        orch = self._orchestrator(self._tracer(transport))
+
+        orch.run_real_fix_chain(task)
+
+        # Exactly one durable row, bound to the real task and in the
+        # canonical ``admitted`` state. The row exists independently of
+        # any audit payload.
+        rows = self.conn.execute(
+            "SELECT intent_id, task_id, state FROM intent_anchor_records;"
+        ).fetchall()
+        self.assertEqual(len(rows), 1)
+        intent_id, row_task_id, row_state = rows[0]
+        self.assertEqual(intent_id, f"real-fix::intent::{task_id}")
+        self.assertEqual(row_task_id, task_id)
+        self.assertEqual(row_state, "admitted")
+
+        # Audit-as-attestation ordering: the ``intent_anchor_created``
+        # audit record references the same intent_id the durable row
+        # already carries. Exactly one such audit record per chain.
+        audit_rows = self.conn.execute(
+            "SELECT payload_json FROM audit_records "
+            "WHERE record_type = 'intent_anchor_created';"
+        ).fetchall()
+        self.assertEqual(len(audit_rows), 1)
+        self.assertEqual(
+            json.loads(audit_rows[0][0])["intent_id"], intent_id
+        )
+
+    def test_unverified_tracer_outcome_still_persists_intent_anchor(self) -> None:
+        """Fail-closed honesty: the durable intent row is minted during
+        the ContextArtifact admission hop, which runs before the tracer
+        dispatches. An unverified tracer outcome must therefore still
+        leave a durable originating-intent row behind (the task is
+        abandonable from ``Stage.CONTEXT``) — there is no scenario where
+        a ``Stage.CONTEXT`` frame exists without a matching durable
+        ``intent_anchor_records`` row.
+        """
+        task_id = f"fix-{uuid4().hex[:8]}"
+
+        def transport(*_a, **_k):
+            return _TransportResponse(200, _messages_body(BROKEN_ADD_BLOCK))
+
+        task = make_add_fix_task(task_id=task_id)
+        orch = self._orchestrator(self._tracer(transport))
+
+        result = orch.run_real_fix_chain(task)
+        self.assertFalse(getattr(result, "verified", False))
+
+        rows = self.conn.execute(
+            "SELECT intent_id, task_id, state FROM intent_anchor_records;"
+        ).fetchall()
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0][0], f"real-fix::intent::{task_id}")
+        self.assertEqual(rows[0][1], task_id)
+        self.assertEqual(rows[0][2], "admitted")
 
     def test_unverified_leaves_frame_at_context(self) -> None:
         """On unverified tracer outcome, the eight-stage lifecycle frame

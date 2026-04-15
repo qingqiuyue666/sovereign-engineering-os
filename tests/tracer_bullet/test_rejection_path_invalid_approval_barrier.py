@@ -293,6 +293,7 @@ class TestBarrierRejectionWiredStack(unittest.TestCase):
             revision_seal_service=self.seal_svc,
             evidence_service=self.evidence_svc,
             audit_ledger=self.audit_ledger,
+            intent_anchor_repository=self.intent_repo,
         )
 
     def tearDown(self) -> None:
