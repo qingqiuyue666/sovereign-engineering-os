@@ -45,6 +45,17 @@ class OrchestratorRejected(Exception):
     """Fail-closed rejection raised on any out-of-path or unauthorized admission."""
 
 
+class RealFixChainRejected(Exception):
+    """Fail-closed rejection for the narrow real-fix bridge chain entrypoint.
+
+    Raised only by ``run_real_fix_chain`` when the chain's required
+    components are not all wired, when the verified-pass record was not
+    produced by the tracer, or when the caller attempts to run the
+    real-fix chain on a ``task_id`` that has already entered the eight-
+    stage signable-path frame.
+    """
+
+
 @dataclass(frozen=True)
 class IntentCausalAnchor:
     """Minimal durable intent causal anchor (phase-1 AUDIT-003 disposition).
@@ -110,6 +121,24 @@ class SignablePathOrchestrator:
         audit_ledger: Any,
         budget_governor: Any | None = None,
         context_repository: Any | None = None,
+        # ------------------------------------------------------------------
+        # Narrow real-fix bridge-chain wirings (all optional; all-or-nothing).
+        #
+        # These reuse the already-merged bridges exactly as they exist.
+        # The orchestrator composes them in causal order via
+        # ``run_real_fix_chain`` and does not re-implement any of their
+        # admission, schema, or audit logic. When any of the seven
+        # wirings are absent, ``run_real_fix_chain`` refuses fail-closed;
+        # the eight-stage admission surface continues to operate
+        # unchanged regardless of whether these are wired.
+        # ------------------------------------------------------------------
+        real_fix_tracer: Any | None = None,
+        real_fix_patch_projector: Any | None = None,
+        real_fix_validation_bridge: Any | None = None,
+        real_fix_review_bridge: Any | None = None,
+        real_fix_approval_bridge: Any | None = None,
+        real_fix_revision_seal_bridge: Any | None = None,
+        real_fix_evidence_closure_bridge: Any | None = None,
     ) -> None:
         # The orchestrator holds references only; it does not own policy.
         self._capability = capability_service
@@ -134,6 +163,16 @@ class SignablePathOrchestrator:
         self._budget = budget_governor
         self._ctx_repo = context_repository
         self._tasks: dict[str, TaskLifecycleState] = {}
+
+        # Narrow real-fix bridge-chain wirings. Held as references only;
+        # policy and admission live in the bridges themselves.
+        self._rf_tracer = real_fix_tracer
+        self._rf_projector = real_fix_patch_projector
+        self._rf_validation_bridge = real_fix_validation_bridge
+        self._rf_review_bridge = real_fix_review_bridge
+        self._rf_approval_bridge = real_fix_approval_bridge
+        self._rf_revision_seal_bridge = real_fix_revision_seal_bridge
+        self._rf_evidence_closure_bridge = real_fix_evidence_closure_bridge
 
     # ------------------------------------------------------------------
     # admission primitives
@@ -465,3 +504,191 @@ class SignablePathOrchestrator:
     def current_stage(self, task_id: str) -> Optional[Stage]:
         state = self._tasks.get(task_id)
         return None if state is None else state.current_stage
+
+    # ------------------------------------------------------------------
+    # narrow real-fix bridge chain
+    # ------------------------------------------------------------------
+
+    def run_real_fix_chain(self, task: Any) -> Any:
+        """Drive the already-merged real-fix bridge chain in causal order.
+
+        This is the single orchestrator entrypoint that wires the
+        verified real-fix narrow path end-to-end. It reuses the
+        already-merged components exactly as they exist:
+
+            RealFixTracer.run
+                -> RealFixNarrowPathRecorder.record    (via the tracer)
+                -> RealFixPatchProjector.project
+                -> RealFixValidationBridge.bridge
+                -> RealFixReviewBridge.bridge
+                -> RealFixApprovalBridge.bridge
+                -> RealFixRevisionSealBridge.bridge
+                -> RealFixEvidenceClosureBridge.bridge
+
+        Fail-closed conditions (raise ``RealFixChainRejected`` without
+        any downstream call):
+        - any of the seven wirings is absent
+        - the tracer did not produce ``real_fix_verified_pass`` (the
+          tracer's own unverified outcome is returned via the rejection
+          path so the caller still sees the verified=False result; no
+          downstream bridge is dispatched)
+        - the tracer returned verified=True but no ``inference_artifact_id``
+          (the injected recorder did not produce an authority-bearing
+          row; chain cannot proceed honestly)
+        - the ``task.task_id`` already holds an eight-stage frame in
+          this orchestrator's in-memory bookkeeping (the two surfaces
+          must not conflate)
+
+        Any ``Rejected`` exception raised by an individual bridge or by
+        the underlying service bubbles up unchanged — the orchestrator
+        does not swallow, rewrap, or silently downgrade bridge refusal.
+        The existing per-bridge audit records and per-service audit
+        records (including the recorder's ``inference_artifact_created``
+        event, every ``*_bridge_attested`` event, and the evidence
+        service's ``evidence_closure`` record) are emitted unchanged;
+        the replay-ceiling ``"semantic"`` tag flows from the tracer
+        through every bridge attestation without modification.
+
+        The orchestrator emits one wrapper audit record
+        (``real_fix_chain_completed``) at the end of a successful chain
+        that names every artifact id the chain produced. This is a
+        review convenience hop; it is not authority — the authority
+        lives in the bridge-emitted records.
+        """
+        required = {
+            "real_fix_tracer": self._rf_tracer,
+            "real_fix_patch_projector": self._rf_projector,
+            "real_fix_validation_bridge": self._rf_validation_bridge,
+            "real_fix_review_bridge": self._rf_review_bridge,
+            "real_fix_approval_bridge": self._rf_approval_bridge,
+            "real_fix_revision_seal_bridge": self._rf_revision_seal_bridge,
+            "real_fix_evidence_closure_bridge": self._rf_evidence_closure_bridge,
+        }
+        missing = [name for name, value in required.items() if value is None]
+        if missing:
+            # Fail-closed: a partially-wired chain must never silently
+            # degrade to a shorter chain; the caller has requested the
+            # full narrow real-fix path.
+            raise RealFixChainRejected(
+                "real-fix bridge chain is not fully wired; missing: "
+                f"{', '.join(missing)}"
+            )
+
+        task_id = getattr(task, "task_id", "")
+        if not isinstance(task_id, str) or not task_id:
+            raise RealFixChainRejected("task is missing task_id")
+
+        # The eight-stage admission surface and the narrow real-fix
+        # chain both take a ``task_id``; refuse to run the real-fix
+        # chain for a task that has already entered the eight-stage
+        # frame to prevent conflation of the two surfaces.
+        if task_id in self._tasks:
+            raise RealFixChainRejected(
+                f"task {task_id!r} has already entered the eight-stage "
+                "signable-path frame; real-fix chain refuses to overlay"
+            )
+
+        # --- 1/7: tracer + recorder ---------------------------------------
+        # The tracer owns the adapter boundary and (when configured with
+        # the recorder) produces exactly one authority-bearing
+        # ``InferenceArtifact`` row on a verified pass. The tracer
+        # already emits every audit record the narrow path requires
+        # (attempt started, failure class on reject, verified_pass on
+        # success) and propagates the honest replay ceiling.
+        result = self._rf_tracer.run(task)
+        if not getattr(result, "verified", False) or \
+                getattr(result, "outcome", "") != "real_fix_verified_pass":
+            # Fail-closed by outcome class: the tracer's own failure-
+            # class audit record is already the evidence. The chain
+            # does not dispatch any bridge for an unverified result.
+            return result
+
+        inference_artifact_id = getattr(result, "inference_artifact_id", "")
+        if not isinstance(inference_artifact_id, str) or not inference_artifact_id:
+            # Defense-in-depth: verified_pass without an
+            # authority-bearing narrow-path id means the recorder did
+            # not actually persist. Refuse to chain.
+            raise RealFixChainRejected(
+                "tracer returned verified_pass without an "
+                "inference_artifact_id; recorder did not persist"
+            )
+
+        # The recorder's returned ``RealFixNarrowPathRecord`` carries
+        # ``context_artifact_id`` / ``root_revision_id`` / ``output_hash``
+        # / ``replay_ceiling``. We reconstruct the equivalent record
+        # shape for the projector from the tracer surface + synthetic
+        # narrow-path ids that match the recorder's labelling exactly.
+        # This keeps the orchestrator from having to hold a second
+        # reference to the recorder itself.
+        from kernel.lifecycle.real_fix_recorder import RealFixNarrowPathRecord
+
+        record = RealFixNarrowPathRecord(
+            inference_artifact_id=inference_artifact_id,
+            context_artifact_id=f"real-fix::context::{task_id}",
+            root_revision_id=f"real-fix::root::{task_id}",
+            output_hash=getattr(result, "output_hash", ""),
+            replay_ceiling=getattr(result, "replay_ceiling", "") or "semantic",
+        )
+
+        # --- 2/7: patch projection ----------------------------------------
+        projection = self._rf_projector.project(
+            task=task, result=result, record=record
+        )
+
+        # --- 3/7: validation bridge ---------------------------------------
+        validation_outcome = self._rf_validation_bridge.bridge(
+            projection=projection
+        )
+
+        # --- 4/7: review bridge -------------------------------------------
+        review_outcome = self._rf_review_bridge.bridge(
+            outcome=validation_outcome
+        )
+
+        # --- 5/7: approval bridge -----------------------------------------
+        approval_outcome = self._rf_approval_bridge.bridge(
+            outcome=review_outcome
+        )
+
+        # --- 6/7: revision-seal bridge ------------------------------------
+        seal_outcome = self._rf_revision_seal_bridge.bridge(
+            outcome=approval_outcome
+        )
+
+        # --- 7/7: evidence-closure bridge ---------------------------------
+        closure_outcome = self._rf_evidence_closure_bridge.bridge(
+            outcome=seal_outcome
+        )
+
+        # Wrapper audit: one record that names every id a reviewer needs
+        # to walk the chain from a single hop. The replay ceiling is
+        # carried through from the tracer / recorder unchanged.
+        self._audit.append(
+            record_type="real_fix_chain_completed",
+            task_id=task_id,
+            artifact_refs=[
+                closure_outcome.replay_anchor_id,
+                closure_outcome.revision_id,
+                closure_outcome.snapshot_root_id,
+                closure_outcome.approval_artifact_id,
+                closure_outcome.review_artifact_id,
+                closure_outcome.validation_receipt_id,
+                closure_outcome.patch_proposal_id,
+                closure_outcome.inference_artifact_id,
+            ],
+            payload={
+                "replay_anchor_id": closure_outcome.replay_anchor_id,
+                "revision_id": closure_outcome.revision_id,
+                "snapshot_root_id": closure_outcome.snapshot_root_id,
+                "approval_artifact_id": closure_outcome.approval_artifact_id,
+                "review_artifact_id": closure_outcome.review_artifact_id,
+                "validation_receipt_id": closure_outcome.validation_receipt_id,
+                "patch_proposal_id": closure_outcome.patch_proposal_id,
+                "inference_artifact_id": closure_outcome.inference_artifact_id,
+                "context_artifact_id": closure_outcome.context_artifact_id,
+                "root_revision_id": closure_outcome.root_revision_id,
+                "replay_ceiling": record.replay_ceiling,
+                "source": "real_fix_tracer",
+            },
+        )
+        return closure_outcome
