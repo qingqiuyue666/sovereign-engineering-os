@@ -181,6 +181,24 @@ class RevisionSealService:
         snapshot_root_id = f"snap-{uuid4().hex}"
         now = _now_iso()
 
+        # AUDIT-003 / §22.1: refuse to seal without an originating
+        # intent_id. The eight-stage `admit_revision_seal` and the
+        # real-fix `run_real_fix_chain` both already supply the durable
+        # `intent_anchor_records.intent_id` they minted at intent
+        # emission. No production caller relies on the previous
+        # `intent-<task_id>` fallback, which silently fabricated a label
+        # with no matching durable row and so broke the §22.1
+        # precondition that "a valid originating intent exists" before
+        # the seal transaction runs. Removing the fabrication makes the
+        # seal-time linkage to the durable anchor a fail-closed
+        # admission rather than a silently-fabricated one.
+        if intent_id is None or not str(intent_id).strip():
+            raise SealRejected(
+                "missing originating intent_id: seal_revision requires "
+                "the durable intent_anchor_records.intent_id minted at "
+                "intent emission (AUDIT-003 / §22.1)"
+            )
+
         root_hash = _canonical_hash(
             {
                 "patch_hash": patch_hash,
@@ -193,8 +211,6 @@ class RevisionSealService:
         artifact_manifest_hash = _canonical_hash(
             {"approval_id": approval_id, "revision_id": revision_id}
         )
-
-        effective_intent_id = intent_id or f"intent-{task_id}"
 
         # ==== nine-step seal ordering (§22.2 exact) ====
 
@@ -211,7 +227,7 @@ class RevisionSealService:
             "state": "pending",
             "root_hash": root_hash,
             "snapshot_root_id": snapshot_root_id,
-            "intent_id": effective_intent_id,
+            "intent_id": intent_id,
             "originating_context_artifact_id": reviewed_context,
             "approval_id": approval_id,
             "logical_sequence_at_seal": 0,  # will be set at step 7
