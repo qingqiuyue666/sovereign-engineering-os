@@ -64,6 +64,7 @@ from kernel.stores.sqlite.repositories import (
     ApprovalArtifactRepository,
     AuditRepository,
     InferenceArtifactRepository,
+    IntentAnchorRepository,
     JournalEntryRepository,
     PatchProposalRepository,
     ReviewArtifactRepository,
@@ -201,6 +202,7 @@ class RevisionSealServiceIntentIdFailClosedTest(unittest.TestCase):
             approval_reader=self.approval_repo,
             audit_ledger=self.audit,
         )
+        self.intent_anchor_repo = IntentAnchorRepository(self.conn)
         self.seal_service = RevisionSealService(
             revision_repo=self.revision_repo,
             snapshot_repo=self.snapshot_repo,
@@ -209,6 +211,7 @@ class RevisionSealServiceIntentIdFailClosedTest(unittest.TestCase):
             patch_reader=self.patch_repo,
             approval_service=self.approval_service,
             audit_ledger=self.audit,
+            intent_anchor_reader=self.intent_anchor_repo,
         )
 
     def tearDown(self) -> None:
@@ -321,6 +324,13 @@ class RevisionSealServiceIntentIdFailClosedTest(unittest.TestCase):
         task_id = f"fix-{uuid4().hex[:8]}"
         ap_outcome = self._bridge_to_approval(task_id)
         intent_id = f"real-fix::intent::{task_id}"
+        # The durable ``intent_anchor_records`` row must exist before
+        # the seal (AUDIT-003 / §22.1). Both production callers
+        # mint this row at intent emission; the test mirrors that
+        # production sequence explicitly.
+        self.intent_anchor_repo.insert(
+            intent_id=intent_id, task_id=task_id, state="admitted"
+        )
 
         revision_id = self.seal_service.seal_revision(
             task_id=ap_outcome.task_id,
@@ -336,6 +346,54 @@ class RevisionSealServiceIntentIdFailClosedTest(unittest.TestCase):
         self.assertEqual(revision["intent_id"], intent_id)
         # No silently-fabricated ``intent-<task_id>`` label written.
         self.assertNotEqual(revision["intent_id"], f"intent-{task_id}")
+
+    # ------------------------------------------------------------------
+    # Fail-closed: seal_revision refuses when intent_id names no durable
+    # intent_anchor_records row, or resolves to a row whose task_id does
+    # not match the seal's task_id (AUDIT-003 / §22.1).
+    # ------------------------------------------------------------------
+
+    def test_seal_revision_rejects_unknown_intent_id(self) -> None:
+        task_id = f"fix-{uuid4().hex[:8]}"
+        ap_outcome = self._bridge_to_approval(task_id)
+        # Intentionally do NOT insert a matching anchor row: the
+        # supplied label is non-empty but names no durable row.
+        unknown_intent_id = f"real-fix::intent::{task_id}"
+
+        with self.assertRaises(SealRejected) as raised:
+            self.seal_service.seal_revision(
+                task_id=ap_outcome.task_id,
+                approval_id=ap_outcome.approval_artifact_id,
+                context_artifact_id=ap_outcome.context_artifact_id,
+                intent_id=unknown_intent_id,
+            )
+        self.assertIn("intent_anchor_records", str(raised.exception))
+        self._assert_no_seal_side_effects()
+
+    def test_seal_revision_rejects_task_id_mismatch_on_anchor_row(
+        self,
+    ) -> None:
+        task_id = f"fix-{uuid4().hex[:8]}"
+        ap_outcome = self._bridge_to_approval(task_id)
+        other_task_id = f"fix-{uuid4().hex[:8]}"
+        intent_id = f"real-fix::intent::{other_task_id}"
+        # Durable row exists but is bound to a different task_id than
+        # the one being sealed: must be refused.
+        self.intent_anchor_repo.insert(
+            intent_id=intent_id,
+            task_id=other_task_id,
+            state="admitted",
+        )
+
+        with self.assertRaises(SealRejected) as raised:
+            self.seal_service.seal_revision(
+                task_id=ap_outcome.task_id,
+                approval_id=ap_outcome.approval_artifact_id,
+                context_artifact_id=ap_outcome.context_artifact_id,
+                intent_id=intent_id,
+            )
+        self.assertIn("task_id", str(raised.exception))
+        self._assert_no_seal_side_effects()
 
 
 if __name__ == "__main__":

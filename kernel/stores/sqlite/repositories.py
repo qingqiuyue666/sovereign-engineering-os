@@ -289,6 +289,20 @@ class IntentAnchorRepository:
             (intent_id, task_id, state, _iso_now()),
         )
 
+    def fetch(self, intent_id: str) -> dict[str, Any] | None:
+        """Read-only lookup of a durable ``intent_anchor_records`` row.
+
+        Returns the row as a dict or ``None`` when absent. Used by
+        ``RevisionSealService.seal_revision`` to verify that the supplied
+        ``intent_id`` names a real durable row (AUDIT-003 / §22.1) rather
+        than accepting any non-empty string.
+        """
+        row = self._conn.execute(
+            "SELECT * FROM intent_anchor_records WHERE intent_id = ?;",
+            (intent_id,),
+        ).fetchone()
+        return _row_to_dict(row)
+
 
 # ---------------------------------------------------------------------------
 # Generic artifact writers (thin, schema-validated upstream)

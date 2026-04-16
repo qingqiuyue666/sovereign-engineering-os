@@ -49,6 +49,7 @@ from kernel.schemas import load_schema
 from kernel.schemas.validator import validate_artifact
 from kernel.stores.sqlite.repositories import (
     ApprovalArtifactRepository,
+    IntentAnchorRepository,
     JournalEntryRepository,
     PatchProposalRepository,
     RevisionRepository,
@@ -110,6 +111,23 @@ class RevisionSealService:
         audit_ledger: Any,
         project_id: str = "phase1_default",
         version_tuple_overrides: Mapping[str, Any] | None = None,
+        # ------------------------------------------------------------------
+        # AUDIT-003 / §22.1 durable intent-anchor verification (optional).
+        #
+        # When wired, ``seal_revision`` additionally verifies that the
+        # supplied ``intent_id`` names a real row in
+        # ``intent_anchor_records`` whose ``task_id`` equals the seal's
+        # ``task_id``. This closes the remaining silent gap after the
+        # fabrication removal: the service no longer accepts any
+        # non-empty string but requires the durable row the anchor
+        # emitter actually minted.
+        #
+        # When absent, the service preserves the prior behavior for
+        # hand-built tracer-bullet tests that do not wire the anchor
+        # repository — the existing missing/empty guard remains in
+        # effect as the fail-closed floor.
+        # ------------------------------------------------------------------
+        intent_anchor_reader: IntentAnchorRepository | None = None,
     ) -> None:
         self._revision_repo = revision_repo
         self._snapshot_repo = snapshot_repo
@@ -120,6 +138,7 @@ class RevisionSealService:
         self._audit = audit_ledger
         self._project_id = project_id
         self._vt_overrides = dict(version_tuple_overrides or {})
+        self._intent_anchor_reader = intent_anchor_reader
 
     def seal_revision(
         self,
@@ -198,6 +217,34 @@ class RevisionSealService:
                 "the durable intent_anchor_records.intent_id minted at "
                 "intent emission (AUDIT-003 / §22.1)"
             )
+
+        # AUDIT-003 / §22.1 durable-row verification. When the intent
+        # anchor reader is wired, refuse to seal unless the supplied
+        # ``intent_id`` names a real ``intent_anchor_records`` row whose
+        # ``task_id`` equals the seal's ``task_id``. This promotes the
+        # seal's ``intent_id`` linkage from "any non-empty label" to
+        # "durable row exists and task-bound", closing the last silent
+        # hop in the AUDIT-003 chain without introducing a new audit
+        # record, schema, or top-level artifact. When unwired, the
+        # missing/empty guard above remains the fail-closed floor so
+        # existing tracer-bullet tests that hand-build the service
+        # without the reader continue to compile unchanged.
+        if self._intent_anchor_reader is not None:
+            anchor_row = self._intent_anchor_reader.fetch(intent_id)
+            if anchor_row is None:
+                raise SealRejected(
+                    "originating intent_id does not name a durable "
+                    "intent_anchor_records row: "
+                    f"{intent_id!r} (AUDIT-003 / §22.1)"
+                )
+            if anchor_row.get("task_id") != task_id:
+                raise SealRejected(
+                    "originating intent_id resolves to an "
+                    "intent_anchor_records row whose task_id does not "
+                    f"match the seal's task_id: anchor.task_id="
+                    f"{anchor_row.get('task_id')!r}, seal.task_id="
+                    f"{task_id!r} (AUDIT-003 / §22.1)"
+                )
 
         root_hash = _canonical_hash(
             {
