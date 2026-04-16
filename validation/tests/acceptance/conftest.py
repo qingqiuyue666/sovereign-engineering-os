@@ -180,6 +180,16 @@ class AcceptanceHarness:
             patch_reader=self.pp_repo,
             approval_service=self.ap_svc,
             audit_ledger=self.audit_ledger,
+            # AUDIT-003 / §22.1: wire the durable intent-anchor reader so
+            # the production orchestrator-driven seal path enforces the
+            # "intent_id must name a real intent_anchor_records row whose
+            # task_id matches" check. The orchestrator already mints the
+            # durable row at ``_emit_intent_anchor`` and threads the same
+            # ``intent_id`` into ``seal_revision``; wiring the reader
+            # promotes that linkage from opt-in (proven in
+            # ``test_revision_seal_service_intent_id.py``) to always-on
+            # in the production composition root.
+            intent_anchor_reader=self.intent_repo,
         )
         self.evidence_svc = EvidenceService(
             replay_anchor_repo=self.ra_repo,

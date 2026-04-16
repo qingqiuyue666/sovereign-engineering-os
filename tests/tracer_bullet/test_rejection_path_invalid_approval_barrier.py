@@ -273,6 +273,14 @@ class TestBarrierRejectionWiredStack(unittest.TestCase):
             patch_reader=self.pp_repo,
             approval_service=self.ap_svc,
             audit_ledger=self.audit_ledger,
+            # AUDIT-003 / §22.1: wire the durable intent-anchor reader so
+            # the orchestrator-driven rejection path enforces the same
+            # durable-row verification the happy path does. This
+            # rejection-path test does not reach the seal (it is refused
+            # earlier at the approval barrier), so wiring the reader is
+            # a defense-in-depth composition consistency fix rather than
+            # a new assertion surface.
+            intent_anchor_reader=self.intent_repo,
         )
         self.evidence_svc = EvidenceService(
             replay_anchor_repo=self.ra_repo,

@@ -171,6 +171,13 @@ class TestHappyPathContextToEvidence(unittest.TestCase):
             patch_reader=self.pp_repo,
             approval_service=self.ap_svc,
             audit_ledger=self.audit_ledger,
+            # AUDIT-003 / §22.1: wire the durable intent-anchor reader so
+            # the orchestrator-driven happy path enforces the durable-row
+            # verification. The orchestrator mints the row at
+            # ``_emit_intent_anchor`` and threads the same ``intent_id``
+            # into the seal; wiring the reader makes the linkage check
+            # fire on this end-to-end path rather than silently accept.
+            intent_anchor_reader=self.intent_repo,
         )
         self.evidence_svc = EvidenceService(
             replay_anchor_repo=self.ra_repo,
