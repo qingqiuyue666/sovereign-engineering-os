@@ -59,7 +59,10 @@ from kernel.services.approval_service import ApprovalService
 from kernel.services.context_service import ContextService
 from kernel.services.evidence_service import EvidenceService
 from kernel.services.review_service import ReviewService
-from kernel.services.revision_seal_service import RevisionSealService
+from kernel.services.revision_seal_service import (
+    RevisionSealService,
+    SealRejected,
+)
 from kernel.services.validation_service import ValidationService
 from kernel.stores.sqlite.repositories import (
     ApprovalArtifactRepository,
@@ -200,6 +203,14 @@ class SignablePathOrchestratorRealFixChainTest(unittest.TestCase):
             patch_reader=self.patch_repo,
             approval_service=self.approval_service,
             audit_ledger=self.ledger,
+            # AUDIT-003 / §22.1: wire the durable intent-anchor reader so
+            # the orchestrator-driven seal path enforces the durable-row
+            # verification the service already implements. The
+            # orchestrator mints the row at ``_emit_intent_anchor`` above
+            # and threads the same ``intent_id`` into the seal bridge;
+            # this wiring promotes the linkage from opt-in to always-on
+            # on every orchestrator composition.
+            intent_anchor_reader=self.intent_repo,
         )
         self.seal_bridge = RealFixRevisionSealBridge(
             seal_service=self.seal_service,
@@ -769,6 +780,102 @@ class SignablePathOrchestratorRealFixChainTest(unittest.TestCase):
         self.assertIn("stage_entered", types)
         self.assertNotIn("signable_path_sealed", types)
         self.assertIn("task_abandoned", types)
+
+    # ------------------------------------------------------------------
+    # AUDIT-003 / §22.1 seal-time durable-row verification on the
+    # orchestrator composition.
+    #
+    # The ``RevisionSealService`` can refuse any ``intent_id`` that does
+    # not resolve to a durable ``intent_anchor_records`` row, but only
+    # when ``intent_anchor_reader`` is wired at construction. The
+    # orchestrator-driving composition (``setUp`` above) now wires the
+    # reader, promoting that check from opt-in (proven in
+    # ``test_revision_seal_service_intent_id.py``) to always-on on every
+    # orchestrator-composed seal call. The fail-closed floor for the
+    # unwired back-compat path (missing/empty ``intent_id``) remains
+    # unchanged.
+    # ------------------------------------------------------------------
+    def test_orchestrator_seal_service_enforces_durable_row_check(
+        self,
+    ) -> None:
+        """Wiring proof: with the orchestrator-composed seal service,
+        a direct ``seal_revision`` call with an ``intent_id`` that does
+        not name a durable ``intent_anchor_records`` row is refused
+        fail-closed with the durable-row error.
+
+        The chain is driven first so a real approval + context exists.
+        A new seal attempt is then dispatched directly against the same
+        seal service using those authority-bearing ids but a freshly
+        synthesized ``intent_id`` that was never minted as a durable
+        row. This exercises the seal-time check end-to-end on the
+        orchestrator composition rather than on an isolated unit
+        harness.
+        """
+        task_id = f"fix-{uuid4().hex[:8]}"
+
+        def transport(*_a, **_k):
+            return _TransportResponse(200, _messages_body(CORRECT_ADD_BLOCK))
+
+        task = make_add_fix_task(task_id=task_id)
+        orch = self._orchestrator(self._tracer(transport))
+        outcome = orch.run_real_fix_chain(task)
+
+        # The chain minted exactly one durable row for its own
+        # ``real-fix::intent::<task_id>`` label. Any other non-empty
+        # string is a well-formed intent_id at the fail-closed floor
+        # but names no durable row and must be refused by the
+        # seal-time durable-row check.
+        bogus_intent_id = f"real-fix::intent::bogus-{uuid4().hex[:8]}"
+        self.assertIsNone(self.intent_repo.fetch(bogus_intent_id))
+
+        with self.assertRaises(SealRejected) as raised:
+            self.seal_service.seal_revision(
+                task_id=task_id,
+                approval_id=outcome.approval_artifact_id,
+                context_artifact_id=outcome.context_artifact_id,
+                intent_id=bogus_intent_id,
+            )
+        # The message names the durable-row surface so a reviewer can
+        # distinguish this refusal from the missing/empty fail-closed
+        # floor.
+        self.assertIn("intent_anchor_records", str(raised.exception))
+
+    def test_orchestrator_seal_service_enforces_task_id_binding(
+        self,
+    ) -> None:
+        """Wiring proof: the orchestrator-composed seal service refuses
+        an ``intent_id`` that resolves to a durable row whose
+        ``task_id`` does not match the seal's ``task_id``. This is the
+        second half of the durable-row verification and is what makes
+        the linkage task-bound rather than merely durable.
+        """
+        task_id = f"fix-{uuid4().hex[:8]}"
+
+        def transport(*_a, **_k):
+            return _TransportResponse(200, _messages_body(CORRECT_ADD_BLOCK))
+
+        task = make_add_fix_task(task_id=task_id)
+        orch = self._orchestrator(self._tracer(transport))
+        outcome = orch.run_real_fix_chain(task)
+
+        # Mint a durable row bound to a DIFFERENT task_id. The row is
+        # real, but its task_id mismatches the seal's task_id.
+        other_task_id = f"fix-{uuid4().hex[:8]}"
+        mismatched_intent_id = f"real-fix::intent::{other_task_id}"
+        self.intent_repo.insert(
+            intent_id=mismatched_intent_id,
+            task_id=other_task_id,
+            state="admitted",
+        )
+
+        with self.assertRaises(SealRejected) as raised:
+            self.seal_service.seal_revision(
+                task_id=task_id,
+                approval_id=outcome.approval_artifact_id,
+                context_artifact_id=outcome.context_artifact_id,
+                intent_id=mismatched_intent_id,
+            )
+        self.assertIn("task_id", str(raised.exception))
 
 
 if __name__ == "__main__":

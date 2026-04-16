@@ -384,6 +384,14 @@ class TestEvidenceServiceReplayClassification(unittest.TestCase):
             patch_reader=self.pp_repo,
             approval_service=self.ap_svc,
             audit_ledger=self.audit_ledger,
+            # AUDIT-003 / §22.1: wire the durable intent-anchor reader so
+            # the orchestrator-driven replay-downgrade path enforces the
+            # same durable-row verification the happy path does. The
+            # orchestrator mints the durable row and threads the
+            # ``intent_id`` into the seal; this wiring promotes the
+            # linkage check from opt-in to always-on on every
+            # orchestrator composition.
+            intent_anchor_reader=self.intent_repo,
         )
         self.evidence_svc = EvidenceService(
             replay_anchor_repo=self.ra_repo,
