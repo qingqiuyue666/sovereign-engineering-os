@@ -281,7 +281,10 @@ class RealFixRevisionSealBridgeTest(unittest.TestCase):
         task_id = f"fix-{uuid4().hex[:8]}"
         ap_outcome = self._bridge_to_approval(task_id)
 
-        outcome = self.seal_bridge.bridge(outcome=ap_outcome)
+        outcome = self.seal_bridge.bridge(
+            outcome=ap_outcome,
+            intent_id=f"real-fix::intent::{task_id}",
+        )
 
         self.assertIsInstance(outcome, RealFixRevisionSealBridgeOutcome)
         self.assertTrue(outcome.revision_id.startswith("rev-"))
@@ -368,7 +371,10 @@ class RealFixRevisionSealBridgeTest(unittest.TestCase):
     def test_bridge_audit_chain_is_complete(self) -> None:
         task_id = f"fix-{uuid4().hex[:8]}"
         ap_outcome = self._bridge_to_approval(task_id)
-        self.seal_bridge.bridge(outcome=ap_outcome)
+        self.seal_bridge.bridge(
+            outcome=ap_outcome,
+            intent_id=f"real-fix::intent::{task_id}",
+        )
 
         # A reviewer can walk the end-to-end chain from a single
         # ordered audit trail: tracer → inference row → verified pass →
@@ -591,7 +597,10 @@ class RealFixRevisionSealBridgeTest(unittest.TestCase):
         ap_a = self._bridge_to_approval(first_task)
         ap_b = self._bridge_to_approval(second_task)
 
-        self.seal_bridge.bridge(outcome=ap_a)
+        self.seal_bridge.bridge(
+            outcome=ap_a,
+            intent_id=f"real-fix::intent::{first_task}",
+        )
 
         # Exactly one revision row exists, and it is bound to task A.
         self.assertEqual(self._count("revisions"), 1)

@@ -300,7 +300,10 @@ class RealFixEvidenceClosureBridgeTest(unittest.TestCase):
         vb_outcome = self.validation_bridge.bridge(projection=projection)
         rb_outcome = self.review_bridge.bridge(outcome=vb_outcome)
         ap_outcome = self.approval_bridge.bridge(outcome=rb_outcome)
-        return self.seal_bridge.bridge(outcome=ap_outcome)
+        return self.seal_bridge.bridge(
+            outcome=ap_outcome,
+            intent_id=f"real-fix::intent::{task_id}",
+        )
 
     # ------------------------------------------------------------------
     # Success: bridged sealed revision → exactly one schema-valid ReplayAnchor
