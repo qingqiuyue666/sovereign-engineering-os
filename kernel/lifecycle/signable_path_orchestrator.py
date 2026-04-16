@@ -842,8 +842,21 @@ class SignablePathOrchestrator:
         )
 
         # --- 6/7: revision-seal bridge ------------------------------------
+        # Thread the durable ``intent_anchor_records.intent_id`` minted
+        # above into the seal bridge so the sealed ``Revision.intent_id``
+        # references the same durable row rather than the seal service's
+        # fallback ``intent-<task_id>`` label. This closes the real-fix
+        # surface's half of the AUDIT-003 / §22.1 linkage already closed
+        # on the eight-stage ``admit_revision_seal`` surface (which also
+        # passes ``state.intent_anchor.intent_id``). No schema change, no
+        # new field, no new audit record: the bridge and service already
+        # accept ``intent_id`` as a keyword-only argument; this is a
+        # missed keyword the real-fix chain now supplies. On unverified
+        # tracer outcome this call is never reached, so the early-return
+        # path is unchanged.
         seal_outcome = self._rf_revision_seal_bridge.bridge(
-            outcome=approval_outcome
+            outcome=approval_outcome,
+            intent_id=rf_intent_anchor.intent_id,
         )
         self._advance(state, Stage.REVISION_SEAL)
         state.artifact_ids[Stage.REVISION_SEAL] = seal_outcome.revision_id
