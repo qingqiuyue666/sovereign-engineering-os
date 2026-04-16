@@ -673,7 +673,7 @@ class SignablePathOrchestratorRealFixChainTest(unittest.TestCase):
         task = make_add_fix_task(task_id=task_id)
         orch = self._orchestrator(self._tracer(transport))
 
-        orch.run_real_fix_chain(task)
+        outcome = orch.run_real_fix_chain(task)
 
         # Exactly one durable row, bound to the real task and in the
         # canonical ``admitted`` state. The row exists independently of
@@ -698,6 +698,18 @@ class SignablePathOrchestratorRealFixChainTest(unittest.TestCase):
         self.assertEqual(
             json.loads(audit_rows[0][0])["intent_id"], intent_id
         )
+
+        # The sealed ``Revision.intent_id`` references the same durable
+        # ``intent_anchor_records.intent_id`` rather than the seal
+        # service's fallback ``intent-<task_id>`` label. This closes the
+        # real-fix surface's half of the AUDIT-003 / §22.1 linkage that
+        # was already closed on the eight-stage ``admit_revision_seal``
+        # surface (see ``test_happy_path_context_to_evidence``:
+        # ``self.assertEqual(rev["intent_id"], intent_id)``).
+        rev = self.revision_repo.fetch(outcome.revision_id)
+        self.assertIsNotNone(rev)
+        self.assertEqual(rev["intent_id"], intent_id)
+        self.assertNotEqual(rev["intent_id"], f"intent-{task_id}")
 
     def test_unverified_tracer_outcome_still_persists_intent_anchor(self) -> None:
         """Fail-closed honesty: the durable intent row is minted during
