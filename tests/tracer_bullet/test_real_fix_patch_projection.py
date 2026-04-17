@@ -200,8 +200,12 @@ class RealFixPatchProjectionTest(unittest.TestCase):
         task_id = f"fix-{uuid4().hex[:8]}"
         task, result, record = self._run_and_record(task_id)
 
+        expected_intent_id = f"real-fix::intent::{task_id}"
         projection = self.projector.project(
-            task=task, result=result, record=record
+            task=task,
+            result=result,
+            record=record,
+            intent_id=expected_intent_id,
         )
 
         # Honest return value carrying the authority-bearing ids.
@@ -231,17 +235,20 @@ class RealFixPatchProjectionTest(unittest.TestCase):
         self.assertEqual(row["capability_requirements"], [])
         self.assertEqual(row["taint_set"], [])
 
-        # Audit: one patch_proposal_created linking both sides.
+        # Audit: one patch_proposal_created linking both sides plus the
+        # originating durable intent-anchor id (AUDIT-003 / §22.1).
         created_recs = self._records_of("patch_proposal_created")
         self.assertEqual(len(created_recs), 1)
         created = created_recs[0]
         self.assertEqual(created["task_id"], task_id)
         self.assertIn(projection.patch_proposal_id, created["artifact_refs"])
         self.assertIn(record.inference_artifact_id, created["artifact_refs"])
+        self.assertIn(expected_intent_id, created["artifact_refs"])
         self.assertEqual(
             created["payload"]["inference_artifact_id"],
             record.inference_artifact_id,
         )
+        self.assertEqual(created["payload"]["intent_id"], expected_intent_id)
         self.assertEqual(created["payload"]["source"], "real_fix_tracer")
         self.assertEqual(created["payload"]["replay_ceiling"], "semantic")
         self.assertEqual(
@@ -250,6 +257,40 @@ class RealFixPatchProjectionTest(unittest.TestCase):
         )
         self.assertEqual(
             created["payload"]["patch_group_hash"], projection.patch_group_hash
+        )
+
+    def test_projection_without_intent_id_preserves_prior_audit_shape(
+        self,
+    ) -> None:
+        """Back-compat: unwired callers (no ``intent_id`` kwarg) still
+        produce a well-formed ``patch_proposal_created`` record.
+
+        The ``intent_id`` is admitted as ``None`` in ``payload`` and is
+        NOT appended to ``artifact_refs`` so existing ledger consumers
+        that index on artifact_refs do not see a spurious ``None``
+        reference. Authoritative fail-closed verification of
+        ``intent_id`` remains in ``RevisionSealService`` at stage 6.
+        """
+        task_id = f"fix-{uuid4().hex[:8]}"
+        task, result, record = self._run_and_record(task_id)
+
+        projection = self.projector.project(
+            task=task, result=result, record=record
+        )
+
+        created_recs = self._records_of("patch_proposal_created")
+        self.assertEqual(len(created_recs), 1)
+        created = created_recs[0]
+        # Payload carries a literal None so a reader can distinguish
+        # "unwired caller" from "intent_id missing from payload".
+        self.assertIsNone(created["payload"]["intent_id"])
+        # artifact_refs contain exactly the two authority-bearing ids
+        # the prior mainline record shape carried; no None entry.
+        self.assertEqual(
+            sorted(created["artifact_refs"]),
+            sorted(
+                [projection.patch_proposal_id, record.inference_artifact_id]
+            ),
         )
 
     def test_projection_audit_ordering_after_tracer_chain(self) -> None:
