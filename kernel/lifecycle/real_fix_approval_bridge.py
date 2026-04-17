@@ -174,9 +174,22 @@ class RealFixApprovalBridge:
     # ------------------------------------------------------------------
 
     def bridge(
-        self, *, outcome: RealFixReviewBridgeOutcome
+        self,
+        *,
+        outcome: RealFixReviewBridgeOutcome,
+        intent_id: str | None = None,
     ) -> RealFixApprovalBridgeOutcome:
-        """Admit the outcome and produce one ``ApprovalArtifact``."""
+        """Admit the outcome and produce one ``ApprovalArtifact``.
+
+        ``intent_id`` is the durable ``intent_anchor_records.intent_id``
+        minted at the real-fix chain entrypoint. The bridge only names
+        it in the attestation record so a reviewer reading that single
+        audit hop can recover the originating intent-anchor id without
+        a second fetch. Authoritative fail-closed verification of
+        ``intent_id`` against ``intent_anchor_records`` remains the
+        responsibility of the downstream ``RevisionSealService`` at
+        stage 6; this bridge performs no independent verification.
+        """
         if not isinstance(outcome, RealFixReviewBridgeOutcome):
             raise RealFixApprovalBridgeRejected(
                 "bridge input must be a RealFixReviewBridgeOutcome; "
@@ -311,6 +324,24 @@ class RealFixApprovalBridge:
         # the review and patch proposal; this record adds the upstream
         # ``ValidationReceipt`` and ``InferenceArtifact`` bindings and
         # tags the source as real-fix tracer.
+        #
+        # AUDIT-003 / §22.1: name ``intent_id`` in both ``artifact_refs``
+        # and ``payload``. The id is the durable
+        # ``intent_anchor_records.intent_id`` minted at the real-fix
+        # chain entrypoint and threaded in by the orchestrator.
+        # Naming it here mirrors the pattern already applied to
+        # ``real_fix_revision_seal_bridge_attested`` (stage 6),
+        # ``real_fix_evidence_closure_bridge_attested`` (stage 7),
+        # ``revision_sealed`` (seal service), and
+        # ``real_fix_chain_completed`` (orchestrator wrapper), closing
+        # the next one-hop asymmetry going upstream so a reviewer
+        # reading only this record can recover the originating durable
+        # intent-anchor id without a second fetch. Authoritative fail-
+        # closed verification of ``intent_id`` against
+        # ``intent_anchor_records`` remains in ``RevisionSealService``
+        # at stage 6; this bridge performs no independent verification.
+        # No schema change, no migration, no new artifact family, no
+        # new audit record type.
         self._audit.append(
             record_type="real_fix_approval_bridge_attested",
             task_id=outcome.task_id,
@@ -321,6 +352,7 @@ class RealFixApprovalBridge:
                 outcome.validation_receipt_id,
                 outcome.patch_proposal_id,
                 outcome.inference_artifact_id,
+                intent_id,
             ],
             payload={
                 "approval_artifact_id": approval_id,
@@ -329,6 +361,7 @@ class RealFixApprovalBridge:
                 "patch_proposal_id": outcome.patch_proposal_id,
                 "inference_artifact_id": outcome.inference_artifact_id,
                 "reviewed_context_artifact_id": context_artifact_id,
+                "intent_id": intent_id,
                 "approval_state": approval["approval_state"],
                 "approval_scope": approval["approval_scope"],
                 "policy_version": approval["policy_version"],

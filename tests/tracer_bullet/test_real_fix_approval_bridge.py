@@ -252,7 +252,10 @@ class RealFixApprovalBridgeTest(unittest.TestCase):
         task_id = f"fix-{uuid4().hex[:8]}"
         rb_outcome = self._bridge_to_review(task_id)
 
-        outcome = self.approval_bridge.bridge(outcome=rb_outcome)
+        outcome = self.approval_bridge.bridge(
+            outcome=rb_outcome,
+            intent_id=f"real-fix::intent::{task_id}",
+        )
 
         self.assertIsInstance(outcome, RealFixApprovalBridgeOutcome)
         self.assertTrue(outcome.approval_artifact_id.startswith("ap-"))
@@ -296,7 +299,12 @@ class RealFixApprovalBridgeTest(unittest.TestCase):
             patch_row["inference_artifact_id"], rb_outcome.inference_artifact_id
         )
 
-        # Exactly one bridge attestation audit event, carrying all five ids.
+        # Exactly one bridge attestation audit event, carrying all five
+        # upstream ids plus the originating durable intent-anchor id
+        # (AUDIT-003 / §22.1): a reviewer reading only this record can
+        # recover the originating ``intent_anchor_records.intent_id``
+        # without a second fetch.
+        expected_intent_id = f"real-fix::intent::{task_id}"
         attested = self._records_of("real_fix_approval_bridge_attested")
         self.assertEqual(len(attested), 1)
         a = attested[0]
@@ -311,9 +319,11 @@ class RealFixApprovalBridgeTest(unittest.TestCase):
                     rb_outcome.validation_receipt_id,
                     rb_outcome.patch_proposal_id,
                     rb_outcome.inference_artifact_id,
+                    expected_intent_id,
                 ]
             ),
         )
+        self.assertIn(expected_intent_id, a["artifact_refs"])
         self.assertEqual(
             a["payload"]["approval_artifact_id"], outcome.approval_artifact_id
         )
@@ -335,6 +345,7 @@ class RealFixApprovalBridgeTest(unittest.TestCase):
             a["payload"]["reviewed_context_artifact_id"],
             outcome.context_artifact_id,
         )
+        self.assertEqual(a["payload"]["intent_id"], expected_intent_id)
         self.assertEqual(a["payload"]["approval_state"], "approved")
         self.assertEqual(a["payload"]["source"], "real_fix_tracer")
 
