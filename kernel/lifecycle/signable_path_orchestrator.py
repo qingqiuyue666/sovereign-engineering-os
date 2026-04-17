@@ -799,8 +799,17 @@ class SignablePathOrchestrator:
         )
 
         # --- 3/7: validation bridge ---------------------------------------
+        # Thread the durable ``intent_anchor_records.intent_id`` minted
+        # at entrypoint so the ``real_fix_validation_bridge_attested``
+        # record names it in both ``artifact_refs`` and ``payload``.
+        # AUDIT-003 / §22.1: this closes the last one-hop asymmetry on
+        # the real-fix bridge surface upstream of the already-closed
+        # review bridge attestation. The validation bridge does not
+        # verify the id; authoritative fail-closed verification remains
+        # in the downstream seal service at stage 6.
         validation_outcome = self._rf_validation_bridge.bridge(
-            projection=projection
+            projection=projection,
+            intent_id=rf_intent_anchor.intent_id,
         )
         self._advance(state, Stage.VALIDATION)
         state.artifact_ids[Stage.VALIDATION] = (

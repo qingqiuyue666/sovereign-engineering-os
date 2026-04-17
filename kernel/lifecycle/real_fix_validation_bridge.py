@@ -137,6 +137,7 @@ class RealFixValidationBridge:
         projection: RealFixPatchProjection,
         run: QuarantineRun | None = None,
         static_result: StaticCheckResult | None = None,
+        intent_id: str | None = None,
     ) -> RealFixValidationBridgeOutcome:
         """Admit the projection and produce one ``ValidationReceipt``.
 
@@ -145,6 +146,15 @@ class RealFixValidationBridge:
         ``None`` so the bridge stays thin: callers that need to inject a
         specific quarantine envelope or static outcome use the same
         surface they already use with ``ValidationService`` directly.
+
+        ``intent_id`` is the durable ``intent_anchor_records.intent_id``
+        minted at the real-fix chain entrypoint. The bridge only names
+        it in the attestation record so a reviewer reading that single
+        audit hop can recover the originating intent-anchor id without
+        a second fetch. Authoritative fail-closed verification of
+        ``intent_id`` against ``intent_anchor_records`` remains the
+        responsibility of the downstream ``RevisionSealService`` at
+        stage 6; this bridge performs no independent verification.
         """
         if not isinstance(projection, RealFixPatchProjection):
             raise RealFixValidationBridgeRejected(
@@ -224,6 +234,26 @@ class RealFixValidationBridge:
         # the patch proposal; this record adds the upstream
         # ``InferenceArtifact`` binding that the receipt schema does
         # not carry on-row.
+        #
+        # AUDIT-003 / §22.1: name ``intent_id`` in both ``artifact_refs``
+        # and ``payload``. The id is the durable
+        # ``intent_anchor_records.intent_id`` minted at the real-fix
+        # chain entrypoint and threaded in by the orchestrator. Naming
+        # it here mirrors the pattern already applied to
+        # ``real_fix_review_bridge_attested`` (stage 4),
+        # ``real_fix_approval_bridge_attested`` (stage 5),
+        # ``real_fix_revision_seal_bridge_attested`` (stage 6),
+        # ``real_fix_evidence_closure_bridge_attested`` (stage 7),
+        # ``revision_sealed`` (seal service), and
+        # ``real_fix_chain_completed`` (orchestrator wrapper), closing
+        # the last one-hop asymmetry on the real-fix bridge surface so a
+        # reviewer reading only this record can recover the originating
+        # durable intent-anchor id without a second fetch. Authoritative
+        # fail-closed verification of ``intent_id`` against
+        # ``intent_anchor_records`` remains in ``RevisionSealService``
+        # at stage 6; this bridge performs no independent verification.
+        # No schema change, no migration, no new artifact family, no
+        # new audit record type.
         self._audit.append(
             record_type="real_fix_validation_bridge_attested",
             task_id=projection.task_id,
@@ -232,11 +262,13 @@ class RealFixValidationBridge:
                 validation_receipt_id,
                 projection.patch_proposal_id,
                 projection.inference_artifact_id,
+                intent_id,
             ],
             payload={
                 "validation_receipt_id": validation_receipt_id,
                 "patch_proposal_id": projection.patch_proposal_id,
                 "inference_artifact_id": projection.inference_artifact_id,
+                "intent_id": intent_id,
                 "receipt_result": receipt["result"],
                 "source": "real_fix_tracer",
             },

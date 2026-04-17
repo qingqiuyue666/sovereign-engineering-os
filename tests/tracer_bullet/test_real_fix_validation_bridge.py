@@ -212,7 +212,10 @@ class RealFixValidationBridgeTest(unittest.TestCase):
         task_id = f"fix-{uuid4().hex[:8]}"
         projection = self._project(task_id)
 
-        outcome = self.bridge.bridge(projection=projection)
+        outcome = self.bridge.bridge(
+            projection=projection,
+            intent_id=f"real-fix::intent::{task_id}",
+        )
 
         self.assertIsInstance(outcome, RealFixValidationBridgeOutcome)
         self.assertTrue(outcome.validation_receipt_id.startswith("vr-"))
@@ -242,7 +245,12 @@ class RealFixValidationBridgeTest(unittest.TestCase):
             patch_row["inference_artifact_id"], projection.inference_artifact_id
         )
 
-        # Exactly one bridge attestation audit event, carrying all three ids.
+        # Exactly one bridge attestation audit event, carrying all three
+        # upstream ids plus the originating durable intent-anchor id
+        # (AUDIT-003 / §22.1): a reviewer reading only this record can
+        # recover the originating ``intent_anchor_records.intent_id``
+        # without a second fetch.
+        expected_intent_id = f"real-fix::intent::{task_id}"
         attested = self._records_of("real_fix_validation_bridge_attested")
         self.assertEqual(len(attested), 1)
         a = attested[0]
@@ -255,9 +263,11 @@ class RealFixValidationBridgeTest(unittest.TestCase):
                     outcome.validation_receipt_id,
                     projection.patch_proposal_id,
                     projection.inference_artifact_id,
+                    expected_intent_id,
                 ]
             ),
         )
+        self.assertIn(expected_intent_id, a["artifact_refs"])
         self.assertEqual(
             a["payload"]["validation_receipt_id"], outcome.validation_receipt_id
         )
@@ -268,6 +278,7 @@ class RealFixValidationBridgeTest(unittest.TestCase):
             a["payload"]["inference_artifact_id"],
             projection.inference_artifact_id,
         )
+        self.assertEqual(a["payload"]["intent_id"], expected_intent_id)
         self.assertEqual(a["payload"]["receipt_result"], "pass")
         self.assertEqual(a["payload"]["source"], "real_fix_tracer")
 
