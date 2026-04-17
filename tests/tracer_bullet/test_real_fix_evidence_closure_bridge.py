@@ -353,12 +353,17 @@ class RealFixEvidenceClosureBridgeTest(unittest.TestCase):
         self.assertIn(outcome.replay_anchor_id, closures[0]["artifact_refs"])
         self.assertIn(outcome.revision_id, closures[0]["artifact_refs"])
 
-        # Exactly one bridge attestation audit event, carrying all eight ids.
+        # Exactly one bridge attestation audit event, carrying all eight ids
+        # plus the originating durable ``intent_anchor_records.intent_id``
+        # (AUDIT-003 / §22.1): a reviewer reading only this attestation can
+        # recover the originating intent-anchor id without a second fetch
+        # on ``revisions.intent_id``.
         attested = self._records_of("real_fix_evidence_closure_bridge_attested")
         self.assertEqual(len(attested), 1)
         a = attested[0]
         self.assertEqual(a["task_id"], task_id)
         self.assertEqual(a["root_revision_id"], seal_outcome.root_revision_id)
+        expected_intent_id = f"real-fix::intent::{task_id}"
         self.assertEqual(
             sorted(a["artifact_refs"]),
             sorted(
@@ -371,6 +376,7 @@ class RealFixEvidenceClosureBridgeTest(unittest.TestCase):
                     seal_outcome.validation_receipt_id,
                     seal_outcome.patch_proposal_id,
                     seal_outcome.inference_artifact_id,
+                    expected_intent_id,
                 ]
             ),
         )
@@ -410,6 +416,7 @@ class RealFixEvidenceClosureBridgeTest(unittest.TestCase):
         self.assertEqual(
             a["payload"]["anchor_root_revision_id"], seal_outcome.revision_id
         )
+        self.assertEqual(a["payload"]["intent_id"], expected_intent_id)
         self.assertEqual(a["payload"]["source"], "real_fix_tracer")
 
     def test_bridge_audit_chain_is_complete(self) -> None:

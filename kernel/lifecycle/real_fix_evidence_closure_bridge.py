@@ -427,6 +427,22 @@ class RealFixEvidenceClosureBridge:
         # receipt / patch / inference / snapshot-root bindings that the
         # replay-anchor schema does not carry on-row, and tags the
         # source as real-fix tracer.
+        #
+        # AUDIT-003 / §22.1: name ``intent_id`` in both ``artifact_refs``
+        # and ``payload``. The sealed ``revision`` row fetched above
+        # carries the originating durable ``intent_anchor_records.intent_id``
+        # on its ``intent_id`` column, which ``RevisionSealService.seal_revision``
+        # has already fail-closed on (missing / empty / unknown id, or
+        # task_id mismatch against the durable row) before the row was
+        # written. Naming it here mirrors the pattern already applied to
+        # ``revision_sealed`` (seal service), ``real_fix_revision_seal_bridge_attested``
+        # (seal bridge), and ``real_fix_chain_completed`` (orchestrator
+        # wrapper), closing the last terminal-path bridge-layer one-hop
+        # asymmetry so a reviewer reading only this record can recover
+        # the originating durable intent-anchor id without a second
+        # fetch on ``revisions.intent_id``. No schema change, no
+        # migration, no new artifact family, no new audit record type.
+        intent_id = revision.get("intent_id")
         self._audit.append(
             record_type="real_fix_evidence_closure_bridge_attested",
             task_id=outcome.task_id,
@@ -440,6 +456,7 @@ class RealFixEvidenceClosureBridge:
                 outcome.validation_receipt_id,
                 outcome.patch_proposal_id,
                 outcome.inference_artifact_id,
+                intent_id,
             ],
             payload={
                 "replay_anchor_id": replay_anchor_id,
@@ -454,6 +471,7 @@ class RealFixEvidenceClosureBridge:
                 "originating_root_revision_id": outcome.root_revision_id,
                 "anchor_root_revision_id": anchor["root_revision_id"],
                 "replay_class_claim": anchor["replay_class_claim"],
+                "intent_id": intent_id,
                 "source": "real_fix_tracer",
             },
         )
