@@ -733,10 +733,20 @@ class SignablePathOrchestrator:
         # above and the ``root_revision_id`` to the labelled
         # ``real-fix::root::<task_id>`` form (matching the
         # ContextArtifact row's own ``root_revision_id``).
+        # Thread the durable ``intent_anchor_records.intent_id`` minted
+        # at entrypoint so the ``inference_artifact_created`` record the
+        # recorder emits on a verified pass names it in both
+        # ``artifact_refs`` and ``payload``. AUDIT-003 / §22.1: this
+        # closes the last upstream one-hop asymmetry on the real-fix
+        # narrow-path audit chain above ``patch_proposal_created``. The
+        # tracer and recorder perform no independent verification;
+        # authoritative fail-closed verification of ``intent_id`` remains
+        # in the downstream seal service at stage 6.
         result = self._rf_tracer.run(
             task,
             context_artifact_id=rf_context_artifact_id,
             root_revision_id=rf_root_revision_id,
+            intent_id=rf_intent_anchor.intent_id,
         )
         if not getattr(result, "verified", False) or \
                 getattr(result, "outcome", "") != "real_fix_verified_pass":
