@@ -237,7 +237,10 @@ class RealFixReviewBridgeTest(unittest.TestCase):
         task_id = f"fix-{uuid4().hex[:8]}"
         vb_outcome = self._bridge_to_receipt(task_id)
 
-        outcome = self.review_bridge.bridge(outcome=vb_outcome)
+        outcome = self.review_bridge.bridge(
+            outcome=vb_outcome,
+            intent_id=f"real-fix::intent::{task_id}",
+        )
 
         self.assertIsInstance(outcome, RealFixReviewBridgeOutcome)
         self.assertTrue(outcome.review_artifact_id.startswith("rv-"))
@@ -274,7 +277,12 @@ class RealFixReviewBridgeTest(unittest.TestCase):
             patch_row["inference_artifact_id"], vb_outcome.inference_artifact_id
         )
 
-        # Exactly one bridge attestation audit event, carrying all four ids.
+        # Exactly one bridge attestation audit event, carrying all four
+        # upstream ids plus the originating durable intent-anchor id
+        # (AUDIT-003 / §22.1): a reviewer reading only this record can
+        # recover the originating ``intent_anchor_records.intent_id``
+        # without a second fetch.
+        expected_intent_id = f"real-fix::intent::{task_id}"
         attested = self._records_of("real_fix_review_bridge_attested")
         self.assertEqual(len(attested), 1)
         a = attested[0]
@@ -288,9 +296,11 @@ class RealFixReviewBridgeTest(unittest.TestCase):
                     vb_outcome.validation_receipt_id,
                     vb_outcome.patch_proposal_id,
                     vb_outcome.inference_artifact_id,
+                    expected_intent_id,
                 ]
             ),
         )
+        self.assertIn(expected_intent_id, a["artifact_refs"])
         self.assertEqual(
             a["payload"]["review_artifact_id"], outcome.review_artifact_id
         )
@@ -305,6 +315,7 @@ class RealFixReviewBridgeTest(unittest.TestCase):
             a["payload"]["inference_artifact_id"],
             vb_outcome.inference_artifact_id,
         )
+        self.assertEqual(a["payload"]["intent_id"], expected_intent_id)
         self.assertEqual(a["payload"]["risk_class"], "low")
         self.assertEqual(a["payload"]["source"], "real_fix_tracer")
 
