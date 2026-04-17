@@ -786,8 +786,19 @@ class SignablePathOrchestrator:
         )
 
         # --- 2/7: patch projection ----------------------------------------
+        # Thread the durable ``intent_anchor_records.intent_id`` minted
+        # at entrypoint so the ``patch_proposal_created`` record names
+        # it in both ``artifact_refs`` and ``payload``. AUDIT-003 /
+        # §22.1: this closes the next upstream one-hop asymmetry on the
+        # real-fix narrow-path audit chain above
+        # ``real_fix_validation_bridge_attested``. The projector does
+        # not verify the id; authoritative fail-closed verification
+        # remains in the downstream seal service at stage 6.
         projection = self._rf_projector.project(
-            task=task, result=result, record=record
+            task=task,
+            result=result,
+            record=record,
+            intent_id=rf_intent_anchor.intent_id,
         )
         self._advance(state, Stage.PATCH_PROPOSAL)
         state.artifact_ids[Stage.PATCH_PROPOSAL] = projection.patch_proposal_id

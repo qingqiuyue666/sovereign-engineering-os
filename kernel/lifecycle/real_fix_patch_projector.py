@@ -135,12 +135,23 @@ class RealFixPatchProjector:
         task: Any,
         result: Any,
         record: Any,
+        intent_id: str | None = None,
     ) -> RealFixPatchProjection:
         """Insert one PatchProposal row and emit one audit record.
 
         Raises ``RealFixProjectorRejected`` if the inputs are not
         admissible. In that case no row is persisted and no audit event
         is appended — the tracer's existing evidence remains intact.
+
+        ``intent_id`` is the durable ``intent_anchor_records.intent_id``
+        minted at the real-fix chain entrypoint. The projector only
+        names it in the ``patch_proposal_created`` attestation so a
+        reviewer reading that single audit hop can recover the
+        originating intent-anchor id without a second fetch. The
+        projector performs no independent verification; authoritative
+        fail-closed verification of ``intent_id`` against
+        ``intent_anchor_records`` remains the responsibility of the
+        downstream ``RevisionSealService`` at stage 6.
         """
         outcome = getattr(result, "outcome", None)
         if outcome != "real_fix_verified_pass" or not getattr(result, "verified", False):
@@ -226,18 +237,43 @@ class RealFixPatchProjector:
         # ``source`` tag lets the reviewer see that the row was
         # projected from a real-fix tracer result, not produced by the
         # full signable-path orchestrator.
+        #
+        # AUDIT-003 / §22.1: when the caller supplies the durable
+        # ``intent_anchor_records.intent_id`` minted at the real-fix
+        # chain entrypoint, name it in both ``artifact_refs`` and
+        # ``payload``. This mirrors the pattern already applied to
+        # ``real_fix_validation_bridge_attested`` (stage 3),
+        # ``real_fix_review_bridge_attested`` (stage 4),
+        # ``real_fix_approval_bridge_attested`` (stage 5),
+        # ``real_fix_revision_seal_bridge_attested`` (stage 6),
+        # ``real_fix_evidence_closure_bridge_attested`` (stage 7),
+        # ``revision_sealed`` (seal service), and
+        # ``real_fix_chain_completed`` (orchestrator wrapper), closing
+        # the next upstream one-hop asymmetry on the real-fix narrow-
+        # path so a reviewer reading only this record can recover the
+        # originating durable intent-anchor id without a second fetch
+        # (via ``inference_artifact_id -> context_artifact_id ->
+        # intent_anchor_records``). Authoritative fail-closed
+        # verification of ``intent_id`` against ``intent_anchor_records``
+        # remains in ``RevisionSealService`` at stage 6; this projector
+        # performs no independent verification. No schema change, no
+        # migration, no new artifact family, no new audit record type.
+        artifact_refs = [
+            artifact["patch_proposal_id"],
+            inference_artifact_id,
+        ]
+        if intent_id is not None:
+            artifact_refs.append(intent_id)
         self._audit.append(
             record_type="patch_proposal_created",
             task_id=task_id,
-            artifact_refs=[
-                artifact["patch_proposal_id"],
-                inference_artifact_id,
-            ],
+            artifact_refs=artifact_refs,
             payload={
                 "patch_group_hash": patch_group_hash,
                 "target_file_ids": [target_file_id],
                 "side_effect_class_proposal": "local_text_substitution",
                 "inference_artifact_id": inference_artifact_id,
+                "intent_id": intent_id,
                 "source": "real_fix_tracer",
                 # Real-provider output admits at most a semantic replay
                 # ceiling. Preserving the ceiling tag on this downstream
