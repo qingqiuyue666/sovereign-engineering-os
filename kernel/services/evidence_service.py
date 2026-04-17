@@ -201,17 +201,40 @@ class EvidenceService:
 
         self._anchor_repo.insert(anchor)
 
+        # AUDIT-003 / §22.1: name the originating durable
+        # ``intent_anchor_records.intent_id`` in both ``artifact_refs``
+        # and ``payload``. The id is already in local scope on the
+        # sealed ``revision`` row fetched above; by the time this
+        # service runs, ``RevisionSealService.seal_revision`` has
+        # already fail-closed on missing / empty / unknown id and, when
+        # the intent-anchor reader is wired, on any id whose durable
+        # row's ``task_id`` does not match the seal's. Naming it here
+        # closes the evidence-stage service-record one-hop asymmetry
+        # that the already-closed
+        # ``real_fix_evidence_closure_bridge_attested`` covers at the
+        # bridge layer, matching the precedent set by
+        # ``revision_sealed`` (seal service, PR #33). This service
+        # performs no independent verification. No schema change, no
+        # migration, no new artifact family, no new audit record type.
+        # Absent / empty ``intent_id`` preserves the prior audit shape
+        # exactly.
+        revision_intent_id = revision.get("intent_id")
+        audit_artifact_refs = [replay_anchor_id, revision_id]
+        audit_payload: dict[str, Any] = {
+            "replay_class_claim": classification.replay_class.value,
+            "degradation_reason": classification.degradation_reason,
+            "unreplayable_reason": classification.unreplayable_reason,
+            "required_artifact_ids": list(classification.required_artifact_ids),
+        }
+        if isinstance(revision_intent_id, str) and revision_intent_id:
+            audit_artifact_refs.append(revision_intent_id)
+            audit_payload["intent_id"] = revision_intent_id
         self._audit.append(
             record_type="evidence_closure",
             task_id=task_id,
             root_revision_id=root_revision_id,
             replay_anchor_id=replay_anchor_id,
-            artifact_refs=[replay_anchor_id, revision_id],
-            payload={
-                "replay_class_claim": classification.replay_class.value,
-                "degradation_reason": classification.degradation_reason,
-                "unreplayable_reason": classification.unreplayable_reason,
-                "required_artifact_ids": list(classification.required_artifact_ids),
-            },
+            artifact_refs=audit_artifact_refs,
+            payload=audit_payload,
         )
         return replay_anchor_id

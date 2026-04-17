@@ -33,6 +33,7 @@ What it proves:
 
 from __future__ import annotations
 
+import json
 import sys
 import os
 import unittest
@@ -498,6 +499,44 @@ class TestEvidenceServiceReplayClassification(unittest.TestCase):
             len(evidence_records), 1,
             "audit must contain evidence_closure record",
         )
+
+        # AUDIT-003 / §22.1: the ``evidence_closure`` service-level record
+        # must name the originating durable
+        # ``intent_anchor_records.intent_id`` in both ``artifact_refs``
+        # and ``payload``. The id is the same one written onto the sealed
+        # ``revisions.intent_id`` column by ``RevisionSealService``
+        # upstream; a reviewer reading only this record can now recover
+        # the intent linkage without a second fetch via
+        # ``revisions.intent_id``. Matches the precedent set by
+        # ``revision_sealed`` (seal service) and the bridge-layer
+        # ``real_fix_evidence_closure_bridge_attested`` record.
+        closure_row = self.conn.execute(
+            "SELECT payload_json, artifact_refs FROM audit_records "
+            "WHERE task_id = ? AND record_type = 'evidence_closure' "
+            "ORDER BY sequence;",
+            (task_id,),
+        ).fetchone()
+        self.assertIsNotNone(closure_row)
+        closure_payload = json.loads(closure_row["payload_json"])
+        closure_refs = json.loads(closure_row["artifact_refs"])
+
+        anchor_row = self.conn.execute(
+            "SELECT root_revision_id FROM replay_anchors "
+            "WHERE replay_anchor_id = ?;",
+            (ra_id,),
+        ).fetchone()
+        self.assertIsNotNone(anchor_row)
+        revision_row = self.conn.execute(
+            "SELECT intent_id FROM revisions WHERE revision_id = ?;",
+            (anchor_row["root_revision_id"],),
+        ).fetchone()
+        self.assertIsNotNone(revision_row)
+        expected_intent_id = revision_row["intent_id"]
+        self.assertIsInstance(expected_intent_id, str)
+        self.assertNotEqual(expected_intent_id, "")
+
+        self.assertEqual(closure_payload.get("intent_id"), expected_intent_id)
+        self.assertIn(expected_intent_id, closure_refs)
 
     def test_sealed_state_reached(self) -> None:
         """After evidence closure, the orchestrator reaches SEALED."""

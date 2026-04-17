@@ -503,6 +503,26 @@ class SignablePathOrchestratorRealFixChainTest(unittest.TestCase):
         self.assertEqual(cac_payload["intent_id"], expected_intent_id)
         self.assertIn(expected_intent_id, cac_refs)
 
+        # AUDIT-003 / §22.1 (evidence service-record parity): the
+        # ``evidence_closure`` record emitted by ``EvidenceService`` must
+        # also name the same durable intent-anchor id in both ``payload``
+        # and ``artifact_refs``. The id is the one written onto
+        # ``revisions.intent_id`` by ``RevisionSealService`` upstream;
+        # reading it from the already-fetched sealed revision row and
+        # naming it on the service record closes the evidence-stage
+        # one-hop asymmetry next to the already-closed bridge-layer
+        # ``real_fix_evidence_closure_bridge_attested``. Mirrors the
+        # parity between ``revision_sealed`` (service) and
+        # ``real_fix_revision_seal_bridge_attested`` (bridge).
+        ec = self.conn.execute(
+            "SELECT payload_json, artifact_refs FROM audit_records "
+            "WHERE record_type = 'evidence_closure';"
+        ).fetchone()
+        ec_payload = json.loads(ec[0])
+        ec_refs = json.loads(ec[1])
+        self.assertEqual(ec_payload["intent_id"], expected_intent_id)
+        self.assertIn(expected_intent_id, ec_refs)
+
         # Audit sequence is gap-free.
         seqs = [
             r[0]
