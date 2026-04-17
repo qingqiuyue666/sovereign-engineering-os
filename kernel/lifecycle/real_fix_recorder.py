@@ -137,6 +137,7 @@ class RealFixNarrowPathRecorder:
         model_route_id: str,
         context_artifact_id: str | None = None,
         root_revision_id: str | None = None,
+        intent_id: str | None = None,
     ) -> RealFixNarrowPathRecord:
         """Insert one InferenceArtifact row and emit one audit record.
 
@@ -152,6 +153,20 @@ class RealFixNarrowPathRecorder:
         falls back to the tracer-scoped synthetic label. Empty-string
         overrides are rejected fail-closed — supplying an override is a
         positive assertion that an authority-bearing id exists.
+
+        ``intent_id`` is the durable ``intent_anchor_records.intent_id``
+        minted at the real-fix chain entrypoint. The recorder only names
+        it in the ``inference_artifact_created`` attestation so a
+        reviewer reading that single audit hop can recover the
+        originating intent-anchor id without a second fetch (via
+        ``context_artifact_id -> intent_anchor_records``). The recorder
+        performs no independent verification; authoritative fail-closed
+        verification of ``intent_id`` against ``intent_anchor_records``
+        remains the responsibility of the downstream
+        ``RevisionSealService`` at stage 6. When ``None`` the recorder
+        preserves the prior audit shape exactly (no ``intent_id`` in
+        ``artifact_refs`` or ``payload``) so hand-built tracer-bullet
+        tests that do not thread the id continue to pass unchanged.
         """
         outcome = getattr(result, "outcome", None)
         if outcome != "real_fix_verified_pass" or not getattr(result, "verified", False):
@@ -224,20 +239,48 @@ class RealFixNarrowPathRecorder:
         # The audit record is the cross-plane evidence hook. It carries
         # the honest replay ceiling and the ids a reviewer needs to go
         # read the persisted row.
+        #
+        # AUDIT-003 / §22.1: when the caller supplies the durable
+        # ``intent_anchor_records.intent_id`` minted at the real-fix
+        # chain entrypoint, name it in both ``artifact_refs`` and
+        # ``payload``. This mirrors the pattern already applied to
+        # ``patch_proposal_created`` (projector),
+        # ``real_fix_validation_bridge_attested`` (stage 3),
+        # ``real_fix_review_bridge_attested`` (stage 4),
+        # ``real_fix_approval_bridge_attested`` (stage 5),
+        # ``real_fix_revision_seal_bridge_attested`` (stage 6),
+        # ``real_fix_evidence_closure_bridge_attested`` (stage 7),
+        # ``revision_sealed`` (seal service), and
+        # ``real_fix_chain_completed`` (orchestrator wrapper), closing
+        # the next upstream one-hop asymmetry on the real-fix narrow-
+        # path so a reviewer reading only this record can recover the
+        # originating durable intent-anchor id without a second fetch
+        # (via ``context_artifact_id -> intent_anchor_records``).
+        # Authoritative fail-closed verification of ``intent_id``
+        # against ``intent_anchor_records`` remains in
+        # ``RevisionSealService`` at stage 6; this recorder performs no
+        # independent verification. No schema change, no migration, no
+        # new artifact family, no new audit record type.
+        artifact_refs = [
+            artifact["inference_artifact_id"],
+            context_artifact_id,
+        ]
+        if intent_id is not None:
+            artifact_refs.append(intent_id)
+        audit_payload: dict[str, Any] = {
+            "worker_profile": worker_profile,
+            "model_route_id": model_route_id,
+            "output_hash": output_hash,
+            "replay_ceiling": ceiling,
+            "source": "real_fix_tracer",
+        }
+        if intent_id is not None:
+            audit_payload["intent_id"] = intent_id
         self._audit.append(
             record_type="inference_artifact_created",
             task_id=task_id,
-            artifact_refs=[
-                artifact["inference_artifact_id"],
-                context_artifact_id,
-            ],
-            payload={
-                "worker_profile": worker_profile,
-                "model_route_id": model_route_id,
-                "output_hash": output_hash,
-                "replay_ceiling": ceiling,
-                "source": "real_fix_tracer",
-            },
+            artifact_refs=artifact_refs,
+            payload=audit_payload,
         )
 
         return RealFixNarrowPathRecord(

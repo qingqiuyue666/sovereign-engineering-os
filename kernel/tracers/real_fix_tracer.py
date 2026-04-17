@@ -294,6 +294,7 @@ class RealFixTracer:
         *,
         context_artifact_id: str | None = None,
         root_revision_id: str | None = None,
+        intent_id: str | None = None,
     ) -> RealFixResult:
         """Invoke the adapter once, verify, and emit evidence.
 
@@ -311,6 +312,15 @@ class RealFixTracer:
         persisted ``InferenceArtifact`` row to the real id instead of
         the synthetic tracer-scoped label. Default ``None`` preserves
         bit-identical legacy behavior (synthetic labels).
+
+        ``intent_id`` is the durable ``intent_anchor_records.intent_id``
+        minted at the real-fix chain entrypoint. When supplied, the
+        tracer forwards it to the narrow-path recorder so the
+        ``inference_artifact_created`` audit record names it in both
+        ``artifact_refs`` and ``payload`` (AUDIT-003 / §22.1). The
+        tracer performs no independent verification; authoritative
+        fail-closed verification remains in ``RevisionSealService`` at
+        stage 6. Default ``None`` preserves prior audit shape.
         """
         envelope = self._build_envelope(task)
 
@@ -473,6 +483,7 @@ class RealFixTracer:
                 model_route_id=self._model_route_id,
                 context_artifact_id=context_artifact_id,
                 root_revision_id=root_revision_id,
+                intent_id=intent_id,
             )
             narrow_path_inference_id = record.inference_artifact_id
 
