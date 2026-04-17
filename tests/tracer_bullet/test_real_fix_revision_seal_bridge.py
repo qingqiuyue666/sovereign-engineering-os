@@ -321,7 +321,12 @@ class RealFixRevisionSealBridgeTest(unittest.TestCase):
         # Exactly one snapshot root, bound to the revision.
         self.assertEqual(self._count("snapshot_roots"), 1)
 
-        # Exactly one bridge attestation audit event, carrying all seven ids.
+        # Exactly one bridge attestation audit event, carrying all seven
+        # upstream ids plus the originating durable intent-anchor id
+        # (AUDIT-003 / §22.1): a reviewer reading only this record can
+        # recover the full end-to-end chain including the intent row
+        # without a second fetch on ``revisions.intent_id``.
+        expected_intent_id = f"real-fix::intent::{task_id}"
         attested = self._records_of("real_fix_revision_seal_bridge_attested")
         self.assertEqual(len(attested), 1)
         a = attested[0]
@@ -338,9 +343,11 @@ class RealFixRevisionSealBridgeTest(unittest.TestCase):
                     ap_outcome.validation_receipt_id,
                     ap_outcome.patch_proposal_id,
                     ap_outcome.inference_artifact_id,
+                    expected_intent_id,
                 ]
             ),
         )
+        self.assertIn(expected_intent_id, a["artifact_refs"])
         self.assertEqual(a["payload"]["revision_id"], outcome.revision_id)
         self.assertEqual(
             a["payload"]["snapshot_root_id"], outcome.snapshot_root_id
@@ -365,6 +372,7 @@ class RealFixRevisionSealBridgeTest(unittest.TestCase):
         self.assertEqual(
             a["payload"]["context_artifact_id"], ap_outcome.context_artifact_id
         )
+        self.assertEqual(a["payload"]["intent_id"], expected_intent_id)
         self.assertEqual(a["payload"]["revision_state"], "sealed")
         self.assertEqual(a["payload"]["source"], "real_fix_tracer")
 

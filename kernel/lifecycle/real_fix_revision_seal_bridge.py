@@ -403,6 +403,22 @@ class RealFixRevisionSealBridge:
         # this record adds the upstream review / receipt / patch /
         # inference bindings that the revision schema does not carry
         # on-row, and tags the source as real-fix tracer.
+        #
+        # AUDIT-003 / §22.1: name ``intent_id`` in both ``artifact_refs``
+        # and ``payload``. ``RevisionSealService.seal_revision`` above
+        # fail-closes on a missing / empty / unknown ``intent_id`` before
+        # returning, so at this point the supplied id has been verified
+        # (when the intent-anchor reader is wired) to name a durable
+        # ``intent_anchor_records`` row whose ``task_id`` matches the
+        # seal's, and has been written onto ``Revision.intent_id``.
+        # Naming it here mirrors the pattern already applied to the
+        # seal service's own ``revision_sealed`` audit and to the
+        # orchestrator's ``real_fix_chain_completed`` wrapper, closing
+        # the last bridge-layer one-hop asymmetry so a reviewer reading
+        # only this record can recover the originating durable intent-
+        # anchor id without a second fetch on ``revisions.intent_id``.
+        # No schema change, no migration, no new artifact family, no
+        # new audit record type.
         self._audit.append(
             record_type="real_fix_revision_seal_bridge_attested",
             task_id=outcome.task_id,
@@ -415,6 +431,7 @@ class RealFixRevisionSealBridge:
                 outcome.validation_receipt_id,
                 outcome.patch_proposal_id,
                 outcome.inference_artifact_id,
+                intent_id,
             ],
             payload={
                 "revision_id": revision_id,
@@ -425,6 +442,7 @@ class RealFixRevisionSealBridge:
                 "patch_proposal_id": outcome.patch_proposal_id,
                 "inference_artifact_id": outcome.inference_artifact_id,
                 "context_artifact_id": outcome.context_artifact_id,
+                "intent_id": intent_id,
                 "revision_state": revision["state"],
                 "sealed_at": revision["sealed_at"],
                 "source": "real_fix_tracer",
