@@ -382,11 +382,22 @@ class RevisionSealService:
         seal_log.ensure_complete()
 
         # Audit emission for the seal.
+        #
+        # AUDIT-003 / §22.1: name ``intent_id`` in both ``artifact_refs``
+        # and ``payload``. The service has just verified (when the
+        # intent-anchor reader is wired) that ``intent_id`` resolves to a
+        # durable ``intent_anchor_records`` row whose ``task_id`` matches
+        # the seal's, and has written that same id onto the Revision row
+        # above. Naming it here makes the authority-bearing seal audit
+        # self-contained: a reviewer reading this record can recover the
+        # originating durable intent-anchor id without a second fetch on
+        # ``revisions.intent_id``. No schema change, no new field on any
+        # artifact, no new audit record type.
         self._audit.append(
             record_type="revision_sealed",
             task_id=task_id,
             root_revision_id=root_revision_id,
-            artifact_refs=[revision_id, snapshot_root_id, approval_id],
+            artifact_refs=[revision_id, snapshot_root_id, approval_id, intent_id],
             payload={
                 "root_hash": root_hash,
                 "sealed_at": sealed_at,
@@ -394,6 +405,7 @@ class RevisionSealService:
                 "journal_prepare_seq": prepare_seq,
                 "journal_confirm_seq": confirm_seq,
                 "seal_steps": list(seal_log.as_tuples()),
+                "intent_id": intent_id,
             },
         )
         return revision_id
