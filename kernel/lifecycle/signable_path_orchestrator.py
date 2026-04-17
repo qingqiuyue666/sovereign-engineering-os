@@ -896,6 +896,17 @@ class SignablePathOrchestrator:
         # Wrapper audit: one record that names every id a reviewer needs
         # to walk the chain from a single hop. The replay ceiling is
         # carried through from the tracer / recorder unchanged.
+        #
+        # AUDIT-003 / §22.1: ``intent_id`` is included in both
+        # ``artifact_refs`` and ``payload`` so the wrapper's own "every
+        # id from a single hop" claim is true for the originating
+        # ``intent_anchor_records`` row as well. Without it, a reviewer
+        # reading this record would still need a DB fetch on the
+        # revision row (``revisions.intent_id``) to recover the
+        # durable intent-anchor id the seal service just verified —
+        # the last one-hop asymmetry on the real-fix surface for the
+        # AUDIT-003 linkage. The id itself is unchanged from the
+        # durable row minted at ``_emit_intent_anchor`` above.
         self._audit.append(
             record_type="real_fix_chain_completed",
             task_id=task_id,
@@ -908,6 +919,7 @@ class SignablePathOrchestrator:
                 closure_outcome.validation_receipt_id,
                 closure_outcome.patch_proposal_id,
                 closure_outcome.inference_artifact_id,
+                rf_intent_anchor.intent_id,
             ],
             payload={
                 "replay_anchor_id": closure_outcome.replay_anchor_id,
@@ -920,6 +932,7 @@ class SignablePathOrchestrator:
                 "inference_artifact_id": closure_outcome.inference_artifact_id,
                 "context_artifact_id": closure_outcome.context_artifact_id,
                 "root_revision_id": closure_outcome.root_revision_id,
+                "intent_id": rf_intent_anchor.intent_id,
                 "replay_ceiling": record.replay_ceiling,
                 "source": "real_fix_tracer",
             },
