@@ -736,6 +736,22 @@ class SignablePathOrchestratorRealFixChainTest(unittest.TestCase):
         self.assertEqual(rev["intent_id"], intent_id)
         self.assertNotEqual(rev["intent_id"], f"intent-{task_id}")
 
+        # AUDIT-003 / §22.1: the authority-bearing ``revision_sealed``
+        # service audit names the durable ``intent_id`` in both
+        # ``artifact_refs`` and ``payload``. A reviewer reading only this
+        # one record can recover the originating durable intent-anchor id
+        # without a second fetch on ``revisions.intent_id``. Exactly one
+        # such record per chain invocation.
+        sealed_rows = self.conn.execute(
+            "SELECT payload_json, artifact_refs FROM audit_records "
+            "WHERE record_type = 'revision_sealed';"
+        ).fetchall()
+        self.assertEqual(len(sealed_rows), 1)
+        sealed_payload = json.loads(sealed_rows[0][0])
+        self.assertEqual(sealed_payload["intent_id"], intent_id)
+        sealed_refs = json.loads(sealed_rows[0][1])
+        self.assertIn(intent_id, sealed_refs)
+
     def test_unverified_tracer_outcome_still_persists_intent_anchor(self) -> None:
         """Fail-closed honesty: the durable intent row is minted during
         the ContextArtifact admission hop, which runs before the tracer

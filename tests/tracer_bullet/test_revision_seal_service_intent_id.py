@@ -347,6 +347,17 @@ class RevisionSealServiceIntentIdFailClosedTest(unittest.TestCase):
         # No silently-fabricated ``intent-<task_id>`` label written.
         self.assertNotEqual(revision["intent_id"], f"intent-{task_id}")
 
+        # AUDIT-003 / §22.1: the authority-bearing ``revision_sealed``
+        # audit record names the durable ``intent_id`` in both
+        # ``artifact_refs`` and ``payload`` so a reviewer reading only
+        # this one record can recover the originating intent-anchor id
+        # without a second fetch on ``revisions.intent_id``.
+        sealed_records = self._records_of("revision_sealed")
+        self.assertEqual(len(sealed_records), 1)
+        sealed = sealed_records[0]
+        self.assertEqual(sealed["payload"]["intent_id"], intent_id)
+        self.assertIn(intent_id, sealed["artifact_refs"])
+
     # ------------------------------------------------------------------
     # Fail-closed: seal_revision refuses when intent_id names no durable
     # intent_anchor_records row, or resolves to a row whose task_id does
