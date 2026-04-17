@@ -419,7 +419,7 @@ class SignablePathOrchestratorRealFixChainTest(unittest.TestCase):
         # wrapper both carry "semantic". Real-provider output admits no
         # stronger ceiling.
         wrapper = self.conn.execute(
-            "SELECT payload_json FROM audit_records "
+            "SELECT payload_json, artifact_refs FROM audit_records "
             "WHERE record_type = 'real_fix_chain_completed';"
         ).fetchone()
         wrapper_payload = json.loads(wrapper[0])
@@ -428,6 +428,20 @@ class SignablePathOrchestratorRealFixChainTest(unittest.TestCase):
         self.assertEqual(
             wrapper_payload["replay_anchor_id"], outcome.replay_anchor_id
         )
+
+        # AUDIT-003 / §22.1: the wrapper's own "every id from a single
+        # hop" claim must include the originating durable intent-anchor
+        # id — both in ``payload`` and in ``artifact_refs``. The id
+        # pinned here is the exact label minted by
+        # ``_emit_intent_anchor`` and persisted into
+        # ``intent_anchor_records`` during the ContextArtifact hop, so a
+        # reviewer reading only this one record can recover the full
+        # AUDIT-003 linkage without an extra DB fetch on
+        # ``revisions.intent_id``.
+        expected_intent_id = f"real-fix::intent::{task_id}"
+        self.assertEqual(wrapper_payload["intent_id"], expected_intent_id)
+        wrapper_artifact_refs = json.loads(wrapper[1])
+        self.assertIn(expected_intent_id, wrapper_artifact_refs)
 
         # Audit sequence is gap-free.
         seqs = [
