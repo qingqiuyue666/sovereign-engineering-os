@@ -202,16 +202,42 @@ class ContextService:
 
         self._repo.insert(payload)
 
+        # AUDIT-003 / §22.1: when the caller supplies an intent anchor
+        # carrying a durable ``intent_anchor_records.intent_id`` (today:
+        # ``SignablePathOrchestrator._emit_intent_anchor`` for both the
+        # eight-stage ``admit_context`` surface and the real-fix chain
+        # entrypoint ``run_real_fix_chain``), name it in both
+        # ``artifact_refs`` and ``payload``. This closes the last
+        # upstream one-hop asymmetry on the real-fix narrow-path audit
+        # chain, immediately upstream of the already-closed
+        # ``inference_artifact_created`` record: a reviewer reading only
+        # this single record can recover the originating durable
+        # intent-anchor id without a second fetch (via
+        # ``context_artifact_id -> intent_anchor_records``).
+        # Authoritative fail-closed verification of ``intent_id`` against
+        # ``intent_anchor_records`` remains the responsibility of the
+        # downstream ``RevisionSealService`` at stage 6; this service
+        # performs no independent verification. No schema change, no
+        # migration, no new artifact family, no new audit record type.
+        # Absent / empty ``intent_id`` preserves the prior audit shape
+        # exactly so any caller that threads a stub anchor continues to
+        # observe unchanged records.
+        anchor_intent_id = getattr(intent_anchor, "intent_id", None)
+        audit_artifact_refs = [payload["context_artifact_id"]]
+        audit_payload: dict[str, Any] = {
+            "root_revision_id": root_revision_id,
+            "content_hash": payload["content_hash"],
+            "hard_budget_tokens": hard_budget,
+            "effective_budget_tokens": effective_budget,
+            "budget_policy_id": PHASE1_BUDGET_POLICY_ID,
+        }
+        if isinstance(anchor_intent_id, str) and anchor_intent_id:
+            audit_artifact_refs.append(anchor_intent_id)
+            audit_payload["intent_id"] = anchor_intent_id
         self._audit.append(
             record_type="context_artifact_created",
             task_id=task_id,
-            artifact_refs=[payload["context_artifact_id"]],
-            payload={
-                "root_revision_id": root_revision_id,
-                "content_hash": payload["content_hash"],
-                "hard_budget_tokens": hard_budget,
-                "effective_budget_tokens": effective_budget,
-                "budget_policy_id": PHASE1_BUDGET_POLICY_ID,
-            },
+            artifact_refs=audit_artifact_refs,
+            payload=audit_payload,
         )
         return payload["context_artifact_id"]

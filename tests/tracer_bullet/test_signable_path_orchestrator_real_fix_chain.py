@@ -483,6 +483,26 @@ class SignablePathOrchestratorRealFixChainTest(unittest.TestCase):
         self.assertEqual(iac_payload["intent_id"], expected_intent_id)
         self.assertIn(expected_intent_id, iac_refs)
 
+        # AUDIT-003 / §22.1 (upstream-of-recorder): the
+        # ``context_artifact_created`` record emitted by ``ContextService``
+        # when composed by ``run_real_fix_chain`` must also name the same
+        # durable intent-anchor id in both ``payload`` and
+        # ``artifact_refs``. Without this the service's "cross-plane
+        # evidence hook" audit would still require a second fetch (via
+        # ``context_artifact_id -> intent_anchor_records``) to recover the
+        # originating intent-anchor id, leaving the last one-hop
+        # asymmetry immediately upstream of ``inference_artifact_created``
+        # that the mainline pattern already closed on every downstream
+        # hop.
+        cac = self.conn.execute(
+            "SELECT payload_json, artifact_refs FROM audit_records "
+            "WHERE record_type = 'context_artifact_created';"
+        ).fetchone()
+        cac_payload = json.loads(cac[0])
+        cac_refs = json.loads(cac[1])
+        self.assertEqual(cac_payload["intent_id"], expected_intent_id)
+        self.assertIn(expected_intent_id, cac_refs)
+
         # Audit sequence is gap-free.
         seqs = [
             r[0]
