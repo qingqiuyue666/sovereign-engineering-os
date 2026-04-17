@@ -814,8 +814,17 @@ class SignablePathOrchestrator:
         )
 
         # --- 4/7: review bridge -------------------------------------------
+        # Thread the durable ``intent_anchor_records.intent_id`` minted
+        # at entrypoint so the ``real_fix_review_bridge_attested``
+        # record names it in both ``artifact_refs`` and ``payload``.
+        # AUDIT-003 / §22.1: this closes the next one-hop asymmetry
+        # upstream of the already-closed approval-bridge attestation.
+        # The review bridge does not verify the id; authoritative
+        # fail-closed verification remains in the downstream seal
+        # service at stage 6.
         review_outcome = self._rf_review_bridge.bridge(
-            outcome=validation_outcome
+            outcome=validation_outcome,
+            intent_id=rf_intent_anchor.intent_id,
         )
         self._advance(state, Stage.REVIEW)
         state.artifact_ids[Stage.REVIEW] = review_outcome.review_artifact_id
