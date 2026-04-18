@@ -182,6 +182,7 @@ class RevisionSealService:
             current_root_revision_id=root_revision_id,
             current_context_artifact_id=reviewed_context,
             current_patch_hash=patch_hash,
+            intent_id=intent_id,
         )
 
         # ---- preconditions (§22.2) ----

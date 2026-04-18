@@ -31,6 +31,7 @@ What it proves:
 
 from __future__ import annotations
 
+import json
 import sys
 import os
 import unittest
@@ -472,6 +473,50 @@ class TestBarrierRejectionWiredStack(unittest.TestCase):
             len(seal_rejection_records), 1,
             "audit must contain approval_seal_time_barrier_rejected record",
         )
+
+    def test_seal_time_reverification_names_intent_id_when_supplied(self) -> None:
+        """AUDIT-003 / §22.1 (seal-time reverification service-record parity):
+        when ``RevisionSealService`` threads the fail-closed-verified
+        durable ``intent_anchor_records.intent_id`` into
+        ``ApprovalService.reverify_for_seal``, and the barrier rejects
+        on drift, the ``approval_seal_time_barrier_rejected`` record
+        must name the same id in both ``artifact_refs`` and ``payload``.
+
+        This closes the seal-time rejection one-hop asymmetry so a
+        reviewer reading only the rejection record can recover the
+        AUDIT-003 / §22.1 linkage without a second fetch. The service
+        performs no independent verification of ``intent_id``;
+        authoritative fail-closed verification remains in
+        ``RevisionSealService`` upstream.
+        """
+        task_id = f"task-{uuid4().hex[:8]}"
+        ids = self._run_through_review(task_id)
+
+        ap_id = self.orch.admit_approval(task_id=task_id)
+        self.assertTrue(ap_id.startswith("ap-"))
+
+        supplied_intent_id = f"intent-{uuid4().hex[:8]}"
+        with self.assertRaises(ApprovalBarrierFailed):
+            self.ap_svc.reverify_for_seal(
+                approval_id=ap_id,
+                current_root_revision_id="rev-DRIFTED-CONCURRENT",
+                current_context_artifact_id=ids["context_id"],
+                current_patch_hash="hash-unchanged",
+                intent_id=supplied_intent_id,
+            )
+
+        row = self.conn.execute(
+            "SELECT payload_json, artifact_refs FROM audit_records "
+            "WHERE task_id = ? "
+            "AND record_type = 'approval_seal_time_barrier_rejected' "
+            "ORDER BY sequence DESC LIMIT 1;",
+            (task_id,),
+        ).fetchone()
+        self.assertIsNotNone(row)
+        payload = json.loads(row["payload_json"])
+        refs = json.loads(row["artifact_refs"])
+        self.assertEqual(payload["intent_id"], supplied_intent_id)
+        self.assertIn(supplied_intent_id, refs)
 
 
 # ---------------------------------------------------------------------------
