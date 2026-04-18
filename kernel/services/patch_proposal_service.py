@@ -95,6 +95,7 @@ class PatchProposalService:
         task_id: str,
         inference_artifact_id: str,
         request: PatchProposalRequest | Mapping[str, Any] | None = None,
+        intent_id: str | None = None,
     ) -> str:
         """Produce and persist a PatchProposal.
 
@@ -102,6 +103,18 @@ class PatchProposalService:
         single-file proposal from the inference artifact's output_hash;
         this is the phase-1 default used by the tracer bullet. Real
         callers always pass an explicit request.
+
+        ``intent_id`` is the durable ``intent_anchor_records.intent_id``
+        minted at the real-fix chain entrypoint (or the eight-stage
+        ``admit_context`` surface) and threaded in by the caller. When
+        supplied and non-empty it is named in both ``artifact_refs`` and
+        ``payload`` of the ``patch_proposal_created`` audit record so a
+        reviewer reading only that record can recover the AUDIT-003 /
+        §22.1 linkage without a second fetch. Authoritative fail-closed
+        verification of ``intent_id`` against ``intent_anchor_records``
+        remains the responsibility of ``RevisionSealService`` downstream;
+        this service performs no independent verification. Absent /
+        empty ``intent_id`` preserves the prior audit shape exactly.
         """
         inf = self._inference_reader.fetch(inference_artifact_id)
         if inf is None:
@@ -164,15 +177,23 @@ class PatchProposalService:
 
         self._repo.insert(artifact)
 
+        audit_artifact_refs: list[str] = [
+            artifact["patch_proposal_id"],
+            inference_artifact_id,
+        ]
+        audit_payload: dict[str, Any] = {
+            "patch_group_hash": patch_group_hash,
+            "target_file_ids": target_file_ids,
+            "side_effect_class_proposal": req.side_effect_class_proposal,
+        }
+        if isinstance(intent_id, str) and intent_id:
+            audit_artifact_refs.append(intent_id)
+            audit_payload["intent_id"] = intent_id
         self._audit.append(
             record_type="patch_proposal_created",
             task_id=task_id,
-            artifact_refs=[artifact["patch_proposal_id"], inference_artifact_id],
-            payload={
-                "patch_group_hash": patch_group_hash,
-                "target_file_ids": target_file_ids,
-                "side_effect_class_proposal": req.side_effect_class_proposal,
-            },
+            artifact_refs=audit_artifact_refs,
+            payload=audit_payload,
         )
 
         # Incremental invalidation enforcement (AT-017 / INV-017).
