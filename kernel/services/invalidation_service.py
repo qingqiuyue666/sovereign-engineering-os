@@ -124,6 +124,7 @@ class InvalidationService:
         root_revision_id: str,
         new_patch_group_hash: str,
         new_patch_proposal_id: str,
+        intent_id: str | None = None,
     ) -> list[str]:
         """Invalidate any live receipts whose upstream patch hash drifted.
 
@@ -137,6 +138,17 @@ class InvalidationService:
         Returns the list of validation_receipt_ids that were actually
         invalidated by this call (empty in the common single-proposal
         tracer-bullet path).
+
+        ``intent_id`` is the durable ``intent_anchor_records.intent_id``
+        threaded in by ``PatchProposalService.propose`` (which already
+        carries it from the orchestrator). It is forwarded unchanged to
+        ``invalidate_receipt`` so the ``validation_receipt_invalidated``
+        audit record names it in both ``artifact_refs`` and ``payload``
+        (AUDIT-003 / §22.1). This service performs no independent
+        verification; authoritative fail-closed verification of
+        ``intent_id`` against ``intent_anchor_records`` remains with
+        ``RevisionSealService`` downstream. Absent / empty ``intent_id``
+        preserves the prior audit shape exactly.
         """
         new_input_hash = _derive_input_hash_from_patch_hash(new_patch_group_hash)
         invalidated: list[str] = []
@@ -154,6 +166,7 @@ class InvalidationService:
                 source_artifact_id=new_patch_proposal_id,
                 task_id=task_id,
                 root_revision_id=root_revision_id,
+                intent_id=intent_id,
             ):
                 invalidated.append(rid)
         return invalidated
@@ -171,12 +184,27 @@ class InvalidationService:
         source_artifact_id: str,
         task_id: str,
         root_revision_id: str,
+        intent_id: str | None = None,
     ) -> bool:
         """Mark a receipt invalidated + cascade to gated approvals.
 
         Returns True iff this call actually transitioned the receipt
         (idempotent: a second call on an already-invalidated receipt
         returns False and emits no duplicate evidence).
+
+        ``intent_id`` is the durable ``intent_anchor_records.intent_id``
+        threaded in by the caller. When supplied and non-empty it is
+        named in both ``artifact_refs`` and ``payload`` of the
+        ``validation_receipt_invalidated`` audit record so a reviewer
+        reading only that record can recover the AUDIT-003 / §22.1
+        linkage without a second fetch. Authoritative fail-closed
+        verification of ``intent_id`` against ``intent_anchor_records``
+        remains the responsibility of ``RevisionSealService`` downstream;
+        this service performs no independent verification. Absent /
+        empty ``intent_id`` preserves the prior audit shape exactly.
+        The cascaded ``approval_invalidated`` record is intentionally
+        not in scope of this increment and is emitted with its prior
+        shape unchanged.
         """
         now = _now_iso()
         transitioned = self._receipts.mark_invalidated(
@@ -203,17 +231,22 @@ class InvalidationService:
         )
 
         # Audit: the append-only ledger records the receipt transition.
+        audit_artifact_refs: list[str] = [validation_receipt_id, source_artifact_id]
+        audit_payload: dict[str, Any] = {
+            "reason": reason,
+            "drift_class": drift_class,
+            "drift_event_id": drift_id,
+            "source_artifact_id": source_artifact_id,
+        }
+        if isinstance(intent_id, str) and intent_id:
+            audit_artifact_refs.append(intent_id)
+            audit_payload["intent_id"] = intent_id
         self._audit.append(
             record_type="validation_receipt_invalidated",
             task_id=task_id,
             root_revision_id=root_revision_id,
-            artifact_refs=[validation_receipt_id, source_artifact_id],
-            payload={
-                "reason": reason,
-                "drift_class": drift_class,
-                "drift_event_id": drift_id,
-                "source_artifact_id": source_artifact_id,
-            },
+            artifact_refs=audit_artifact_refs,
+            payload=audit_payload,
         )
 
         # Cascade to approvals.
