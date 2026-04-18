@@ -210,6 +210,7 @@ class RealFixValidationBridge:
                 patch_proposal_id=projection.patch_proposal_id,
                 run=run,
                 static_result=static_result,
+                intent_id=intent_id,
             )
         except ValidationRejected:
             # Fail-closed: no bridge attestation on rejection. The

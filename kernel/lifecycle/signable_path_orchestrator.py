@@ -421,7 +421,9 @@ class SignablePathOrchestrator:
         self._advance(state, Stage.VALIDATION)
         proposal_id = state.artifact_ids[Stage.PATCH_PROPOSAL]
         receipt_id = self._validation.validate(
-            task_id=task_id, patch_proposal_id=proposal_id
+            task_id=task_id,
+            patch_proposal_id=proposal_id,
+            intent_id=state.intent_anchor.intent_id,
         )
         state.artifact_ids[Stage.VALIDATION] = receipt_id
         self._audit.append(
