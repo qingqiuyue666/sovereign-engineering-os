@@ -109,8 +109,10 @@ class ReviewService:
         minted at the real-fix chain entrypoint (or the eight-stage
         ``admit_context`` surface) and threaded in by the caller. When
         supplied and non-empty it is named in both ``artifact_refs`` and
-        ``payload`` of the ``review_artifact_created`` audit record so a
-        reviewer reading only that record can recover the AUDIT-003 /
+        ``payload`` of the ``review_artifact_created`` happy-path audit
+        record and, on policy-forbidden self-summary rejection, in the
+        ``review_self_summary_rejected`` rejection record as well, so a
+        reviewer reading only either record can recover the AUDIT-003 /
         §22.1 linkage without a second fetch. Authoritative fail-closed
         verification of ``intent_id`` against ``intent_anchor_records``
         remains the responsibility of ``RevisionSealService`` downstream;
@@ -131,11 +133,16 @@ class ReviewService:
         provenance = rendering_provenance or self._default_renderer
 
         if self.FORBID_SELF_SUMMARY and provenance.self_summary_flag:
+            audit_artifact_refs = [patch_proposal_id, validation_receipt_id]
+            audit_payload: dict[str, Any] = {"renderer_id": provenance.renderer_id}
+            if isinstance(intent_id, str) and intent_id:
+                audit_artifact_refs.append(intent_id)
+                audit_payload["intent_id"] = intent_id
             self._audit.append(
                 record_type="review_self_summary_rejected",
                 task_id=task_id,
-                artifact_refs=[patch_proposal_id, validation_receipt_id],
-                payload={"renderer_id": provenance.renderer_id},
+                artifact_refs=audit_artifact_refs,
+                payload=audit_payload,
             )
             raise ReviewRejected(
                 f"self-summary by {provenance.renderer_id!r} forbidden by policy"
