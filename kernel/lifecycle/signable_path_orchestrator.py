@@ -531,11 +531,28 @@ class SignablePathOrchestrator:
         )
         # Evidence -> SEALED terminal. This is the only way to reach SEALED.
         self._advance(state, Stage.SEALED)
+        # AUDIT-003 / §22.1: name the durable
+        # ``intent_anchor_records.intent_id`` (the one
+        # ``_emit_intent_anchor`` minted at admit_context and that lives
+        # on ``state.intent_anchor``) in both ``artifact_refs`` and
+        # ``payload`` so a reviewer reading only this terminal seal
+        # record can recover the originating-intent linkage without a
+        # second fetch. Authoritative fail-closed verification of
+        # ``intent_id`` against ``intent_anchor_records`` remains the
+        # responsibility of ``RevisionSealService`` downstream; this
+        # surface performs no independent verification. Absent / empty
+        # ``intent_id`` preserves the prior audit shape exactly.
+        audit_artifact_refs: list[str] = list(state.artifact_ids.values())
+        audit_payload: dict[str, Any] = {"stage": Stage.SEALED.value}
+        anchor_intent_id = getattr(state.intent_anchor, "intent_id", None)
+        if isinstance(anchor_intent_id, str) and anchor_intent_id:
+            audit_artifact_refs.append(anchor_intent_id)
+            audit_payload["intent_id"] = anchor_intent_id
         self._audit.append(
             record_type="signable_path_sealed",
             task_id=task_id,
-            artifact_refs=list(state.artifact_ids.values()),
-            payload={"stage": Stage.SEALED.value},
+            artifact_refs=audit_artifact_refs,
+            payload=audit_payload,
         )
         return replay_anchor_id
 
@@ -552,11 +569,28 @@ class SignablePathOrchestrator:
             return
         self._advance(state, Stage.ABANDONED)
         state.abandoned = True
+        # AUDIT-003 / §22.1: name the durable
+        # ``intent_anchor_records.intent_id`` (the one
+        # ``_emit_intent_anchor`` minted at admit_context and that lives
+        # on ``state.intent_anchor``) in both ``artifact_refs`` and
+        # ``payload`` so a reviewer reading only this terminal
+        # abandonment record can recover the originating-intent linkage
+        # without a second fetch. Authoritative fail-closed verification
+        # of ``intent_id`` against ``intent_anchor_records`` remains the
+        # responsibility of ``RevisionSealService`` downstream; this
+        # surface performs no independent verification. Absent / empty
+        # ``intent_id`` preserves the prior audit shape exactly.
+        audit_artifact_refs: list[str] = list(state.artifact_ids.values())
+        audit_payload: dict[str, Any] = {"reason": reason}
+        anchor_intent_id = getattr(state.intent_anchor, "intent_id", None)
+        if isinstance(anchor_intent_id, str) and anchor_intent_id:
+            audit_artifact_refs.append(anchor_intent_id)
+            audit_payload["intent_id"] = anchor_intent_id
         self._audit.append(
             record_type="task_abandoned",
             task_id=task_id,
-            artifact_refs=list(state.artifact_ids.values()),
-            payload={"reason": reason},
+            artifact_refs=audit_artifact_refs,
+            payload=audit_payload,
         )
 
     def current_stage(self, task_id: str) -> Optional[Stage]:
@@ -957,11 +991,24 @@ class SignablePathOrchestrator:
         # chain was driven by the eight-stage admission surface or the
         # real-fix chain entrypoint.
         self._advance(state, Stage.SEALED)
+        # AUDIT-003 / §22.1: name the durable
+        # ``intent_anchor_records.intent_id`` (the ``rf_intent_anchor``
+        # minted earlier in ``run_real_fix_chain`` and carried on
+        # ``state.intent_anchor``) in both ``artifact_refs`` and
+        # ``payload`` so the real-fix terminal seal record mirrors the
+        # eight-stage terminal shape for the AUDIT-003 linkage. Absent /
+        # empty ``intent_id`` preserves the prior audit shape exactly.
+        audit_artifact_refs: list[str] = list(state.artifact_ids.values())
+        audit_payload: dict[str, Any] = {"stage": Stage.SEALED.value}
+        anchor_intent_id = getattr(state.intent_anchor, "intent_id", None)
+        if isinstance(anchor_intent_id, str) and anchor_intent_id:
+            audit_artifact_refs.append(anchor_intent_id)
+            audit_payload["intent_id"] = anchor_intent_id
         self._audit.append(
             record_type="signable_path_sealed",
             task_id=task_id,
-            artifact_refs=list(state.artifact_ids.values()),
-            payload={"stage": Stage.SEALED.value},
+            artifact_refs=audit_artifact_refs,
+            payload=audit_payload,
         )
 
         # Wrapper audit: one record that names every id a reviewer needs
