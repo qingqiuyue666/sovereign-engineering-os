@@ -195,16 +195,16 @@ class InvalidationService:
         ``intent_id`` is the durable ``intent_anchor_records.intent_id``
         threaded in by the caller. When supplied and non-empty it is
         named in both ``artifact_refs`` and ``payload`` of the
-        ``validation_receipt_invalidated`` audit record so a reviewer
-        reading only that record can recover the AUDIT-003 / §22.1
+        ``validation_receipt_invalidated`` audit record and forwarded to
+        ``_invalidate_approval_cascade`` so the cascaded
+        ``approval_invalidated`` record names it as well, so a reviewer
+        reading only either record can recover the AUDIT-003 / §22.1
         linkage without a second fetch. Authoritative fail-closed
         verification of ``intent_id`` against ``intent_anchor_records``
         remains the responsibility of ``RevisionSealService`` downstream;
         this service performs no independent verification. Absent /
-        empty ``intent_id`` preserves the prior audit shape exactly.
-        The cascaded ``approval_invalidated`` record is intentionally
-        not in scope of this increment and is emitted with its prior
-        shape unchanged.
+        empty ``intent_id`` preserves the prior audit shape exactly on
+        both records.
         """
         now = _now_iso()
         transitioned = self._receipts.mark_invalidated(
@@ -258,6 +258,7 @@ class InvalidationService:
                 approval=approval,
                 invalidating_receipt_id=validation_receipt_id,
                 now=now,
+                intent_id=intent_id,
             )
         return True
 
@@ -271,7 +272,22 @@ class InvalidationService:
         approval: dict[str, Any],
         invalidating_receipt_id: str,
         now: str,
+        intent_id: str | None = None,
     ) -> None:
+        """Cascade invalidation to a live approval that referenced a
+        newly-invalidated receipt.
+
+        ``intent_id`` is the durable ``intent_anchor_records.intent_id``
+        threaded in by ``invalidate_receipt``. When supplied and
+        non-empty it is named in both ``artifact_refs`` and ``payload``
+        of the ``approval_invalidated`` audit record so a reviewer
+        reading only that cascade record can recover the AUDIT-003 /
+        §22.1 linkage without a second fetch. Authoritative fail-closed
+        verification of ``intent_id`` against ``intent_anchor_records``
+        remains the responsibility of ``RevisionSealService`` downstream;
+        this service performs no independent verification. Absent /
+        empty ``intent_id`` preserves the prior audit shape exactly.
+        """
         approval_id = approval["approval_id"]
         transitioned = self._approvals.mark_invalidated(
             approval_id=approval_id,
@@ -296,16 +312,21 @@ class InvalidationService:
             }
         )
 
+        audit_artifact_refs: list[str] = [approval_id, invalidating_receipt_id]
+        audit_payload: dict[str, Any] = {
+            "reason": REASON_REQUIRED_RECEIPT_INVALIDATED,
+            "drift_class": DRIFT_CLASS_RECEIPT_INVALIDATED_CASCADE,
+            "drift_event_id": drift_id,
+            "invalidating_receipt_id": invalidating_receipt_id,
+        }
+        if isinstance(intent_id, str) and intent_id:
+            audit_artifact_refs.append(intent_id)
+            audit_payload["intent_id"] = intent_id
         self._audit.append(
             record_type="approval_invalidated",
             task_id=approval.get("task_id"),
             root_revision_id=approval.get("originating_root_revision_id"),
-            artifact_refs=[approval_id, invalidating_receipt_id],
+            artifact_refs=audit_artifact_refs,
             approval_id=approval_id,
-            payload={
-                "reason": REASON_REQUIRED_RECEIPT_INVALIDATED,
-                "drift_class": DRIFT_CLASS_RECEIPT_INVALIDATED_CASCADE,
-                "drift_event_id": drift_id,
-                "invalidating_receipt_id": invalidating_receipt_id,
-            },
+            payload=audit_payload,
         )
