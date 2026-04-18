@@ -25,6 +25,7 @@ What it proves:
 
 from __future__ import annotations
 
+import json
 import sys
 import os
 import unittest
@@ -341,6 +342,25 @@ class TestHappyPathContextToEvidence(unittest.TestCase):
         self.assertEqual(intent_rows[0]["intent_id"], intent_id)
         self.assertEqual(intent_rows[0]["state"], "admitted")
         self.assertEqual(rev["intent_id"], intent_id)
+
+        # AUDIT-003 / §22.1 (approval service-record parity): the
+        # ``approval_artifact_issued`` record emitted by
+        # ``ApprovalService.evaluate_barrier`` must name the same durable
+        # intent-anchor id in both ``payload`` and ``artifact_refs``. The
+        # id is threaded in from the orchestrator
+        # (``state.intent_anchor.intent_id``); the service performs no
+        # independent verification. Naming it on the service record
+        # closes the approval-stage one-hop asymmetry on the eight-stage
+        # path.
+        ap_row = self.conn.execute(
+            "SELECT payload_json, artifact_refs FROM audit_records "
+            "WHERE record_type = 'approval_artifact_issued';"
+        ).fetchone()
+        self.assertIsNotNone(ap_row)
+        ap_payload = json.loads(ap_row["payload_json"])
+        ap_refs = json.loads(ap_row["artifact_refs"])
+        self.assertEqual(ap_payload["intent_id"], intent_id)
+        self.assertIn(intent_id, ap_refs)
 
 
 class TestIllegalTransitionRejected(unittest.TestCase):
