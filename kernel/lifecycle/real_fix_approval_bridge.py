@@ -303,6 +303,7 @@ class RealFixApprovalBridge:
                 review_artifact_id=outcome.review_artifact_id,
                 required_receipt_ids=[outcome.validation_receipt_id],
                 reviewed_context_artifact_id=context_artifact_id,
+                intent_id=intent_id,
             )
         except (ApprovalBarrierFailed, ApprovalRejected):
             raise

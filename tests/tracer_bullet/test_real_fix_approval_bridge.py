@@ -349,6 +349,24 @@ class RealFixApprovalBridgeTest(unittest.TestCase):
         self.assertEqual(a["payload"]["approval_state"], "approved")
         self.assertEqual(a["payload"]["source"], "real_fix_tracer")
 
+        # AUDIT-003 / §22.1 (approval service-record parity): the
+        # upstream ``approval_artifact_issued`` record emitted by
+        # ``ApprovalService.evaluate_barrier`` must also name the same
+        # durable intent-anchor id in both ``payload`` and
+        # ``artifact_refs``. The service performs no independent
+        # verification; authoritative fail-closed verification of
+        # ``intent_id`` against ``intent_anchor_records`` remains the
+        # responsibility of ``RevisionSealService`` downstream. Naming
+        # it on the service record closes the approval-stage one-hop
+        # asymmetry next to the already-closed bridge-layer
+        # ``real_fix_approval_bridge_attested``.
+        issued = self._records_of("approval_artifact_issued")
+        self.assertEqual(len(issued), 1)
+        issued_rec = issued[0]
+        self.assertEqual(issued_rec["task_id"], task_id)
+        self.assertEqual(issued_rec["payload"]["intent_id"], expected_intent_id)
+        self.assertIn(expected_intent_id, issued_rec["artifact_refs"])
+
     def test_bridge_audit_chain_is_complete(self) -> None:
         task_id = f"fix-{uuid4().hex[:8]}"
         rb_outcome = self._bridge_to_review(task_id)

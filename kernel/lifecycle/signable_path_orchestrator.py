@@ -462,6 +462,7 @@ class SignablePathOrchestrator:
             review_artifact_id=review_id,
             required_receipt_ids=[receipt_id],
             reviewed_context_artifact_id=context_id,
+            intent_id=state.intent_anchor.intent_id,
         )
         state.artifact_ids[Stage.APPROVAL] = approval_id
         self._audit.append(

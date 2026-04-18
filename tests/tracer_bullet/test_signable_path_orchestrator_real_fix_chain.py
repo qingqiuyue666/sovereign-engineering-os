@@ -523,6 +523,25 @@ class SignablePathOrchestratorRealFixChainTest(unittest.TestCase):
         self.assertEqual(ec_payload["intent_id"], expected_intent_id)
         self.assertIn(expected_intent_id, ec_refs)
 
+        # AUDIT-003 / §22.1 (approval service-record parity): the
+        # ``approval_artifact_issued`` record emitted by
+        # ``ApprovalService.evaluate_barrier`` must also name the same
+        # durable intent-anchor id in both ``payload`` and
+        # ``artifact_refs``. The id is threaded in from the orchestrator
+        # (``state.intent_anchor.intent_id``) and from the real-fix
+        # approval bridge; the service performs no independent
+        # verification. Naming it on the service record closes the
+        # approval-stage one-hop asymmetry next to the already-closed
+        # bridge-layer ``real_fix_approval_bridge_attested``.
+        ap = self.conn.execute(
+            "SELECT payload_json, artifact_refs FROM audit_records "
+            "WHERE record_type = 'approval_artifact_issued';"
+        ).fetchone()
+        ap_payload = json.loads(ap[0])
+        ap_refs = json.loads(ap[1])
+        self.assertEqual(ap_payload["intent_id"], expected_intent_id)
+        self.assertIn(expected_intent_id, ap_refs)
+
         # Audit sequence is gap-free.
         seqs = [
             r[0]

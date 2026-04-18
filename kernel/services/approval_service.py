@@ -108,6 +108,7 @@ class ApprovalService:
         review_artifact_id: str,
         required_receipt_ids: list[str] | None = None,
         reviewed_context_artifact_id: str | None = None,
+        intent_id: str | None = None,
     ) -> str:
         """Issue an ApprovalArtifact gated by the §22.3 barrier.
 
@@ -115,6 +116,18 @@ class ApprovalService:
         is gating. The service reads the live patch / receipt / context
         state, constructs `BarrierInputs`, runs `evaluate_barrier`, and
         only issues the artifact if the verdict is `REASON_PASS`.
+
+        ``intent_id`` is the durable ``intent_anchor_records.intent_id``
+        minted at the real-fix chain entrypoint (or the eight-stage
+        ``admit_context`` surface) and threaded in by the caller. When
+        supplied and non-empty it is named in both ``artifact_refs`` and
+        ``payload`` of the ``approval_artifact_issued`` audit record so a
+        reviewer reading only that record can recover the AUDIT-003 /
+        §22.1 linkage without a second fetch. Authoritative fail-closed
+        verification of ``intent_id`` against ``intent_anchor_records``
+        remains the responsibility of ``RevisionSealService`` downstream;
+        this service performs no independent verification. Absent /
+        empty ``intent_id`` preserves the prior audit shape exactly.
         """
         review = self._review_reader.fetch(review_artifact_id)
         if review is None:
@@ -232,17 +245,22 @@ class ApprovalService:
 
         self._repo.insert(artifact)
 
+        audit_artifact_refs = [approval_id, review_artifact_id, patch_proposal_id]
+        audit_payload: dict[str, Any] = {
+            "barrier_reason": REASON_PASS,
+            "approval_scope": PHASE1_APPROVAL_SCOPE,
+            "approver_identity": PHASE1_APPROVER_IDENTITY,
+            "policy_version": PHASE1_APPROVAL_POLICY_VERSION,
+            "expires_at": _iso(expires_at),
+        }
+        if isinstance(intent_id, str) and intent_id:
+            audit_artifact_refs.append(intent_id)
+            audit_payload["intent_id"] = intent_id
         self._audit.append(
             record_type="approval_artifact_issued",
             task_id=task_id,
-            artifact_refs=[approval_id, review_artifact_id, patch_proposal_id],
-            payload={
-                "barrier_reason": REASON_PASS,
-                "approval_scope": PHASE1_APPROVAL_SCOPE,
-                "approver_identity": PHASE1_APPROVER_IDENTITY,
-                "policy_version": PHASE1_APPROVAL_POLICY_VERSION,
-                "expires_at": _iso(expires_at),
-            },
+            artifact_refs=audit_artifact_refs,
+            payload=audit_payload,
         )
         return approval_id
 
