@@ -37,12 +37,14 @@ import os
 import unittest
 from datetime import datetime, timedelta, timezone
 from typing import Any, Mapping
+from unittest.mock import patch
 from uuid import uuid4
 
 # Ensure repo root is on the path.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
 from kernel.contracts.barrier_rules import (
+    BarrierEvaluationError,
     BarrierInputs,
     BarrierVerdict,
     REASON_APPROVAL_EXPIRED,
@@ -562,6 +564,61 @@ class TestBarrierRejectionWiredStack(unittest.TestCase):
             "SELECT payload_json, artifact_refs FROM audit_records "
             "WHERE task_id = ? "
             "AND record_type = 'approval_barrier_rejected' "
+            "ORDER BY sequence DESC LIMIT 1;",
+            (task_id,),
+        ).fetchone()
+        self.assertIsNotNone(row)
+        payload = json.loads(row["payload_json"])
+        refs = json.loads(row["artifact_refs"])
+        self.assertEqual(payload["intent_id"], supplied_intent_id)
+        self.assertIn(supplied_intent_id, refs)
+
+    def test_approval_issue_time_barrier_evaluation_error_names_intent_id_when_supplied(self) -> None:
+        """AUDIT-003 / §22.1 (approval-issue-time evaluation-error record parity):
+        when the orchestrator threads the durable
+        ``intent_anchor_records.intent_id`` into
+        ``ApprovalService.evaluate_barrier`` and the §22.3 barrier
+        evaluator itself raises ``BarrierEvaluationError`` (rather than
+        returning a failing verdict), the
+        ``approval_barrier_evaluation_error`` audit record must name
+        the same id in both ``artifact_refs`` and ``payload``.
+
+        This closes the approval-issue-time evaluation-error one-hop
+        asymmetry so a reviewer reading only that record can recover
+        the AUDIT-003 / §22.1 linkage without a second fetch. The
+        service performs no independent verification of ``intent_id``;
+        authoritative fail-closed verification remains in
+        ``RevisionSealService`` downstream. Absent / empty ``intent_id``
+        preserves the prior audit shape exactly.
+
+        The evaluator is patched to raise ``BarrierEvaluationError``
+        because reaching that branch from the live service surface is
+        practically impossible (the service constructs
+        ``approval_expires_at`` from a deterministic ``_now()`` + TTL,
+        so the only raise site — ISO parse failure — is unreachable
+        without injection).
+        """
+        task_id = f"task-{uuid4().hex[:8]}"
+        ids = self._run_through_review(task_id)
+
+        supplied_intent_id = f"intent-{uuid4().hex[:8]}"
+        with patch(
+            "kernel.services.approval_service.evaluate_barrier",
+            side_effect=BarrierEvaluationError("injected"),
+        ):
+            with self.assertRaises(ApprovalRejected):
+                self.ap_svc.evaluate_barrier(
+                    task_id=task_id,
+                    review_artifact_id=ids["review_id"],
+                    required_receipt_ids=[ids["validation_receipt_id"]],
+                    reviewed_context_artifact_id=ids["context_id"],
+                    intent_id=supplied_intent_id,
+                )
+
+        row = self.conn.execute(
+            "SELECT payload_json, artifact_refs FROM audit_records "
+            "WHERE task_id = ? "
+            "AND record_type = 'approval_barrier_evaluation_error' "
             "ORDER BY sequence DESC LIMIT 1;",
             (task_id,),
         ).fetchone()
