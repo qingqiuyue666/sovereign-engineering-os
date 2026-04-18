@@ -402,6 +402,7 @@ class SignablePathOrchestrator:
             context_artifact_id=context_artifact_id,
             worker_profile=worker_profile,
             model_route_id=model_route_id,
+            intent_id=state.intent_anchor.intent_id,
         )
         state.artifact_ids[Stage.INFERENCE] = inference_artifact_id
 
