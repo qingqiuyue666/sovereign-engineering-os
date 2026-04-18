@@ -274,6 +274,7 @@ class InferenceService:
         context_artifact_id: str,
         worker_profile: str,
         model_route_id: str,
+        intent_id: str | None = None,
     ) -> str:
         """Run a governed inference for `task_id`.
 
@@ -289,6 +290,19 @@ class InferenceService:
         - persist InferenceArtifact row
         - emit AuditRecord
         - on failure emit FailureBundle-equivalent audit note and raise
+
+        ``intent_id`` is the durable ``intent_anchor_records.intent_id``
+        minted at the real-fix chain entrypoint (or the eight-stage
+        ``admit_context`` surface) and threaded in by the caller. When
+        supplied and non-empty it is named in both ``artifact_refs`` and
+        ``payload`` of the ``inference_artifact_created`` happy-path
+        audit record so a reviewer reading only that record can recover
+        the AUDIT-003 / §22.1 linkage without a second fetch.
+        Authoritative fail-closed verification of ``intent_id`` against
+        ``intent_anchor_records`` remains the responsibility of
+        ``RevisionSealService`` downstream; this service performs no
+        independent verification. Absent / empty ``intent_id`` preserves
+        the prior audit shape exactly.
         """
         context_artifact = self._context_reader.fetch(context_artifact_id)
         if context_artifact is None:
@@ -422,10 +436,17 @@ class InferenceService:
         if isinstance(adapter_ceiling, str) and adapter_ceiling:
             audit_payload["replay_ceiling"] = adapter_ceiling
 
+        audit_artifact_refs: list[str] = [
+            artifact["inference_artifact_id"],
+            context_artifact_id,
+        ]
+        if isinstance(intent_id, str) and intent_id:
+            audit_artifact_refs.append(intent_id)
+            audit_payload["intent_id"] = intent_id
         self._audit.append(
             record_type="inference_artifact_created",
             task_id=task_id,
-            artifact_refs=[artifact["inference_artifact_id"], context_artifact_id],
+            artifact_refs=audit_artifact_refs,
             payload=audit_payload,
         )
         return artifact["inference_artifact_id"]
