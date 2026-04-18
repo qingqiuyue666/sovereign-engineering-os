@@ -425,6 +425,7 @@ class SignablePathOrchestrator:
         proposal_id = self._patch_proposal.propose(
             task_id=task_id,
             inference_artifact_id=inference_artifact_id,
+            intent_id=state.intent_anchor.intent_id,
         )
         state.artifact_ids[Stage.PATCH_PROPOSAL] = proposal_id
         self._audit.append(
