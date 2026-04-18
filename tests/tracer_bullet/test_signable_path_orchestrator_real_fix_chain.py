@@ -561,6 +561,25 @@ class SignablePathOrchestratorRealFixChainTest(unittest.TestCase):
         self.assertEqual(rv_payload["intent_id"], expected_intent_id)
         self.assertIn(expected_intent_id, rv_refs)
 
+        # AUDIT-003 / §22.1 (validation service-record parity): the
+        # ``validation_receipt_created`` record emitted by
+        # ``ValidationService.validate`` must also name the same durable
+        # intent-anchor id in both ``payload`` and ``artifact_refs``. The
+        # id is threaded in from the orchestrator
+        # (``state.intent_anchor.intent_id``) and from the real-fix
+        # validation bridge; the service performs no independent
+        # verification. Naming it on the service record closes the
+        # validation-stage one-hop asymmetry next to the already-closed
+        # bridge-layer ``real_fix_validation_bridge_attested``.
+        vr = self.conn.execute(
+            "SELECT payload_json, artifact_refs FROM audit_records "
+            "WHERE record_type = 'validation_receipt_created';"
+        ).fetchone()
+        vr_payload = json.loads(vr[0])
+        vr_refs = json.loads(vr[1])
+        self.assertEqual(vr_payload["intent_id"], expected_intent_id)
+        self.assertIn(expected_intent_id, vr_refs)
+
         # Audit sequence is gap-free.
         seqs = [
             r[0]

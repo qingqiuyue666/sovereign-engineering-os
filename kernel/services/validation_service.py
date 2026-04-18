@@ -106,6 +106,7 @@ class ValidationService:
         patch_proposal_id: str,
         run: QuarantineRun | None = None,
         static_result: StaticCheckResult | None = None,
+        intent_id: str | None = None,
     ) -> str:
         """Run the phase-1 validation pipeline and issue a ValidationReceipt.
 
@@ -116,6 +117,18 @@ class ValidationService:
         - `static_result` is the caller's static-analysis outcome. If
           omitted, the service treats the single-file text-substitution
           patch as trivially passing at the static layer (phase-1 default).
+
+        ``intent_id`` is the durable ``intent_anchor_records.intent_id``
+        minted at the real-fix chain entrypoint (or the eight-stage
+        ``admit_context`` surface) and threaded in by the caller. When
+        supplied and non-empty it is named in both ``artifact_refs`` and
+        ``payload`` of the ``validation_receipt_created`` audit record so
+        a reviewer reading only that record can recover the AUDIT-003 /
+        §22.1 linkage without a second fetch. Authoritative fail-closed
+        verification of ``intent_id`` against ``intent_anchor_records``
+        remains the responsibility of ``RevisionSealService`` downstream;
+        this service performs no independent verification. Absent /
+        empty ``intent_id`` preserves the prior audit shape exactly.
         """
         proposal = self._patch_reader.fetch(patch_proposal_id)
         if proposal is None:
@@ -192,18 +205,23 @@ class ValidationService:
 
         self._repo.insert(receipt)
 
+        audit_artifact_refs = [receipt["validation_receipt_id"], patch_proposal_id]
+        audit_payload: dict[str, Any] = {
+            "result": receipt["result"],
+            "trust_class": admission.trust.class_name,
+            "trust_reason": admission.trust.reason,
+            "quarantine_run_id": admission.quarantine_run_id,
+            "final_state": admission.final_state.value,
+            "taint_propagated": list(admission.trust.taint_to_propagate),
+        }
+        if isinstance(intent_id, str) and intent_id:
+            audit_artifact_refs.append(intent_id)
+            audit_payload["intent_id"] = intent_id
         self._audit.append(
             record_type="validation_receipt_created",
             task_id=task_id,
-            artifact_refs=[receipt["validation_receipt_id"], patch_proposal_id],
-            payload={
-                "result": receipt["result"],
-                "trust_class": admission.trust.class_name,
-                "trust_reason": admission.trust.reason,
-                "quarantine_run_id": admission.quarantine_run_id,
-                "final_state": admission.final_state.value,
-                "taint_propagated": list(admission.trust.taint_to_propagate),
-            },
+            artifact_refs=audit_artifact_refs,
+            payload=audit_payload,
         )
         return receipt["validation_receipt_id"]
 

@@ -282,6 +282,24 @@ class RealFixValidationBridgeTest(unittest.TestCase):
         self.assertEqual(a["payload"]["receipt_result"], "pass")
         self.assertEqual(a["payload"]["source"], "real_fix_tracer")
 
+        # AUDIT-003 / §22.1 (validation service-record parity): the
+        # upstream ``validation_receipt_created`` record emitted by
+        # ``ValidationService.validate`` must also name the same durable
+        # intent-anchor id in both ``payload`` and ``artifact_refs``.
+        # The service performs no independent verification;
+        # authoritative fail-closed verification of ``intent_id``
+        # against ``intent_anchor_records`` remains the responsibility
+        # of ``RevisionSealService`` downstream. Naming it on the
+        # service record closes the validation-stage one-hop asymmetry
+        # next to the already-closed bridge-layer
+        # ``real_fix_validation_bridge_attested``.
+        created = self._records_of("validation_receipt_created")
+        self.assertEqual(len(created), 1)
+        created_rec = created[0]
+        self.assertEqual(created_rec["task_id"], task_id)
+        self.assertEqual(created_rec["payload"]["intent_id"], expected_intent_id)
+        self.assertIn(expected_intent_id, created_rec["artifact_refs"])
+
     def test_bridge_audit_chain_is_complete(self) -> None:
         task_id = f"fix-{uuid4().hex[:8]}"
         projection = self._project(task_id)
