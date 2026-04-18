@@ -122,13 +122,16 @@ class ValidationService:
         minted at the real-fix chain entrypoint (or the eight-stage
         ``admit_context`` surface) and threaded in by the caller. When
         supplied and non-empty it is named in both ``artifact_refs`` and
-        ``payload`` of the ``validation_receipt_created`` audit record so
-        a reviewer reading only that record can recover the AUDIT-003 /
-        §22.1 linkage without a second fetch. Authoritative fail-closed
-        verification of ``intent_id`` against ``intent_anchor_records``
-        remains the responsibility of ``RevisionSealService`` downstream;
-        this service performs no independent verification. Absent /
-        empty ``intent_id`` preserves the prior audit shape exactly.
+        ``payload`` of the ``validation_receipt_created`` happy-path
+        audit record and, when the C22.4 quarantine admissibility check
+        rejects, in the ``validation_quarantine_admission_rejected``
+        rejection record as well, so a reviewer reading only either
+        record can recover the AUDIT-003 / §22.1 linkage without a
+        second fetch. Authoritative fail-closed verification of
+        ``intent_id`` against ``intent_anchor_records`` remains the
+        responsibility of ``RevisionSealService`` downstream; this
+        service performs no independent verification. Absent / empty
+        ``intent_id`` preserves the prior audit shape exactly.
         """
         proposal = self._patch_reader.fetch(patch_proposal_id)
         if proposal is None:
@@ -153,11 +156,16 @@ class ValidationService:
         try:
             assert_proposal_admissible(quarantine_proposal)
         except QuarantineAdmissibilityError as exc:
+            audit_artifact_refs = [patch_proposal_id]
+            audit_payload: dict[str, Any] = {"reason": str(exc)}
+            if isinstance(intent_id, str) and intent_id:
+                audit_artifact_refs.append(intent_id)
+                audit_payload["intent_id"] = intent_id
             self._audit.append(
                 record_type="validation_quarantine_admission_rejected",
                 task_id=task_id,
-                artifact_refs=[patch_proposal_id],
-                payload={"reason": str(exc)},
+                artifact_refs=audit_artifact_refs,
+                payload=audit_payload,
             )
             raise ValidationRejected(str(exc)) from exc
 

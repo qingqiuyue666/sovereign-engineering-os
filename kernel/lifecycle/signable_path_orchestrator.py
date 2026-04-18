@@ -254,15 +254,34 @@ class SignablePathOrchestrator:
         except IllegalStageTransition as exc:
             # Fail closed. INV-018-compatible: illegal lifecycle
             # transitions are audit-emitted rather than silently ignored.
+            #
+            # AUDIT-003 / §22.1: name the durable
+            # ``intent_anchor_records.intent_id`` (the one
+            # ``_emit_intent_anchor`` minted at admit_context and that
+            # lives on ``state.intent_anchor``) in both ``artifact_refs``
+            # and ``payload`` so a reviewer reading only this rejection
+            # record can recover the originating-intent linkage without
+            # a second fetch. Authoritative fail-closed verification of
+            # ``intent_id`` against ``intent_anchor_records`` remains
+            # the responsibility of ``RevisionSealService`` downstream;
+            # this surface performs no independent verification. Absent
+            # / empty ``intent_id`` preserves the prior audit shape
+            # exactly.
+            audit_artifact_refs: list[str] = []
+            audit_payload: dict[str, Any] = {
+                "from": state.current_stage.value,
+                "to": target.value,
+                "reason": str(exc),
+            }
+            anchor_intent_id = getattr(state.intent_anchor, "intent_id", None)
+            if isinstance(anchor_intent_id, str) and anchor_intent_id:
+                audit_artifact_refs.append(anchor_intent_id)
+                audit_payload["intent_id"] = anchor_intent_id
             self._audit.append(
                 record_type="illegal_stage_transition_rejected",
                 task_id=state.task_id,
-                artifact_refs=[],
-                payload={
-                    "from": state.current_stage.value,
-                    "to": target.value,
-                    "reason": str(exc),
-                },
+                artifact_refs=audit_artifact_refs,
+                payload=audit_payload,
             )
             raise OrchestratorRejected(str(exc)) from exc
         state.current_stage = target
