@@ -441,6 +441,7 @@ class SignablePathOrchestrator:
             task_id=task_id,
             patch_proposal_id=proposal_id,
             validation_receipt_id=receipt_id,
+            intent_id=state.intent_anchor.intent_id,
         )
         state.artifact_ids[Stage.REVIEW] = review_id
         self._audit.append(

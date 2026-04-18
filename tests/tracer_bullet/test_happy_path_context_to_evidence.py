@@ -362,6 +362,25 @@ class TestHappyPathContextToEvidence(unittest.TestCase):
         self.assertEqual(ap_payload["intent_id"], intent_id)
         self.assertIn(intent_id, ap_refs)
 
+        # AUDIT-003 / §22.1 (review service-record parity): the
+        # ``review_artifact_created`` record emitted by
+        # ``ReviewService.render_review`` must name the same durable
+        # intent-anchor id in both ``payload`` and ``artifact_refs``. The
+        # id is threaded in from the orchestrator
+        # (``state.intent_anchor.intent_id``); the service performs no
+        # independent verification. Naming it on the service record
+        # closes the review-stage one-hop asymmetry on the eight-stage
+        # path.
+        rv_row = self.conn.execute(
+            "SELECT payload_json, artifact_refs FROM audit_records "
+            "WHERE record_type = 'review_artifact_created';"
+        ).fetchone()
+        self.assertIsNotNone(rv_row)
+        rv_payload = json.loads(rv_row["payload_json"])
+        rv_refs = json.loads(rv_row["artifact_refs"])
+        self.assertEqual(rv_payload["intent_id"], intent_id)
+        self.assertIn(intent_id, rv_refs)
+
 
 class TestIllegalTransitionRejected(unittest.TestCase):
     """Verify the orchestrator refuses an out-of-order stage skip."""
