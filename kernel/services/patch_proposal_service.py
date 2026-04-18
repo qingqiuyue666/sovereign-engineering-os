@@ -209,6 +209,7 @@ class PatchProposalService:
                 root_revision_id=artifact["root_revision_id"],
                 new_patch_group_hash=patch_group_hash,
                 new_patch_proposal_id=artifact["patch_proposal_id"],
+                intent_id=intent_id,
             )
 
         return artifact["patch_proposal_id"]
