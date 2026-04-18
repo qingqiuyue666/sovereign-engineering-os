@@ -248,6 +248,7 @@ class RealFixReviewBridge:
                 validation_receipt_id=outcome.validation_receipt_id,
                 risk_class=risk_class,
                 rendering_provenance=rendering_provenance,
+                intent_id=intent_id,
             )
         except ReviewRejected:
             # Fail-closed: no bridge attestation on rejection. The

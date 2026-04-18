@@ -101,7 +101,22 @@ class ReviewService:
         validation_receipt_id: str,
         risk_class: str = "low",
         rendering_provenance: RenderingProvenance | None = None,
+        intent_id: str | None = None,
     ) -> str:
+        """Render a §23.10 ReviewArtifact under C22.14 governance.
+
+        ``intent_id`` is the durable ``intent_anchor_records.intent_id``
+        minted at the real-fix chain entrypoint (or the eight-stage
+        ``admit_context`` surface) and threaded in by the caller. When
+        supplied and non-empty it is named in both ``artifact_refs`` and
+        ``payload`` of the ``review_artifact_created`` audit record so a
+        reviewer reading only that record can recover the AUDIT-003 /
+        §22.1 linkage without a second fetch. Authoritative fail-closed
+        verification of ``intent_id`` against ``intent_anchor_records``
+        remains the responsibility of ``RevisionSealService`` downstream;
+        this service performs no independent verification. Absent /
+        empty ``intent_id`` preserves the prior audit shape exactly.
+        """
         proposal = self._patch_reader.fetch(patch_proposal_id)
         if proposal is None:
             raise ReviewRejected(
@@ -176,19 +191,24 @@ class ReviewService:
 
         self._repo.insert(artifact)
 
+        audit_artifact_refs = [
+            artifact["review_artifact_id"],
+            patch_proposal_id,
+            validation_receipt_id,
+        ]
+        audit_payload: dict[str, Any] = {
+            "risk_class": risk_class,
+            "self_summary_flag": provenance.self_summary_flag,
+            "renderer_id": provenance.renderer_id,
+            "taint_surfaced": list(taint_set),
+        }
+        if isinstance(intent_id, str) and intent_id:
+            audit_artifact_refs.append(intent_id)
+            audit_payload["intent_id"] = intent_id
         self._audit.append(
             record_type="review_artifact_created",
             task_id=task_id,
-            artifact_refs=[
-                artifact["review_artifact_id"],
-                patch_proposal_id,
-                validation_receipt_id,
-            ],
-            payload={
-                "risk_class": risk_class,
-                "self_summary_flag": provenance.self_summary_flag,
-                "renderer_id": provenance.renderer_id,
-                "taint_surfaced": list(taint_set),
-            },
+            artifact_refs=audit_artifact_refs,
+            payload=audit_payload,
         )
         return artifact["review_artifact_id"]
