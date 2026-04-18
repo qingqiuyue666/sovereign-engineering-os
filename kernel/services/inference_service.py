@@ -247,20 +247,38 @@ class InferenceService:
         context_artifact_id: str,
         failure_class: str,
         detail: str,
+        intent_id: str | None = None,
     ) -> None:
         # The ledger's FailureBundle writer lives in the evidence service
         # in the general case. In phase 1 we emit an AuditRecord with
         # explicit failure classification; a full FailureBundle row is
         # left to the evidence/append_only_ledger wiring.
+        #
+        # ``intent_id`` is the durable ``intent_anchor_records.intent_id``
+        # threaded in by ``run_inference``. When supplied and non-empty
+        # it is named in both ``artifact_refs`` and ``payload`` of the
+        # ``inference_failure`` audit record so a reviewer reading only
+        # that rejection record can recover the AUDIT-003 / §22.1
+        # linkage without a second fetch. Authoritative fail-closed
+        # verification of ``intent_id`` against ``intent_anchor_records``
+        # remains the responsibility of ``RevisionSealService``
+        # downstream; this service performs no independent verification.
+        # Absent / empty ``intent_id`` preserves the prior audit shape
+        # exactly.
+        audit_artifact_refs: list[str] = [context_artifact_id]
+        audit_payload: dict[str, Any] = {
+            "failure_class": failure_class,
+            "detail": detail,
+            "root_revision_id": root_revision_id,
+        }
+        if isinstance(intent_id, str) and intent_id:
+            audit_artifact_refs.append(intent_id)
+            audit_payload["intent_id"] = intent_id
         self._audit.append(
             record_type="inference_failure",
             task_id=task_id,
-            artifact_refs=[context_artifact_id],
-            payload={
-                "failure_class": failure_class,
-                "detail": detail,
-                "root_revision_id": root_revision_id,
-            },
+            artifact_refs=audit_artifact_refs,
+            payload=audit_payload,
         )
 
     # ------------------------------------------------------------------
@@ -296,13 +314,14 @@ class InferenceService:
         ``admit_context`` surface) and threaded in by the caller. When
         supplied and non-empty it is named in both ``artifact_refs`` and
         ``payload`` of the ``inference_artifact_created`` happy-path
-        audit record so a reviewer reading only that record can recover
-        the AUDIT-003 / §22.1 linkage without a second fetch.
-        Authoritative fail-closed verification of ``intent_id`` against
-        ``intent_anchor_records`` remains the responsibility of
-        ``RevisionSealService`` downstream; this service performs no
-        independent verification. Absent / empty ``intent_id`` preserves
-        the prior audit shape exactly.
+        audit record and of every ``inference_failure`` rejection-path
+        audit record emitted via ``_emit_failure_bundle`` so a reviewer
+        reading only that record can recover the AUDIT-003 / §22.1
+        linkage without a second fetch. Authoritative fail-closed
+        verification of ``intent_id`` against ``intent_anchor_records``
+        remains the responsibility of ``RevisionSealService`` downstream;
+        this service performs no independent verification. Absent /
+        empty ``intent_id`` preserves the prior audit shape exactly.
         """
         context_artifact = self._context_reader.fetch(context_artifact_id)
         if context_artifact is None:
@@ -330,6 +349,7 @@ class InferenceService:
                     context_artifact_id=context_artifact_id,
                     failure_class=be.reason,
                     detail=be.detail,
+                    intent_id=intent_id,
                 )
                 raise InferenceBudgetExhausted(
                     reason=be.reason, detail=be.detail
@@ -346,6 +366,7 @@ class InferenceService:
                 context_artifact_id=context_artifact_id,
                 failure_class="model_api_failure",
                 detail=str(exc),
+                intent_id=intent_id,
             )
             raise
         except Exception as exc:  # noqa: BLE001 — fail closed on any error
@@ -355,6 +376,7 @@ class InferenceService:
                 context_artifact_id=context_artifact_id,
                 failure_class="model_adapter_exception",
                 detail=f"{type(exc).__name__}: {exc}",
+                intent_id=intent_id,
             )
             raise InferenceFailure(str(exc)) from exc
 
@@ -380,6 +402,7 @@ class InferenceService:
                     context_artifact_id=context_artifact_id,
                     failure_class=be.reason,
                     detail=be.detail,
+                    intent_id=intent_id,
                 )
                 raise InferenceBudgetExhausted(
                     reason=be.reason, detail=be.detail
