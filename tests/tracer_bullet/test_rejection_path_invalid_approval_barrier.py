@@ -518,6 +518,59 @@ class TestBarrierRejectionWiredStack(unittest.TestCase):
         self.assertEqual(payload["intent_id"], supplied_intent_id)
         self.assertIn(supplied_intent_id, refs)
 
+    def test_approval_issue_time_barrier_rejection_names_intent_id_when_supplied(self) -> None:
+        """AUDIT-003 / §22.1 (approval-issue-time service-record parity):
+        when the orchestrator threads the durable
+        ``intent_anchor_records.intent_id`` into
+        ``ApprovalService.evaluate_barrier`` and the §22.3 barrier
+        rejects, the ``approval_barrier_rejected`` record must name the
+        same id in both ``artifact_refs`` and ``payload``.
+
+        This closes the approval-issue-time rejection one-hop asymmetry
+        so a reviewer reading only that rejection record can recover
+        the AUDIT-003 / §22.1 linkage without a second fetch. The
+        service performs no independent verification of ``intent_id``;
+        authoritative fail-closed verification remains in
+        ``RevisionSealService`` downstream. Absent / empty ``intent_id``
+        preserves the prior audit shape exactly.
+        """
+        task_id = f"task-{uuid4().hex[:8]}"
+        ids = self._run_through_review(task_id)
+
+        # Tamper: mark the validation receipt as failing so the barrier
+        # rejects with REASON_RECEIPT_NOT_PASS (a verdict failure, not a
+        # BarrierEvaluationError — this lands in the
+        # approval_barrier_rejected branch).
+        self.conn.execute(
+            "UPDATE validation_receipts SET result = 'fail' "
+            "WHERE validation_receipt_id = ?;",
+            (ids["validation_receipt_id"],),
+        )
+        self.conn.commit()
+
+        supplied_intent_id = f"intent-{uuid4().hex[:8]}"
+        with self.assertRaises(ApprovalBarrierFailed):
+            self.ap_svc.evaluate_barrier(
+                task_id=task_id,
+                review_artifact_id=ids["review_id"],
+                required_receipt_ids=[ids["validation_receipt_id"]],
+                reviewed_context_artifact_id=ids["context_id"],
+                intent_id=supplied_intent_id,
+            )
+
+        row = self.conn.execute(
+            "SELECT payload_json, artifact_refs FROM audit_records "
+            "WHERE task_id = ? "
+            "AND record_type = 'approval_barrier_rejected' "
+            "ORDER BY sequence DESC LIMIT 1;",
+            (task_id,),
+        ).fetchone()
+        self.assertIsNotNone(row)
+        payload = json.loads(row["payload_json"])
+        refs = json.loads(row["artifact_refs"])
+        self.assertEqual(payload["intent_id"], supplied_intent_id)
+        self.assertIn(supplied_intent_id, refs)
+
 
 # ---------------------------------------------------------------------------
 # Test: audit evidence for rejection events
