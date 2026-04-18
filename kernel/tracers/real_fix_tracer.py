@@ -275,14 +275,32 @@ class RealFixTracer:
         record_type: str,
         task_id: str,
         payload: Mapping[str, Any],
+        intent_id: str | None = None,
     ) -> None:
         # Every real-model audit record carries the honest replay ceiling.
+        #
+        # ``intent_id`` is the durable ``intent_anchor_records.intent_id``
+        # threaded in by the caller (currently only ``run_real_fix_chain``
+        # via ``run``). When supplied and non-empty it is named in both
+        # ``artifact_refs`` and ``payload`` of the emitted record so a
+        # reviewer reading only that record can recover the AUDIT-003 /
+        # §22.1 linkage without a second fetch. Authoritative fail-closed
+        # verification of ``intent_id`` against ``intent_anchor_records``
+        # remains the responsibility of ``RevisionSealService``
+        # downstream; this tracer performs no independent verification.
+        # Absent / empty ``intent_id`` preserves the prior audit shape
+        # exactly, so sites that do not forward it continue to emit
+        # byte-for-byte as before.
         full_payload = dict(payload)
         full_payload.setdefault("replay_ceiling", self._replay_ceiling())
+        audit_artifact_refs: list[str] = [f"real-fix::{task_id}"]
+        if isinstance(intent_id, str) and intent_id:
+            audit_artifact_refs.append(intent_id)
+            full_payload["intent_id"] = intent_id
         self._audit.append(
             record_type=record_type,
             task_id=task_id,
-            artifact_refs=[f"real-fix::{task_id}"],
+            artifact_refs=audit_artifact_refs,
             payload=full_payload,
         )
 
@@ -504,6 +522,7 @@ class RealFixTracer:
             record_type="real_fix_verified_pass",
             task_id=task.task_id,
             payload=verified_payload,
+            intent_id=intent_id,
         )
 
         if narrow_path_inference_id:
