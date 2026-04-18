@@ -357,6 +357,7 @@ class RealFixTracer:
                     "max_retries": self._policy.max_retries,
                 },
             },
+            intent_id=intent_id,
         )
 
         # Adapter boundary — the one real provider call.
