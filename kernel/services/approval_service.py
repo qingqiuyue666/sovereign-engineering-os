@@ -275,12 +275,26 @@ class ApprovalService:
         current_root_revision_id: str,
         current_context_artifact_id: str,
         current_patch_hash: str,
+        intent_id: str | None = None,
     ) -> BarrierVerdict:
         """Re-run §22.3 at seal time. Raises `ApprovalBarrierFailed` on drift.
 
         Called by `RevisionSealService` before the nine-step seal
         sequence begins. This is what makes the approval *atomic*
         relative to seal execution.
+
+        ``intent_id`` is the durable ``intent_anchor_records.intent_id``
+        the seal service already fail-closed-verified against
+        ``intent_anchor_records`` before invoking this method. When
+        supplied and non-empty it is named in both ``artifact_refs`` and
+        ``payload`` of the ``approval_seal_time_barrier_rejected`` audit
+        record so a reviewer reading only that rejection record can
+        recover the AUDIT-003 / §22.1 linkage without a second fetch.
+        This service performs no independent verification of
+        ``intent_id``; authoritative fail-closed verification remains
+        the responsibility of ``RevisionSealService`` upstream of this
+        call. Absent / empty ``intent_id`` preserves the prior audit
+        shape exactly.
         """
         approval = self._repo.fetch(approval_id)
         if approval is None:
@@ -314,14 +328,19 @@ class ApprovalService:
         )
         verdict = evaluate_barrier(inputs)
         if not verdict.passes:
+            audit_artifact_refs = [approval_id]
+            audit_payload: dict[str, Any] = {
+                "reason_code": verdict.reason_code,
+                "detail": verdict.detail,
+            }
+            if isinstance(intent_id, str) and intent_id:
+                audit_artifact_refs.append(intent_id)
+                audit_payload["intent_id"] = intent_id
             self._audit.append(
                 record_type="approval_seal_time_barrier_rejected",
                 task_id=approval["task_id"],
-                artifact_refs=[approval_id],
-                payload={
-                    "reason_code": verdict.reason_code,
-                    "detail": verdict.detail,
-                },
+                artifact_refs=audit_artifact_refs,
+                payload=audit_payload,
             )
             raise ApprovalBarrierFailed(verdict)
         return verdict
