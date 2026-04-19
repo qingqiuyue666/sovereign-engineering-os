@@ -406,6 +406,7 @@ class RealFixTracer:
                     "output_hash": _output_hash(output_text),
                     "latency_ms": latency_ms,
                 },
+                intent_id=intent_id,
             )
             return RealFixResult(
                 verified=False,
