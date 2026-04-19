@@ -436,6 +436,7 @@ class RealFixTracer:
                         "case_index": idx,
                         "latency_ms": latency_ms,
                     },
+                    intent_id=intent_id,
                 )
                 return RealFixResult(
                     verified=False,
