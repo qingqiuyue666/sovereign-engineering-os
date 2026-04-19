@@ -375,6 +375,7 @@ class RealFixTracer:
                     "failure_class": failure_class or "unknown",
                     "detail": detail,
                 },
+                intent_id=intent_id,
             )
             return RealFixResult(
                 verified=False,
