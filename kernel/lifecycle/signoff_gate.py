@@ -224,13 +224,36 @@ class SignoffGate:
         )
 
     def _check_service_modules(self, report: SignoffReport) -> None:
-        missing = [
-            m for m in REQUIRED_SERVICE_MODULES if not (self._root / m).is_file()
-        ]
+        missing: list[str] = []
+        empty: list[str] = []
+        syntax_invalid: list[str] = []
+        for module in REQUIRED_SERVICE_MODULES:
+            path = self._root / module
+            if not path.is_file():
+                missing.append(module)
+                continue
+            source = path.read_text(encoding="utf-8")
+            if not source.strip():
+                empty.append(module)
+                continue
+            if path.suffix == ".py":
+                try:
+                    ast.parse(source, filename=module)
+                except SyntaxError:
+                    syntax_invalid.append(module)
+        failures: list[str] = []
+        if missing:
+            failures.append(f"missing service modules: {missing}")
+        if empty:
+            failures.append(f"empty service modules: {empty}")
+        if syntax_invalid:
+            failures.append(f"syntax-invalid service modules: {syntax_invalid}")
         report.add(
             "capability_approval_context_governance_active",
-            not missing,
-            f"missing service modules: {missing}" if missing else "services present",
+            not failures,
+            "; ".join(failures)
+            if failures
+            else "service modules present, non-empty, and syntax-valid",
         )
 
     def _check_kernel_modules(self, report: SignoffReport) -> None:

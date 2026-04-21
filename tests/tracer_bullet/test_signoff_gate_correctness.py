@@ -300,6 +300,48 @@ class TestSignoffGateFailsOnMissingArtifacts(unittest.TestCase):
             for mod in REQUIRED_CONTRACT_MODULES:
                 self.assertIn(mod, contract_check.detail)
 
+    def test_empty_service_module_rejects(self) -> None:
+        """A listed service module must be non-empty to satisfy governance."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            for mod in REQUIRED_SERVICE_MODULES:
+                p = root / mod
+                p.parent.mkdir(parents=True, exist_ok=True)
+                p.write_text("")
+
+            gate = SignoffGate(repo_root=root)
+            report = gate.evaluate()
+            service_check = next(
+                c
+                for c in report.checks
+                if c.name == "capability_approval_context_governance_active"
+            )
+            self.assertFalse(service_check.passed)
+            self.assertIn("empty service modules", service_check.detail)
+            for mod in REQUIRED_SERVICE_MODULES:
+                self.assertIn(mod, service_check.detail)
+
+    def test_syntax_invalid_service_module_rejects(self) -> None:
+        """Service module proof is import-free but requires valid Python."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            for mod in REQUIRED_SERVICE_MODULES:
+                p = root / mod
+                p.parent.mkdir(parents=True, exist_ok=True)
+                p.write_text("def not valid python\n")
+
+            gate = SignoffGate(repo_root=root)
+            report = gate.evaluate()
+            service_check = next(
+                c
+                for c in report.checks
+                if c.name == "capability_approval_context_governance_active"
+            )
+            self.assertFalse(service_check.passed)
+            self.assertIn("syntax-invalid service modules", service_check.detail)
+            for mod in REQUIRED_SERVICE_MODULES:
+                self.assertIn(mod, service_check.detail)
+
     def test_missing_replay_classifier_flags_replay_honesty(self) -> None:
         """If the replay classifier module is absent, replay_honesty
         must fail."""
