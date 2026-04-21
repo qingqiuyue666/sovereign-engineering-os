@@ -32,6 +32,7 @@ single atomic truth signal.
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Mapping
@@ -147,21 +148,45 @@ class SignoffGate:
 
     def _check_frozen_schemas(self, report: SignoffReport) -> None:
         missing: list[str] = []
+        invalid_json: list[str] = []
+        invalid_version: list[str] = []
         for name in REQUIRED_SCHEMAS:
             p = self._root / "kernel" / "schemas" / f"{name}.schema.json"
             if not p.is_file():
                 missing.append(name)
+                continue
+            try:
+                schema = json.loads(p.read_text(encoding="utf-8"))
+            except json.JSONDecodeError:
+                invalid_json.append(name)
+                continue
+            if (
+                not isinstance(schema, dict)
+                or schema.get("schema_version") != SCHEMA_FREEZE_TAG
+            ):
+                invalid_version.append(name)
+        failures: list[str] = []
         if missing:
+            failures.append(f"missing schemas: {missing}")
+        if invalid_json:
+            failures.append(f"unparseable schema json: {invalid_json}")
+        if invalid_version:
+            failures.append(
+                f"schema_version mismatch: {invalid_version} "
+                f"(expected {SCHEMA_FREEZE_TAG})"
+            )
+        if failures:
             report.add(
                 "frozen_schemas_present",
                 False,
-                f"missing schemas: {missing}",
+                "; ".join(failures),
             )
         else:
             report.add(
                 "frozen_schemas_present",
                 True,
-                f"all {len(REQUIRED_SCHEMAS)} slice schemas present "
+                f"all {len(REQUIRED_SCHEMAS)} slice schemas parse with "
+                f"schema_version={SCHEMA_FREEZE_TAG} "
                 f"(freeze tag: {SCHEMA_FREEZE_TAG})",
             )
 
