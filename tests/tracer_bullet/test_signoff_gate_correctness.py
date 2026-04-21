@@ -695,6 +695,161 @@ invariants:
             self.assertIn("context_artifact", context_check.detail)
             self.assertIn(SCHEMA_FREEZE_TAG, context_check.detail)
 
+    def test_missing_retention_artifact_rejects_retention_declaration(self) -> None:
+        """The retention surface requires both schemas and the runner module."""
+        cases = (
+            (
+                "kernel/schemas/taint_record.schema.json",
+                "missing retention schema",
+                "taint_record",
+            ),
+            (
+                "kernel/schemas/failure_bundle.schema.json",
+                "missing retention schema",
+                "failure_bundle",
+            ),
+            (
+                "validation/quarantine/runner_adapter.py",
+                "missing quarantine runner",
+                "validation/quarantine/runner_adapter.py",
+            ),
+        )
+        for rel_path, expected_text, expected_label in cases:
+            with self.subTest(rel_path=rel_path):
+                with tempfile.TemporaryDirectory() as tmp:
+                    root = Path(tmp)
+                    self._make_full_tree(root)
+                    (root / rel_path).unlink()
+
+                    gate = SignoffGate(repo_root=root)
+                    report = gate.evaluate()
+                    retention_check = next(
+                        c
+                        for c in report.checks
+                        if c.name == "retention_and_pinning_declared"
+                    )
+                    self.assertFalse(retention_check.passed)
+                    self.assertIn(expected_text, retention_check.detail)
+                    self.assertIn(expected_label, retention_check.detail)
+
+    def test_empty_quarantine_runner_rejects_retention_declaration(self) -> None:
+        """The retention surface requires a non-empty quarantine runner."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._make_full_tree(root)
+            runner = "validation/quarantine/runner_adapter.py"
+            (root / runner).write_text("")
+
+            gate = SignoffGate(repo_root=root)
+            report = gate.evaluate()
+            retention_check = next(
+                c for c in report.checks if c.name == "retention_and_pinning_declared"
+            )
+            self.assertFalse(retention_check.passed)
+            self.assertIn("empty quarantine runner", retention_check.detail)
+            self.assertIn(runner, retention_check.detail)
+
+    def test_syntax_invalid_quarantine_runner_rejects_retention_declaration(
+        self,
+    ) -> None:
+        """The quarantine runner proof is import-free but requires valid Python."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._make_full_tree(root)
+            runner = "validation/quarantine/runner_adapter.py"
+            (root / runner).write_text("def not valid python\n")
+
+            gate = SignoffGate(repo_root=root)
+            report = gate.evaluate()
+            retention_check = next(
+                c for c in report.checks if c.name == "retention_and_pinning_declared"
+            )
+            self.assertFalse(retention_check.passed)
+            self.assertIn("syntax-invalid quarantine runner", retention_check.detail)
+            self.assertIn(runner, retention_check.detail)
+
+    def test_unparseable_retention_schemas_reject_retention_declaration(self) -> None:
+        """Both retention schemas must parse as JSON."""
+        for schema_name in ("taint_record", "failure_bundle"):
+            with self.subTest(schema_name=schema_name):
+                with tempfile.TemporaryDirectory() as tmp:
+                    root = Path(tmp)
+                    self._make_full_tree(root)
+                    schema = root / "kernel" / "schemas" / f"{schema_name}.schema.json"
+                    schema.write_text("{not json")
+
+                    gate = SignoffGate(repo_root=root)
+                    report = gate.evaluate()
+                    retention_check = next(
+                        c
+                        for c in report.checks
+                        if c.name == "retention_and_pinning_declared"
+                    )
+                    self.assertFalse(retention_check.passed)
+                    self.assertIn(
+                        "unparseable retention schema json",
+                        retention_check.detail,
+                    )
+                    self.assertIn(schema_name, retention_check.detail)
+
+    def test_non_object_retention_schemas_reject_retention_declaration(self) -> None:
+        """Both retention schemas must be JSON objects."""
+        for schema_name in ("taint_record", "failure_bundle"):
+            with self.subTest(schema_name=schema_name):
+                with tempfile.TemporaryDirectory() as tmp:
+                    root = Path(tmp)
+                    self._make_full_tree(root)
+                    schema = root / "kernel" / "schemas" / f"{schema_name}.schema.json"
+                    schema.write_text(json.dumps([]))
+
+                    gate = SignoffGate(repo_root=root)
+                    report = gate.evaluate()
+                    retention_check = next(
+                        c
+                        for c in report.checks
+                        if c.name == "retention_and_pinning_declared"
+                    )
+                    self.assertFalse(retention_check.passed)
+                    self.assertIn(
+                        "retention schema is not a JSON object",
+                        retention_check.detail,
+                    )
+                    self.assertIn(schema_name, retention_check.detail)
+
+    def test_retention_schema_version_mismatch_rejects_retention_declaration(
+        self,
+    ) -> None:
+        """Both retention schemas must declare the frozen schema version."""
+        for schema_name in ("taint_record", "failure_bundle"):
+            with self.subTest(schema_name=schema_name):
+                with tempfile.TemporaryDirectory() as tmp:
+                    root = Path(tmp)
+                    self._make_full_tree(root)
+                    schema = root / "kernel" / "schemas" / f"{schema_name}.schema.json"
+                    schema.write_text(
+                        json.dumps(
+                            {
+                                "type": "object",
+                                "schema_version": "wrong-freeze",
+                            }
+                        )
+                    )
+
+                    gate = SignoffGate(repo_root=root)
+                    report = gate.evaluate()
+                    retention_check = next(
+                        c
+                        for c in report.checks
+                        if c.name == "retention_and_pinning_declared"
+                    )
+                    self.assertFalse(retention_check.passed)
+                    self.assertIn(
+                        "retention schema_version mismatch",
+                        retention_check.detail,
+                    )
+                    self.assertIn(schema_name, retention_check.detail)
+                    self.assertIn(SCHEMA_FREEZE_TAG, retention_check.detail)
+
     def test_removing_constitution_fails_invariant_coverage(self) -> None:
         """Removing the baseline constitution file must fail the invariant
         coverage declaration check (INV-CAP-UI-STATE-IS-NOT-AUTHORITY

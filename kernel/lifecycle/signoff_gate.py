@@ -380,26 +380,51 @@ class SignoffGate:
         )
 
     def _check_retention_declaration(self, report: SignoffReport) -> None:
-        # Phase-1 retention/pinning declaration is minimum-explicit:
-        # we require the taint_record and failure_bundle schemas to be
-        # present (they carry retention classes) AND the quarantine
-        # runner_adapter to declare its posture. This is the honest
-        # phase-1 "retention and pinning are explicit" surface.
-        taint_ok = (
-            self._root / "kernel" / "schemas" / "taint_record.schema.json"
-        ).is_file()
-        fb_ok = (
-            self._root / "kernel" / "schemas" / "failure_bundle.schema.json"
-        ).is_file()
-        runner_ok = (
-            self._root / "validation" / "quarantine" / "runner_adapter.py"
-        ).is_file()
+        # Minimal static retention-surface proof. This intentionally
+        # does not prove retention semantics or runtime quarantine behavior.
+        retention_schemas = ("taint_record", "failure_bundle")
+        runner_module = "validation/quarantine/runner_adapter.py"
+        runner_path = self._root / runner_module
+
+        failures: list[str] = []
+        for schema_name in retention_schemas:
+            schema_path = (
+                self._root / "kernel" / "schemas" / f"{schema_name}.schema.json"
+            )
+            if not schema_path.is_file():
+                failures.append(f"missing retention schema: {schema_name}")
+                continue
+            try:
+                schema = json.loads(schema_path.read_text(encoding="utf-8"))
+            except json.JSONDecodeError:
+                failures.append(f"unparseable retention schema json: {schema_name}")
+                continue
+            if not isinstance(schema, dict):
+                failures.append(f"retention schema is not a JSON object: {schema_name}")
+            elif schema.get("schema_version") != SCHEMA_FREEZE_TAG:
+                failures.append(
+                    f"retention schema_version mismatch: {schema_name} "
+                    f"(expected {SCHEMA_FREEZE_TAG})"
+                )
+
+        if not runner_path.is_file():
+            failures.append(f"missing quarantine runner: {runner_module}")
+        else:
+            source = runner_path.read_text(encoding="utf-8")
+            if not source.strip():
+                failures.append(f"empty quarantine runner: {runner_module}")
+            else:
+                try:
+                    ast.parse(source, filename=runner_module)
+                except SyntaxError:
+                    failures.append(f"syntax-invalid quarantine runner: {runner_module}")
+
         report.add(
             "retention_and_pinning_declared",
-            taint_ok and fb_ok and runner_ok,
-            "taint_record + failure_bundle schemas + quarantine posture declared"
-            if (taint_ok and fb_ok and runner_ok)
-            else f"taint={taint_ok}, failure_bundle={fb_ok}, runner={runner_ok}",
+            not failures,
+            "; ".join(failures)
+            if failures
+            else "retention schemas frozen and quarantine runner syntax-valid",
         )
 
     @staticmethod
