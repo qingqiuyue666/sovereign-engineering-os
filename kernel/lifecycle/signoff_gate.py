@@ -310,18 +310,46 @@ class SignoffGate:
         )
 
     def _check_context_completeness(self, report: SignoffReport) -> None:
-        ctx_service = (
-            self._root / "kernel" / "services" / "context_service.py"
-        ).is_file()
-        ctx_schema = (
-            self._root / "kernel" / "schemas" / "context_artifact.schema.json"
-        ).is_file()
+        service_module = "kernel/services/context_service.py"
+        schema_name = "context_artifact"
+        service_path = self._root / service_module
+        schema_path = self._root / "kernel" / "schemas" / f"{schema_name}.schema.json"
+
+        failures: list[str] = []
+        if not service_path.is_file():
+            failures.append(f"missing context service: {service_module}")
+        else:
+            source = service_path.read_text(encoding="utf-8")
+            if not source.strip():
+                failures.append(f"empty context service: {service_module}")
+            else:
+                try:
+                    ast.parse(source, filename=service_module)
+                except SyntaxError:
+                    failures.append(f"syntax-invalid context service: {service_module}")
+
+        if not schema_path.is_file():
+            failures.append(f"missing context schema: {schema_name}")
+        else:
+            try:
+                schema = json.loads(schema_path.read_text(encoding="utf-8"))
+            except json.JSONDecodeError:
+                failures.append(f"unparseable context schema json: {schema_name}")
+            else:
+                if not isinstance(schema, dict):
+                    failures.append(f"context schema is not a JSON object: {schema_name}")
+                elif schema.get("schema_version") != SCHEMA_FREEZE_TAG:
+                    failures.append(
+                        f"context schema_version mismatch: {schema_name} "
+                        f"(expected {SCHEMA_FREEZE_TAG})"
+                    )
+
         report.add(
             "context_completeness_active",
-            ctx_service and ctx_schema,
-            "context service + context_artifact schema present"
-            if (ctx_service and ctx_schema)
-            else f"service={ctx_service}, schema={ctx_schema}",
+            not failures,
+            "; ".join(failures)
+            if failures
+            else "context service syntax-valid and context_artifact schema frozen",
         )
 
     def _check_retention_declaration(self, report: SignoffReport) -> None:

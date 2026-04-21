@@ -509,6 +509,99 @@ invariants:
                 f"non-Python artifact should not be AST parsed: {kernel_check.detail}",
             )
 
+    def test_empty_context_service_rejects_context_completeness(self) -> None:
+        """The context surface requires a non-empty context service module."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._make_full_tree(root)
+            service = "kernel/services/context_service.py"
+            (root / service).write_text("")
+
+            gate = SignoffGate(repo_root=root)
+            report = gate.evaluate()
+            context_check = next(
+                c for c in report.checks if c.name == "context_completeness_active"
+            )
+            self.assertFalse(context_check.passed)
+            self.assertIn("empty context service", context_check.detail)
+            self.assertIn(service, context_check.detail)
+
+    def test_syntax_invalid_context_service_rejects_context_completeness(self) -> None:
+        """The context service proof is import-free but requires valid Python."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._make_full_tree(root)
+            service = "kernel/services/context_service.py"
+            (root / service).write_text("def not valid python\n")
+
+            gate = SignoffGate(repo_root=root)
+            report = gate.evaluate()
+            context_check = next(
+                c for c in report.checks if c.name == "context_completeness_active"
+            )
+            self.assertFalse(context_check.passed)
+            self.assertIn("syntax-invalid context service", context_check.detail)
+            self.assertIn(service, context_check.detail)
+
+    def test_unparseable_context_schema_rejects_context_completeness(self) -> None:
+        """The context surface requires parseable context_artifact JSON."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._make_full_tree(root)
+            schema = root / "kernel" / "schemas" / "context_artifact.schema.json"
+            schema.write_text("{not json")
+
+            gate = SignoffGate(repo_root=root)
+            report = gate.evaluate()
+            context_check = next(
+                c for c in report.checks if c.name == "context_completeness_active"
+            )
+            self.assertFalse(context_check.passed)
+            self.assertIn("unparseable context schema json", context_check.detail)
+            self.assertIn("context_artifact", context_check.detail)
+
+    def test_non_object_context_schema_rejects_context_completeness(self) -> None:
+        """The context_artifact schema must be a JSON object."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._make_full_tree(root)
+            schema = root / "kernel" / "schemas" / "context_artifact.schema.json"
+            schema.write_text(json.dumps([]))
+
+            gate = SignoffGate(repo_root=root)
+            report = gate.evaluate()
+            context_check = next(
+                c for c in report.checks if c.name == "context_completeness_active"
+            )
+            self.assertFalse(context_check.passed)
+            self.assertIn("context schema is not a JSON object", context_check.detail)
+            self.assertIn("context_artifact", context_check.detail)
+
+    def test_context_schema_version_mismatch_rejects_context_completeness(self) -> None:
+        """The context_artifact schema must declare the frozen schema version."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._make_full_tree(root)
+            schema = root / "kernel" / "schemas" / "context_artifact.schema.json"
+            schema.write_text(
+                json.dumps(
+                    {
+                        "type": "object",
+                        "schema_version": "wrong-freeze",
+                    }
+                )
+            )
+
+            gate = SignoffGate(repo_root=root)
+            report = gate.evaluate()
+            context_check = next(
+                c for c in report.checks if c.name == "context_completeness_active"
+            )
+            self.assertFalse(context_check.passed)
+            self.assertIn("context schema_version mismatch", context_check.detail)
+            self.assertIn("context_artifact", context_check.detail)
+            self.assertIn(SCHEMA_FREEZE_TAG, context_check.detail)
+
     def test_removing_constitution_fails_invariant_coverage(self) -> None:
         """Removing the baseline constitution file must fail the invariant
         coverage declaration check (INV-CAP-UI-STATE-IS-NOT-AUTHORITY
