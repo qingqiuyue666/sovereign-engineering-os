@@ -32,6 +32,7 @@ single atomic truth signal.
 
 from __future__ import annotations
 
+import ast
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -191,13 +192,35 @@ class SignoffGate:
             )
 
     def _check_contract_modules(self, report: SignoffReport) -> None:
-        missing = [
-            m for m in REQUIRED_CONTRACT_MODULES if not (self._root / m).is_file()
-        ]
+        missing: list[str] = []
+        empty: list[str] = []
+        syntax_invalid: list[str] = []
+        for module in REQUIRED_CONTRACT_MODULES:
+            path = self._root / module
+            if not path.is_file():
+                missing.append(module)
+                continue
+            source = path.read_text(encoding="utf-8")
+            if not source.strip():
+                empty.append(module)
+                continue
+            try:
+                ast.parse(source, filename=module)
+            except SyntaxError:
+                syntax_invalid.append(module)
+        failures: list[str] = []
+        if missing:
+            failures.append(f"missing contract modules: {missing}")
+        if empty:
+            failures.append(f"empty contract modules: {empty}")
+        if syntax_invalid:
+            failures.append(f"syntax-invalid contract modules: {syntax_invalid}")
         report.add(
             "core_contracts_formalized",
-            not missing,
-            f"missing contract modules: {missing}" if missing else "contract modules present",
+            not failures,
+            "; ".join(failures)
+            if failures
+            else "contract modules present, non-empty, and syntax-valid",
         )
 
     def _check_service_modules(self, report: SignoffReport) -> None:
