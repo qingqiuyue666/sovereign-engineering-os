@@ -234,13 +234,36 @@ class SignoffGate:
         )
 
     def _check_kernel_modules(self, report: SignoffReport) -> None:
-        missing = [
-            m for m in REQUIRED_KERNEL_MODULES if not (self._root / m).is_file()
-        ]
+        missing: list[str] = []
+        empty: list[str] = []
+        syntax_invalid: list[str] = []
+        for module in REQUIRED_KERNEL_MODULES:
+            path = self._root / module
+            if not path.is_file():
+                missing.append(module)
+                continue
+            source = path.read_text(encoding="utf-8")
+            if not source.strip():
+                empty.append(module)
+                continue
+            if path.suffix == ".py":
+                try:
+                    ast.parse(source, filename=module)
+                except SyntaxError:
+                    syntax_invalid.append(module)
+        failures: list[str] = []
+        if missing:
+            failures.append(f"missing kernel modules: {missing}")
+        if empty:
+            failures.append(f"empty kernel modules: {empty}")
+        if syntax_invalid:
+            failures.append(f"syntax-invalid kernel modules: {syntax_invalid}")
         report.add(
             "kernel_modules_present",
-            not missing,
-            f"missing kernel modules: {missing}" if missing else "kernel modules present",
+            not failures,
+            "; ".join(failures)
+            if failures
+            else "kernel modules/files present, non-empty, and Python entries syntax-valid",
         )
 
     def _check_replay_honesty(self, report: SignoffReport) -> None:

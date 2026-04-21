@@ -413,6 +413,60 @@ invariants:
             self.assertFalse(kernel_check.passed)
             self.assertIn(REQUIRED_KERNEL_MODULES[0], kernel_check.detail)
 
+    def test_empty_kernel_module_rejects(self) -> None:
+        """A listed kernel artifact must be non-empty to satisfy signoff."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._make_full_tree(root)
+            victim = REQUIRED_KERNEL_MODULES[0]
+            (root / victim).write_text("")
+
+            gate = SignoffGate(repo_root=root)
+            report = gate.evaluate()
+            kernel_check = next(
+                c for c in report.checks if c.name == "kernel_modules_present"
+            )
+            self.assertFalse(kernel_check.passed)
+            self.assertIn("empty kernel modules", kernel_check.detail)
+            self.assertIn(victim, kernel_check.detail)
+
+    def test_syntax_invalid_python_kernel_module_rejects(self) -> None:
+        """Python kernel artifacts are checked with import-free AST parsing."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._make_full_tree(root)
+            victim = REQUIRED_KERNEL_MODULES[0]
+            (root / victim).write_text("def not valid python\n")
+
+            gate = SignoffGate(repo_root=root)
+            report = gate.evaluate()
+            kernel_check = next(
+                c for c in report.checks if c.name == "kernel_modules_present"
+            )
+            self.assertFalse(kernel_check.passed)
+            self.assertIn("syntax-invalid kernel modules", kernel_check.detail)
+            self.assertIn(victim, kernel_check.detail)
+
+    def test_non_python_kernel_artifact_requires_only_non_empty_presence(self) -> None:
+        """Non-Python kernel artifacts remain non-empty presence checks only."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._make_full_tree(root)
+            sql_artifact = (
+                "kernel/stores/sqlite/migrations/0001_core_signable_path.sql"
+            )
+            (root / sql_artifact).write_text("not python but non-empty\n")
+
+            gate = SignoffGate(repo_root=root)
+            report = gate.evaluate()
+            kernel_check = next(
+                c for c in report.checks if c.name == "kernel_modules_present"
+            )
+            self.assertTrue(
+                kernel_check.passed,
+                f"non-Python artifact should not be AST parsed: {kernel_check.detail}",
+            )
+
     def test_removing_constitution_fails_invariant_coverage(self) -> None:
         """Removing the baseline constitution file must fail the invariant
         coverage declaration check (INV-CAP-UI-STATE-IS-NOT-AUTHORITY
