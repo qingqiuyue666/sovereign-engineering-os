@@ -509,6 +509,99 @@ invariants:
                 f"non-Python artifact should not be AST parsed: {kernel_check.detail}",
             )
 
+    def test_empty_replay_classifier_rejects_replay_honesty(self) -> None:
+        """The replay surface requires a non-empty replay classifier module."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._make_full_tree(root)
+            classifier = "kernel/replay/replay_classifier.py"
+            (root / classifier).write_text("")
+
+            gate = SignoffGate(repo_root=root)
+            report = gate.evaluate()
+            replay_check = next(
+                c for c in report.checks if c.name == "replay_honesty_active"
+            )
+            self.assertFalse(replay_check.passed)
+            self.assertIn("empty replay classifier", replay_check.detail)
+            self.assertIn(classifier, replay_check.detail)
+
+    def test_syntax_invalid_replay_classifier_rejects_replay_honesty(self) -> None:
+        """The replay classifier proof is import-free but requires valid Python."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._make_full_tree(root)
+            classifier = "kernel/replay/replay_classifier.py"
+            (root / classifier).write_text("def not valid python\n")
+
+            gate = SignoffGate(repo_root=root)
+            report = gate.evaluate()
+            replay_check = next(
+                c for c in report.checks if c.name == "replay_honesty_active"
+            )
+            self.assertFalse(replay_check.passed)
+            self.assertIn("syntax-invalid replay classifier", replay_check.detail)
+            self.assertIn(classifier, replay_check.detail)
+
+    def test_unparseable_replay_schema_rejects_replay_honesty(self) -> None:
+        """The replay surface requires parseable replay_anchor JSON."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._make_full_tree(root)
+            schema = root / "kernel" / "schemas" / "replay_anchor.schema.json"
+            schema.write_text("{not json")
+
+            gate = SignoffGate(repo_root=root)
+            report = gate.evaluate()
+            replay_check = next(
+                c for c in report.checks if c.name == "replay_honesty_active"
+            )
+            self.assertFalse(replay_check.passed)
+            self.assertIn("unparseable replay schema json", replay_check.detail)
+            self.assertIn("replay_anchor", replay_check.detail)
+
+    def test_non_object_replay_schema_rejects_replay_honesty(self) -> None:
+        """The replay_anchor schema must be a JSON object."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._make_full_tree(root)
+            schema = root / "kernel" / "schemas" / "replay_anchor.schema.json"
+            schema.write_text(json.dumps([]))
+
+            gate = SignoffGate(repo_root=root)
+            report = gate.evaluate()
+            replay_check = next(
+                c for c in report.checks if c.name == "replay_honesty_active"
+            )
+            self.assertFalse(replay_check.passed)
+            self.assertIn("replay schema is not a JSON object", replay_check.detail)
+            self.assertIn("replay_anchor", replay_check.detail)
+
+    def test_replay_schema_version_mismatch_rejects_replay_honesty(self) -> None:
+        """The replay_anchor schema must declare the frozen schema version."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._make_full_tree(root)
+            schema = root / "kernel" / "schemas" / "replay_anchor.schema.json"
+            schema.write_text(
+                json.dumps(
+                    {
+                        "type": "object",
+                        "schema_version": "wrong-freeze",
+                    }
+                )
+            )
+
+            gate = SignoffGate(repo_root=root)
+            report = gate.evaluate()
+            replay_check = next(
+                c for c in report.checks if c.name == "replay_honesty_active"
+            )
+            self.assertFalse(replay_check.passed)
+            self.assertIn("replay schema_version mismatch", replay_check.detail)
+            self.assertIn("replay_anchor", replay_check.detail)
+            self.assertIn(SCHEMA_FREEZE_TAG, replay_check.detail)
+
     def test_empty_context_service_rejects_context_completeness(self) -> None:
         """The context surface requires a non-empty context service module."""
         with tempfile.TemporaryDirectory() as tmp:
