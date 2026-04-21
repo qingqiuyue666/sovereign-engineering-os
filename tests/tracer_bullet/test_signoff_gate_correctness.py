@@ -21,7 +21,7 @@ This test verifies that the §31 sign-off gate:
    detail) for each §31 baseline check.
 4. Reports pass/fail atomically via `all_passed()`.
 5. Does NOT pretend to evaluate constitutional breadth beyond §31 slice
-   scope (the gate is a presence probe, not a runtime proof).
+   scope (the gate is a presence/proof-link probe, not a runtime proof).
 
 The gate's scope is narrow-path only; any broader evaluation is out of
 phase-1 scope and explicitly deferred by the foundation document.
@@ -248,6 +248,24 @@ class TestSignoffGateFailClosedOnPartialPresence(unittest.TestCase):
         (
             gov_impl / "v11_narrow_path_implementation_foundation.md"
         ).write_text("stub foundation\n")
+        (gov_impl / "invariant_bindings.yaml").write_text(
+            """---
+invariants:
+  - invariant_id: INV-TEST
+    enforcement_module: "kernel/lifecycle/stage_types.py"
+    acceptance_test_ids:
+      - "AT-999"
+"""
+        )
+        carrier = (
+            root
+            / "validation"
+            / "tests"
+            / "acceptance"
+            / "test_at_999_invariant_binding.py"
+        )
+        carrier.parent.mkdir(parents=True, exist_ok=True)
+        carrier.write_text("# stub invariant binding carrier\n")
 
     def test_full_fake_tree_passes(self) -> None:
         """Control: a fake tree with ALL required artifacts must PASS.
@@ -305,6 +323,121 @@ class TestSignoffGateFailClosedOnPartialPresence(unittest.TestCase):
                 c for c in report.checks if c.name == "invariant_coverage_declared"
             )
             self.assertFalse(inv_check.passed)
+
+    def test_missing_invariant_bindings_fails_invariant_coverage(self) -> None:
+        """The first proof-linked signoff check must require the binding
+        registry, not only foundation/constitution document presence."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._make_full_tree(root)
+            (
+                root
+                / "governance"
+                / "implementation"
+                / "invariant_bindings.yaml"
+            ).unlink()
+
+            gate = SignoffGate(repo_root=root)
+            report = gate.evaluate()
+            inv_check = next(
+                c for c in report.checks if c.name == "invariant_coverage_declared"
+            )
+            self.assertFalse(inv_check.passed)
+            self.assertIn("missing invariant bindings", inv_check.detail)
+
+    def test_empty_invariant_bindings_fails_invariant_coverage(self) -> None:
+        """The invariant proof-link surface must be non-empty."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._make_full_tree(root)
+            (
+                root
+                / "governance"
+                / "implementation"
+                / "invariant_bindings.yaml"
+            ).write_text("---\ninvariants: []\n")
+
+            gate = SignoffGate(repo_root=root)
+            report = gate.evaluate()
+            inv_check = next(
+                c for c in report.checks if c.name == "invariant_coverage_declared"
+            )
+            self.assertFalse(inv_check.passed)
+            self.assertIn("invariant bindings are empty", inv_check.detail)
+
+    def test_binding_without_enforcement_module_fails_invariant_coverage(self) -> None:
+        """Every checked invariant binding must name an enforcement module."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._make_full_tree(root)
+            (
+                root
+                / "governance"
+                / "implementation"
+                / "invariant_bindings.yaml"
+            ).write_text(
+                """---
+invariants:
+  - invariant_id: INV-TEST
+    acceptance_test_ids:
+      - "AT-999"
+"""
+            )
+
+            gate = SignoffGate(repo_root=root)
+            report = gate.evaluate()
+            inv_check = next(
+                c for c in report.checks if c.name == "invariant_coverage_declared"
+            )
+            self.assertFalse(inv_check.passed)
+            self.assertIn("INV-TEST missing enforcement_module", inv_check.detail)
+
+    def test_binding_without_acceptance_ids_fails_invariant_coverage(self) -> None:
+        """Every checked invariant binding must name acceptance-test IDs."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._make_full_tree(root)
+            (
+                root
+                / "governance"
+                / "implementation"
+                / "invariant_bindings.yaml"
+            ).write_text(
+                """---
+invariants:
+  - invariant_id: INV-TEST
+    enforcement_module: "kernel/lifecycle/stage_types.py"
+"""
+            )
+
+            gate = SignoffGate(repo_root=root)
+            report = gate.evaluate()
+            inv_check = next(
+                c for c in report.checks if c.name == "invariant_coverage_declared"
+            )
+            self.assertFalse(inv_check.passed)
+            self.assertIn("INV-TEST missing acceptance_test_ids", inv_check.detail)
+
+    def test_missing_acceptance_carrier_fails_invariant_coverage(self) -> None:
+        """Every acceptance-test ID must resolve to an existing carrier file."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._make_full_tree(root)
+            (
+                root
+                / "validation"
+                / "tests"
+                / "acceptance"
+                / "test_at_999_invariant_binding.py"
+            ).unlink()
+
+            gate = SignoffGate(repo_root=root)
+            report = gate.evaluate()
+            inv_check = next(
+                c for c in report.checks if c.name == "invariant_coverage_declared"
+            )
+            self.assertFalse(inv_check.passed)
+            self.assertIn("test carrier missing for AT-999", inv_check.detail)
 
 
 # ---------------------------------------------------------------------------
