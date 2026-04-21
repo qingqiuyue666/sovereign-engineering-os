@@ -290,23 +290,50 @@ class SignoffGate:
         )
 
     def _check_replay_honesty(self, report: SignoffReport) -> None:
-        # Replay honesty is claimed "active" iff the replay classifier
-        # module exists AND the replay anchor schema is in the frozen
-        # pack. This is a presence probe, not a runtime proof.
-        classifier_ok = (
-            self._root / "kernel" / "replay" / "replay_classifier.py"
-        ).is_file()
-        schema_ok = (
-            self._root / "kernel" / "schemas" / "replay_anchor.schema.json"
-        ).is_file()
+        # Minimal static replay-surface proof. This intentionally does
+        # not import the classifier or prove replay semantics.
+        classifier_module = "kernel/replay/replay_classifier.py"
+        schema_name = "replay_anchor"
+        classifier_path = self._root / classifier_module
+        schema_path = self._root / "kernel" / "schemas" / f"{schema_name}.schema.json"
+
+        failures: list[str] = []
+        if not classifier_path.is_file():
+            failures.append(f"missing replay classifier: {classifier_module}")
+        else:
+            source = classifier_path.read_text(encoding="utf-8")
+            if not source.strip():
+                failures.append(f"empty replay classifier: {classifier_module}")
+            else:
+                try:
+                    ast.parse(source, filename=classifier_module)
+                except SyntaxError:
+                    failures.append(
+                        f"syntax-invalid replay classifier: {classifier_module}"
+                    )
+
+        if not schema_path.is_file():
+            failures.append(f"missing replay schema: {schema_name}")
+        else:
+            try:
+                schema = json.loads(schema_path.read_text(encoding="utf-8"))
+            except json.JSONDecodeError:
+                failures.append(f"unparseable replay schema json: {schema_name}")
+            else:
+                if not isinstance(schema, dict):
+                    failures.append(f"replay schema is not a JSON object: {schema_name}")
+                elif schema.get("schema_version") != SCHEMA_FREEZE_TAG:
+                    failures.append(
+                        f"replay schema_version mismatch: {schema_name} "
+                        f"(expected {SCHEMA_FREEZE_TAG})"
+                    )
+
         report.add(
             "replay_honesty_active",
-            classifier_ok and schema_ok,
-            (
-                "replay classifier + replay_anchor schema present"
-                if (classifier_ok and schema_ok)
-                else f"classifier={classifier_ok}, schema={schema_ok}"
-            ),
+            not failures,
+            "; ".join(failures)
+            if failures
+            else "replay classifier syntax-valid and replay_anchor schema frozen",
         )
 
     def _check_context_completeness(self, report: SignoffReport) -> None:
