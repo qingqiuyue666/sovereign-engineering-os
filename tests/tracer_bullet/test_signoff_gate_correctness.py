@@ -262,6 +262,44 @@ class TestSignoffGateFailsOnMissingArtifacts(unittest.TestCase):
             for mod in REQUIRED_CONTRACT_MODULES:
                 self.assertIn(mod, contract_check.detail)
 
+    def test_empty_contract_module_rejects(self) -> None:
+        """A present but empty contract module must not prove formalization."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            for mod in REQUIRED_CONTRACT_MODULES:
+                p = root / mod
+                p.parent.mkdir(parents=True, exist_ok=True)
+                p.write_text("")
+
+            gate = SignoffGate(repo_root=root)
+            report = gate.evaluate()
+            contract_check = next(
+                c for c in report.checks if c.name == "core_contracts_formalized"
+            )
+            self.assertFalse(contract_check.passed)
+            self.assertIn("empty contract modules", contract_check.detail)
+            for mod in REQUIRED_CONTRACT_MODULES:
+                self.assertIn(mod, contract_check.detail)
+
+    def test_syntax_invalid_contract_module_rejects(self) -> None:
+        """Contract module proof is import-free but requires valid Python."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            for mod in REQUIRED_CONTRACT_MODULES:
+                p = root / mod
+                p.parent.mkdir(parents=True, exist_ok=True)
+                p.write_text("def not valid python\n")
+
+            gate = SignoffGate(repo_root=root)
+            report = gate.evaluate()
+            contract_check = next(
+                c for c in report.checks if c.name == "core_contracts_formalized"
+            )
+            self.assertFalse(contract_check.passed)
+            self.assertIn("syntax-invalid contract modules", contract_check.detail)
+            for mod in REQUIRED_CONTRACT_MODULES:
+                self.assertIn(mod, contract_check.detail)
+
     def test_missing_replay_classifier_flags_replay_honesty(self) -> None:
         """If the replay classifier module is absent, replay_honesty
         must fail."""
