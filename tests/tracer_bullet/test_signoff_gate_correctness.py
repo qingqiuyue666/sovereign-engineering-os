@@ -165,7 +165,12 @@ class TestSignoffGateFailsOnMissingArtifacts(unittest.TestCase):
             schema_dir.mkdir(parents=True)
             for name in REQUIRED_SCHEMAS:
                 (schema_dir / f"{name}.schema.json").write_text(
-                    '{"type": "object"}'
+                    json.dumps(
+                        {
+                            "type": "object",
+                            "schema_version": SCHEMA_FREEZE_TAG,
+                        }
+                    )
                 )
             # ...except one (deliberately omitted).
             omitted = REQUIRED_SCHEMAS[0]
@@ -178,6 +183,68 @@ class TestSignoffGateFailsOnMissingArtifacts(unittest.TestCase):
             )
             self.assertFalse(schema_check.passed)
             self.assertIn(omitted, schema_check.detail)
+
+    def test_unparseable_schema_rejects(self) -> None:
+        """A present but non-JSON schema must not satisfy the frozen pack."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            schema_dir = root / "kernel" / "schemas"
+            schema_dir.mkdir(parents=True)
+            for name in REQUIRED_SCHEMAS:
+                (schema_dir / f"{name}.schema.json").write_text(
+                    json.dumps(
+                        {
+                            "type": "object",
+                            "schema_version": SCHEMA_FREEZE_TAG,
+                        }
+                    )
+                )
+            broken = REQUIRED_SCHEMAS[0]
+            (schema_dir / f"{broken}.schema.json").write_text("{not json")
+
+            gate = SignoffGate(repo_root=root)
+            report = gate.evaluate()
+            schema_check = next(
+                c for c in report.checks if c.name == "frozen_schemas_present"
+            )
+            self.assertFalse(schema_check.passed)
+            self.assertIn("unparseable schema json", schema_check.detail)
+            self.assertIn(broken, schema_check.detail)
+
+    def test_schema_version_mismatch_rejects(self) -> None:
+        """Every required schema must declare the frozen schema version."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            schema_dir = root / "kernel" / "schemas"
+            schema_dir.mkdir(parents=True)
+            for name in REQUIRED_SCHEMAS:
+                (schema_dir / f"{name}.schema.json").write_text(
+                    json.dumps(
+                        {
+                            "type": "object",
+                            "schema_version": SCHEMA_FREEZE_TAG,
+                        }
+                    )
+                )
+            mismatched = REQUIRED_SCHEMAS[0]
+            (schema_dir / f"{mismatched}.schema.json").write_text(
+                json.dumps(
+                    {
+                        "type": "object",
+                        "schema_version": "wrong-freeze",
+                    }
+                )
+            )
+
+            gate = SignoffGate(repo_root=root)
+            report = gate.evaluate()
+            schema_check = next(
+                c for c in report.checks if c.name == "frozen_schemas_present"
+            )
+            self.assertFalse(schema_check.passed)
+            self.assertIn("schema_version mismatch", schema_check.detail)
+            self.assertIn(mismatched, schema_check.detail)
+            self.assertIn(SCHEMA_FREEZE_TAG, schema_check.detail)
 
     def test_missing_contract_module_surfaces_path(self) -> None:
         """A missing contract module must produce a check failure whose
@@ -225,7 +292,14 @@ class TestSignoffGateFailClosedOnPartialPresence(unittest.TestCase):
         schema_dir = root / "kernel" / "schemas"
         schema_dir.mkdir(parents=True)
         for name in REQUIRED_SCHEMAS:
-            (schema_dir / f"{name}.schema.json").write_text('{"type": "object"}')
+            (schema_dir / f"{name}.schema.json").write_text(
+                json.dumps(
+                    {
+                        "type": "object",
+                        "schema_version": SCHEMA_FREEZE_TAG,
+                    }
+                )
+            )
         # Contract / service / kernel modules.
         for rel in (
             REQUIRED_CONTRACT_MODULES
