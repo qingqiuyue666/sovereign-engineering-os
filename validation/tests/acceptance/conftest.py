@@ -22,6 +22,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..",
 from kernel.stores.sqlite.wal_recovery import open_connection, apply_migrations
 from kernel.stores.sqlite.repositories import (
     AuditRepository,
+    BudgetRepository,
     CapabilityRepository,
     ContextArtifactRepository,
     InferenceArtifactRepository,
@@ -92,6 +93,7 @@ class AcceptanceHarness:
 
         # Repositories.
         self.audit_repo = AuditRepository(self.conn)
+        self.budget_repo = BudgetRepository(self.conn)
         self.cap_repo = CapabilityRepository(self.conn)
         self.ctx_repo = ContextArtifactRepository(self.conn)
         self.inf_repo = InferenceArtifactRepository(self.conn)
@@ -140,6 +142,7 @@ class AcceptanceHarness:
         self.budget_governor = BudgetGovernor(
             audit_ledger=self.audit_ledger,
             default_hard_budget_tokens=default_hard_budget_tokens,
+            budget_repository=self.budget_repo,
         )
         self.inf_svc = InferenceService(
             repository=self.inf_repo,

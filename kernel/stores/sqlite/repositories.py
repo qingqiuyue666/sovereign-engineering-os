@@ -162,6 +162,52 @@ class TaintRepository:
 
 
 # ---------------------------------------------------------------------------
+# Budget ledger (minimal durable transition records)
+# ---------------------------------------------------------------------------
+
+
+class BudgetRepository:
+    def __init__(self, conn: sqlite3.Connection) -> None:
+        self._conn = conn
+
+    def append(
+        self,
+        *,
+        budget_record_id: str,
+        task_id: str,
+        budget_class: str,
+        allocated_amount: int,
+        consumed_amount: int,
+        remaining_amount: int,
+        budget_state: str,
+        close_reason: str | None = None,
+    ) -> None:
+        created_at = _iso_now()
+        self._conn.execute(
+            """
+            INSERT INTO budget_records (
+              budget_record_id, task_id, budget_class, allocated_amount,
+              consumed_amount, remaining_amount, budget_state, created_at,
+              suspended_at, replenished_at, close_reason
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            """,
+            (
+                budget_record_id,
+                task_id,
+                budget_class,
+                allocated_amount,
+                consumed_amount,
+                remaining_amount,
+                budget_state,
+                created_at,
+                created_at if budget_state == "suspended" else None,
+                created_at if budget_state == "replenished" else None,
+                close_reason,
+            ),
+        )
+
+
+# ---------------------------------------------------------------------------
 # Capability token ledger (issue + atomic single-use consume)
 # ---------------------------------------------------------------------------
 
