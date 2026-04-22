@@ -1009,6 +1009,20 @@ class FailureBundleRepository:
     def __init__(self, conn: sqlite3.Connection) -> None:
         self._conn = conn
 
+    def list_for_task_root(
+        self, task_id: str, root_revision_id: str
+    ) -> list[dict[str, Any]]:
+        rows = self._conn.execute(
+            """
+            SELECT * FROM failure_bundles
+             WHERE task_id = ?
+               AND root_revision_id = ?
+             ORDER BY rowid;
+            """,
+            (task_id, root_revision_id),
+        ).fetchall()
+        return [d for row in rows if (d := _row_to_dict(row)) is not None]
+
     def append(self, *, artifact: Mapping[str, Any]) -> None:
         self._conn.execute(
             """

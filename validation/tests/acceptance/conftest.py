@@ -209,6 +209,7 @@ class AcceptanceHarness:
             taint_repo=self.taint_repo,
             budget_repo=self.budget_repo,
             drift_repo=self.drift_repo,
+            failure_repo=self.failure_repo,
             audit_ledger=self.audit_ledger,
         )
 

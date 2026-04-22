@@ -463,6 +463,69 @@ class TestAT027BudgetExhaustionGovernance(unittest.TestCase):
         finally:
             harness.close()
 
+    def test_evidence_closure_binds_task_root_failure_bundle_ids(self) -> None:
+        """ReplayAnchor.required_artifact_ids carries durable failure bundles."""
+        from kernel.lifecycle.stage_types import Stage
+
+        harness = AcceptanceHarness(default_hard_budget_tokens=10_000)
+        try:
+            task_id = f"task-{uuid4().hex[:8]}"
+            ids = harness.run_through_stage(task_id, Stage.REVISION_SEAL)
+            root = ids["root_revision_id"]
+            first_failure_id = f"fb-{uuid4().hex}"
+            second_failure_id = f"fb-{uuid4().hex}"
+            other_task_failure_id = f"fb-{uuid4().hex}"
+            other_root_failure_id = f"fb-{uuid4().hex}"
+
+            for failure_bundle_id, failure_task_id, failure_root_id in (
+                (first_failure_id, task_id, root),
+                (second_failure_id, task_id, root),
+                (other_task_failure_id, f"{task_id}-other", root),
+                (other_root_failure_id, task_id, f"{root}-other"),
+            ):
+                harness.failure_repo.append(
+                    artifact={
+                        "failure_bundle_id": failure_bundle_id,
+                        "task_id": failure_task_id,
+                        "root_revision_id": failure_root_id,
+                        "failure_class": "model_api_failure",
+                        "cause_hash": f"sha256:{uuid4().hex}",
+                        "evidence_refs": [ids["context_artifact_id"]],
+                        "taint_set": [],
+                        "created_at": "2026-01-01T00:00:00+00:00",
+                    }
+                )
+
+            failure_rows = harness.failure_repo.list_for_task_root(task_id, root)
+            self.assertEqual(
+                [row["failure_bundle_id"] for row in failure_rows],
+                [first_failure_id, second_failure_id],
+            )
+
+            replay_anchor_id = harness.orch.admit_evidence(task_id=task_id)
+            anchor = harness.ra_repo.fetch(replay_anchor_id)
+            self.assertIsNotNone(anchor)
+            self.assertIn(first_failure_id, anchor["required_artifact_ids"])
+            self.assertIn(second_failure_id, anchor["required_artifact_ids"])
+            self.assertNotIn(other_task_failure_id, anchor["required_artifact_ids"])
+            self.assertNotIn(other_root_failure_id, anchor["required_artifact_ids"])
+
+            closure_row = harness.conn.execute(
+                "SELECT payload_json FROM audit_records "
+                "WHERE task_id = ? AND record_type = 'evidence_closure' "
+                "AND replay_anchor_id = ?;",
+                (task_id, replay_anchor_id),
+            ).fetchone()
+            self.assertIsNotNone(closure_row)
+            payload = json.loads(closure_row["payload_json"])
+            self.assertIn(first_failure_id, payload["required_artifact_ids"])
+            self.assertIn(second_failure_id, payload["required_artifact_ids"])
+            self.assertNotIn(other_task_failure_id, payload["required_artifact_ids"])
+            self.assertNotIn(other_root_failure_id, payload["required_artifact_ids"])
+            self.assertNotIn("failure_bundle_ids", payload)
+        finally:
+            harness.close()
+
 
 if __name__ == "__main__":
     unittest.main()
