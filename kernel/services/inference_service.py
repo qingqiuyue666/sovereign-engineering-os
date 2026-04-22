@@ -43,13 +43,16 @@ import hashlib
 import json
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Mapping, Protocol
+from typing import Any, Mapping, Protocol, Sequence
 from uuid import uuid4
 
 from kernel.schemas import load_schema
 from kernel.schemas.validator import validate_artifact
 from kernel.services.budget_governor import BudgetExhausted, BudgetGovernor
-from kernel.stores.sqlite.repositories import InferenceArtifactRepository
+from kernel.stores.sqlite.repositories import (
+    FailureBundleRepository,
+    InferenceArtifactRepository,
+)
 from kernel.version.version_tuple import compose_version_tuple_hash
 
 
@@ -136,6 +139,21 @@ def _output_hash(output_text: str) -> str:
     return "sha256:" + hashlib.sha256(output_text.encode("utf-8")).hexdigest()
 
 
+def _failure_cause_hash(
+    *,
+    failure_class: str,
+    detail: str,
+    evidence_refs: Sequence[str],
+) -> str:
+    payload = {
+        "failure_class": failure_class,
+        "detail": detail,
+        "evidence_refs": list(evidence_refs),
+    }
+    canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+    return "sha256:" + hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
 def _actual_total_tokens(token_usage: Mapping[str, Any]) -> int:
     """Derive a conservative total-token count from a parsed token_usage.
 
@@ -162,6 +180,7 @@ class InferenceService:
         policy: InferencePolicy | None = None,
         version_tuple_overrides: Mapping[str, Any] | None = None,
         budget_governor: BudgetGovernor | None = None,
+        failure_bundle_repository: FailureBundleRepository | None = None,
     ) -> None:
         self._repo = repository
         self._audit = audit_ledger
@@ -175,6 +194,7 @@ class InferenceService:
         # refuses to persist inference artifacts whose actual token
         # usage pushes past the task's hard budget.
         self._budget: BudgetGovernor | None = budget_governor
+        self._failure_bundles = failure_bundle_repository
 
     # ------------------------------------------------------------------
     # governed prompt construction
@@ -247,12 +267,13 @@ class InferenceService:
         context_artifact_id: str,
         failure_class: str,
         detail: str,
+        taint_set: Sequence[str] | None = None,
         intent_id: str | None = None,
     ) -> None:
-        # The ledger's FailureBundle writer lives in the evidence service
-        # in the general case. In phase 1 we emit an AuditRecord with
-        # explicit failure classification; a full FailureBundle row is
-        # left to the evidence/append_only_ledger wiring.
+        # When a FailureBundleRepository is wired, persist the durable
+        # failure row before appending the audit record that names it.
+        # Unwired direct-service tests retain the pre-existing audit-only
+        # failure behavior.
         #
         # ``intent_id`` is the durable ``intent_anchor_records.intent_id``
         # threaded in by ``run_inference``. When supplied and non-empty
@@ -265,6 +286,28 @@ class InferenceService:
         # downstream; this service performs no independent verification.
         # Absent / empty ``intent_id`` preserves the prior audit shape
         # exactly.
+        failure_bundle_id: str | None = None
+        evidence_refs = [context_artifact_id]
+        taints = list(taint_set or [])
+        if self._failure_bundles is not None:
+            failure_bundle_id = f"fb-{uuid4().hex}"
+            self._failure_bundles.append(
+                artifact={
+                    "failure_bundle_id": failure_bundle_id,
+                    "task_id": task_id,
+                    "root_revision_id": root_revision_id,
+                    "failure_class": failure_class,
+                    "cause_hash": _failure_cause_hash(
+                        failure_class=failure_class,
+                        detail=detail,
+                        evidence_refs=evidence_refs,
+                    ),
+                    "evidence_refs": evidence_refs,
+                    "taint_set": taints,
+                    "created_at": _now_iso(),
+                }
+            )
+
         audit_artifact_refs: list[str] = [context_artifact_id]
         audit_payload: dict[str, Any] = {
             "failure_class": failure_class,
@@ -279,6 +322,7 @@ class InferenceService:
             task_id=task_id,
             artifact_refs=audit_artifact_refs,
             payload=audit_payload,
+            failure_bundle_id=failure_bundle_id,
         )
 
     # ------------------------------------------------------------------
@@ -349,6 +393,7 @@ class InferenceService:
                     context_artifact_id=context_artifact_id,
                     failure_class=be.reason,
                     detail=be.detail,
+                    taint_set=context_artifact.get("taint_set", []),
                     intent_id=intent_id,
                 )
                 raise InferenceBudgetExhausted(
@@ -366,6 +411,7 @@ class InferenceService:
                 context_artifact_id=context_artifact_id,
                 failure_class="model_api_failure",
                 detail=str(exc),
+                taint_set=context_artifact.get("taint_set", []),
                 intent_id=intent_id,
             )
             raise
@@ -376,6 +422,7 @@ class InferenceService:
                 context_artifact_id=context_artifact_id,
                 failure_class="model_adapter_exception",
                 detail=f"{type(exc).__name__}: {exc}",
+                taint_set=context_artifact.get("taint_set", []),
                 intent_id=intent_id,
             )
             raise InferenceFailure(str(exc)) from exc
@@ -402,6 +449,7 @@ class InferenceService:
                     context_artifact_id=context_artifact_id,
                     failure_class=be.reason,
                     detail=be.detail,
+                    taint_set=context_artifact.get("taint_set", []),
                     intent_id=intent_id,
                 )
                 raise InferenceBudgetExhausted(

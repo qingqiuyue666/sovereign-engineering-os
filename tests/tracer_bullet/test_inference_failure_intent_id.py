@@ -91,6 +91,7 @@ class TestInferenceFailureNamesIntentId(unittest.TestCase):
             adapter=adapter,
             policy=InferencePolicy(max_output_tokens=50),
             budget_governor=self.harness.budget_governor,
+            failure_bundle_repository=self.harness.failure_repo,
         )
         self.harness.orch._inference = self.harness.inf_svc  # type: ignore[attr-defined]
         self._adapter = adapter
@@ -139,7 +140,7 @@ class TestInferenceFailureNamesIntentId(unittest.TestCase):
         self.assertEqual(self._adapter.invocations, 0)
 
         row = self.harness.conn.execute(
-            "SELECT payload_json, artifact_refs FROM audit_records "
+            "SELECT payload_json, artifact_refs, failure_bundle_id FROM audit_records "
             "WHERE task_id = ? "
             "AND record_type = 'inference_failure' "
             "ORDER BY sequence DESC LIMIT 1;",
@@ -155,6 +156,16 @@ class TestInferenceFailureNamesIntentId(unittest.TestCase):
         self.assertIn("detail", payload)
         self.assertEqual(payload["root_revision_id"], root_revision_id)
         self.assertIn(context_artifact_id, refs)
+        self.assertIsNotNone(row["failure_bundle_id"])
+        bundle = self.harness.conn.execute(
+            "SELECT * FROM failure_bundles WHERE failure_bundle_id = ?;",
+            (row["failure_bundle_id"],),
+        ).fetchone()
+        self.assertIsNotNone(bundle)
+        self.assertEqual(bundle["task_id"], task_id)
+        self.assertEqual(bundle["root_revision_id"], root_revision_id)
+        self.assertEqual(bundle["failure_class"], "budget_would_be_exceeded")
+        self.assertEqual(json.loads(bundle["evidence_refs"]), [context_artifact_id])
 
 
 if __name__ == "__main__":
