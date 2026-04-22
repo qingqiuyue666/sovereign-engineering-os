@@ -128,10 +128,18 @@ def _admit_context(harness: AcceptanceHarness, task_id: str, *, actual_tokens: i
 
 def _select_records(harness: AcceptanceHarness, record_type: str, task_id: str):
     rows = harness.conn.execute(
-        "SELECT audit_record_id, record_type, payload_json "
+        "SELECT audit_record_id, record_type, payload_json, sequence "
         "FROM audit_records WHERE record_type = ? AND task_id = ? "
-        "ORDER BY created_at, audit_record_id;",
+        "ORDER BY sequence;",
         (record_type, task_id),
+    ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def _select_budget_records(harness: AcceptanceHarness, task_id: str):
+    rows = harness.conn.execute(
+        "SELECT * FROM budget_records WHERE task_id = ? ORDER BY rowid;",
+        (task_id,),
     ).fetchall()
     return [dict(r) for r in rows]
 
@@ -251,6 +259,30 @@ class TestAT027BudgetExhaustionGovernance(unittest.TestCase):
             self.assertTrue(failures)
             last = json.loads(failures[-1]["payload_json"])
             self.assertEqual(last["failure_class"], "budget_exceeded_during_inference")
+
+            transitions = _select_records(harness, "budget_transition", task_id)
+            budget_records = _select_budget_records(harness, task_id)
+            self.assertEqual(len(budget_records), len(transitions))
+            self.assertEqual(
+                [json.loads(r["payload_json"])["to_state"] for r in transitions],
+                [r["budget_state"] for r in budget_records],
+            )
+            self.assertEqual(
+                [r["budget_state"] for r in budget_records],
+                [
+                    BudgetState.ALLOCATED.value,
+                    BudgetState.ACTIVE.value,
+                    BudgetState.EXCEEDED.value,
+                    BudgetState.SUSPENDED.value,
+                ],
+            )
+            suspended = budget_records[-1]
+            self.assertEqual(suspended["task_id"], task_id)
+            self.assertEqual(suspended["budget_class"], "tokens")
+            self.assertEqual(suspended["allocated_amount"], 200)
+            self.assertEqual(suspended["consumed_amount"], 250)
+            self.assertEqual(suspended["remaining_amount"], -50)
+            self.assertIsNotNone(suspended["suspended_at"])
         finally:
             harness.close()
 
@@ -366,6 +398,16 @@ class TestAT027BudgetExhaustionGovernance(unittest.TestCase):
             self.assertEqual(
                 to_states[:2],
                 [BudgetState.ALLOCATED.value, BudgetState.ACTIVE.value],
+            )
+            budget_records = _select_budget_records(harness, task_id)
+            self.assertEqual([r["budget_state"] for r in budget_records], to_states)
+            self.assertEqual(
+                [r["allocated_amount"] for r in budget_records],
+                [10_000, 10_000],
+            )
+            self.assertEqual(
+                [r["remaining_amount"] for r in budget_records],
+                [10_000, 10_000],
             )
         finally:
             harness.close()

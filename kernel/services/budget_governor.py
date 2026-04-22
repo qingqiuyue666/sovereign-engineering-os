@@ -14,7 +14,8 @@ Constitutional anchors:
   `phase1_budget_policy_v1`)
 - foundation §3 item 8 / AUDIT-004 (BudgetRecord schema expansion is a
   later-stage hardening target; phase-1 uses in-memory state + AuditRecord
-  evidence)
+  evidence, with optional durable BudgetRecord rows when a repository is
+  wired)
 
 Scope (explicitly narrow):
 - in-memory per-task budget state.
@@ -24,9 +25,11 @@ Scope (explicitly narrow):
   hard budget" (not admissible, forces `active -> exceeded -> suspended`).
 - every state transition emits a `budget_transition` AuditRecord via the
   injected ledger so replay can reconstruct the governance decision.
+- when a BudgetRepository is wired, the same transition funnel persists one
+  durable `budget_records` row using the current table shape.
 
 Out of scope (explicitly deferred):
-- `BudgetRecord` schema / SQL table (AUDIT-004 later-stage hardening).
+- `BudgetRecord` schema file / new migration (AUDIT-004 later-stage hardening).
 - `replenished`, `closed` lifecycle paths (no code path in phase-1 needs
   them; we keep the states in the enum but never drive them internally).
 - dynamic budget policy / multi-tenant budget classes.
@@ -41,6 +44,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from threading import Lock
 from typing import Any, Mapping
+from uuid import uuid4
 
 
 class BudgetState(str, Enum):
@@ -105,6 +109,7 @@ class _TaskBudget:
     nearing_limit_ratio: float
     consumed: int = 0
     state: BudgetState = BudgetState.ALLOCATED
+    budget_class: str = "tokens"
     budget_policy_id: str = "phase1_budget_policy_v1"
     history: list[Mapping[str, Any]] = field(default_factory=list)
 
@@ -133,6 +138,7 @@ class BudgetGovernor:
         default_hard_budget_tokens: int = 96_000,
         nearing_limit_ratio: float = 0.9,
         budget_policy_id: str = "phase1_budget_policy_v1",
+        budget_repository: Any | None = None,
     ) -> None:
         if default_hard_budget_tokens <= 0:
             raise BudgetGovernorViolation("default_hard_budget_tokens must be > 0")
@@ -144,6 +150,7 @@ class BudgetGovernor:
         self._default_hard = int(default_hard_budget_tokens)
         self._nearing_ratio = float(nearing_limit_ratio)
         self._policy_id = str(budget_policy_id)
+        self._budget_repo = budget_repository
         self._tasks: dict[str, _TaskBudget] = {}
         self._lock = Lock()
 
@@ -443,6 +450,17 @@ class BudgetGovernor:
         if detail:
             payload["detail"] = dict(detail)
         tb.history.append(payload)
+        if self._budget_repo is not None:
+            self._budget_repo.append(
+                budget_record_id=f"budget-{uuid4().hex}",
+                task_id=tb.task_id,
+                budget_class=tb.budget_class,
+                allocated_amount=tb.hard_budget_tokens,
+                consumed_amount=tb.consumed,
+                remaining_amount=tb.hard_budget_tokens - tb.consumed,
+                budget_state=to_state.value,
+                close_reason=reason if to_state is BudgetState.CLOSED else None,
+            )
         self._audit.append(
             record_type="budget_transition",
             task_id=tb.task_id,
