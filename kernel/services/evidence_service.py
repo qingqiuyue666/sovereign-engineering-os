@@ -126,10 +126,10 @@ class _LiveEvidenceView:
         # In phase-1, required artifacts are the context + inference
         # artifact ids for this task, the sealed revision's SnapshotRoot,
         # approval artifact and its required validation receipts, review
-        # artifact, seal journal entries, plus already-durable budget, drift,
-        # failure-bundle, and validation taint records when the evidence
-        # composition root wires those read surfaces. Full artifact closure
-        # is a hardening-stage expansion.
+        # artifact and its carried patch proposal id, seal journal entries,
+        # plus already-durable budget, drift, failure-bundle, and validation
+        # taint records when the evidence composition root wires those read
+        # surfaces. Full artifact closure is a hardening-stage expansion.
         ids: list[str] = []
         ctx_row = self._ctx._conn.execute(
             "SELECT context_artifact_id FROM context_artifacts "
@@ -149,6 +149,7 @@ class _LiveEvidenceView:
         ids.extend(self._approval_artifact_ids(root_revision_id))
         ids.extend(self._validation_receipt_ids(root_revision_id))
         ids.extend(self._review_artifact_ids(task_id, root_revision_id))
+        ids.extend(self._patch_proposal_ids(task_id, root_revision_id))
         ids.extend(self._journal_entry_ids(root_revision_id))
         ids.extend(self._budget_record_ids(task_id))
         ids.extend(self._drift_event_ids(task_id, root_revision_id))
@@ -226,6 +227,30 @@ class _LiveEvidenceView:
             review_artifact_id = record.get("review_artifact_id")
             if isinstance(review_artifact_id, str) and review_artifact_id:
                 ids.append(review_artifact_id)
+        return ids
+
+    def _patch_proposal_ids(
+        self, task_id: str, root_revision_id: str
+    ) -> list[str]:
+        if self._review is None or self._approval is None:
+            return []
+        review_root_revision_id = self._originating_root_revision_id(
+            root_revision_id
+        )
+        if review_root_revision_id is None:
+            return []
+        ids: list[str] = []
+        seen: set[str] = set()
+        for record in self._review.list_for_task_root(
+            task_id, review_root_revision_id
+        ):
+            patch_proposal_id = record.get("patch_proposal_id")
+            if not isinstance(patch_proposal_id, str) or not patch_proposal_id:
+                continue
+            if patch_proposal_id in seen:
+                continue
+            seen.add(patch_proposal_id)
+            ids.append(patch_proposal_id)
         return ids
 
     def _budget_record_ids(self, task_id: str) -> list[str]:
