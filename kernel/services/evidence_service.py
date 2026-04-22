@@ -122,10 +122,11 @@ class _LiveEvidenceView:
     ) -> list[str]:
         # In phase-1, required artifacts are the context + inference
         # artifact ids for this task, the sealed revision's SnapshotRoot,
-        # approval artifact, seal journal entries, plus already-durable
-        # budget, drift, failure-bundle, and validation taint records when
-        # the evidence composition root wires those read surfaces. Full
-        # artifact closure is a hardening-stage expansion.
+        # approval artifact and its required validation receipts, seal
+        # journal entries, plus already-durable budget, drift,
+        # failure-bundle, and validation taint records when the evidence
+        # composition root wires those read surfaces. Full artifact closure
+        # is a hardening-stage expansion.
         ids: list[str] = []
         ctx_row = self._ctx._conn.execute(
             "SELECT context_artifact_id FROM context_artifacts "
@@ -143,6 +144,7 @@ class _LiveEvidenceView:
             ids.append(inf_row[0])
         ids.extend(self._snapshot_root_ids(root_revision_id))
         ids.extend(self._approval_artifact_ids(root_revision_id))
+        ids.extend(self._validation_receipt_ids(root_revision_id))
         ids.extend(self._journal_entry_ids(root_revision_id))
         ids.extend(self._budget_record_ids(task_id))
         ids.extend(self._drift_event_ids(task_id, root_revision_id))
@@ -167,6 +169,31 @@ class _LiveEvidenceView:
         if isinstance(approval_id, str) and approval_id:
             return [approval_id]
         return []
+
+    def _validation_receipt_ids(self, root_revision_id: str) -> list[str]:
+        if self._approval is None:
+            return []
+
+        revision = self._rev.fetch(root_revision_id)
+        if revision is None:
+            return []
+
+        approval_id = revision.get("approval_id")
+        if not isinstance(approval_id, str) or not approval_id:
+            return []
+
+        approval = self._approval.fetch(approval_id)
+        if approval is None:
+            raise EvidenceClosureRejected(
+                f"approval not found for sealed revision {root_revision_id}: "
+                f"{approval_id}"
+            )
+
+        ids: list[str] = []
+        for receipt_id in approval.get("required_receipt_ids", []):
+            if isinstance(receipt_id, str) and receipt_id:
+                ids.append(receipt_id)
+        return ids
 
     def _journal_entry_ids(self, root_revision_id: str) -> list[str]:
         if self._journal is None:
