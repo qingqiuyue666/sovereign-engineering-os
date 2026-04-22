@@ -57,6 +57,7 @@ from kernel.stores.sqlite.repositories import (
     JournalEntryRepository,
     ReplayAnchorRepository,
     RevisionRepository,
+    ReviewArtifactRepository,
     TaintRepository,
 )
 from kernel.version.version_tuple import compose_version_tuple_hash
@@ -95,6 +96,7 @@ class _LiveEvidenceView:
         drift_repo: DriftEventRecordRepository | None = None,
         failure_repo: FailureBundleRepository | None = None,
         journal_repo: JournalEntryRepository | None = None,
+        review_repo: ReviewArtifactRepository | None = None,
     ) -> None:
         self._rev = revision_repo
         self._ctx = context_repo
@@ -105,6 +107,7 @@ class _LiveEvidenceView:
         self._drift = drift_repo
         self._failure = failure_repo
         self._journal = journal_repo
+        self._review = review_repo
 
     def has_sealed_revision(self, root_revision_id: str) -> bool:
         return self._rev.has_sealed(root_revision_id)
@@ -122,8 +125,8 @@ class _LiveEvidenceView:
     ) -> list[str]:
         # In phase-1, required artifacts are the context + inference
         # artifact ids for this task, the sealed revision's SnapshotRoot,
-        # approval artifact and its required validation receipts, seal
-        # journal entries, plus already-durable budget, drift,
+        # approval artifact and its required validation receipts, review
+        # artifact, seal journal entries, plus already-durable budget, drift,
         # failure-bundle, and validation taint records when the evidence
         # composition root wires those read surfaces. Full artifact closure
         # is a hardening-stage expansion.
@@ -145,6 +148,7 @@ class _LiveEvidenceView:
         ids.extend(self._snapshot_root_ids(root_revision_id))
         ids.extend(self._approval_artifact_ids(root_revision_id))
         ids.extend(self._validation_receipt_ids(root_revision_id))
+        ids.extend(self._review_artifact_ids(task_id, root_revision_id))
         ids.extend(self._journal_entry_ids(root_revision_id))
         ids.extend(self._budget_record_ids(task_id))
         ids.extend(self._drift_event_ids(task_id, root_revision_id))
@@ -203,6 +207,25 @@ class _LiveEvidenceView:
             journal_entry_id = record.get("journal_entry_id")
             if isinstance(journal_entry_id, str) and journal_entry_id:
                 ids.append(journal_entry_id)
+        return ids
+
+    def _review_artifact_ids(
+        self, task_id: str, root_revision_id: str
+    ) -> list[str]:
+        if self._review is None or self._approval is None:
+            return []
+        review_root_revision_id = self._originating_root_revision_id(
+            root_revision_id
+        )
+        if review_root_revision_id is None:
+            return []
+        ids: list[str] = []
+        for record in self._review.list_for_task_root(
+            task_id, review_root_revision_id
+        ):
+            review_artifact_id = record.get("review_artifact_id")
+            if isinstance(review_artifact_id, str) and review_artifact_id:
+                ids.append(review_artifact_id)
         return ids
 
     def _budget_record_ids(self, task_id: str) -> list[str]:
@@ -326,6 +349,7 @@ class EvidenceService:
         drift_repo: DriftEventRecordRepository | None = None,
         failure_repo: FailureBundleRepository | None = None,
         journal_repo: JournalEntryRepository | None = None,
+        review_repo: ReviewArtifactRepository | None = None,
         project_id: str = "phase1_default",
         version_tuple_overrides: Mapping[str, Any] | None = None,
     ) -> None:
@@ -339,6 +363,7 @@ class EvidenceService:
         self._drift_repo = drift_repo
         self._failure_repo = failure_repo
         self._journal_repo = journal_repo
+        self._review_repo = review_repo
         self._audit = audit_ledger
         self._project_id = project_id
         self._vt_overrides = dict(version_tuple_overrides or {})
@@ -376,6 +401,7 @@ class EvidenceService:
             drift_repo=self._drift_repo,
             failure_repo=self._failure_repo,
             journal_repo=self._journal_repo,
+            review_repo=self._review_repo,
         )
         classifier = ReplayClassifier(evidence_view)
 
