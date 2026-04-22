@@ -24,8 +24,12 @@ from uuid import uuid4
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")))
 
+from kernel.lifecycle.stage_types import Stage
 from kernel.stores.sqlite.wal_recovery import open_connection, apply_migrations
 from kernel.stores.sqlite.repositories import TaintRepository
+from kernel.version.version_tuple import compose_version_tuple_hash
+from validation.quarantine.runner_adapter import QuarantineRun, QuarantineState
+from validation.tests.acceptance.conftest import AcceptanceHarness
 
 
 class TestTaintPropagation(unittest.TestCase):
@@ -56,6 +60,120 @@ class TestTaintPropagation(unittest.TestCase):
         self.assertIsNotNone(row)
         self.assertEqual(row["taint_class"], "quarantine_breach_suspect")
         self.assertEqual(row["taint_state"], "tainted")
+
+    def test_validation_emits_quarantine_classification_taint_records(self) -> None:
+        """ValidationService must durably emit new quarantine taints."""
+        cases = (
+            (
+                QuarantineRun(
+                    quarantine_run_id=f"qr-{uuid4().hex}",
+                    state=QuarantineState.EXITED_CLEAN,
+                    entered_at="2026-04-22T00:00:00+00:00",
+                    exited_at="2026-04-22T00:00:01+00:00",
+                    host_pollution_suspected=False,
+                    workspace_preserved_for_forensics=False,
+                    env_scrub_violations=("HOME=/real/home",),
+                    network_attempts=(),
+                ),
+                "policy_degraded",
+                "downgraded",
+            ),
+            (
+                QuarantineRun(
+                    quarantine_run_id=f"qr-{uuid4().hex}",
+                    state=QuarantineState.EXITED_TAINTED,
+                    entered_at="2026-04-22T00:00:00+00:00",
+                    exited_at="2026-04-22T00:00:01+00:00",
+                    host_pollution_suspected=True,
+                    workspace_preserved_for_forensics=True,
+                    env_scrub_violations=(),
+                    network_attempts=(),
+                ),
+                "quarantine_breach_suspect",
+                "tainted",
+            ),
+        )
+        for run, expected_class, expected_state in cases:
+            with self.subTest(expected_class=expected_class):
+                harness = AcceptanceHarness()
+                try:
+                    task_id = f"task-{uuid4().hex[:8]}"
+                    ids = harness.run_through_stage(task_id, Stage.PATCH_PROPOSAL)
+
+                    receipt_id = harness.val_svc.validate(
+                        task_id=task_id,
+                        patch_proposal_id=ids["patch_proposal_id"],
+                        run=run,
+                    )
+
+                    receipt = harness.vr_repo.fetch(receipt_id)
+                    self.assertIsNotNone(receipt)
+                    self.assertIn(expected_class, receipt["taint_set"])
+
+                    rows = harness.conn.execute(
+                        "SELECT subject_id, taint_class, taint_state, source_ref "
+                        "FROM taint_records WHERE subject_id = ?;",
+                        (receipt_id,),
+                    ).fetchall()
+                    self.assertEqual(len(rows), 1)
+                    self.assertEqual(rows[0]["subject_id"], receipt_id)
+                    self.assertEqual(rows[0]["taint_class"], expected_class)
+                    self.assertEqual(rows[0]["taint_state"], expected_state)
+                    self.assertEqual(
+                        rows[0]["source_ref"],
+                        f"quarantine_run:{run.quarantine_run_id}",
+                    )
+                finally:
+                    harness.close()
+
+    def test_validation_does_not_reemit_upstream_proposal_taints(self) -> None:
+        """Only new quarantine classification taints get durable records."""
+        harness = AcceptanceHarness()
+        try:
+            task_id = f"task-{uuid4().hex[:8]}"
+            patch_id = f"pp-{uuid4().hex}"
+            harness.pp_repo.insert(
+                {
+                    "patch_proposal_id": patch_id,
+                    "task_id": task_id,
+                    "root_revision_id": "rev-genesis-000",
+                    "inference_artifact_id": f"inf-{uuid4().hex}",
+                    "target_file_ids": ["src/main.py"],
+                    "patch_group_hash": "sha256:" + "a" * 64,
+                    "side_effect_class_proposal": "local_text_substitution",
+                    "capability_requirements": [],
+                    "taint_set": ["untrusted_text"],
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                    "version_tuple_hash": compose_version_tuple_hash(),
+                }
+            )
+            clean_run = QuarantineRun(
+                quarantine_run_id=f"qr-{uuid4().hex}",
+                state=QuarantineState.EXITED_CLEAN,
+                entered_at="2026-04-22T00:00:00+00:00",
+                exited_at="2026-04-22T00:00:01+00:00",
+                host_pollution_suspected=False,
+                workspace_preserved_for_forensics=False,
+                env_scrub_violations=(),
+                network_attempts=(),
+            )
+
+            receipt_id = harness.val_svc.validate(
+                task_id=task_id,
+                patch_proposal_id=patch_id,
+                run=clean_run,
+            )
+
+            receipt = harness.vr_repo.fetch(receipt_id)
+            self.assertIsNotNone(receipt)
+            self.assertIn("untrusted_text", receipt["taint_set"])
+            rows = harness.conn.execute(
+                "SELECT * FROM taint_records WHERE subject_id = ?;",
+                (receipt_id,),
+            ).fetchall()
+            self.assertEqual(rows, [])
+        finally:
+            harness.close()
 
     def test_taint_record_append_only_no_update(self) -> None:
         """INV-022: taint records cannot be updated in place."""

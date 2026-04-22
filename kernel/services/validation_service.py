@@ -50,6 +50,7 @@ from kernel.schemas import load_schema
 from kernel.schemas.validator import validate_artifact
 from kernel.stores.sqlite.repositories import (
     PatchProposalRepository,
+    TaintRepository,
     ValidationReceiptRepository,
 )
 from kernel.version.version_tuple import compose_version_tuple_hash
@@ -67,6 +68,12 @@ class StaticCheckResult:
     diagnostics_hash: str
 
 
+_QUARANTINE_TAINT_STATE_BY_CLASS = {
+    "policy_degraded": "downgraded",
+    "quarantine_breach_suspect": "tainted",
+}
+
+
 def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -80,6 +87,15 @@ def _canonical_hash(payload: Mapping[str, Any]) -> str:
     return "sha256:" + hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
+def _quarantine_taint_state(taint_class: str) -> str:
+    try:
+        return _QUARANTINE_TAINT_STATE_BY_CLASS[taint_class]
+    except KeyError as exc:
+        raise ValidationRejected(
+            f"unsupported quarantine taint class: {taint_class}"
+        ) from exc
+
+
 class ValidationService:
     def __init__(
         self,
@@ -87,6 +103,7 @@ class ValidationService:
         repository: ValidationReceiptRepository,
         patch_reader: PatchProposalRepository,
         audit_ledger: Any,
+        taint_repository: TaintRepository | None = None,
         validator_identity: str = "phase1_static_validator",
         validator_version: str = "phase1-slice1",
         version_tuple_overrides: Mapping[str, Any] | None = None,
@@ -94,6 +111,7 @@ class ValidationService:
         self._repo = repository
         self._patch_reader = patch_reader
         self._audit = audit_ledger
+        self._taint_repo = taint_repository
         self._validator_identity = validator_identity
         self._validator_version = validator_version
         self._vt_overrides = dict(version_tuple_overrides or {})
@@ -212,6 +230,16 @@ class ValidationService:
             )
 
         self._repo.insert(receipt)
+
+        if self._taint_repo is not None:
+            for taint_class in admission.trust.taint_to_propagate:
+                self._taint_repo.append(
+                    taint_record_id=f"taint-{uuid4().hex}",
+                    subject_id=receipt["validation_receipt_id"],
+                    taint_class=taint_class,
+                    taint_state=_quarantine_taint_state(taint_class),
+                    source_ref=f"quarantine_run:{admission.quarantine_run_id}",
+                )
 
         audit_artifact_refs = [receipt["validation_receipt_id"], patch_proposal_id]
         audit_payload: dict[str, Any] = {
