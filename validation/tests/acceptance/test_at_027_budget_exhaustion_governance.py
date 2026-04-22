@@ -137,11 +137,7 @@ def _select_records(harness: AcceptanceHarness, record_type: str, task_id: str):
 
 
 def _select_budget_records(harness: AcceptanceHarness, task_id: str):
-    rows = harness.conn.execute(
-        "SELECT * FROM budget_records WHERE task_id = ? ORDER BY rowid;",
-        (task_id,),
-    ).fetchall()
-    return [dict(r) for r in rows]
+    return harness.budget_repo.list_for_task(task_id)
 
 
 class TestAT027BudgetExhaustionGovernance(unittest.TestCase):
@@ -409,6 +405,39 @@ class TestAT027BudgetExhaustionGovernance(unittest.TestCase):
                 [r["remaining_amount"] for r in budget_records],
                 [10_000, 10_000],
             )
+        finally:
+            harness.close()
+
+    def test_evidence_closure_binds_budget_record_ids(self) -> None:
+        """ReplayAnchor.required_artifact_ids carries durable budget records."""
+        harness = AcceptanceHarness(default_hard_budget_tokens=10_000)
+        try:
+            task_id = f"task-{uuid4().hex[:8]}"
+            ids = harness.run_full_happy_path(task_id)
+
+            budget_rows = harness.budget_repo.list_for_task(task_id)
+            budget_record_ids = [row["budget_record_id"] for row in budget_rows]
+            self.assertEqual(
+                [row["budget_state"] for row in budget_rows],
+                [BudgetState.ALLOCATED.value, BudgetState.ACTIVE.value],
+            )
+
+            anchor = harness.ra_repo.fetch(ids["replay_anchor_id"])
+            self.assertIsNotNone(anchor)
+            for budget_record_id in budget_record_ids:
+                self.assertIn(budget_record_id, anchor["required_artifact_ids"])
+
+            closure_row = harness.conn.execute(
+                "SELECT payload_json FROM audit_records "
+                "WHERE task_id = ? AND record_type = 'evidence_closure' "
+                "AND replay_anchor_id = ?;",
+                (task_id, ids["replay_anchor_id"]),
+            ).fetchone()
+            self.assertIsNotNone(closure_row)
+            payload = json.loads(closure_row["payload_json"])
+            for budget_record_id in budget_record_ids:
+                self.assertIn(budget_record_id, payload["required_artifact_ids"])
+            self.assertNotIn("budget_record_ids", payload)
         finally:
             harness.close()
 

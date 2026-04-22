@@ -170,6 +170,17 @@ class BudgetRepository:
     def __init__(self, conn: sqlite3.Connection) -> None:
         self._conn = conn
 
+    def list_for_task(self, task_id: str) -> list[dict[str, Any]]:
+        rows = self._conn.execute(
+            """
+            SELECT * FROM budget_records
+             WHERE task_id = ?
+             ORDER BY rowid;
+            """,
+            (task_id,),
+        ).fetchall()
+        return [d for row in rows if (d := _row_to_dict(row)) is not None]
+
     def append(
         self,
         *,
