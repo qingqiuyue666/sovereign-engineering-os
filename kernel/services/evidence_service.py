@@ -122,10 +122,10 @@ class _LiveEvidenceView:
     ) -> list[str]:
         # In phase-1, required artifacts are the context + inference
         # artifact ids for this task, the sealed revision's SnapshotRoot,
-        # seal journal entries, plus already-durable budget, drift,
-        # failure-bundle, and validation taint records when the evidence
-        # composition root wires those read surfaces. Full artifact closure
-        # is a hardening-stage expansion.
+        # approval artifact, seal journal entries, plus already-durable
+        # budget, drift, failure-bundle, and validation taint records when
+        # the evidence composition root wires those read surfaces. Full
+        # artifact closure is a hardening-stage expansion.
         ids: list[str] = []
         ctx_row = self._ctx._conn.execute(
             "SELECT context_artifact_id FROM context_artifacts "
@@ -142,6 +142,7 @@ class _LiveEvidenceView:
         if inf_row:
             ids.append(inf_row[0])
         ids.extend(self._snapshot_root_ids(root_revision_id))
+        ids.extend(self._approval_artifact_ids(root_revision_id))
         ids.extend(self._journal_entry_ids(root_revision_id))
         ids.extend(self._budget_record_ids(task_id))
         ids.extend(self._drift_event_ids(task_id, root_revision_id))
@@ -156,6 +157,15 @@ class _LiveEvidenceView:
         snapshot_root_id = revision.get("snapshot_root_id")
         if isinstance(snapshot_root_id, str) and snapshot_root_id:
             return [snapshot_root_id]
+        return []
+
+    def _approval_artifact_ids(self, root_revision_id: str) -> list[str]:
+        revision = self._rev.fetch(root_revision_id)
+        if revision is None:
+            return []
+        approval_id = revision.get("approval_id")
+        if isinstance(approval_id, str) and approval_id:
+            return [approval_id]
         return []
 
     def _journal_entry_ids(self, root_revision_id: str) -> list[str]:
