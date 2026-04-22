@@ -45,6 +45,7 @@ What this test proves:
 from __future__ import annotations
 
 import hashlib
+import json
 import os
 import sys
 import unittest
@@ -63,6 +64,7 @@ from kernel.stores.sqlite.repositories import (
     ValidationReceiptRepository,
 )
 from kernel.evidence.append_only_ledger import AppendOnlyLedger
+from kernel.lifecycle.stage_types import Stage
 from kernel.services.invalidation_service import (
     CONSEQUENCE_APPROVAL_INVALIDATED,
     CONSEQUENCE_RECEIPT_INVALIDATED,
@@ -81,6 +83,7 @@ from kernel.contracts.barrier_rules import (
     REASON_RECEIPT_INVALIDATED,
     evaluate_barrier,
 )
+from validation.tests.acceptance.conftest import AcceptanceHarness
 
 
 def _derive_input_hash(patch_group_hash: str) -> str:
@@ -550,6 +553,75 @@ class TestPatchProposalServiceTriggersInvalidation(unittest.TestCase):
         self.assertEqual(
             receipt["invalidation_reason"], REASON_UPSTREAM_PATCH_DRIFT
         )
+
+
+class TestDriftEvidenceVisibility(unittest.TestCase):
+    """Already-durable drift records are visible through evidence closure."""
+
+    def test_evidence_closure_binds_task_root_drift_event_ids(self) -> None:
+        """ReplayAnchor.required_artifact_ids carries durable drift records."""
+        harness = AcceptanceHarness()
+        try:
+            task_id = f"task-{uuid4().hex[:8]}"
+            ids = harness.run_through_stage(task_id, Stage.REVISION_SEAL)
+            root = ids["root_revision_id"]
+            first_drift_id = f"dr-{uuid4().hex}"
+            second_drift_id = f"dr-{uuid4().hex}"
+            other_task_drift_id = f"dr-{uuid4().hex}"
+            other_root_drift_id = f"dr-{uuid4().hex}"
+
+            for drift_event_id, drift_task_id, drift_root_id in (
+                (first_drift_id, task_id, root),
+                (second_drift_id, task_id, root),
+                (other_task_drift_id, f"{task_id}-other", root),
+                (other_root_drift_id, task_id, f"{root}-other"),
+            ):
+                harness.drift_repo.insert(
+                    {
+                        "drift_event_id": drift_event_id,
+                        "task_id": drift_task_id,
+                        "root_revision_id": drift_root_id,
+                        "drift_class": DRIFT_CLASS_UPSTREAM_PATCH_DRIFT,
+                        "detected_at": _now_iso(),
+                        "affected_artifact_ids": [
+                            ids["validation_receipt_id"],
+                        ],
+                        "consequence_class": CONSEQUENCE_RECEIPT_INVALIDATED,
+                        "required_reconciliation_action": (
+                            "revalidate_against_current_patch"
+                        ),
+                    }
+                )
+
+            drift_rows = harness.drift_repo.list_for_task_root(task_id, root)
+            self.assertEqual(
+                [row["drift_event_id"] for row in drift_rows],
+                [first_drift_id, second_drift_id],
+            )
+
+            replay_anchor_id = harness.orch.admit_evidence(task_id=task_id)
+            anchor = harness.ra_repo.fetch(replay_anchor_id)
+            self.assertIsNotNone(anchor)
+            self.assertIn(first_drift_id, anchor["required_artifact_ids"])
+            self.assertIn(second_drift_id, anchor["required_artifact_ids"])
+            self.assertNotIn(other_task_drift_id, anchor["required_artifact_ids"])
+            self.assertNotIn(other_root_drift_id, anchor["required_artifact_ids"])
+
+            closure_row = harness.conn.execute(
+                "SELECT payload_json FROM audit_records "
+                "WHERE task_id = ? AND record_type = 'evidence_closure' "
+                "AND replay_anchor_id = ?;",
+                (task_id, replay_anchor_id),
+            ).fetchone()
+            self.assertIsNotNone(closure_row)
+            payload = json.loads(closure_row["payload_json"])
+            self.assertIn(first_drift_id, payload["required_artifact_ids"])
+            self.assertIn(second_drift_id, payload["required_artifact_ids"])
+            self.assertNotIn(other_task_drift_id, payload["required_artifact_ids"])
+            self.assertNotIn(other_root_drift_id, payload["required_artifact_ids"])
+            self.assertNotIn("drift_event_ids", payload)
+        finally:
+            harness.close()
 
 
 if __name__ == "__main__":

@@ -1040,11 +1040,35 @@ class DriftEventRecordRepository:
     Drift events are emitted when governing upstream inputs for a
     current-path artifact change underneath it (upstream patch drift,
     receipt invalidation cascade, etc.). The SQL trigger enforces
-    append-only (no UPDATE, no DELETE); this adapter exposes only insert.
+    append-only (no UPDATE, no DELETE); this adapter exposes insert and
+    the narrow task/root read surface needed by evidence closure.
     """
 
     def __init__(self, conn: sqlite3.Connection) -> None:
         self._conn = conn
+
+    def list_for_task_root(
+        self, task_id: str, root_revision_id: str
+    ) -> list[dict[str, Any]]:
+        rows = self._conn.execute(
+            """
+            SELECT * FROM drift_event_records
+             WHERE task_id = ?
+               AND root_revision_id = ?
+             ORDER BY rowid;
+            """,
+            (task_id, root_revision_id),
+        ).fetchall()
+        results: list[dict[str, Any]] = []
+        for row in rows:
+            d = _row_to_dict(row)
+            if d is None:
+                continue
+            d["affected_artifact_ids"] = (
+                _unjsonify(d.get("affected_artifact_ids")) or []
+            )
+            results.append(d)
+        return results
 
     def insert(self, record: Mapping[str, Any]) -> None:
         self._conn.execute(

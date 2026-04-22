@@ -51,6 +51,7 @@ from kernel.stores.sqlite.repositories import (
     ApprovalArtifactRepository,
     BudgetRepository,
     ContextArtifactRepository,
+    DriftEventRecordRepository,
     InferenceArtifactRepository,
     ReplayAnchorRepository,
     RevisionRepository,
@@ -89,6 +90,7 @@ class _LiveEvidenceView:
         approval_repo: ApprovalArtifactRepository | None = None,
         taint_repo: TaintRepository | None = None,
         budget_repo: BudgetRepository | None = None,
+        drift_repo: DriftEventRecordRepository | None = None,
     ) -> None:
         self._rev = revision_repo
         self._ctx = context_repo
@@ -96,6 +98,7 @@ class _LiveEvidenceView:
         self._approval = approval_repo
         self._taint = taint_repo
         self._budget = budget_repo
+        self._drift = drift_repo
 
     def has_sealed_revision(self, root_revision_id: str) -> bool:
         return self._rev.has_sealed(root_revision_id)
@@ -112,10 +115,10 @@ class _LiveEvidenceView:
         self, task_id: str, root_revision_id: str
     ) -> list[str]:
         # In phase-1, required artifacts are the context + inference
-        # artifact ids for this task, plus already-durable budget and
-        # validation taint records when the evidence composition root wires
-        # those read surfaces. Full artifact closure is a hardening-stage
-        # expansion.
+        # artifact ids for this task, plus already-durable budget, drift,
+        # and validation taint records when the evidence composition root
+        # wires those read surfaces. Full artifact closure is a
+        # hardening-stage expansion.
         ids: list[str] = []
         ctx_row = self._ctx._conn.execute(
             "SELECT context_artifact_id FROM context_artifacts "
@@ -132,6 +135,7 @@ class _LiveEvidenceView:
         if inf_row:
             ids.append(inf_row[0])
         ids.extend(self._budget_record_ids(task_id))
+        ids.extend(self._drift_event_ids(task_id, root_revision_id))
         ids.extend(self._validation_taint_record_ids(root_revision_id))
         return ids
 
@@ -144,6 +148,44 @@ class _LiveEvidenceView:
             if isinstance(budget_record_id, str) and budget_record_id:
                 ids.append(budget_record_id)
         return ids
+
+    def _drift_event_ids(
+        self, task_id: str, root_revision_id: str
+    ) -> list[str]:
+        if self._drift is None or self._approval is None:
+            return []
+        drift_root_revision_id = self._drift_lookup_root(root_revision_id)
+        if drift_root_revision_id is None:
+            return []
+        ids: list[str] = []
+        for record in self._drift.list_for_task_root(
+            task_id, drift_root_revision_id
+        ):
+            drift_event_id = record.get("drift_event_id")
+            if isinstance(drift_event_id, str) and drift_event_id:
+                ids.append(drift_event_id)
+        return ids
+
+    def _drift_lookup_root(self, replay_root_revision_id: str) -> str | None:
+        revision = self._rev.fetch(replay_root_revision_id)
+        if revision is None:
+            return None
+
+        approval_id = revision.get("approval_id")
+        if not isinstance(approval_id, str) or not approval_id:
+            return None
+
+        approval = self._approval.fetch(approval_id)
+        if approval is None:
+            raise EvidenceClosureRejected(
+                f"approval not found for sealed revision {replay_root_revision_id}: "
+                f"{approval_id}"
+            )
+
+        originating_root = approval.get("originating_root_revision_id")
+        if not isinstance(originating_root, str) or not originating_root:
+            return None
+        return originating_root
 
     def _validation_taint_record_ids(self, root_revision_id: str) -> list[str]:
         if self._approval is None or self._taint is None:
@@ -192,6 +234,7 @@ class EvidenceService:
         approval_repo: ApprovalArtifactRepository | None = None,
         taint_repo: TaintRepository | None = None,
         budget_repo: BudgetRepository | None = None,
+        drift_repo: DriftEventRecordRepository | None = None,
         project_id: str = "phase1_default",
         version_tuple_overrides: Mapping[str, Any] | None = None,
     ) -> None:
@@ -202,6 +245,7 @@ class EvidenceService:
         self._approval_repo = approval_repo
         self._taint_repo = taint_repo
         self._budget_repo = budget_repo
+        self._drift_repo = drift_repo
         self._audit = audit_ledger
         self._project_id = project_id
         self._vt_overrides = dict(version_tuple_overrides or {})
@@ -236,6 +280,7 @@ class EvidenceService:
             approval_repo=self._approval_repo,
             taint_repo=self._taint_repo,
             budget_repo=self._budget_repo,
+            drift_repo=self._drift_repo,
         )
         classifier = ReplayClassifier(evidence_view)
 
