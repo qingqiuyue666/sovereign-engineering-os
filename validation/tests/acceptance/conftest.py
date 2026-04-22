@@ -25,6 +25,7 @@ from kernel.stores.sqlite.repositories import (
     BudgetRepository,
     CapabilityRepository,
     ContextArtifactRepository,
+    DriftEventRecordRepository,
     InferenceArtifactRepository,
     IntentAnchorRepository,
     PatchProposalRepository,
@@ -107,6 +108,7 @@ class AcceptanceHarness:
         self.je_repo = JournalEntryRepository(self.conn)
         self.ra_repo = ReplayAnchorRepository(self.conn)
         self.taint_repo = TaintRepository(self.conn)
+        self.drift_repo = DriftEventRecordRepository(self.conn)
 
         # Audit ledger.
         self.audit_ledger = AppendOnlyLedger(
@@ -203,6 +205,7 @@ class AcceptanceHarness:
             approval_repo=self.ap_repo,
             taint_repo=self.taint_repo,
             budget_repo=self.budget_repo,
+            drift_repo=self.drift_repo,
             audit_ledger=self.audit_ledger,
         )
 
