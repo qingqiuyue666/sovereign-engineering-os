@@ -118,10 +118,10 @@ class _LiveEvidenceView:
         self, task_id: str, root_revision_id: str
     ) -> list[str]:
         # In phase-1, required artifacts are the context + inference
-        # artifact ids for this task, plus already-durable budget, drift,
-        # failure-bundle, and validation taint records when the evidence
-        # composition root wires those read surfaces. Full artifact closure is a
-        # hardening-stage expansion.
+        # artifact ids for this task, the sealed revision's SnapshotRoot,
+        # plus already-durable budget, drift, failure-bundle, and validation
+        # taint records when the evidence composition root wires those read
+        # surfaces. Full artifact closure is a hardening-stage expansion.
         ids: list[str] = []
         ctx_row = self._ctx._conn.execute(
             "SELECT context_artifact_id FROM context_artifacts "
@@ -137,11 +137,21 @@ class _LiveEvidenceView:
         ).fetchone()
         if inf_row:
             ids.append(inf_row[0])
+        ids.extend(self._snapshot_root_ids(root_revision_id))
         ids.extend(self._budget_record_ids(task_id))
         ids.extend(self._drift_event_ids(task_id, root_revision_id))
         ids.extend(self._failure_bundle_ids(task_id, root_revision_id))
         ids.extend(self._validation_taint_record_ids(root_revision_id))
         return ids
+
+    def _snapshot_root_ids(self, root_revision_id: str) -> list[str]:
+        revision = self._rev.fetch(root_revision_id)
+        if revision is None:
+            return []
+        snapshot_root_id = revision.get("snapshot_root_id")
+        if isinstance(snapshot_root_id, str) and snapshot_root_id:
+            return [snapshot_root_id]
+        return []
 
     def _budget_record_ids(self, task_id: str) -> list[str]:
         if self._budget is None:

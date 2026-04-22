@@ -19,6 +19,7 @@ Phase-1 scope: reconstruction is limited to audit records + artifact
 
 from __future__ import annotations
 
+import json
 import unittest
 import sys
 import os
@@ -79,6 +80,31 @@ class TestForensicReconstructability(unittest.TestCase):
             (ids["replay_anchor_id"],),
         ).fetchone()
         self.assertIsNotNone(anchor_row)
+
+    def test_replay_anchor_binds_snapshot_root_id(self) -> None:
+        """ReplayAnchor.required_artifact_ids carries the sealed SnapshotRoot."""
+        ids = self.harness.run_full_happy_path()
+
+        revision = self.harness.rev_repo.fetch(ids["revision_id"])
+        self.assertIsNotNone(revision)
+        snapshot_root_id = revision["snapshot_root_id"]
+        self.assertTrue(snapshot_root_id)
+
+        anchor = self.harness.ra_repo.fetch(ids["replay_anchor_id"])
+        self.assertIsNotNone(anchor)
+        self.assertIn(snapshot_root_id, anchor["required_artifact_ids"])
+
+        closure_row = self.harness.conn.execute(
+            "SELECT payload_json FROM audit_records "
+            "WHERE task_id = ? AND record_type = 'evidence_closure' "
+            "AND replay_anchor_id = ?;",
+            (ids["task_id"], ids["replay_anchor_id"]),
+        ).fetchone()
+        self.assertIsNotNone(closure_row)
+        payload = json.loads(closure_row["payload_json"])
+        self.assertIn(snapshot_root_id, payload["required_artifact_ids"])
+        self.assertNotIn("snapshot_root_id", payload)
+        self.assertNotIn("snapshot_root_ids", payload)
 
 
 if __name__ == "__main__":
