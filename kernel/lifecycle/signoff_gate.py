@@ -1,5 +1,5 @@
 """
-Sign-off gate skeleton: §31 baseline checks for the first narrow slice.
+Sign-off gate: §31 static proof-like baseline checks for the first narrow slice.
 
 Constitutional anchors:
 - v11 §31 Sign-Off Rule (current-stage signable path)
@@ -8,22 +8,21 @@ Constitutional anchors:
 - foundation §8 module mapping (P1 required before sign-off)
 
 This module does NOT evaluate full constitutional breadth. It evaluates
-the narrow-path baseline conditions named in §31:
-- core contracts formalized and executable
-- frozen schemas present for required slice artifacts
-- replay honesty checks active
-- capability/approval/side-effect governance active on the slice
-- context completeness checks active
-- retention/pinning explicitly declared
-- invariant coverage non-zero
+the narrow-path baseline conditions named in §31 using local static
+artifact checks:
+- core contract module artifacts are present, non-empty, and syntax-valid
+- frozen schemas parse as JSON objects with the current freeze tag
+- replay honesty has a static classifier/schema surface
+- capability/approval/context governance has static service module surfaces
+- context completeness has a static service/schema surface
+- retention/pinning has static retention schema and quarantine-runner surfaces
+- invariant coverage is proof-linked to enforcement and test carriers
 
-Phase-1 posture: most checks are simple *presence* probes over the code
-and schema artifacts present in this repository. The
-`invariant_coverage_declared` check is the first minimally proof-linked
-check: it reads `governance/implementation/invariant_bindings.yaml` and
-requires each declared invariant to name enforcement and test-carrier
-evidence. Runtime correctness remains the job of the tracer-bullet and
-acceptance test matrix in `validation/tests/acceptance/*`.
+Phase-1 posture: the gate is a static proof-like signoff gate, not a runtime
+semantic proof. It reads local code/schema/governance artifacts, checks
+parseability and freeze tags where applicable, and validates invariant binding
+links. Runtime correctness remains the job of the tracer-bullet and acceptance
+test matrix in `validation/tests/acceptance/*`.
 
 The gate returns a structured `SignoffReport` listing pass/fail per
 check; the caller is expected to surface it. `all_passed()` is the
@@ -41,8 +40,8 @@ from typing import Mapping
 from kernel.schemas import SCHEMA_FREEZE_TAG
 
 
-#: First-slice schema artifacts that MUST be present under
-#: `kernel/schemas/*.schema.json` for sign-off to proceed.
+#: First-slice schema artifacts that MUST exist, parse as JSON objects,
+#: and declare the current freeze tag for sign-off to proceed.
 REQUIRED_SCHEMAS: tuple[str, ...] = (
     "context_artifact",
     "inference_artifact",
@@ -61,13 +60,13 @@ REQUIRED_SCHEMAS: tuple[str, ...] = (
     "snapshot_root",
 )
 
-#: Contract modules that must exist (non-empty) to claim contract formalization.
+#: Contract modules that must exist, be non-empty, and parse as Python.
 REQUIRED_CONTRACT_MODULES: tuple[str, ...] = (
     "kernel/contracts/capability_rules.py",
 )
 
-#: Core services that must exist for capability/approval/context/replay
-#: governance to be claimed "active".
+#: Core services that must exist, be non-empty, and parse as Python for the
+#: static governance surface check to pass.
 REQUIRED_SERVICE_MODULES: tuple[str, ...] = (
     "kernel/services/capability_service.py",
     "kernel/services/context_service.py",
@@ -512,7 +511,7 @@ class SignoffGate:
         return tuple(carriers)
 
     def _check_invariant_coverage_nonzero(self, report: SignoffReport) -> None:
-        # First minimally proof-linked signoff check. Keep scope narrow:
+        # Proof-linked signoff check. Keep scope narrow:
         # prove that declared invariant bindings name enforcement modules
         # and existing test carrier files. Do not inspect or clean up the
         # invariants themselves here.

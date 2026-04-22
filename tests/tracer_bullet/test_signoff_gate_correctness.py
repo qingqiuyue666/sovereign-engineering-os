@@ -12,16 +12,15 @@ Constitutional anchors:
 - foundation §17 INV-CAP-UI-STATE-IS-NOT-AUTHORITY (signoff gate proof)
 
 This test verifies that the §31 sign-off gate:
-1. Passes when the repository's required narrow-path artifacts are all
-   present (in-tree baseline).
-2. Fails fail-closed when a required schema, contract module, service
-   module, or kernel module is absent (simulated via a throwaway
-   repo-root directory tree).
+1. Passes when the repository's required narrow-path artifacts satisfy
+   the current static proof-like gate (in-tree baseline).
+2. Fails fail-closed when required static artifacts are missing,
+   empty, malformed, or insufficiently proof-linked.
 3. Emits structured, actionable CheckResult entries (name, passed,
    detail) for each §31 baseline check.
 4. Reports pass/fail atomically via `all_passed()`.
 5. Does NOT pretend to evaluate constitutional breadth beyond §31 slice
-   scope (the gate is a presence/proof-link probe, not a runtime proof).
+   scope (the gate is static proof-like, not a runtime proof).
 
 The gate's scope is narrow-path only; any broader evaluation is out of
 phase-1 scope and explicitly deferred by the foundation document.
@@ -64,7 +63,7 @@ class TestSignoffGatePassesOnLiveRepo(unittest.TestCase):
     """The §31 gate must PASS against the live baseline repository."""
 
     def test_all_checks_pass(self) -> None:
-        """Each §31 slice check must be present and passing in-tree."""
+        """Each §31 slice check must pass against the live static surface."""
         gate = SignoffGate(repo_root=_REPO_ROOT)
         report = gate.evaluate()
         self.assertTrue(
@@ -119,12 +118,12 @@ class TestSignoffGatePassesOnLiveRepo(unittest.TestCase):
 
 
 class TestSignoffGateFailsOnMissingArtifacts(unittest.TestCase):
-    """The §31 gate must FAIL fail-closed when required artifacts are
-    absent. These tests use a throwaway empty directory as the repo
-    root so no production artifacts are disturbed."""
+    """The §31 gate must FAIL fail-closed when required static artifacts
+    are missing or malformed. These tests use a throwaway empty directory
+    as the repo root so no production artifacts are disturbed."""
 
     def test_empty_repo_fails_all_checks(self) -> None:
-        """An empty directory must fail every presence check."""
+        """An empty directory must fail every static signoff check."""
         with tempfile.TemporaryDirectory() as tmp:
             gate = SignoffGate(repo_root=Path(tmp))
             report = gate.evaluate()
@@ -357,14 +356,14 @@ class TestSignoffGateFailsOnMissingArtifacts(unittest.TestCase):
 
 
 # ---------------------------------------------------------------------------
-# Test: gate is fail-closed on partial presence
+# Test: gate is fail-closed on partial or malformed static proof surfaces
 # ---------------------------------------------------------------------------
 
 
 class TestSignoffGateFailClosedOnPartialPresence(unittest.TestCase):
-    """Prove the gate refuses partial coverage. These tests simulate a
-    repo that has SOME but not ALL required artifacts, and assert that
-    the gate reports a fail (never a silent partial pass)."""
+    """Prove the gate refuses partial or malformed static proof surfaces.
+    These tests simulate a repo that has SOME but not ALL required proof
+    conditions, and assert that the gate reports a fail."""
 
     def _make_full_tree(self, root: Path) -> None:
         """Create a minimal fake tree that passes every signoff check."""
