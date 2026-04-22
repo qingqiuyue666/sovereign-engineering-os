@@ -667,6 +667,28 @@ class ReviewArtifactRepository:
     def __init__(self, conn: sqlite3.Connection) -> None:
         self._conn = conn
 
+    def list_for_task_root(
+        self, task_id: str, root_revision_id: str
+    ) -> list[dict[str, Any]]:
+        rows = self._conn.execute(
+            """
+            SELECT * FROM review_artifacts
+             WHERE task_id = ?
+               AND root_revision_id = ?
+             ORDER BY rowid;
+            """,
+            (task_id, root_revision_id),
+        ).fetchall()
+        results: list[dict[str, Any]] = []
+        for row in rows:
+            d = _row_to_dict(row)
+            if d is None:
+                continue
+            d["rendering_provenance"] = _unjsonify(d.get("rendering_provenance")) or {}
+            d["taint_set"] = _unjsonify(d.get("taint_set_json")) or []
+            results.append(d)
+        return results
+
     def insert(self, artifact: Mapping[str, Any]) -> None:
         self._conn.execute(
             """
