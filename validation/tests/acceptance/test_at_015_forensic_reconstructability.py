@@ -219,6 +219,74 @@ class TestForensicReconstructability(unittest.TestCase):
         self.assertNotIn("review_artifact_id", payload)
         self.assertNotIn("review_artifact_ids", payload)
 
+    def test_replay_anchor_binds_patch_proposal_id_from_review(self) -> None:
+        """ReplayAnchor.required_artifact_ids carries scoped reviewed patches."""
+        task_id = f"task-{uuid4().hex[:8]}"
+        ids = self.harness.run_through_stage(task_id, Stage.REVISION_SEAL)
+
+        def insert_extra_review(
+            review_artifact_id: str,
+            extra_task_id: str,
+            root_revision_id: str,
+            patch_proposal_id: str,
+        ) -> None:
+            self.harness.rv_repo.insert(
+                {
+                    "review_artifact_id": review_artifact_id,
+                    "task_id": extra_task_id,
+                    "root_revision_id": root_revision_id,
+                    "patch_proposal_id": patch_proposal_id,
+                    "diff_hash": f"sha256:{review_artifact_id}",
+                    "semantic_impact_hash": f"sha256:semantic-{review_artifact_id}",
+                    "risk_class": "low",
+                    "rendering_provenance": {
+                        "renderer_id": "acceptance_test",
+                        "renderer_version": "1.0",
+                        "self_summary_flag": False,
+                    },
+                    "taint_set": [],
+                    "created_at": "2026-01-01T00:00:00+00:00",
+                    "version_tuple_hash": "vt-review-extra",
+                }
+            )
+
+        other_root_patch_id = f"pp-{uuid4().hex}"
+        other_task_patch_id = f"pp-{uuid4().hex}"
+        insert_extra_review(
+            f"rv-{uuid4().hex}",
+            task_id,
+            "rev-out-of-scope-root",
+            other_root_patch_id,
+        )
+        insert_extra_review(
+            f"rv-{uuid4().hex}",
+            "task-out-of-scope",
+            ids["root_revision_id"],
+            other_task_patch_id,
+        )
+
+        replay_anchor_id = self.harness.orch.admit_evidence(task_id=task_id)
+
+        anchor = self.harness.ra_repo.fetch(replay_anchor_id)
+        self.assertIsNotNone(anchor)
+        self.assertIn(ids["patch_proposal_id"], anchor["required_artifact_ids"])
+        self.assertNotIn(other_root_patch_id, anchor["required_artifact_ids"])
+        self.assertNotIn(other_task_patch_id, anchor["required_artifact_ids"])
+
+        closure_row = self.harness.conn.execute(
+            "SELECT payload_json FROM audit_records "
+            "WHERE task_id = ? AND record_type = 'evidence_closure' "
+            "AND replay_anchor_id = ?;",
+            (task_id, replay_anchor_id),
+        ).fetchone()
+        self.assertIsNotNone(closure_row)
+        payload = json.loads(closure_row["payload_json"])
+        self.assertIn(ids["patch_proposal_id"], payload["required_artifact_ids"])
+        self.assertNotIn(other_root_patch_id, payload["required_artifact_ids"])
+        self.assertNotIn(other_task_patch_id, payload["required_artifact_ids"])
+        self.assertNotIn("patch_proposal_id", payload)
+        self.assertNotIn("patch_proposal_ids", payload)
+
     def test_replay_anchor_binds_seal_journal_entry_ids(self) -> None:
         """ReplayAnchor.required_artifact_ids carries seal journal entries."""
         ids = self.harness.run_full_happy_path()
