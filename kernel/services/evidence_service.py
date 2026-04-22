@@ -54,6 +54,7 @@ from kernel.stores.sqlite.repositories import (
     DriftEventRecordRepository,
     FailureBundleRepository,
     InferenceArtifactRepository,
+    JournalEntryRepository,
     ReplayAnchorRepository,
     RevisionRepository,
     TaintRepository,
@@ -93,6 +94,7 @@ class _LiveEvidenceView:
         budget_repo: BudgetRepository | None = None,
         drift_repo: DriftEventRecordRepository | None = None,
         failure_repo: FailureBundleRepository | None = None,
+        journal_repo: JournalEntryRepository | None = None,
     ) -> None:
         self._rev = revision_repo
         self._ctx = context_repo
@@ -102,6 +104,7 @@ class _LiveEvidenceView:
         self._budget = budget_repo
         self._drift = drift_repo
         self._failure = failure_repo
+        self._journal = journal_repo
 
     def has_sealed_revision(self, root_revision_id: str) -> bool:
         return self._rev.has_sealed(root_revision_id)
@@ -119,9 +122,10 @@ class _LiveEvidenceView:
     ) -> list[str]:
         # In phase-1, required artifacts are the context + inference
         # artifact ids for this task, the sealed revision's SnapshotRoot,
-        # plus already-durable budget, drift, failure-bundle, and validation
-        # taint records when the evidence composition root wires those read
-        # surfaces. Full artifact closure is a hardening-stage expansion.
+        # seal journal entries, plus already-durable budget, drift,
+        # failure-bundle, and validation taint records when the evidence
+        # composition root wires those read surfaces. Full artifact closure
+        # is a hardening-stage expansion.
         ids: list[str] = []
         ctx_row = self._ctx._conn.execute(
             "SELECT context_artifact_id FROM context_artifacts "
@@ -138,6 +142,7 @@ class _LiveEvidenceView:
         if inf_row:
             ids.append(inf_row[0])
         ids.extend(self._snapshot_root_ids(root_revision_id))
+        ids.extend(self._journal_entry_ids(root_revision_id))
         ids.extend(self._budget_record_ids(task_id))
         ids.extend(self._drift_event_ids(task_id, root_revision_id))
         ids.extend(self._failure_bundle_ids(task_id, root_revision_id))
@@ -152,6 +157,16 @@ class _LiveEvidenceView:
         if isinstance(snapshot_root_id, str) and snapshot_root_id:
             return [snapshot_root_id]
         return []
+
+    def _journal_entry_ids(self, root_revision_id: str) -> list[str]:
+        if self._journal is None:
+            return []
+        ids: list[str] = []
+        for record in self._journal.list_for_revision(root_revision_id):
+            journal_entry_id = record.get("journal_entry_id")
+            if isinstance(journal_entry_id, str) and journal_entry_id:
+                ids.append(journal_entry_id)
+        return ids
 
     def _budget_record_ids(self, task_id: str) -> list[str]:
         if self._budget is None:
@@ -273,6 +288,7 @@ class EvidenceService:
         budget_repo: BudgetRepository | None = None,
         drift_repo: DriftEventRecordRepository | None = None,
         failure_repo: FailureBundleRepository | None = None,
+        journal_repo: JournalEntryRepository | None = None,
         project_id: str = "phase1_default",
         version_tuple_overrides: Mapping[str, Any] | None = None,
     ) -> None:
@@ -285,6 +301,7 @@ class EvidenceService:
         self._budget_repo = budget_repo
         self._drift_repo = drift_repo
         self._failure_repo = failure_repo
+        self._journal_repo = journal_repo
         self._audit = audit_ledger
         self._project_id = project_id
         self._vt_overrides = dict(version_tuple_overrides or {})
@@ -321,6 +338,7 @@ class EvidenceService:
             budget_repo=self._budget_repo,
             drift_repo=self._drift_repo,
             failure_repo=self._failure_repo,
+            journal_repo=self._journal_repo,
         )
         classifier = ReplayClassifier(evidence_view)
 

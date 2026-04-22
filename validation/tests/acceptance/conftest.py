@@ -210,6 +210,7 @@ class AcceptanceHarness:
             budget_repo=self.budget_repo,
             drift_repo=self.drift_repo,
             failure_repo=self.failure_repo,
+            journal_repo=self.je_repo,
             audit_ledger=self.audit_ledger,
         )
 
