@@ -158,6 +158,7 @@ class AcceptanceHarness:
             repository=self.vr_repo,
             patch_reader=self.pp_repo,
             audit_ledger=self.audit_ledger,
+            taint_repository=self.taint_repo,
         )
         self.rev_svc = ReviewService(
             repository=self.rv_repo,
