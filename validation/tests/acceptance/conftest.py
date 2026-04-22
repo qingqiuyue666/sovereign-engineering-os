@@ -197,6 +197,8 @@ class AcceptanceHarness:
             revision_repo=self.rev_repo,
             context_repo=self.ctx_repo,
             inference_repo=self.inf_repo,
+            approval_repo=self.ap_repo,
+            taint_repo=self.taint_repo,
             audit_ledger=self.audit_ledger,
         )
 
