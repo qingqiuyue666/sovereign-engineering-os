@@ -15,6 +15,7 @@ What this test proves:
 
 from __future__ import annotations
 
+import json
 import unittest
 import sqlite3
 import sys
@@ -60,6 +61,40 @@ class TestTaintPropagation(unittest.TestCase):
         self.assertIsNotNone(row)
         self.assertEqual(row["taint_class"], "quarantine_breach_suspect")
         self.assertEqual(row["taint_state"], "tainted")
+
+    def test_taint_records_queryable_by_subject(self) -> None:
+        """TaintRepository exposes deterministic subject-scoped reads."""
+        first_id = "taint-subject-a"
+        second_id = "taint-subject-b"
+        self.taint_repo.append(
+            taint_record_id=second_id,
+            subject_id="vr-subject",
+            taint_class="policy_degraded",
+            taint_state="downgraded",
+            source_ref="at-024-query-b",
+        )
+        self.taint_repo.append(
+            taint_record_id=first_id,
+            subject_id="vr-subject",
+            taint_class="quarantine_breach_suspect",
+            taint_state="tainted",
+            source_ref="at-024-query-a",
+        )
+        self.taint_repo.append(
+            taint_record_id="taint-other-subject",
+            subject_id="vr-other",
+            taint_class="policy_degraded",
+            taint_state="downgraded",
+            source_ref="at-024-query-other",
+        )
+
+        rows = self.taint_repo.list_for_subject("vr-subject")
+
+        self.assertEqual(
+            [row["taint_record_id"] for row in rows],
+            [first_id, second_id],
+        )
+        self.assertEqual({row["subject_id"] for row in rows}, {"vr-subject"})
 
     def test_validation_emits_quarantine_classification_taint_records(self) -> None:
         """ValidationService must durably emit new quarantine taints."""
@@ -172,6 +207,47 @@ class TestTaintPropagation(unittest.TestCase):
                 (receipt_id,),
             ).fetchall()
             self.assertEqual(rows, [])
+        finally:
+            harness.close()
+
+    def test_evidence_closure_binds_validation_taint_record_ids(self) -> None:
+        """ReplayAnchor.required_artifact_ids carries durable validation taints."""
+        harness = AcceptanceHarness()
+        try:
+            task_id = f"task-{uuid4().hex[:8]}"
+            ids = harness.run_through_stage(task_id, Stage.VALIDATION)
+            receipt_id = ids["validation_receipt_id"]
+            taint_record_id = f"taint-{uuid4().hex}"
+            harness.taint_repo.append(
+                taint_record_id=taint_record_id,
+                subject_id=receipt_id,
+                taint_class="policy_degraded",
+                taint_state="downgraded",
+                source_ref="at-024-evidence-visibility",
+            )
+
+            taint_rows = harness.taint_repo.list_for_subject(receipt_id)
+            self.assertEqual(len(taint_rows), 1)
+            self.assertEqual(taint_rows[0]["taint_record_id"], taint_record_id)
+
+            harness.orch.admit_review(task_id=task_id)
+            harness.orch.admit_approval(task_id=task_id)
+            harness.orch.admit_revision_seal(task_id=task_id)
+            replay_anchor_id = harness.orch.admit_evidence(task_id=task_id)
+            anchor = harness.ra_repo.fetch(replay_anchor_id)
+            self.assertIsNotNone(anchor)
+            self.assertIn(taint_record_id, anchor["required_artifact_ids"])
+
+            closure_row = harness.conn.execute(
+                "SELECT payload_json FROM audit_records "
+                "WHERE task_id = ? AND record_type = 'evidence_closure' "
+                "AND replay_anchor_id = ?;",
+                (task_id, replay_anchor_id),
+            ).fetchone()
+            self.assertIsNotNone(closure_row)
+            payload = json.loads(closure_row["payload_json"])
+            self.assertIn(taint_record_id, payload["required_artifact_ids"])
+            self.assertNotIn("taint_record_ids", payload)
         finally:
             harness.close()
 

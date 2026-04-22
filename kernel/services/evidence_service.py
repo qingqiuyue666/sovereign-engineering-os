@@ -48,10 +48,12 @@ from kernel.replay.replay_classifier import (
 from kernel.schemas import load_schema
 from kernel.schemas.validator import validate_artifact
 from kernel.stores.sqlite.repositories import (
+    ApprovalArtifactRepository,
     ContextArtifactRepository,
     InferenceArtifactRepository,
     ReplayAnchorRepository,
     RevisionRepository,
+    TaintRepository,
 )
 from kernel.version.version_tuple import compose_version_tuple_hash
 from validation.quarantine.runner_adapter import QUARANTINE_HARDWARE_ENVELOPE
@@ -83,10 +85,14 @@ class _LiveEvidenceView:
         revision_repo: RevisionRepository,
         context_repo: ContextArtifactRepository,
         inference_repo: InferenceArtifactRepository,
+        approval_repo: ApprovalArtifactRepository | None = None,
+        taint_repo: TaintRepository | None = None,
     ) -> None:
         self._rev = revision_repo
         self._ctx = context_repo
         self._inf = inference_repo
+        self._approval = approval_repo
+        self._taint = taint_repo
 
     def has_sealed_revision(self, root_revision_id: str) -> bool:
         return self._rev.has_sealed(root_revision_id)
@@ -103,8 +109,9 @@ class _LiveEvidenceView:
         self, task_id: str, root_revision_id: str
     ) -> list[str]:
         # In phase-1, required artifacts are the context + inference
-        # artifact ids for this task. Full artifact closure is a
-        # hardening-stage expansion.
+        # artifact ids for this task, plus already-durable validation
+        # taint records when the evidence composition root wires that
+        # read surface. Full artifact closure is a hardening-stage expansion.
         ids: list[str] = []
         ctx_row = self._ctx._conn.execute(
             "SELECT context_artifact_id FROM context_artifacts "
@@ -120,7 +127,42 @@ class _LiveEvidenceView:
         ).fetchone()
         if inf_row:
             ids.append(inf_row[0])
+        ids.extend(self._validation_taint_record_ids(root_revision_id))
         return ids
+
+    def _validation_taint_record_ids(self, root_revision_id: str) -> list[str]:
+        if self._approval is None or self._taint is None:
+            return []
+
+        revision = self._rev.fetch(root_revision_id)
+        if revision is None:
+            return []
+
+        approval_id = revision.get("approval_id")
+        if not isinstance(approval_id, str) or not approval_id:
+            return []
+
+        approval = self._approval.fetch(approval_id)
+        if approval is None:
+            raise EvidenceClosureRejected(
+                f"approval not found for sealed revision {root_revision_id}: "
+                f"{approval_id}"
+            )
+
+        taint_record_ids: list[str] = []
+        seen: set[str] = set()
+        for receipt_id in approval.get("required_receipt_ids", []):
+            if not isinstance(receipt_id, str) or not receipt_id:
+                continue
+            for record in self._taint.list_for_subject(receipt_id):
+                taint_record_id = record.get("taint_record_id")
+                if not isinstance(taint_record_id, str) or not taint_record_id:
+                    continue
+                if taint_record_id in seen:
+                    continue
+                seen.add(taint_record_id)
+                taint_record_ids.append(taint_record_id)
+        return taint_record_ids
 
 
 class EvidenceService:
@@ -132,6 +174,8 @@ class EvidenceService:
         context_repo: ContextArtifactRepository,
         inference_repo: InferenceArtifactRepository,
         audit_ledger: Any,
+        approval_repo: ApprovalArtifactRepository | None = None,
+        taint_repo: TaintRepository | None = None,
         project_id: str = "phase1_default",
         version_tuple_overrides: Mapping[str, Any] | None = None,
     ) -> None:
@@ -139,6 +183,8 @@ class EvidenceService:
         self._revision_repo = revision_repo
         self._context_repo = context_repo
         self._inference_repo = inference_repo
+        self._approval_repo = approval_repo
+        self._taint_repo = taint_repo
         self._audit = audit_ledger
         self._project_id = project_id
         self._vt_overrides = dict(version_tuple_overrides or {})
@@ -170,6 +216,8 @@ class EvidenceService:
             revision_repo=self._revision_repo,
             context_repo=self._context_repo,
             inference_repo=self._inference_repo,
+            approval_repo=self._approval_repo,
+            taint_repo=self._taint_repo,
         )
         classifier = ReplayClassifier(evidence_view)
 

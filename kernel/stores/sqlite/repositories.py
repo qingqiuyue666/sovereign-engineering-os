@@ -117,6 +117,17 @@ class TaintRepository:
     def __init__(self, conn: sqlite3.Connection) -> None:
         self._conn = conn
 
+    def list_for_subject(self, subject_id: str) -> list[dict[str, Any]]:
+        rows = self._conn.execute(
+            """
+            SELECT * FROM taint_records
+             WHERE subject_id = ?
+             ORDER BY taint_record_id;
+            """,
+            (subject_id,),
+        ).fetchall()
+        return [d for row in rows if (d := _row_to_dict(row)) is not None]
+
     def append(
         self,
         *,
