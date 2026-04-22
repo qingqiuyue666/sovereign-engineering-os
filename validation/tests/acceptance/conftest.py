@@ -26,6 +26,7 @@ from kernel.stores.sqlite.repositories import (
     CapabilityRepository,
     ContextArtifactRepository,
     DriftEventRecordRepository,
+    FailureBundleRepository,
     InferenceArtifactRepository,
     IntentAnchorRepository,
     PatchProposalRepository,
@@ -109,6 +110,7 @@ class AcceptanceHarness:
         self.ra_repo = ReplayAnchorRepository(self.conn)
         self.taint_repo = TaintRepository(self.conn)
         self.drift_repo = DriftEventRecordRepository(self.conn)
+        self.failure_repo = FailureBundleRepository(self.conn)
 
         # Audit ledger.
         self.audit_ledger = AppendOnlyLedger(
@@ -153,6 +155,7 @@ class AcceptanceHarness:
             adapter=FakeModelAdapter(),
             policy=inference_policy or InferencePolicy(),
             budget_governor=self.budget_governor,
+            failure_bundle_repository=self.failure_repo,
         )
         self.pp_svc = PatchProposalService(
             repository=self.pp_repo,

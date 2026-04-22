@@ -101,16 +101,19 @@ def _build_tight_harness(
         adapter=adapter,
         policy=InferencePolicy(max_output_tokens=max_output_tokens),
         budget_governor=harness.budget_governor,
+        failure_bundle_repository=harness.failure_repo,
     )
     harness.orch._inference = harness.inf_svc  # type: ignore[attr-defined]
     return harness
 
 
-def _admit_context(harness: AcceptanceHarness, task_id: str, *, actual_tokens: int = 10) -> None:
+def _admit_context(
+    harness: AcceptanceHarness, task_id: str, *, actual_tokens: int = 10
+) -> str:
     intent_id = f"intent-{uuid4().hex[:8]}"
     root_rev_id = "rev-genesis-000"
     cap_ctx = harness.issue_capability("read_repository_snapshot", task_id)
-    harness.orch.admit_context(
+    return harness.orch.admit_context(
         task_id=task_id,
         intent_id=intent_id,
         capability_token=cap_ctx,
@@ -128,7 +131,8 @@ def _admit_context(harness: AcceptanceHarness, task_id: str, *, actual_tokens: i
 
 def _select_records(harness: AcceptanceHarness, record_type: str, task_id: str):
     rows = harness.conn.execute(
-        "SELECT audit_record_id, record_type, payload_json, sequence "
+        "SELECT audit_record_id, record_type, payload_json, "
+        "failure_bundle_id, sequence "
         "FROM audit_records WHERE record_type = ? AND task_id = ? "
         "ORDER BY sequence;",
         (record_type, task_id),
@@ -161,7 +165,9 @@ class TestAT027BudgetExhaustionGovernance(unittest.TestCase):
         )
         try:
             task_id = f"task-{uuid4().hex[:8]}"
-            _admit_context(harness, task_id, actual_tokens=10)
+            context_artifact_id = _admit_context(
+                harness, task_id, actual_tokens=10
+            )
 
             # Sanity: orchestrator allocated a 40-token budget for this task.
             snap = harness.budget_governor.snapshot(task_id)
@@ -201,8 +207,24 @@ class TestAT027BudgetExhaustionGovernance(unittest.TestCase):
 
             failures = _select_records(harness, "inference_failure", task_id)
             self.assertTrue(failures)
+            self.assertIsNotNone(failures[-1]["failure_bundle_id"])
             last = json.loads(failures[-1]["payload_json"])
             self.assertEqual(last["failure_class"], "budget_would_be_exceeded")
+
+            bundle = harness.conn.execute(
+                "SELECT * FROM failure_bundles WHERE failure_bundle_id = ?;",
+                (failures[-1]["failure_bundle_id"],),
+            ).fetchone()
+            self.assertIsNotNone(bundle)
+            self.assertEqual(bundle["task_id"], task_id)
+            self.assertEqual(bundle["root_revision_id"], "rev-genesis-000")
+            self.assertEqual(bundle["failure_class"], "budget_would_be_exceeded")
+            self.assertTrue(bundle["cause_hash"].startswith("sha256:"))
+            self.assertEqual(
+                json.loads(bundle["evidence_refs"]),
+                [context_artifact_id],
+            )
+            self.assertEqual(json.loads(bundle["taint_set_json"]), [])
         finally:
             harness.close()
 
