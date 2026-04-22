@@ -106,6 +106,31 @@ class TestForensicReconstructability(unittest.TestCase):
         self.assertNotIn("snapshot_root_id", payload)
         self.assertNotIn("snapshot_root_ids", payload)
 
+    def test_replay_anchor_binds_approval_id(self) -> None:
+        """ReplayAnchor.required_artifact_ids carries the sealed approval."""
+        ids = self.harness.run_full_happy_path()
+
+        revision = self.harness.rev_repo.fetch(ids["revision_id"])
+        self.assertIsNotNone(revision)
+        approval_id = revision["approval_id"]
+        self.assertEqual(approval_id, ids["approval_id"])
+
+        anchor = self.harness.ra_repo.fetch(ids["replay_anchor_id"])
+        self.assertIsNotNone(anchor)
+        self.assertIn(approval_id, anchor["required_artifact_ids"])
+
+        closure_row = self.harness.conn.execute(
+            "SELECT payload_json FROM audit_records "
+            "WHERE task_id = ? AND record_type = 'evidence_closure' "
+            "AND replay_anchor_id = ?;",
+            (ids["task_id"], ids["replay_anchor_id"]),
+        ).fetchone()
+        self.assertIsNotNone(closure_row)
+        payload = json.loads(closure_row["payload_json"])
+        self.assertIn(approval_id, payload["required_artifact_ids"])
+        self.assertNotIn("approval_id", payload)
+        self.assertNotIn("approval_ids", payload)
+
     def test_replay_anchor_binds_seal_journal_entry_ids(self) -> None:
         """ReplayAnchor.required_artifact_ids carries seal journal entries."""
         ids = self.harness.run_full_happy_path()
