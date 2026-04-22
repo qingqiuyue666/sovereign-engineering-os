@@ -49,6 +49,7 @@ from kernel.schemas import load_schema
 from kernel.schemas.validator import validate_artifact
 from kernel.stores.sqlite.repositories import (
     ApprovalArtifactRepository,
+    BudgetRepository,
     ContextArtifactRepository,
     InferenceArtifactRepository,
     ReplayAnchorRepository,
@@ -87,12 +88,14 @@ class _LiveEvidenceView:
         inference_repo: InferenceArtifactRepository,
         approval_repo: ApprovalArtifactRepository | None = None,
         taint_repo: TaintRepository | None = None,
+        budget_repo: BudgetRepository | None = None,
     ) -> None:
         self._rev = revision_repo
         self._ctx = context_repo
         self._inf = inference_repo
         self._approval = approval_repo
         self._taint = taint_repo
+        self._budget = budget_repo
 
     def has_sealed_revision(self, root_revision_id: str) -> bool:
         return self._rev.has_sealed(root_revision_id)
@@ -109,9 +112,10 @@ class _LiveEvidenceView:
         self, task_id: str, root_revision_id: str
     ) -> list[str]:
         # In phase-1, required artifacts are the context + inference
-        # artifact ids for this task, plus already-durable validation
-        # taint records when the evidence composition root wires that
-        # read surface. Full artifact closure is a hardening-stage expansion.
+        # artifact ids for this task, plus already-durable budget and
+        # validation taint records when the evidence composition root wires
+        # those read surfaces. Full artifact closure is a hardening-stage
+        # expansion.
         ids: list[str] = []
         ctx_row = self._ctx._conn.execute(
             "SELECT context_artifact_id FROM context_artifacts "
@@ -127,7 +131,18 @@ class _LiveEvidenceView:
         ).fetchone()
         if inf_row:
             ids.append(inf_row[0])
+        ids.extend(self._budget_record_ids(task_id))
         ids.extend(self._validation_taint_record_ids(root_revision_id))
+        return ids
+
+    def _budget_record_ids(self, task_id: str) -> list[str]:
+        if self._budget is None:
+            return []
+        ids: list[str] = []
+        for record in self._budget.list_for_task(task_id):
+            budget_record_id = record.get("budget_record_id")
+            if isinstance(budget_record_id, str) and budget_record_id:
+                ids.append(budget_record_id)
         return ids
 
     def _validation_taint_record_ids(self, root_revision_id: str) -> list[str]:
@@ -176,6 +191,7 @@ class EvidenceService:
         audit_ledger: Any,
         approval_repo: ApprovalArtifactRepository | None = None,
         taint_repo: TaintRepository | None = None,
+        budget_repo: BudgetRepository | None = None,
         project_id: str = "phase1_default",
         version_tuple_overrides: Mapping[str, Any] | None = None,
     ) -> None:
@@ -185,6 +201,7 @@ class EvidenceService:
         self._inference_repo = inference_repo
         self._approval_repo = approval_repo
         self._taint_repo = taint_repo
+        self._budget_repo = budget_repo
         self._audit = audit_ledger
         self._project_id = project_id
         self._vt_overrides = dict(version_tuple_overrides or {})
@@ -218,6 +235,7 @@ class EvidenceService:
             inference_repo=self._inference_repo,
             approval_repo=self._approval_repo,
             taint_repo=self._taint_repo,
+            budget_repo=self._budget_repo,
         )
         classifier = ReplayClassifier(evidence_view)
 
