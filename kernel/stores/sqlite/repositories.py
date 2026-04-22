@@ -963,6 +963,24 @@ class JournalEntryRepository:
     def __init__(self, conn: sqlite3.Connection) -> None:
         self._conn = conn
 
+    def list_for_revision(self, revision_id: str) -> list[dict[str, Any]]:
+        rows = self._conn.execute(
+            """
+            SELECT * FROM journal_entries
+             WHERE revision_id = ?
+             ORDER BY logical_sequence;
+            """,
+            (revision_id,),
+        ).fetchall()
+        out: list[dict[str, Any]] = []
+        for row in rows:
+            d = _row_to_dict(row)
+            if d is None:
+                continue
+            d["taint_set"] = _unjsonify(d.get("taint_set_json")) or []
+            out.append(d)
+        return out
+
     def append(self, *, artifact: Mapping[str, Any]) -> int:
         cur = self._conn.cursor()
         row = cur.execute(
