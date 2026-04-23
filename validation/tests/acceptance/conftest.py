@@ -291,7 +291,11 @@ class AcceptanceHarness:
             model_route_id="fake-model-v1",
         )
 
-        pp_id = self.orch.admit_patch_proposal(task_id=task_id)
+        cap_patch = self.issue_capability("propose_patch", task_id)
+        pp_id = self.orch.admit_patch_proposal(
+            task_id=task_id,
+            capability_token=cap_patch,
+        )
         vr_id = self.orch.admit_validation(task_id=task_id)
         rv_id = self.orch.admit_review(task_id=task_id)
         ap_id = self.orch.admit_approval(task_id=task_id)
@@ -355,8 +359,10 @@ class AcceptanceHarness:
                     model_route_id="fake-model-v1",
                 )
             elif stage == Stage.PATCH_PROPOSAL:
+                cap = self.issue_capability("propose_patch", task_id)
                 ids["patch_proposal_id"] = self.orch.admit_patch_proposal(
                     task_id=task_id,
+                    capability_token=cap,
                 )
             elif stage == Stage.VALIDATION:
                 ids["validation_receipt_id"] = self.orch.admit_validation(

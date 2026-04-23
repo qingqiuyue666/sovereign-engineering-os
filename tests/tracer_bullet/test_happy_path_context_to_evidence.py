@@ -254,7 +254,11 @@ class TestHappyPathContextToEvidence(unittest.TestCase):
         self.assertEqual(self.orch.current_stage(task_id), Stage.INFERENCE)
 
         # Stage 3: PatchProposal (phase-1 single-file default).
-        pp_id = self.orch.admit_patch_proposal(task_id=task_id)
+        cap_patch = self._issue_capability("propose_patch", task_id)
+        pp_id = self.orch.admit_patch_proposal(
+            task_id=task_id,
+            capability_token=cap_patch,
+        )
         self.assertTrue(pp_id.startswith("pp-"))
         self.assertEqual(self.orch.current_stage(task_id), Stage.PATCH_PROPOSAL)
 
@@ -469,8 +473,19 @@ class TestIllegalTransitionRejected(unittest.TestCase):
                 "actual_tokens": 10,
             },
         )
+        cap_patch = self.cap_svc.issue_token(
+            subject_identity="test",
+            capability_name="propose_patch",
+            scope_hash="scope:test",
+            issued_at=now.isoformat(),
+            expires_at=(now + timedelta(hours=1)).isoformat(),
+            bound_task_id=task_id,
+        )
         with self.assertRaises(OrchestratorRejected):
-            self.orch.admit_patch_proposal(task_id=task_id)
+            self.orch.admit_patch_proposal(
+                task_id=task_id,
+                capability_token=cap_patch,
+            )
 
 
 class TestSealedRevisionImmutable(unittest.TestCase):

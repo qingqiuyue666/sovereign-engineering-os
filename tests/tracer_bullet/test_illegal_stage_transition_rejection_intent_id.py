@@ -65,8 +65,12 @@ class TestIllegalStageTransitionRejectionNamesIntentId(unittest.TestCase):
         ids = self.harness.run_through_stage(task_id, Stage.CONTEXT)
         anchor_intent_id = ids["intent_id"]
 
+        cap_patch = self.harness.issue_capability("propose_patch", task_id)
         with self.assertRaises(OrchestratorRejected):
-            self.harness.orch.admit_patch_proposal(task_id=task_id)
+            self.harness.orch.admit_patch_proposal(
+                task_id=task_id,
+                capability_token=cap_patch,
+            )
 
         row = self.harness.conn.execute(
             "SELECT payload_json, artifact_refs FROM audit_records "

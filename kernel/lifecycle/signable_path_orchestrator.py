@@ -429,15 +429,34 @@ class SignablePathOrchestrator:
     # bodies are intentionally minimal in this first slice; the contract is
     # that any real logic lives in the service, never in the orchestrator.
 
-    def admit_patch_proposal(self, *, task_id: str) -> str:
+    def admit_patch_proposal(
+        self,
+        *,
+        task_id: str,
+        capability_token: Mapping[str, Any],
+    ) -> str:
         state = self._get_task(task_id)
-        self._advance(state, Stage.PATCH_PROPOSAL)
+        if successor_of(state.current_stage) is not Stage.PATCH_PROPOSAL:
+            self._advance(state, Stage.PATCH_PROPOSAL)
+
+        self._capability.verify_for_action(
+            token=capability_token,
+            action_class="propose_patch",
+            task_id=task_id,
+            root_revision_id=None,
+        )
+        self._capability.consume(
+            capability_token_id=str(capability_token["capability_token_id"]),
+            task_id=task_id,
+        )
+
         inference_artifact_id = state.artifact_ids[Stage.INFERENCE]
         proposal_id = self._patch_proposal.propose(
             task_id=task_id,
             inference_artifact_id=inference_artifact_id,
             intent_id=state.intent_anchor.intent_id,
         )
+        self._advance(state, Stage.PATCH_PROPOSAL)
         state.artifact_ids[Stage.PATCH_PROPOSAL] = proposal_id
         self._audit.append(
             record_type="stage_entered",

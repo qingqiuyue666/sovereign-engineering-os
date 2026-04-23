@@ -78,8 +78,12 @@ class TestWorkerLifecycleTransitions(unittest.TestCase):
             # Admit context.
             harness.run_through_stage(task_id, Stage.CONTEXT)
             # Skip inference and try patch proposal.
+            cap_patch = harness.issue_capability("propose_patch", task_id)
             with self.assertRaises(OrchestratorRejected):
-                harness.orch.admit_patch_proposal(task_id=task_id)
+                harness.orch.admit_patch_proposal(
+                    task_id=task_id,
+                    capability_token=cap_patch,
+                )
         finally:
             harness.close()
 

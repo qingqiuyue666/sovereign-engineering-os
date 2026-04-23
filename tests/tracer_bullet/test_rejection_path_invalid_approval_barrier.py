@@ -354,7 +354,11 @@ class TestBarrierRejectionWiredStack(unittest.TestCase):
             model_route_id="fake-model-v1",
         )
 
-        pp_id = self.orch.admit_patch_proposal(task_id=task_id)
+        cap_patch = self._issue_capability("propose_patch", task_id)
+        pp_id = self.orch.admit_patch_proposal(
+            task_id=task_id,
+            capability_token=cap_patch,
+        )
         vr_id = self.orch.admit_validation(task_id=task_id)
         rv_id = self.orch.admit_review(task_id=task_id)
 

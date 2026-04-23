@@ -457,7 +457,11 @@ class TestEvidenceServiceReplayClassification(unittest.TestCase):
             worker_profile="tracer_worker",
             model_route_id="fake-model-v1",
         )
-        self.orch.admit_patch_proposal(task_id=task_id)
+        cap_patch = self._issue_capability("propose_patch", task_id)
+        self.orch.admit_patch_proposal(
+            task_id=task_id,
+            capability_token=cap_patch,
+        )
         self.orch.admit_validation(task_id=task_id)
         self.orch.admit_review(task_id=task_id)
         self.orch.admit_approval(task_id=task_id)
