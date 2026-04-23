@@ -94,6 +94,20 @@ class AuditRepository:
         ).fetchall()
         return [d for row in rows if (d := _row_to_dict(row)) is not None]
 
+    def list_capability_verification_rejected_for_task(
+        self, task_id: str
+    ) -> list[dict[str, Any]]:
+        rows = self._conn.execute(
+            """
+            SELECT * FROM audit_records
+             WHERE task_id = ?
+               AND record_type = 'capability_verification_rejected'
+             ORDER BY sequence;
+            """,
+            (task_id,),
+        ).fetchall()
+        return [d for row in rows if (d := _row_to_dict(row)) is not None]
+
     def append(
         self,
         *,
