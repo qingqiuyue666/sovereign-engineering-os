@@ -50,6 +50,7 @@ from kernel.schemas.validator import validate_artifact
 from kernel.stores.sqlite.repositories import (
     ApprovalArtifactRepository,
     BudgetRepository,
+    CapabilityRepository,
     ContextArtifactRepository,
     DriftEventRecordRepository,
     FailureBundleRepository,
@@ -97,6 +98,7 @@ class _LiveEvidenceView:
         failure_repo: FailureBundleRepository | None = None,
         journal_repo: JournalEntryRepository | None = None,
         review_repo: ReviewArtifactRepository | None = None,
+        capability_repo: CapabilityRepository | None = None,
     ) -> None:
         self._rev = revision_repo
         self._ctx = context_repo
@@ -108,6 +110,7 @@ class _LiveEvidenceView:
         self._failure = failure_repo
         self._journal = journal_repo
         self._review = review_repo
+        self._capability = capability_repo
 
     def has_sealed_revision(self, root_revision_id: str) -> bool:
         return self._rev.has_sealed(root_revision_id)
@@ -127,9 +130,10 @@ class _LiveEvidenceView:
         # artifact ids for this task, the sealed revision's SnapshotRoot,
         # approval artifact and its required validation receipts, review
         # artifact and its carried patch proposal id, seal journal entries,
-        # plus already-durable budget, drift, failure-bundle, and validation
-        # taint records when the evidence composition root wires those read
-        # surfaces. Full artifact closure is a hardening-stage expansion.
+        # plus already-durable budget, drift, failure-bundle, validation
+        # taint, and issued capability-token records when the evidence
+        # composition root wires those read surfaces. Full artifact closure
+        # is a hardening-stage expansion.
         ids: list[str] = []
         ctx_row = self._ctx._conn.execute(
             "SELECT context_artifact_id FROM context_artifacts "
@@ -155,6 +159,7 @@ class _LiveEvidenceView:
         ids.extend(self._drift_event_ids(task_id, root_revision_id))
         ids.extend(self._failure_bundle_ids(task_id, root_revision_id))
         ids.extend(self._validation_taint_record_ids(root_revision_id))
+        ids.extend(self._capability_token_ids(task_id))
         return ids
 
     def _snapshot_root_ids(self, root_revision_id: str) -> list[str]:
@@ -358,6 +363,16 @@ class _LiveEvidenceView:
                 taint_record_ids.append(taint_record_id)
         return taint_record_ids
 
+    def _capability_token_ids(self, task_id: str) -> list[str]:
+        if self._capability is None:
+            return []
+        ids: list[str] = []
+        for record in self._capability.list_for_task(task_id):
+            capability_token_id = record.get("capability_token_id")
+            if isinstance(capability_token_id, str) and capability_token_id:
+                ids.append(capability_token_id)
+        return ids
+
 
 class EvidenceService:
     def __init__(
@@ -375,6 +390,7 @@ class EvidenceService:
         failure_repo: FailureBundleRepository | None = None,
         journal_repo: JournalEntryRepository | None = None,
         review_repo: ReviewArtifactRepository | None = None,
+        capability_repo: CapabilityRepository | None = None,
         project_id: str = "phase1_default",
         version_tuple_overrides: Mapping[str, Any] | None = None,
     ) -> None:
@@ -389,6 +405,7 @@ class EvidenceService:
         self._failure_repo = failure_repo
         self._journal_repo = journal_repo
         self._review_repo = review_repo
+        self._capability_repo = capability_repo
         self._audit = audit_ledger
         self._project_id = project_id
         self._vt_overrides = dict(version_tuple_overrides or {})
@@ -427,6 +444,7 @@ class EvidenceService:
             failure_repo=self._failure_repo,
             journal_repo=self._journal_repo,
             review_repo=self._review_repo,
+            capability_repo=self._capability_repo,
         )
         classifier = ReplayClassifier(evidence_view)
 
