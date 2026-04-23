@@ -264,6 +264,31 @@ class TestCapabilitySingleUse(unittest.TestCase):
             7,
         )
 
+    def test_orchestrator_consumes_evidence_token(self) -> None:
+        """Live evidence admission consumes its append_evidence token."""
+        task_id = f"task-{uuid4().hex[:8]}"
+        self.harness.run_through_stage(task_id, Stage.REVISION_SEAL)
+        evidence_token = self.harness.issue_capability(
+            "append_evidence", task_id, single_use=True,
+        )
+
+        replay_anchor_id = self.harness.orch.admit_evidence(
+            task_id=task_id,
+            capability_token=evidence_token,
+        )
+
+        self.assertTrue(replay_anchor_id.startswith("ra-"))
+        row = self.harness.cap_repo.fetch(
+            evidence_token["capability_token_id"]
+        )
+        self.assertIsNotNone(row)
+        self.assertIsNotNone(row["consumed_at"])
+        self.assertEqual(self.harness.orch.current_stage(task_id), Stage.SEALED)
+        self.assertEqual(
+            self._count_audit(task_id, "capability_token_consumed"),
+            8,
+        )
+
     def test_context_consume_failure_blocks_artifact_and_stage(self) -> None:
         """A pre-consumed context token rejects before durable path progress."""
         task_id = f"task-{uuid4().hex[:8]}"
@@ -550,6 +575,49 @@ class TestCapabilitySingleUse(unittest.TestCase):
             )
         )
         self.assertEqual(self._count_audit(task_id, "revision_sealed"), 0)
+        self.assertEqual(
+            self._count_audit(task_id, "capability_token_consume_rejected"),
+            1,
+        )
+
+    def test_evidence_consume_failure_blocks_anchor_and_terminal_stage(self) -> None:
+        """A pre-consumed append_evidence token rejects before evidence effects."""
+        task_id = f"task-{uuid4().hex[:8]}"
+        self.harness.run_through_stage(task_id, Stage.REVISION_SEAL)
+        evidence_token = self.harness.issue_capability(
+            "append_evidence", task_id, single_use=True,
+        )
+        self.harness.cap_repo.atomic_consume(
+            evidence_token["capability_token_id"]
+        )
+
+        with self.assertRaises(CapabilityDenied):
+            self.harness.orch.admit_evidence(
+                task_id=task_id,
+                capability_token=evidence_token,
+            )
+
+        anchor_count = self.harness.conn.execute(
+            "SELECT COUNT(*) FROM replay_anchors WHERE task_id = ?;",
+            (task_id,),
+        ).fetchone()[0]
+        self.assertEqual(anchor_count, 0)
+        self.assertEqual(
+            self.harness.orch.current_stage(task_id), Stage.REVISION_SEAL
+        )
+        stage_rows = self.harness.conn.execute(
+            "SELECT payload_json FROM audit_records "
+            "WHERE task_id = ? AND record_type = 'stage_entered';",
+            (task_id,),
+        ).fetchall()
+        self.assertFalse(
+            any(
+                '"stage":"evidence"' in row["payload_json"]
+                for row in stage_rows
+            )
+        )
+        self.assertEqual(self._count_audit(task_id, "evidence_closure"), 0)
+        self.assertEqual(self._count_audit(task_id, "signable_path_sealed"), 0)
         self.assertEqual(
             self._count_audit(task_id, "capability_token_consume_rejected"),
             1,

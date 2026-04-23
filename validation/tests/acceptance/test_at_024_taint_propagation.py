@@ -245,7 +245,11 @@ class TestTaintPropagation(unittest.TestCase):
                 task_id=task_id,
                 capability_token=cap_seal,
             )
-            replay_anchor_id = harness.orch.admit_evidence(task_id=task_id)
+            cap_evidence = harness.issue_capability("append_evidence", task_id)
+            replay_anchor_id = harness.orch.admit_evidence(
+                task_id=task_id,
+                capability_token=cap_evidence,
+            )
             anchor = harness.ra_repo.fetch(replay_anchor_id)
             self.assertIsNotNone(anchor)
             self.assertIn(taint_record_id, anchor["required_artifact_ids"])

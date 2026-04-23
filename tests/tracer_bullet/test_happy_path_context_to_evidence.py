@@ -301,7 +301,11 @@ class TestHappyPathContextToEvidence(unittest.TestCase):
         self.assertEqual(self.orch.current_stage(task_id), Stage.REVISION_SEAL)
 
         # Stage 8: Evidence closure (replay anchor).
-        ra_id = self.orch.admit_evidence(task_id=task_id)
+        cap_evidence = self._issue_capability("append_evidence", task_id)
+        ra_id = self.orch.admit_evidence(
+            task_id=task_id,
+            capability_token=cap_evidence,
+        )
         self.assertTrue(ra_id.startswith("ra-"))
         self.assertEqual(self.orch.current_stage(task_id), Stage.SEALED)
 

@@ -622,13 +622,32 @@ class SignablePathOrchestrator:
         )
         return revision_id
 
-    def admit_evidence(self, *, task_id: str) -> str:
+    def admit_evidence(
+        self,
+        *,
+        task_id: str,
+        capability_token: Mapping[str, Any],
+    ) -> str:
         state = self._get_task(task_id)
-        self._advance(state, Stage.EVIDENCE)
+        if successor_of(state.current_stage) is not Stage.EVIDENCE:
+            self._advance(state, Stage.EVIDENCE)
+
+        self._capability.verify_for_action(
+            token=capability_token,
+            action_class="append_evidence",
+            task_id=task_id,
+            root_revision_id=None,
+        )
+        self._capability.consume(
+            capability_token_id=str(capability_token["capability_token_id"]),
+            task_id=task_id,
+        )
+
         revision_id = state.artifact_ids[Stage.REVISION_SEAL]
         replay_anchor_id = self._evidence.close_evidence(
             task_id=task_id, revision_id=revision_id
         )
+        self._advance(state, Stage.EVIDENCE)
         state.artifact_ids[Stage.EVIDENCE] = replay_anchor_id
         self._audit.append(
             record_type="stage_entered",
