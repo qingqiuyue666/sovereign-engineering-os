@@ -41,15 +41,30 @@ def _jsonify(value: Any) -> str:
 
 
 class AuditRepository:
-    """Append-only audit record writer.
+    """Append-only audit record writer with narrow deterministic readers.
 
     Every stage transition of the signable path must land here. The
     INV-026 trigger on `audit_records` guarantees that no UPDATE/DELETE
-    can occur at the SQL layer, so this adapter only exposes `append`.
+    can occur at the SQL layer; read helpers must stay deterministic and
+    scoped to already-durable rows.
     """
 
     def __init__(self, conn: sqlite3.Connection) -> None:
         self._conn = conn
+
+    def list_capability_token_consumed_for_task(
+        self, task_id: str
+    ) -> list[dict[str, Any]]:
+        rows = self._conn.execute(
+            """
+            SELECT * FROM audit_records
+             WHERE task_id = ?
+               AND record_type = 'capability_token_consumed'
+             ORDER BY sequence;
+            """,
+            (task_id,),
+        ).fetchall()
+        return [d for row in rows if (d := _row_to_dict(row)) is not None]
 
     def append(
         self,

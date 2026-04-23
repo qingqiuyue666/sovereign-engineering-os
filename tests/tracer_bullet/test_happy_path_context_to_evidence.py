@@ -185,6 +185,7 @@ class TestHappyPathContextToEvidence(unittest.TestCase):
             revision_repo=self.rev_repo,
             context_repo=self.ctx_repo,
             inference_repo=self.inf_repo,
+            audit_repo=self.audit_repo,
             audit_ledger=self.audit_ledger,
         )
 
