@@ -213,6 +213,7 @@ class AcceptanceHarness:
             journal_repo=self.je_repo,
             review_repo=self.rv_repo,
             capability_repo=self.cap_repo,
+            audit_repo=self.audit_repo,
             audit_ledger=self.audit_ledger,
         )
 

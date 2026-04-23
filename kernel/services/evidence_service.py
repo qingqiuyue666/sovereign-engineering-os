@@ -49,6 +49,7 @@ from kernel.schemas import load_schema
 from kernel.schemas.validator import validate_artifact
 from kernel.stores.sqlite.repositories import (
     ApprovalArtifactRepository,
+    AuditRepository,
     BudgetRepository,
     CapabilityRepository,
     ContextArtifactRepository,
@@ -99,6 +100,7 @@ class _LiveEvidenceView:
         journal_repo: JournalEntryRepository | None = None,
         review_repo: ReviewArtifactRepository | None = None,
         capability_repo: CapabilityRepository | None = None,
+        audit_repo: AuditRepository | None = None,
     ) -> None:
         self._rev = revision_repo
         self._ctx = context_repo
@@ -111,6 +113,7 @@ class _LiveEvidenceView:
         self._journal = journal_repo
         self._review = review_repo
         self._capability = capability_repo
+        self._audit_repo = audit_repo
 
     def has_sealed_revision(self, root_revision_id: str) -> bool:
         return self._rev.has_sealed(root_revision_id)
@@ -131,9 +134,9 @@ class _LiveEvidenceView:
         # approval artifact and its required validation receipts, review
         # artifact and its carried patch proposal id, seal journal entries,
         # plus already-durable budget, drift, failure-bundle, validation
-        # taint, and issued capability-token records when the evidence
-        # composition root wires those read surfaces. Full artifact closure
-        # is a hardening-stage expansion.
+        # taint, issued capability-token records, and consumed-token audit
+        # records when the evidence composition root wires those read
+        # surfaces. Full artifact closure is a hardening-stage expansion.
         ids: list[str] = []
         ctx_row = self._ctx._conn.execute(
             "SELECT context_artifact_id FROM context_artifacts "
@@ -160,6 +163,7 @@ class _LiveEvidenceView:
         ids.extend(self._failure_bundle_ids(task_id, root_revision_id))
         ids.extend(self._validation_taint_record_ids(root_revision_id))
         ids.extend(self._capability_token_ids(task_id))
+        ids.extend(self._capability_token_consumed_audit_ids(task_id))
         return ids
 
     def _snapshot_root_ids(self, root_revision_id: str) -> list[str]:
@@ -373,6 +377,18 @@ class _LiveEvidenceView:
                 ids.append(capability_token_id)
         return ids
 
+    def _capability_token_consumed_audit_ids(self, task_id: str) -> list[str]:
+        if self._audit_repo is None:
+            return []
+        ids: list[str] = []
+        for record in self._audit_repo.list_capability_token_consumed_for_task(
+            task_id
+        ):
+            audit_record_id = record.get("audit_record_id")
+            if isinstance(audit_record_id, str) and audit_record_id:
+                ids.append(audit_record_id)
+        return ids
+
 
 class EvidenceService:
     def __init__(
@@ -391,6 +407,7 @@ class EvidenceService:
         journal_repo: JournalEntryRepository | None = None,
         review_repo: ReviewArtifactRepository | None = None,
         capability_repo: CapabilityRepository | None = None,
+        audit_repo: AuditRepository | None = None,
         project_id: str = "phase1_default",
         version_tuple_overrides: Mapping[str, Any] | None = None,
     ) -> None:
@@ -406,6 +423,7 @@ class EvidenceService:
         self._journal_repo = journal_repo
         self._review_repo = review_repo
         self._capability_repo = capability_repo
+        self._audit_repo = audit_repo
         self._audit = audit_ledger
         self._project_id = project_id
         self._vt_overrides = dict(version_tuple_overrides or {})
@@ -445,6 +463,7 @@ class EvidenceService:
             journal_repo=self._journal_repo,
             review_repo=self._review_repo,
             capability_repo=self._capability_repo,
+            audit_repo=self._audit_repo,
         )
         classifier = ReplayClassifier(evidence_view)
 

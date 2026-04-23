@@ -243,6 +243,7 @@ class RealFixEvidenceClosureBridgeTest(unittest.TestCase):
             revision_repo=self.revision_repo,
             context_repo=self.context_repo,
             inference_repo=self.inference_repo,
+            audit_repo=self.audit_repo,
             audit_ledger=self.audit,
         )
         self.evidence_bridge = RealFixEvidenceClosureBridge(
