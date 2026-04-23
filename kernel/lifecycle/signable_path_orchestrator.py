@@ -322,6 +322,10 @@ class SignablePathOrchestrator:
             task_id=task_id,
             root_revision_id=root_revision_id,
         )
+        self._capability.consume(
+            capability_token_id=str(capability_token["capability_token_id"]),
+            task_id=task_id,
+        )
 
         anchor = self._emit_intent_anchor(task_id=task_id, intent_id=intent_id)
 
@@ -387,13 +391,18 @@ class SignablePathOrchestrator:
         InferenceService, which owns the governed prompt/response boundary.
         """
         state = self._get_task(task_id)
-        self._advance(state, Stage.INFERENCE)
+        if successor_of(state.current_stage) is not Stage.INFERENCE:
+            self._advance(state, Stage.INFERENCE)
 
         self._capability.verify_for_action(
             token=capability_token,
             action_class="invoke_inference",
             task_id=task_id,
             root_revision_id=None,
+        )
+        self._capability.consume(
+            capability_token_id=str(capability_token["capability_token_id"]),
+            task_id=task_id,
         )
 
         context_artifact_id = state.artifact_ids[Stage.CONTEXT]
@@ -404,6 +413,7 @@ class SignablePathOrchestrator:
             model_route_id=model_route_id,
             intent_id=state.intent_anchor.intent_id,
         )
+        self._advance(state, Stage.INFERENCE)
         state.artifact_ids[Stage.INFERENCE] = inference_artifact_id
 
         self._audit.append(

@@ -25,6 +25,7 @@ from uuid import uuid4
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")))
 
 from validation.tests.acceptance.conftest import AcceptanceHarness
+from kernel.lifecycle.stage_types import Stage
 from kernel.services.capability_service import CapabilityDenied
 
 
@@ -36,6 +37,24 @@ class TestCapabilitySingleUse(unittest.TestCase):
 
     def tearDown(self) -> None:
         self.harness.close()
+
+    def _context_request(self) -> dict:
+        return {
+            "repo_graph_version": "1.0",
+            "symbol_index_version": "1.0",
+            "candidate_file_ids": ["src/main.py"],
+            "symbol_frontier_ids": ["main"],
+            "packing_policy_version": "phase1_budget_policy_v1",
+            "actual_tokens": 500,
+        }
+
+    def _count_audit(self, task_id: str, record_type: str) -> int:
+        row = self.harness.conn.execute(
+            "SELECT COUNT(*) FROM audit_records "
+            "WHERE task_id = ? AND record_type = ?;",
+            (task_id, record_type),
+        ).fetchone()
+        return int(row[0])
 
     def test_single_use_consumed_once(self) -> None:
         """First consume succeeds; second must fail."""
@@ -88,6 +107,115 @@ class TestCapabilitySingleUse(unittest.TestCase):
         result = self.harness.cap_repo.atomic_consume(token_id)
         self.assertFalse(result.winner)
         self.assertEqual(result.reason, "revoked")
+
+    def test_orchestrator_consumes_context_and_inference_tokens(self) -> None:
+        """Live context and inference admissions consume issued tokens."""
+        task_id = f"task-{uuid4().hex[:8]}"
+        context_token = self.harness.issue_capability(
+            "read_repository_snapshot", task_id, single_use=True,
+        )
+        inference_token = self.harness.issue_capability(
+            "invoke_inference", task_id, single_use=True,
+        )
+
+        self.harness.orch.admit_context(
+            task_id=task_id,
+            intent_id=f"intent-{uuid4().hex[:8]}",
+            capability_token=context_token,
+            root_revision_id="rev-genesis-000",
+            request=self._context_request(),
+        )
+        self.harness.orch.admit_inference(
+            task_id=task_id,
+            capability_token=inference_token,
+            worker_profile="acceptance_worker",
+            model_route_id="fake-model-v1",
+        )
+
+        for token in (context_token, inference_token):
+            row = self.harness.cap_repo.fetch(token["capability_token_id"])
+            self.assertIsNotNone(row)
+            self.assertIsNotNone(row["consumed_at"])
+        self.assertEqual(
+            self._count_audit(task_id, "capability_token_consumed"),
+            2,
+        )
+
+    def test_context_consume_failure_blocks_artifact_and_stage(self) -> None:
+        """A pre-consumed context token rejects before durable path progress."""
+        task_id = f"task-{uuid4().hex[:8]}"
+        token = self.harness.issue_capability(
+            "read_repository_snapshot", task_id, single_use=True,
+        )
+        self.harness.cap_repo.atomic_consume(token["capability_token_id"])
+
+        with self.assertRaises(CapabilityDenied):
+            self.harness.orch.admit_context(
+                task_id=task_id,
+                intent_id=f"intent-{uuid4().hex[:8]}",
+                capability_token=token,
+                root_revision_id="rev-genesis-000",
+                request=self._context_request(),
+            )
+
+        context_count = self.harness.conn.execute(
+            "SELECT COUNT(*) FROM context_artifacts WHERE task_id = ?;",
+            (task_id,),
+        ).fetchone()[0]
+        self.assertEqual(context_count, 0)
+        self.assertIsNone(self.harness.orch.current_stage(task_id))
+        self.assertEqual(self._count_audit(task_id, "stage_entered"), 0)
+        self.assertEqual(
+            self._count_audit(task_id, "capability_token_consume_rejected"),
+            1,
+        )
+
+    def test_inference_consume_failure_blocks_artifact_and_stage(self) -> None:
+        """A pre-consumed inference token rejects before inference effects."""
+        task_id = f"task-{uuid4().hex[:8]}"
+        context_token = self.harness.issue_capability(
+            "read_repository_snapshot", task_id, single_use=True,
+        )
+        self.harness.orch.admit_context(
+            task_id=task_id,
+            intent_id=f"intent-{uuid4().hex[:8]}",
+            capability_token=context_token,
+            root_revision_id="rev-genesis-000",
+            request=self._context_request(),
+        )
+        inference_token = self.harness.issue_capability(
+            "invoke_inference", task_id, single_use=True,
+        )
+        self.harness.cap_repo.atomic_consume(
+            inference_token["capability_token_id"]
+        )
+
+        with self.assertRaises(CapabilityDenied):
+            self.harness.orch.admit_inference(
+                task_id=task_id,
+                capability_token=inference_token,
+                worker_profile="acceptance_worker",
+                model_route_id="fake-model-v1",
+            )
+
+        inference_count = self.harness.conn.execute(
+            "SELECT COUNT(*) FROM inference_artifacts WHERE task_id = ?;",
+            (task_id,),
+        ).fetchone()[0]
+        self.assertEqual(inference_count, 0)
+        self.assertEqual(self.harness.orch.current_stage(task_id), Stage.CONTEXT)
+        stage_rows = self.harness.conn.execute(
+            "SELECT payload_json FROM audit_records "
+            "WHERE task_id = ? AND record_type = 'stage_entered';",
+            (task_id,),
+        ).fetchall()
+        self.assertFalse(
+            any('"stage":"inference"' in row["payload_json"] for row in stage_rows)
+        )
+        self.assertEqual(
+            self._count_audit(task_id, "capability_token_consume_rejected"),
+            1,
+        )
 
 
 if __name__ == "__main__":
