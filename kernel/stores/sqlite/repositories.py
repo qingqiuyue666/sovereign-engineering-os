@@ -303,13 +303,13 @@ class CapabilityRepository:
             (capability_token_id,),
         ).fetchone()
 
-    def revoke(self, capability_token_id: str, reason: str) -> None:
+    def revoke(self, capability_token_id: str, reason: str) -> bool:
         # Revocation is an authority-bearing mutation; it is intentionally
         # UPDATE (not append-only) on the `capability_tokens` row because
         # §23.13 treats consumed_at/revoked_at as optional on-row columns.
         # Each revocation MUST also emit an AuditRecord at the service
         # layer; this repository does not synthesize audit.
-        self._conn.execute(
+        cur = self._conn.execute(
             """
             UPDATE capability_tokens
                SET revoked_at = ?, revocation_reason = ?
@@ -318,6 +318,7 @@ class CapabilityRepository:
             """,
             (_iso_now(), reason, capability_token_id),
         )
+        return cur.rowcount == 1
 
     def atomic_consume(
         self, capability_token_id: str

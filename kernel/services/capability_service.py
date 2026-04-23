@@ -125,6 +125,43 @@ class CapabilityService:
         return token
 
     # ------------------------------------------------------------------
+    # revocation (INV-CAP-REVOCATION-WINS)
+    # ------------------------------------------------------------------
+
+    def revoke_token(
+        self,
+        *,
+        capability_token_id: str,
+        reason: str,
+    ) -> None:
+        """Revoke a capability token and emit the durable authority audit."""
+        if not capability_token_id:
+            raise CapabilityDenied("capability_token_id is required")
+        if not reason:
+            raise CapabilityDenied("revocation reason is required")
+
+        token = self._repo.fetch(capability_token_id)
+        if token is None:
+            raise CapabilityDenied(
+                f"capability token not found: {capability_token_id}"
+            )
+
+        if not self._repo.revoke(capability_token_id, reason):
+            raise CapabilityDenied(
+                f"capability token already revoked: {capability_token_id}"
+            )
+
+        task_id = token["bound_task_id"]
+        root_revision_id = token["bound_root_revision_id"]
+        self._audit.append(
+            record_type="capability_token_revoked",
+            task_id=task_id,
+            root_revision_id=root_revision_id,
+            artifact_refs=[capability_token_id],
+            payload={"reason": reason},
+        )
+
+    # ------------------------------------------------------------------
     # verification (C22.6 pre-effect gate)
     # ------------------------------------------------------------------
 
