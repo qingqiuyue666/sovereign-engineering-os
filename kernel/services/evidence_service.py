@@ -135,8 +135,9 @@ class _LiveEvidenceView:
         # artifact and its carried patch proposal id, seal journal entries,
         # plus already-durable budget, drift, failure-bundle, validation
         # taint, issued capability-token records, and consumed-token audit
-        # records when the evidence composition root wires those read
-        # surfaces. Full artifact closure is a hardening-stage expansion.
+        # records, and revoked-token audit records when the evidence
+        # composition root wires those read surfaces. Full artifact
+        # closure is a hardening-stage expansion.
         ids: list[str] = []
         ctx_row = self._ctx._conn.execute(
             "SELECT context_artifact_id FROM context_artifacts "
@@ -164,6 +165,7 @@ class _LiveEvidenceView:
         ids.extend(self._validation_taint_record_ids(root_revision_id))
         ids.extend(self._capability_token_ids(task_id))
         ids.extend(self._capability_token_consumed_audit_ids(task_id))
+        ids.extend(self._capability_token_revoked_audit_ids(task_id))
         return ids
 
     def _snapshot_root_ids(self, root_revision_id: str) -> list[str]:
@@ -382,6 +384,18 @@ class _LiveEvidenceView:
             return []
         ids: list[str] = []
         for record in self._audit_repo.list_capability_token_consumed_for_task(
+            task_id
+        ):
+            audit_record_id = record.get("audit_record_id")
+            if isinstance(audit_record_id, str) and audit_record_id:
+                ids.append(audit_record_id)
+        return ids
+
+    def _capability_token_revoked_audit_ids(self, task_id: str) -> list[str]:
+        if self._audit_repo is None:
+            return []
+        ids: list[str] = []
+        for record in self._audit_repo.list_capability_token_revoked_for_task(
             task_id
         ):
             audit_record_id = record.get("audit_record_id")

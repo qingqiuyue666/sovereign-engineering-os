@@ -278,6 +278,72 @@ class TestForensicReconstructability(unittest.TestCase):
         self.assertNotIn("capability_token_consumed_audit_id", payload)
         self.assertNotIn("capability_token_consumed_audit_ids", payload)
 
+    def test_replay_anchor_binds_revoked_capability_audit_ids(self) -> None:
+        """ReplayAnchor.required_artifact_ids carries revoked-token audits."""
+        task_id = f"task-{uuid4().hex[:8]}"
+        ids = self.harness.run_through_stage(task_id, Stage.REVISION_SEAL)
+
+        other_task_id = f"task-other-{uuid4().hex[:8]}"
+        other_token = self.harness.issue_capability(
+            "read_repository_snapshot", other_task_id
+        )
+        self.harness.cap_svc.revoke_token(
+            capability_token_id=other_token["capability_token_id"],
+            reason="other_task_revocation",
+        )
+        other_revoked_rows = (
+            self.harness.audit_repo.list_capability_token_revoked_for_task(
+                other_task_id
+            )
+        )
+        self.assertEqual(len(other_revoked_rows), 1)
+        other_revoked_audit_id = other_revoked_rows[0]["audit_record_id"]
+
+        revoked_token = self.harness.issue_capability(
+            "read_repository_snapshot", task_id
+        )
+        self.harness.cap_svc.revoke_token(
+            capability_token_id=revoked_token["capability_token_id"],
+            reason="same_task_revocation",
+        )
+        evidence_token = self.harness.issue_capability(
+            "append_evidence", task_id
+        )
+        replay_anchor_id = self.harness.orch.admit_evidence(
+            task_id=task_id,
+            capability_token=evidence_token,
+        )
+
+        revoked_rows = (
+            self.harness.audit_repo.list_capability_token_revoked_for_task(
+                task_id
+            )
+        )
+        revoked_audit_ids = [
+            row["audit_record_id"] for row in revoked_rows
+        ]
+        self.assertEqual(len(revoked_audit_ids), 1)
+
+        anchor = self.harness.ra_repo.fetch(replay_anchor_id)
+        self.assertIsNotNone(anchor)
+        for audit_record_id in revoked_audit_ids:
+            self.assertIn(audit_record_id, anchor["required_artifact_ids"])
+        self.assertNotIn(other_revoked_audit_id, anchor["required_artifact_ids"])
+
+        closure_row = self.harness.conn.execute(
+            "SELECT payload_json FROM audit_records "
+            "WHERE task_id = ? AND record_type = 'evidence_closure' "
+            "AND replay_anchor_id = ?;",
+            (ids["task_id"], replay_anchor_id),
+        ).fetchone()
+        self.assertIsNotNone(closure_row)
+        payload = json.loads(closure_row["payload_json"])
+        for audit_record_id in revoked_audit_ids:
+            self.assertIn(audit_record_id, payload["required_artifact_ids"])
+        self.assertNotIn(other_revoked_audit_id, payload["required_artifact_ids"])
+        self.assertNotIn("capability_token_revoked_audit_id", payload)
+        self.assertNotIn("capability_token_revoked_audit_ids", payload)
+
     def test_replay_anchor_binds_review_artifact_id(self) -> None:
         """ReplayAnchor.required_artifact_ids carries scoped review artifacts."""
         task_id = f"task-{uuid4().hex[:8]}"
