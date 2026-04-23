@@ -168,6 +168,9 @@ class TestForensicReconstructability(unittest.TestCase):
             "read_repository_snapshot",
             "task-out-of-scope",
         )
+        evidence_token = self.harness.issue_capability(
+            "append_evidence", task_id
+        )
 
         capability_rows = self.harness.cap_repo.list_for_task(task_id)
         capability_token_ids = [
@@ -183,10 +186,14 @@ class TestForensicReconstructability(unittest.TestCase):
                 "render_review",
                 "grant_approval",
                 "seal_revision",
+                "append_evidence",
             ],
         )
 
-        replay_anchor_id = self.harness.orch.admit_evidence(task_id=task_id)
+        replay_anchor_id = self.harness.orch.admit_evidence(
+            task_id=task_id,
+            capability_token=evidence_token,
+        )
 
         anchor = self.harness.ra_repo.fetch(replay_anchor_id)
         self.assertIsNotNone(anchor)
@@ -249,7 +256,13 @@ class TestForensicReconstructability(unittest.TestCase):
             other_task_review_id, "task-out-of-scope", ids["root_revision_id"]
         )
 
-        replay_anchor_id = self.harness.orch.admit_evidence(task_id=task_id)
+        evidence_token = self.harness.issue_capability(
+            "append_evidence", task_id
+        )
+        replay_anchor_id = self.harness.orch.admit_evidence(
+            task_id=task_id,
+            capability_token=evidence_token,
+        )
 
         anchor = self.harness.ra_repo.fetch(replay_anchor_id)
         self.assertIsNotNone(anchor)
@@ -317,7 +330,13 @@ class TestForensicReconstructability(unittest.TestCase):
             other_task_patch_id,
         )
 
-        replay_anchor_id = self.harness.orch.admit_evidence(task_id=task_id)
+        evidence_token = self.harness.issue_capability(
+            "append_evidence", task_id
+        )
+        replay_anchor_id = self.harness.orch.admit_evidence(
+            task_id=task_id,
+            capability_token=evidence_token,
+        )
 
         anchor = self.harness.ra_repo.fetch(replay_anchor_id)
         self.assertIsNotNone(anchor)

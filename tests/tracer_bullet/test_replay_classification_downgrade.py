@@ -484,7 +484,11 @@ class TestEvidenceServiceReplayClassification(unittest.TestCase):
             task_id=task_id,
             capability_token=cap_seal,
         )
-        ra_id = self.orch.admit_evidence(task_id=task_id)
+        cap_evidence = self._issue_capability("append_evidence", task_id)
+        ra_id = self.orch.admit_evidence(
+            task_id=task_id,
+            capability_token=cap_evidence,
+        )
         return ra_id
 
     def test_evidence_closure_produces_persisted_anchor(self) -> None:

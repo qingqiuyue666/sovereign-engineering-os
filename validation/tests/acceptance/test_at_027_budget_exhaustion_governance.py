@@ -502,7 +502,11 @@ class TestAT027BudgetExhaustionGovernance(unittest.TestCase):
                 [first_failure_id, second_failure_id],
             )
 
-            replay_anchor_id = harness.orch.admit_evidence(task_id=task_id)
+            cap_evidence = harness.issue_capability("append_evidence", task_id)
+            replay_anchor_id = harness.orch.admit_evidence(
+                task_id=task_id,
+                capability_token=cap_evidence,
+            )
             anchor = harness.ra_repo.fetch(replay_anchor_id)
             self.assertIsNotNone(anchor)
             self.assertIn(first_failure_id, anchor["required_artifact_ids"])

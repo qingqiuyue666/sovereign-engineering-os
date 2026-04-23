@@ -599,7 +599,11 @@ class TestDriftEvidenceVisibility(unittest.TestCase):
                 [first_drift_id, second_drift_id],
             )
 
-            replay_anchor_id = harness.orch.admit_evidence(task_id=task_id)
+            cap_evidence = harness.issue_capability("append_evidence", task_id)
+            replay_anchor_id = harness.orch.admit_evidence(
+                task_id=task_id,
+                capability_token=cap_evidence,
+            )
             anchor = harness.ra_repo.fetch(replay_anchor_id)
             self.assertIsNotNone(anchor)
             self.assertIn(first_drift_id, anchor["required_artifact_ids"])

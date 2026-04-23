@@ -316,7 +316,11 @@ class AcceptanceHarness:
             task_id=task_id,
             capability_token=cap_seal,
         )
-        ra_id = self.orch.admit_evidence(task_id=task_id)
+        cap_evidence = self.issue_capability("append_evidence", task_id)
+        ra_id = self.orch.admit_evidence(
+            task_id=task_id,
+            capability_token=cap_evidence,
+        )
 
         return {
             "task_id": task_id,
@@ -405,8 +409,10 @@ class AcceptanceHarness:
                     capability_token=cap,
                 )
             elif stage == Stage.EVIDENCE:
+                cap = self.issue_capability("append_evidence", task_id)
                 ids["replay_anchor_id"] = self.orch.admit_evidence(
                     task_id=task_id,
+                    capability_token=cap,
                 )
 
             if stage == target_stage:
