@@ -137,8 +137,9 @@ class _LiveEvidenceView:
         # taint, issued capability-token records, and consumed-token audit
         # records, revoked-token audit records, and consume-rejection audit
         # records, and verification-rejection audit records when the evidence
-        # composition root wires those read surfaces. Full artifact closure is
-        # a hardening-stage expansion.
+        # composition root wires those read surfaces. Illegal-stage-transition
+        # rejection audit records follow the same task-scoped mirror path.
+        # Full artifact closure is a hardening-stage expansion.
         ids: list[str] = []
         ctx_row = self._ctx._conn.execute(
             "SELECT context_artifact_id FROM context_artifacts "
@@ -169,6 +170,7 @@ class _LiveEvidenceView:
         ids.extend(self._capability_token_revoked_audit_ids(task_id))
         ids.extend(self._capability_token_consume_rejected_audit_ids(task_id))
         ids.extend(self._capability_verification_rejected_audit_ids(task_id))
+        ids.extend(self._illegal_stage_transition_rejected_audit_ids(task_id))
         return ids
 
     def _snapshot_root_ids(self, root_revision_id: str) -> list[str]:
@@ -427,6 +429,20 @@ class _LiveEvidenceView:
             return []
         ids: list[str] = []
         for record in self._audit_repo.list_capability_verification_rejected_for_task(
+            task_id
+        ):
+            audit_record_id = record.get("audit_record_id")
+            if isinstance(audit_record_id, str) and audit_record_id:
+                ids.append(audit_record_id)
+        return ids
+
+    def _illegal_stage_transition_rejected_audit_ids(
+        self, task_id: str
+    ) -> list[str]:
+        if self._audit_repo is None:
+            return []
+        ids: list[str] = []
+        for record in self._audit_repo.list_illegal_stage_transition_rejected_for_task(
             task_id
         ):
             audit_record_id = record.get("audit_record_id")

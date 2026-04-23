@@ -28,6 +28,7 @@ from uuid import uuid4
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")))
 
 from kernel.lifecycle.stage_types import Stage
+from kernel.lifecycle.signable_path_orchestrator import OrchestratorRejected
 from kernel.services.capability_service import CapabilityDenied
 from validation.tests.acceptance.conftest import AcceptanceHarness
 
@@ -500,6 +501,116 @@ class TestForensicReconstructability(unittest.TestCase):
         )
         self.assertNotIn("capability_verification_rejected_audit_id", payload)
         self.assertNotIn("capability_verification_rejected_audit_ids", payload)
+
+    def test_replay_anchor_binds_illegal_stage_transition_rejected_audit_ids(
+        self,
+    ) -> None:
+        """ReplayAnchor.required_artifact_ids carries illegal-stage rejections."""
+        task_id = f"task-{uuid4().hex[:8]}"
+        ids = self.harness.run_through_stage(task_id, Stage.CONTEXT)
+
+        other_task_id = f"task-other-{uuid4().hex[:8]}"
+        self.harness.run_through_stage(other_task_id, Stage.CONTEXT)
+        other_patch_token = self.harness.issue_capability(
+            "propose_patch", other_task_id
+        )
+        with self.assertRaises(OrchestratorRejected):
+            self.harness.orch.admit_patch_proposal(
+                task_id=other_task_id,
+                capability_token=other_patch_token,
+            )
+        other_rejected_rows = (
+            self.harness.audit_repo.list_illegal_stage_transition_rejected_for_task(
+                other_task_id
+            )
+        )
+        self.assertEqual(len(other_rejected_rows), 1)
+        other_rejected_audit_id = other_rejected_rows[0]["audit_record_id"]
+
+        rejected_patch_token = self.harness.issue_capability(
+            "propose_patch", task_id
+        )
+        with self.assertRaises(OrchestratorRejected):
+            self.harness.orch.admit_patch_proposal(
+                task_id=task_id,
+                capability_token=rejected_patch_token,
+            )
+
+        inference_token = self.harness.issue_capability(
+            "invoke_inference", task_id
+        )
+        ids["inference_artifact_id"] = self.harness.orch.admit_inference(
+            task_id=task_id,
+            capability_token=inference_token,
+            worker_profile="acceptance_worker",
+            model_route_id="fake-model-v1",
+        )
+        patch_token = self.harness.issue_capability("propose_patch", task_id)
+        ids["patch_proposal_id"] = self.harness.orch.admit_patch_proposal(
+            task_id=task_id,
+            capability_token=patch_token,
+        )
+        validation_token = self.harness.issue_capability(
+            "run_validation_quarantine", task_id
+        )
+        ids["validation_receipt_id"] = self.harness.orch.admit_validation(
+            task_id=task_id,
+            capability_token=validation_token,
+        )
+        review_token = self.harness.issue_capability("render_review", task_id)
+        ids["review_artifact_id"] = self.harness.orch.admit_review(
+            task_id=task_id,
+            capability_token=review_token,
+        )
+        approval_token = self.harness.issue_capability("grant_approval", task_id)
+        ids["approval_id"] = self.harness.orch.admit_approval(
+            task_id=task_id,
+            capability_token=approval_token,
+        )
+        seal_token = self.harness.issue_capability("seal_revision", task_id)
+        ids["revision_id"] = self.harness.orch.admit_revision_seal(
+            task_id=task_id,
+            capability_token=seal_token,
+        )
+        evidence_token = self.harness.issue_capability("append_evidence", task_id)
+        replay_anchor_id = self.harness.orch.admit_evidence(
+            task_id=task_id,
+            capability_token=evidence_token,
+        )
+
+        rejected_rows = (
+            self.harness.audit_repo.list_illegal_stage_transition_rejected_for_task(
+                task_id
+            )
+        )
+        rejected_audit_ids = [
+            row["audit_record_id"] for row in rejected_rows
+        ]
+        self.assertEqual(len(rejected_audit_ids), 1)
+
+        anchor = self.harness.ra_repo.fetch(replay_anchor_id)
+        self.assertIsNotNone(anchor)
+        for audit_record_id in rejected_audit_ids:
+            self.assertIn(audit_record_id, anchor["required_artifact_ids"])
+        self.assertNotIn(
+            other_rejected_audit_id, anchor["required_artifact_ids"]
+        )
+
+        closure_row = self.harness.conn.execute(
+            "SELECT payload_json FROM audit_records "
+            "WHERE task_id = ? AND record_type = 'evidence_closure' "
+            "AND replay_anchor_id = ?;",
+            (ids["task_id"], replay_anchor_id),
+        ).fetchone()
+        self.assertIsNotNone(closure_row)
+        payload = json.loads(closure_row["payload_json"])
+        for audit_record_id in rejected_audit_ids:
+            self.assertIn(audit_record_id, payload["required_artifact_ids"])
+        self.assertNotIn(
+            other_rejected_audit_id, payload["required_artifact_ids"]
+        )
+        self.assertNotIn("illegal_stage_transition_rejected_audit_id", payload)
+        self.assertNotIn("illegal_stage_transition_rejected_audit_ids", payload)
 
     def test_replay_anchor_binds_review_artifact_id(self) -> None:
         """ReplayAnchor.required_artifact_ids carries scoped review artifacts."""
