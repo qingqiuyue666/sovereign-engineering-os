@@ -366,7 +366,11 @@ class TestBarrierRejectionWiredStack(unittest.TestCase):
             task_id=task_id,
             capability_token=cap_validation,
         )
-        rv_id = self.orch.admit_review(task_id=task_id)
+        cap_review = self._issue_capability("render_review", task_id)
+        rv_id = self.orch.admit_review(
+            task_id=task_id,
+            capability_token=cap_review,
+        )
 
         return {
             "context_id": ctx_id,

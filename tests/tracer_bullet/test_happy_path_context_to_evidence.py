@@ -274,7 +274,11 @@ class TestHappyPathContextToEvidence(unittest.TestCase):
         self.assertEqual(self.orch.current_stage(task_id), Stage.VALIDATION)
 
         # Stage 5: Review.
-        rv_id = self.orch.admit_review(task_id=task_id)
+        cap_review = self._issue_capability("render_review", task_id)
+        rv_id = self.orch.admit_review(
+            task_id=task_id,
+            capability_token=cap_review,
+        )
         self.assertTrue(rv_id.startswith("rv-"))
         self.assertEqual(self.orch.current_stage(task_id), Stage.REVIEW)
 

@@ -180,6 +180,7 @@ class TestForensicReconstructability(unittest.TestCase):
                 "invoke_inference",
                 "propose_patch",
                 "run_validation_quarantine",
+                "render_review",
             ],
         )
 
