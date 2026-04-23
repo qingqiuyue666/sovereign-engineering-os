@@ -191,6 +191,29 @@ class TestCapabilitySingleUse(unittest.TestCase):
             4,
         )
 
+    def test_orchestrator_consumes_review_token(self) -> None:
+        """Live review admission consumes its render_review token."""
+        task_id = f"task-{uuid4().hex[:8]}"
+        self.harness.run_through_stage(task_id, Stage.VALIDATION)
+        review_token = self.harness.issue_capability(
+            "render_review", task_id, single_use=True,
+        )
+
+        review_id = self.harness.orch.admit_review(
+            task_id=task_id,
+            capability_token=review_token,
+        )
+
+        self.assertTrue(review_id.startswith("rv-"))
+        row = self.harness.cap_repo.fetch(review_token["capability_token_id"])
+        self.assertIsNotNone(row)
+        self.assertIsNotNone(row["consumed_at"])
+        self.assertEqual(self.harness.orch.current_stage(task_id), Stage.REVIEW)
+        self.assertEqual(
+            self._count_audit(task_id, "capability_token_consumed"),
+            5,
+        )
+
     def test_context_consume_failure_blocks_artifact_and_stage(self) -> None:
         """A pre-consumed context token rejects before durable path progress."""
         task_id = f"task-{uuid4().hex[:8]}"
@@ -348,6 +371,46 @@ class TestCapabilitySingleUse(unittest.TestCase):
             )
         )
         self.assertEqual(self._count_audit(task_id, "validation_receipt_created"), 0)
+        self.assertEqual(
+            self._count_audit(task_id, "capability_token_consume_rejected"),
+            1,
+        )
+
+    def test_review_consume_failure_blocks_artifact_and_stage(self) -> None:
+        """A pre-consumed render_review token rejects before review effects."""
+        task_id = f"task-{uuid4().hex[:8]}"
+        self.harness.run_through_stage(task_id, Stage.VALIDATION)
+        review_token = self.harness.issue_capability(
+            "render_review", task_id, single_use=True,
+        )
+        self.harness.cap_repo.atomic_consume(
+            review_token["capability_token_id"]
+        )
+
+        with self.assertRaises(CapabilityDenied):
+            self.harness.orch.admit_review(
+                task_id=task_id,
+                capability_token=review_token,
+            )
+
+        review_count = self.harness.conn.execute(
+            "SELECT COUNT(*) FROM review_artifacts WHERE task_id = ?;",
+            (task_id,),
+        ).fetchone()[0]
+        self.assertEqual(review_count, 0)
+        self.assertEqual(self.harness.orch.current_stage(task_id), Stage.VALIDATION)
+        stage_rows = self.harness.conn.execute(
+            "SELECT payload_json FROM audit_records "
+            "WHERE task_id = ? AND record_type = 'stage_entered';",
+            (task_id,),
+        ).fetchall()
+        self.assertFalse(
+            any(
+                '"stage":"review"' in row["payload_json"]
+                for row in stage_rows
+            )
+        )
+        self.assertEqual(self._count_audit(task_id, "review_artifact_created"), 0)
         self.assertEqual(
             self._count_audit(task_id, "capability_token_consume_rejected"),
             1,

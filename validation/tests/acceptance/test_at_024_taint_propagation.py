@@ -230,7 +230,11 @@ class TestTaintPropagation(unittest.TestCase):
             self.assertEqual(len(taint_rows), 1)
             self.assertEqual(taint_rows[0]["taint_record_id"], taint_record_id)
 
-            harness.orch.admit_review(task_id=task_id)
+            cap_review = harness.issue_capability("render_review", task_id)
+            harness.orch.admit_review(
+                task_id=task_id,
+                capability_token=cap_review,
+            )
             harness.orch.admit_approval(task_id=task_id)
             harness.orch.admit_revision_seal(task_id=task_id)
             replay_anchor_id = harness.orch.admit_evidence(task_id=task_id)
