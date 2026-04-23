@@ -166,6 +166,31 @@ class TestCapabilitySingleUse(unittest.TestCase):
             3,
         )
 
+    def test_orchestrator_consumes_validation_token(self) -> None:
+        """Live validation admission consumes its quarantine token."""
+        task_id = f"task-{uuid4().hex[:8]}"
+        self.harness.run_through_stage(task_id, Stage.PATCH_PROPOSAL)
+        validation_token = self.harness.issue_capability(
+            "run_validation_quarantine", task_id, single_use=True,
+        )
+
+        receipt_id = self.harness.orch.admit_validation(
+            task_id=task_id,
+            capability_token=validation_token,
+        )
+
+        self.assertTrue(receipt_id.startswith("vr-"))
+        row = self.harness.cap_repo.fetch(
+            validation_token["capability_token_id"]
+        )
+        self.assertIsNotNone(row)
+        self.assertIsNotNone(row["consumed_at"])
+        self.assertEqual(self.harness.orch.current_stage(task_id), Stage.VALIDATION)
+        self.assertEqual(
+            self._count_audit(task_id, "capability_token_consumed"),
+            4,
+        )
+
     def test_context_consume_failure_blocks_artifact_and_stage(self) -> None:
         """A pre-consumed context token rejects before durable path progress."""
         task_id = f"task-{uuid4().hex[:8]}"
@@ -277,6 +302,52 @@ class TestCapabilitySingleUse(unittest.TestCase):
             )
         )
         self.assertEqual(self._count_audit(task_id, "patch_proposal_created"), 0)
+        self.assertEqual(
+            self._count_audit(task_id, "capability_token_consume_rejected"),
+            1,
+        )
+
+    def test_validation_consume_failure_blocks_artifact_taint_and_stage(self) -> None:
+        """A pre-consumed validation token rejects before validation effects."""
+        task_id = f"task-{uuid4().hex[:8]}"
+        self.harness.run_through_stage(task_id, Stage.PATCH_PROPOSAL)
+        validation_token = self.harness.issue_capability(
+            "run_validation_quarantine", task_id, single_use=True,
+        )
+        self.harness.cap_repo.atomic_consume(
+            validation_token["capability_token_id"]
+        )
+
+        with self.assertRaises(CapabilityDenied):
+            self.harness.orch.admit_validation(
+                task_id=task_id,
+                capability_token=validation_token,
+            )
+
+        validation_count = self.harness.conn.execute(
+            "SELECT COUNT(*) FROM validation_receipts WHERE task_id = ?;",
+            (task_id,),
+        ).fetchone()[0]
+        taint_count = self.harness.conn.execute(
+            "SELECT COUNT(*) FROM taint_records;"
+        ).fetchone()[0]
+        self.assertEqual(validation_count, 0)
+        self.assertEqual(taint_count, 0)
+        self.assertEqual(
+            self.harness.orch.current_stage(task_id), Stage.PATCH_PROPOSAL
+        )
+        stage_rows = self.harness.conn.execute(
+            "SELECT payload_json FROM audit_records "
+            "WHERE task_id = ? AND record_type = 'stage_entered';",
+            (task_id,),
+        ).fetchall()
+        self.assertFalse(
+            any(
+                '"stage":"validation"' in row["payload_json"]
+                for row in stage_rows
+            )
+        )
+        self.assertEqual(self._count_audit(task_id, "validation_receipt_created"), 0)
         self.assertEqual(
             self._count_audit(task_id, "capability_token_consume_rejected"),
             1,

@@ -466,15 +466,34 @@ class SignablePathOrchestrator:
         )
         return proposal_id
 
-    def admit_validation(self, *, task_id: str) -> str:
+    def admit_validation(
+        self,
+        *,
+        task_id: str,
+        capability_token: Mapping[str, Any],
+    ) -> str:
         state = self._get_task(task_id)
-        self._advance(state, Stage.VALIDATION)
+        if successor_of(state.current_stage) is not Stage.VALIDATION:
+            self._advance(state, Stage.VALIDATION)
+
+        self._capability.verify_for_action(
+            token=capability_token,
+            action_class="run_validation_quarantine",
+            task_id=task_id,
+            root_revision_id=None,
+        )
+        self._capability.consume(
+            capability_token_id=str(capability_token["capability_token_id"]),
+            task_id=task_id,
+        )
+
         proposal_id = state.artifact_ids[Stage.PATCH_PROPOSAL]
         receipt_id = self._validation.validate(
             task_id=task_id,
             patch_proposal_id=proposal_id,
             intent_id=state.intent_anchor.intent_id,
         )
+        self._advance(state, Stage.VALIDATION)
         state.artifact_ids[Stage.VALIDATION] = receipt_id
         self._audit.append(
             record_type="stage_entered",

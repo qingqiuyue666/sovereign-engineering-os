@@ -263,7 +263,13 @@ class TestHappyPathContextToEvidence(unittest.TestCase):
         self.assertEqual(self.orch.current_stage(task_id), Stage.PATCH_PROPOSAL)
 
         # Stage 4: Validation.
-        vr_id = self.orch.admit_validation(task_id=task_id)
+        cap_validation = self._issue_capability(
+            "run_validation_quarantine", task_id
+        )
+        vr_id = self.orch.admit_validation(
+            task_id=task_id,
+            capability_token=cap_validation,
+        )
         self.assertTrue(vr_id.startswith("vr-"))
         self.assertEqual(self.orch.current_stage(task_id), Stage.VALIDATION)
 

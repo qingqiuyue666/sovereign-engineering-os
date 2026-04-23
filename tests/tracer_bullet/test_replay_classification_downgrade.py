@@ -462,7 +462,13 @@ class TestEvidenceServiceReplayClassification(unittest.TestCase):
             task_id=task_id,
             capability_token=cap_patch,
         )
-        self.orch.admit_validation(task_id=task_id)
+        cap_validation = self._issue_capability(
+            "run_validation_quarantine", task_id
+        )
+        self.orch.admit_validation(
+            task_id=task_id,
+            capability_token=cap_validation,
+        )
         self.orch.admit_review(task_id=task_id)
         self.orch.admit_approval(task_id=task_id)
         self.orch.admit_revision_seal(task_id=task_id)
