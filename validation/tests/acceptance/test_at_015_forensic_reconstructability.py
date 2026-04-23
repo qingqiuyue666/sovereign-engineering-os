@@ -160,6 +160,50 @@ class TestForensicReconstructability(unittest.TestCase):
         self.assertNotIn("validation_receipt_id", payload)
         self.assertNotIn("validation_receipt_ids", payload)
 
+    def test_replay_anchor_binds_issued_capability_token_ids(self) -> None:
+        """ReplayAnchor.required_artifact_ids carries scoped issued tokens."""
+        task_id = f"task-{uuid4().hex[:8]}"
+        ids = self.harness.run_through_stage(task_id, Stage.REVISION_SEAL)
+        other_token = self.harness.issue_capability(
+            "read_repository_snapshot",
+            "task-out-of-scope",
+        )
+
+        capability_rows = self.harness.cap_repo.list_for_task(task_id)
+        capability_token_ids = [
+            row["capability_token_id"] for row in capability_rows
+        ]
+        self.assertEqual(
+            [row["capability_name"] for row in capability_rows],
+            ["read_repository_snapshot", "invoke_inference"],
+        )
+
+        replay_anchor_id = self.harness.orch.admit_evidence(task_id=task_id)
+
+        anchor = self.harness.ra_repo.fetch(replay_anchor_id)
+        self.assertIsNotNone(anchor)
+        for capability_token_id in capability_token_ids:
+            self.assertIn(capability_token_id, anchor["required_artifact_ids"])
+        self.assertNotIn(
+            other_token["capability_token_id"], anchor["required_artifact_ids"]
+        )
+
+        closure_row = self.harness.conn.execute(
+            "SELECT payload_json FROM audit_records "
+            "WHERE task_id = ? AND record_type = 'evidence_closure' "
+            "AND replay_anchor_id = ?;",
+            (ids["task_id"], replay_anchor_id),
+        ).fetchone()
+        self.assertIsNotNone(closure_row)
+        payload = json.loads(closure_row["payload_json"])
+        for capability_token_id in capability_token_ids:
+            self.assertIn(capability_token_id, payload["required_artifact_ids"])
+        self.assertNotIn(
+            other_token["capability_token_id"], payload["required_artifact_ids"]
+        )
+        self.assertNotIn("capability_token_id", payload)
+        self.assertNotIn("capability_token_ids", payload)
+
     def test_replay_anchor_binds_review_artifact_id(self) -> None:
         """ReplayAnchor.required_artifact_ids carries scoped review artifacts."""
         task_id = f"task-{uuid4().hex[:8]}"
