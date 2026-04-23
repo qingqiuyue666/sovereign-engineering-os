@@ -400,8 +400,12 @@ class TestBarrierRejectionWiredStack(unittest.TestCase):
         self.conn.commit()
 
         # Approval must now fail.
+        cap_approval = self._issue_capability("grant_approval", task_id)
         with self.assertRaises(ApprovalBarrierFailed) as cm:
-            self.orch.admit_approval(task_id=task_id)
+            self.orch.admit_approval(
+                task_id=task_id,
+                capability_token=cap_approval,
+            )
 
         verdict = cm.exception.verdict
         self.assertFalse(verdict.passes)
@@ -411,10 +415,6 @@ class TestBarrierRejectionWiredStack(unittest.TestCase):
         )
 
         # Orchestrator must NOT have advanced to APPROVAL.
-        # After the barrier failure in admit_approval, the orchestrator
-        # advanced the stage machine to APPROVAL before calling the
-        # service. The stage is APPROVAL but no artifact was recorded.
-        # The critical proof is: no approval artifact exists.
         approval_rows = self.conn.execute(
             "SELECT * FROM approval_artifacts WHERE task_id = ?;",
             (task_id,),
@@ -457,7 +457,11 @@ class TestBarrierRejectionWiredStack(unittest.TestCase):
         ids = self._run_through_review(task_id)
 
         # Stage 6: Approval succeeds on clean state.
-        ap_id = self.orch.admit_approval(task_id=task_id)
+        cap_approval = self._issue_capability("grant_approval", task_id)
+        ap_id = self.orch.admit_approval(
+            task_id=task_id,
+            capability_token=cap_approval,
+        )
         self.assertTrue(ap_id.startswith("ap-"))
 
         # Call reverify_for_seal with a drifted current_root_revision_id.
@@ -508,7 +512,11 @@ class TestBarrierRejectionWiredStack(unittest.TestCase):
         task_id = f"task-{uuid4().hex[:8]}"
         ids = self._run_through_review(task_id)
 
-        ap_id = self.orch.admit_approval(task_id=task_id)
+        cap_approval = self._issue_capability("grant_approval", task_id)
+        ap_id = self.orch.admit_approval(
+            task_id=task_id,
+            capability_token=cap_approval,
+        )
         self.assertTrue(ap_id.startswith("ap-"))
 
         supplied_intent_id = f"intent-{uuid4().hex[:8]}"

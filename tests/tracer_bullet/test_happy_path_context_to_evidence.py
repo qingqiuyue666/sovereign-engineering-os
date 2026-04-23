@@ -283,7 +283,11 @@ class TestHappyPathContextToEvidence(unittest.TestCase):
         self.assertEqual(self.orch.current_stage(task_id), Stage.REVIEW)
 
         # Stage 6: Approval (§22.3 barrier check).
-        ap_id = self.orch.admit_approval(task_id=task_id)
+        cap_approval = self._issue_capability("grant_approval", task_id)
+        ap_id = self.orch.admit_approval(
+            task_id=task_id,
+            capability_token=cap_approval,
+        )
         self.assertTrue(ap_id.startswith("ap-"))
         self.assertEqual(self.orch.current_stage(task_id), Stage.APPROVAL)
 

@@ -181,6 +181,7 @@ class TestForensicReconstructability(unittest.TestCase):
                 "propose_patch",
                 "run_validation_quarantine",
                 "render_review",
+                "grant_approval",
             ],
         )
 

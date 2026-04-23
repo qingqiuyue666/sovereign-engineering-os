@@ -235,7 +235,11 @@ class TestTaintPropagation(unittest.TestCase):
                 task_id=task_id,
                 capability_token=cap_review,
             )
-            harness.orch.admit_approval(task_id=task_id)
+            cap_approval = harness.issue_capability("grant_approval", task_id)
+            harness.orch.admit_approval(
+                task_id=task_id,
+                capability_token=cap_approval,
+            )
             harness.orch.admit_revision_seal(task_id=task_id)
             replay_anchor_id = harness.orch.admit_evidence(task_id=task_id)
             anchor = harness.ra_repo.fetch(replay_anchor_id)
