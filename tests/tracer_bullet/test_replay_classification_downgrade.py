@@ -479,7 +479,11 @@ class TestEvidenceServiceReplayClassification(unittest.TestCase):
             task_id=task_id,
             capability_token=cap_approval,
         )
-        self.orch.admit_revision_seal(task_id=task_id)
+        cap_seal = self._issue_capability("seal_revision", task_id)
+        self.orch.admit_revision_seal(
+            task_id=task_id,
+            capability_token=cap_seal,
+        )
         ra_id = self.orch.admit_evidence(task_id=task_id)
         return ra_id
 

@@ -292,7 +292,11 @@ class TestHappyPathContextToEvidence(unittest.TestCase):
         self.assertEqual(self.orch.current_stage(task_id), Stage.APPROVAL)
 
         # Stage 7: Revision Seal (nine-step §22.2 ordering).
-        rev_id = self.orch.admit_revision_seal(task_id=task_id)
+        cap_seal = self._issue_capability("seal_revision", task_id)
+        rev_id = self.orch.admit_revision_seal(
+            task_id=task_id,
+            capability_token=cap_seal,
+        )
         self.assertTrue(rev_id.startswith("rev-"))
         self.assertEqual(self.orch.current_stage(task_id), Stage.REVISION_SEAL)
 

@@ -583,9 +583,27 @@ class SignablePathOrchestrator:
         )
         return approval_id
 
-    def admit_revision_seal(self, *, task_id: str) -> str:
+    def admit_revision_seal(
+        self,
+        *,
+        task_id: str,
+        capability_token: Mapping[str, Any],
+    ) -> str:
         state = self._get_task(task_id)
-        self._advance(state, Stage.REVISION_SEAL)
+        if successor_of(state.current_stage) is not Stage.REVISION_SEAL:
+            self._advance(state, Stage.REVISION_SEAL)
+
+        self._capability.verify_for_action(
+            token=capability_token,
+            action_class="seal_revision",
+            task_id=task_id,
+            root_revision_id=None,
+        )
+        self._capability.consume(
+            capability_token_id=str(capability_token["capability_token_id"]),
+            task_id=task_id,
+        )
+
         approval_id = state.artifact_ids[Stage.APPROVAL]
         context_id = state.artifact_ids[Stage.CONTEXT]
         revision_id = self._seal.seal_revision(
@@ -594,6 +612,7 @@ class SignablePathOrchestrator:
             context_artifact_id=context_id,
             intent_id=state.intent_anchor.intent_id,
         )
+        self._advance(state, Stage.REVISION_SEAL)
         state.artifact_ids[Stage.REVISION_SEAL] = revision_id
         self._audit.append(
             record_type="stage_entered",

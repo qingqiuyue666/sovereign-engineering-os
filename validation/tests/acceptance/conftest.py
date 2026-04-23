@@ -311,7 +311,11 @@ class AcceptanceHarness:
             task_id=task_id,
             capability_token=cap_approval,
         )
-        rev_id = self.orch.admit_revision_seal(task_id=task_id)
+        cap_seal = self.issue_capability("seal_revision", task_id)
+        rev_id = self.orch.admit_revision_seal(
+            task_id=task_id,
+            capability_token=cap_seal,
+        )
         ra_id = self.orch.admit_evidence(task_id=task_id)
 
         return {
@@ -395,8 +399,10 @@ class AcceptanceHarness:
                     capability_token=cap,
                 )
             elif stage == Stage.REVISION_SEAL:
+                cap = self.issue_capability("seal_revision", task_id)
                 ids["revision_id"] = self.orch.admit_revision_seal(
                     task_id=task_id,
+                    capability_token=cap,
                 )
             elif stage == Stage.EVIDENCE:
                 ids["replay_anchor_id"] = self.orch.admit_evidence(
