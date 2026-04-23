@@ -296,7 +296,11 @@ class AcceptanceHarness:
             task_id=task_id,
             capability_token=cap_patch,
         )
-        vr_id = self.orch.admit_validation(task_id=task_id)
+        cap_validation = self.issue_capability("run_validation_quarantine", task_id)
+        vr_id = self.orch.admit_validation(
+            task_id=task_id,
+            capability_token=cap_validation,
+        )
         rv_id = self.orch.admit_review(task_id=task_id)
         ap_id = self.orch.admit_approval(task_id=task_id)
         rev_id = self.orch.admit_revision_seal(task_id=task_id)
@@ -365,8 +369,10 @@ class AcceptanceHarness:
                     capability_token=cap,
                 )
             elif stage == Stage.VALIDATION:
+                cap = self.issue_capability("run_validation_quarantine", task_id)
                 ids["validation_receipt_id"] = self.orch.admit_validation(
                     task_id=task_id,
+                    capability_token=cap,
                 )
             elif stage == Stage.REVIEW:
                 ids["review_artifact_id"] = self.orch.admit_review(

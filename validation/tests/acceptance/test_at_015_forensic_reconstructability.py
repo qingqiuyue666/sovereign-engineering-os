@@ -175,7 +175,12 @@ class TestForensicReconstructability(unittest.TestCase):
         ]
         self.assertEqual(
             [row["capability_name"] for row in capability_rows],
-            ["read_repository_snapshot", "invoke_inference", "propose_patch"],
+            [
+                "read_repository_snapshot",
+                "invoke_inference",
+                "propose_patch",
+                "run_validation_quarantine",
+            ],
         )
 
         replay_anchor_id = self.harness.orch.admit_evidence(task_id=task_id)
