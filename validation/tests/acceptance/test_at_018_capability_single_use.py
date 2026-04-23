@@ -16,6 +16,7 @@ What this test proves:
 
 from __future__ import annotations
 
+import json
 import unittest
 import sys
 import os
@@ -107,6 +108,80 @@ class TestCapabilitySingleUse(unittest.TestCase):
         result = self.harness.cap_repo.atomic_consume(token_id)
         self.assertFalse(result.winner)
         self.assertEqual(result.reason, "revoked")
+
+    def test_service_revoke_token_emits_revocation_audit(self) -> None:
+        """Service-level revocation records the token and authority context."""
+        task_id = f"task-{uuid4().hex[:8]}"
+        root_revision_id = "rev-genesis-000"
+        now = datetime.now(timezone.utc)
+        token = self.harness.cap_svc.issue_token(
+            subject_identity="test",
+            capability_name="read_repository_snapshot",
+            scope_hash="scope:test",
+            issued_at=now.isoformat(),
+            expires_at=(now + timedelta(hours=1)).isoformat(),
+            single_use=True,
+            bound_task_id=task_id,
+            bound_root_revision_id=root_revision_id,
+        )
+        token_id = token["capability_token_id"]
+
+        self.harness.cap_svc.revoke_token(
+            capability_token_id=token_id,
+            reason="test_revocation",
+        )
+
+        row = self.harness.cap_repo.fetch(token_id)
+        self.assertIsNotNone(row)
+        self.assertIsNotNone(row["revoked_at"])
+        self.assertEqual(row["revocation_reason"], "test_revocation")
+
+        audit_row = self.harness.conn.execute(
+            "SELECT task_id, root_revision_id, artifact_refs, payload_json "
+            "FROM audit_records "
+            "WHERE task_id = ? AND record_type = 'capability_token_revoked';",
+            (task_id,),
+        ).fetchone()
+        self.assertIsNotNone(audit_row)
+        self.assertEqual(audit_row["task_id"], task_id)
+        self.assertEqual(audit_row["root_revision_id"], root_revision_id)
+        self.assertEqual(json.loads(audit_row["artifact_refs"]), [token_id])
+        self.assertEqual(
+            json.loads(audit_row["payload_json"]),
+            {"reason": "test_revocation"},
+        )
+
+    def test_service_revocation_feeds_consume_rejection(self) -> None:
+        """A service-revoked token rejects through service-level consume."""
+        task_id = f"task-{uuid4().hex[:8]}"
+        token = self.harness.issue_capability(
+            "read_repository_snapshot", task_id, single_use=True,
+        )
+        token_id = token["capability_token_id"]
+
+        self.harness.cap_svc.revoke_token(
+            capability_token_id=token_id,
+            reason="test_revocation",
+        )
+
+        with self.assertRaises(CapabilityDenied) as ctx:
+            self.harness.cap_svc.consume(
+                capability_token_id=token_id,
+                task_id=task_id,
+            )
+        self.assertIn("revoked", str(ctx.exception))
+
+        rejected_row = self.harness.conn.execute(
+            "SELECT payload_json FROM audit_records "
+            "WHERE task_id = ? "
+            "AND record_type = 'capability_token_consume_rejected';",
+            (task_id,),
+        ).fetchone()
+        self.assertIsNotNone(rejected_row)
+        self.assertEqual(
+            json.loads(rejected_row["payload_json"]),
+            {"reason": "revoked", "result": "loser"},
+        )
 
     def test_orchestrator_consumes_context_and_inference_tokens(self) -> None:
         """Live context and inference admissions consume issued tokens."""
