@@ -182,6 +182,7 @@ class TestForensicReconstructability(unittest.TestCase):
                 "run_validation_quarantine",
                 "render_review",
                 "grant_approval",
+                "seal_revision",
             ],
         )
 

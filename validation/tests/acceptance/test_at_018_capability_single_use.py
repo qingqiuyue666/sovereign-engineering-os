@@ -239,6 +239,31 @@ class TestCapabilitySingleUse(unittest.TestCase):
             6,
         )
 
+    def test_orchestrator_consumes_revision_seal_token(self) -> None:
+        """Live revision-seal admission consumes its seal_revision token."""
+        task_id = f"task-{uuid4().hex[:8]}"
+        self.harness.run_through_stage(task_id, Stage.APPROVAL)
+        seal_token = self.harness.issue_capability(
+            "seal_revision", task_id, single_use=True,
+        )
+
+        revision_id = self.harness.orch.admit_revision_seal(
+            task_id=task_id,
+            capability_token=seal_token,
+        )
+
+        self.assertTrue(revision_id.startswith("rev-"))
+        row = self.harness.cap_repo.fetch(seal_token["capability_token_id"])
+        self.assertIsNotNone(row)
+        self.assertIsNotNone(row["consumed_at"])
+        self.assertEqual(
+            self.harness.orch.current_stage(task_id), Stage.REVISION_SEAL
+        )
+        self.assertEqual(
+            self._count_audit(task_id, "capability_token_consumed"),
+            7,
+        )
+
     def test_context_consume_failure_blocks_artifact_and_stage(self) -> None:
         """A pre-consumed context token rejects before durable path progress."""
         task_id = f"task-{uuid4().hex[:8]}"
@@ -476,6 +501,55 @@ class TestCapabilitySingleUse(unittest.TestCase):
             )
         )
         self.assertEqual(self._count_audit(task_id, "approval_artifact_issued"), 0)
+        self.assertEqual(
+            self._count_audit(task_id, "capability_token_consume_rejected"),
+            1,
+        )
+
+    def test_revision_seal_consume_failure_blocks_artifacts_and_stage(self) -> None:
+        """A pre-consumed seal_revision token rejects before seal effects."""
+        task_id = f"task-{uuid4().hex[:8]}"
+        self.harness.run_through_stage(task_id, Stage.APPROVAL)
+        seal_token = self.harness.issue_capability(
+            "seal_revision", task_id, single_use=True,
+        )
+        self.harness.cap_repo.atomic_consume(
+            seal_token["capability_token_id"]
+        )
+
+        with self.assertRaises(CapabilityDenied):
+            self.harness.orch.admit_revision_seal(
+                task_id=task_id,
+                capability_token=seal_token,
+            )
+
+        revision_count = self.harness.conn.execute(
+            "SELECT COUNT(*) FROM revisions WHERE task_id = ?;",
+            (task_id,),
+        ).fetchone()[0]
+        snapshot_count = self.harness.conn.execute(
+            "SELECT COUNT(*) FROM snapshot_roots;"
+        ).fetchone()[0]
+        journal_count = self.harness.conn.execute(
+            "SELECT COUNT(*) FROM journal_entries WHERE task_id = ?;",
+            (task_id,),
+        ).fetchone()[0]
+        self.assertEqual(revision_count, 0)
+        self.assertEqual(snapshot_count, 0)
+        self.assertEqual(journal_count, 0)
+        self.assertEqual(self.harness.orch.current_stage(task_id), Stage.APPROVAL)
+        stage_rows = self.harness.conn.execute(
+            "SELECT payload_json FROM audit_records "
+            "WHERE task_id = ? AND record_type = 'stage_entered';",
+            (task_id,),
+        ).fetchall()
+        self.assertFalse(
+            any(
+                '"stage":"revision_seal"' in row["payload_json"]
+                for row in stage_rows
+            )
+        )
+        self.assertEqual(self._count_audit(task_id, "revision_sealed"), 0)
         self.assertEqual(
             self._count_audit(task_id, "capability_token_consume_rejected"),
             1,
