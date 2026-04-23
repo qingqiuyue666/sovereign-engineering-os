@@ -139,8 +139,8 @@ class _LiveEvidenceView:
         # records, and verification-rejection audit records when the evidence
         # composition root wires those read surfaces. Illegal-stage-transition,
         # validation-quarantine rejection, review self-summary rejection, and
-        # issue-time and seal-time approval-barrier rejection audit records
-        # follow the same task-scoped mirror path.
+        # issue-time and seal-time approval-barrier rejection and evaluation
+        # error audit records follow the same task-scoped mirror path.
         # Full artifact closure is a hardening-stage expansion.
         ids: list[str] = []
         ctx_row = self._ctx._conn.execute(
@@ -179,6 +179,7 @@ class _LiveEvidenceView:
         ids.extend(self._review_self_summary_rejected_audit_ids(task_id))
         ids.extend(self._approval_barrier_rejected_audit_ids(task_id))
         ids.extend(self._approval_seal_time_barrier_rejected_audit_ids(task_id))
+        ids.extend(self._approval_barrier_evaluation_error_audit_ids(task_id))
         return ids
 
     def _snapshot_root_ids(self, root_revision_id: str) -> list[str]:
@@ -508,6 +509,22 @@ class _LiveEvidenceView:
         ids: list[str] = []
         for record in (
             self._audit_repo.list_approval_seal_time_barrier_rejected_for_task(
+                task_id
+            )
+        ):
+            audit_record_id = record.get("audit_record_id")
+            if isinstance(audit_record_id, str) and audit_record_id:
+                ids.append(audit_record_id)
+        return ids
+
+    def _approval_barrier_evaluation_error_audit_ids(
+        self, task_id: str
+    ) -> list[str]:
+        if self._audit_repo is None:
+            return []
+        ids: list[str] = []
+        for record in (
+            self._audit_repo.list_approval_barrier_evaluation_error_for_task(
                 task_id
             )
         ):

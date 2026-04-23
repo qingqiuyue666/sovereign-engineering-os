@@ -30,9 +30,10 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..",
 
 from kernel.lifecycle.stage_types import Stage
 from kernel.lifecycle.signable_path_orchestrator import OrchestratorRejected
+from kernel.contracts.barrier_rules import BarrierEvaluationError
 from kernel.contracts.quarantine_rules import QuarantineAdmissibilityError
 from kernel.services.capability_service import CapabilityDenied
-from kernel.services.approval_service import ApprovalBarrierFailed
+from kernel.services.approval_service import ApprovalBarrierFailed, ApprovalRejected
 from kernel.services.review_service import (
     RenderingProvenance,
     ReviewRejected,
@@ -1008,6 +1009,93 @@ class TestForensicReconstructability(unittest.TestCase):
         )
         self.assertNotIn("approval_seal_time_barrier_rejected_audit_id", payload)
         self.assertNotIn("approval_seal_time_barrier_rejected_audit_ids", payload)
+
+    def test_replay_anchor_binds_approval_barrier_evaluation_error_audit_ids(
+        self,
+    ) -> None:
+        """ReplayAnchor.required_artifact_ids carries approval evaluation errors."""
+        task_id = f"task-{uuid4().hex[:8]}"
+        ids = self.harness.run_through_stage(task_id, Stage.REVIEW)
+
+        other_task_id = f"task-other-{uuid4().hex[:8]}"
+        other_ids = self.harness.run_through_stage(
+            other_task_id, Stage.REVIEW
+        )
+
+        def evaluation_error(error_ids: dict[str, str]) -> None:
+            with patch(
+                "kernel.services.approval_service.evaluate_barrier",
+                side_effect=BarrierEvaluationError("injected"),
+            ):
+                with self.assertRaises(ApprovalRejected):
+                    self.harness.ap_svc.evaluate_barrier(
+                        task_id=error_ids["task_id"],
+                        review_artifact_id=error_ids["review_artifact_id"],
+                        required_receipt_ids=[
+                            error_ids["validation_receipt_id"]
+                        ],
+                        reviewed_context_artifact_id=error_ids[
+                            "context_artifact_id"
+                        ],
+                        intent_id=error_ids["intent_id"],
+                    )
+
+        evaluation_error(other_ids)
+        evaluation_error(ids)
+
+        other_error_rows = (
+            self.harness.audit_repo.list_approval_barrier_evaluation_error_for_task(
+                other_task_id
+            )
+        )
+        self.assertEqual(len(other_error_rows), 1)
+        other_error_audit_id = other_error_rows[0]["audit_record_id"]
+
+        approval_token = self.harness.issue_capability("grant_approval", task_id)
+        ids["approval_id"] = self.harness.orch.admit_approval(
+            task_id=task_id,
+            capability_token=approval_token,
+        )
+        seal_token = self.harness.issue_capability("seal_revision", task_id)
+        ids["revision_id"] = self.harness.orch.admit_revision_seal(
+            task_id=task_id,
+            capability_token=seal_token,
+        )
+        evidence_token = self.harness.issue_capability("append_evidence", task_id)
+        replay_anchor_id = self.harness.orch.admit_evidence(
+            task_id=task_id,
+            capability_token=evidence_token,
+        )
+
+        error_rows = (
+            self.harness.audit_repo.list_approval_barrier_evaluation_error_for_task(
+                task_id
+            )
+        )
+        error_audit_ids = [row["audit_record_id"] for row in error_rows]
+        self.assertEqual(len(error_audit_ids), 1)
+
+        anchor = self.harness.ra_repo.fetch(replay_anchor_id)
+        self.assertIsNotNone(anchor)
+        for audit_record_id in error_audit_ids:
+            self.assertIn(audit_record_id, anchor["required_artifact_ids"])
+        self.assertNotIn(other_error_audit_id, anchor["required_artifact_ids"])
+
+        closure_row = self.harness.conn.execute(
+            "SELECT payload_json FROM audit_records "
+            "WHERE task_id = ? AND record_type = 'evidence_closure' "
+            "AND replay_anchor_id = ?;",
+            (ids["task_id"], replay_anchor_id),
+        ).fetchone()
+        self.assertIsNotNone(closure_row)
+        payload = json.loads(closure_row["payload_json"])
+        for audit_record_id in error_audit_ids:
+            self.assertIn(audit_record_id, payload["required_artifact_ids"])
+        self.assertNotIn(
+            other_error_audit_id, payload["required_artifact_ids"]
+        )
+        self.assertNotIn("approval_barrier_evaluation_error_audit_id", payload)
+        self.assertNotIn("approval_barrier_evaluation_error_audit_ids", payload)
 
     def test_replay_anchor_binds_review_artifact_id(self) -> None:
         """ReplayAnchor.required_artifact_ids carries scoped review artifacts."""
