@@ -3017,6 +3017,118 @@ class TestForensicReconstructability(unittest.TestCase):
         self.assertNotIn("approval_seal_time_barrier_rejected_audit_id", payload)
         self.assertNotIn("approval_seal_time_barrier_rejected_audit_ids", payload)
 
+    def test_replay_anchor_approval_barrier_evaluation_error_audit_ids_preserve_sequence_order(
+        self,
+    ) -> None:
+        """_approval_barrier_evaluation_error_audit_ids order is stable.
+
+        AuditRepository.list_approval_barrier_evaluation_error_for_task
+        orders rows by `sequence`, so the deterministic position of
+        approval-barrier evaluation-error audit ids within
+        ReplayAnchor.required_artifact_ids must match audit append
+        order. Two same-task evaluation errors are seeded in a known
+        sequence by calling ApprovalService.evaluate_barrier twice
+        under an injected BarrierEvaluationError patch; one other-task
+        evaluation error proves task-scoping exclusion. Issue-time
+        rejections and seal-time rejections are intentionally out of
+        scope for this reader.
+        """
+        task_id = f"task-{uuid4().hex[:8]}"
+        ids = self.harness.run_through_stage(task_id, Stage.REVIEW)
+
+        other_task_id = f"task-other-{uuid4().hex[:8]}"
+        other_ids = self.harness.run_through_stage(
+            other_task_id, Stage.REVIEW
+        )
+
+        def evaluation_error(error_ids: dict[str, str]) -> None:
+            with patch(
+                "kernel.services.approval_service.evaluate_barrier",
+                side_effect=BarrierEvaluationError("injected"),
+            ):
+                with self.assertRaises(ApprovalRejected):
+                    self.harness.ap_svc.evaluate_barrier(
+                        task_id=error_ids["task_id"],
+                        review_artifact_id=error_ids["review_artifact_id"],
+                        required_receipt_ids=[
+                            error_ids["validation_receipt_id"]
+                        ],
+                        reviewed_context_artifact_id=error_ids[
+                            "context_artifact_id"
+                        ],
+                        intent_id=error_ids["intent_id"],
+                    )
+
+        evaluation_error(other_ids)
+        evaluation_error(ids)
+        evaluation_error(ids)
+
+        other_error_rows = (
+            self.harness.audit_repo.list_approval_barrier_evaluation_error_for_task(
+                other_task_id
+            )
+        )
+        self.assertEqual(len(other_error_rows), 1)
+        other_error_audit_id = other_error_rows[0]["audit_record_id"]
+
+        approval_token = self.harness.issue_capability(
+            "grant_approval", task_id
+        )
+        ids["approval_id"] = self.harness.orch.admit_approval(
+            task_id=task_id,
+            capability_token=approval_token,
+        )
+        seal_token = self.harness.issue_capability("seal_revision", task_id)
+        ids["revision_id"] = self.harness.orch.admit_revision_seal(
+            task_id=task_id,
+            capability_token=seal_token,
+        )
+        evidence_token = self.harness.issue_capability(
+            "append_evidence", task_id
+        )
+        replay_anchor_id = self.harness.orch.admit_evidence(
+            task_id=task_id,
+            capability_token=evidence_token,
+        )
+
+        error_rows = (
+            self.harness.audit_repo.list_approval_barrier_evaluation_error_for_task(
+                task_id
+            )
+        )
+        error_audit_ids = [row["audit_record_id"] for row in error_rows]
+        self.assertEqual(len(error_audit_ids), 2)
+
+        anchor = self.harness.ra_repo.fetch(replay_anchor_id)
+        self.assertIsNotNone(anchor)
+        required = anchor["required_artifact_ids"]
+        for audit_record_id in error_audit_ids:
+            self.assertIn(audit_record_id, required)
+        self.assertEqual(
+            [aid for aid in required if aid in error_audit_ids],
+            error_audit_ids,
+        )
+        self.assertNotIn(other_error_audit_id, required)
+
+        closure_row = self.harness.conn.execute(
+            "SELECT payload_json FROM audit_records "
+            "WHERE task_id = ? AND record_type = 'evidence_closure' "
+            "AND replay_anchor_id = ?;",
+            (ids["task_id"], replay_anchor_id),
+        ).fetchone()
+        self.assertIsNotNone(closure_row)
+        payload = json.loads(closure_row["payload_json"])
+        mirrored = payload["required_artifact_ids"]
+        for audit_record_id in error_audit_ids:
+            self.assertIn(audit_record_id, mirrored)
+        self.assertEqual(
+            [aid for aid in mirrored if aid in error_audit_ids],
+            error_audit_ids,
+        )
+        self.assertNotIn(other_error_audit_id, mirrored)
+        self.assertNotIn("approval_barrier_evaluation_error_audit_id", payload)
+        self.assertNotIn("approval_barrier_evaluation_error_audit_ids", payload)
+
 
 if __name__ == "__main__":
     unittest.main()
