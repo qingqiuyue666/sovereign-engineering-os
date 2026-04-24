@@ -3362,6 +3362,40 @@ class TestForensicReconstructability(unittest.TestCase):
         self.assertNotIn("journal_entry_id", payload)
         self.assertNotIn("journal_entry_ids", payload)
 
+    def test_replay_anchor_required_artifact_ids_contain_no_duplicates(
+        self,
+    ) -> None:
+        """Aggregated required_artifact_ids is duplicate-free.
+
+        `_LiveEvidenceView.required_artifact_ids` fans out across 21
+        reader extensions, each yielding from a disjoint id-space by
+        type, but there is no per-reader test that asserts the
+        aggregate list is duplicate-free. This test runs the happy
+        path to maximize the populated reader set and asserts
+        `len(required_artifact_ids) == len(set(required_artifact_ids))`
+        on both the replay anchor and the existing evidence_closure
+        payload mirror. Ordering is not re-tested here.
+        """
+        ids = self.harness.run_full_happy_path()
+
+        anchor = self.harness.ra_repo.fetch(ids["replay_anchor_id"])
+        self.assertIsNotNone(anchor)
+        required = anchor["required_artifact_ids"]
+        self.assertGreater(len(required), 0)
+        self.assertEqual(len(required), len(set(required)))
+
+        closure_row = self.harness.conn.execute(
+            "SELECT payload_json FROM audit_records "
+            "WHERE task_id = ? AND record_type = 'evidence_closure' "
+            "AND replay_anchor_id = ?;",
+            (ids["task_id"], ids["replay_anchor_id"]),
+        ).fetchone()
+        self.assertIsNotNone(closure_row)
+        payload = json.loads(closure_row["payload_json"])
+        mirrored = payload["required_artifact_ids"]
+        self.assertGreater(len(mirrored), 0)
+        self.assertEqual(len(mirrored), len(set(mirrored)))
+
 
 if __name__ == "__main__":
     unittest.main()
