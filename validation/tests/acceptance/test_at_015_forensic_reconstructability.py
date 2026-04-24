@@ -2065,6 +2065,119 @@ class TestForensicReconstructability(unittest.TestCase):
         self.assertNotIn("budget_record_id", payload)
         self.assertNotIn("budget_record_ids", payload)
 
+    def test_replay_anchor_validation_taint_record_ids_preserve_repository_order(
+        self,
+    ) -> None:
+        """_validation_taint_record_ids order is stable and receipt scoped.
+
+        TaintRepository.list_for_subject orders rows by taint_record_id,
+        so the deterministic position of taint record ids within
+        ReplayAnchor.required_artifact_ids must match the repository's
+        lexicographic order. Insertion order here is intentionally
+        reversed vs. the expected output to keep the test sensitive to
+        that ORDER BY clause.
+        """
+        task_id = f"task-{uuid4().hex[:8]}"
+        ids = self.harness.run_through_stage(task_id, Stage.APPROVAL)
+
+        other_task_id = f"task-other-{uuid4().hex[:8]}"
+        other_ids = self.harness.run_through_stage(
+            other_task_id, Stage.APPROVAL
+        )
+
+        first_taint_id = f"taint-aaa-{uuid4().hex[:8]}"
+        second_taint_id = f"taint-bbb-{uuid4().hex[:8]}"
+        other_taint_id = f"taint-ccc-{uuid4().hex[:8]}"
+        self.assertLess(first_taint_id, second_taint_id)
+
+        existing_taint_ids = [
+            row["taint_record_id"]
+            for row in self.harness.taint_repo.list_for_subject(
+                ids["validation_receipt_id"]
+            )
+        ]
+
+        self.harness.taint_repo.append(
+            taint_record_id=second_taint_id,
+            subject_id=ids["validation_receipt_id"],
+            taint_class="policy_degraded",
+            taint_state="downgraded",
+            source_ref="ordering_coverage_probe",
+        )
+        self.harness.taint_repo.append(
+            taint_record_id=first_taint_id,
+            subject_id=ids["validation_receipt_id"],
+            taint_class="policy_degraded",
+            taint_state="downgraded",
+            source_ref="ordering_coverage_probe",
+        )
+        self.harness.taint_repo.append(
+            taint_record_id=other_taint_id,
+            subject_id=other_ids["validation_receipt_id"],
+            taint_class="policy_degraded",
+            taint_state="downgraded",
+            source_ref="ordering_coverage_probe",
+        )
+
+        seal_token = self.harness.issue_capability("seal_revision", task_id)
+        self.harness.orch.admit_revision_seal(
+            task_id=task_id,
+            capability_token=seal_token,
+        )
+        evidence_token = self.harness.issue_capability(
+            "append_evidence", task_id
+        )
+        replay_anchor_id = self.harness.orch.admit_evidence(
+            task_id=task_id,
+            capability_token=evidence_token,
+        )
+
+        repo_ordered_ids = [
+            row["taint_record_id"]
+            for row in self.harness.taint_repo.list_for_subject(
+                ids["validation_receipt_id"]
+            )
+        ]
+        probe_ids = [first_taint_id, second_taint_id]
+        self.assertEqual(
+            [tid for tid in repo_ordered_ids if tid in probe_ids],
+            probe_ids,
+        )
+        for existing_id in existing_taint_ids:
+            self.assertIn(existing_id, repo_ordered_ids)
+
+        anchor = self.harness.ra_repo.fetch(replay_anchor_id)
+        self.assertIsNotNone(anchor)
+        required = anchor["required_artifact_ids"]
+        for taint_id in probe_ids:
+            self.assertIn(taint_id, required)
+        self.assertEqual(
+            [tid for tid in required if tid in probe_ids],
+            probe_ids,
+        )
+        self.assertNotIn(other_taint_id, required)
+
+        closure_row = self.harness.conn.execute(
+            "SELECT payload_json FROM audit_records "
+            "WHERE task_id = ? AND record_type = 'evidence_closure' "
+            "AND replay_anchor_id = ?;",
+            (task_id, replay_anchor_id),
+        ).fetchone()
+        self.assertIsNotNone(closure_row)
+        payload = json.loads(closure_row["payload_json"])
+        mirrored = payload["required_artifact_ids"]
+        for taint_id in probe_ids:
+            self.assertIn(taint_id, mirrored)
+        self.assertEqual(
+            [tid for tid in mirrored if tid in probe_ids],
+            probe_ids,
+        )
+        self.assertNotIn(other_taint_id, mirrored)
+        self.assertNotIn("taint_record_id", payload)
+        self.assertNotIn("taint_record_ids", payload)
+        self.assertNotIn("validation_taint_record_id", payload)
+        self.assertNotIn("validation_taint_record_ids", payload)
+
 
 if __name__ == "__main__":
     unittest.main()
