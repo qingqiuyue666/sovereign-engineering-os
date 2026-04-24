@@ -2285,6 +2285,110 @@ class TestForensicReconstructability(unittest.TestCase):
         self.assertNotIn("capability_token_consume_rejected_audit_id", payload)
         self.assertNotIn("capability_token_consume_rejected_audit_ids", payload)
 
+    def test_replay_anchor_capability_verification_rejected_audit_ids_preserve_sequence_order(
+        self,
+    ) -> None:
+        """_capability_verification_rejected_audit_ids order is stable.
+
+        AuditRepository.list_capability_verification_rejected_for_task
+        orders rows by `sequence`, so the deterministic position of
+        verification-rejection audit ids within
+        ReplayAnchor.required_artifact_ids must match audit append
+        order. Two same-task rejections are seeded in a known sequence
+        plus one other-task rejection to prove task-scoping exclusion.
+        """
+        task_id = f"task-{uuid4().hex[:8]}"
+        ids = self.harness.run_through_stage(task_id, Stage.REVISION_SEAL)
+
+        other_task_id = f"task-other-{uuid4().hex[:8]}"
+        other_token = self.harness.issue_capability(
+            "read_repository_snapshot", other_task_id
+        )
+        with self.assertRaises(CapabilityDenied):
+            self.harness.cap_svc.verify_for_action(
+                token=other_token,
+                action_class="append_evidence",
+                task_id=other_task_id,
+                root_revision_id=None,
+            )
+        other_rejected_rows = (
+            self.harness.audit_repo.list_capability_verification_rejected_for_task(
+                other_task_id
+            )
+        )
+        self.assertEqual(len(other_rejected_rows), 1)
+        other_rejected_audit_id = other_rejected_rows[0]["audit_record_id"]
+
+        first_rejected_token = self.harness.issue_capability(
+            "read_repository_snapshot", task_id
+        )
+        with self.assertRaises(CapabilityDenied):
+            self.harness.cap_svc.verify_for_action(
+                token=first_rejected_token,
+                action_class="append_evidence",
+                task_id=task_id,
+                root_revision_id=None,
+            )
+
+        second_rejected_token = self.harness.issue_capability(
+            "read_repository_snapshot", task_id
+        )
+        with self.assertRaises(CapabilityDenied):
+            self.harness.cap_svc.verify_for_action(
+                token=second_rejected_token,
+                action_class="append_evidence",
+                task_id=task_id,
+                root_revision_id=None,
+            )
+
+        evidence_token = self.harness.issue_capability(
+            "append_evidence", task_id
+        )
+        replay_anchor_id = self.harness.orch.admit_evidence(
+            task_id=task_id,
+            capability_token=evidence_token,
+        )
+
+        rejected_rows = (
+            self.harness.audit_repo.list_capability_verification_rejected_for_task(
+                task_id
+            )
+        )
+        rejected_audit_ids = [
+            row["audit_record_id"] for row in rejected_rows
+        ]
+        self.assertEqual(len(rejected_audit_ids), 2)
+
+        anchor = self.harness.ra_repo.fetch(replay_anchor_id)
+        self.assertIsNotNone(anchor)
+        required = anchor["required_artifact_ids"]
+        for audit_record_id in rejected_audit_ids:
+            self.assertIn(audit_record_id, required)
+        self.assertEqual(
+            [aid for aid in required if aid in rejected_audit_ids],
+            rejected_audit_ids,
+        )
+        self.assertNotIn(other_rejected_audit_id, required)
+
+        closure_row = self.harness.conn.execute(
+            "SELECT payload_json FROM audit_records "
+            "WHERE task_id = ? AND record_type = 'evidence_closure' "
+            "AND replay_anchor_id = ?;",
+            (ids["task_id"], replay_anchor_id),
+        ).fetchone()
+        self.assertIsNotNone(closure_row)
+        payload = json.loads(closure_row["payload_json"])
+        mirrored = payload["required_artifact_ids"]
+        for audit_record_id in rejected_audit_ids:
+            self.assertIn(audit_record_id, mirrored)
+        self.assertEqual(
+            [aid for aid in mirrored if aid in rejected_audit_ids],
+            rejected_audit_ids,
+        )
+        self.assertNotIn(other_rejected_audit_id, mirrored)
+        self.assertNotIn("capability_verification_rejected_audit_id", payload)
+        self.assertNotIn("capability_verification_rejected_audit_ids", payload)
+
 
 if __name__ == "__main__":
     unittest.main()
