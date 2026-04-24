@@ -2789,6 +2789,131 @@ class TestForensicReconstructability(unittest.TestCase):
         self.assertNotIn("review_self_summary_rejected_audit_id", payload)
         self.assertNotIn("review_self_summary_rejected_audit_ids", payload)
 
+    def test_replay_anchor_approval_barrier_rejected_audit_ids_preserve_sequence_order(
+        self,
+    ) -> None:
+        """_approval_barrier_rejected_audit_ids order is stable (issue-time).
+
+        AuditRepository.list_approval_barrier_rejected_for_task orders
+        rows by `sequence`, so the deterministic position of issue-time
+        approval-barrier rejection audit ids within
+        ReplayAnchor.required_artifact_ids must match audit append
+        order. Two same-task issue-time rejections are seeded in a
+        known sequence by calling ApprovalService.evaluate_barrier
+        twice with a synthetic failing receipt; one other-task
+        rejection proves task-scoping exclusion. Seal-time rejections
+        and evaluation-error rejections are intentionally out of scope
+        for this reader.
+        """
+        task_id = f"task-{uuid4().hex[:8]}"
+        ids = self.harness.run_through_stage(task_id, Stage.REVIEW)
+
+        other_task_id = f"task-other-{uuid4().hex[:8]}"
+        other_ids = self.harness.run_through_stage(
+            other_task_id, Stage.REVIEW
+        )
+
+        def issue_time_rejection(rejection_ids: dict[str, str]) -> None:
+            failing_receipt_id = f"vr-fail-{uuid4().hex}"
+            self.harness.vr_repo.insert(
+                {
+                    "validation_receipt_id": failing_receipt_id,
+                    "task_id": rejection_ids["task_id"],
+                    "root_revision_id": rejection_ids["root_revision_id"],
+                    "receipt_type": "phase1_static_quarantine",
+                    "validator_identity": "acceptance_test",
+                    "validator_version": "phase1-slice1",
+                    "input_hash": f"sha256:{failing_receipt_id}",
+                    "result": "fail",
+                    "diagnostics_hash": f"sha256:diag-{failing_receipt_id}",
+                    "taint_set": [],
+                    "created_at": "2026-01-01T00:00:00+00:00",
+                    "version_tuple_hash": "vt-approval-barrier-rejection",
+                }
+            )
+            with self.assertRaises(ApprovalBarrierFailed):
+                self.harness.ap_svc.evaluate_barrier(
+                    task_id=rejection_ids["task_id"],
+                    review_artifact_id=rejection_ids["review_artifact_id"],
+                    required_receipt_ids=[failing_receipt_id],
+                    reviewed_context_artifact_id=rejection_ids[
+                        "context_artifact_id"
+                    ],
+                    intent_id=rejection_ids["intent_id"],
+                )
+
+        issue_time_rejection(other_ids)
+        issue_time_rejection(ids)
+        issue_time_rejection(ids)
+
+        other_rejected_rows = (
+            self.harness.audit_repo.list_approval_barrier_rejected_for_task(
+                other_task_id
+            )
+        )
+        self.assertEqual(len(other_rejected_rows), 1)
+        other_rejected_audit_id = other_rejected_rows[0]["audit_record_id"]
+
+        approval_token = self.harness.issue_capability(
+            "grant_approval", task_id
+        )
+        ids["approval_id"] = self.harness.orch.admit_approval(
+            task_id=task_id,
+            capability_token=approval_token,
+        )
+        seal_token = self.harness.issue_capability("seal_revision", task_id)
+        ids["revision_id"] = self.harness.orch.admit_revision_seal(
+            task_id=task_id,
+            capability_token=seal_token,
+        )
+        evidence_token = self.harness.issue_capability(
+            "append_evidence", task_id
+        )
+        replay_anchor_id = self.harness.orch.admit_evidence(
+            task_id=task_id,
+            capability_token=evidence_token,
+        )
+
+        rejected_rows = (
+            self.harness.audit_repo.list_approval_barrier_rejected_for_task(
+                task_id
+            )
+        )
+        rejected_audit_ids = [
+            row["audit_record_id"] for row in rejected_rows
+        ]
+        self.assertEqual(len(rejected_audit_ids), 2)
+
+        anchor = self.harness.ra_repo.fetch(replay_anchor_id)
+        self.assertIsNotNone(anchor)
+        required = anchor["required_artifact_ids"]
+        for audit_record_id in rejected_audit_ids:
+            self.assertIn(audit_record_id, required)
+        self.assertEqual(
+            [aid for aid in required if aid in rejected_audit_ids],
+            rejected_audit_ids,
+        )
+        self.assertNotIn(other_rejected_audit_id, required)
+
+        closure_row = self.harness.conn.execute(
+            "SELECT payload_json FROM audit_records "
+            "WHERE task_id = ? AND record_type = 'evidence_closure' "
+            "AND replay_anchor_id = ?;",
+            (ids["task_id"], replay_anchor_id),
+        ).fetchone()
+        self.assertIsNotNone(closure_row)
+        payload = json.loads(closure_row["payload_json"])
+        mirrored = payload["required_artifact_ids"]
+        for audit_record_id in rejected_audit_ids:
+            self.assertIn(audit_record_id, mirrored)
+        self.assertEqual(
+            [aid for aid in mirrored if aid in rejected_audit_ids],
+            rejected_audit_ids,
+        )
+        self.assertNotIn(other_rejected_audit_id, mirrored)
+        self.assertNotIn("approval_barrier_rejected_audit_id", payload)
+        self.assertNotIn("approval_barrier_rejected_audit_ids", payload)
+
 
 if __name__ == "__main__":
     unittest.main()
