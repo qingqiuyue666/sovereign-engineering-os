@@ -315,6 +315,174 @@ class TestForensicReconstructability(unittest.TestCase):
         self.assertNotIn("validation_receipt_invalidated_audit_id", payload)
         self.assertNotIn("validation_receipt_invalidated_audit_ids", payload)
 
+    def test_replay_anchor_binds_approval_invalidated_audit_ids(self) -> None:
+        """ReplayAnchor.required_artifact_ids carries approval invalidations."""
+        task_id = f"task-{uuid4().hex[:8]}"
+        ids = self.harness.run_through_stage(task_id, Stage.PATCH_PROPOSAL)
+
+        other_task_id = f"task-other-{uuid4().hex[:8]}"
+        other_ids = self.harness.run_through_stage(
+            other_task_id, Stage.PATCH_PROPOSAL
+        )
+
+        inval_svc = InvalidationService(
+            receipt_repo=self.harness.vr_repo,
+            approval_repo=self.harness.ap_repo,
+            drift_repo=self.harness.drift_repo,
+            audit_ledger=self.harness.audit_ledger,
+        )
+
+        def seed_receipt_and_approval(
+            extra_task_id: str, root_revision_id: str
+        ) -> tuple[str, str]:
+            validation_receipt_id = f"vr-extra-{uuid4().hex[:8]}"
+            approval_id = f"ap-extra-{uuid4().hex[:8]}"
+            self.harness.vr_repo.insert(
+                {
+                    "validation_receipt_id": validation_receipt_id,
+                    "task_id": extra_task_id,
+                    "root_revision_id": root_revision_id,
+                    "receipt_type": "phase1_static_quarantine",
+                    "validator_identity": "phase1_static_validator",
+                    "validator_version": "phase1-slice1",
+                    "input_hash": f"sha256:{validation_receipt_id}",
+                    "result": "pass",
+                    "diagnostics_hash": f"sha256:diag-{validation_receipt_id}",
+                    "taint_set": [],
+                    "created_at": "2026-01-01T00:00:00+00:00",
+                    "version_tuple_hash": "vt-validation-extra",
+                }
+            )
+            self.harness.ap_repo.insert(
+                {
+                    "approval_id": approval_id,
+                    "task_id": extra_task_id,
+                    "originating_root_revision_id": root_revision_id,
+                    "reviewed_patch_hash": f"sha256:{approval_id}",
+                    "reviewed_context_artifact_id": f"ctx-extra-{approval_id}",
+                    "required_receipt_ids": [validation_receipt_id],
+                    "approval_scope": "phase1_narrow_path_single_file",
+                    "approver_identity": "kernel:phase1",
+                    "approval_state": "approved",
+                    "policy_version": "phase1_approval_policy_v1",
+                    "created_at": "2026-01-01T00:00:00+00:00",
+                    "expires_at": "2026-01-02T00:00:00+00:00",
+                    "version_tuple_hash": "vt-approval-extra",
+                }
+            )
+            return validation_receipt_id, approval_id
+
+        other_receipt_id, _ = seed_receipt_and_approval(
+            other_task_id, other_ids["root_revision_id"]
+        )
+        self.assertTrue(
+            inval_svc.invalidate_receipt(
+                validation_receipt_id=other_receipt_id,
+                reason=REASON_UPSTREAM_PATCH_DRIFT,
+                drift_class=DRIFT_CLASS_UPSTREAM_PATCH_DRIFT,
+                source_artifact_id=other_ids["patch_proposal_id"],
+                task_id=other_task_id,
+                root_revision_id=other_ids["root_revision_id"],
+                intent_id=other_ids["intent_id"],
+            )
+        )
+        other_invalidated_rows = (
+            self.harness.audit_repo.list_approval_invalidated_for_task(
+                other_task_id
+            )
+        )
+        self.assertEqual(len(other_invalidated_rows), 1)
+        other_invalidated_audit_id = other_invalidated_rows[0]["audit_record_id"]
+
+        first_receipt_id, _ = seed_receipt_and_approval(
+            task_id, ids["root_revision_id"]
+        )
+        second_receipt_id, _ = seed_receipt_and_approval(
+            task_id, ids["root_revision_id"]
+        )
+        for receipt_id in (first_receipt_id, second_receipt_id):
+            self.assertTrue(
+                inval_svc.invalidate_receipt(
+                    validation_receipt_id=receipt_id,
+                    reason=REASON_UPSTREAM_PATCH_DRIFT,
+                    drift_class=DRIFT_CLASS_UPSTREAM_PATCH_DRIFT,
+                    source_artifact_id=ids["patch_proposal_id"],
+                    task_id=task_id,
+                    root_revision_id=ids["root_revision_id"],
+                    intent_id=ids["intent_id"],
+                )
+            )
+
+        validation_token = self.harness.issue_capability(
+            "run_validation_quarantine", task_id
+        )
+        ids["validation_receipt_id"] = self.harness.orch.admit_validation(
+            task_id=task_id,
+            capability_token=validation_token,
+        )
+        review_token = self.harness.issue_capability("render_review", task_id)
+        ids["review_artifact_id"] = self.harness.orch.admit_review(
+            task_id=task_id,
+            capability_token=review_token,
+        )
+        approval_token = self.harness.issue_capability("grant_approval", task_id)
+        ids["approval_id"] = self.harness.orch.admit_approval(
+            task_id=task_id,
+            capability_token=approval_token,
+        )
+        seal_token = self.harness.issue_capability("seal_revision", task_id)
+        ids["revision_id"] = self.harness.orch.admit_revision_seal(
+            task_id=task_id,
+            capability_token=seal_token,
+        )
+        evidence_token = self.harness.issue_capability("append_evidence", task_id)
+        replay_anchor_id = self.harness.orch.admit_evidence(
+            task_id=task_id,
+            capability_token=evidence_token,
+        )
+
+        invalidated_rows = (
+            self.harness.audit_repo.list_approval_invalidated_for_task(task_id)
+        )
+        invalidated_audit_ids = [
+            row["audit_record_id"] for row in invalidated_rows
+        ]
+        self.assertEqual(len(invalidated_audit_ids), 2)
+
+        anchor = self.harness.ra_repo.fetch(replay_anchor_id)
+        self.assertIsNotNone(anchor)
+        required = anchor["required_artifact_ids"]
+        for audit_record_id in invalidated_audit_ids:
+            self.assertIn(audit_record_id, required)
+        self.assertEqual(
+            [audit_id for audit_id in required if audit_id in invalidated_audit_ids],
+            invalidated_audit_ids,
+        )
+        self.assertNotIn(other_invalidated_audit_id, required)
+
+        closure_row = self.harness.conn.execute(
+            "SELECT payload_json FROM audit_records "
+            "WHERE task_id = ? AND record_type = 'evidence_closure' "
+            "AND replay_anchor_id = ?;",
+            (ids["task_id"], replay_anchor_id),
+        ).fetchone()
+        self.assertIsNotNone(closure_row)
+        payload = json.loads(closure_row["payload_json"])
+        mirrored = payload["required_artifact_ids"]
+        for audit_record_id in invalidated_audit_ids:
+            self.assertIn(audit_record_id, mirrored)
+        self.assertEqual(
+            [
+                audit_id
+                for audit_id in mirrored
+                if audit_id in invalidated_audit_ids
+            ],
+            invalidated_audit_ids,
+        )
+        self.assertNotIn(other_invalidated_audit_id, mirrored)
+        self.assertNotIn("approval_invalidated_audit_id", payload)
+        self.assertNotIn("approval_invalidated_audit_ids", payload)
+
     def test_replay_anchor_binds_issued_capability_token_ids(self) -> None:
         """ReplayAnchor.required_artifact_ids carries scoped issued tokens."""
         task_id = f"task-{uuid4().hex[:8]}"
