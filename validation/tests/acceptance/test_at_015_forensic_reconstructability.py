@@ -2528,6 +2528,141 @@ class TestForensicReconstructability(unittest.TestCase):
         self.assertNotIn("illegal_stage_transition_rejected_audit_id", payload)
         self.assertNotIn("illegal_stage_transition_rejected_audit_ids", payload)
 
+    def test_replay_anchor_validation_quarantine_admission_rejected_audit_ids_preserve_sequence_order(
+        self,
+    ) -> None:
+        """_validation_quarantine_admission_rejected_audit_ids order is stable.
+
+        AuditRepository.list_validation_quarantine_admission_rejected_for_task
+        orders rows by `sequence`, so the deterministic position of
+        quarantine-admission rejection audit ids within
+        ReplayAnchor.required_artifact_ids must match audit append
+        order. Two same-task rejections are seeded in a known sequence
+        by injecting QuarantineAdmissibilityError around two
+        admit_validation attempts; one other-task rejection proves
+        task-scoping exclusion.
+        """
+        task_id = f"task-{uuid4().hex[:8]}"
+        ids = self.harness.run_through_stage(task_id, Stage.PATCH_PROPOSAL)
+
+        other_task_id = f"task-other-{uuid4().hex[:8]}"
+        self.harness.run_through_stage(other_task_id, Stage.PATCH_PROPOSAL)
+
+        with patch(
+            "kernel.services.validation_service.assert_proposal_admissible",
+            side_effect=QuarantineAdmissibilityError("injected"),
+        ):
+            other_validation_token = self.harness.issue_capability(
+                "run_validation_quarantine", other_task_id
+            )
+            with self.assertRaises(ValidationRejected):
+                self.harness.orch.admit_validation(
+                    task_id=other_task_id,
+                    capability_token=other_validation_token,
+                )
+
+            first_rejected_token = self.harness.issue_capability(
+                "run_validation_quarantine", task_id
+            )
+            with self.assertRaises(ValidationRejected):
+                self.harness.orch.admit_validation(
+                    task_id=task_id,
+                    capability_token=first_rejected_token,
+                )
+
+            second_rejected_token = self.harness.issue_capability(
+                "run_validation_quarantine", task_id
+            )
+            with self.assertRaises(ValidationRejected):
+                self.harness.orch.admit_validation(
+                    task_id=task_id,
+                    capability_token=second_rejected_token,
+                )
+
+        other_rejected_rows = (
+            self.harness.audit_repo.list_validation_quarantine_admission_rejected_for_task(
+                other_task_id
+            )
+        )
+        self.assertEqual(len(other_rejected_rows), 1)
+        other_rejected_audit_id = other_rejected_rows[0]["audit_record_id"]
+
+        validation_token = self.harness.issue_capability(
+            "run_validation_quarantine", task_id
+        )
+        ids["validation_receipt_id"] = self.harness.orch.admit_validation(
+            task_id=task_id,
+            capability_token=validation_token,
+        )
+        review_token = self.harness.issue_capability("render_review", task_id)
+        ids["review_artifact_id"] = self.harness.orch.admit_review(
+            task_id=task_id,
+            capability_token=review_token,
+        )
+        approval_token = self.harness.issue_capability(
+            "grant_approval", task_id
+        )
+        ids["approval_id"] = self.harness.orch.admit_approval(
+            task_id=task_id,
+            capability_token=approval_token,
+        )
+        seal_token = self.harness.issue_capability("seal_revision", task_id)
+        ids["revision_id"] = self.harness.orch.admit_revision_seal(
+            task_id=task_id,
+            capability_token=seal_token,
+        )
+        evidence_token = self.harness.issue_capability(
+            "append_evidence", task_id
+        )
+        replay_anchor_id = self.harness.orch.admit_evidence(
+            task_id=task_id,
+            capability_token=evidence_token,
+        )
+
+        rejected_rows = (
+            self.harness.audit_repo.list_validation_quarantine_admission_rejected_for_task(
+                task_id
+            )
+        )
+        rejected_audit_ids = [
+            row["audit_record_id"] for row in rejected_rows
+        ]
+        self.assertEqual(len(rejected_audit_ids), 2)
+
+        anchor = self.harness.ra_repo.fetch(replay_anchor_id)
+        self.assertIsNotNone(anchor)
+        required = anchor["required_artifact_ids"]
+        for audit_record_id in rejected_audit_ids:
+            self.assertIn(audit_record_id, required)
+        self.assertEqual(
+            [aid for aid in required if aid in rejected_audit_ids],
+            rejected_audit_ids,
+        )
+        self.assertNotIn(other_rejected_audit_id, required)
+
+        closure_row = self.harness.conn.execute(
+            "SELECT payload_json FROM audit_records "
+            "WHERE task_id = ? AND record_type = 'evidence_closure' "
+            "AND replay_anchor_id = ?;",
+            (ids["task_id"], replay_anchor_id),
+        ).fetchone()
+        self.assertIsNotNone(closure_row)
+        payload = json.loads(closure_row["payload_json"])
+        mirrored = payload["required_artifact_ids"]
+        for audit_record_id in rejected_audit_ids:
+            self.assertIn(audit_record_id, mirrored)
+        self.assertEqual(
+            [aid for aid in mirrored if aid in rejected_audit_ids],
+            rejected_audit_ids,
+        )
+        self.assertNotIn(other_rejected_audit_id, mirrored)
+        self.assertNotIn(
+            "validation_quarantine_admission_rejected_audit_id", payload
+        )
+        self.assertNotIn(
+            "validation_quarantine_admission_rejected_audit_ids", payload
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
