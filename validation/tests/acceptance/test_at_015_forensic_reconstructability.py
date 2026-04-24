@@ -1939,9 +1939,7 @@ class TestForensicReconstructability(unittest.TestCase):
                     "evidence_refs": [],
                     "taint_set": [],
                     "created_at": "2026-01-01T00:00:00+00:00",
-                    "incident_id": None,
                     "retained_for_forensics_flag": False,
-                    "recovery_action_ref": None,
                 }
             )
 

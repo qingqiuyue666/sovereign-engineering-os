@@ -443,21 +443,23 @@ class RealFixEvidenceClosureBridge:
         # fetch on ``revisions.intent_id``. No schema change, no
         # migration, no new artifact family, no new audit record type.
         intent_id = revision.get("intent_id")
+        audit_artifact_refs: list[str] = [
+            replay_anchor_id,
+            outcome.revision_id,
+            outcome.snapshot_root_id,
+            outcome.approval_artifact_id,
+            outcome.review_artifact_id,
+            outcome.validation_receipt_id,
+            outcome.patch_proposal_id,
+            outcome.inference_artifact_id,
+        ]
+        if intent_id is not None:
+            audit_artifact_refs.append(intent_id)
         self._audit.append(
             record_type="real_fix_evidence_closure_bridge_attested",
             task_id=outcome.task_id,
             root_revision_id=outcome.root_revision_id,
-            artifact_refs=[
-                replay_anchor_id,
-                outcome.revision_id,
-                outcome.snapshot_root_id,
-                outcome.approval_artifact_id,
-                outcome.review_artifact_id,
-                outcome.validation_receipt_id,
-                outcome.patch_proposal_id,
-                outcome.inference_artifact_id,
-                intent_id,
-            ],
+            artifact_refs=audit_artifact_refs,
             payload={
                 "replay_anchor_id": replay_anchor_id,
                 "revision_id": outcome.revision_id,

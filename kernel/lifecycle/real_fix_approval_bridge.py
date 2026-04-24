@@ -343,18 +343,20 @@ class RealFixApprovalBridge:
         # at stage 6; this bridge performs no independent verification.
         # No schema change, no migration, no new artifact family, no
         # new audit record type.
+        audit_artifact_refs: list[str] = [
+            approval_id,
+            outcome.review_artifact_id,
+            outcome.validation_receipt_id,
+            outcome.patch_proposal_id,
+            outcome.inference_artifact_id,
+        ]
+        if intent_id is not None:
+            audit_artifact_refs.append(intent_id)
         self._audit.append(
             record_type="real_fix_approval_bridge_attested",
             task_id=outcome.task_id,
             root_revision_id=outcome.root_revision_id,
-            artifact_refs=[
-                approval_id,
-                outcome.review_artifact_id,
-                outcome.validation_receipt_id,
-                outcome.patch_proposal_id,
-                outcome.inference_artifact_id,
-                intent_id,
-            ],
+            artifact_refs=audit_artifact_refs,
             payload={
                 "approval_artifact_id": approval_id,
                 "review_artifact_id": outcome.review_artifact_id,
