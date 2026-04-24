@@ -255,16 +255,18 @@ class RealFixValidationBridge:
         # at stage 6; this bridge performs no independent verification.
         # No schema change, no migration, no new artifact family, no
         # new audit record type.
+        audit_artifact_refs: list[str] = [
+            validation_receipt_id,
+            projection.patch_proposal_id,
+            projection.inference_artifact_id,
+        ]
+        if intent_id is not None:
+            audit_artifact_refs.append(intent_id)
         self._audit.append(
             record_type="real_fix_validation_bridge_attested",
             task_id=projection.task_id,
             root_revision_id=projection.root_revision_id,
-            artifact_refs=[
-                validation_receipt_id,
-                projection.patch_proposal_id,
-                projection.inference_artifact_id,
-                intent_id,
-            ],
+            artifact_refs=audit_artifact_refs,
             payload={
                 "validation_receipt_id": validation_receipt_id,
                 "patch_proposal_id": projection.patch_proposal_id,

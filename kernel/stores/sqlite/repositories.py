@@ -26,6 +26,14 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any, Mapping, Sequence
 
+from kernel.schemas import load_schema
+from kernel.schemas.validator import validate_artifact_strict
+
+
+_DRIFT_EVENT_RECORD_SCHEMA = load_schema("drift_event_record")
+_FAILURE_BUNDLE_SCHEMA = load_schema("failure_bundle")
+_TAINT_RECORD_SCHEMA = load_schema("taint_record")
+
 
 def _iso_now() -> str:
     return datetime.now(timezone.utc).isoformat()
@@ -309,6 +317,32 @@ class TaintRepository:
         clearing_identity: str | None = None,
         clearing_reason: str | None = None,
     ) -> None:
+        # Ingress validation (foundation §3.4): validate the candidate
+        # §23.17 TaintRecord shape before persist. `created_at` is
+        # computed here for validation shape proof; the INSERT below
+        # regenerates its own `_iso_now()` — both are ISO date-time
+        # strings and both satisfy the schema, so persisted timestamp
+        # semantics are unchanged. Optional fields that are None at
+        # call-time are omitted from the validation candidate so the
+        # non-nullable string types declared in the schema are not
+        # violated by a kwarg default.
+        candidate: dict[str, Any] = {
+            "taint_record_id": taint_record_id,
+            "subject_id": subject_id,
+            "taint_class": taint_class,
+            "taint_state": taint_state,
+            "source_ref": source_ref,
+            "created_at": _iso_now(),
+        }
+        if cleared_at is not None:
+            candidate["cleared_at"] = cleared_at
+        if clearing_identity is not None:
+            candidate["clearing_identity"] = clearing_identity
+        if clearing_reason is not None:
+            candidate["clearing_reason"] = clearing_reason
+        validate_artifact_strict(
+            candidate, _TAINT_RECORD_SCHEMA, "TaintRecord"
+        )
         self._conn.execute(
             """
             INSERT INTO taint_records (
@@ -1245,6 +1279,11 @@ class FailureBundleRepository:
         return [d for row in rows if (d := _row_to_dict(row)) is not None]
 
     def append(self, *, artifact: Mapping[str, Any]) -> None:
+        # Ingress validation (foundation §3.4): validate the §23.15
+        # FailureBundle shape against the frozen schema before persist.
+        validate_artifact_strict(
+            artifact, _FAILURE_BUNDLE_SCHEMA, "FailureBundle"
+        )
         self._conn.execute(
             """
             INSERT INTO failure_bundles (
@@ -1306,6 +1345,12 @@ class DriftEventRecordRepository:
         return results
 
     def insert(self, record: Mapping[str, Any]) -> None:
+        # Ingress validation (foundation §3.4): validate the §23.19
+        # DriftEventRecord shape against the frozen schema before
+        # persist.
+        validate_artifact_strict(
+            record, _DRIFT_EVENT_RECORD_SCHEMA, "DriftEventRecord"
+        )
         self._conn.execute(
             """
             INSERT INTO drift_event_records (

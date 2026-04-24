@@ -28,11 +28,17 @@ Design rules:
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from typing import Any, Mapping, Sequence
 from uuid import uuid4
 
+from kernel.schemas import load_schema
+from kernel.schemas.validator import validate_artifact
 from kernel.stores.sqlite.repositories import AuditRepository
 from kernel.version.version_tuple import compose_version_tuple_hash
+
+
+_AUDIT_RECORD_SCHEMA = load_schema("audit_record")
 
 
 class LedgerViolation(Exception):
@@ -77,11 +83,48 @@ class AppendOnlyLedger:
         if not record_type:
             raise LedgerViolation("record_type must be non-empty")
         audit_record_id = f"aud-{uuid4().hex}"
+        version_tuple_hash = compose_version_tuple_hash(self._vt_overrides)
+
+        # Ingress validation (foundation §3.4): validate the candidate
+        # §23.14 AuditRecord shape against the frozen schema before
+        # persist. This promotes the previously-descriptive schema to a
+        # runtime gate. `created_at` is computed here for validation
+        # shape proof; the repository independently regenerates its own
+        # `_iso_now()` at INSERT time — both are ISO date-time strings
+        # and both satisfy the schema, so persisted-row timestamp
+        # semantics are unchanged.
+        candidate: dict[str, Any] = {
+            "audit_record_id": audit_record_id,
+            "record_type": record_type,
+            "actor_identity": self._actor,
+            "version_tuple_hash": version_tuple_hash,
+            "task_id": task_id,
+            "root_revision_id": root_revision_id,
+            "causality_ref": causality_ref,
+            "artifact_refs": list(artifact_refs or []),
+            "taint_set": list(taint_set or []),
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        }
+        if payload is not None:
+            candidate["payload"] = dict(payload)
+        if failure_bundle_id is not None:
+            candidate["failure_bundle_id"] = failure_bundle_id
+        if replay_anchor_id is not None:
+            candidate["replay_anchor_id"] = replay_anchor_id
+        if approval_id is not None:
+            candidate["approval_id"] = approval_id
+        violations = validate_artifact(candidate, _AUDIT_RECORD_SCHEMA)
+        if violations:
+            raise LedgerViolation(
+                "audit record schema validation failed: "
+                + "; ".join(violations[:5])
+            )
+
         self._repo.append(
             audit_record_id=audit_record_id,
             record_type=record_type,
             actor_identity=self._actor,
-            version_tuple_hash=compose_version_tuple_hash(self._vt_overrides),
+            version_tuple_hash=version_tuple_hash,
             task_id=task_id,
             root_revision_id=root_revision_id,
             causality_ref=causality_ref,
