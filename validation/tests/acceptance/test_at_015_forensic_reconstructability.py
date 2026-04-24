@@ -3129,6 +3129,89 @@ class TestForensicReconstructability(unittest.TestCase):
         self.assertNotIn("approval_barrier_evaluation_error_audit_id", payload)
         self.assertNotIn("approval_barrier_evaluation_error_audit_ids", payload)
 
+    def test_replay_anchor_capability_token_consumed_audit_ids_preserve_sequence_order(
+        self,
+    ) -> None:
+        """_capability_token_consumed_audit_ids order is stable.
+
+        AuditRepository.list_capability_token_consumed_for_task orders
+        rows by `sequence`, so the deterministic position of
+        consumed-token audit ids within
+        ReplayAnchor.required_artifact_ids must match audit append
+        order. The happy path through REVISION_SEAL + EVIDENCE already
+        emits multiple same-task consumed-token audits (one per stage
+        that consumes a capability), which gives at least two
+        same-task rows; one other-task consumed audit proves
+        task-scoping exclusion. Revoked-lifecycle and rejection-audit
+        readers are intentionally out of scope for this reader.
+        """
+        task_id = f"task-{uuid4().hex[:8]}"
+        ids = self.harness.run_through_stage(task_id, Stage.REVISION_SEAL)
+
+        other_task_id = f"task-other-{uuid4().hex[:8]}"
+        other_token = self.harness.issue_capability(
+            "append_evidence", other_task_id
+        )
+        self.harness.cap_svc.consume(
+            capability_token_id=other_token["capability_token_id"],
+            task_id=other_task_id,
+        )
+        other_consumed_rows = (
+            self.harness.audit_repo.list_capability_token_consumed_for_task(
+                other_task_id
+            )
+        )
+        self.assertEqual(len(other_consumed_rows), 1)
+        other_consumed_audit_id = other_consumed_rows[0]["audit_record_id"]
+
+        evidence_token = self.harness.issue_capability(
+            "append_evidence", task_id
+        )
+        replay_anchor_id = self.harness.orch.admit_evidence(
+            task_id=task_id,
+            capability_token=evidence_token,
+        )
+
+        consumed_rows = (
+            self.harness.audit_repo.list_capability_token_consumed_for_task(
+                task_id
+            )
+        )
+        consumed_audit_ids = [
+            row["audit_record_id"] for row in consumed_rows
+        ]
+        self.assertGreaterEqual(len(consumed_audit_ids), 2)
+
+        anchor = self.harness.ra_repo.fetch(replay_anchor_id)
+        self.assertIsNotNone(anchor)
+        required = anchor["required_artifact_ids"]
+        for audit_record_id in consumed_audit_ids:
+            self.assertIn(audit_record_id, required)
+        self.assertEqual(
+            [aid for aid in required if aid in consumed_audit_ids],
+            consumed_audit_ids,
+        )
+        self.assertNotIn(other_consumed_audit_id, required)
+
+        closure_row = self.harness.conn.execute(
+            "SELECT payload_json FROM audit_records "
+            "WHERE task_id = ? AND record_type = 'evidence_closure' "
+            "AND replay_anchor_id = ?;",
+            (ids["task_id"], replay_anchor_id),
+        ).fetchone()
+        self.assertIsNotNone(closure_row)
+        payload = json.loads(closure_row["payload_json"])
+        mirrored = payload["required_artifact_ids"]
+        for audit_record_id in consumed_audit_ids:
+            self.assertIn(audit_record_id, mirrored)
+        self.assertEqual(
+            [aid for aid in mirrored if aid in consumed_audit_ids],
+            consumed_audit_ids,
+        )
+        self.assertNotIn(other_consumed_audit_id, mirrored)
+        self.assertNotIn("capability_token_consumed_audit_id", payload)
+        self.assertNotIn("capability_token_consumed_audit_ids", payload)
+
 
 if __name__ == "__main__":
     unittest.main()
