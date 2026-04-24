@@ -3310,6 +3310,58 @@ class TestForensicReconstructability(unittest.TestCase):
         self.assertNotIn("capability_token_revoked_audit_id", payload)
         self.assertNotIn("capability_token_revoked_audit_ids", payload)
 
+    def test_replay_anchor_journal_entry_ids_preserve_logical_sequence_order(
+        self,
+    ) -> None:
+        """_journal_entry_ids order is stable (logical_sequence).
+
+        JournalEntryRepository.list_for_revision orders rows by
+        `logical_sequence`, so the deterministic position of seal
+        journal entry ids within ReplayAnchor.required_artifact_ids
+        must match that ordering. The happy path seals a single
+        revision with multiple journal entries, which is sufficient to
+        exercise positional-equality. Rejection-audit and
+        lifecycle-audit readers are intentionally out of scope for
+        this reader.
+        """
+        ids = self.harness.run_full_happy_path()
+
+        journal_rows = self.harness.conn.execute(
+            "SELECT journal_entry_id FROM journal_entries "
+            "WHERE revision_id = ? ORDER BY logical_sequence;",
+            (ids["revision_id"],),
+        ).fetchall()
+        journal_entry_ids = [row["journal_entry_id"] for row in journal_rows]
+        self.assertGreaterEqual(len(journal_entry_ids), 2)
+
+        anchor = self.harness.ra_repo.fetch(ids["replay_anchor_id"])
+        self.assertIsNotNone(anchor)
+        required = anchor["required_artifact_ids"]
+        for journal_entry_id in journal_entry_ids:
+            self.assertIn(journal_entry_id, required)
+        self.assertEqual(
+            [jid for jid in required if jid in journal_entry_ids],
+            journal_entry_ids,
+        )
+
+        closure_row = self.harness.conn.execute(
+            "SELECT payload_json FROM audit_records "
+            "WHERE task_id = ? AND record_type = 'evidence_closure' "
+            "AND replay_anchor_id = ?;",
+            (ids["task_id"], ids["replay_anchor_id"]),
+        ).fetchone()
+        self.assertIsNotNone(closure_row)
+        payload = json.loads(closure_row["payload_json"])
+        mirrored = payload["required_artifact_ids"]
+        for journal_entry_id in journal_entry_ids:
+            self.assertIn(journal_entry_id, mirrored)
+        self.assertEqual(
+            [jid for jid in mirrored if jid in journal_entry_ids],
+            journal_entry_ids,
+        )
+        self.assertNotIn("journal_entry_id", payload)
+        self.assertNotIn("journal_entry_ids", payload)
+
 
 if __name__ == "__main__":
     unittest.main()
