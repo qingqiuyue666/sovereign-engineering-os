@@ -546,6 +546,14 @@ class TestForensicReconstructability(unittest.TestCase):
         self.assertNotIn(
             other_token["capability_token_id"], anchor["required_artifact_ids"]
         )
+        self.assertEqual(
+            [
+                tok
+                for tok in anchor["required_artifact_ids"]
+                if tok in capability_token_ids
+            ],
+            capability_token_ids,
+        )
 
         closure_row = self.harness.conn.execute(
             "SELECT payload_json FROM audit_records "
@@ -559,6 +567,14 @@ class TestForensicReconstructability(unittest.TestCase):
             self.assertIn(capability_token_id, payload["required_artifact_ids"])
         self.assertNotIn(
             other_token["capability_token_id"], payload["required_artifact_ids"]
+        )
+        self.assertEqual(
+            [
+                tok
+                for tok in payload["required_artifact_ids"]
+                if tok in capability_token_ids
+            ],
+            capability_token_ids,
         )
         self.assertNotIn("capability_token_id", payload)
         self.assertNotIn("capability_token_ids", payload)
@@ -1597,6 +1613,459 @@ class TestForensicReconstructability(unittest.TestCase):
             self.assertIn(journal_entry_id, payload["required_artifact_ids"])
         self.assertNotIn("journal_entry_id", payload)
         self.assertNotIn("journal_entry_ids", payload)
+
+    def test_replay_anchor_review_artifact_ids_preserve_insertion_order(
+        self,
+    ) -> None:
+        """_review_artifact_ids order is stable and task+root scoped."""
+        task_id = f"task-{uuid4().hex[:8]}"
+        ids = self.harness.run_through_stage(task_id, Stage.REVISION_SEAL)
+
+        def insert_review(
+            review_artifact_id: str,
+            extra_task_id: str,
+            root_revision_id: str,
+            patch_proposal_id: str,
+        ) -> None:
+            self.harness.rv_repo.insert(
+                {
+                    "review_artifact_id": review_artifact_id,
+                    "task_id": extra_task_id,
+                    "root_revision_id": root_revision_id,
+                    "patch_proposal_id": patch_proposal_id,
+                    "diff_hash": f"sha256:{review_artifact_id}",
+                    "semantic_impact_hash": f"sha256:sem-{review_artifact_id}",
+                    "risk_class": "low",
+                    "rendering_provenance": {
+                        "renderer_id": "acceptance_test",
+                        "renderer_version": "1.0",
+                        "self_summary_flag": False,
+                    },
+                    "taint_set": [],
+                    "created_at": "2026-01-01T00:00:00+00:00",
+                    "version_tuple_hash": "vt-review-extra",
+                }
+            )
+
+        first_extra_id = f"rv-extra-a-{uuid4().hex[:8]}"
+        second_extra_id = f"rv-extra-b-{uuid4().hex[:8]}"
+        third_extra_id = f"rv-extra-c-{uuid4().hex[:8]}"
+        other_task_review_id = f"rv-other-task-{uuid4().hex[:8]}"
+        other_root_review_id = f"rv-other-root-{uuid4().hex[:8]}"
+
+        insert_review(
+            first_extra_id,
+            task_id,
+            ids["root_revision_id"],
+            ids["patch_proposal_id"],
+        )
+        insert_review(
+            second_extra_id,
+            task_id,
+            ids["root_revision_id"],
+            ids["patch_proposal_id"],
+        )
+        insert_review(
+            third_extra_id,
+            task_id,
+            ids["root_revision_id"],
+            ids["patch_proposal_id"],
+        )
+        insert_review(
+            other_task_review_id,
+            "task-out-of-scope",
+            ids["root_revision_id"],
+            ids["patch_proposal_id"],
+        )
+        insert_review(
+            other_root_review_id,
+            task_id,
+            "rev-out-of-scope-root",
+            ids["patch_proposal_id"],
+        )
+
+        evidence_token = self.harness.issue_capability(
+            "append_evidence", task_id
+        )
+        replay_anchor_id = self.harness.orch.admit_evidence(
+            task_id=task_id,
+            capability_token=evidence_token,
+        )
+
+        expected_review_ids = [
+            ids["review_artifact_id"],
+            first_extra_id,
+            second_extra_id,
+            third_extra_id,
+        ]
+
+        anchor = self.harness.ra_repo.fetch(replay_anchor_id)
+        self.assertIsNotNone(anchor)
+        required = anchor["required_artifact_ids"]
+        self.assertEqual(
+            [i for i in required if i in expected_review_ids],
+            expected_review_ids,
+        )
+        self.assertNotIn(other_task_review_id, required)
+        self.assertNotIn(other_root_review_id, required)
+
+        closure_row = self.harness.conn.execute(
+            "SELECT payload_json FROM audit_records "
+            "WHERE task_id = ? AND record_type = 'evidence_closure' "
+            "AND replay_anchor_id = ?;",
+            (task_id, replay_anchor_id),
+        ).fetchone()
+        self.assertIsNotNone(closure_row)
+        payload = json.loads(closure_row["payload_json"])
+        mirrored = payload["required_artifact_ids"]
+        self.assertEqual(
+            [i for i in mirrored if i in expected_review_ids],
+            expected_review_ids,
+        )
+        self.assertNotIn(other_task_review_id, mirrored)
+        self.assertNotIn(other_root_review_id, mirrored)
+        self.assertNotIn("review_artifact_id", payload)
+        self.assertNotIn("review_artifact_ids", payload)
+
+    def test_replay_anchor_patch_proposal_ids_preserve_first_seen_order(
+        self,
+    ) -> None:
+        """_patch_proposal_ids first-seen order is stable and task+root scoped."""
+        task_id = f"task-{uuid4().hex[:8]}"
+        ids = self.harness.run_through_stage(task_id, Stage.REVISION_SEAL)
+
+        def insert_review(
+            review_artifact_id: str,
+            extra_task_id: str,
+            root_revision_id: str,
+            patch_proposal_id: str,
+        ) -> None:
+            self.harness.rv_repo.insert(
+                {
+                    "review_artifact_id": review_artifact_id,
+                    "task_id": extra_task_id,
+                    "root_revision_id": root_revision_id,
+                    "patch_proposal_id": patch_proposal_id,
+                    "diff_hash": f"sha256:{review_artifact_id}",
+                    "semantic_impact_hash": f"sha256:sem-{review_artifact_id}",
+                    "risk_class": "low",
+                    "rendering_provenance": {
+                        "renderer_id": "acceptance_test",
+                        "renderer_version": "1.0",
+                        "self_summary_flag": False,
+                    },
+                    "taint_set": [],
+                    "created_at": "2026-01-01T00:00:00+00:00",
+                    "version_tuple_hash": "vt-review-extra",
+                }
+            )
+
+        pp_extra_a = f"pp-extra-a-{uuid4().hex[:8]}"
+        pp_extra_b = f"pp-extra-b-{uuid4().hex[:8]}"
+        pp_other_task = f"pp-other-task-{uuid4().hex[:8]}"
+        pp_other_root = f"pp-other-root-{uuid4().hex[:8]}"
+
+        insert_review(
+            f"rv-a-{uuid4().hex[:8]}",
+            task_id,
+            ids["root_revision_id"],
+            pp_extra_a,
+        )
+        insert_review(
+            f"rv-a2-{uuid4().hex[:8]}",
+            task_id,
+            ids["root_revision_id"],
+            pp_extra_a,
+        )
+        insert_review(
+            f"rv-b-{uuid4().hex[:8]}",
+            task_id,
+            ids["root_revision_id"],
+            pp_extra_b,
+        )
+        insert_review(
+            f"rv-other-task-{uuid4().hex[:8]}",
+            "task-out-of-scope",
+            ids["root_revision_id"],
+            pp_other_task,
+        )
+        insert_review(
+            f"rv-other-root-{uuid4().hex[:8]}",
+            task_id,
+            "rev-out-of-scope-root",
+            pp_other_root,
+        )
+
+        evidence_token = self.harness.issue_capability(
+            "append_evidence", task_id
+        )
+        replay_anchor_id = self.harness.orch.admit_evidence(
+            task_id=task_id,
+            capability_token=evidence_token,
+        )
+
+        expected_pp_ids = [
+            ids["patch_proposal_id"],
+            pp_extra_a,
+            pp_extra_b,
+        ]
+
+        anchor = self.harness.ra_repo.fetch(replay_anchor_id)
+        self.assertIsNotNone(anchor)
+        required = anchor["required_artifact_ids"]
+        self.assertEqual(
+            [i for i in required if i in expected_pp_ids],
+            expected_pp_ids,
+        )
+        self.assertNotIn(pp_other_task, required)
+        self.assertNotIn(pp_other_root, required)
+        # Dedup guarantee: each same-task/same-root patch_proposal_id appears once.
+        self.assertEqual(
+            sum(1 for i in required if i == pp_extra_a), 1
+        )
+
+        closure_row = self.harness.conn.execute(
+            "SELECT payload_json FROM audit_records "
+            "WHERE task_id = ? AND record_type = 'evidence_closure' "
+            "AND replay_anchor_id = ?;",
+            (task_id, replay_anchor_id),
+        ).fetchone()
+        self.assertIsNotNone(closure_row)
+        payload = json.loads(closure_row["payload_json"])
+        mirrored = payload["required_artifact_ids"]
+        self.assertEqual(
+            [i for i in mirrored if i in expected_pp_ids],
+            expected_pp_ids,
+        )
+        self.assertNotIn(pp_other_task, mirrored)
+        self.assertNotIn(pp_other_root, mirrored)
+        self.assertNotIn("patch_proposal_id", payload)
+        self.assertNotIn("patch_proposal_ids", payload)
+
+    def test_replay_anchor_drift_event_ids_preserve_insertion_order(
+        self,
+    ) -> None:
+        """_drift_event_ids order is stable and task+root scoped."""
+        task_id = f"task-{uuid4().hex[:8]}"
+        ids = self.harness.run_through_stage(task_id, Stage.REVISION_SEAL)
+
+        def insert_drift(
+            drift_event_id: str,
+            extra_task_id: str,
+            root_revision_id: str,
+        ) -> None:
+            self.harness.drift_repo.insert(
+                {
+                    "drift_event_id": drift_event_id,
+                    "task_id": extra_task_id,
+                    "root_revision_id": root_revision_id,
+                    "drift_class": "ordering_coverage_probe",
+                    "detected_at": "2026-01-01T00:00:00+00:00",
+                    "affected_artifact_ids": [],
+                    "consequence_class": "probe_no_op",
+                }
+            )
+
+        first_id = f"drift-a-{uuid4().hex[:8]}"
+        second_id = f"drift-b-{uuid4().hex[:8]}"
+        third_id = f"drift-c-{uuid4().hex[:8]}"
+        other_task_drift = f"drift-other-task-{uuid4().hex[:8]}"
+        other_root_drift = f"drift-other-root-{uuid4().hex[:8]}"
+
+        insert_drift(first_id, task_id, ids["root_revision_id"])
+        insert_drift(second_id, task_id, ids["root_revision_id"])
+        insert_drift(third_id, task_id, ids["root_revision_id"])
+        insert_drift(
+            other_task_drift, "task-out-of-scope", ids["root_revision_id"]
+        )
+        insert_drift(other_root_drift, task_id, "rev-out-of-scope-root")
+
+        evidence_token = self.harness.issue_capability(
+            "append_evidence", task_id
+        )
+        replay_anchor_id = self.harness.orch.admit_evidence(
+            task_id=task_id,
+            capability_token=evidence_token,
+        )
+
+        expected_ids = [first_id, second_id, third_id]
+        anchor = self.harness.ra_repo.fetch(replay_anchor_id)
+        self.assertIsNotNone(anchor)
+        required = anchor["required_artifact_ids"]
+        self.assertEqual(
+            [i for i in required if i in expected_ids],
+            expected_ids,
+        )
+        self.assertNotIn(other_task_drift, required)
+        self.assertNotIn(other_root_drift, required)
+
+        closure_row = self.harness.conn.execute(
+            "SELECT payload_json FROM audit_records "
+            "WHERE task_id = ? AND record_type = 'evidence_closure' "
+            "AND replay_anchor_id = ?;",
+            (task_id, replay_anchor_id),
+        ).fetchone()
+        self.assertIsNotNone(closure_row)
+        payload = json.loads(closure_row["payload_json"])
+        mirrored = payload["required_artifact_ids"]
+        self.assertEqual(
+            [i for i in mirrored if i in expected_ids],
+            expected_ids,
+        )
+        self.assertNotIn(other_task_drift, mirrored)
+        self.assertNotIn(other_root_drift, mirrored)
+        self.assertNotIn("drift_event_id", payload)
+        self.assertNotIn("drift_event_ids", payload)
+
+    def test_replay_anchor_failure_bundle_ids_preserve_insertion_order(
+        self,
+    ) -> None:
+        """_failure_bundle_ids order is stable and task+root scoped."""
+        task_id = f"task-{uuid4().hex[:8]}"
+        ids = self.harness.run_through_stage(task_id, Stage.REVISION_SEAL)
+
+        def insert_bundle(
+            failure_bundle_id: str,
+            extra_task_id: str,
+            root_revision_id: str,
+        ) -> None:
+            self.harness.failure_repo.append(
+                artifact={
+                    "failure_bundle_id": failure_bundle_id,
+                    "task_id": extra_task_id,
+                    "root_revision_id": root_revision_id,
+                    "failure_class": "ordering_coverage_probe",
+                    "cause_hash": f"sha256:{failure_bundle_id}",
+                    "evidence_refs": [],
+                    "taint_set": [],
+                    "created_at": "2026-01-01T00:00:00+00:00",
+                    "incident_id": None,
+                    "retained_for_forensics_flag": False,
+                    "recovery_action_ref": None,
+                }
+            )
+
+        first_id = f"fb-a-{uuid4().hex[:8]}"
+        second_id = f"fb-b-{uuid4().hex[:8]}"
+        third_id = f"fb-c-{uuid4().hex[:8]}"
+        other_task_fb = f"fb-other-task-{uuid4().hex[:8]}"
+        other_root_fb = f"fb-other-root-{uuid4().hex[:8]}"
+
+        insert_bundle(first_id, task_id, ids["root_revision_id"])
+        insert_bundle(second_id, task_id, ids["root_revision_id"])
+        insert_bundle(third_id, task_id, ids["root_revision_id"])
+        insert_bundle(
+            other_task_fb, "task-out-of-scope", ids["root_revision_id"]
+        )
+        insert_bundle(other_root_fb, task_id, "rev-out-of-scope-root")
+
+        evidence_token = self.harness.issue_capability(
+            "append_evidence", task_id
+        )
+        replay_anchor_id = self.harness.orch.admit_evidence(
+            task_id=task_id,
+            capability_token=evidence_token,
+        )
+
+        expected_ids = [first_id, second_id, third_id]
+        anchor = self.harness.ra_repo.fetch(replay_anchor_id)
+        self.assertIsNotNone(anchor)
+        required = anchor["required_artifact_ids"]
+        self.assertEqual(
+            [i for i in required if i in expected_ids],
+            expected_ids,
+        )
+        self.assertNotIn(other_task_fb, required)
+        self.assertNotIn(other_root_fb, required)
+
+        closure_row = self.harness.conn.execute(
+            "SELECT payload_json FROM audit_records "
+            "WHERE task_id = ? AND record_type = 'evidence_closure' "
+            "AND replay_anchor_id = ?;",
+            (task_id, replay_anchor_id),
+        ).fetchone()
+        self.assertIsNotNone(closure_row)
+        payload = json.loads(closure_row["payload_json"])
+        mirrored = payload["required_artifact_ids"]
+        self.assertEqual(
+            [i for i in mirrored if i in expected_ids],
+            expected_ids,
+        )
+        self.assertNotIn(other_task_fb, mirrored)
+        self.assertNotIn(other_root_fb, mirrored)
+        self.assertNotIn("failure_bundle_id", payload)
+        self.assertNotIn("failure_bundle_ids", payload)
+
+    def test_replay_anchor_budget_record_ids_preserve_insertion_order(
+        self,
+    ) -> None:
+        """_budget_record_ids order is stable and task scoped."""
+        task_id = f"task-{uuid4().hex[:8]}"
+        ids = self.harness.run_through_stage(task_id, Stage.REVISION_SEAL)
+
+        def insert_budget(
+            budget_record_id: str,
+            extra_task_id: str,
+        ) -> None:
+            self.harness.budget_repo.append(
+                budget_record_id=budget_record_id,
+                task_id=extra_task_id,
+                budget_class="ordering_coverage_probe",
+                allocated_amount=0,
+                consumed_amount=0,
+                remaining_amount=0,
+                budget_state="active",
+            )
+
+        first_id = f"budget-probe-a-{uuid4().hex[:8]}"
+        second_id = f"budget-probe-b-{uuid4().hex[:8]}"
+        third_id = f"budget-probe-c-{uuid4().hex[:8]}"
+        other_task_budget = f"budget-probe-other-{uuid4().hex[:8]}"
+
+        existing_budget_ids = [
+            row["budget_record_id"]
+            for row in self.harness.budget_repo.list_for_task(task_id)
+        ]
+
+        insert_budget(first_id, task_id)
+        insert_budget(second_id, task_id)
+        insert_budget(third_id, task_id)
+        insert_budget(other_task_budget, "task-out-of-scope")
+
+        evidence_token = self.harness.issue_capability(
+            "append_evidence", task_id
+        )
+        replay_anchor_id = self.harness.orch.admit_evidence(
+            task_id=task_id,
+            capability_token=evidence_token,
+        )
+
+        expected_ids = existing_budget_ids + [first_id, second_id, third_id]
+        anchor = self.harness.ra_repo.fetch(replay_anchor_id)
+        self.assertIsNotNone(anchor)
+        required = anchor["required_artifact_ids"]
+        self.assertEqual(
+            [i for i in required if i in expected_ids],
+            expected_ids,
+        )
+        self.assertNotIn(other_task_budget, required)
+
+        closure_row = self.harness.conn.execute(
+            "SELECT payload_json FROM audit_records "
+            "WHERE task_id = ? AND record_type = 'evidence_closure' "
+            "AND replay_anchor_id = ?;",
+            (task_id, replay_anchor_id),
+        ).fetchone()
+        self.assertIsNotNone(closure_row)
+        payload = json.loads(closure_row["payload_json"])
+        mirrored = payload["required_artifact_ids"]
+        self.assertEqual(
+            [i for i in mirrored if i in expected_ids],
+            expected_ids,
+        )
+        self.assertNotIn(other_task_budget, mirrored)
+        self.assertNotIn("budget_record_id", payload)
+        self.assertNotIn("budget_record_ids", payload)
 
 
 if __name__ == "__main__":
