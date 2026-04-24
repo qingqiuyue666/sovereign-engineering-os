@@ -238,20 +238,27 @@ class TestForensicReconstructability(unittest.TestCase):
         self.assertEqual(len(other_invalidated_rows), 1)
         other_invalidated_audit_id = other_invalidated_rows[0]["audit_record_id"]
 
-        invalidated_receipt_id = seed_extra_receipt(
+        first_invalidated_receipt_id = seed_extra_receipt(
             task_id, ids["root_revision_id"]
         )
-        self.assertTrue(
-            inval_svc.invalidate_receipt(
-                validation_receipt_id=invalidated_receipt_id,
-                reason=REASON_UPSTREAM_PATCH_DRIFT,
-                drift_class=DRIFT_CLASS_UPSTREAM_PATCH_DRIFT,
-                source_artifact_id=ids["patch_proposal_id"],
-                task_id=task_id,
-                root_revision_id=ids["root_revision_id"],
-                intent_id=ids["intent_id"],
-            )
+        second_invalidated_receipt_id = seed_extra_receipt(
+            task_id, ids["root_revision_id"]
         )
+        for receipt_id in (
+            first_invalidated_receipt_id,
+            second_invalidated_receipt_id,
+        ):
+            self.assertTrue(
+                inval_svc.invalidate_receipt(
+                    validation_receipt_id=receipt_id,
+                    reason=REASON_UPSTREAM_PATCH_DRIFT,
+                    drift_class=DRIFT_CLASS_UPSTREAM_PATCH_DRIFT,
+                    source_artifact_id=ids["patch_proposal_id"],
+                    task_id=task_id,
+                    root_revision_id=ids["root_revision_id"],
+                    intent_id=ids["intent_id"],
+                )
+            )
 
         validation_token = self.harness.issue_capability(
             "run_validation_quarantine", task_id
@@ -289,14 +296,19 @@ class TestForensicReconstructability(unittest.TestCase):
         invalidated_audit_ids = [
             row["audit_record_id"] for row in invalidated_rows
         ]
-        self.assertEqual(len(invalidated_audit_ids), 1)
+        self.assertEqual(len(invalidated_audit_ids), 2)
 
         anchor = self.harness.ra_repo.fetch(replay_anchor_id)
         self.assertIsNotNone(anchor)
+        required = anchor["required_artifact_ids"]
         for audit_record_id in invalidated_audit_ids:
-            self.assertIn(audit_record_id, anchor["required_artifact_ids"])
+            self.assertIn(audit_record_id, required)
+        self.assertEqual(
+            [audit_id for audit_id in required if audit_id in invalidated_audit_ids],
+            invalidated_audit_ids,
+        )
         self.assertNotIn(
-            other_invalidated_audit_id, anchor["required_artifact_ids"]
+            other_invalidated_audit_id, required
         )
 
         closure_row = self.harness.conn.execute(
@@ -307,10 +319,19 @@ class TestForensicReconstructability(unittest.TestCase):
         ).fetchone()
         self.assertIsNotNone(closure_row)
         payload = json.loads(closure_row["payload_json"])
+        mirrored = payload["required_artifact_ids"]
         for audit_record_id in invalidated_audit_ids:
-            self.assertIn(audit_record_id, payload["required_artifact_ids"])
+            self.assertIn(audit_record_id, mirrored)
+        self.assertEqual(
+            [
+                audit_id
+                for audit_id in mirrored
+                if audit_id in invalidated_audit_ids
+            ],
+            invalidated_audit_ids,
+        )
         self.assertNotIn(
-            other_invalidated_audit_id, payload["required_artifact_ids"]
+            other_invalidated_audit_id, mirrored
         )
         self.assertNotIn("validation_receipt_invalidated_audit_id", payload)
         self.assertNotIn("validation_receipt_invalidated_audit_ids", payload)
