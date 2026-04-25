@@ -228,6 +228,49 @@ class AuditRepository:
         ).fetchall()
         return [d for row in rows if (d := _row_to_dict(row)) is not None]
 
+    # ------------------------------------------------------------------
+    # P0-2 phase 1: durable task lifecycle recovery (read-side only).
+    #
+    # `list_stage_entered_for_task` and `list_task_lifecycle_for_task`
+    # back `kernel.lifecycle.task_recovery.TaskRecoveryReader` which
+    # reconstructs an orchestrator's `current_stage` and `artifact_ids`
+    # from existing durable rows after process restart. No write
+    # surface, no schema change, no new audit record_type.
+    # ------------------------------------------------------------------
+
+    def list_stage_entered_for_task(
+        self, task_id: str
+    ) -> list[dict[str, Any]]:
+        rows = self._conn.execute(
+            """
+            SELECT * FROM audit_records
+             WHERE task_id = ?
+               AND record_type = 'stage_entered'
+             ORDER BY sequence;
+            """,
+            (task_id,),
+        ).fetchall()
+        return [d for row in rows if (d := _row_to_dict(row)) is not None]
+
+    def list_task_lifecycle_for_task(
+        self, task_id: str
+    ) -> list[dict[str, Any]]:
+        rows = self._conn.execute(
+            """
+            SELECT * FROM audit_records
+             WHERE task_id = ?
+               AND record_type IN (
+                 'stage_entered',
+                 'signable_path_sealed',
+                 'task_abandoned',
+                 'illegal_stage_transition_rejected'
+               )
+             ORDER BY sequence;
+            """,
+            (task_id,),
+        ).fetchall()
+        return [d for row in rows if (d := _row_to_dict(row)) is not None]
+
     def append(
         self,
         *,
@@ -583,6 +626,23 @@ class IntentAnchorRepository:
         row = self._conn.execute(
             "SELECT * FROM intent_anchor_records WHERE intent_id = ?;",
             (intent_id,),
+        ).fetchone()
+        return _row_to_dict(row)
+
+    def fetch_by_task(self, task_id: str) -> dict[str, Any] | None:
+        """Read-only lookup keyed by ``task_id``.
+
+        P0-2 phase 1 read-side recovery surface. Returns the earliest
+        durable ``intent_anchor_records`` row for the task (one task
+        admits exactly one intent in phase 1; ORDER BY created_at is
+        defensive against any future multi-anchor extension). Returns
+        ``None`` when the task never began.
+        """
+        row = self._conn.execute(
+            "SELECT * FROM intent_anchor_records "
+            "WHERE task_id = ? "
+            "ORDER BY created_at LIMIT 1;",
+            (task_id,),
         ).fetchone()
         return _row_to_dict(row)
 
