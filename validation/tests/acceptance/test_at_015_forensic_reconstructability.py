@@ -3396,6 +3396,42 @@ class TestForensicReconstructability(unittest.TestCase):
         self.assertGreater(len(mirrored), 0)
         self.assertEqual(len(mirrored), len(set(mirrored)))
 
+    def test_replay_anchor_required_artifact_ids_match_evidence_closure_payload(
+        self,
+    ) -> None:
+        """`ReplayAnchor.required_artifact_ids` and the
+        `evidence_closure.payload.required_artifact_ids` mirror are
+        whole-list identical (ordered equality) on the happy path.
+
+        `EvidenceService.close_evidence` builds a single
+        `classification.required_artifact_ids` and emits the same
+        source object into both the persisted `ReplayAnchor` and the
+        `evidence_closure` audit-record payload. The per-reader
+        `preserve_*_order` and `binds_*` tests prove subset / ordering
+        per reader; this test pins the full anchor↔payload list
+        equality so any future refactor that splits the two
+        computations fails AT-015 immediately rather than silently
+        drifting.
+        """
+        ids = self.harness.run_full_happy_path()
+
+        anchor = self.harness.ra_repo.fetch(ids["replay_anchor_id"])
+        self.assertIsNotNone(anchor)
+
+        closure_row = self.harness.conn.execute(
+            "SELECT payload_json FROM audit_records "
+            "WHERE task_id = ? AND record_type = 'evidence_closure' "
+            "AND replay_anchor_id = ?;",
+            (ids["task_id"], ids["replay_anchor_id"]),
+        ).fetchone()
+        self.assertIsNotNone(closure_row)
+        payload = json.loads(closure_row["payload_json"])
+
+        self.assertEqual(
+            anchor["required_artifact_ids"],
+            payload["required_artifact_ids"],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
