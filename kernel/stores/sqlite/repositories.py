@@ -637,6 +637,12 @@ class IntentAnchorRepository:
         admits exactly one intent in phase 1; ORDER BY created_at is
         defensive against any future multi-anchor extension). Returns
         ``None`` when the task never began.
+
+        NOTE: this helper hides duplicate-task-id evidence by silently
+        selecting the first row. Callers that must detect duplicate
+        intent anchors must use ``list_for_task`` instead.
+        ``TaskRecoveryReader`` uses ``list_for_task`` so the recovery
+        classifier can return NEEDS_MANUAL_REVIEW on intent ambiguity.
         """
         row = self._conn.execute(
             "SELECT * FROM intent_anchor_records "
@@ -645,6 +651,23 @@ class IntentAnchorRepository:
             (task_id,),
         ).fetchone()
         return _row_to_dict(row)
+
+    def list_for_task(self, task_id: str) -> list[dict[str, Any]]:
+        """Read-only listing of all durable intent anchors for a task.
+
+        ``intent_anchor_records.task_id`` is not UNIQUE in migration
+        0001, so multiple rows can in principle share a task_id. This
+        helper exposes that ambiguity to ``TaskRecoveryReader`` so the
+        classifier can return NEEDS_MANUAL_REVIEW rather than silently
+        picking one row. Returns ``[]`` when the task never began.
+        """
+        rows = self._conn.execute(
+            "SELECT * FROM intent_anchor_records "
+            "WHERE task_id = ? "
+            "ORDER BY created_at;",
+            (task_id,),
+        ).fetchall()
+        return [d for row in rows if (d := _row_to_dict(row)) is not None]
 
 
 # ---------------------------------------------------------------------------

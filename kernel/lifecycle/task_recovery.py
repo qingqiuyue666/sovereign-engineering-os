@@ -62,6 +62,17 @@ class TaskLifecycleSnapshot:
     Reconstructed from `intent_anchor_records` + `audit_records` rows
     of record_type 'stage_entered', 'signable_path_sealed',
     'task_abandoned', 'illegal_stage_transition_rejected'.
+
+    `intent_anchor_count` exposes the number of durable
+    `intent_anchor_records` rows that share this `task_id`. Phase-1
+    invariant is exactly one. Any other value is a duplicate-identity
+    anomaly that the classifier must surface as NEEDS_MANUAL_REVIEW.
+
+    `malformed_event_count` counts lifecycle audit rows with an
+    unparseable payload, an unknown stage value, or a missing /
+    invalid first artifact_ref. Any non-zero value is an integrity
+    anomaly that the classifier must surface as NEEDS_MANUAL_REVIEW
+    (outranks terminal state).
     """
 
     task_id: str
@@ -72,6 +83,7 @@ class TaskLifecycleSnapshot:
     last_event_sequence: Optional[int]
     lifecycle_record_count: int
     malformed_event_count: int = 0
+    intent_anchor_count: int = 1
 
 
 class ArtifactExistenceResolver(Protocol):
@@ -108,12 +120,22 @@ class TaskRecoveryReader:
 
         Returns `None` when no `intent_anchor_records` row exists for
         `task_id` (the durable proof that a task ever began).
+
+        When more than one `intent_anchor_records` row shares the
+        `task_id` (a duplicate-identity anomaly given that
+        `intent_anchor_records.task_id` is not UNIQUE in migration
+        0001), reconstruction continues using the earliest row's
+        `intent_id` only as a diagnostic anchor and records the
+        ambiguity in `intent_anchor_count`. The classifier surfaces
+        this as `NEEDS_MANUAL_REVIEW` rather than silently picking one
+        anchor.
         """
-        intent_row = self._intent_repo.fetch_by_task(task_id)
-        if intent_row is None:
+        intent_rows = self._intent_repo.list_for_task(task_id)
+        if not intent_rows:
             return None
 
-        intent_id = str(intent_row["intent_id"])
+        intent_id = str(intent_rows[0]["intent_id"])
+        intent_anchor_count = len(intent_rows)
 
         rows = self._audit_repo.list_task_lifecycle_for_task(task_id)
         artifact_ids: dict[Stage, str] = {}
@@ -166,6 +188,7 @@ class TaskRecoveryReader:
             last_event_sequence=last_event_sequence,
             lifecycle_record_count=len(rows),
             malformed_event_count=malformed_event_count,
+            intent_anchor_count=intent_anchor_count,
         )
 
     @staticmethod
@@ -222,13 +245,25 @@ class TaskRecoveryClassifier:
     def classify(
         self, snapshot: Optional[TaskLifecycleSnapshot]
     ) -> RecoveryClass:
+        # Precedence: integrity anomalies outrank terminal state. A
+        # SEALED or ABANDONED verdict on a snapshot whose intent
+        # ambiguity, malformed lifecycle row, or dangling artifact
+        # reference would otherwise hide a durable-evidence anomaly is
+        # not safe to act on; the classifier must surface
+        # NEEDS_MANUAL_REVIEW first.
+        #
+        # Order:
+        # 1. snapshot is None                              -> UNRECOVERABLE
+        # 2. duplicate / missing intent anchor count       -> NEEDS_MANUAL_REVIEW
+        # 3. malformed_event_count > 0                     -> NEEDS_MANUAL_REVIEW
+        # 4. resolver supplied AND any artifact dangling   -> NEEDS_MANUAL_REVIEW
+        # 5. terminal_state == Stage.SEALED                -> SEALED
+        # 6. terminal_state == Stage.ABANDONED             -> ABANDONED
+        # 7. current_stage is None                         -> NEEDS_MANUAL_REVIEW
+        # 8. otherwise                                     -> SAFE_TO_RESUME
         if snapshot is None:
             return RecoveryClass.UNRECOVERABLE
-        if snapshot.terminal_state is Stage.SEALED:
-            return RecoveryClass.SEALED
-        if snapshot.terminal_state is Stage.ABANDONED:
-            return RecoveryClass.ABANDONED
-        if snapshot.current_stage is None:
+        if snapshot.intent_anchor_count != 1:
             return RecoveryClass.NEEDS_MANUAL_REVIEW
         if snapshot.malformed_event_count > 0:
             return RecoveryClass.NEEDS_MANUAL_REVIEW
@@ -236,4 +271,10 @@ class TaskRecoveryClassifier:
             for stage, artifact_id in snapshot.artifact_ids.items():
                 if not self._artifact_exists(stage, artifact_id):
                     return RecoveryClass.NEEDS_MANUAL_REVIEW
+        if snapshot.terminal_state is Stage.SEALED:
+            return RecoveryClass.SEALED
+        if snapshot.terminal_state is Stage.ABANDONED:
+            return RecoveryClass.ABANDONED
+        if snapshot.current_stage is None:
+            return RecoveryClass.NEEDS_MANUAL_REVIEW
         return RecoveryClass.SAFE_TO_RESUME

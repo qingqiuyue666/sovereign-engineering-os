@@ -158,6 +158,207 @@ class TestTaskRecoveryClassifier(unittest.TestCase):
             permissive.classify(snapshot), RecoveryClass.SAFE_TO_RESUME
         )
 
+    # ------------------------------------------------------------------
+    # Anomaly-precedence checks (integrity outranks terminal state).
+    # ------------------------------------------------------------------
+
+    def test_classify_sealed_with_dangling_artifact_returns_needs_manual_review(
+        self,
+    ) -> None:
+        """SEALED + dangling artifact must surface as NEEDS_MANUAL_REVIEW."""
+        snapshot = TaskLifecycleSnapshot(
+            task_id="task-sealed-dangling",
+            intent_id="intent-sealed-dangling",
+            current_stage=Stage.SEALED,
+            artifact_ids={
+                Stage.CONTEXT: "ctx-ok",
+                Stage.EVIDENCE: "ev-dangling",
+            },
+            terminal_state=Stage.SEALED,
+            last_event_sequence=99,
+            lifecycle_record_count=9,
+            malformed_event_count=0,
+            intent_anchor_count=1,
+        )
+
+        def artifact_exists(stage: Stage, artifact_id: str) -> bool:
+            return stage is not Stage.EVIDENCE
+
+        classifier = TaskRecoveryClassifier(artifact_exists=artifact_exists)
+        self.assertEqual(
+            classifier.classify(snapshot), RecoveryClass.NEEDS_MANUAL_REVIEW
+        )
+
+    def test_classify_sealed_with_malformed_event_returns_needs_manual_review(
+        self,
+    ) -> None:
+        """SEALED + malformed_event_count > 0 must surface as NEEDS_MANUAL_REVIEW."""
+        snapshot = TaskLifecycleSnapshot(
+            task_id="task-sealed-malformed",
+            intent_id="intent-sealed-malformed",
+            current_stage=Stage.SEALED,
+            artifact_ids={Stage.CONTEXT: "ctx-ok"},
+            terminal_state=Stage.SEALED,
+            last_event_sequence=10,
+            lifecycle_record_count=10,
+            malformed_event_count=1,
+            intent_anchor_count=1,
+        )
+        classifier = TaskRecoveryClassifier()
+        self.assertEqual(
+            classifier.classify(snapshot), RecoveryClass.NEEDS_MANUAL_REVIEW
+        )
+
+    def test_classify_abandoned_with_dangling_artifact_returns_needs_manual_review(
+        self,
+    ) -> None:
+        """ABANDONED + dangling artifact must surface as NEEDS_MANUAL_REVIEW."""
+        snapshot = TaskLifecycleSnapshot(
+            task_id="task-abandoned-dangling",
+            intent_id="intent-abandoned-dangling",
+            current_stage=Stage.ABANDONED,
+            artifact_ids={
+                Stage.CONTEXT: "ctx-ok",
+                Stage.INFERENCE: "inf-dangling",
+            },
+            terminal_state=Stage.ABANDONED,
+            last_event_sequence=5,
+            lifecycle_record_count=3,
+            malformed_event_count=0,
+            intent_anchor_count=1,
+        )
+
+        def artifact_exists(stage: Stage, artifact_id: str) -> bool:
+            return stage is not Stage.INFERENCE
+
+        classifier = TaskRecoveryClassifier(artifact_exists=artifact_exists)
+        self.assertEqual(
+            classifier.classify(snapshot), RecoveryClass.NEEDS_MANUAL_REVIEW
+        )
+
+    # ------------------------------------------------------------------
+    # Duplicate intent anchor anomaly (Fix 2).
+    # ------------------------------------------------------------------
+
+    def test_duplicate_intent_anchors_classify_as_needs_manual_review(
+        self,
+    ) -> None:
+        """Two intent_anchor_records rows with same task_id must surface anomaly."""
+        harness = AcceptanceHarness()
+        try:
+            task_id = f"task-{uuid4().hex[:8]}"
+            harness.run_through_stage(task_id, Stage.CONTEXT)
+            # Inject a second durable intent_anchor_records row for the
+            # same task_id with a distinct intent_id. This is a
+            # synthetic representation of a duplicate-identity anomaly
+            # (intent_anchor_records.task_id is not UNIQUE).
+            harness.intent_repo.insert(
+                intent_id=f"intent-dup-{uuid4().hex[:8]}",
+                task_id=task_id,
+                state="admitted",
+            )
+
+            reader = TaskRecoveryReader(
+                audit_repository=harness.audit_repo,
+                intent_anchor_repository=harness.intent_repo,
+            )
+            snapshot = reader.reconstruct(task_id)
+            self.assertIsNotNone(snapshot)
+            self.assertEqual(snapshot.intent_anchor_count, 2)
+
+            classifier = TaskRecoveryClassifier()
+            self.assertEqual(
+                classifier.classify(snapshot),
+                RecoveryClass.NEEDS_MANUAL_REVIEW,
+            )
+        finally:
+            harness.close()
+
+    def test_duplicate_intent_anchors_do_not_classify_as_safe_or_terminal(
+        self,
+    ) -> None:
+        """Duplicates outrank SAFE_TO_RESUME, SEALED, ABANDONED verdicts."""
+        # SAFE_TO_RESUME shape with duplicate intent anchors.
+        non_terminal_dup = TaskLifecycleSnapshot(
+            task_id="task-dup-non-terminal",
+            intent_id="intent-dup-1",
+            current_stage=Stage.CONTEXT,
+            artifact_ids={Stage.CONTEXT: "ctx-1"},
+            terminal_state=None,
+            last_event_sequence=1,
+            lifecycle_record_count=1,
+            malformed_event_count=0,
+            intent_anchor_count=2,
+        )
+
+        # SEALED shape with duplicate intent anchors.
+        sealed_dup = TaskLifecycleSnapshot(
+            task_id="task-dup-sealed",
+            intent_id="intent-dup-1",
+            current_stage=Stage.SEALED,
+            artifact_ids={
+                Stage.CONTEXT: "ctx-1",
+                Stage.EVIDENCE: "ev-1",
+            },
+            terminal_state=Stage.SEALED,
+            last_event_sequence=99,
+            lifecycle_record_count=9,
+            malformed_event_count=0,
+            intent_anchor_count=3,
+        )
+
+        # ABANDONED shape with duplicate intent anchors.
+        abandoned_dup = TaskLifecycleSnapshot(
+            task_id="task-dup-abandoned",
+            intent_id="intent-dup-1",
+            current_stage=Stage.ABANDONED,
+            artifact_ids={Stage.CONTEXT: "ctx-1"},
+            terminal_state=Stage.ABANDONED,
+            last_event_sequence=5,
+            lifecycle_record_count=3,
+            malformed_event_count=0,
+            intent_anchor_count=4,
+        )
+
+        classifier = TaskRecoveryClassifier()
+        for snapshot in (non_terminal_dup, sealed_dup, abandoned_dup):
+            verdict = classifier.classify(snapshot)
+            self.assertEqual(
+                verdict,
+                RecoveryClass.NEEDS_MANUAL_REVIEW,
+                f"intent_anchor_count={snapshot.intent_anchor_count} "
+                f"current_stage={snapshot.current_stage} "
+                f"terminal_state={snapshot.terminal_state} "
+                f"-> expected NEEDS_MANUAL_REVIEW, got {verdict}",
+            )
+            self.assertNotIn(
+                verdict,
+                (
+                    RecoveryClass.SAFE_TO_RESUME,
+                    RecoveryClass.SEALED,
+                    RecoveryClass.ABANDONED,
+                ),
+            )
+
+    def test_unknown_task_still_returns_none_and_unrecoverable_after_fix(
+        self,
+    ) -> None:
+        """Fix 2 must not regress the unknown-task path."""
+        harness = AcceptanceHarness()
+        try:
+            reader = TaskRecoveryReader(
+                audit_repository=harness.audit_repo,
+                intent_anchor_repository=harness.intent_repo,
+            )
+            snapshot = reader.reconstruct("task-never-existed")
+            self.assertIsNone(snapshot)
+            classifier = TaskRecoveryClassifier()
+            self.assertEqual(
+                classifier.classify(snapshot), RecoveryClass.UNRECOVERABLE
+            )
+        finally:
+            harness.close()
+
 
 if __name__ == "__main__":
     unittest.main()
