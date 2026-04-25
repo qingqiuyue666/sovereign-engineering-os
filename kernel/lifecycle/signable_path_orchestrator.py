@@ -75,12 +75,30 @@ class OrchestratorRejected(Exception):
     """Fail-closed rejection raised on any out-of-path or unauthorized admission."""
 
 
-# Append the orchestrator's own rejection exception now that it is defined.
-# Membership in `EXPECTED_GOVERNANCE_REJECTIONS` keeps the
-# `illegal_stage_transition_rejected` audit (emitted by `_advance` on
-# illegal-transition refusal) durable across the admission boundary.
+class IllegalStageTransitionRejected(OrchestratorRejected):
+    """Expected governance rejection for illegal lifecycle transitions.
+
+    Raised by `_advance` AFTER the `illegal_stage_transition_rejected`
+    audit row is emitted, so the kernel transaction boundary commits
+    that durable rejection evidence (AT-015 forensic visibility) before
+    re-raising. Subclassing `OrchestratorRejected` preserves caller
+    `except OrchestratorRejected:` compatibility for existing tests.
+
+    Internal orchestrator defects (e.g. budget governor wired without
+    context repository, post-persistence consistency violations) raise
+    bare `OrchestratorRejected` and therefore trigger ROLLBACK rather
+    than commit-and-propagate.
+    """
+
+
+# Append the orchestrator's own illegal-transition rejection exception
+# now that it is defined. Membership in `EXPECTED_GOVERNANCE_REJECTIONS`
+# keeps the `illegal_stage_transition_rejected` audit (emitted by
+# `_advance` on illegal-transition refusal) durable across the
+# admission boundary. Bare `OrchestratorRejected` is intentionally NOT
+# in the tuple so internal orchestrator defects ROLLBACK.
 EXPECTED_GOVERNANCE_REJECTIONS = EXPECTED_GOVERNANCE_REJECTIONS + (
-    OrchestratorRejected,
+    IllegalStageTransitionRejected,
 )
 
 
@@ -357,7 +375,7 @@ class SignablePathOrchestrator:
                 artifact_refs=audit_artifact_refs,
                 payload=audit_payload,
             )
-            raise OrchestratorRejected(str(exc)) from exc
+            raise IllegalStageTransitionRejected(str(exc)) from exc
         state.current_stage = target
 
     # ------------------------------------------------------------------

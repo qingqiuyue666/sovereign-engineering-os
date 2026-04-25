@@ -34,7 +34,11 @@ sys.path.insert(
 )
 
 from kernel.contracts.quarantine_rules import QuarantineAdmissibilityError
-from kernel.lifecycle.signable_path_orchestrator import OrchestratorRejected
+from kernel.lifecycle.signable_path_orchestrator import (
+    IllegalStageTransitionRejected,
+    OrchestratorRejected,
+    SignablePathOrchestrator,
+)
 from kernel.lifecycle.stage_types import Stage
 from kernel.services.capability_service import CapabilityDenied
 from kernel.services.inference_service import (
@@ -303,6 +307,101 @@ class TestRejectionEvidenceSurvives(unittest.TestCase):
             self.assertEqual(harness.orch.current_stage(task_id), Stage.CONTEXT)
         finally:
             harness.close()
+
+
+class TestInternalOrchestratorDefectRollsBack(unittest.TestCase):
+    """Internal orchestrator defects (bare OrchestratorRejected) must ROLLBACK.
+
+    Only `IllegalStageTransitionRejected` (the narrow subclass raised
+    after the `illegal_stage_transition_rejected` audit lands) is in
+    `EXPECTED_GOVERNANCE_REJECTIONS`. Bare `OrchestratorRejected`
+    (raised for internal misconfiguration such as
+    "budget_governor wired without context_repository" or
+    "context artifact missing after persistence") must trigger ROLLBACK
+    so the partial admission cannot leave durable side effects.
+    """
+
+    def setUp(self) -> None:
+        self.harness = AcceptanceHarness()
+
+    def tearDown(self) -> None:
+        self.harness.close()
+
+    def test_internal_orchestrator_rejected_rolls_back_context_admission(
+        self,
+    ) -> None:
+        """budget_governor wired without context_repository must ROLLBACK."""
+        # Build a fresh orchestrator on the same harness wiring but with
+        # `context_repository=None`. admit_context will raise bare
+        # `OrchestratorRejected` AFTER capability consume + intent
+        # anchor + ContextArtifact insert, so we can prove all of those
+        # are rolled back.
+        broken_orch = SignablePathOrchestrator(
+            capability_service=self.harness.cap_svc,
+            context_service=self.harness.ctx_svc,
+            inference_service=self.harness.inf_svc,
+            patch_proposal_service=self.harness.pp_svc,
+            validation_service=self.harness.val_svc,
+            review_service=self.harness.rev_svc,
+            approval_service=self.harness.ap_svc,
+            revision_seal_service=self.harness.seal_svc,
+            evidence_service=self.harness.evidence_svc,
+            audit_ledger=self.harness.audit_ledger,
+            budget_governor=self.harness.budget_governor,
+            context_repository=None,
+            intent_anchor_repository=self.harness.intent_repo,
+            connection=self.harness.conn,
+        )
+
+        task_id = f"task-{uuid4().hex[:8]}"
+        token = self.harness.issue_capability(
+            "read_repository_snapshot", task_id
+        )
+        token_id = token["capability_token_id"]
+
+        with self.assertRaises(OrchestratorRejected) as ctx:
+            broken_orch.admit_context(
+                task_id=task_id,
+                intent_id=f"intent-{uuid4().hex[:8]}",
+                capability_token=token,
+                root_revision_id="rev-genesis-000",
+                request={
+                    "repo_graph_version": "1.0",
+                    "symbol_index_version": "1.0",
+                    "candidate_file_ids": ["src/main.py"],
+                    "symbol_frontier_ids": ["main"],
+                    "packing_policy_version": "phase1_budget_policy_v1",
+                    "actual_tokens": 10,
+                },
+            )
+        # The exception is the broad/bare class, NOT the narrow
+        # IllegalStageTransitionRejected subclass.
+        self.assertIs(type(ctx.exception), OrchestratorRejected)
+        self.assertNotIsInstance(ctx.exception, IllegalStageTransitionRejected)
+
+        # Capability token rollback: consumed_at must be NULL.
+        token_row = self.harness.cap_repo.fetch(token_id)
+        self.assertIsNone(token_row["consumed_at"])
+
+        # No context_artifacts row survives for this task.
+        ctx_count = self.harness.conn.execute(
+            "SELECT COUNT(*) FROM context_artifacts WHERE task_id = ?;",
+            (task_id,),
+        ).fetchone()[0]
+        self.assertEqual(ctx_count, 0)
+
+        # No stage_entered audit for context survives.
+        stage_rows = self.harness.conn.execute(
+            "SELECT payload_json FROM audit_records "
+            "WHERE task_id = ? AND record_type = 'stage_entered';",
+            (task_id,),
+        ).fetchall()
+        self.assertFalse(
+            any('"stage":"context"' in row["payload_json"] for row in stage_rows)
+        )
+
+        # No in-memory task entry survives on the broken orchestrator.
+        self.assertIsNone(broken_orch.current_stage(task_id))
 
 
 if __name__ == "__main__":
