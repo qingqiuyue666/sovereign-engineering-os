@@ -29,6 +29,8 @@ Phase-1 minimal durable intent causal anchor (per foundation §6 / AUDIT-003):
 
 from __future__ import annotations
 
+import contextlib
+import sqlite3
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Mapping, MutableMapping, Optional
@@ -39,10 +41,47 @@ from kernel.lifecycle.stage_types import (
     assert_legal_transition,
     successor_of,
 )
+from kernel.services.approval_service import (
+    ApprovalBarrierFailed,
+    ApprovalRejected,
+)
+from kernel.services.capability_service import CapabilityDenied
+from kernel.services.inference_service import InferenceBudgetExhausted
+from kernel.services.review_service import ReviewRejected
+from kernel.services.validation_service import ValidationRejected
+from kernel.stores.sqlite.unit_of_work import KernelUnitOfWork
+
+
+# Concrete kernel rejection exceptions that are emit-rejection-audit-
+# then-raise governance decisions (not unexpected runtime crashes).
+# When any of these escapes an admit_* body, KernelUnitOfWork commits
+# the rejection evidence so AT-015 forensic visibility is preserved,
+# then re-raises. Any other exception triggers ROLLBACK.
+#
+# NOTE: `OrchestratorRejected` is defined in this module and is added
+# to this tuple immediately after its declaration below, since it
+# cannot be referenced before the class statement.
+EXPECTED_GOVERNANCE_REJECTIONS: tuple[type[BaseException], ...] = (
+    CapabilityDenied,
+    ValidationRejected,
+    ReviewRejected,
+    ApprovalBarrierFailed,
+    ApprovalRejected,
+    InferenceBudgetExhausted,
+)
 
 
 class OrchestratorRejected(Exception):
     """Fail-closed rejection raised on any out-of-path or unauthorized admission."""
+
+
+# Append the orchestrator's own rejection exception now that it is defined.
+# Membership in `EXPECTED_GOVERNANCE_REJECTIONS` keeps the
+# `illegal_stage_transition_rejected` audit (emitted by `_advance` on
+# illegal-transition refusal) durable across the admission boundary.
+EXPECTED_GOVERNANCE_REJECTIONS = EXPECTED_GOVERNANCE_REJECTIONS + (
+    OrchestratorRejected,
+)
 
 
 class RealFixChainRejected(Exception):
@@ -154,6 +193,21 @@ class SignablePathOrchestrator:
         real_fix_approval_bridge: Any | None = None,
         real_fix_revision_seal_bridge: Any | None = None,
         real_fix_evidence_closure_bridge: Any | None = None,
+        # ------------------------------------------------------------------
+        # P0 transaction boundary (phase 1; foundation §6 / §22.1 / §22.6).
+        #
+        # When a shared `sqlite3.Connection` is wired, every admit_*
+        # method wraps its DB-mutating body in `KernelUnitOfWork(conn,
+        # commit_on_expected_rejection=EXPECTED_GOVERNANCE_REJECTIONS)`
+        # so capability consume, service effect, artifact insert, and
+        # audit append commit-or-rollback as one unit, while emit-then-
+        # raise governance rejection audits remain durable. When absent,
+        # the admit_* body uses `contextlib.nullcontext()` and behavior
+        # matches today's autocommit semantics — kept optional so
+        # tracer-bullet tests that hand-build a partial orchestrator
+        # without the connection continue to compile unchanged.
+        # ------------------------------------------------------------------
+        connection: sqlite3.Connection | None = None,
     ) -> None:
         # The orchestrator holds references only; it does not own policy.
         self._capability = capability_service
@@ -193,6 +247,26 @@ class SignablePathOrchestrator:
         self._rf_approval_bridge = real_fix_approval_bridge
         self._rf_revision_seal_bridge = real_fix_revision_seal_bridge
         self._rf_evidence_closure_bridge = real_fix_evidence_closure_bridge
+
+        # P0 transaction boundary connection (optional; see __init__ kwarg).
+        self._conn = connection
+
+    def _admission_boundary(self):
+        """Context manager owning the kernel transaction for one admit_*.
+
+        Returns `KernelUnitOfWork(self._conn,
+        commit_on_expected_rejection=EXPECTED_GOVERNANCE_REJECTIONS)`
+        when a shared connection was wired at construction; otherwise
+        `contextlib.nullcontext()` which preserves the prior autocommit
+        behavior for tracer-bullet tests that hand-build a partial
+        orchestrator without the connection.
+        """
+        if self._conn is not None:
+            return KernelUnitOfWork(
+                self._conn,
+                commit_on_expected_rejection=EXPECTED_GOVERNANCE_REJECTIONS,
+            )
+        return contextlib.nullcontext()
 
     # ------------------------------------------------------------------
     # admission primitives
@@ -315,67 +389,77 @@ class SignablePathOrchestrator:
         if task_id in self._tasks:
             raise OrchestratorRejected(f"task already admitted: {task_id}")
 
-        # Capability gate (C22.6 / INV-CAP-VERIFY-BEFORE-EFFECT).
-        self._capability.verify_for_action(
-            token=capability_token,
-            action_class="read_repository_snapshot",
-            task_id=task_id,
-            root_revision_id=root_revision_id,
-        )
-        self._capability.consume(
-            capability_token_id=str(capability_token["capability_token_id"]),
-            task_id=task_id,
-        )
-
-        anchor = self._emit_intent_anchor(task_id=task_id, intent_id=intent_id)
-
-        artifact_id = self._context.build_context_artifact(
-            task_id=task_id,
-            root_revision_id=root_revision_id,
-            request=request,
-            intent_anchor=anchor,
-        )
-
-        # AT-027 / INV-021 runtime allocation: bind the budget envelope
-        # to the same `hard_budget_tokens` the ContextArtifact records
-        # under `phase1_budget_policy_v1`. This is the single real
-        # runtime point at which a task acquires its governed budget;
-        # it must not be pre-seeded by callers / harnesses. Allocation
-        # happens after the context artifact is persisted so the
-        # governance value comes from the durable artifact, not from
-        # an unaudited request mapping.
-        if self._budget is not None:
-            if self._ctx_repo is None:
-                raise OrchestratorRejected(
-                    "budget_governor wired without context_repository; "
-                    "cannot read hard_budget_tokens off the persisted "
-                    "ContextArtifact (AT-027 wiring is incomplete)"
+        try:
+            with self._admission_boundary():
+                # Capability gate (C22.6 / INV-CAP-VERIFY-BEFORE-EFFECT).
+                self._capability.verify_for_action(
+                    token=capability_token,
+                    action_class="read_repository_snapshot",
+                    task_id=task_id,
+                    root_revision_id=root_revision_id,
                 )
-            ctx_row = self._ctx_repo.fetch(artifact_id)
-            if ctx_row is None:
-                raise OrchestratorRejected(
-                    f"context artifact {artifact_id} missing after persistence"
+                self._capability.consume(
+                    capability_token_id=str(capability_token["capability_token_id"]),
+                    task_id=task_id,
                 )
-            self._budget.allocate(
-                task_id=task_id,
-                hard_budget_tokens=int(ctx_row["hard_budget_tokens"]),
-            )
 
-        state = TaskLifecycleState(
-            task_id=task_id,
-            intent_anchor=anchor,
-            current_stage=Stage.CONTEXT,
-        )
-        state.artifact_ids[Stage.CONTEXT] = artifact_id
-        self._tasks[task_id] = state
+                anchor = self._emit_intent_anchor(task_id=task_id, intent_id=intent_id)
 
-        self._audit.append(
-            record_type="stage_entered",
-            task_id=task_id,
-            artifact_refs=[artifact_id],
-            payload={"stage": Stage.CONTEXT.value},
-        )
-        return artifact_id
+                artifact_id = self._context.build_context_artifact(
+                    task_id=task_id,
+                    root_revision_id=root_revision_id,
+                    request=request,
+                    intent_anchor=anchor,
+                )
+
+                # AT-027 / INV-021 runtime allocation: bind the budget envelope
+                # to the same `hard_budget_tokens` the ContextArtifact records
+                # under `phase1_budget_policy_v1`. This is the single real
+                # runtime point at which a task acquires its governed budget;
+                # it must not be pre-seeded by callers / harnesses. Allocation
+                # happens after the context artifact is persisted so the
+                # governance value comes from the durable artifact, not from
+                # an unaudited request mapping.
+                if self._budget is not None:
+                    if self._ctx_repo is None:
+                        raise OrchestratorRejected(
+                            "budget_governor wired without context_repository; "
+                            "cannot read hard_budget_tokens off the persisted "
+                            "ContextArtifact (AT-027 wiring is incomplete)"
+                        )
+                    ctx_row = self._ctx_repo.fetch(artifact_id)
+                    if ctx_row is None:
+                        raise OrchestratorRejected(
+                            f"context artifact {artifact_id} missing after persistence"
+                        )
+                    self._budget.allocate(
+                        task_id=task_id,
+                        hard_budget_tokens=int(ctx_row["hard_budget_tokens"]),
+                    )
+
+                state = TaskLifecycleState(
+                    task_id=task_id,
+                    intent_anchor=anchor,
+                    current_stage=Stage.CONTEXT,
+                )
+                state.artifact_ids[Stage.CONTEXT] = artifact_id
+                self._tasks[task_id] = state
+
+                self._audit.append(
+                    record_type="stage_entered",
+                    task_id=task_id,
+                    artifact_refs=[artifact_id],
+                    payload={"stage": Stage.CONTEXT.value},
+                )
+                return artifact_id
+        except BaseException:
+            # P0 transaction boundary (foundation §6): the UoW has
+            # either rolled back the DB on unexpected failure or
+            # committed durable rejection evidence on expected
+            # governance rejection. In either case the in-memory task
+            # entry must NOT linger past a refused admission.
+            self._tasks.pop(task_id, None)
+            raise
 
     def admit_inference(
         self,
@@ -391,38 +475,52 @@ class SignablePathOrchestrator:
         InferenceService, which owns the governed prompt/response boundary.
         """
         state = self._get_task(task_id)
-        if successor_of(state.current_stage) is not Stage.INFERENCE:
-            self._advance(state, Stage.INFERENCE)
+        prior_stage = state.current_stage
+        prior_artifacts = dict(state.artifact_ids)
+        try:
+            with self._admission_boundary():
+                if successor_of(state.current_stage) is not Stage.INFERENCE:
+                    self._advance(state, Stage.INFERENCE)
 
-        self._capability.verify_for_action(
-            token=capability_token,
-            action_class="invoke_inference",
-            task_id=task_id,
-            root_revision_id=None,
-        )
-        self._capability.consume(
-            capability_token_id=str(capability_token["capability_token_id"]),
-            task_id=task_id,
-        )
+                self._capability.verify_for_action(
+                    token=capability_token,
+                    action_class="invoke_inference",
+                    task_id=task_id,
+                    root_revision_id=None,
+                )
+                self._capability.consume(
+                    capability_token_id=str(capability_token["capability_token_id"]),
+                    task_id=task_id,
+                )
 
-        context_artifact_id = state.artifact_ids[Stage.CONTEXT]
-        inference_artifact_id = self._inference.run_inference(
-            task_id=task_id,
-            context_artifact_id=context_artifact_id,
-            worker_profile=worker_profile,
-            model_route_id=model_route_id,
-            intent_id=state.intent_anchor.intent_id,
-        )
-        self._advance(state, Stage.INFERENCE)
-        state.artifact_ids[Stage.INFERENCE] = inference_artifact_id
+                context_artifact_id = state.artifact_ids[Stage.CONTEXT]
+                inference_artifact_id = self._inference.run_inference(
+                    task_id=task_id,
+                    context_artifact_id=context_artifact_id,
+                    worker_profile=worker_profile,
+                    model_route_id=model_route_id,
+                    intent_id=state.intent_anchor.intent_id,
+                )
+                self._advance(state, Stage.INFERENCE)
+                state.artifact_ids[Stage.INFERENCE] = inference_artifact_id
 
-        self._audit.append(
-            record_type="stage_entered",
-            task_id=task_id,
-            artifact_refs=[inference_artifact_id],
-            payload={"stage": Stage.INFERENCE.value},
-        )
-        return inference_artifact_id
+                self._audit.append(
+                    record_type="stage_entered",
+                    task_id=task_id,
+                    artifact_refs=[inference_artifact_id],
+                    payload={"stage": Stage.INFERENCE.value},
+                )
+                return inference_artifact_id
+        except BaseException:
+            # Restore in-memory state on any exception. The UoW has
+            # already rolled back (unexpected) or committed durable
+            # rejection evidence (expected governance rejection); in
+            # neither case should current_stage advance past a refused
+            # admission.
+            state.current_stage = prior_stage
+            state.artifact_ids.clear()
+            state.artifact_ids.update(prior_artifacts)
+            raise
 
     # The remaining stages follow the same narrow pattern. They are stubs
     # that call their owning service and record stage transitions. Concrete
@@ -436,35 +534,44 @@ class SignablePathOrchestrator:
         capability_token: Mapping[str, Any],
     ) -> str:
         state = self._get_task(task_id)
-        if successor_of(state.current_stage) is not Stage.PATCH_PROPOSAL:
-            self._advance(state, Stage.PATCH_PROPOSAL)
+        prior_stage = state.current_stage
+        prior_artifacts = dict(state.artifact_ids)
+        try:
+            with self._admission_boundary():
+                if successor_of(state.current_stage) is not Stage.PATCH_PROPOSAL:
+                    self._advance(state, Stage.PATCH_PROPOSAL)
 
-        self._capability.verify_for_action(
-            token=capability_token,
-            action_class="propose_patch",
-            task_id=task_id,
-            root_revision_id=None,
-        )
-        self._capability.consume(
-            capability_token_id=str(capability_token["capability_token_id"]),
-            task_id=task_id,
-        )
+                self._capability.verify_for_action(
+                    token=capability_token,
+                    action_class="propose_patch",
+                    task_id=task_id,
+                    root_revision_id=None,
+                )
+                self._capability.consume(
+                    capability_token_id=str(capability_token["capability_token_id"]),
+                    task_id=task_id,
+                )
 
-        inference_artifact_id = state.artifact_ids[Stage.INFERENCE]
-        proposal_id = self._patch_proposal.propose(
-            task_id=task_id,
-            inference_artifact_id=inference_artifact_id,
-            intent_id=state.intent_anchor.intent_id,
-        )
-        self._advance(state, Stage.PATCH_PROPOSAL)
-        state.artifact_ids[Stage.PATCH_PROPOSAL] = proposal_id
-        self._audit.append(
-            record_type="stage_entered",
-            task_id=task_id,
-            artifact_refs=[proposal_id],
-            payload={"stage": Stage.PATCH_PROPOSAL.value},
-        )
-        return proposal_id
+                inference_artifact_id = state.artifact_ids[Stage.INFERENCE]
+                proposal_id = self._patch_proposal.propose(
+                    task_id=task_id,
+                    inference_artifact_id=inference_artifact_id,
+                    intent_id=state.intent_anchor.intent_id,
+                )
+                self._advance(state, Stage.PATCH_PROPOSAL)
+                state.artifact_ids[Stage.PATCH_PROPOSAL] = proposal_id
+                self._audit.append(
+                    record_type="stage_entered",
+                    task_id=task_id,
+                    artifact_refs=[proposal_id],
+                    payload={"stage": Stage.PATCH_PROPOSAL.value},
+                )
+                return proposal_id
+        except BaseException:
+            state.current_stage = prior_stage
+            state.artifact_ids.clear()
+            state.artifact_ids.update(prior_artifacts)
+            raise
 
     def admit_validation(
         self,
@@ -473,35 +580,44 @@ class SignablePathOrchestrator:
         capability_token: Mapping[str, Any],
     ) -> str:
         state = self._get_task(task_id)
-        if successor_of(state.current_stage) is not Stage.VALIDATION:
-            self._advance(state, Stage.VALIDATION)
+        prior_stage = state.current_stage
+        prior_artifacts = dict(state.artifact_ids)
+        try:
+            with self._admission_boundary():
+                if successor_of(state.current_stage) is not Stage.VALIDATION:
+                    self._advance(state, Stage.VALIDATION)
 
-        self._capability.verify_for_action(
-            token=capability_token,
-            action_class="run_validation_quarantine",
-            task_id=task_id,
-            root_revision_id=None,
-        )
-        self._capability.consume(
-            capability_token_id=str(capability_token["capability_token_id"]),
-            task_id=task_id,
-        )
+                self._capability.verify_for_action(
+                    token=capability_token,
+                    action_class="run_validation_quarantine",
+                    task_id=task_id,
+                    root_revision_id=None,
+                )
+                self._capability.consume(
+                    capability_token_id=str(capability_token["capability_token_id"]),
+                    task_id=task_id,
+                )
 
-        proposal_id = state.artifact_ids[Stage.PATCH_PROPOSAL]
-        receipt_id = self._validation.validate(
-            task_id=task_id,
-            patch_proposal_id=proposal_id,
-            intent_id=state.intent_anchor.intent_id,
-        )
-        self._advance(state, Stage.VALIDATION)
-        state.artifact_ids[Stage.VALIDATION] = receipt_id
-        self._audit.append(
-            record_type="stage_entered",
-            task_id=task_id,
-            artifact_refs=[receipt_id],
-            payload={"stage": Stage.VALIDATION.value},
-        )
-        return receipt_id
+                proposal_id = state.artifact_ids[Stage.PATCH_PROPOSAL]
+                receipt_id = self._validation.validate(
+                    task_id=task_id,
+                    patch_proposal_id=proposal_id,
+                    intent_id=state.intent_anchor.intent_id,
+                )
+                self._advance(state, Stage.VALIDATION)
+                state.artifact_ids[Stage.VALIDATION] = receipt_id
+                self._audit.append(
+                    record_type="stage_entered",
+                    task_id=task_id,
+                    artifact_refs=[receipt_id],
+                    payload={"stage": Stage.VALIDATION.value},
+                )
+                return receipt_id
+        except BaseException:
+            state.current_stage = prior_stage
+            state.artifact_ids.clear()
+            state.artifact_ids.update(prior_artifacts)
+            raise
 
     def admit_review(
         self,
@@ -510,37 +626,46 @@ class SignablePathOrchestrator:
         capability_token: Mapping[str, Any],
     ) -> str:
         state = self._get_task(task_id)
-        if successor_of(state.current_stage) is not Stage.REVIEW:
-            self._advance(state, Stage.REVIEW)
+        prior_stage = state.current_stage
+        prior_artifacts = dict(state.artifact_ids)
+        try:
+            with self._admission_boundary():
+                if successor_of(state.current_stage) is not Stage.REVIEW:
+                    self._advance(state, Stage.REVIEW)
 
-        self._capability.verify_for_action(
-            token=capability_token,
-            action_class="render_review",
-            task_id=task_id,
-            root_revision_id=None,
-        )
-        self._capability.consume(
-            capability_token_id=str(capability_token["capability_token_id"]),
-            task_id=task_id,
-        )
+                self._capability.verify_for_action(
+                    token=capability_token,
+                    action_class="render_review",
+                    task_id=task_id,
+                    root_revision_id=None,
+                )
+                self._capability.consume(
+                    capability_token_id=str(capability_token["capability_token_id"]),
+                    task_id=task_id,
+                )
 
-        proposal_id = state.artifact_ids[Stage.PATCH_PROPOSAL]
-        receipt_id = state.artifact_ids[Stage.VALIDATION]
-        review_id = self._review.render_review(
-            task_id=task_id,
-            patch_proposal_id=proposal_id,
-            validation_receipt_id=receipt_id,
-            intent_id=state.intent_anchor.intent_id,
-        )
-        self._advance(state, Stage.REVIEW)
-        state.artifact_ids[Stage.REVIEW] = review_id
-        self._audit.append(
-            record_type="stage_entered",
-            task_id=task_id,
-            artifact_refs=[review_id],
-            payload={"stage": Stage.REVIEW.value},
-        )
-        return review_id
+                proposal_id = state.artifact_ids[Stage.PATCH_PROPOSAL]
+                receipt_id = state.artifact_ids[Stage.VALIDATION]
+                review_id = self._review.render_review(
+                    task_id=task_id,
+                    patch_proposal_id=proposal_id,
+                    validation_receipt_id=receipt_id,
+                    intent_id=state.intent_anchor.intent_id,
+                )
+                self._advance(state, Stage.REVIEW)
+                state.artifact_ids[Stage.REVIEW] = review_id
+                self._audit.append(
+                    record_type="stage_entered",
+                    task_id=task_id,
+                    artifact_refs=[review_id],
+                    payload={"stage": Stage.REVIEW.value},
+                )
+                return review_id
+        except BaseException:
+            state.current_stage = prior_stage
+            state.artifact_ids.clear()
+            state.artifact_ids.update(prior_artifacts)
+            raise
 
     def admit_approval(
         self,
@@ -549,39 +674,48 @@ class SignablePathOrchestrator:
         capability_token: Mapping[str, Any],
     ) -> str:
         state = self._get_task(task_id)
-        if successor_of(state.current_stage) is not Stage.APPROVAL:
-            self._advance(state, Stage.APPROVAL)
+        prior_stage = state.current_stage
+        prior_artifacts = dict(state.artifact_ids)
+        try:
+            with self._admission_boundary():
+                if successor_of(state.current_stage) is not Stage.APPROVAL:
+                    self._advance(state, Stage.APPROVAL)
 
-        self._capability.verify_for_action(
-            token=capability_token,
-            action_class="grant_approval",
-            task_id=task_id,
-            root_revision_id=None,
-        )
-        self._capability.consume(
-            capability_token_id=str(capability_token["capability_token_id"]),
-            task_id=task_id,
-        )
+                self._capability.verify_for_action(
+                    token=capability_token,
+                    action_class="grant_approval",
+                    task_id=task_id,
+                    root_revision_id=None,
+                )
+                self._capability.consume(
+                    capability_token_id=str(capability_token["capability_token_id"]),
+                    task_id=task_id,
+                )
 
-        review_id = state.artifact_ids[Stage.REVIEW]
-        receipt_id = state.artifact_ids[Stage.VALIDATION]
-        context_id = state.artifact_ids[Stage.CONTEXT]
-        approval_id = self._approval.evaluate_barrier(
-            task_id=task_id,
-            review_artifact_id=review_id,
-            required_receipt_ids=[receipt_id],
-            reviewed_context_artifact_id=context_id,
-            intent_id=state.intent_anchor.intent_id,
-        )
-        self._advance(state, Stage.APPROVAL)
-        state.artifact_ids[Stage.APPROVAL] = approval_id
-        self._audit.append(
-            record_type="stage_entered",
-            task_id=task_id,
-            artifact_refs=[approval_id],
-            payload={"stage": Stage.APPROVAL.value},
-        )
-        return approval_id
+                review_id = state.artifact_ids[Stage.REVIEW]
+                receipt_id = state.artifact_ids[Stage.VALIDATION]
+                context_id = state.artifact_ids[Stage.CONTEXT]
+                approval_id = self._approval.evaluate_barrier(
+                    task_id=task_id,
+                    review_artifact_id=review_id,
+                    required_receipt_ids=[receipt_id],
+                    reviewed_context_artifact_id=context_id,
+                    intent_id=state.intent_anchor.intent_id,
+                )
+                self._advance(state, Stage.APPROVAL)
+                state.artifact_ids[Stage.APPROVAL] = approval_id
+                self._audit.append(
+                    record_type="stage_entered",
+                    task_id=task_id,
+                    artifact_refs=[approval_id],
+                    payload={"stage": Stage.APPROVAL.value},
+                )
+                return approval_id
+        except BaseException:
+            state.current_stage = prior_stage
+            state.artifact_ids.clear()
+            state.artifact_ids.update(prior_artifacts)
+            raise
 
     def admit_revision_seal(
         self,
@@ -590,37 +724,46 @@ class SignablePathOrchestrator:
         capability_token: Mapping[str, Any],
     ) -> str:
         state = self._get_task(task_id)
-        if successor_of(state.current_stage) is not Stage.REVISION_SEAL:
-            self._advance(state, Stage.REVISION_SEAL)
+        prior_stage = state.current_stage
+        prior_artifacts = dict(state.artifact_ids)
+        try:
+            with self._admission_boundary():
+                if successor_of(state.current_stage) is not Stage.REVISION_SEAL:
+                    self._advance(state, Stage.REVISION_SEAL)
 
-        self._capability.verify_for_action(
-            token=capability_token,
-            action_class="seal_revision",
-            task_id=task_id,
-            root_revision_id=None,
-        )
-        self._capability.consume(
-            capability_token_id=str(capability_token["capability_token_id"]),
-            task_id=task_id,
-        )
+                self._capability.verify_for_action(
+                    token=capability_token,
+                    action_class="seal_revision",
+                    task_id=task_id,
+                    root_revision_id=None,
+                )
+                self._capability.consume(
+                    capability_token_id=str(capability_token["capability_token_id"]),
+                    task_id=task_id,
+                )
 
-        approval_id = state.artifact_ids[Stage.APPROVAL]
-        context_id = state.artifact_ids[Stage.CONTEXT]
-        revision_id = self._seal.seal_revision(
-            task_id=task_id,
-            approval_id=approval_id,
-            context_artifact_id=context_id,
-            intent_id=state.intent_anchor.intent_id,
-        )
-        self._advance(state, Stage.REVISION_SEAL)
-        state.artifact_ids[Stage.REVISION_SEAL] = revision_id
-        self._audit.append(
-            record_type="stage_entered",
-            task_id=task_id,
-            artifact_refs=[revision_id],
-            payload={"stage": Stage.REVISION_SEAL.value},
-        )
-        return revision_id
+                approval_id = state.artifact_ids[Stage.APPROVAL]
+                context_id = state.artifact_ids[Stage.CONTEXT]
+                revision_id = self._seal.seal_revision(
+                    task_id=task_id,
+                    approval_id=approval_id,
+                    context_artifact_id=context_id,
+                    intent_id=state.intent_anchor.intent_id,
+                )
+                self._advance(state, Stage.REVISION_SEAL)
+                state.artifact_ids[Stage.REVISION_SEAL] = revision_id
+                self._audit.append(
+                    record_type="stage_entered",
+                    task_id=task_id,
+                    artifact_refs=[revision_id],
+                    payload={"stage": Stage.REVISION_SEAL.value},
+                )
+                return revision_id
+        except BaseException:
+            state.current_stage = prior_stage
+            state.artifact_ids.clear()
+            state.artifact_ids.update(prior_artifacts)
+            raise
 
     def admit_evidence(
         self,
@@ -629,58 +772,67 @@ class SignablePathOrchestrator:
         capability_token: Mapping[str, Any],
     ) -> str:
         state = self._get_task(task_id)
-        if successor_of(state.current_stage) is not Stage.EVIDENCE:
-            self._advance(state, Stage.EVIDENCE)
+        prior_stage = state.current_stage
+        prior_artifacts = dict(state.artifact_ids)
+        try:
+            with self._admission_boundary():
+                if successor_of(state.current_stage) is not Stage.EVIDENCE:
+                    self._advance(state, Stage.EVIDENCE)
 
-        self._capability.verify_for_action(
-            token=capability_token,
-            action_class="append_evidence",
-            task_id=task_id,
-            root_revision_id=None,
-        )
-        self._capability.consume(
-            capability_token_id=str(capability_token["capability_token_id"]),
-            task_id=task_id,
-        )
+                self._capability.verify_for_action(
+                    token=capability_token,
+                    action_class="append_evidence",
+                    task_id=task_id,
+                    root_revision_id=None,
+                )
+                self._capability.consume(
+                    capability_token_id=str(capability_token["capability_token_id"]),
+                    task_id=task_id,
+                )
 
-        revision_id = state.artifact_ids[Stage.REVISION_SEAL]
-        replay_anchor_id = self._evidence.close_evidence(
-            task_id=task_id, revision_id=revision_id
-        )
-        self._advance(state, Stage.EVIDENCE)
-        state.artifact_ids[Stage.EVIDENCE] = replay_anchor_id
-        self._audit.append(
-            record_type="stage_entered",
-            task_id=task_id,
-            artifact_refs=[replay_anchor_id],
-            payload={"stage": Stage.EVIDENCE.value},
-        )
-        # Evidence -> SEALED terminal. This is the only way to reach SEALED.
-        self._advance(state, Stage.SEALED)
-        # AUDIT-003 / §22.1: name the durable
-        # ``intent_anchor_records.intent_id`` (the one
-        # ``_emit_intent_anchor`` minted at admit_context and that lives
-        # on ``state.intent_anchor``) in both ``artifact_refs`` and
-        # ``payload`` so a reviewer reading only this terminal seal
-        # record can recover the originating-intent linkage without a
-        # second fetch. Authoritative fail-closed verification of
-        # ``intent_id`` against ``intent_anchor_records`` remains the
-        # responsibility of ``RevisionSealService`` downstream; this
-        # surface performs no independent verification. Absent / empty
-        # ``intent_id`` preserves the prior audit shape exactly.
-        audit_artifact_refs: list[str] = list(state.artifact_ids.values())
-        audit_payload: dict[str, Any] = {"stage": Stage.SEALED.value}
-        anchor_intent_id = getattr(state.intent_anchor, "intent_id", None)
-        if isinstance(anchor_intent_id, str) and anchor_intent_id:
-            audit_artifact_refs.append(anchor_intent_id)
-            audit_payload["intent_id"] = anchor_intent_id
-        self._audit.append(
-            record_type="signable_path_sealed",
-            task_id=task_id,
-            artifact_refs=audit_artifact_refs,
-            payload=audit_payload,
-        )
-        return replay_anchor_id
+                revision_id = state.artifact_ids[Stage.REVISION_SEAL]
+                replay_anchor_id = self._evidence.close_evidence(
+                    task_id=task_id, revision_id=revision_id
+                )
+                self._advance(state, Stage.EVIDENCE)
+                state.artifact_ids[Stage.EVIDENCE] = replay_anchor_id
+                self._audit.append(
+                    record_type="stage_entered",
+                    task_id=task_id,
+                    artifact_refs=[replay_anchor_id],
+                    payload={"stage": Stage.EVIDENCE.value},
+                )
+                # Evidence -> SEALED terminal. This is the only way to reach SEALED.
+                self._advance(state, Stage.SEALED)
+                # AUDIT-003 / §22.1: name the durable
+                # ``intent_anchor_records.intent_id`` (the one
+                # ``_emit_intent_anchor`` minted at admit_context and that lives
+                # on ``state.intent_anchor``) in both ``artifact_refs`` and
+                # ``payload`` so a reviewer reading only this terminal seal
+                # record can recover the originating-intent linkage without a
+                # second fetch. Authoritative fail-closed verification of
+                # ``intent_id`` against ``intent_anchor_records`` remains the
+                # responsibility of ``RevisionSealService`` downstream; this
+                # surface performs no independent verification. Absent / empty
+                # ``intent_id`` preserves the prior audit shape exactly.
+                audit_artifact_refs: list[str] = list(state.artifact_ids.values())
+                audit_payload: dict[str, Any] = {"stage": Stage.SEALED.value}
+                anchor_intent_id = getattr(state.intent_anchor, "intent_id", None)
+                if isinstance(anchor_intent_id, str) and anchor_intent_id:
+                    audit_artifact_refs.append(anchor_intent_id)
+                    audit_payload["intent_id"] = anchor_intent_id
+                self._audit.append(
+                    record_type="signable_path_sealed",
+                    task_id=task_id,
+                    artifact_refs=audit_artifact_refs,
+                    payload=audit_payload,
+                )
+                return replay_anchor_id
+        except BaseException:
+            state.current_stage = prior_stage
+            state.artifact_ids.clear()
+            state.artifact_ids.update(prior_artifacts)
+            raise
 
     # ------------------------------------------------------------------
     # abandonment / introspection

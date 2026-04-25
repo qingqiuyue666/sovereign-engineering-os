@@ -234,6 +234,7 @@ class AcceptanceHarness:
             budget_governor=self.budget_governor,
             context_repository=self.ctx_repo,
             intent_anchor_repository=self.intent_repo,
+            connection=self.conn,
         )
 
     def close(self) -> None:
