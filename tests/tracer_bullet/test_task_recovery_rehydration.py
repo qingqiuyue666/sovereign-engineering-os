@@ -267,6 +267,76 @@ class TestControlledTaskRehydration(unittest.TestCase):
         )
 
     # ------------------------------------------------------------------
+    # Pin: SEALED-restored tasks must refuse any further admission.
+    # ABANDONED-restored already covered above (G); SEALED needs the
+    # same protection. No implementation change should be required —
+    # `Stage.SEALED` is a terminal stage with no successors per
+    # `kernel.lifecycle.stage_types`, so `_advance` from SEALED
+    # to any next stage raises `IllegalStageTransitionRejected`
+    # (subclass of `OrchestratorRejected`) and emits the durable
+    # `illegal_stage_transition_rejected` audit row inside the
+    # KernelUnitOfWork from PR #125.
+    # ------------------------------------------------------------------
+
+    def test_restore_sealed_terminal_snapshot_refuses_further_admission(
+        self,
+    ) -> None:
+        ids = self.harness.run_full_happy_path()
+        snapshot = self.reader.reconstruct(ids["task_id"])
+        verdict = self.classifier.classify(snapshot)
+        self.assertEqual(verdict, RecoveryClass.SEALED)
+
+        fresh_orch = fresh_orchestrator_from_harness(self.harness)
+        fresh_orch.restore_task_from_snapshot(
+            snapshot=snapshot, recovery_class=verdict
+        )
+        self.assertEqual(
+            fresh_orch.current_stage(ids["task_id"]), Stage.SEALED
+        )
+
+        # Snapshot the count of stage_entered audits for this task
+        # before attempting an impossible post-seal admission.
+        before_stage_entered_count = self.harness.conn.execute(
+            "SELECT COUNT(*) FROM audit_records "
+            "WHERE task_id = ? AND record_type = 'stage_entered';",
+            (ids["task_id"],),
+        ).fetchone()[0]
+
+        # Any admit_* against a SEALED task is illegal: SEALED has no
+        # successors. Issue an inference capability and attempt to
+        # admit it; admission must be refused fail-closed.
+        bogus_token = self.harness.issue_capability(
+            "invoke_inference", ids["task_id"]
+        )
+        with self.assertRaises(OrchestratorRejected):
+            fresh_orch.admit_inference(
+                task_id=ids["task_id"],
+                capability_token=bogus_token,
+                worker_profile="acceptance_worker",
+                model_route_id="fake-model-v1",
+            )
+
+        # In-memory state must remain SEALED.
+        self.assertEqual(
+            fresh_orch.current_stage(ids["task_id"]), Stage.SEALED
+        )
+
+        # No new stage_entered audit row was written for the refused
+        # admission. (The illegal_stage_transition_rejected row IS
+        # written and durable per PR #125, but stage_entered count
+        # must be unchanged.)
+        after_stage_entered_count = self.harness.conn.execute(
+            "SELECT COUNT(*) FROM audit_records "
+            "WHERE task_id = ? AND record_type = 'stage_entered';",
+            (ids["task_id"],),
+        ).fetchone()[0]
+        self.assertEqual(
+            after_stage_entered_count,
+            before_stage_entered_count,
+            "refused post-seal admission must not write a stage_entered audit",
+        )
+
+    # ------------------------------------------------------------------
     # G
     # ------------------------------------------------------------------
 
