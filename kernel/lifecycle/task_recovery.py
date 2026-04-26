@@ -84,6 +84,7 @@ class TaskLifecycleSnapshot:
     lifecycle_record_count: int
     malformed_event_count: int = 0
     intent_anchor_count: int = 1
+    intent_created_at: Optional[str] = None
 
 
 class ArtifactExistenceResolver(Protocol):
@@ -134,8 +135,20 @@ class TaskRecoveryReader:
         if not intent_rows:
             return None
 
+        # Earliest row supplies the diagnostic anchor (P0-2 behavior).
+        # Duplicate-anchor anomaly is exposed via `intent_anchor_count`
+        # and the classifier surfaces NEEDS_MANUAL_REVIEW; the same
+        # earliest-row data is used for `intent_created_at` so P0-3
+        # rehydration can reconstruct an `IntentCausalAnchor` faithful
+        # to the durable row's timestamp.
         intent_id = str(intent_rows[0]["intent_id"])
         intent_anchor_count = len(intent_rows)
+        intent_created_at_raw = intent_rows[0].get("created_at")
+        intent_created_at: Optional[str]
+        if isinstance(intent_created_at_raw, str) and intent_created_at_raw:
+            intent_created_at = intent_created_at_raw
+        else:
+            intent_created_at = None
 
         rows = self._audit_repo.list_task_lifecycle_for_task(task_id)
         artifact_ids: dict[Stage, str] = {}
@@ -189,6 +202,7 @@ class TaskRecoveryReader:
             lifecycle_record_count=len(rows),
             malformed_event_count=malformed_event_count,
             intent_anchor_count=intent_anchor_count,
+            intent_created_at=intent_created_at,
         )
 
     @staticmethod

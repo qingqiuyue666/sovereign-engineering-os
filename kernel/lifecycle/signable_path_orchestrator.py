@@ -50,6 +50,10 @@ from kernel.services.inference_service import InferenceBudgetExhausted
 from kernel.services.review_service import ReviewRejected
 from kernel.services.validation_service import ValidationRejected
 from kernel.stores.sqlite.unit_of_work import KernelUnitOfWork
+from kernel.lifecycle.task_recovery import (
+    RecoveryClass,
+    TaskLifecycleSnapshot,
+)
 
 
 # Concrete kernel rejection exceptions that are emit-rejection-audit-
@@ -892,6 +896,116 @@ class SignablePathOrchestrator:
     def current_stage(self, task_id: str) -> Optional[Stage]:
         state = self._tasks.get(task_id)
         return None if state is None else state.current_stage
+
+    # ------------------------------------------------------------------
+    # P0-3 controlled task rehydration (phase 1)
+    # ------------------------------------------------------------------
+
+    def restore_task_from_snapshot(
+        self,
+        *,
+        snapshot: TaskLifecycleSnapshot,
+        recovery_class: RecoveryClass,
+    ) -> None:
+        """Restore in-memory `_tasks` state from a durable snapshot.
+
+        Read-side bridge from P0-2 reconstruction to a resumable
+        in-memory orchestrator. This method:
+
+        - performs zero durable writes (no audit_records, no
+          intent_anchor_records, no artifact rows, no
+          KernelUnitOfWork);
+        - calls no service and consumes no capability;
+        - does not change `admit_*` semantics;
+        - is the only path that can populate `self._tasks` outside the
+          eight-stage admission surface, and is therefore explicit and
+          fail-closed at every guard.
+
+        Recovery classes:
+        - `SAFE_TO_RESUME`, `SEALED`, `ABANDONED` are admissible.
+        - `UNRECOVERABLE` and `NEEDS_MANUAL_REVIEW` are refused
+          fail-closed (`OrchestratorRejected`).
+
+        Snapshot integrity guards (any failure raises
+        `OrchestratorRejected`):
+        - `current_stage` is not None
+        - `intent_id` is non-empty
+        - `intent_created_at` is non-empty
+        - `intent_anchor_count == 1`
+        - `malformed_event_count == 0`
+
+        In-memory uniqueness guard:
+        - `task_id` must not already exist in `self._tasks`. The
+          method never overwrites an existing in-memory entry.
+
+        After all guards pass, an `IntentCausalAnchor` is constructed
+        from the snapshot's intent fields, a `TaskLifecycleState` is
+        constructed at `snapshot.current_stage` with `artifact_ids`
+        copied from the snapshot, and `state.abandoned` is set when
+        `recovery_class == ABANDONED`. The new state is inserted into
+        `self._tasks`. No other side effect.
+        """
+        if recovery_class is RecoveryClass.UNRECOVERABLE:
+            raise OrchestratorRejected(
+                "restore refused: recovery_class=UNRECOVERABLE"
+            )
+        if recovery_class is RecoveryClass.NEEDS_MANUAL_REVIEW:
+            raise OrchestratorRejected(
+                "restore refused: recovery_class=NEEDS_MANUAL_REVIEW"
+            )
+        if recovery_class not in (
+            RecoveryClass.SAFE_TO_RESUME,
+            RecoveryClass.SEALED,
+            RecoveryClass.ABANDONED,
+        ):
+            raise OrchestratorRejected(
+                f"restore refused: unsupported recovery_class={recovery_class!r}"
+            )
+
+        if snapshot.current_stage is None:
+            raise OrchestratorRejected(
+                "restore refused: snapshot.current_stage is None"
+            )
+        if not snapshot.intent_id:
+            raise OrchestratorRejected(
+                "restore refused: snapshot.intent_id is empty"
+            )
+        if not snapshot.intent_created_at:
+            raise OrchestratorRejected(
+                "restore refused: snapshot.intent_created_at is missing"
+            )
+        if snapshot.intent_anchor_count != 1:
+            raise OrchestratorRejected(
+                "restore refused: snapshot.intent_anchor_count="
+                f"{snapshot.intent_anchor_count}"
+            )
+        if snapshot.malformed_event_count > 0:
+            raise OrchestratorRejected(
+                "restore refused: snapshot.malformed_event_count="
+                f"{snapshot.malformed_event_count}"
+            )
+
+        if snapshot.task_id in self._tasks:
+            raise OrchestratorRejected(
+                f"restore refused: task already in memory: {snapshot.task_id}"
+            )
+
+        anchor = IntentCausalAnchor(
+            intent_id=snapshot.intent_id,
+            task_id=snapshot.task_id,
+            state="admitted",
+            created_at=snapshot.intent_created_at,
+        )
+        state = TaskLifecycleState(
+            task_id=snapshot.task_id,
+            intent_anchor=anchor,
+            current_stage=snapshot.current_stage,
+        )
+        for stage, artifact_id in snapshot.artifact_ids.items():
+            state.artifact_ids[stage] = artifact_id
+        if recovery_class is RecoveryClass.ABANDONED:
+            state.abandoned = True
+        self._tasks[snapshot.task_id] = state
 
     # ------------------------------------------------------------------
     # narrow real-fix bridge chain
