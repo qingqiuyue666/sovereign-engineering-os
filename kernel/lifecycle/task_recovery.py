@@ -292,3 +292,79 @@ class TaskRecoveryClassifier:
         if snapshot.current_stage is None:
             return RecoveryClass.NEEDS_MANUAL_REVIEW
         return RecoveryClass.SAFE_TO_RESUME
+
+
+class StageArtifactExistenceResolver:
+    """Standard read-only artifact existence resolver for the eight
+    artifact-bearing stages of the narrow signable path.
+
+    Implements the callable protocol expected by
+    `TaskRecoveryClassifier(artifact_exists=...)`. For each
+    artifact-bearing stage in `TaskLifecycleSnapshot.artifact_ids`,
+    this resolver delegates to the corresponding repository's
+    `fetch(artifact_id)` and returns `True` only when the row exists.
+
+    Out of scope:
+    - Writing rows of any kind.
+    - Calling services.
+    - Importing `SignablePathOrchestrator`.
+
+    Repositories may be passed as `None` for stages a caller does not
+    wire (the resolver returns `False` for those stages — fail-closed,
+    not silent SAFE_TO_RESUME).
+
+    Terminal stages (`Stage.SEALED`, `Stage.ABANDONED`) are not
+    artifact-bearing; resolver returns `False` for them so any
+    snapshot that mistakenly indexed an "artifact id" under a
+    terminal-state key is surfaced as NEEDS_MANUAL_REVIEW by the
+    classifier.
+    """
+
+    __slots__ = ("_stage_repos",)
+
+    _ARTIFACT_BEARING_STAGES: tuple[Stage, ...] = (
+        Stage.CONTEXT,
+        Stage.INFERENCE,
+        Stage.PATCH_PROPOSAL,
+        Stage.VALIDATION,
+        Stage.REVIEW,
+        Stage.APPROVAL,
+        Stage.REVISION_SEAL,
+        Stage.EVIDENCE,
+    )
+
+    def __init__(
+        self,
+        *,
+        context_repository: Optional[Any] = None,
+        inference_repository: Optional[Any] = None,
+        patch_proposal_repository: Optional[Any] = None,
+        validation_receipt_repository: Optional[Any] = None,
+        review_repository: Optional[Any] = None,
+        approval_repository: Optional[Any] = None,
+        revision_repository: Optional[Any] = None,
+        replay_anchor_repository: Optional[Any] = None,
+    ) -> None:
+        self._stage_repos: dict[Stage, Optional[Any]] = {
+            Stage.CONTEXT: context_repository,
+            Stage.INFERENCE: inference_repository,
+            Stage.PATCH_PROPOSAL: patch_proposal_repository,
+            Stage.VALIDATION: validation_receipt_repository,
+            Stage.REVIEW: review_repository,
+            Stage.APPROVAL: approval_repository,
+            Stage.REVISION_SEAL: revision_repository,
+            Stage.EVIDENCE: replay_anchor_repository,
+        }
+
+    def __call__(self, stage: Stage, artifact_id: str) -> bool:
+        if not isinstance(artifact_id, str) or not artifact_id:
+            return False
+        if stage not in self._ARTIFACT_BEARING_STAGES:
+            # Terminal stages and any unmapped stage value: not
+            # artifact-bearing on the narrow signable path.
+            return False
+        repo = self._stage_repos.get(stage)
+        if repo is None:
+            return False
+        row = repo.fetch(artifact_id)
+        return row is not None
