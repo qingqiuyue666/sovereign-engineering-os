@@ -47,6 +47,7 @@ from kernel.lifecycle.recovery_gate import (
     build_standard_recovery_gate,
 )
 from kernel.lifecycle.stage_types import Stage
+from kernel.lifecycle.task_recovery import RecoveryClass
 from kernel.stores.sqlite.repositories import (
     ApprovalArtifactRepository,
     AuditRepository,
@@ -91,6 +92,9 @@ def build_parser() -> argparse.ArgumentParser:
     Subcommands:
     - `evaluate` — run RecoveryGate.evaluate against a SQLite database
       and print the deterministic JSON verdict.
+    - `restore-dry-run` — same evaluation, plus restore-eligibility
+      verdict (`restore_allowed`, `would_restore`, `restore_mode`,
+      `refusal_reason`). Never calls restore.
     """
     parser = argparse.ArgumentParser(
         prog="kernel.lifecycle.recovery_cli",
@@ -115,6 +119,24 @@ def build_parser() -> argparse.ArgumentParser:
         "--task-id",
         required=True,
         help="task_id to evaluate.",
+    )
+
+    dry_run = sub.add_parser(
+        "restore-dry-run",
+        help=(
+            "Evaluate restore eligibility for one task_id without "
+            "calling restore. JSON verdict only."
+        ),
+    )
+    dry_run.add_argument(
+        "--db",
+        required=True,
+        help="Path to the SQLite database file.",
+    )
+    dry_run.add_argument(
+        "--task-id",
+        required=True,
+        help="task_id to evaluate for restore eligibility.",
     )
     return parser
 
@@ -192,6 +214,67 @@ def render_result(result: RecoveryGateResult) -> dict[str, Any]:
     }
 
 
+_RESTORE_ALLOWED_CLASSES: frozenset[RecoveryClass] = frozenset(
+    {
+        RecoveryClass.SAFE_TO_RESUME,
+        RecoveryClass.SEALED,
+        RecoveryClass.ABANDONED,
+    }
+)
+
+_TERMINAL_INTROSPECTION_CLASSES: frozenset[RecoveryClass] = frozenset(
+    {RecoveryClass.SEALED, RecoveryClass.ABANDONED}
+)
+
+
+def _restore_mode_for(recovery_class: RecoveryClass) -> str:
+    if recovery_class is RecoveryClass.SAFE_TO_RESUME:
+        return "resume"
+    if recovery_class in _TERMINAL_INTROSPECTION_CLASSES:
+        return "terminal_introspection"
+    return "refused"
+
+
+def _refusal_reason_for(recovery_class: RecoveryClass) -> Optional[str]:
+    if recovery_class is RecoveryClass.UNRECOVERABLE:
+        return "unrecoverable"
+    if recovery_class is RecoveryClass.NEEDS_MANUAL_REVIEW:
+        return "needs_manual_review"
+    return None
+
+
+def render_restore_dry_run(result: RecoveryGateResult) -> dict[str, Any]:
+    """Render a `RecoveryGateResult` to a deterministic restore-dry-run
+    JSON-ready dict.
+
+    Adds restore-eligibility fields (`restore_allowed`,
+    `would_restore`, `restore_mode`, `refusal_reason`) on top of the
+    evaluate-shape fields. `restored` is always `False` for dry-run.
+    """
+    snap = result.snapshot
+    snapshot_present = snap is not None
+    recovery_class = result.recovery_class
+    restore_allowed = recovery_class in _RESTORE_ALLOWED_CLASSES
+    return {
+        "task_id": result.task_id,
+        "command": "restore-dry-run",
+        "recovery_class": recovery_class.value,
+        "reason": result.reason,
+        "restore_allowed": restore_allowed,
+        "would_restore": restore_allowed,
+        "restored": False,
+        "snapshot_present": snapshot_present,
+        "current_stage": _stage_str(snap.current_stage) if snap else None,
+        "terminal_state": _stage_str(snap.terminal_state) if snap else None,
+        "artifact_count": len(snap.artifact_ids) if snap else 0,
+        "intent_anchor_count": snap.intent_anchor_count if snap else None,
+        "malformed_event_count": snap.malformed_event_count if snap else None,
+        "last_event_sequence": snap.last_event_sequence if snap else None,
+        "restore_mode": _restore_mode_for(recovery_class),
+        "refusal_reason": _refusal_reason_for(recovery_class),
+    }
+
+
 def _emit_json(payload: dict[str, Any]) -> str:
     return json.dumps(payload, sort_keys=True, separators=(",", ":"))
 
@@ -212,7 +295,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         code = exc.code if isinstance(exc.code, int) else EXIT_INVALID_ARGS
         return code if code is not None else EXIT_INVALID_ARGS
 
-    if args.command != "evaluate":
+    if args.command not in ("evaluate", "restore-dry-run"):
         # `add_subparsers(required=True)` makes this unreachable for
         # the current parser shape, but guard anyway for forward
         # additions.
@@ -251,7 +334,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             traceback.print_exc(file=sys.stderr)
             return EXIT_UNEXPECTED
 
-        sys.stdout.write(_emit_json(render_result(result)) + "\n")
+        if args.command == "evaluate":
+            payload = render_result(result)
+        else:  # restore-dry-run
+            payload = render_restore_dry_run(result)
+        sys.stdout.write(_emit_json(payload) + "\n")
         sys.stdout.flush()
         return EXIT_OK
     finally:
