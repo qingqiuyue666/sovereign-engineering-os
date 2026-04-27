@@ -37,8 +37,9 @@ sys.path.insert(
 )
 
 from kernel.lifecycle.recovery_cli import (
-    EXIT_OK,
+    EXIT_DB_ERROR,
     EXIT_INVALID_ARGS,
+    EXIT_OK,
     evaluate_task,
     main,
     render_result,
@@ -369,6 +370,39 @@ class TestRecoveryCliMainEntry(unittest.TestCase):
         with redirect_stdout(buf_out), redirect_stderr(buf_err):
             rc = main(["evaluate", "--task-id", "task-x"])
         self.assertEqual(rc, EXIT_INVALID_ARGS)
+
+    # ------------------------------------------------------------------
+    # F — read-only operator boundary: missing --db path must not
+    # initialize a new SQLite database as a side effect of a typo.
+    # ------------------------------------------------------------------
+
+    def test_cli_missing_db_path_returns_3_and_does_not_create_file(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            missing_path = os.path.join(tmpdir, "missing.db")
+            self.assertFalse(os.path.exists(missing_path))
+
+            buf_out = io.StringIO()
+            buf_err = io.StringIO()
+            with redirect_stdout(buf_out), redirect_stderr(buf_err):
+                rc = main(
+                    [
+                        "evaluate",
+                        "--db",
+                        missing_path,
+                        "--task-id",
+                        "task-x",
+                    ]
+                )
+            self.assertEqual(rc, EXIT_DB_ERROR)
+            self.assertIn(
+                "database file does not exist", buf_err.getvalue()
+            )
+            self.assertFalse(
+                os.path.exists(missing_path),
+                "CLI must not create a new SQLite file at a missing --db path",
+            )
 
 
 if __name__ == "__main__":

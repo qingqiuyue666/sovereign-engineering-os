@@ -38,6 +38,7 @@ import sqlite3
 import sys
 import traceback
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Optional, Sequence
 
 from kernel.lifecycle.recovery_gate import (
@@ -223,8 +224,20 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     conn: Optional[sqlite3.Connection] = None
     try:
+        # Read-only operator boundary: the CLI must not initialize a
+        # new database as a side effect of a typo. `sqlite3.connect`
+        # silently creates a new file when the path does not exist;
+        # check first and fail closed with EXIT_DB_ERROR.
+        db_path = Path(args.db)
+        if not db_path.is_file():
+            print(
+                "database open / repository construction error: "
+                f"database file does not exist: {db_path}",
+                file=sys.stderr,
+            )
+            return EXIT_DB_ERROR
         try:
-            conn = open_connection(args.db)
+            conn = open_connection(db_path)
         except Exception as exc:
             print(
                 f"database open / repository construction error: {exc}",
