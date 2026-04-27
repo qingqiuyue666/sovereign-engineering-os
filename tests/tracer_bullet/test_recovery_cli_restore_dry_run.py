@@ -202,6 +202,32 @@ class TestRestoreDryRunPureHelpers(unittest.TestCase):
         self.assertEqual(rendered["refusal_reason"], "needs_manual_review")
 
     # ------------------------------------------------------------------
+    # 9a. would_restore is a future-projection signal; it does NOT
+    # mean this dry-run command performed restore.
+    # ------------------------------------------------------------------
+
+    def test_restore_dry_run_would_restore_does_not_mean_restored(
+        self,
+    ) -> None:
+        """`would_restore=True` and `restored=False` must coexist for
+        SAFE_TO_RESUME on a dry-run.
+
+        `would_restore` projects what a future non-dry-run restore
+        command would attempt. `restored` reports whether THIS command
+        actually performed restore — and for `restore-dry-run` it is
+        always `False`.
+        """
+        task_id = f"task-{uuid4().hex[:8]}"
+        self.harness.run_through_stage(task_id, Stage.INFERENCE)
+        result = self.gate.evaluate(task_id)
+        rendered = render_restore_dry_run(result)
+        self.assertEqual(rendered["recovery_class"], "safe_to_resume")
+        self.assertTrue(rendered["restore_allowed"])
+        self.assertTrue(rendered["would_restore"])
+        self.assertFalse(rendered["restored"])
+        self.assertEqual(rendered["restore_mode"], "resume")
+
+    # ------------------------------------------------------------------
     # 9. evaluate JSON shape unchanged (does not include dry-run keys)
     # ------------------------------------------------------------------
 

@@ -250,6 +250,27 @@ def render_restore_dry_run(result: RecoveryGateResult) -> dict[str, Any]:
     Adds restore-eligibility fields (`restore_allowed`,
     `would_restore`, `restore_mode`, `refusal_reason`) on top of the
     evaluate-shape fields. `restored` is always `False` for dry-run.
+
+    Field semantics (load-bearing for operator interpretation):
+
+    - ``restore_allowed`` — boolean. True iff the recovery class is
+      one of ``SAFE_TO_RESUME``, ``SEALED``, ``ABANDONED``. Reports
+      whether the gate's policy admits restore for this verdict; it
+      does not imply any action was taken.
+
+    - ``would_restore`` — boolean. True iff a future non-dry-run
+      restore command (e.g. an operator-driven
+      ``RecoveryGate.restore_if_allowed`` call) would attempt restore
+      for this verdict. Tracks ``restore_allowed`` exactly today, but
+      is exposed as a separate field so future policies can refine
+      "allowed by class but skipped for another reason" without
+      reshaping the JSON. ``would_restore`` does NOT mean this
+      dry-run invocation performed restore.
+
+    - ``restored`` — boolean. ALWAYS ``False`` for every
+      restore-dry-run response. The dry-run command never calls
+      ``restore_if_allowed`` and never calls
+      ``restore_task_from_snapshot``; it is a pure read-side report.
     """
     snap = result.snapshot
     snapshot_present = snap is not None
@@ -261,7 +282,13 @@ def render_restore_dry_run(result: RecoveryGateResult) -> dict[str, Any]:
         "recovery_class": recovery_class.value,
         "reason": result.reason,
         "restore_allowed": restore_allowed,
+        # `would_restore` mirrors `restore_allowed` today. See the
+        # docstring above: it is the explicit "future restore would
+        # attempt" projection, kept as a separate field so callers
+        # never confuse it with `restored`.
         "would_restore": restore_allowed,
+        # Always False on dry-run: this command does not perform
+        # restore under any circumstances.
         "restored": False,
         "snapshot_present": snapshot_present,
         "current_stage": _stage_str(snap.current_stage) if snap else None,
