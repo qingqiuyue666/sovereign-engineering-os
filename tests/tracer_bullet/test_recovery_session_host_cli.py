@@ -27,6 +27,9 @@ sys.path.insert(
 )
 
 from kernel.lifecycle.recovery_session_host_cli import build_parser, main
+from kernel.lifecycle.recovery_session_host import (
+    RecoverySessionHostFactoryResult,
+)
 from tests.tracer_bullet.test_recovery_session_host_factory import (
     _audit_count,
     _initialize_empty_db,
@@ -48,6 +51,15 @@ def _invoke(argv: Sequence[str]) -> tuple[int, str, str]:
     with redirect_stdout(stdout), redirect_stderr(stderr):
         code = main(list(argv))
     return code, stdout.getvalue(), stderr.getvalue()
+
+
+class _CloseFailingHost:
+    @property
+    def closed(self) -> bool:
+        return False
+
+    def close(self) -> None:
+        raise RuntimeError("close failed")
 
 
 class TestRecoverySessionHostCli(unittest.TestCase):
@@ -91,6 +103,32 @@ class TestRecoverySessionHostCli(unittest.TestCase):
         self.assertIs(factory["host_closed"], True)
         self.assertNotIn("host", factory)
         self.assertEqual(stderr, "")
+
+    def test_factory_check_close_failure_returns_4_and_no_success_json(
+        self,
+    ) -> None:
+        db_path = self.tmpdir / "factory.db"
+        result = RecoverySessionHostFactoryResult(
+            ok=True,
+            host=_CloseFailingHost(),
+            reason_code=None,
+            message=None,
+            details={},
+            db_path=str(db_path),
+        )
+
+        with mock.patch(
+            "kernel.lifecycle.recovery_session_host_cli."
+            "try_build_recovery_session_host_from_sqlite",
+            return_value=result,
+        ):
+            code, stdout, stderr = _invoke(
+                ["factory-check", "--db", str(db_path)]
+            )
+
+        self.assertEqual(code, 4)
+        self.assertEqual(stdout, "")
+        self.assertIn("close failed", stderr)
 
     def test_factory_check_missing_db_outputs_failure_json_and_does_not_create_file(
         self,

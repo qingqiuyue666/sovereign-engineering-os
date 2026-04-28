@@ -94,7 +94,12 @@ def _render_factory_check(db_path: str | Path) -> tuple[int, dict[str, object]]:
         }
 
     host = _require_host(result)
-    host.close()
+    try:
+        pass
+    finally:
+        if not host.closed:
+            host.close()
+
     return EXIT_OK, {
         "command": "factory-check",
         "factory": render_factory_result(result),
