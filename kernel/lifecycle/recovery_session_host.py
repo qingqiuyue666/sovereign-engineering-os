@@ -43,7 +43,8 @@ stays a thin runtime boundary rather than a wiring graph.
 
 from __future__ import annotations
 
-from typing import Callable, Optional, Protocol
+from pathlib import Path
+from typing import Callable, Optional, Protocol, Union
 
 from kernel.lifecycle.recovery_gate import RecoveryGate, RecoveryGateResult
 from kernel.lifecycle.stage_types import Stage
@@ -179,3 +180,266 @@ class RecoverySessionHost:
         self._closed = True
         if self._close_callback is not None:
             self._close_callback()
+
+
+class RecoverySessionHostFactoryError(RuntimeError):
+    """Raised when `build_recovery_session_host_from_sqlite` cannot
+    produce a host.
+
+    Subclass of `RuntimeError` so existing broad-except sites do not
+    need to learn a new exception type to fail closed; specific
+    callers (operators, integration tests) can still catch this class
+    directly to distinguish factory-construction failures (missing DB
+    file, repository wiring failure) from other runtime conditions.
+
+    The factory raises this exception strictly BEFORE returning a
+    host — successful construction returns the host and never
+    raises. If construction fails after the SQLite connection is
+    opened, the factory closes that connection before raising so the
+    operator never inherits a leaked file handle.
+    """
+
+
+def build_recovery_session_host_from_sqlite(
+    *,
+    db_path: Union[str, Path],
+) -> RecoverySessionHost:
+    """Construct a `RecoverySessionHost` over an existing SQLite DB file.
+
+    P0-10 phase 1 — the smallest correct production-side construction
+    boundary for `RecoverySessionHost`. Until P0-10 the host could only
+    be wired by tests; this factory promotes it to "production code has
+    one standard operator construction boundary" without introducing a
+    daemon, async runtime, queue, web server, IPC, scheduler, or
+    background worker.
+
+    Behavior:
+
+    - The ``db_path`` MUST point at an existing SQLite database file.
+      The factory checks ``Path(db_path).is_file()`` before opening,
+      and raises `RecoverySessionHostFactoryError` when the path does
+      not exist. The factory NEVER creates a new database file as a
+      side effect of a typo (mirrors `recovery_cli.main`'s P0-6
+      operator-boundary semantics).
+    - The factory does NOT call `apply_migrations`. The caller is
+      responsible for having initialized schema before construction.
+    - The factory composes the same production classes used by the
+      narrow signable path: kernel-level repositories, the
+      `AppendOnlyLedger`, the eight signable-path services, the
+      `BudgetGovernor`, a `SignablePathOrchestrator`, and the standard
+      `RecoveryGate` built via `build_standard_recovery_gate`.
+    - The factory writes NO durable rows during construction. It does
+      NOT call `RecoveryGate.restore_if_allowed`. It does NOT call
+      `restore_task_from_snapshot`. It does NOT auto-restore any task.
+    - The factory owns the SQLite connection it opens. The returned
+      host's `close()` releases the connection through
+      `close_callback`. If construction fails after the connection
+      is opened, the factory closes it before raising.
+
+    The InferenceService is intentionally constructed without a real
+    `ModelAdapter` because the factory's purpose is recovery
+    evaluation / restore — not new inference. The service falls back
+    to its in-module `_NullAdapter`, which raises
+    `model_adapter_not_configured` if a caller mistakenly attempts
+    `admit_inference` against this host. This matches the
+    "evaluate / restore" scope of P0-10 phase 1.
+    """
+    # Imports are local to keep `RecoverySessionHost` itself a thin
+    # runtime boundary: the host class continues to bind only the
+    # protocol-typed `SessionOrchestrator`, while the factory pulls in
+    # the production wiring graph only when an operator constructs a
+    # host through it.
+    from kernel.evidence.append_only_ledger import AppendOnlyLedger
+    from kernel.lifecycle.recovery_gate import (
+        build_standard_recovery_gate,
+    )
+    from kernel.lifecycle.signable_path_orchestrator import (
+        SignablePathOrchestrator,
+    )
+    from kernel.services.approval_service import ApprovalService
+    from kernel.services.budget_governor import BudgetGovernor
+    from kernel.services.capability_service import CapabilityService
+    from kernel.services.context_service import ContextService
+    from kernel.services.evidence_service import EvidenceService
+    from kernel.services.inference_service import InferenceService
+    from kernel.services.patch_proposal_service import (
+        PatchProposalService,
+    )
+    from kernel.services.review_service import ReviewService
+    from kernel.services.revision_seal_service import RevisionSealService
+    from kernel.services.validation_service import ValidationService
+    from kernel.stores.sqlite.repositories import (
+        ApprovalArtifactRepository,
+        AuditRepository,
+        BudgetRepository,
+        CapabilityRepository,
+        ContextArtifactRepository,
+        DriftEventRecordRepository,
+        FailureBundleRepository,
+        InferenceArtifactRepository,
+        IntentAnchorRepository,
+        JournalEntryRepository,
+        PatchProposalRepository,
+        ReplayAnchorRepository,
+        ReviewArtifactRepository,
+        RevisionRepository,
+        SnapshotRootRepository,
+        TaintRepository,
+        ValidationReceiptRepository,
+    )
+    from kernel.stores.sqlite.wal_recovery import open_connection
+
+    path = Path(db_path)
+    if not path.is_file():
+        raise RecoverySessionHostFactoryError(
+            f"database file does not exist: {path}"
+        )
+
+    try:
+        conn = open_connection(path)
+    except Exception as exc:
+        raise RecoverySessionHostFactoryError(
+            f"failed to open SQLite connection at {path}: {exc}"
+        ) from exc
+
+    try:
+        audit_repo = AuditRepository(conn)
+        budget_repo = BudgetRepository(conn)
+        cap_repo = CapabilityRepository(conn)
+        ctx_repo = ContextArtifactRepository(conn)
+        inf_repo = InferenceArtifactRepository(conn)
+        intent_repo = IntentAnchorRepository(conn)
+        pp_repo = PatchProposalRepository(conn)
+        vr_repo = ValidationReceiptRepository(conn)
+        rv_repo = ReviewArtifactRepository(conn)
+        ap_repo = ApprovalArtifactRepository(conn)
+        rev_repo = RevisionRepository(conn)
+        snap_repo = SnapshotRootRepository(conn)
+        je_repo = JournalEntryRepository(conn)
+        ra_repo = ReplayAnchorRepository(conn)
+        taint_repo = TaintRepository(conn)
+        drift_repo = DriftEventRecordRepository(conn)
+        failure_repo = FailureBundleRepository(conn)
+
+        audit_ledger = AppendOnlyLedger(
+            repository=audit_repo,
+            actor_identity="recovery_session_host_factory",
+        )
+
+        cap_svc = CapabilityService(
+            repository=cap_repo,
+            audit_ledger=audit_ledger,
+        )
+        ctx_svc = ContextService(
+            repository=ctx_repo,
+            audit_ledger=audit_ledger,
+        )
+        budget_governor = BudgetGovernor(
+            audit_ledger=audit_ledger,
+            budget_repository=budget_repo,
+        )
+        # The InferenceService falls back to `_NullAdapter` when no
+        # adapter is wired. P0-10 phase 1 is recovery evaluation /
+        # restore only — the factory deliberately does not select a
+        # real model adapter here.
+        inf_svc = InferenceService(
+            repository=inf_repo,
+            audit_ledger=audit_ledger,
+            context_reader=ctx_repo,
+            budget_governor=budget_governor,
+            failure_bundle_repository=failure_repo,
+        )
+        pp_svc = PatchProposalService(
+            repository=pp_repo,
+            inference_reader=inf_repo,
+            audit_ledger=audit_ledger,
+        )
+        val_svc = ValidationService(
+            repository=vr_repo,
+            patch_reader=pp_repo,
+            audit_ledger=audit_ledger,
+            taint_repository=taint_repo,
+        )
+        rv_svc = ReviewService(
+            repository=rv_repo,
+            patch_reader=pp_repo,
+            receipt_reader=vr_repo,
+            audit_ledger=audit_ledger,
+        )
+        ap_svc = ApprovalService(
+            repository=ap_repo,
+            patch_reader=pp_repo,
+            receipt_reader=vr_repo,
+            review_reader=rv_repo,
+            audit_ledger=audit_ledger,
+        )
+        seal_svc = RevisionSealService(
+            revision_repo=rev_repo,
+            snapshot_repo=snap_repo,
+            journal_repo=je_repo,
+            approval_repo=ap_repo,
+            patch_reader=pp_repo,
+            approval_service=ap_svc,
+            audit_ledger=audit_ledger,
+            intent_anchor_reader=intent_repo,
+        )
+        evidence_svc = EvidenceService(
+            replay_anchor_repo=ra_repo,
+            revision_repo=rev_repo,
+            context_repo=ctx_repo,
+            inference_repo=inf_repo,
+            approval_repo=ap_repo,
+            taint_repo=taint_repo,
+            budget_repo=budget_repo,
+            drift_repo=drift_repo,
+            failure_repo=failure_repo,
+            journal_repo=je_repo,
+            review_repo=rv_repo,
+            capability_repo=cap_repo,
+            audit_repo=audit_repo,
+            audit_ledger=audit_ledger,
+        )
+
+        orchestrator = SignablePathOrchestrator(
+            capability_service=cap_svc,
+            context_service=ctx_svc,
+            inference_service=inf_svc,
+            patch_proposal_service=pp_svc,
+            validation_service=val_svc,
+            review_service=rv_svc,
+            approval_service=ap_svc,
+            revision_seal_service=seal_svc,
+            evidence_service=evidence_svc,
+            audit_ledger=audit_ledger,
+            budget_governor=budget_governor,
+            context_repository=ctx_repo,
+            intent_anchor_repository=intent_repo,
+            connection=conn,
+        )
+
+        recovery_gate = build_standard_recovery_gate(
+            audit_repository=audit_repo,
+            intent_anchor_repository=intent_repo,
+            context_repository=ctx_repo,
+            inference_repository=inf_repo,
+            patch_proposal_repository=pp_repo,
+            validation_receipt_repository=vr_repo,
+            review_repository=rv_repo,
+            approval_repository=ap_repo,
+            revision_repository=rev_repo,
+            replay_anchor_repository=ra_repo,
+        )
+    except Exception as exc:
+        try:
+            conn.close()
+        except Exception:
+            pass
+        raise RecoverySessionHostFactoryError(
+            f"recovery session host factory wiring failed: {exc}"
+        ) from exc
+
+    return RecoverySessionHost(
+        recovery_gate=recovery_gate,
+        orchestrator=orchestrator,
+        close_callback=conn.close,
+    )
