@@ -823,6 +823,210 @@ class TestRecoverySessionHostFactory(unittest.TestCase):
             "factory must not recreate dropped indexes as a side effect",
         )
 
+    # ------------------------------------------------------------------
+    # P0-13 A. required index recreated without UNIQUE -> raise
+    # ------------------------------------------------------------------
+
+    def test_factory_required_index_wrong_uniqueness_raises(self) -> None:
+        db_path = self.tmpdir / "factory.db"
+        _initialize_empty_db(db_path)
+
+        # Drop the unique audit-sequence index and replace it with a
+        # same-name non-unique index. The P0-12 existence-only check
+        # would still pass — the index exists by name — but the index
+        # is no longer the substrate for monotonic audit append order
+        # because duplicate sequence values would now silently succeed.
+        # The factory must refuse.
+        raw = sqlite3.connect(str(db_path))
+        try:
+            raw.execute("DROP INDEX idx_audit_records_sequence;")
+            raw.execute(
+                "CREATE INDEX idx_audit_records_sequence "
+                "ON audit_records(sequence);"
+            )
+            raw.commit()
+        finally:
+            raw.close()
+
+        with self.assertRaises(RecoverySessionHostFactoryError) as ctx:
+            build_recovery_session_host_from_sqlite(db_path=db_path)
+
+        message = str(ctx.exception)
+        self.assertIn("idx_audit_records_sequence", message)
+        # Operator-actionable diagnostic must surface the uniqueness
+        # contract being violated and the expected/actual values.
+        self.assertIn("unique", message.lower())
+        self.assertIn("expected unique=True", message)
+        self.assertIn("actual unique=False", message)
+
+        # No side-effect repair: the index must still exist with the
+        # wrong (non-unique) shape — the factory did not silently
+        # restore the UNIQUE constraint.
+        raw = sqlite3.connect(str(db_path))
+        try:
+            list_rows = raw.execute(
+                "PRAGMA index_list(audit_records);"
+            ).fetchall()
+        finally:
+            raw.close()
+        # PRAGMA index_list rows: (seq, name, unique, origin, partial)
+        match = [
+            row for row in list_rows
+            if row[1] == "idx_audit_records_sequence"
+        ]
+        self.assertEqual(
+            len(match),
+            1,
+            "non-unique impostor index must still be present after the "
+            "factory refusal",
+        )
+        self.assertEqual(
+            bool(match[0][2]),
+            False,
+            "factory must not repair the uniqueness of the impostor "
+            "index as a side effect",
+        )
+
+    # ------------------------------------------------------------------
+    # P0-13 B. required trigger same name, no-op body -> raise
+    # ------------------------------------------------------------------
+
+    def test_factory_required_trigger_same_name_wrong_body_raises(
+        self,
+    ) -> None:
+        db_path = self.tmpdir / "factory.db"
+        _initialize_empty_db(db_path)
+
+        # Drop the audit append-only-update trigger and recreate a
+        # same-name no-op impostor. The P0-12 existence-only check
+        # would still pass, but INV-026 enforcement is silently
+        # disabled because the impostor body has no RAISE(ABORT). The
+        # factory must refuse.
+        raw = sqlite3.connect(str(db_path))
+        try:
+            raw.execute(
+                "DROP TRIGGER audit_records_append_only_update;"
+            )
+            raw.execute(
+                "CREATE TRIGGER audit_records_append_only_update "
+                "BEFORE UPDATE ON audit_records "
+                "BEGIN "
+                "  SELECT 1; "
+                "END;"
+            )
+            raw.commit()
+        finally:
+            raw.close()
+
+        with self.assertRaises(RecoverySessionHostFactoryError) as ctx:
+            build_recovery_session_host_from_sqlite(db_path=db_path)
+
+        message = str(ctx.exception)
+        self.assertIn("audit_records_append_only_update", message)
+        self.assertIn("trigger", message)
+        # Operator-actionable diagnostic must surface that a required
+        # invariant snippet is missing from the trigger body.
+        self.assertIn("invariant snippet", message)
+
+        # No side-effect repair: sqlite_master must still contain the
+        # no-op impostor body, not the original RAISE(ABORT) body.
+        raw = sqlite3.connect(str(db_path))
+        try:
+            row = raw.execute(
+                "SELECT sql FROM sqlite_master "
+                "WHERE type = 'trigger' "
+                "AND name = 'audit_records_append_only_update';"
+            ).fetchone()
+        finally:
+            raw.close()
+        self.assertIsNotNone(
+            row,
+            "no-op impostor trigger must still be present after the "
+            "factory refusal",
+        )
+        stored_sql = row[0] or ""
+        self.assertIn(
+            "SELECT 1",
+            stored_sql,
+            "factory must not repair the no-op impostor body as a "
+            "side effect",
+        )
+        self.assertNotIn(
+            "RAISE(ABORT",
+            stored_sql,
+            "factory must not silently re-install the original "
+            "RAISE(ABORT) body",
+        )
+
+    # ------------------------------------------------------------------
+    # P0-13 C. required revisions trigger missing WHEN clause -> raise
+    # ------------------------------------------------------------------
+
+    def test_factory_required_revisions_trigger_missing_when_clause_raises(
+        self,
+    ) -> None:
+        db_path = self.tmpdir / "factory.db"
+        _initialize_empty_db(db_path)
+
+        # Drop the revisions sealed-immutable-update trigger and
+        # recreate a same-name version that still uses RAISE(ABORT)
+        # but omits the ``WHEN OLD.state = 'sealed'`` clause. Without
+        # the WHEN clause, INV-005 enforcement no longer scopes to
+        # sealed revisions — every UPDATE on revisions would abort,
+        # which is silently equivalent to denying lifecycle progress.
+        # Either way, the migration's invariant is broken; the factory
+        # must refuse.
+        raw = sqlite3.connect(str(db_path))
+        try:
+            raw.execute(
+                "DROP TRIGGER revisions_sealed_immutable_update;"
+            )
+            raw.execute(
+                "CREATE TRIGGER revisions_sealed_immutable_update "
+                "BEFORE UPDATE ON revisions "
+                "BEGIN "
+                "  SELECT RAISE(ABORT, 'revisions: sealed revision "
+                "is immutable (INV-005/§23.1)'); "
+                "END;"
+            )
+            raw.commit()
+        finally:
+            raw.close()
+
+        with self.assertRaises(RecoverySessionHostFactoryError) as ctx:
+            build_recovery_session_host_from_sqlite(db_path=db_path)
+
+        message = str(ctx.exception)
+        self.assertIn("revisions_sealed_immutable_update", message)
+        # Operator-actionable diagnostic must surface the specific
+        # missing WHEN clause snippet.
+        self.assertIn("WHEN OLD.state = 'sealed'", message)
+
+        # No side-effect repair: the trigger body must still lack the
+        # WHEN clause — the factory must not have silently re-armed
+        # the constitutional scoping.
+        raw = sqlite3.connect(str(db_path))
+        try:
+            row = raw.execute(
+                "SELECT sql FROM sqlite_master "
+                "WHERE type = 'trigger' "
+                "AND name = 'revisions_sealed_immutable_update';"
+            ).fetchone()
+        finally:
+            raw.close()
+        self.assertIsNotNone(
+            row,
+            "WHEN-clause-less impostor trigger must still be present "
+            "after the factory refusal",
+        )
+        stored_sql = (row[0] or "").lower()
+        self.assertNotIn(
+            "when old.state = 'sealed'",
+            stored_sql,
+            "factory must not repair the missing WHEN clause as a "
+            "side effect",
+        )
+
     def test_factory_does_not_add_cli_restore(self) -> None:
         import argparse as _argparse
 
