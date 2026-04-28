@@ -204,6 +204,32 @@ def _assert_no_set_values(value: object) -> None:
             _assert_no_set_values(nested)
 
 
+def _recursive_values(payload: object) -> Sequence[object]:
+    values: list[object] = [payload]
+    if isinstance(payload, dict):
+        for key, value in payload.items():
+            values.extend(_recursive_values(key))
+            values.extend(_recursive_values(value))
+    elif isinstance(payload, list):
+        for value in payload:
+            values.extend(_recursive_values(value))
+    return values
+
+
+def _assert_json_safe_no_runtime_types(payload: object) -> None:
+    encoded = json.dumps(payload, sort_keys=True)
+    decoded = json.loads(encoded)
+    if decoded != payload:
+        raise AssertionError("payload did not round-trip through JSON")
+
+    for value in _recursive_values(payload):
+        if isinstance(value, (set, frozenset, tuple)):
+            raise AssertionError(
+                "payload exposed a runtime collection type: "
+                f"{type(value).__name__} {value!r}"
+            )
+
+
 def _stdio_contract_observation(
     stdout: str, stderr: str
 ) -> dict[str, bool]:
@@ -2843,6 +2869,383 @@ class TestRecoverySessionHostCli(unittest.TestCase):
         self.assertEqual(
             _subparser_choices(build_legacy_parser()),
             {"evaluate", "restore-dry-run"},
+        )
+
+    def test_operator_surface_freeze_current_smoke_passes(self) -> None:
+        smoke = current_recovery_session_host_cli_readiness_smoke()
+        rendered = render_recovery_session_host_cli_readiness_smoke(smoke)
+
+        self.assertIs(smoke.passed, True)
+        self.assertEqual(smoke.reason_code, "passed")
+        self.assertEqual(smoke.failures, ())
+        self.assertIs(rendered["passed"], True)
+        self.assertEqual(rendered["reason_code"], "passed")
+        self.assertEqual(rendered["failures"], [])
+        self.assertIs(rendered["payload"]["ready"], True)
+        self.assertEqual(rendered["payload"]["reason_code"], "ready")
+        self.assertEqual(rendered["payload"]["failures"], [])
+
+    def test_operator_surface_freeze_command_sets_are_exact(self) -> None:
+        from kernel.lifecycle.recovery_cli import (
+            build_parser as build_legacy_parser,
+        )
+
+        session_host_choices = _subparser_choices(build_parser())
+        legacy_choices = _subparser_choices(build_legacy_parser())
+        manifest = session_host_cli_contract_manifest()
+
+        self.assertEqual(session_host_choices, {"factory-check", "evaluate"})
+        self.assertEqual(legacy_choices, {"evaluate", "restore-dry-run"})
+        self.assertEqual(manifest["commands"], ["evaluate", "factory-check"])
+
+        forbidden_commands = {
+            "restore",
+            "restore-dry-run",
+            "contract",
+            "readiness",
+            "smoke",
+            "status",
+            "apply",
+            "repair",
+        }
+        self.assertTrue(forbidden_commands.isdisjoint(session_host_choices))
+
+    def test_operator_surface_freeze_manifest_readiness_payload_smoke_are_consistent(
+        self,
+    ) -> None:
+        manifest = session_host_cli_contract_manifest()
+        readiness = recovery_session_host_cli_readiness()
+        readiness_payload = render_recovery_session_host_cli_readiness(
+            readiness
+        )
+        current_payload = current_recovery_session_host_cli_readiness_payload()
+        smoke = current_recovery_session_host_cli_readiness_smoke()
+        smoke_payload = render_recovery_session_host_cli_readiness_smoke(
+            smoke
+        )
+
+        self.assertIs(readiness.ready, True)
+        self.assertEqual(readiness_payload, current_payload)
+        self.assertEqual(current_payload["manifest"], manifest)
+        self.assertIs(smoke.passed, True)
+        self.assertEqual(smoke.payload, current_payload)
+        self.assertEqual(smoke_payload["payload"], current_payload)
+
+    def test_operator_surface_freeze_output_contract_matches_manifest(
+        self,
+    ) -> None:
+        db_path = self.tmpdir / "factory.db"
+        task_id = f"task-{uuid4().hex[:8]}"
+        _initialize_empty_db(db_path)
+        _seed_inference_stage(db_path, task_id)
+        manifest = session_host_cli_contract_manifest()
+
+        factory_code, factory_stdout, factory_stderr = _invoke(
+            ["factory-check", "--db", str(db_path)]
+        )
+        evaluate_code, evaluate_stdout, evaluate_stderr = _invoke(
+            ["evaluate", "--db", str(db_path), "--task-id", task_id]
+        )
+
+        self.assertEqual(factory_code, EXIT_OK)
+        self.assertEqual(evaluate_code, EXIT_OK)
+        self.assertEqual(factory_stderr, "")
+        self.assertEqual(evaluate_stderr, "")
+        factory_payload = _assert_single_json_line(factory_stdout)
+        evaluate_payload = _assert_single_json_line(evaluate_stdout)
+
+        self.assertEqual(
+            set(factory_payload),
+            set(manifest["top_level_keys"]["factory-check"]),
+        )
+        self.assertEqual(
+            set(evaluate_payload),
+            set(manifest["top_level_keys"]["evaluate"]),
+        )
+        self.assertEqual(
+            set(factory_payload["factory"]),
+            set(manifest["factory_keys"]),
+        )
+        self.assertEqual(
+            set(evaluate_payload["factory"]),
+            set(manifest["factory_keys"]),
+        )
+        self.assertEqual(
+            set(evaluate_payload["host_state"]),
+            set(manifest["host_state_keys"]),
+        )
+        self.assertEqual(
+            set(evaluate_payload["recovery"]),
+            set(manifest["recovery_keys"]),
+        )
+
+    def test_operator_surface_freeze_exit_codes_match_manifest(self) -> None:
+        manifest = session_host_cli_contract_manifest()
+        exit_codes = manifest["exit_codes"]
+        self.assertIsInstance(exit_codes, dict)
+
+        valid_db_path = self.tmpdir / "valid.db"
+        _initialize_empty_db(valid_db_path)
+
+        cases: list[tuple[str, int]] = []
+        code, _stdout, _stderr = _invoke(
+            ["factory-check", "--db", str(valid_db_path)]
+        )
+        cases.append(("factory-check valid DB", code))
+
+        code, _stdout, _stderr = _invoke(
+            ["factory-check", "--db", str(self.tmpdir / "missing.db")]
+        )
+        cases.append(("factory-check missing DB", code))
+
+        code, _stdout, _stderr = _invoke(
+            ["evaluate", "--db", str(valid_db_path), "--task-id", "missing"]
+        )
+        cases.append(("evaluate unknown task valid DB", code))
+
+        code, _stdout, _stderr = _invoke([])
+        cases.append(("invalid args", code))
+
+        with mock.patch(
+            "kernel.lifecycle.recovery_session_host_cli."
+            "try_build_recovery_session_host_from_sqlite",
+            side_effect=RuntimeError("freeze unexpected"),
+        ):
+            code, _stdout, _stderr = _invoke(
+                ["factory-check", "--db", str(self.tmpdir / "factory.db")]
+            )
+        cases.append(("unexpected", code))
+
+        expected = {
+            "factory-check valid DB": exit_codes["ok"],
+            "factory-check missing DB": exit_codes["factory_error"],
+            "evaluate unknown task valid DB": exit_codes["ok"],
+            "invalid args": exit_codes["invalid_args"],
+            "unexpected": exit_codes["unexpected"],
+        }
+        for label, code in cases:
+            with self.subTest(label=label):
+                self.assertEqual(code, expected[label])
+
+    def test_operator_surface_freeze_stdio_contract_matches_manifest(
+        self,
+    ) -> None:
+        manifest = session_host_cli_contract_manifest()
+        valid_db_path = self.tmpdir / "valid.db"
+        _initialize_empty_db(valid_db_path)
+
+        cases: list[tuple[str, int, str, str]] = []
+        code, stdout, stderr = _invoke(
+            ["factory-check", "--db", str(valid_db_path)]
+        )
+        cases.append(("factory-check valid DB", code, stdout, stderr))
+
+        code, stdout, stderr = _invoke(
+            ["factory-check", "--db", str(self.tmpdir / "missing.db")]
+        )
+        cases.append(("factory-check missing DB", code, stdout, stderr))
+
+        code, stdout, stderr = _invoke([])
+        cases.append(("invalid args", code, stdout, stderr))
+
+        with mock.patch(
+            "kernel.lifecycle.recovery_session_host_cli."
+            "try_build_recovery_session_host_from_sqlite",
+            side_effect=RuntimeError("freeze unexpected"),
+        ):
+            code, stdout, stderr = _invoke(
+                ["factory-check", "--db", str(self.tmpdir / "factory.db")]
+            )
+        cases.append(("unexpected", code, stdout, stderr))
+
+        for label, code, stdout, stderr in cases:
+            with self.subTest(label=label):
+                stdio_contract = manifest["stdio_contract"][str(code)]
+                if stdio_contract["stdout_json"] is True:
+                    _assert_single_json_line(stdout)
+                else:
+                    self.assertEqual(stdout, "")
+
+                if stdio_contract["stderr_empty"] is True:
+                    self.assertEqual(stderr, "")
+                else:
+                    self.assertNotEqual(stderr, "")
+
+    def test_operator_surface_freeze_no_durable_writes_across_all_read_only_entrypoints(
+        self,
+    ) -> None:
+        db_path = self.tmpdir / "factory.db"
+        task_id = f"task-{uuid4().hex[:8]}"
+        _initialize_empty_db(db_path)
+        _seed_inference_stage(db_path, task_id)
+        before_counts = _table_row_counts(db_path)
+
+        session_host_cli_contract_manifest()
+        readiness = recovery_session_host_cli_readiness()
+        render_recovery_session_host_cli_readiness(readiness)
+        current_recovery_session_host_cli_readiness_payload()
+        smoke = current_recovery_session_host_cli_readiness_smoke()
+        render_recovery_session_host_cli_readiness_smoke(smoke)
+
+        factory_code, _stdout, _stderr = _invoke(
+            ["factory-check", "--db", str(db_path)]
+        )
+        evaluate_code, _stdout, _stderr = _invoke(
+            ["evaluate", "--db", str(db_path), "--task-id", task_id]
+        )
+
+        self.assertEqual(factory_code, EXIT_OK)
+        self.assertEqual(evaluate_code, EXIT_OK)
+        self.assertEqual(_table_row_counts(db_path), before_counts)
+
+    def test_operator_surface_freeze_expected_failures_do_not_create_files(
+        self,
+    ) -> None:
+        missing_path = self.tmpdir / "missing.db"
+
+        factory_code, factory_stdout, factory_stderr = _invoke(
+            ["factory-check", "--db", str(missing_path)]
+        )
+        evaluate_code, evaluate_stdout, evaluate_stderr = _invoke(
+            [
+                "evaluate",
+                "--db",
+                str(missing_path),
+                "--task-id",
+                "missing",
+            ]
+        )
+
+        self.assertEqual(factory_code, EXIT_FACTORY_ERROR)
+        self.assertEqual(evaluate_code, EXIT_FACTORY_ERROR)
+        self.assertFalse(missing_path.exists())
+        _assert_single_json_line(factory_stdout)
+        _assert_single_json_line(evaluate_stdout)
+        self.assertEqual(factory_stderr, "")
+        self.assertEqual(evaluate_stderr, "")
+
+    def test_operator_surface_freeze_unexpected_failures_do_not_emit_json(
+        self,
+    ) -> None:
+        cases = [
+            ["factory-check", "--db", str(self.tmpdir / "factory.db")],
+            [
+                "evaluate",
+                "--db",
+                str(self.tmpdir / "factory.db"),
+                "--task-id",
+                "missing",
+            ],
+        ]
+
+        for argv in cases:
+            with self.subTest(argv=argv):
+                with mock.patch(
+                    "kernel.lifecycle.recovery_session_host_cli."
+                    "try_build_recovery_session_host_from_sqlite",
+                    side_effect=RuntimeError("freeze unexpected"),
+                ):
+                    code, stdout, stderr = _invoke(argv)
+
+                self.assertEqual(code, EXIT_UNEXPECTED)
+                self.assertEqual(stdout, "")
+                self.assertIn("Traceback", stderr)
+                self.assertIn("freeze unexpected", stderr)
+
+    def test_operator_surface_freeze_no_restore_surface_anywhere(self) -> None:
+        from kernel.lifecycle.recovery_cli import (
+            build_parser as build_legacy_parser,
+        )
+
+        session_host_choices = _subparser_choices(build_parser())
+        legacy_choices = _subparser_choices(build_legacy_parser())
+        manifest = session_host_cli_contract_manifest()
+        readiness = recovery_session_host_cli_readiness()
+        current_payload = current_recovery_session_host_cli_readiness_payload()
+        smoke_payload = render_recovery_session_host_cli_readiness_smoke(
+            current_recovery_session_host_cli_readiness_smoke()
+        )
+
+        command_sets = [
+            manifest["commands"],
+            readiness.manifest["commands"],
+            current_payload["manifest"]["commands"],
+            smoke_payload["payload"]["manifest"]["commands"],
+        ]
+        manifests = [
+            manifest,
+            readiness.manifest,
+            current_payload["manifest"],
+            smoke_payload["payload"]["manifest"],
+        ]
+
+        self.assertEqual(session_host_choices, {"factory-check", "evaluate"})
+        self.assertEqual(legacy_choices, {"evaluate", "restore-dry-run"})
+        for commands in command_sets:
+            with self.subTest(commands=commands):
+                self.assertNotIn("restore", commands)
+                self.assertNotIn("restore-dry-run", commands)
+
+        for payload_manifest in manifests:
+            with self.subTest(payload_manifest=payload_manifest):
+                self.assertIs(payload_manifest["restore_supported"], False)
+                self.assertIs(payload_manifest["durable_writes"], False)
+
+    def test_operator_surface_freeze_public_helper_payloads_are_json_safe(
+        self,
+    ) -> None:
+        payloads = [
+            session_host_cli_contract_manifest(),
+            render_recovery_session_host_cli_readiness(
+                recovery_session_host_cli_readiness()
+            ),
+            current_recovery_session_host_cli_readiness_payload(),
+            render_recovery_session_host_cli_readiness_smoke(
+                current_recovery_session_host_cli_readiness_smoke()
+            ),
+        ]
+
+        for index, payload in enumerate(payloads):
+            with self.subTest(index=index):
+                _assert_json_safe_no_runtime_types(payload)
+
+    def test_operator_surface_freeze_public_helper_payloads_are_defensive(
+        self,
+    ) -> None:
+        payload1 = current_recovery_session_host_cli_readiness_payload()
+        smoke1 = render_recovery_session_host_cli_readiness_smoke(
+            current_recovery_session_host_cli_readiness_smoke()
+        )
+
+        payload1["manifest"]["commands"].append("restore")
+        payload1["manifest"]["stdio_contract"]["0"]["stdout_json"] = False
+        smoke1["payload"]["manifest"]["commands"].append("restore")
+        smoke1["failures"].append("x")
+
+        payload2 = current_recovery_session_host_cli_readiness_payload()
+        smoke2 = render_recovery_session_host_cli_readiness_smoke(
+            current_recovery_session_host_cli_readiness_smoke()
+        )
+
+        self.assertIs(payload2["ready"], True)
+        self.assertEqual(payload2["reason_code"], "ready")
+        self.assertEqual(payload2["failures"], [])
+        self.assertNotIn("restore", payload2["manifest"]["commands"])
+        self.assertIs(
+            payload2["manifest"]["stdio_contract"]["0"]["stdout_json"],
+            True,
+        )
+        self.assertIs(smoke2["passed"], True)
+        self.assertEqual(smoke2["reason_code"], "passed")
+        self.assertEqual(smoke2["failures"], [])
+        self.assertNotIn(
+            "restore", smoke2["payload"]["manifest"]["commands"]
+        )
+        self.assertIs(
+            smoke2["payload"]["manifest"]["stdio_contract"]["0"][
+                "stdout_json"
+            ],
+            True,
         )
 
     def test_session_host_cli_module_import_has_no_side_effects(self) -> None:
