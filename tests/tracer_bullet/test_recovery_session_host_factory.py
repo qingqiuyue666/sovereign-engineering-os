@@ -1045,6 +1045,227 @@ class TestRecoverySessionHostFactory(unittest.TestCase):
             f"got {sorted(registered)!r}",
         )
 
+    # ------------------------------------------------------------------
+    # P0-14 — operator-readable / machine-readable error surface
+    # ------------------------------------------------------------------
+
+    def test_factory_error_message_only_constructor_backwards_compatible(
+        self,
+    ) -> None:
+        # P0-14 — `RecoverySessionHostFactoryError("plain failure")` must
+        # still work after the operator-error-surface widening so existing
+        # raise sites that only pass a message keep behaving identically.
+        # ``str(exc)`` must remain the human message; the new
+        # ``reason_code`` / ``details`` fields default to a stable
+        # placeholder code and an empty plain dict.
+        exc = RecoverySessionHostFactoryError("plain failure")
+        self.assertIsInstance(exc, RuntimeError)
+        self.assertEqual(str(exc), "plain failure")
+        self.assertEqual(exc.reason_code, "factory_error")
+        self.assertEqual(exc.details, {})
+        # ``details`` is a plain dict, not ``None`` or a Mapping view, so
+        # operator surfaces can rely on dict semantics unconditionally.
+        self.assertIsInstance(exc.details, dict)
+
+    def test_factory_error_details_are_copied(self) -> None:
+        # P0-14 — caller-supplied ``details`` is copied into a plain dict
+        # so post-construction caller mutation of the mapping itself
+        # (adding, replacing, or removing top-level keys) cannot affect
+        # the raised exception. This is the substrate for "operators see
+        # the error surface as it was at raise time, not at observation
+        # time".
+        details: dict[str, object] = {
+            "missing_tables": ["audit_records"]
+        }
+        exc = RecoverySessionHostFactoryError(
+            "x",
+            reason_code="missing_required_tables",
+            details=details,
+        )
+
+        # Mutate the original mapping after construction by adding,
+        # replacing, and removing top-level keys.
+        details["new_key"] = "leaked"
+        details["missing_tables"] = ["totally_different"]
+
+        self.assertEqual(
+            exc.details,
+            {"missing_tables": ["audit_records"]},
+            "RecoverySessionHostFactoryError.details must be a snapshot "
+            "of the caller-supplied mapping, not a live reference",
+        )
+
+    def test_factory_missing_db_path_error_surface(self) -> None:
+        # P0-14 — missing DB path must surface
+        # ``reason_code="missing_db_file"`` and a ``db_path`` string in
+        # ``details`` so operator surfaces can branch on a stable code
+        # without parsing the human message. The factory must still
+        # NEVER create the file as a side effect.
+        missing_path = self.tmpdir / "missing.db"
+        self.assertFalse(missing_path.exists())
+
+        with self.assertRaises(RecoverySessionHostFactoryError) as ctx:
+            build_recovery_session_host_from_sqlite(db_path=missing_path)
+
+        exc = ctx.exception
+        self.assertEqual(exc.reason_code, "missing_db_file")
+        self.assertEqual(exc.details["db_path"], str(missing_path))
+        self.assertFalse(
+            missing_path.exists(),
+            "factory must not create a DB file for a missing path",
+        )
+
+    def test_factory_empty_db_missing_tables_error_surface(self) -> None:
+        # P0-14 — empty file fails the table-existence check; the
+        # operator-readable surface must surface
+        # ``reason_code="missing_required_tables"`` and a sorted
+        # ``missing_tables`` list including at least one of the core
+        # constitutional tables.
+        empty_path = self.tmpdir / "empty.db"
+        empty_path.touch()
+        self.assertTrue(empty_path.is_file())
+
+        with self.assertRaises(RecoverySessionHostFactoryError) as ctx:
+            build_recovery_session_host_from_sqlite(db_path=empty_path)
+
+        exc = ctx.exception
+        self.assertEqual(exc.reason_code, "missing_required_tables")
+        self.assertIn("missing_tables", exc.details)
+        missing = exc.details["missing_tables"]
+        self.assertIsInstance(missing, list)
+        self.assertTrue(
+            "audit_records" in missing
+            or "intent_anchor_records" in missing,
+            f"missing_tables must include at least one core "
+            f"constitutional table; got: {missing!r}",
+        )
+
+    def test_factory_missing_column_error_surface(self) -> None:
+        # P0-14 — when a required table exists but is missing a required
+        # column, the error surface must carry the table name and a
+        # sorted list of missing columns including ``created_at``.
+        db_path = self.tmpdir / "factory.db"
+        _initialize_empty_db(db_path)
+
+        # Drop and recreate `intent_anchor_records` without `created_at`.
+        # `intent_anchor_records` has no append-only triggers, so DROP is
+        # safe; the recreated table satisfies P0-11 existence but fails
+        # the P0-12 column-identity check.
+        raw = sqlite3.connect(str(db_path))
+        try:
+            raw.execute("DROP TABLE intent_anchor_records;")
+            raw.execute(
+                "CREATE TABLE intent_anchor_records ("
+                "intent_id TEXT PRIMARY KEY, "
+                "task_id TEXT NOT NULL, "
+                "state TEXT NOT NULL"
+                ");"
+            )
+            raw.commit()
+        finally:
+            raw.close()
+
+        with self.assertRaises(RecoverySessionHostFactoryError) as ctx:
+            build_recovery_session_host_from_sqlite(db_path=db_path)
+
+        exc = ctx.exception
+        self.assertEqual(exc.reason_code, "missing_required_columns")
+        self.assertEqual(
+            exc.details["table"], "intent_anchor_records"
+        )
+        self.assertIn("created_at", exc.details["missing_columns"])
+
+    def test_factory_invalid_trigger_body_error_surface(self) -> None:
+        # P0-14 — when a same-name trigger lacks a required invariant
+        # snippet, the error surface must carry the trigger name and the
+        # specific snippet that was missing so an operator can act
+        # without re-reading the migration.
+        db_path = self.tmpdir / "factory.db"
+        _initialize_empty_db(db_path)
+
+        # Replace ``audit_records_append_only_update`` with a no-op
+        # impostor body. The P0-12 existence-only check passes, but the
+        # P0-13 invariant-snippet check refuses.
+        raw = sqlite3.connect(str(db_path))
+        try:
+            raw.execute(
+                "DROP TRIGGER audit_records_append_only_update;"
+            )
+            raw.execute(
+                "CREATE TRIGGER audit_records_append_only_update "
+                "BEFORE UPDATE ON audit_records "
+                "BEGIN "
+                "  SELECT 1; "
+                "END;"
+            )
+            raw.commit()
+        finally:
+            raw.close()
+
+        with self.assertRaises(RecoverySessionHostFactoryError) as ctx:
+            build_recovery_session_host_from_sqlite(db_path=db_path)
+
+        exc = ctx.exception
+        self.assertEqual(exc.reason_code, "invalid_trigger_body")
+        self.assertEqual(
+            exc.details["trigger"], "audit_records_append_only_update"
+        )
+        self.assertIn("missing_snippet", exc.details)
+
+    def test_factory_wrong_index_uniqueness_error_surface(self) -> None:
+        # P0-14 — when a required UNIQUE index has been silently replaced
+        # with a same-name non-unique impostor, the error surface must
+        # carry the index name and the expected/actual uniqueness flags
+        # so an operator can branch without parsing strings.
+        db_path = self.tmpdir / "factory.db"
+        _initialize_empty_db(db_path)
+
+        raw = sqlite3.connect(str(db_path))
+        try:
+            raw.execute("DROP INDEX idx_audit_records_sequence;")
+            raw.execute(
+                "CREATE INDEX idx_audit_records_sequence "
+                "ON audit_records(sequence);"
+            )
+            raw.commit()
+        finally:
+            raw.close()
+
+        with self.assertRaises(RecoverySessionHostFactoryError) as ctx:
+            build_recovery_session_host_from_sqlite(db_path=db_path)
+
+        exc = ctx.exception
+        self.assertEqual(exc.reason_code, "wrong_index_uniqueness")
+        self.assertEqual(
+            exc.details["index"], "idx_audit_records_sequence"
+        )
+        self.assertIs(exc.details["expected_unique"], True)
+        self.assertIs(exc.details["actual_unique"], False)
+
+    def test_factory_wiring_failure_error_surface_preserves_cause(
+        self,
+    ) -> None:
+        # P0-14 — wiring failure must surface ``reason_code="wiring_error"``
+        # and ``details["error_type"]`` while keeping the original
+        # exception chained via ``__cause__`` so the underlying failure is
+        # not swallowed. This piggybacks on the P0-11 wiring-failure
+        # patching strategy.
+        db_path = self.tmpdir / "factory.db"
+        _initialize_empty_db(db_path)
+
+        with mock.patch(
+            "kernel.stores.sqlite.repositories.AuditRepository",
+            side_effect=RuntimeError("forced wiring failure"),
+        ):
+            with self.assertRaises(RecoverySessionHostFactoryError) as ctx:
+                build_recovery_session_host_from_sqlite(db_path=db_path)
+
+        exc = ctx.exception
+        self.assertEqual(exc.reason_code, "wiring_error")
+        self.assertEqual(exc.details["error_type"], "RuntimeError")
+        self.assertIsInstance(exc.__cause__, RuntimeError)
+        self.assertIn("forced wiring failure", str(exc.__cause__))
+
 
 if __name__ == "__main__":
     unittest.main()
