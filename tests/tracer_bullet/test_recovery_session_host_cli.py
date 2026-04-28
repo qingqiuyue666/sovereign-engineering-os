@@ -33,6 +33,13 @@ from kernel.lifecycle.recovery_session_host_cli import (
     EXIT_INVALID_ARGS,
     EXIT_OK,
     EXIT_UNEXPECTED,
+    SESSION_HOST_CLI_COMMANDS,
+    SESSION_HOST_CLI_EXIT_CODES,
+    SESSION_HOST_CLI_FACTORY_KEYS,
+    SESSION_HOST_CLI_HOST_STATE_KEYS,
+    SESSION_HOST_CLI_RECOVERY_KEYS,
+    SESSION_HOST_CLI_STDIO_CONTRACT,
+    SESSION_HOST_CLI_TOP_LEVEL_KEYS,
     build_parser,
     main,
     session_host_cli_contract_manifest,
@@ -1521,6 +1528,226 @@ class TestRecoverySessionHostCli(unittest.TestCase):
         )
         self.assertNotIn("host", fresh_manifest["factory_keys"])
         self.assertEqual(fresh_manifest["exit_codes"]["ok"], EXIT_OK)
+
+    def test_contract_manifest_does_not_call_parser_factory_or_serializers(
+        self,
+    ) -> None:
+        with mock.patch(
+            "kernel.lifecycle.recovery_session_host_cli.build_parser",
+            side_effect=RuntimeError("parser should not be called"),
+        ), mock.patch(
+            "kernel.lifecycle.recovery_session_host_cli."
+            "try_build_recovery_session_host_from_sqlite",
+            side_effect=RuntimeError("factory should not be called"),
+        ), mock.patch(
+            "kernel.lifecycle.recovery_session_host_cli."
+            "render_factory_result",
+            side_effect=RuntimeError(
+                "render_factory_result should not be called"
+            ),
+        ), mock.patch(
+            "kernel.lifecycle.recovery_session_host_cli."
+            "render_recovery_gate_result",
+            side_effect=RuntimeError(
+                "render_recovery_gate_result should not be called"
+            ),
+        ), mock.patch(
+            "kernel.lifecycle.recovery_session_host_cli."
+            "render_session_host_state",
+            side_effect=RuntimeError(
+                "render_session_host_state should not be called"
+            ),
+        ):
+            manifest = session_host_cli_contract_manifest()
+
+        self.assertEqual(
+            manifest["commands"], ["evaluate", "factory-check"]
+        )
+
+    def test_contract_manifest_does_not_touch_stdout_or_stderr(self) -> None:
+        stdout = io.StringIO()
+        stderr = io.StringIO()
+
+        with redirect_stdout(stdout), redirect_stderr(stderr):
+            session_host_cli_contract_manifest()
+
+        self.assertEqual(stdout.getvalue(), "")
+        self.assertEqual(stderr.getvalue(), "")
+
+    def test_contract_manifest_does_not_touch_filesystem_or_db(self) -> None:
+        missing_path = self.tmpdir / "missing.db"
+
+        before_entries = {path.name for path in self.tmpdir.iterdir()}
+        for _ in range(3):
+            session_host_cli_contract_manifest()
+
+        self.assertEqual(
+            {path.name for path in self.tmpdir.iterdir()}, before_entries
+        )
+        self.assertFalse(missing_path.exists())
+
+        db_path = self.tmpdir / "factory.db"
+        _initialize_empty_db(db_path)
+        before_counts = _table_row_counts(db_path)
+
+        for _ in range(5):
+            session_host_cli_contract_manifest()
+
+        self.assertEqual(_table_row_counts(db_path), before_counts)
+
+    def test_contract_manifest_is_stable_before_and_after_cli_invocations(
+        self,
+    ) -> None:
+        manifest_before = session_host_cli_contract_manifest()
+        db_path = self.tmpdir / "factory.db"
+        task_id = f"task-{uuid4().hex[:8]}"
+        _initialize_empty_db(db_path)
+        _seed_inference_stage(db_path, task_id)
+
+        code, _stdout, _stderr = _invoke(
+            ["factory-check", "--db", str(db_path)]
+        )
+        self.assertEqual(code, EXIT_OK)
+        code, _stdout, _stderr = _invoke(
+            ["evaluate", "--db", str(db_path), "--task-id", task_id]
+        )
+        self.assertEqual(code, EXIT_OK)
+        code, _stdout, _stderr = _invoke([])
+        self.assertEqual(code, EXIT_INVALID_ARGS)
+        code, _stdout, _stderr = _invoke(
+            ["factory-check", "--db", str(self.tmpdir / "missing.db")]
+        )
+        self.assertEqual(code, EXIT_FACTORY_ERROR)
+
+        manifest_after = session_host_cli_contract_manifest()
+        self.assertEqual(manifest_after, manifest_before)
+
+    def test_contract_manifest_defensive_copy_is_deep_enough_for_nested_stdio_contract(
+        self,
+    ) -> None:
+        manifest1 = session_host_cli_contract_manifest()
+        manifest1["stdio_contract"]["0"]["stdout_json"] = False
+        manifest1["top_level_keys"]["evaluate"].append("host")
+
+        manifest2 = session_host_cli_contract_manifest()
+
+        self.assertIs(
+            manifest2["stdio_contract"]["0"]["stdout_json"], True
+        )
+        self.assertNotIn("host", manifest2["top_level_keys"]["evaluate"])
+
+    def test_contract_manifest_matches_current_module_constants_after_mutating_returned_manifest(
+        self,
+    ) -> None:
+        manifest = session_host_cli_contract_manifest()
+        manifest["commands"].append("restore")
+        manifest["exit_codes"]["ok"] = 99
+        manifest["top_level_keys"]["factory-check"].append("host")
+        manifest["factory_keys"].append("host")
+        manifest["host_state_keys"].append("anything")
+        manifest["recovery_keys"].append("anything")
+        manifest["stdio_contract"]["4"]["stderr_empty"] = True
+
+        fresh = session_host_cli_contract_manifest()
+
+        self.assertEqual(
+            fresh["commands"], sorted(SESSION_HOST_CLI_COMMANDS)
+        )
+        self.assertEqual(fresh["exit_codes"], SESSION_HOST_CLI_EXIT_CODES)
+        self.assertEqual(
+            fresh["top_level_keys"],
+            {
+                command: sorted(keys)
+                for command, keys in sorted(
+                    SESSION_HOST_CLI_TOP_LEVEL_KEYS.items()
+                )
+            },
+        )
+        self.assertEqual(
+            fresh["factory_keys"], sorted(SESSION_HOST_CLI_FACTORY_KEYS)
+        )
+        self.assertEqual(
+            fresh["host_state_keys"],
+            sorted(SESSION_HOST_CLI_HOST_STATE_KEYS),
+        )
+        self.assertEqual(
+            fresh["recovery_keys"], sorted(SESSION_HOST_CLI_RECOVERY_KEYS)
+        )
+        self.assertEqual(
+            fresh["stdio_contract"],
+            {
+                str(code): dict(contract)
+                for code, contract in sorted(
+                    SESSION_HOST_CLI_STDIO_CONTRACT.items()
+                )
+            },
+        )
+
+    def test_contract_manifest_has_no_restore_surface(self) -> None:
+        from kernel.lifecycle.recovery_cli import (
+            build_parser as build_legacy_parser,
+        )
+
+        manifest = session_host_cli_contract_manifest()
+
+        self.assertIs(manifest["restore_supported"], False)
+        self.assertNotIn("restore", manifest["commands"])
+        self.assertNotIn("restore-dry-run", manifest["commands"])
+        self.assertEqual(
+            _subparser_choices(build_parser()), {"factory-check", "evaluate"}
+        )
+        self.assertEqual(
+            _subparser_choices(build_legacy_parser()),
+            {"evaluate", "restore-dry-run"},
+        )
+
+    def test_contract_manifest_output_can_be_round_tripped_through_json(
+        self,
+    ) -> None:
+        manifest = session_host_cli_contract_manifest()
+        encoded = json.dumps(manifest, sort_keys=True)
+        decoded = json.loads(encoded)
+
+        self.assertEqual(decoded, manifest)
+
+    def test_contract_manifest_repeated_calls_allocate_independent_objects(
+        self,
+    ) -> None:
+        manifest1 = session_host_cli_contract_manifest()
+        manifest2 = session_host_cli_contract_manifest()
+
+        self.assertEqual(manifest1, manifest2)
+        self.assertIsNot(manifest1, manifest2)
+        self.assertIsNot(manifest1["commands"], manifest2["commands"])
+        self.assertIsNot(
+            manifest1["top_level_keys"], manifest2["top_level_keys"]
+        )
+        self.assertIsNot(
+            manifest1["top_level_keys"]["evaluate"],
+            manifest2["top_level_keys"]["evaluate"],
+        )
+        self.assertIsNot(
+            manifest1["stdio_contract"]["0"],
+            manifest2["stdio_contract"]["0"],
+        )
+
+    def test_contract_manifest_does_not_depend_on_environment_variables(
+        self,
+    ) -> None:
+        environment = {
+            "RECOVERY_SESSION_HOST_CLI_RESTORE": "1",
+            "SOVEREIGN_ENGINEERING_OS_ENABLE_RESTORE": "1",
+            "PYTHONHASHSEED": "random",
+        }
+
+        with mock.patch.dict(os.environ, environment, clear=False):
+            manifest = session_host_cli_contract_manifest()
+
+        self.assertEqual(
+            manifest["commands"], ["evaluate", "factory-check"]
+        )
+        self.assertIs(manifest["restore_supported"], False)
+        self.assertIs(manifest["durable_writes"], False)
 
     def test_session_host_cli_module_import_has_no_side_effects(self) -> None:
         import kernel.lifecycle.recovery_session_host_cli as module
