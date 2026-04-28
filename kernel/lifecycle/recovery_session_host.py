@@ -45,7 +45,7 @@ from __future__ import annotations
 
 import sqlite3
 from pathlib import Path
-from typing import Callable, Optional, Protocol, Union
+from typing import Callable, Mapping, Optional, Protocol, Union
 
 from kernel.lifecycle.recovery_gate import RecoveryGate, RecoveryGateResult
 from kernel.lifecycle.stage_types import Stage
@@ -678,7 +678,13 @@ def _validate_factory_schema_ready(
     except sqlite3.Error as exc:
         raise RecoverySessionHostFactoryError(
             f"recovery session host factory failed to read sqlite "
-            f"table metadata for {db_path}: {exc}"
+            f"table metadata for {db_path}: {exc}",
+            reason_code=_FACTORY_ERROR_SCHEMA_METADATA_READ_ERROR,
+            details={
+                "db_path": str(db_path),
+                "phase": "tables",
+                "error_type": exc.__class__.__name__,
+            },
         ) from exc
     present_tables = {row[0] for row in table_rows}
     missing_tables = (
@@ -688,7 +694,12 @@ def _validate_factory_schema_ready(
         raise RecoverySessionHostFactoryError(
             f"recovery session host factory refused to construct host: "
             f"SQLite database at {db_path} is missing required schema "
-            f"table(s): {sorted(missing_tables)!r}"
+            f"table(s): {sorted(missing_tables)!r}",
+            reason_code=_FACTORY_ERROR_MISSING_REQUIRED_TABLES,
+            details={
+                "db_path": str(db_path),
+                "missing_tables": sorted(missing_tables),
+            },
         )
 
     # Column existence per factory-wired table. Column names sourced
@@ -704,7 +715,14 @@ def _validate_factory_schema_ready(
         except sqlite3.Error as exc:
             raise RecoverySessionHostFactoryError(
                 f"recovery session host factory failed to read column "
-                f"metadata for table {table_name!r} in {db_path}: {exc}"
+                f"metadata for table {table_name!r} in {db_path}: {exc}",
+                reason_code=_FACTORY_ERROR_SCHEMA_METADATA_READ_ERROR,
+                details={
+                    "db_path": str(db_path),
+                    "phase": "columns",
+                    "table": table_name,
+                    "error_type": exc.__class__.__name__,
+                },
             ) from exc
         # PRAGMA table_info returns rows of (cid, name, type, notnull,
         # dflt_value, pk).
@@ -715,7 +733,13 @@ def _validate_factory_schema_ready(
                 f"recovery session host factory refused to construct "
                 f"host: SQLite database at {db_path} table "
                 f"{table_name!r} is missing required column(s): "
-                f"{sorted(missing_columns)!r}"
+                f"{sorted(missing_columns)!r}",
+                reason_code=_FACTORY_ERROR_MISSING_REQUIRED_COLUMNS,
+                details={
+                    "db_path": str(db_path),
+                    "table": table_name,
+                    "missing_columns": sorted(missing_columns),
+                },
             )
 
     # Append-only / immutability triggers — existence first, then
@@ -729,7 +753,13 @@ def _validate_factory_schema_ready(
     except sqlite3.Error as exc:
         raise RecoverySessionHostFactoryError(
             f"recovery session host factory failed to read sqlite "
-            f"trigger metadata for {db_path}: {exc}"
+            f"trigger metadata for {db_path}: {exc}",
+            reason_code=_FACTORY_ERROR_SCHEMA_METADATA_READ_ERROR,
+            details={
+                "db_path": str(db_path),
+                "phase": "triggers",
+                "error_type": exc.__class__.__name__,
+            },
         ) from exc
     present_triggers = {row[0] for row in trigger_rows}
     trigger_sql_map: dict[str, str] = {
@@ -742,7 +772,12 @@ def _validate_factory_schema_ready(
         raise RecoverySessionHostFactoryError(
             f"recovery session host factory refused to construct host: "
             f"SQLite database at {db_path} is missing required "
-            f"append-only trigger(s): {sorted(missing_triggers)!r}"
+            f"append-only trigger(s): {sorted(missing_triggers)!r}",
+            reason_code=_FACTORY_ERROR_MISSING_REQUIRED_TRIGGERS,
+            details={
+                "db_path": str(db_path),
+                "missing_triggers": sorted(missing_triggers),
+            },
         )
 
     # P0-13 — required trigger body invariant snippets.
@@ -761,7 +796,13 @@ def _validate_factory_schema_ready(
                     f"recovery session host factory refused to construct "
                     f"host: SQLite database at {db_path} trigger "
                     f"{trigger_name!r} body is missing required invariant "
-                    f"snippet {snippet!r}"
+                    f"snippet {snippet!r}",
+                    reason_code=_FACTORY_ERROR_INVALID_TRIGGER_BODY,
+                    details={
+                        "db_path": str(db_path),
+                        "trigger": trigger_name,
+                        "missing_snippet": snippet,
+                    },
                 )
 
     # Critical indexes — existence first, then uniqueness.
@@ -773,7 +814,13 @@ def _validate_factory_schema_ready(
     except sqlite3.Error as exc:
         raise RecoverySessionHostFactoryError(
             f"recovery session host factory failed to read sqlite "
-            f"index metadata for {db_path}: {exc}"
+            f"index metadata for {db_path}: {exc}",
+            reason_code=_FACTORY_ERROR_SCHEMA_METADATA_READ_ERROR,
+            details={
+                "db_path": str(db_path),
+                "phase": "indexes",
+                "error_type": exc.__class__.__name__,
+            },
         ) from exc
     present_indexes = {row[0] for row in index_rows}
     index_table_map: dict[str, str] = {row[0]: row[1] for row in index_rows}
@@ -784,7 +831,12 @@ def _validate_factory_schema_ready(
         raise RecoverySessionHostFactoryError(
             f"recovery session host factory refused to construct host: "
             f"SQLite database at {db_path} is missing required "
-            f"critical index(es): {sorted(missing_indexes)!r}"
+            f"critical index(es): {sorted(missing_indexes)!r}",
+            reason_code=_FACTORY_ERROR_MISSING_REQUIRED_INDEXES,
+            details={
+                "db_path": str(db_path),
+                "missing_indexes": sorted(missing_indexes),
+            },
         )
 
     # P0-13 — required-index uniqueness check. Uses PRAGMA index_list,
@@ -808,7 +860,13 @@ def _validate_factory_schema_ready(
                 f"recovery session host factory refused to construct "
                 f"host: SQLite database at {db_path} required index "
                 f"{required_index!r} is attached to unexpected table "
-                f"{table_name!r}"
+                f"{table_name!r}",
+                reason_code=_FACTORY_ERROR_UNEXPECTED_INDEX_BINDING,
+                details={
+                    "db_path": str(db_path),
+                    "index": required_index,
+                    "actual_table": table_name,
+                },
             )
         try:
             list_rows = conn.execute(
@@ -817,7 +875,14 @@ def _validate_factory_schema_ready(
         except sqlite3.Error as exc:
             raise RecoverySessionHostFactoryError(
                 f"recovery session host factory failed to read index "
-                f"metadata for table {table_name!r} in {db_path}: {exc}"
+                f"metadata for table {table_name!r} in {db_path}: {exc}",
+                reason_code=_FACTORY_ERROR_SCHEMA_METADATA_READ_ERROR,
+                details={
+                    "db_path": str(db_path),
+                    "phase": "index_list",
+                    "table": table_name,
+                    "error_type": exc.__class__.__name__,
+                },
             ) from exc
         # PRAGMA index_list returns rows of (seq, name, unique, origin,
         # partial). We only need name + unique flag.
@@ -830,15 +895,51 @@ def _validate_factory_schema_ready(
             raise RecoverySessionHostFactoryError(
                 f"recovery session host factory refused to construct "
                 f"host: SQLite database at {db_path} could not resolve "
-                f"uniqueness for required index {required_index!r}"
+                f"uniqueness for required index {required_index!r}",
+                reason_code=_FACTORY_ERROR_INDEX_METADATA_UNAVAILABLE,
+                details={
+                    "db_path": str(db_path),
+                    "index": required_index,
+                    "table": table_name,
+                },
             )
         if actual_unique != expected_unique:
             raise RecoverySessionHostFactoryError(
                 f"recovery session host factory refused to construct "
                 f"host: SQLite database at {db_path} index "
                 f"{required_index!r} has wrong uniqueness: expected "
-                f"unique={expected_unique}, actual unique={actual_unique}"
+                f"unique={expected_unique}, actual unique={actual_unique}",
+                reason_code=_FACTORY_ERROR_WRONG_INDEX_UNIQUENESS,
+                details={
+                    "db_path": str(db_path),
+                    "index": required_index,
+                    "expected_unique": expected_unique,
+                    "actual_unique": actual_unique,
+                },
             )
+
+
+# P0-14 — operator-readable / machine-readable factory error reason codes.
+#
+# Stable string constants surfaced via
+# ``RecoverySessionHostFactoryError.reason_code``. Exposed at module level
+# so future operator surfaces (CLI, dashboards, integration tests) can
+# branch on a stable identifier rather than parse human-readable strings.
+# These values are part of the factory's public failure contract and
+# must not be renamed without a coordinated downstream change.
+_FACTORY_ERROR_DEFAULT = "factory_error"
+_FACTORY_ERROR_MISSING_DB_FILE = "missing_db_file"
+_FACTORY_ERROR_OPEN_ERROR = "open_error"
+_FACTORY_ERROR_SCHEMA_METADATA_READ_ERROR = "schema_metadata_read_error"
+_FACTORY_ERROR_MISSING_REQUIRED_TABLES = "missing_required_tables"
+_FACTORY_ERROR_MISSING_REQUIRED_COLUMNS = "missing_required_columns"
+_FACTORY_ERROR_MISSING_REQUIRED_TRIGGERS = "missing_required_triggers"
+_FACTORY_ERROR_INVALID_TRIGGER_BODY = "invalid_trigger_body"
+_FACTORY_ERROR_MISSING_REQUIRED_INDEXES = "missing_required_indexes"
+_FACTORY_ERROR_UNEXPECTED_INDEX_BINDING = "unexpected_index_binding"
+_FACTORY_ERROR_INDEX_METADATA_UNAVAILABLE = "index_metadata_unavailable"
+_FACTORY_ERROR_WRONG_INDEX_UNIQUENESS = "wrong_index_uniqueness"
+_FACTORY_ERROR_WIRING_ERROR = "wiring_error"
 
 
 class RecoverySessionHostFactoryError(RuntimeError):
@@ -856,7 +957,40 @@ class RecoverySessionHostFactoryError(RuntimeError):
     raises. If construction fails after the SQLite connection is
     opened, the factory closes that connection before raising so the
     operator never inherits a leaked file handle.
+
+    P0-14 — operator error surface. The exception carries two stable
+    machine-readable fields alongside the existing human-readable
+    message, so operator surfaces can branch on a stable identifier
+    rather than parse strings:
+
+    - ``reason_code``: stable string from the
+      ``_FACTORY_ERROR_*`` constants (default
+      ``"factory_error"``).
+    - ``details``: a plain ``dict`` of supplementary fields (e.g.
+      ``db_path``, ``missing_tables``, ``error_type``). Always a real
+      ``dict`` — never ``None`` — and copied from the caller-supplied
+      mapping so post-construction caller mutation cannot affect the
+      raised exception.
+
+    Backwards compatibility:
+    - ``RecoverySessionHostFactoryError("plain failure")`` still works
+      and ``str(exc)`` still returns ``"plain failure"``.
+    - The default ``reason_code`` is ``"factory_error"`` and the
+      default ``details`` is an empty ``dict``.
     """
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        reason_code: str = _FACTORY_ERROR_DEFAULT,
+        details: Optional[Mapping[str, object]] = None,
+    ) -> None:
+        super().__init__(message)
+        self.reason_code = reason_code
+        self.details: dict[str, object] = (
+            dict(details) if details is not None else {}
+        )
 
 
 def build_recovery_session_host_from_sqlite(
@@ -960,14 +1094,21 @@ def build_recovery_session_host_from_sqlite(
     path = Path(db_path)
     if not path.is_file():
         raise RecoverySessionHostFactoryError(
-            f"database file does not exist: {path}"
+            f"database file does not exist: {path}",
+            reason_code=_FACTORY_ERROR_MISSING_DB_FILE,
+            details={"db_path": str(path)},
         )
 
     try:
         conn = open_connection(path)
     except Exception as exc:
         raise RecoverySessionHostFactoryError(
-            f"failed to open SQLite connection at {path}: {exc}"
+            f"failed to open SQLite connection at {path}: {exc}",
+            reason_code=_FACTORY_ERROR_OPEN_ERROR,
+            details={
+                "db_path": str(path),
+                "error_type": exc.__class__.__name__,
+            },
         ) from exc
 
     # Read-only schema readiness check. Runs immediately after the
@@ -991,7 +1132,12 @@ def build_recovery_session_host_from_sqlite(
             pass
         raise RecoverySessionHostFactoryError(
             f"recovery session host factory schema validation failed "
-            f"for {path}: {exc}"
+            f"for {path}: {exc}",
+            reason_code=_FACTORY_ERROR_SCHEMA_METADATA_READ_ERROR,
+            details={
+                "db_path": str(path),
+                "error_type": exc.__class__.__name__,
+            },
         ) from exc
 
     try:
@@ -1127,7 +1273,12 @@ def build_recovery_session_host_from_sqlite(
         except Exception:
             pass
         raise RecoverySessionHostFactoryError(
-            f"recovery session host factory wiring failed: {exc}"
+            f"recovery session host factory wiring failed: {exc}",
+            reason_code=_FACTORY_ERROR_WIRING_ERROR,
+            details={
+                "db_path": str(path),
+                "error_type": exc.__class__.__name__,
+            },
         ) from exc
 
     return RecoverySessionHost(
