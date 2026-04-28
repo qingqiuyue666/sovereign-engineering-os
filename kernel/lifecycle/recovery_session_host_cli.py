@@ -30,6 +30,85 @@ EXIT_INVALID_ARGS = 2
 EXIT_FACTORY_ERROR = 3
 EXIT_UNEXPECTED = 4
 
+SESSION_HOST_CLI_COMMANDS = frozenset({"factory-check", "evaluate"})
+
+SESSION_HOST_CLI_EXIT_CODES = {
+    "ok": EXIT_OK,
+    "invalid_args": EXIT_INVALID_ARGS,
+    "factory_error": EXIT_FACTORY_ERROR,
+    "unexpected": EXIT_UNEXPECTED,
+}
+
+SESSION_HOST_CLI_TOP_LEVEL_KEYS = {
+    "factory-check": frozenset({"command", "factory"}),
+    "evaluate": frozenset(
+        {"command", "factory", "host_state", "recovery"}
+    ),
+}
+
+SESSION_HOST_CLI_FACTORY_KEYS = frozenset(
+    {
+        "ok",
+        "db_path",
+        "reason_code",
+        "message",
+        "details",
+        "host_present",
+        "host_closed",
+    }
+)
+
+SESSION_HOST_CLI_HOST_STATE_KEYS = frozenset({"closed"})
+
+SESSION_HOST_CLI_RECOVERY_KEYS = frozenset(
+    {
+        "task_id",
+        "recovery_class",
+        "reason",
+        "restored",
+        "snapshot_present",
+        "current_stage",
+        "terminal_state",
+        "artifact_count",
+        "intent_anchor_count",
+        "malformed_event_count",
+        "last_event_sequence",
+    }
+)
+
+SESSION_HOST_CLI_STDIO_CONTRACT = {
+    EXIT_OK: {"stdout_json": True, "stderr_empty": True},
+    EXIT_FACTORY_ERROR: {"stdout_json": True, "stderr_empty": True},
+    EXIT_INVALID_ARGS: {"stdout_json": False, "stderr_empty": False},
+    EXIT_UNEXPECTED: {"stdout_json": False, "stderr_empty": False},
+}
+
+
+def session_host_cli_contract_manifest() -> dict[str, object]:
+    """Return the read-only session-host CLI contract as JSON-safe data."""
+    return {
+        "commands": sorted(SESSION_HOST_CLI_COMMANDS),
+        "exit_codes": dict(SESSION_HOST_CLI_EXIT_CODES),
+        "top_level_keys": {
+            command: sorted(keys)
+            for command, keys in sorted(
+                SESSION_HOST_CLI_TOP_LEVEL_KEYS.items()
+            )
+        },
+        "factory_keys": sorted(SESSION_HOST_CLI_FACTORY_KEYS),
+        "host_state_keys": sorted(SESSION_HOST_CLI_HOST_STATE_KEYS),
+        "recovery_keys": sorted(SESSION_HOST_CLI_RECOVERY_KEYS),
+        "stdio_contract": {
+            str(code): dict(contract)
+            for code, contract in sorted(
+                SESSION_HOST_CLI_STDIO_CONTRACT.items()
+            )
+        },
+        "restore_supported": False,
+        "durable_writes": False,
+        "legacy_recovery_cli_modified": False,
+    }
+
 
 def build_parser() -> argparse.ArgumentParser:
     """Build the session-host operator CLI parser."""

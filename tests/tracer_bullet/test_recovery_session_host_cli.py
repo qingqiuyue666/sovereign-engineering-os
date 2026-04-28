@@ -28,7 +28,15 @@ sys.path.insert(
     os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")),
 )
 
-from kernel.lifecycle.recovery_session_host_cli import build_parser, main
+from kernel.lifecycle.recovery_session_host_cli import (
+    EXIT_FACTORY_ERROR,
+    EXIT_INVALID_ARGS,
+    EXIT_OK,
+    EXIT_UNEXPECTED,
+    build_parser,
+    main,
+    session_host_cli_contract_manifest,
+)
 from kernel.lifecycle.recovery_session_host import (
     RecoverySessionHostFactoryResult,
 )
@@ -165,6 +173,36 @@ def _assert_no_repr_leak(payload: object) -> None:
                     f"payload leaked forbidden marker {marker!r}: "
                     f"{payload!r}"
                 )
+
+
+def _assert_no_set_values(value: object) -> None:
+    if isinstance(value, (set, frozenset)):
+        raise AssertionError(f"manifest exposed a set value: {value!r}")
+
+    if isinstance(value, dict):
+        for key, nested in value.items():
+            _assert_no_set_values(key)
+            _assert_no_set_values(nested)
+        return
+
+    if isinstance(value, list):
+        for nested in value:
+            _assert_no_set_values(nested)
+
+
+def _stdio_contract_observation(
+    stdout: str, stderr: str
+) -> dict[str, bool]:
+    try:
+        _assert_single_json_line(stdout)
+        stdout_json = True
+    except (AssertionError, json.JSONDecodeError):
+        stdout_json = False
+
+    return {
+        "stdout_json": stdout_json,
+        "stderr_empty": stderr == "",
+    }
 
 
 def _quote_sql_identifier(identifier: str) -> str:
@@ -1285,6 +1323,204 @@ class TestRecoverySessionHostCli(unittest.TestCase):
 
         self.assertEqual(_audit_count(db_path), before_audit)
         self.assertEqual(_intent_anchor_count(db_path), before_intent)
+
+    def test_session_host_cli_contract_manifest_is_json_safe_and_deterministic(
+        self,
+    ) -> None:
+        manifest = session_host_cli_contract_manifest()
+        manifest_again = session_host_cli_contract_manifest()
+
+        self.assertEqual(manifest_again, manifest)
+        json.dumps(manifest, sort_keys=True)
+        _assert_no_set_values(manifest)
+
+        commands = manifest["commands"]
+        self.assertIsInstance(commands, list)
+        self.assertEqual(commands, sorted(commands))
+
+        top_level_keys = manifest["top_level_keys"]
+        self.assertIsInstance(top_level_keys, dict)
+        for command, keys in top_level_keys.items():
+            with self.subTest(command=command):
+                self.assertIsInstance(keys, list)
+                self.assertEqual(keys, sorted(keys))
+
+        for key_list_name in (
+            "factory_keys",
+            "host_state_keys",
+            "recovery_keys",
+        ):
+            with self.subTest(key_list_name=key_list_name):
+                key_list = manifest[key_list_name]
+                self.assertIsInstance(key_list, list)
+                self.assertEqual(key_list, sorted(key_list))
+
+    def test_session_host_cli_contract_manifest_commands_match_parser(
+        self,
+    ) -> None:
+        manifest = session_host_cli_contract_manifest()
+        parser_choices = _subparser_choices(build_parser())
+
+        self.assertEqual(set(manifest["commands"]), parser_choices)
+        self.assertEqual(parser_choices, {"factory-check", "evaluate"})
+        self.assertNotIn("restore", manifest["commands"])
+
+    def test_session_host_cli_contract_manifest_exit_codes_match_module_constants(
+        self,
+    ) -> None:
+        expected = {
+            "ok": 0,
+            "invalid_args": 2,
+            "factory_error": 3,
+            "unexpected": 4,
+        }
+        manifest = session_host_cli_contract_manifest()
+
+        self.assertEqual(manifest["exit_codes"], expected)
+        self.assertEqual(expected["ok"], EXIT_OK)
+        self.assertEqual(expected["invalid_args"], EXIT_INVALID_ARGS)
+        self.assertEqual(expected["factory_error"], EXIT_FACTORY_ERROR)
+        self.assertEqual(expected["unexpected"], EXIT_UNEXPECTED)
+
+    def test_session_host_cli_contract_manifest_keys_match_actual_factory_check_success_payload(
+        self,
+    ) -> None:
+        db_path = self.tmpdir / "factory.db"
+        _initialize_empty_db(db_path)
+        manifest = session_host_cli_contract_manifest()
+
+        code, stdout, stderr = _invoke(
+            ["factory-check", "--db", str(db_path)]
+        )
+        payload = _assert_code_json_stderr(
+            code,
+            stdout,
+            stderr,
+            expected_code=EXIT_OK,
+            expect_json=True,
+        )
+
+        self.assertIsNotNone(payload)
+        self.assertEqual(
+            set(payload), set(manifest["top_level_keys"]["factory-check"])
+        )
+        factory = payload["factory"]
+        self.assertIsInstance(factory, dict)
+        self.assertEqual(set(factory), set(manifest["factory_keys"]))
+
+    def test_session_host_cli_contract_manifest_keys_match_actual_evaluate_success_payload(
+        self,
+    ) -> None:
+        db_path = self.tmpdir / "factory.db"
+        task_id = f"task-{uuid4().hex[:8]}"
+        _initialize_empty_db(db_path)
+        _seed_inference_stage(db_path, task_id)
+        manifest = session_host_cli_contract_manifest()
+
+        code, stdout, stderr = _invoke(
+            ["evaluate", "--db", str(db_path), "--task-id", task_id]
+        )
+        payload = _assert_code_json_stderr(
+            code,
+            stdout,
+            stderr,
+            expected_code=EXIT_OK,
+            expect_json=True,
+        )
+
+        self.assertIsNotNone(payload)
+        self.assertEqual(
+            set(payload), set(manifest["top_level_keys"]["evaluate"])
+        )
+        factory = payload["factory"]
+        host_state = payload["host_state"]
+        recovery = payload["recovery"]
+        self.assertIsInstance(factory, dict)
+        self.assertIsInstance(host_state, dict)
+        self.assertIsInstance(recovery, dict)
+        self.assertEqual(set(factory), set(manifest["factory_keys"]))
+        self.assertEqual(set(host_state), set(manifest["host_state_keys"]))
+        self.assertEqual(set(recovery), set(manifest["recovery_keys"]))
+
+    def test_session_host_cli_contract_manifest_stdio_contract_matches_runtime(
+        self,
+    ) -> None:
+        valid_db_path = self.tmpdir / "valid.db"
+        _initialize_empty_db(valid_db_path)
+        missing_path = self.tmpdir / "missing.db"
+        manifest = session_host_cli_contract_manifest()
+
+        cases: list[tuple[str, int, str, str]] = []
+        code, stdout, stderr = _invoke(
+            ["factory-check", "--db", str(valid_db_path)]
+        )
+        cases.append(("factory-check success", code, stdout, stderr))
+
+        code, stdout, stderr = _invoke(
+            ["factory-check", "--db", str(missing_path)]
+        )
+        cases.append(("factory-check missing DB", code, stdout, stderr))
+
+        code, stdout, stderr = _invoke([])
+        cases.append(("invalid args", code, stdout, stderr))
+
+        with mock.patch(
+            "kernel.lifecycle.recovery_session_host_cli."
+            "try_build_recovery_session_host_from_sqlite",
+            side_effect=RuntimeError("unexpected manifest defect"),
+        ):
+            code, stdout, stderr = _invoke(
+                ["factory-check", "--db", str(self.tmpdir / "factory.db")]
+            )
+        cases.append(("unexpected error", code, stdout, stderr))
+
+        for label, code, stdout, stderr in cases:
+            with self.subTest(label=label):
+                self.assertEqual(
+                    _stdio_contract_observation(stdout, stderr),
+                    manifest["stdio_contract"][str(code)],
+                )
+
+    def test_session_host_cli_contract_manifest_does_not_add_restore_or_durable_write(
+        self,
+    ) -> None:
+        manifest = session_host_cli_contract_manifest()
+        self.assertIs(manifest["restore_supported"], False)
+        self.assertIs(manifest["durable_writes"], False)
+        self.assertNotIn("restore", manifest["commands"])
+
+        db_path = self.tmpdir / "factory.db"
+        task_id = f"task-{uuid4().hex[:8]}"
+        _initialize_empty_db(db_path)
+        _seed_inference_stage(db_path, task_id)
+        before_counts = _table_row_counts(db_path)
+
+        code, _stdout, _stderr = _invoke(
+            ["factory-check", "--db", str(db_path)]
+        )
+        self.assertEqual(code, EXIT_OK)
+        code, _stdout, _stderr = _invoke(
+            ["evaluate", "--db", str(db_path), "--task-id", task_id]
+        )
+        self.assertEqual(code, EXIT_OK)
+
+        self.assertEqual(_table_row_counts(db_path), before_counts)
+        self.assertEqual(session_host_cli_contract_manifest(), manifest)
+
+    def test_session_host_cli_contract_manifest_returns_defensive_copies(
+        self,
+    ) -> None:
+        manifest = session_host_cli_contract_manifest()
+        manifest["commands"].append("restore")
+        manifest["factory_keys"].append("host")
+        manifest["exit_codes"]["ok"] = 99
+
+        fresh_manifest = session_host_cli_contract_manifest()
+        self.assertEqual(
+            fresh_manifest["commands"], ["evaluate", "factory-check"]
+        )
+        self.assertNotIn("host", fresh_manifest["factory_keys"])
+        self.assertEqual(fresh_manifest["exit_codes"]["ok"], EXIT_OK)
 
     def test_session_host_cli_module_import_has_no_side_effects(self) -> None:
         import kernel.lifecycle.recovery_session_host_cli as module
