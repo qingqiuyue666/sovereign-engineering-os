@@ -94,6 +94,14 @@ class RecoverySessionHostCliReadiness:
     manifest: dict[str, object]
 
 
+@dataclass(frozen=True)
+class RecoverySessionHostCliReadinessSmoke:
+    passed: bool
+    reason_code: str
+    failures: tuple[str, ...]
+    payload: dict[str, object]
+
+
 def session_host_cli_contract_manifest() -> dict[str, object]:
     """Return the read-only session-host CLI contract as JSON-safe data."""
     return {
@@ -228,6 +236,130 @@ def current_recovery_session_host_cli_readiness_payload() -> dict[str, object]:
     return render_recovery_session_host_cli_readiness(
         recovery_session_host_cli_readiness()
     )
+
+
+def current_recovery_session_host_cli_readiness_smoke(
+) -> RecoverySessionHostCliReadinessSmoke:
+    """Return a pure CI-style smoke result for the current readiness payload."""
+    payload = current_recovery_session_host_cli_readiness_payload()
+    failures: list[str] = []
+
+    if set(payload) != {"ready", "reason_code", "failures", "manifest"}:
+        failures.append("payload_keys_mismatch")
+
+    if payload.get("ready") is not True:
+        failures.append("payload_not_ready")
+
+    if payload.get("reason_code") != "ready":
+        failures.append("reason_code_mismatch")
+
+    if payload.get("failures") != []:
+        failures.append("unexpected_failures")
+
+    manifest = payload.get("manifest")
+    if not isinstance(manifest, dict):
+        failures.append("manifest_missing_or_invalid")
+    else:
+        commands = manifest.get("commands")
+        if (
+            manifest.get("restore_supported") is not False
+            or (
+                isinstance(commands, list)
+                and (
+                    "restore" in commands
+                    or "restore-dry-run" in commands
+                )
+            )
+        ):
+            failures.append("restore_surface_present")
+
+        if manifest.get("durable_writes") is not False:
+            failures.append("durable_writes_enabled")
+
+        if commands != ["evaluate", "factory-check"]:
+            failures.append("commands_mismatch")
+
+        if manifest.get("exit_codes") != {
+            "ok": 0,
+            "invalid_args": 2,
+            "factory_error": 3,
+            "unexpected": 4,
+        }:
+            failures.append("exit_codes_mismatch")
+
+        if manifest.get("stdio_contract") != {
+            "0": {"stdout_json": True, "stderr_empty": True},
+            "2": {"stdout_json": False, "stderr_empty": False},
+            "3": {"stdout_json": True, "stderr_empty": True},
+            "4": {"stdout_json": False, "stderr_empty": False},
+        }:
+            failures.append("stdio_contract_mismatch")
+
+        if (
+            manifest.get("top_level_keys")
+            != {
+                "factory-check": ["command", "factory"],
+                "evaluate": [
+                    "command",
+                    "factory",
+                    "host_state",
+                    "recovery",
+                ],
+            }
+            or manifest.get("factory_keys")
+            != [
+                "db_path",
+                "details",
+                "host_closed",
+                "host_present",
+                "message",
+                "ok",
+                "reason_code",
+            ]
+            or manifest.get("host_state_keys") != ["closed"]
+            or manifest.get("recovery_keys")
+            != [
+                "artifact_count",
+                "current_stage",
+                "intent_anchor_count",
+                "last_event_sequence",
+                "malformed_event_count",
+                "reason",
+                "recovery_class",
+                "restored",
+                "snapshot_present",
+                "task_id",
+                "terminal_state",
+            ]
+        ):
+            failures.append("manifest_keys_mismatch")
+
+    if failures:
+        return RecoverySessionHostCliReadinessSmoke(
+            passed=False,
+            reason_code="failed",
+            failures=tuple(failures),
+            payload=payload,
+        )
+
+    return RecoverySessionHostCliReadinessSmoke(
+        passed=True,
+        reason_code="passed",
+        failures=(),
+        payload=payload,
+    )
+
+
+def render_recovery_session_host_cli_readiness_smoke(
+    smoke: RecoverySessionHostCliReadinessSmoke,
+) -> dict[str, object]:
+    """Render a session-host CLI readiness smoke result as JSON-safe data."""
+    return {
+        "passed": smoke.passed,
+        "reason_code": smoke.reason_code,
+        "failures": list(smoke.failures),
+        "payload": deepcopy(smoke.payload),
+    }
 
 
 def build_parser() -> argparse.ArgumentParser:
