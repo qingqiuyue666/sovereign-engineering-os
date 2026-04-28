@@ -342,6 +342,27 @@ class TestRecoverySessionHostCli(unittest.TestCase):
         self.assertEqual(set(rendered), FACTORY_KEYS)
         return rendered
 
+    def _readiness_for_manifest(
+        self,
+        manifest: dict[str, object],
+    ) -> RecoverySessionHostCliReadiness:
+        with mock.patch(
+            "kernel.lifecycle.recovery_session_host_cli."
+            "session_host_cli_contract_manifest",
+            return_value=manifest,
+        ):
+            return recovery_session_host_cli_readiness()
+
+    def _assert_readiness_failure_for_manifest(
+        self,
+        manifest: dict[str, object],
+        expected_failure: str,
+    ) -> None:
+        readiness = self._readiness_for_manifest(manifest)
+        self.assertIs(readiness.ready, False)
+        self.assertEqual(readiness.reason_code, "not_ready")
+        self.assertIn(expected_failure, readiness.failures)
+
     def test_exit_code_factory_check_success_is_0_and_emits_json(
         self,
     ) -> None:
@@ -2069,6 +2090,225 @@ class TestRecoverySessionHostCli(unittest.TestCase):
             readiness2.manifest["stdio_contract"]["0"]["stdout_json"],
             True,
         )
+
+    def test_readiness_matrix_detects_missing_command(self) -> None:
+        manifest = _valid_manifest_copy()
+        manifest["commands"] = ["evaluate"]
+
+        self._assert_readiness_failure_for_manifest(
+            manifest, "commands_mismatch"
+        )
+
+    def test_readiness_matrix_detects_extra_non_restore_command(self) -> None:
+        manifest = _valid_manifest_copy()
+        manifest["commands"] = ["evaluate", "factory-check", "inspect"]
+
+        readiness = self._readiness_for_manifest(manifest)
+
+        self.assertIs(readiness.ready, False)
+        self.assertEqual(readiness.reason_code, "not_ready")
+        self.assertIn("commands_mismatch", readiness.failures)
+        self.assertNotIn("restore_command_present", readiness.failures)
+
+    def test_readiness_matrix_detects_restore_supported_true(self) -> None:
+        manifest = _valid_manifest_copy()
+        manifest["restore_supported"] = True
+
+        self._assert_readiness_failure_for_manifest(
+            manifest, "restore_supported"
+        )
+
+    def test_readiness_matrix_detects_restore_dry_run_command_present(
+        self,
+    ) -> None:
+        manifest = _valid_manifest_copy()
+        manifest["commands"] = [
+            "evaluate",
+            "factory-check",
+            "restore-dry-run",
+        ]
+
+        readiness = self._readiness_for_manifest(manifest)
+
+        self.assertIs(readiness.ready, False)
+        self.assertEqual(readiness.reason_code, "not_ready")
+        self.assertIn("commands_mismatch", readiness.failures)
+        self.assertIn("restore_command_present", readiness.failures)
+
+    def test_readiness_matrix_detects_durable_writes_enabled(self) -> None:
+        manifest = _valid_manifest_copy()
+        manifest["durable_writes"] = True
+
+        self._assert_readiness_failure_for_manifest(
+            manifest, "durable_writes_enabled"
+        )
+
+    def test_readiness_matrix_detects_legacy_recovery_cli_modified(
+        self,
+    ) -> None:
+        manifest = _valid_manifest_copy()
+        manifest["legacy_recovery_cli_modified"] = True
+
+        self._assert_readiness_failure_for_manifest(
+            manifest, "legacy_recovery_cli_modified"
+        )
+
+    def test_readiness_matrix_detects_missing_exit_code_entry(self) -> None:
+        manifest = _valid_manifest_copy()
+        del manifest["exit_codes"]["factory_error"]
+
+        self._assert_readiness_failure_for_manifest(
+            manifest, "exit_codes_mismatch"
+        )
+
+    def test_readiness_matrix_detects_wrong_exit_code_value(self) -> None:
+        manifest = _valid_manifest_copy()
+        manifest["exit_codes"]["factory_error"] = 99
+
+        self._assert_readiness_failure_for_manifest(
+            manifest, "exit_codes_mismatch"
+        )
+
+    def test_readiness_matrix_detects_missing_stdio_code(self) -> None:
+        manifest = _valid_manifest_copy()
+        del manifest["stdio_contract"]["4"]
+
+        self._assert_readiness_failure_for_manifest(
+            manifest, "stdio_contract_mismatch"
+        )
+
+    def test_readiness_matrix_detects_wrong_stdio_value(self) -> None:
+        manifest = _valid_manifest_copy()
+        manifest["stdio_contract"]["3"]["stderr_empty"] = False
+
+        self._assert_readiness_failure_for_manifest(
+            manifest, "stdio_contract_mismatch"
+        )
+
+    def test_readiness_matrix_detects_factory_check_top_level_key_drift(
+        self,
+    ) -> None:
+        manifest = _valid_manifest_copy()
+        manifest["top_level_keys"]["factory-check"].append("host_state")
+
+        self._assert_readiness_failure_for_manifest(
+            manifest, "top_level_keys_mismatch"
+        )
+
+    def test_readiness_matrix_detects_evaluate_top_level_key_drift(
+        self,
+    ) -> None:
+        manifest = _valid_manifest_copy()
+        manifest["top_level_keys"]["evaluate"].remove("recovery")
+
+        self._assert_readiness_failure_for_manifest(
+            manifest, "top_level_keys_mismatch"
+        )
+
+    def test_readiness_matrix_detects_missing_factory_key(self) -> None:
+        manifest = _valid_manifest_copy()
+        manifest["factory_keys"].remove("host_closed")
+
+        self._assert_readiness_failure_for_manifest(
+            manifest, "factory_keys_mismatch"
+        )
+
+    def test_readiness_matrix_detects_extra_factory_key_host(self) -> None:
+        manifest = _valid_manifest_copy()
+        manifest["factory_keys"].append("host")
+
+        self._assert_readiness_failure_for_manifest(
+            manifest, "factory_keys_mismatch"
+        )
+
+    def test_readiness_matrix_detects_host_state_key_drift(self) -> None:
+        manifest = _valid_manifest_copy()
+        manifest["host_state_keys"] = ["closed", "host"]
+
+        self._assert_readiness_failure_for_manifest(
+            manifest, "host_state_keys_mismatch"
+        )
+
+    def test_readiness_matrix_detects_missing_recovery_key(self) -> None:
+        manifest = _valid_manifest_copy()
+        manifest["recovery_keys"].remove("last_event_sequence")
+
+        self._assert_readiness_failure_for_manifest(
+            manifest, "recovery_keys_mismatch"
+        )
+
+    def test_readiness_matrix_detects_extra_recovery_key(self) -> None:
+        manifest = _valid_manifest_copy()
+        manifest["recovery_keys"].append("host")
+
+        self._assert_readiness_failure_for_manifest(
+            manifest, "recovery_keys_mismatch"
+        )
+
+    def test_readiness_matrix_multiple_failures_are_reported_in_deterministic_order(
+        self,
+    ) -> None:
+        manifest = _valid_manifest_copy()
+        manifest["commands"].append("restore")
+        manifest["durable_writes"] = True
+        manifest["exit_codes"]["ok"] = 99
+        manifest["factory_keys"].append("host")
+
+        readiness = self._readiness_for_manifest(manifest)
+
+        self.assertIs(readiness.ready, False)
+        self.assertEqual(readiness.reason_code, "not_ready")
+        self.assertEqual(
+            readiness.failures,
+            (
+                "commands_mismatch",
+                "restore_command_present",
+                "durable_writes_enabled",
+                "exit_codes_mismatch",
+                "factory_keys_mismatch",
+            ),
+        )
+
+    def test_readiness_render_matrix_failure_payload_contains_all_failures(
+        self,
+    ) -> None:
+        manifest = _valid_manifest_copy()
+        manifest["commands"].append("restore")
+        manifest["durable_writes"] = True
+        manifest["exit_codes"]["ok"] = 99
+        manifest["factory_keys"].append("host")
+        expected_failures = (
+            "commands_mismatch",
+            "restore_command_present",
+            "durable_writes_enabled",
+            "exit_codes_mismatch",
+            "factory_keys_mismatch",
+        )
+
+        readiness = self._readiness_for_manifest(manifest)
+        payload = render_recovery_session_host_cli_readiness(readiness)
+
+        self.assertIs(payload["ready"], False)
+        self.assertEqual(payload["reason_code"], "not_ready")
+        self.assertEqual(payload["failures"], list(readiness.failures))
+        for failure in expected_failures:
+            with self.subTest(failure=failure):
+                self.assertIn(failure, payload["failures"])
+        self.assertIsInstance(json.dumps(payload, sort_keys=True), str)
+
+    def test_readiness_render_matrix_failure_manifest_is_defensive_copy(
+        self,
+    ) -> None:
+        manifest = _valid_manifest_copy()
+        manifest["commands"] = ["evaluate"]
+        readiness = self._readiness_for_manifest(manifest)
+        original_manifest = copy.deepcopy(readiness.manifest)
+
+        payload = render_recovery_session_host_cli_readiness(readiness)
+        payload["manifest"]["commands"].append("another")
+
+        self.assertIs(readiness.ready, False)
+        self.assertEqual(readiness.manifest, original_manifest)
 
     def test_recovery_session_host_cli_readiness_detects_manifest_command_mismatch(
         self,
