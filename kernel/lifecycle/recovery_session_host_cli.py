@@ -12,6 +12,7 @@ import argparse
 import json
 import sys
 import traceback
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Mapping
 
@@ -84,6 +85,14 @@ SESSION_HOST_CLI_STDIO_CONTRACT = {
 }
 
 
+@dataclass(frozen=True)
+class RecoverySessionHostCliReadiness:
+    ready: bool
+    reason_code: str
+    failures: tuple[str, ...]
+    manifest: dict[str, object]
+
+
 def session_host_cli_contract_manifest() -> dict[str, object]:
     """Return the read-only session-host CLI contract as JSON-safe data."""
     return {
@@ -108,6 +117,97 @@ def session_host_cli_contract_manifest() -> dict[str, object]:
         "durable_writes": False,
         "legacy_recovery_cli_modified": False,
     }
+
+
+def recovery_session_host_cli_readiness() -> RecoverySessionHostCliReadiness:
+    """Verify the session-host CLI manifest satisfies operator minimums."""
+    manifest = session_host_cli_contract_manifest()
+    failures: list[str] = []
+
+    commands = manifest.get("commands")
+    expected_commands = ["evaluate", "factory-check"]
+    if commands != expected_commands:
+        failures.append("commands_mismatch")
+
+    if manifest.get("restore_supported") is not False:
+        failures.append("restore_supported")
+
+    if isinstance(commands, list) and (
+        "restore" in commands or "restore-dry-run" in commands
+    ):
+        failures.append("restore_command_present")
+
+    if manifest.get("durable_writes") is not False:
+        failures.append("durable_writes_enabled")
+
+    if manifest.get("legacy_recovery_cli_modified") is not False:
+        failures.append("legacy_recovery_cli_modified")
+
+    if manifest.get("exit_codes") != {
+        "ok": 0,
+        "invalid_args": 2,
+        "factory_error": 3,
+        "unexpected": 4,
+    }:
+        failures.append("exit_codes_mismatch")
+
+    if manifest.get("stdio_contract") != {
+        "0": {"stdout_json": True, "stderr_empty": True},
+        "2": {"stdout_json": False, "stderr_empty": False},
+        "3": {"stdout_json": True, "stderr_empty": True},
+        "4": {"stdout_json": False, "stderr_empty": False},
+    }:
+        failures.append("stdio_contract_mismatch")
+
+    if manifest.get("top_level_keys") != {
+        "factory-check": ["command", "factory"],
+        "evaluate": ["command", "factory", "host_state", "recovery"],
+    }:
+        failures.append("top_level_keys_mismatch")
+
+    if manifest.get("factory_keys") != [
+        "db_path",
+        "details",
+        "host_closed",
+        "host_present",
+        "message",
+        "ok",
+        "reason_code",
+    ]:
+        failures.append("factory_keys_mismatch")
+
+    if manifest.get("host_state_keys") != ["closed"]:
+        failures.append("host_state_keys_mismatch")
+
+    if manifest.get("recovery_keys") != [
+        "artifact_count",
+        "current_stage",
+        "intent_anchor_count",
+        "last_event_sequence",
+        "malformed_event_count",
+        "reason",
+        "recovery_class",
+        "restored",
+        "snapshot_present",
+        "task_id",
+        "terminal_state",
+    ]:
+        failures.append("recovery_keys_mismatch")
+
+    if failures:
+        return RecoverySessionHostCliReadiness(
+            ready=False,
+            reason_code="not_ready",
+            failures=tuple(failures),
+            manifest=manifest,
+        )
+
+    return RecoverySessionHostCliReadiness(
+        ready=True,
+        reason_code="ready",
+        failures=(),
+        manifest=manifest,
+    )
 
 
 def build_parser() -> argparse.ArgumentParser:
