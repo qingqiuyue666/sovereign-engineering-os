@@ -44,6 +44,7 @@ stays a thin runtime boundary rather than a wiring graph.
 from __future__ import annotations
 
 import sqlite3
+from copy import deepcopy
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Mapping, Optional, Protocol, Union
@@ -1364,7 +1365,7 @@ def render_factory_result(
         "db_path": result.db_path,
         "reason_code": result.reason_code,
         "message": result.message,
-        "details": dict(result.details),
+        "details": deepcopy(result.details),
         "host_present": host is not None,
         "host_closed": host.closed if host is not None else None,
     }

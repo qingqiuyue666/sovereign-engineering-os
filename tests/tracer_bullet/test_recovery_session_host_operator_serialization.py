@@ -125,6 +125,32 @@ class TestRecoverySessionHostOperatorSerialization(unittest.TestCase):
 
         self.assertEqual(result.details, {"x": "y"})
 
+    def test_render_factory_result_details_are_deep_copied(self) -> None:
+        result = RecoverySessionHostFactoryResult(
+            ok=False,
+            host=None,
+            reason_code="missing_required_tables",
+            message="missing",
+            details={"missing_tables": ["audit_records"]},
+            db_path="db",
+        )
+
+        payload = render_factory_result(result)
+        details = payload["details"]
+        self.assertIsInstance(details, dict)
+        self.assertIsNot(details, result.details)
+        missing_tables = details["missing_tables"]
+        self.assertIsInstance(missing_tables, list)
+        self.assertIsNot(
+            missing_tables, result.details["missing_tables"]
+        )
+
+        missing_tables.append("mutated")
+
+        self.assertEqual(
+            result.details["missing_tables"], ["audit_records"]
+        )
+
     def test_render_session_host_state_open_and_closed(self) -> None:
         db_path = self.tmpdir / "factory.db"
         _initialize_empty_db(db_path)
