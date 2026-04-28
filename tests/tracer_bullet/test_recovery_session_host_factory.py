@@ -687,6 +687,142 @@ class TestRecoverySessionHostFactory(unittest.TestCase):
         self.assertIsInstance(cause, RuntimeError)
         self.assertIn("forced wiring failure", str(cause))
 
+    # ------------------------------------------------------------------
+    # P0-12 A. existing required table missing a required column -> raise
+    # ------------------------------------------------------------------
+
+    def test_factory_existing_table_with_missing_required_column_raises(
+        self,
+    ) -> None:
+        db_path = self.tmpdir / "factory.db"
+        _initialize_empty_db(db_path)
+
+        # Drop and recreate `intent_anchor_records` without the
+        # required `created_at` column. `intent_anchor_records` has no
+        # append-only triggers, so DROP TABLE is safe; the recreated
+        # table still satisfies the table-existence check from P0-11
+        # but fails the P0-12 column-identity check.
+        raw = sqlite3.connect(str(db_path))
+        try:
+            raw.execute("DROP TABLE intent_anchor_records;")
+            raw.execute(
+                "CREATE TABLE intent_anchor_records ("
+                "intent_id TEXT PRIMARY KEY, "
+                "task_id TEXT NOT NULL, "
+                "state TEXT NOT NULL"
+                ");"
+            )
+            raw.commit()
+        finally:
+            raw.close()
+
+        with self.assertRaises(RecoverySessionHostFactoryError) as ctx:
+            build_recovery_session_host_from_sqlite(db_path=db_path)
+
+        message = str(ctx.exception)
+        self.assertIn("intent_anchor_records", message)
+        self.assertIn("created_at", message)
+        self.assertIn("missing required column", message)
+
+        # The factory must not have backfilled the dropped column or
+        # otherwise mutated schema as a side effect of the failure.
+        raw = sqlite3.connect(str(db_path))
+        try:
+            cols = raw.execute(
+                "PRAGMA table_info(intent_anchor_records);"
+            ).fetchall()
+        finally:
+            raw.close()
+        present_columns = {row[1] for row in cols}
+        self.assertNotIn(
+            "created_at",
+            present_columns,
+            "factory must not repair missing columns as a side effect",
+        )
+
+    # ------------------------------------------------------------------
+    # P0-12 B. existing required append-only trigger missing -> raise
+    # ------------------------------------------------------------------
+
+    def test_factory_missing_required_trigger_raises(self) -> None:
+        db_path = self.tmpdir / "factory.db"
+        _initialize_empty_db(db_path)
+
+        # Drop a single required append-only trigger. INV-026 audit
+        # append-only enforcement is silently disabled when this
+        # trigger is absent — the factory must refuse.
+        raw = sqlite3.connect(str(db_path))
+        try:
+            raw.execute(
+                "DROP TRIGGER audit_records_append_only_update;"
+            )
+            raw.commit()
+        finally:
+            raw.close()
+
+        with self.assertRaises(RecoverySessionHostFactoryError) as ctx:
+            build_recovery_session_host_from_sqlite(db_path=db_path)
+
+        message = str(ctx.exception)
+        self.assertIn("audit_records_append_only_update", message)
+        self.assertIn("trigger", message)
+
+        # No side-effect repair: trigger must remain absent.
+        raw = sqlite3.connect(str(db_path))
+        try:
+            rows = raw.execute(
+                "SELECT name FROM sqlite_master WHERE type = 'trigger';"
+            ).fetchall()
+        finally:
+            raw.close()
+        present_triggers = {row[0] for row in rows}
+        self.assertNotIn(
+            "audit_records_append_only_update",
+            present_triggers,
+            "factory must not recreate dropped triggers as a side effect",
+        )
+
+    # ------------------------------------------------------------------
+    # P0-12 C. existing required critical index missing -> raise
+    # ------------------------------------------------------------------
+
+    def test_factory_missing_required_index_raises(self) -> None:
+        db_path = self.tmpdir / "factory.db"
+        _initialize_empty_db(db_path)
+
+        # Drop the unique audit-sequence index. The factory must
+        # refuse: the index is the substrate for monotonic audit
+        # append order, and a wired host without it would silently
+        # accept duplicate sequence values.
+        raw = sqlite3.connect(str(db_path))
+        try:
+            raw.execute("DROP INDEX idx_audit_records_sequence;")
+            raw.commit()
+        finally:
+            raw.close()
+
+        with self.assertRaises(RecoverySessionHostFactoryError) as ctx:
+            build_recovery_session_host_from_sqlite(db_path=db_path)
+
+        message = str(ctx.exception)
+        self.assertIn("idx_audit_records_sequence", message)
+        self.assertIn("index", message)
+
+        # No side-effect repair: index must remain absent.
+        raw = sqlite3.connect(str(db_path))
+        try:
+            rows = raw.execute(
+                "SELECT name FROM sqlite_master WHERE type = 'index';"
+            ).fetchall()
+        finally:
+            raw.close()
+        present_indexes = {row[0] for row in rows}
+        self.assertNotIn(
+            "idx_audit_records_sequence",
+            present_indexes,
+            "factory must not recreate dropped indexes as a side effect",
+        )
+
     def test_factory_does_not_add_cli_restore(self) -> None:
         import argparse as _argparse
 
