@@ -44,9 +44,11 @@ from kernel.lifecycle.recovery_session_host_cli import (
     SESSION_HOST_CLI_TOP_LEVEL_KEYS,
     build_parser,
     current_recovery_session_host_cli_readiness_payload,
+    current_recovery_session_host_cli_readiness_smoke,
     main,
     recovery_session_host_cli_readiness,
     render_recovery_session_host_cli_readiness,
+    render_recovery_session_host_cli_readiness_smoke,
     session_host_cli_contract_manifest,
 )
 from kernel.lifecycle.recovery_session_host import (
@@ -244,6 +246,10 @@ def _table_row_counts(db_path: Path) -> dict[str, int]:
 
 def _valid_manifest_copy() -> dict[str, object]:
     return copy.deepcopy(session_host_cli_contract_manifest())
+
+
+def _valid_current_readiness_payload_copy() -> dict[str, object]:
+    return copy.deepcopy(current_recovery_session_host_cli_readiness_payload())
 
 
 def _insert_duplicate_intent_anchor(db_path: Path, task_id: str) -> None:
@@ -2150,6 +2156,282 @@ class TestRecoverySessionHostCli(unittest.TestCase):
         self.assertEqual(readiness_mock.call_count, 1)
         self.assertEqual(len(calls), 1)
         self.assertIs(payload["ready"], True)
+
+    def test_current_readiness_smoke_passes_on_current_payload(
+        self,
+    ) -> None:
+        smoke = current_recovery_session_host_cli_readiness_smoke()
+
+        self.assertIs(smoke.passed, True)
+        self.assertEqual(smoke.reason_code, "passed")
+        self.assertEqual(smoke.failures, ())
+        self.assertIs(smoke.payload["ready"], True)
+        self.assertEqual(
+            smoke.payload["manifest"]["commands"],
+            ["evaluate", "factory-check"],
+        )
+
+    def test_current_readiness_smoke_render_payload_shape(self) -> None:
+        smoke = current_recovery_session_host_cli_readiness_smoke()
+        payload = render_recovery_session_host_cli_readiness_smoke(smoke)
+
+        self.assertEqual(
+            set(payload), {"passed", "reason_code", "failures", "payload"}
+        )
+        self.assertIs(payload["passed"], True)
+        self.assertEqual(payload["reason_code"], "passed")
+        self.assertEqual(payload["failures"], [])
+        self.assertEqual(payload["payload"], smoke.payload)
+        self.assertIsInstance(json.dumps(payload, sort_keys=True), str)
+
+    def test_current_readiness_smoke_is_pure_except_current_payload_helper(
+        self,
+    ) -> None:
+        with mock.patch(
+            "kernel.lifecycle.recovery_session_host_cli.build_parser",
+            side_effect=RuntimeError("parser should not be called"),
+        ), mock.patch(
+            "kernel.lifecycle.recovery_session_host_cli."
+            "try_build_recovery_session_host_from_sqlite",
+            side_effect=RuntimeError("factory should not be called"),
+        ), mock.patch(
+            "kernel.lifecycle.recovery_session_host_cli.main",
+            side_effect=RuntimeError("main should not be called"),
+        ), mock.patch(
+            "kernel.lifecycle.recovery_session_host_cli."
+            "render_factory_result",
+            side_effect=RuntimeError(
+                "render_factory_result should not be called"
+            ),
+        ), mock.patch(
+            "kernel.lifecycle.recovery_session_host_cli."
+            "render_recovery_gate_result",
+            side_effect=RuntimeError(
+                "render_recovery_gate_result should not be called"
+            ),
+        ), mock.patch(
+            "kernel.lifecycle.recovery_session_host_cli."
+            "render_session_host_state",
+            side_effect=RuntimeError(
+                "render_session_host_state should not be called"
+            ),
+        ):
+            smoke = current_recovery_session_host_cli_readiness_smoke()
+
+        self.assertIs(smoke.passed, True)
+
+    def test_current_readiness_smoke_does_not_touch_stdout_stderr_filesystem_db(
+        self,
+    ) -> None:
+        missing_path = self.tmpdir / "missing.db"
+        db_path = self.tmpdir / "factory.db"
+        _initialize_empty_db(db_path)
+        before_counts = _table_row_counts(db_path)
+        stdout = io.StringIO()
+        stderr = io.StringIO()
+
+        with redirect_stdout(stdout), redirect_stderr(stderr):
+            for _ in range(5):
+                current_recovery_session_host_cli_readiness_smoke()
+
+        self.assertEqual(stdout.getvalue(), "")
+        self.assertEqual(stderr.getvalue(), "")
+        self.assertFalse(missing_path.exists())
+        self.assertEqual(_table_row_counts(db_path), before_counts)
+
+    def test_current_readiness_smoke_detects_payload_not_ready(
+        self,
+    ) -> None:
+        payload = {
+            "ready": False,
+            "reason_code": "not_ready",
+            "failures": ["commands_mismatch"],
+            "manifest": session_host_cli_contract_manifest(),
+        }
+
+        with mock.patch(
+            "kernel.lifecycle.recovery_session_host_cli."
+            "current_recovery_session_host_cli_readiness_payload",
+            return_value=payload,
+        ):
+            smoke = current_recovery_session_host_cli_readiness_smoke()
+
+        self.assertIs(smoke.passed, False)
+        self.assertEqual(smoke.reason_code, "failed")
+        self.assertIn("payload_not_ready", smoke.failures)
+        self.assertIn("reason_code_mismatch", smoke.failures)
+        self.assertIn("unexpected_failures", smoke.failures)
+
+    def test_current_readiness_smoke_detects_payload_key_mismatch(
+        self,
+    ) -> None:
+        payload = _valid_current_readiness_payload_copy()
+        payload["host"] = None
+
+        with mock.patch(
+            "kernel.lifecycle.recovery_session_host_cli."
+            "current_recovery_session_host_cli_readiness_payload",
+            return_value=payload,
+        ):
+            smoke = current_recovery_session_host_cli_readiness_smoke()
+
+        self.assertIn("payload_keys_mismatch", smoke.failures)
+
+    def test_current_readiness_smoke_detects_manifest_missing_or_invalid(
+        self,
+    ) -> None:
+        payload = _valid_current_readiness_payload_copy()
+        payload["manifest"] = None
+
+        with mock.patch(
+            "kernel.lifecycle.recovery_session_host_cli."
+            "current_recovery_session_host_cli_readiness_payload",
+            return_value=payload,
+        ):
+            smoke = current_recovery_session_host_cli_readiness_smoke()
+
+        self.assertIn("manifest_missing_or_invalid", smoke.failures)
+
+    def test_current_readiness_smoke_detects_restore_surface(self) -> None:
+        payload = _valid_current_readiness_payload_copy()
+        payload["manifest"]["commands"].append("restore")
+
+        with mock.patch(
+            "kernel.lifecycle.recovery_session_host_cli."
+            "current_recovery_session_host_cli_readiness_payload",
+            return_value=payload,
+        ):
+            smoke = current_recovery_session_host_cli_readiness_smoke()
+
+        self.assertIn("restore_surface_present", smoke.failures)
+
+    def test_current_readiness_smoke_detects_durable_writes_enabled(
+        self,
+    ) -> None:
+        payload = _valid_current_readiness_payload_copy()
+        payload["manifest"]["durable_writes"] = True
+
+        with mock.patch(
+            "kernel.lifecycle.recovery_session_host_cli."
+            "current_recovery_session_host_cli_readiness_payload",
+            return_value=payload,
+        ):
+            smoke = current_recovery_session_host_cli_readiness_smoke()
+
+        self.assertIn("durable_writes_enabled", smoke.failures)
+
+    def test_current_readiness_smoke_detects_exit_code_mismatch(
+        self,
+    ) -> None:
+        payload = _valid_current_readiness_payload_copy()
+        payload["manifest"]["exit_codes"]["ok"] = 99
+
+        with mock.patch(
+            "kernel.lifecycle.recovery_session_host_cli."
+            "current_recovery_session_host_cli_readiness_payload",
+            return_value=payload,
+        ):
+            smoke = current_recovery_session_host_cli_readiness_smoke()
+
+        self.assertIn("exit_codes_mismatch", smoke.failures)
+
+    def test_current_readiness_smoke_detects_stdio_mismatch(self) -> None:
+        payload = _valid_current_readiness_payload_copy()
+        payload["manifest"]["stdio_contract"]["3"]["stderr_empty"] = False
+
+        with mock.patch(
+            "kernel.lifecycle.recovery_session_host_cli."
+            "current_recovery_session_host_cli_readiness_payload",
+            return_value=payload,
+        ):
+            smoke = current_recovery_session_host_cli_readiness_smoke()
+
+        self.assertIn("stdio_contract_mismatch", smoke.failures)
+
+    def test_current_readiness_smoke_detects_manifest_key_mismatch(
+        self,
+    ) -> None:
+        payload = _valid_current_readiness_payload_copy()
+        payload["manifest"]["factory_keys"].append("host")
+
+        with mock.patch(
+            "kernel.lifecycle.recovery_session_host_cli."
+            "current_recovery_session_host_cli_readiness_payload",
+            return_value=payload,
+        ):
+            smoke = current_recovery_session_host_cli_readiness_smoke()
+
+        self.assertIn("manifest_keys_mismatch", smoke.failures)
+
+    def test_current_readiness_smoke_failure_order_is_deterministic(
+        self,
+    ) -> None:
+        payload = _valid_current_readiness_payload_copy()
+        payload["host"] = None
+        payload["ready"] = False
+        payload["reason_code"] = "not_ready"
+        payload["failures"] = ["x"]
+        payload["manifest"]["commands"].append("restore")
+        payload["manifest"]["durable_writes"] = True
+        payload["manifest"]["exit_codes"]["ok"] = 99
+        payload["manifest"]["stdio_contract"]["3"]["stderr_empty"] = False
+        payload["manifest"]["factory_keys"].append("host")
+
+        with mock.patch(
+            "kernel.lifecycle.recovery_session_host_cli."
+            "current_recovery_session_host_cli_readiness_payload",
+            return_value=payload,
+        ):
+            smoke = current_recovery_session_host_cli_readiness_smoke()
+
+        self.assertEqual(
+            smoke.failures,
+            (
+                "payload_keys_mismatch",
+                "payload_not_ready",
+                "reason_code_mismatch",
+                "unexpected_failures",
+                "restore_surface_present",
+                "durable_writes_enabled",
+                "commands_mismatch",
+                "exit_codes_mismatch",
+                "stdio_contract_mismatch",
+                "manifest_keys_mismatch",
+            ),
+        )
+
+    def test_render_readiness_smoke_returns_defensive_payload(self) -> None:
+        smoke = current_recovery_session_host_cli_readiness_smoke()
+        rendered = render_recovery_session_host_cli_readiness_smoke(smoke)
+        rendered_payload = rendered["payload"]
+        self.assertIsInstance(rendered_payload, dict)
+        rendered_manifest = rendered_payload["manifest"]
+        self.assertIsInstance(rendered_manifest, dict)
+
+        rendered_manifest["commands"].append("restore")
+        rendered["failures"].append("x")
+
+        self.assertNotIn("restore", smoke.payload["manifest"]["commands"])
+        self.assertEqual(smoke.failures, ())
+
+    def test_current_readiness_smoke_does_not_add_cli_command_or_restore(
+        self,
+    ) -> None:
+        from kernel.lifecycle.recovery_cli import (
+            build_parser as build_legacy_parser,
+        )
+
+        smoke = current_recovery_session_host_cli_readiness_smoke()
+
+        self.assertIs(smoke.passed, True)
+        self.assertEqual(
+            _subparser_choices(build_parser()), {"factory-check", "evaluate"}
+        )
+        self.assertEqual(
+            _subparser_choices(build_legacy_parser()),
+            {"evaluate", "restore-dry-run"},
+        )
+        self.assertNotIn("restore", smoke.payload["manifest"]["commands"])
 
     def test_recovery_session_host_cli_readiness_is_pure(self) -> None:
         with mock.patch(
