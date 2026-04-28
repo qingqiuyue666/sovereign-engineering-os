@@ -12,6 +12,7 @@ import argparse
 import json
 import sys
 import traceback
+from copy import deepcopy
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Mapping
@@ -208,6 +209,18 @@ def recovery_session_host_cli_readiness() -> RecoverySessionHostCliReadiness:
         failures=(),
         manifest=manifest,
     )
+
+
+def render_recovery_session_host_cli_readiness(
+    readiness: RecoverySessionHostCliReadiness,
+) -> dict[str, object]:
+    """Render session-host CLI readiness as JSON-safe payload data."""
+    return {
+        "ready": readiness.ready,
+        "reason_code": readiness.reason_code,
+        "failures": list(readiness.failures),
+        "manifest": deepcopy(readiness.manifest),
+    }
 
 
 def build_parser() -> argparse.ArgumentParser:
