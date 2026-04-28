@@ -223,6 +223,13 @@ def render_recovery_session_host_cli_readiness(
     }
 
 
+def current_recovery_session_host_cli_readiness_payload() -> dict[str, object]:
+    """Return the current session-host CLI readiness payload."""
+    return render_recovery_session_host_cli_readiness(
+        recovery_session_host_cli_readiness()
+    )
+
+
 def build_parser() -> argparse.ArgumentParser:
     """Build the session-host operator CLI parser."""
     parser = argparse.ArgumentParser(
