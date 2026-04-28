@@ -32,6 +32,8 @@ from kernel.lifecycle.recovery_session_host_cli import build_parser, main
 from kernel.lifecycle.recovery_session_host import (
     RecoverySessionHostFactoryResult,
 )
+from kernel.stores.sqlite.repositories import IntentAnchorRepository
+from kernel.stores.sqlite.wal_recovery import open_connection
 from tests.tracer_bullet.test_recovery_session_host_factory import (
     _audit_count,
     _initialize_empty_db,
@@ -111,6 +113,29 @@ def _assert_single_json_line(stdout: str) -> dict[str, object]:
     return payload
 
 
+def _assert_code_json_stderr(
+    code: int,
+    stdout: str,
+    stderr: str,
+    *,
+    expected_code: int,
+    expect_json: bool,
+) -> dict[str, object] | None:
+    if code != expected_code:
+        raise AssertionError(
+            f"expected exit code {expected_code}, got {code}"
+        )
+
+    if expect_json:
+        if stderr != "":
+            raise AssertionError(f"stderr must be empty: {stderr!r}")
+        return _assert_single_json_line(stdout)
+
+    if stdout != "":
+        raise AssertionError(f"stdout must be empty: {stdout!r}")
+    return None
+
+
 def _assert_no_forbidden_strings(raw: str) -> None:
     for marker in RAW_REPR_MARKERS:
         if marker in raw:
@@ -167,6 +192,18 @@ def _table_row_counts(db_path: Path) -> dict[str, int]:
         conn.close()
 
 
+def _insert_duplicate_intent_anchor(db_path: Path, task_id: str) -> None:
+    conn = open_connection(db_path)
+    try:
+        IntentAnchorRepository(conn).insert(
+            intent_id=f"intent-dup-{uuid4().hex[:8]}",
+            task_id=task_id,
+            state="admitted",
+        )
+    finally:
+        conn.close()
+
+
 class _CloseFailingHost:
     @property
     def closed(self) -> bool:
@@ -205,6 +242,33 @@ class _EvaluateFailingHost:
         self._closed = True
 
 
+class _ExitContractEvaluateFailingHost:
+    def __init__(self) -> None:
+        self._closed = False
+
+    @property
+    def closed(self) -> bool:
+        return self._closed
+
+    def evaluate_task(self, task_id: str) -> object:
+        raise RuntimeError("unexpected evaluate defect")
+
+    def close(self) -> None:
+        self._closed = True
+
+
+class _ExitContractCloseFailingHost:
+    @property
+    def closed(self) -> bool:
+        return False
+
+    def evaluate_task(self, task_id: str) -> object:
+        return object()
+
+    def close(self) -> None:
+        raise RuntimeError("unexpected close defect")
+
+
 class TestRecoverySessionHostCli(unittest.TestCase):
     """P0-17 session-host operator CLI tests."""
 
@@ -224,6 +288,362 @@ class TestRecoverySessionHostCli(unittest.TestCase):
         rendered = factory
         self.assertEqual(set(rendered), FACTORY_KEYS)
         return rendered
+
+    def test_exit_code_factory_check_success_is_0_and_emits_json(
+        self,
+    ) -> None:
+        db_path = self.tmpdir / "factory.db"
+        _initialize_empty_db(db_path)
+
+        code, stdout, stderr = _invoke(
+            ["factory-check", "--db", str(db_path)]
+        )
+        payload = _assert_code_json_stderr(
+            code,
+            stdout,
+            stderr,
+            expected_code=0,
+            expect_json=True,
+        )
+
+        self.assertIsNotNone(payload)
+        self.assertEqual(payload["command"], "factory-check")
+        factory = payload["factory"]
+        self.assertIsInstance(factory, dict)
+        self.assertIs(factory["ok"], True)
+
+    def test_exit_code_factory_check_expected_factory_error_is_3_and_emits_json(
+        self,
+    ) -> None:
+        missing_path = self.tmpdir / "missing.db"
+        self.assertFalse(missing_path.exists())
+
+        code, stdout, stderr = _invoke(
+            ["factory-check", "--db", str(missing_path)]
+        )
+        payload = _assert_code_json_stderr(
+            code,
+            stdout,
+            stderr,
+            expected_code=3,
+            expect_json=True,
+        )
+
+        self.assertIsNotNone(payload)
+        factory = payload["factory"]
+        self.assertIsInstance(factory, dict)
+        self.assertIs(factory["ok"], False)
+        self.assertEqual(factory["reason_code"], "missing_db_file")
+        self.assertFalse(missing_path.exists())
+
+    def test_exit_code_evaluate_unknown_task_is_0_and_emits_json(
+        self,
+    ) -> None:
+        db_path = self.tmpdir / "factory.db"
+        _initialize_empty_db(db_path)
+
+        code, stdout, stderr = _invoke(
+            ["evaluate", "--db", str(db_path), "--task-id", "missing-task"]
+        )
+        payload = _assert_code_json_stderr(
+            code,
+            stdout,
+            stderr,
+            expected_code=0,
+            expect_json=True,
+        )
+
+        self.assertIsNotNone(payload)
+        recovery = payload["recovery"]
+        self.assertIsInstance(recovery, dict)
+        self.assertEqual(recovery["recovery_class"], "unrecoverable")
+        self.assertIs(recovery["restored"], False)
+
+    def test_exit_code_evaluate_safe_to_resume_is_0_and_emits_json(
+        self,
+    ) -> None:
+        db_path = self.tmpdir / "factory.db"
+        task_id = f"task-{uuid4().hex[:8]}"
+        _initialize_empty_db(db_path)
+        _seed_inference_stage(db_path, task_id)
+
+        code, stdout, stderr = _invoke(
+            ["evaluate", "--db", str(db_path), "--task-id", task_id]
+        )
+        payload = _assert_code_json_stderr(
+            code,
+            stdout,
+            stderr,
+            expected_code=0,
+            expect_json=True,
+        )
+
+        self.assertIsNotNone(payload)
+        recovery = payload["recovery"]
+        self.assertIsInstance(recovery, dict)
+        self.assertEqual(recovery["recovery_class"], "safe_to_resume")
+        self.assertEqual(recovery["current_stage"], "inference")
+
+    def test_exit_code_evaluate_needs_manual_review_is_0_and_emits_json(
+        self,
+    ) -> None:
+        db_path = self.tmpdir / "factory.db"
+        task_id = f"task-{uuid4().hex[:8]}"
+        _initialize_empty_db(db_path)
+        _seed_inference_stage(db_path, task_id)
+        _insert_duplicate_intent_anchor(db_path, task_id)
+
+        code, stdout, stderr = _invoke(
+            ["evaluate", "--db", str(db_path), "--task-id", task_id]
+        )
+        payload = _assert_code_json_stderr(
+            code,
+            stdout,
+            stderr,
+            expected_code=0,
+            expect_json=True,
+        )
+
+        self.assertIsNotNone(payload)
+        recovery = payload["recovery"]
+        self.assertIsInstance(recovery, dict)
+        self.assertEqual(recovery["recovery_class"], "needs_manual_review")
+
+    def test_exit_code_evaluate_factory_error_is_3_and_emits_json(
+        self,
+    ) -> None:
+        missing_path = self.tmpdir / "missing.db"
+        self.assertFalse(missing_path.exists())
+
+        code, stdout, stderr = _invoke(
+            [
+                "evaluate",
+                "--db",
+                str(missing_path),
+                "--task-id",
+                "missing-task",
+            ]
+        )
+        payload = _assert_code_json_stderr(
+            code,
+            stdout,
+            stderr,
+            expected_code=3,
+            expect_json=True,
+        )
+
+        self.assertIsNotNone(payload)
+        factory = payload["factory"]
+        self.assertIsInstance(factory, dict)
+        self.assertIs(factory["ok"], False)
+        self.assertEqual(factory["reason_code"], "missing_db_file")
+        self.assertIsNone(payload["recovery"])
+        self.assertIsNone(payload["host_state"])
+        self.assertFalse(missing_path.exists())
+
+    def test_exit_code_invalid_args_is_2_and_emits_no_json(self) -> None:
+        restore_path = self.tmpdir / "x.db"
+        cases = [
+            [],
+            ["factory-check"],
+            ["evaluate", "--db", str(self.tmpdir / "x.db")],
+            ["restore", "--db", str(restore_path)],
+        ]
+
+        for argv in cases:
+            with self.subTest(argv=argv):
+                code, stdout, stderr = _invoke(argv)
+
+                _assert_code_json_stderr(
+                    code,
+                    stdout,
+                    stderr,
+                    expected_code=2,
+                    expect_json=False,
+                )
+                self.assertTrue(stderr)
+
+        self.assertFalse(restore_path.exists())
+
+    def test_exit_code_unexpected_factory_check_error_is_4_and_emits_no_json(
+        self,
+    ) -> None:
+        with mock.patch(
+            "kernel.lifecycle.recovery_session_host_cli."
+            "try_build_recovery_session_host_from_sqlite",
+            side_effect=RuntimeError("unexpected factory-check defect"),
+        ):
+            code, stdout, stderr = _invoke(
+                ["factory-check", "--db", str(self.tmpdir / "factory.db")]
+            )
+
+        _assert_code_json_stderr(
+            code,
+            stdout,
+            stderr,
+            expected_code=4,
+            expect_json=False,
+        )
+        self.assertIn("Traceback", stderr)
+        self.assertIn("unexpected factory-check defect", stderr)
+
+    def test_exit_code_unexpected_evaluate_error_is_4_and_emits_no_json(
+        self,
+    ) -> None:
+        db_path = self.tmpdir / "factory.db"
+        host = _ExitContractEvaluateFailingHost()
+        result = RecoverySessionHostFactoryResult(
+            ok=True,
+            host=host,
+            reason_code=None,
+            message=None,
+            details={},
+            db_path=str(db_path),
+        )
+
+        with mock.patch(
+            "kernel.lifecycle.recovery_session_host_cli."
+            "try_build_recovery_session_host_from_sqlite",
+            return_value=result,
+        ):
+            code, stdout, stderr = _invoke(
+                ["evaluate", "--db", str(db_path), "--task-id", "task-1"]
+            )
+
+        _assert_code_json_stderr(
+            code,
+            stdout,
+            stderr,
+            expected_code=4,
+            expect_json=False,
+        )
+        self.assertIn("Traceback", stderr)
+        self.assertIn("unexpected evaluate defect", stderr)
+        self.assertTrue(host.closed)
+
+    def test_exit_code_evaluate_close_failure_is_4_and_emits_no_json(
+        self,
+    ) -> None:
+        db_path = self.tmpdir / "factory.db"
+        result = RecoverySessionHostFactoryResult(
+            ok=True,
+            host=_ExitContractCloseFailingHost(),
+            reason_code=None,
+            message=None,
+            details={},
+            db_path=str(db_path),
+        )
+
+        with mock.patch(
+            "kernel.lifecycle.recovery_session_host_cli."
+            "try_build_recovery_session_host_from_sqlite",
+            return_value=result,
+        ):
+            code, stdout, stderr = _invoke(
+                ["evaluate", "--db", str(db_path), "--task-id", "task-1"]
+            )
+
+        _assert_code_json_stderr(
+            code,
+            stdout,
+            stderr,
+            expected_code=4,
+            expect_json=False,
+        )
+        self.assertIn("Traceback", stderr)
+        self.assertIn("unexpected close defect", stderr)
+
+    def test_exit_code_contract_summary_table(self) -> None:
+        expected_contract = {
+            "factory_check_success": 0,
+            "factory_check_expected_failure": 3,
+            "evaluate_unknown": 0,
+            "evaluate_safe_to_resume": 0,
+            "evaluate_needs_manual_review": 0,
+            "evaluate_factory_failure": 3,
+            "invalid_args": 2,
+            "unexpected": 4,
+        }
+
+        valid_db_path = self.tmpdir / "valid.db"
+        _initialize_empty_db(valid_db_path)
+
+        safe_db_path = self.tmpdir / "safe.db"
+        safe_task_id = f"task-{uuid4().hex[:8]}"
+        _initialize_empty_db(safe_db_path)
+        _seed_inference_stage(safe_db_path, safe_task_id)
+
+        manual_db_path = self.tmpdir / "manual.db"
+        manual_task_id = f"task-{uuid4().hex[:8]}"
+        _initialize_empty_db(manual_db_path)
+        _seed_inference_stage(manual_db_path, manual_task_id)
+        _insert_duplicate_intent_anchor(manual_db_path, manual_task_id)
+
+        factory_success, _stdout, _stderr = _invoke(
+            ["factory-check", "--db", str(valid_db_path)]
+        )
+        factory_failure, _stdout, _stderr = _invoke(
+            ["factory-check", "--db", str(self.tmpdir / "missing.db")]
+        )
+        evaluate_unknown, _stdout, _stderr = _invoke(
+            ["evaluate", "--db", str(valid_db_path), "--task-id", "missing"]
+        )
+        evaluate_safe, _stdout, _stderr = _invoke(
+            ["evaluate", "--db", str(safe_db_path), "--task-id", safe_task_id]
+        )
+        evaluate_manual, _stdout, _stderr = _invoke(
+            [
+                "evaluate",
+                "--db",
+                str(manual_db_path),
+                "--task-id",
+                manual_task_id,
+            ]
+        )
+        evaluate_factory_failure, _stdout, _stderr = _invoke(
+            [
+                "evaluate",
+                "--db",
+                str(self.tmpdir / "missing-evaluate.db"),
+                "--task-id",
+                "missing",
+            ]
+        )
+        invalid_args, _stdout, _stderr = _invoke([])
+        with mock.patch(
+            "kernel.lifecycle.recovery_session_host_cli."
+            "try_build_recovery_session_host_from_sqlite",
+            side_effect=RuntimeError("unexpected defect"),
+        ):
+            unexpected, _stdout, _stderr = _invoke(
+                ["factory-check", "--db", str(self.tmpdir / "factory.db")]
+            )
+
+        actual_contract = {
+            "factory_check_success": factory_success,
+            "factory_check_expected_failure": factory_failure,
+            "evaluate_unknown": evaluate_unknown,
+            "evaluate_safe_to_resume": evaluate_safe,
+            "evaluate_needs_manual_review": evaluate_manual,
+            "evaluate_factory_failure": evaluate_factory_failure,
+            "invalid_args": invalid_args,
+            "unexpected": unexpected,
+        }
+        self.assertEqual(actual_contract, expected_contract)
+
+    def test_exit_code_contract_does_not_add_restore_command(self) -> None:
+        from kernel.lifecycle.recovery_cli import (
+            build_parser as build_legacy_parser,
+        )
+
+        self.assertEqual(
+            _subparser_choices(build_parser()),
+            {"factory-check", "evaluate"},
+        )
+        self.assertEqual(
+            _subparser_choices(build_legacy_parser()),
+            {"evaluate", "restore-dry-run"},
+        )
 
     def test_factory_check_success_stdout_is_single_sorted_json_line(
         self,
