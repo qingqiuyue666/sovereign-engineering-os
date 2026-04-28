@@ -44,6 +44,7 @@ stays a thin runtime boundary rather than a wiring graph.
 from __future__ import annotations
 
 import sqlite3
+from copy import deepcopy
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Mapping, Optional, Protocol, Union
@@ -1340,3 +1341,79 @@ def try_build_recovery_session_host_from_sqlite(
         details={},
         db_path=path_text,
     )
+
+
+def _enum_value(value: object) -> object:
+    return getattr(value, "value", value)
+
+
+def _stage_value_or_none(value: object | None) -> object | None:
+    return _enum_value(value) if value is not None else None
+
+
+def render_factory_result(
+    result: RecoverySessionHostFactoryResult,
+) -> dict[str, object]:
+    """Render a factory result to a deterministic JSON-safe dict.
+
+    The host object itself is deliberately omitted; callers get only
+    presence and closed-state booleans suitable for operator output.
+    """
+    host = result.host
+    return {
+        "ok": result.ok,
+        "db_path": result.db_path,
+        "reason_code": result.reason_code,
+        "message": result.message,
+        "details": deepcopy(result.details),
+        "host_present": host is not None,
+        "host_closed": host.closed if host is not None else None,
+    }
+
+
+def render_session_host_state(
+    host: RecoverySessionHost,
+) -> dict[str, object]:
+    """Render the host's inspection-only state."""
+    return {"closed": host.closed}
+
+
+def render_recovery_gate_result(
+    result: RecoveryGateResult,
+) -> dict[str, object]:
+    """Render a `RecoveryGateResult` to a deterministic JSON-safe dict.
+
+    Mirrors the read-only recovery CLI evaluate shape without importing
+    the CLI module into the host factory/runtime boundary.
+    """
+    snapshot = result.snapshot
+    snapshot_present = snapshot is not None
+    return {
+        "task_id": result.task_id,
+        "recovery_class": _enum_value(result.recovery_class),
+        "reason": result.reason,
+        "restored": bool(result.restored),
+        "snapshot_present": snapshot_present,
+        "current_stage": (
+            _stage_value_or_none(snapshot.current_stage)
+            if snapshot is not None
+            else None
+        ),
+        "terminal_state": (
+            _stage_value_or_none(snapshot.terminal_state)
+            if snapshot is not None
+            else None
+        ),
+        "artifact_count": len(snapshot.artifact_ids)
+        if snapshot is not None
+        else 0,
+        "intent_anchor_count": (
+            snapshot.intent_anchor_count if snapshot is not None else None
+        ),
+        "malformed_event_count": (
+            snapshot.malformed_event_count if snapshot is not None else None
+        ),
+        "last_event_sequence": (
+            snapshot.last_event_sequence if snapshot is not None else None
+        ),
+    }
