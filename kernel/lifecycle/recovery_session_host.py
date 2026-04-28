@@ -414,6 +414,102 @@ _REQUIRED_RECOVERY_SESSION_HOST_INDEXES: frozenset[str] = frozenset(
 )
 
 
+# P0-13 — required critical-index uniqueness. Sourced directly from
+# ``kernel/stores/sqlite/migrations/0001_core_signable_path.sql``:
+# ``idx_audit_records_sequence`` is declared UNIQUE and is the
+# substrate for monotonic audit append order; a same-name non-unique
+# impostor would silently allow duplicate sequence values without
+# tripping the existence-only check from P0-12.
+# ``idx_journal_entries_sequence`` is a normal (non-unique) index.
+_REQUIRED_RECOVERY_SESSION_HOST_INDEX_UNIQUENESS: dict[str, bool] = {
+    "idx_audit_records_sequence": True,
+    "idx_journal_entries_sequence": False,
+}
+
+
+# P0-13 — required append-only / immutability trigger SQL invariants.
+# Sourced directly from
+# ``kernel/stores/sqlite/migrations/0001_core_signable_path.sql``. A
+# trigger with the correct name but a no-op body (e.g. ``SELECT 1;``)
+# satisfies the existence-only check from P0-12 yet silently disables
+# the constitutional invariant the trigger enforces. The factory
+# checks for invariant snippets — not full DDL equality — so that
+# normal SQLite normalization (whitespace, case, ``IF NOT EXISTS``
+# stripping) does not produce false positives.
+#
+# Snippets are matched after lower-casing both the trigger SQL and
+# each snippet; whitespace inside snippets must therefore appear
+# verbatim (a single space) in the trigger SQL after SQLite's own
+# normalization. The migration uses single spaces, which SQLite
+# preserves in ``sqlite_master.sql``.
+_REQUIRED_RECOVERY_SESSION_HOST_TRIGGER_SQL_CONTAINS: dict[
+    str, tuple[str, ...]
+] = {
+    "audit_records_append_only_update": (
+        "BEFORE UPDATE ON audit_records",
+        "RAISE(ABORT",
+        "audit_records: append-only",
+    ),
+    "audit_records_append_only_delete": (
+        "BEFORE DELETE ON audit_records",
+        "RAISE(ABORT",
+        "audit_records: append-only",
+    ),
+    "journal_entries_append_only_update": (
+        "BEFORE UPDATE ON journal_entries",
+        "RAISE(ABORT",
+        "journal_entries: append-only",
+    ),
+    "journal_entries_append_only_delete": (
+        "BEFORE DELETE ON journal_entries",
+        "RAISE(ABORT",
+        "journal_entries: append-only",
+    ),
+    "revisions_sealed_immutable_update": (
+        "BEFORE UPDATE ON revisions",
+        "WHEN OLD.state = 'sealed'",
+        "RAISE(ABORT",
+        "revisions: sealed revision is immutable",
+    ),
+    "revisions_sealed_immutable_delete": (
+        "BEFORE DELETE ON revisions",
+        "WHEN OLD.state = 'sealed'",
+        "RAISE(ABORT",
+        "revisions: sealed revision is immutable",
+    ),
+    "failure_bundles_append_only_update": (
+        "BEFORE UPDATE ON failure_bundles",
+        "RAISE(ABORT",
+        "failure_bundles: append-only",
+    ),
+    "failure_bundles_append_only_delete": (
+        "BEFORE DELETE ON failure_bundles",
+        "RAISE(ABORT",
+        "failure_bundles: append-only",
+    ),
+    "drift_event_records_append_only_update": (
+        "BEFORE UPDATE ON drift_event_records",
+        "RAISE(ABORT",
+        "drift_event_records: append-only",
+    ),
+    "drift_event_records_append_only_delete": (
+        "BEFORE DELETE ON drift_event_records",
+        "RAISE(ABORT",
+        "drift_event_records: append-only",
+    ),
+    "taint_records_append_only_update": (
+        "BEFORE UPDATE ON taint_records",
+        "RAISE(ABORT",
+        "taint_records: append-only",
+    ),
+    "taint_records_append_only_delete": (
+        "BEFORE DELETE ON taint_records",
+        "RAISE(ABORT",
+        "taint_records: append-only",
+    ),
+}
+
+
 class RecoverySessionHostClosed(RuntimeError):
     """Raised when a public `RecoverySessionHost` operation is
     attempted after `close()` has run.
@@ -547,25 +643,33 @@ def _validate_factory_schema_ready(
 ) -> None:
     """Read-only schema identity check for the recovery factory.
 
-    P0-11 verified that every required table exists. P0-12 widens the
-    contract to "the factory's identity dependencies are present":
+    P0-11 verified that every required table exists. P0-12 widened the
+    contract to schema identity (tables + columns + named triggers +
+    named indexes). P0-13 widens it again so a same-name impostor
+    cannot smuggle past existence-only checks:
 
     - every required table exists (P0-11 baseline)
     - every required column on every factory-wired table exists
     - every required append-only / immutability trigger exists
+    - every required trigger's body contains the constitutional
+      invariant snippets sourced from migration 0001
     - every required critical index exists
+    - every required critical index has the expected uniqueness
+      (e.g. ``idx_audit_records_sequence`` MUST remain UNIQUE)
 
-    Inspects ``sqlite_master`` and ``PRAGMA table_info`` only — never
-    writes, never creates tables, never calls ``apply_migrations``,
-    never repairs malformed schema. Any deviation raises
-    `RecoverySessionHostFactoryError` so the factory fails closed
-    before constructing repositories, services, the orchestrator, or
-    the gate.
+    Inspects ``sqlite_master``, ``PRAGMA table_info``, and
+    ``PRAGMA index_list`` only — never writes, never creates tables,
+    never calls ``apply_migrations``, never repairs malformed schema.
+    Any deviation raises `RecoverySessionHostFactoryError` so the
+    factory fails closed before constructing repositories, services,
+    the orchestrator, or the gate.
 
     SQL safety: PRAGMA does not parameterize the table name, so the
     validator iterates only over the names declared in the private
-    ``_REQUIRED_RECOVERY_SESSION_HOST_COLUMNS`` constant. Arbitrary
-    external table names are never substituted into the PRAGMA call.
+    ``_REQUIRED_RECOVERY_SESSION_HOST_COLUMNS`` constant or resolved
+    via ``sqlite_master.tbl_name`` and re-validated against
+    ``_REQUIRED_RECOVERY_SESSION_HOST_TABLES``. Arbitrary external
+    table names are never substituted into the PRAGMA call.
     """
     try:
         table_rows = conn.execute(
@@ -614,10 +718,13 @@ def _validate_factory_schema_ready(
                 f"{sorted(missing_columns)!r}"
             )
 
-    # Append-only / immutability triggers.
+    # Append-only / immutability triggers — existence first, then
+    # invariant-snippet check on each trigger body so that a same-name
+    # no-op impostor (e.g. ``BEGIN SELECT 1; END``) cannot satisfy the
+    # P0-12 existence-only contract.
     try:
         trigger_rows = conn.execute(
-            "SELECT name FROM sqlite_master WHERE type = 'trigger';"
+            "SELECT name, sql FROM sqlite_master WHERE type = 'trigger';"
         ).fetchall()
     except sqlite3.Error as exc:
         raise RecoverySessionHostFactoryError(
@@ -625,6 +732,9 @@ def _validate_factory_schema_ready(
             f"trigger metadata for {db_path}: {exc}"
         ) from exc
     present_triggers = {row[0] for row in trigger_rows}
+    trigger_sql_map: dict[str, str] = {
+        row[0]: (row[1] or "") for row in trigger_rows
+    }
     missing_triggers = (
         _REQUIRED_RECOVERY_SESSION_HOST_TRIGGERS - present_triggers
     )
@@ -635,10 +745,30 @@ def _validate_factory_schema_ready(
             f"append-only trigger(s): {sorted(missing_triggers)!r}"
         )
 
-    # Critical indexes.
+    # P0-13 — required trigger body invariant snippets.
+    for trigger_name in sorted(
+        _REQUIRED_RECOVERY_SESSION_HOST_TRIGGER_SQL_CONTAINS
+    ):
+        snippets = _REQUIRED_RECOVERY_SESSION_HOST_TRIGGER_SQL_CONTAINS[
+            trigger_name
+        ]
+        raw_sql = trigger_sql_map.get(trigger_name, "")
+        normalized_sql = " ".join(raw_sql.split()).lower()
+        for snippet in snippets:
+            normalized_snippet = " ".join(snippet.split()).lower()
+            if normalized_snippet not in normalized_sql:
+                raise RecoverySessionHostFactoryError(
+                    f"recovery session host factory refused to construct "
+                    f"host: SQLite database at {db_path} trigger "
+                    f"{trigger_name!r} body is missing required invariant "
+                    f"snippet {snippet!r}"
+                )
+
+    # Critical indexes — existence first, then uniqueness.
     try:
         index_rows = conn.execute(
-            "SELECT name FROM sqlite_master WHERE type = 'index';"
+            "SELECT name, tbl_name FROM sqlite_master "
+            "WHERE type = 'index';"
         ).fetchall()
     except sqlite3.Error as exc:
         raise RecoverySessionHostFactoryError(
@@ -646,6 +776,7 @@ def _validate_factory_schema_ready(
             f"index metadata for {db_path}: {exc}"
         ) from exc
     present_indexes = {row[0] for row in index_rows}
+    index_table_map: dict[str, str] = {row[0]: row[1] for row in index_rows}
     missing_indexes = (
         _REQUIRED_RECOVERY_SESSION_HOST_INDEXES - present_indexes
     )
@@ -655,6 +786,59 @@ def _validate_factory_schema_ready(
             f"SQLite database at {db_path} is missing required "
             f"critical index(es): {sorted(missing_indexes)!r}"
         )
+
+    # P0-13 — required-index uniqueness check. Uses PRAGMA index_list,
+    # which is the SQLite metadata authority for "is this index UNIQUE".
+    # The parent-table name is resolved from sqlite_master.tbl_name and
+    # then re-validated against the required-tables allowlist before
+    # being substituted into the PRAGMA call, so an arbitrary tbl_name
+    # is never passed to PRAGMA.
+    for required_index in sorted(
+        _REQUIRED_RECOVERY_SESSION_HOST_INDEX_UNIQUENESS
+    ):
+        expected_unique = (
+            _REQUIRED_RECOVERY_SESSION_HOST_INDEX_UNIQUENESS[required_index]
+        )
+        table_name = index_table_map.get(required_index)
+        if (
+            table_name is None
+            or table_name not in _REQUIRED_RECOVERY_SESSION_HOST_TABLES
+        ):
+            raise RecoverySessionHostFactoryError(
+                f"recovery session host factory refused to construct "
+                f"host: SQLite database at {db_path} required index "
+                f"{required_index!r} is attached to unexpected table "
+                f"{table_name!r}"
+            )
+        try:
+            list_rows = conn.execute(
+                f"PRAGMA index_list({table_name});"
+            ).fetchall()
+        except sqlite3.Error as exc:
+            raise RecoverySessionHostFactoryError(
+                f"recovery session host factory failed to read index "
+                f"metadata for table {table_name!r} in {db_path}: {exc}"
+            ) from exc
+        # PRAGMA index_list returns rows of (seq, name, unique, origin,
+        # partial). We only need name + unique flag.
+        actual_unique: Optional[bool] = None
+        for row in list_rows:
+            if row[1] == required_index:
+                actual_unique = bool(row[2])
+                break
+        if actual_unique is None:
+            raise RecoverySessionHostFactoryError(
+                f"recovery session host factory refused to construct "
+                f"host: SQLite database at {db_path} could not resolve "
+                f"uniqueness for required index {required_index!r}"
+            )
+        if actual_unique != expected_unique:
+            raise RecoverySessionHostFactoryError(
+                f"recovery session host factory refused to construct "
+                f"host: SQLite database at {db_path} index "
+                f"{required_index!r} has wrong uniqueness: expected "
+                f"unique={expected_unique}, actual unique={actual_unique}"
+            )
 
 
 class RecoverySessionHostFactoryError(RuntimeError):
