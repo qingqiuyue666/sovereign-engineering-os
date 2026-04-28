@@ -510,6 +510,35 @@ _REQUIRED_RECOVERY_SESSION_HOST_TRIGGER_SQL_CONTAINS: dict[
 }
 
 
+# P0-14 — operator-readable / machine-readable factory error reason codes.
+#
+# Stable string constants surfaced via
+# ``RecoverySessionHostFactoryError.reason_code``. Exposed at module level
+# so future operator surfaces (CLI, dashboards, integration tests) can
+# branch on a stable identifier rather than parse human-readable strings.
+# These values are part of the factory's public failure contract and
+# must not be renamed without a coordinated downstream change.
+#
+# Defined here — alongside the other factory schema-identity constants
+# and ABOVE ``_validate_factory_schema_ready`` — so the validator's
+# reason-code references resolve to a definition that lexically precedes
+# its first use, matching operator-surface readability expectations for
+# P0-14.
+_FACTORY_ERROR_DEFAULT = "factory_error"
+_FACTORY_ERROR_MISSING_DB_FILE = "missing_db_file"
+_FACTORY_ERROR_OPEN_ERROR = "open_error"
+_FACTORY_ERROR_SCHEMA_METADATA_READ_ERROR = "schema_metadata_read_error"
+_FACTORY_ERROR_MISSING_REQUIRED_TABLES = "missing_required_tables"
+_FACTORY_ERROR_MISSING_REQUIRED_COLUMNS = "missing_required_columns"
+_FACTORY_ERROR_MISSING_REQUIRED_TRIGGERS = "missing_required_triggers"
+_FACTORY_ERROR_INVALID_TRIGGER_BODY = "invalid_trigger_body"
+_FACTORY_ERROR_MISSING_REQUIRED_INDEXES = "missing_required_indexes"
+_FACTORY_ERROR_UNEXPECTED_INDEX_BINDING = "unexpected_index_binding"
+_FACTORY_ERROR_INDEX_METADATA_UNAVAILABLE = "index_metadata_unavailable"
+_FACTORY_ERROR_WRONG_INDEX_UNIQUENESS = "wrong_index_uniqueness"
+_FACTORY_ERROR_WIRING_ERROR = "wiring_error"
+
+
 class RecoverySessionHostClosed(RuntimeError):
     """Raised when a public `RecoverySessionHost` operation is
     attempted after `close()` has run.
@@ -917,29 +946,6 @@ def _validate_factory_schema_ready(
                     "actual_unique": actual_unique,
                 },
             )
-
-
-# P0-14 — operator-readable / machine-readable factory error reason codes.
-#
-# Stable string constants surfaced via
-# ``RecoverySessionHostFactoryError.reason_code``. Exposed at module level
-# so future operator surfaces (CLI, dashboards, integration tests) can
-# branch on a stable identifier rather than parse human-readable strings.
-# These values are part of the factory's public failure contract and
-# must not be renamed without a coordinated downstream change.
-_FACTORY_ERROR_DEFAULT = "factory_error"
-_FACTORY_ERROR_MISSING_DB_FILE = "missing_db_file"
-_FACTORY_ERROR_OPEN_ERROR = "open_error"
-_FACTORY_ERROR_SCHEMA_METADATA_READ_ERROR = "schema_metadata_read_error"
-_FACTORY_ERROR_MISSING_REQUIRED_TABLES = "missing_required_tables"
-_FACTORY_ERROR_MISSING_REQUIRED_COLUMNS = "missing_required_columns"
-_FACTORY_ERROR_MISSING_REQUIRED_TRIGGERS = "missing_required_triggers"
-_FACTORY_ERROR_INVALID_TRIGGER_BODY = "invalid_trigger_body"
-_FACTORY_ERROR_MISSING_REQUIRED_INDEXES = "missing_required_indexes"
-_FACTORY_ERROR_UNEXPECTED_INDEX_BINDING = "unexpected_index_binding"
-_FACTORY_ERROR_INDEX_METADATA_UNAVAILABLE = "index_metadata_unavailable"
-_FACTORY_ERROR_WRONG_INDEX_UNIQUENESS = "wrong_index_uniqueness"
-_FACTORY_ERROR_WIRING_ERROR = "wiring_error"
 
 
 class RecoverySessionHostFactoryError(RuntimeError):
