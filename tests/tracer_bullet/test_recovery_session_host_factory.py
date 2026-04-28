@@ -1284,6 +1284,7 @@ class TestRecoverySessionHostFactory(unittest.TestCase):
         self.assertIsNone(result.reason_code)
         self.assertIsNone(result.message)
         self.assertEqual(result.details, {})
+        self.assertEqual(result.db_path, str(db_path))
 
         host = result.host
         if host is None:
@@ -1313,7 +1314,33 @@ class TestRecoverySessionHostFactory(unittest.TestCase):
         self.assertIsNotNone(result.message)
         self.assertIn("database file does not exist", result.message)
         self.assertEqual(result.details["db_path"], str(missing_path))
+        self.assertEqual(result.db_path, str(missing_path))
         self.assertFalse(missing_path.exists())
+
+    def test_factory_result_empty_db_missing_tables_returns_failure_surface(
+        self,
+    ) -> None:
+        empty_path = self.tmpdir / "empty.db"
+        empty_path.touch()
+        self.assertTrue(empty_path.is_file())
+
+        result = try_build_recovery_session_host_from_sqlite(
+            db_path=empty_path
+        )
+
+        self.assertIs(result.ok, False)
+        self.assertIsNone(result.host)
+        self.assertEqual(result.reason_code, "missing_required_tables")
+        self.assertEqual(result.db_path, str(empty_path))
+        self.assertIn("missing_tables", result.details)
+        missing = result.details["missing_tables"]
+        self.assertIsInstance(missing, list)
+        self.assertTrue(
+            "audit_records" in missing
+            or "intent_anchor_records" in missing,
+            f"missing_tables must include at least one core "
+            f"constitutional table; got: {missing!r}",
+        )
 
     def test_factory_result_missing_required_columns_returns_failure_surface(
         self,
@@ -1411,6 +1438,31 @@ class TestRecoverySessionHostFactory(unittest.TestCase):
         )
         self.assertIs(result.details["expected_unique"], True)
         self.assertIs(result.details["actual_unique"], False)
+
+    def test_factory_result_success_construction_has_no_durable_side_effects(
+        self,
+    ) -> None:
+        db_path = self.tmpdir / "factory.db"
+        _initialize_empty_db(db_path)
+        _seed_inference_stage(db_path, f"task-{uuid4().hex[:8]}")
+
+        before_audit = _audit_count(db_path)
+        before_intent = _intent_anchor_count(db_path)
+
+        result = try_build_recovery_session_host_from_sqlite(
+            db_path=db_path
+        )
+        try:
+            after_audit = _audit_count(db_path)
+            after_intent = _intent_anchor_count(db_path)
+
+            self.assertIs(result.ok, True)
+            self.assertIsNotNone(result.host)
+            self.assertEqual(after_audit, before_audit)
+            self.assertEqual(after_intent, before_intent)
+        finally:
+            if result.host is not None:
+                result.host.close()
 
     def test_factory_result_details_are_copied_from_exception(self) -> None:
         missing_path = self.tmpdir / "missing.db"

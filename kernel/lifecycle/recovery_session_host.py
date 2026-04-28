@@ -1009,6 +1009,7 @@ class RecoverySessionHostFactoryResult:
     reason_code: str | None
     message: str | None
     details: dict[str, object]
+    db_path: str
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "details", dict(self.details))
@@ -1319,6 +1320,7 @@ def try_build_recovery_session_host_from_sqlite(
     propagate so programming errors are not converted into recoverable
     operator failures.
     """
+    path_text = str(Path(db_path))
     try:
         host = build_recovery_session_host_from_sqlite(db_path=db_path)
     except RecoverySessionHostFactoryError as exc:
@@ -1328,6 +1330,7 @@ def try_build_recovery_session_host_from_sqlite(
             reason_code=exc.reason_code,
             message=str(exc),
             details=dict(exc.details),
+            db_path=path_text,
         )
     return RecoverySessionHostFactoryResult(
         ok=True,
@@ -1335,4 +1338,5 @@ def try_build_recovery_session_host_from_sqlite(
         reason_code=None,
         message=None,
         details={},
+        db_path=path_text,
     )
