@@ -43,6 +43,7 @@ stays a thin runtime boundary rather than a wiring graph.
 
 from __future__ import annotations
 
+import sqlite3
 from pathlib import Path
 from typing import Callable, Optional, Protocol, Union
 
@@ -51,6 +52,34 @@ from kernel.lifecycle.stage_types import Stage
 from kernel.lifecycle.task_recovery import (
     RecoveryClass,
     TaskLifecycleSnapshot,
+)
+
+
+# Tables required by every repository wired by
+# ``build_recovery_session_host_from_sqlite``. Sourced directly from
+# ``kernel/stores/sqlite/migrations/0001_core_signable_path.sql`` and
+# the table names embedded in the SELECT/INSERT statements of the
+# corresponding repository in ``kernel/stores/sqlite/repositories.py``.
+_REQUIRED_RECOVERY_SESSION_HOST_TABLES: frozenset[str] = frozenset(
+    {
+        "audit_records",
+        "budget_records",
+        "capability_tokens",
+        "context_artifacts",
+        "inference_artifacts",
+        "intent_anchor_records",
+        "patch_proposals",
+        "validation_receipts",
+        "review_artifacts",
+        "approval_artifacts",
+        "revisions",
+        "snapshot_roots",
+        "journal_entries",
+        "replay_anchors",
+        "taint_records",
+        "drift_event_records",
+        "failure_bundles",
+    }
 )
 
 
@@ -182,6 +211,30 @@ class RecoverySessionHost:
             self._close_callback()
 
 
+def _validate_factory_schema_ready(
+    conn: sqlite3.Connection, *, db_path: Path
+) -> None:
+    """Read-only schema readiness check for the recovery factory.
+
+    Inspects ``sqlite_master`` only — never writes, never creates
+    tables, never calls ``apply_migrations``. If any table required
+    by the repositories the factory is about to wire is absent, raises
+    `RecoverySessionHostFactoryError` so the factory fails closed
+    before constructing repositories or services.
+    """
+    rows = conn.execute(
+        "SELECT name FROM sqlite_master WHERE type = 'table';"
+    ).fetchall()
+    present = {row[0] for row in rows}
+    missing = _REQUIRED_RECOVERY_SESSION_HOST_TABLES - present
+    if missing:
+        raise RecoverySessionHostFactoryError(
+            f"recovery session host factory refused to construct host: "
+            f"SQLite database at {db_path} is missing required schema "
+            f"table(s): {sorted(missing)!r}"
+        )
+
+
 class RecoverySessionHostFactoryError(RuntimeError):
     """Raised when `build_recovery_session_host_from_sqlite` cannot
     produce a host.
@@ -221,8 +274,17 @@ def build_recovery_session_host_from_sqlite(
       not exist. The factory NEVER creates a new database file as a
       side effect of a typo (mirrors `recovery_cli.main`'s P0-6
       operator-boundary semantics).
+    - After opening the connection and before constructing any
+      repository, service, orchestrator, or gate, the factory runs a
+      read-only schema readiness check
+      (``_validate_factory_schema_ready``) against ``sqlite_master``.
+      If any required table is missing — empty file, malformed DB,
+      pre-migration DB, or wrong DB — the factory closes the opened
+      connection and raises `RecoverySessionHostFactoryError`.
     - The factory does NOT call `apply_migrations`. The caller is
       responsible for having initialized schema before construction.
+      The schema readiness check inspects metadata only; it never
+      creates tables.
     - The factory composes the same production classes used by the
       narrow signable path: kernel-level repositories, the
       `AppendOnlyLedger`, the eight signable-path services, the
@@ -300,6 +362,30 @@ def build_recovery_session_host_from_sqlite(
     except Exception as exc:
         raise RecoverySessionHostFactoryError(
             f"failed to open SQLite connection at {path}: {exc}"
+        ) from exc
+
+    # Read-only schema readiness check. Runs immediately after the
+    # connection is opened and before any repository/service/
+    # orchestrator/gate is constructed. Fails closed when required
+    # tables are missing — never applies migrations, never creates
+    # schema. If the check fails, close the connection so the operator
+    # never inherits a leaked file handle.
+    try:
+        _validate_factory_schema_ready(conn, db_path=path)
+    except RecoverySessionHostFactoryError:
+        try:
+            conn.close()
+        except Exception:
+            pass
+        raise
+    except Exception as exc:
+        try:
+            conn.close()
+        except Exception:
+            pass
+        raise RecoverySessionHostFactoryError(
+            f"recovery session host factory schema validation failed "
+            f"for {path}: {exc}"
         ) from exc
 
     try:

@@ -32,11 +32,13 @@ These tests pin the behavior of
 from __future__ import annotations
 
 import os
+import sqlite3
 import sys
 import tempfile
 import unittest
 from pathlib import Path
 from typing import Any, Mapping
+from unittest import mock
 from uuid import uuid4
 
 sys.path.insert(
@@ -467,6 +469,223 @@ class TestRecoverySessionHostFactory(unittest.TestCase):
     # ------------------------------------------------------------------
     # F. P0-10 does not add a CLI restore subcommand
     # ------------------------------------------------------------------
+
+    # ------------------------------------------------------------------
+    # P0-11 A. existing empty file -> raise; never initialize schema
+    # ------------------------------------------------------------------
+
+    def test_factory_existing_empty_file_raises_and_does_not_initialize_schema(
+        self,
+    ) -> None:
+        empty_path = self.tmpdir / "empty.db"
+        empty_path.touch()
+        self.assertTrue(empty_path.is_file())
+
+        with self.assertRaises(RecoverySessionHostFactoryError) as ctx:
+            build_recovery_session_host_from_sqlite(db_path=empty_path)
+
+        message = str(ctx.exception)
+        # Message must surface the readiness contract being violated.
+        self.assertIn("required schema", message)
+        # And must surface at least one of the required table names so
+        # operators get an actionable diagnostic, not an opaque blob.
+        self.assertTrue(
+            any(
+                table in message
+                for table in (
+                    "audit_records",
+                    "intent_anchor_records",
+                    "journal_entries",
+                )
+            ),
+            f"missing-required-tables message must name at least one "
+            f"required table; got: {message!r}",
+        )
+
+        # Inspect the file with raw sqlite3 — the factory must not have
+        # applied any migration as a side effect of the failed
+        # construction. None of the required application tables may be
+        # present.
+        raw = sqlite3.connect(str(empty_path))
+        try:
+            rows = raw.execute(
+                "SELECT name FROM sqlite_master WHERE type = 'table';"
+            ).fetchall()
+        finally:
+            raw.close()
+        present_tables = {row[0] for row in rows}
+        required_tables = {
+            "audit_records",
+            "budget_records",
+            "capability_tokens",
+            "context_artifacts",
+            "inference_artifacts",
+            "intent_anchor_records",
+            "patch_proposals",
+            "validation_receipts",
+            "review_artifacts",
+            "approval_artifacts",
+            "revisions",
+            "snapshot_roots",
+            "journal_entries",
+            "replay_anchors",
+            "taint_records",
+            "drift_event_records",
+            "failure_bundles",
+        }
+        leaked = present_tables & required_tables
+        self.assertEqual(
+            leaked,
+            set(),
+            f"factory must not initialize any required schema table on "
+            f"failure; found unexpectedly created: {sorted(leaked)!r}",
+        )
+
+    # ------------------------------------------------------------------
+    # P0-11 B. existing SQLite DB without required schema -> raise
+    # ------------------------------------------------------------------
+
+    def test_factory_existing_sqlite_missing_required_tables_raises(
+        self,
+    ) -> None:
+        db_path = self.tmpdir / "unrelated.db"
+        seed = sqlite3.connect(str(db_path))
+        try:
+            seed.execute("CREATE TABLE unrelated_table(id TEXT);")
+            seed.commit()
+        finally:
+            seed.close()
+
+        with self.assertRaises(RecoverySessionHostFactoryError) as ctx:
+            build_recovery_session_host_from_sqlite(db_path=db_path)
+
+        message = str(ctx.exception)
+        self.assertIn("required schema", message)
+        self.assertTrue(
+            any(
+                table in message
+                for table in (
+                    "audit_records",
+                    "intent_anchor_records",
+                    "journal_entries",
+                )
+            ),
+            f"missing-required-tables message must name at least one "
+            f"required table; got: {message!r}",
+        )
+
+        raw = sqlite3.connect(str(db_path))
+        try:
+            rows = raw.execute(
+                "SELECT name FROM sqlite_master WHERE type = 'table';"
+            ).fetchall()
+        finally:
+            raw.close()
+        present_tables = {row[0] for row in rows}
+        # Pre-existing harmless table must remain — the factory must
+        # not mutate the DB on failure.
+        self.assertIn("unrelated_table", present_tables)
+        # And no required table may have appeared as a side effect.
+        required_tables = {
+            "audit_records",
+            "budget_records",
+            "capability_tokens",
+            "context_artifacts",
+            "inference_artifacts",
+            "intent_anchor_records",
+            "patch_proposals",
+            "validation_receipts",
+            "review_artifacts",
+            "approval_artifacts",
+            "revisions",
+            "snapshot_roots",
+            "journal_entries",
+            "replay_anchors",
+            "taint_records",
+            "drift_event_records",
+            "failure_bundles",
+        }
+        leaked = present_tables & required_tables
+        self.assertEqual(
+            leaked,
+            set(),
+            f"factory must not create any required schema table on "
+            f"failure; found unexpectedly created: {sorted(leaked)!r}",
+        )
+
+    # ------------------------------------------------------------------
+    # P0-11 C. opened connection is closed when schema validation fails
+    # ------------------------------------------------------------------
+
+    def test_factory_opened_connection_is_closed_on_schema_validation_failure(
+        self,
+    ) -> None:
+        db_path = self.tmpdir / "fake.db"
+        # Real file so `Path.is_file()` passes the missing-path guard.
+        db_path.touch()
+
+        class _FakeConn:
+            def __init__(self) -> None:
+                self.close_count = 0
+
+            def execute(self, *args: Any, **kwargs: Any) -> Any:
+                # Force schema validation (the only call between
+                # open and the wiring block) to fail with a malformed-
+                # DB-style error. Mirrors what raw sqlite3 raises when
+                # asked to scan sqlite_master on a corrupt file.
+                raise sqlite3.DatabaseError(
+                    "forced sqlite_master scan failure"
+                )
+
+            def close(self) -> None:
+                self.close_count += 1
+
+        fake_conn = _FakeConn()
+
+        # Patch the module attribute so the factory's local
+        # `from kernel.stores.sqlite.wal_recovery import open_connection`
+        # resolves to the fake.
+        with mock.patch(
+            "kernel.stores.sqlite.wal_recovery.open_connection",
+            return_value=fake_conn,
+        ):
+            with self.assertRaises(RecoverySessionHostFactoryError):
+                build_recovery_session_host_from_sqlite(db_path=db_path)
+
+        self.assertEqual(
+            fake_conn.close_count,
+            1,
+            "factory must close the opened connection exactly once "
+            "when schema validation fails after open_connection",
+        )
+
+    # ------------------------------------------------------------------
+    # P0-11 D. wiring failure after schema validation -> raise (no host)
+    # ------------------------------------------------------------------
+
+    def test_factory_wiring_failure_after_schema_validation_closes_connection(
+        self,
+    ) -> None:
+        db_path = self.tmpdir / "factory.db"
+        _initialize_empty_db(db_path)
+
+        # Patch a repository constructor used by the factory. With a
+        # valid migrated DB on disk, schema validation passes; the
+        # patched constructor then raises during the wiring block,
+        # which the factory must wrap as
+        # `RecoverySessionHostFactoryError` while closing the
+        # opened connection.
+        with mock.patch(
+            "kernel.stores.sqlite.repositories.AuditRepository",
+            side_effect=RuntimeError("forced wiring failure"),
+        ):
+            with self.assertRaises(RecoverySessionHostFactoryError) as ctx:
+                build_recovery_session_host_from_sqlite(db_path=db_path)
+
+        # The original wiring failure must be chained, not swallowed.
+        cause = ctx.exception.__cause__
+        self.assertIsInstance(cause, RuntimeError)
+        self.assertIn("forced wiring failure", str(cause))
 
     def test_factory_does_not_add_cli_restore(self) -> None:
         import argparse as _argparse
