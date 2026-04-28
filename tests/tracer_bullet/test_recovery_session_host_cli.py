@@ -103,6 +103,14 @@ RECURSIVE_REPR_MARKERS = (
     "<sqlite3.",
 )
 
+PHASE_CHECKPOINT_REPR_MARKERS = (
+    "object at 0x",
+    "sqlite3.Connection",
+    "RecoverySessionHost",
+    "<kernel.",
+    "<sqlite3.",
+)
+
 
 def _subparser_choices(parser: argparse.ArgumentParser) -> set[str]:
     for action in parser._actions:
@@ -230,6 +238,18 @@ def _assert_json_safe_no_runtime_types(payload: object) -> None:
             )
 
 
+def _assert_no_runtime_repr_strings(payload: object) -> None:
+    for value in _recursive_values(payload):
+        if not isinstance(value, str):
+            continue
+        for marker in PHASE_CHECKPOINT_REPR_MARKERS:
+            if marker in value:
+                raise AssertionError(
+                    f"payload leaked runtime repr marker {marker!r}: "
+                    f"{value!r}"
+                )
+
+
 def _stdio_contract_observation(
     stdout: str, stderr: str
 ) -> dict[str, bool]:
@@ -276,6 +296,77 @@ def _valid_manifest_copy() -> dict[str, object]:
 
 def _valid_current_readiness_payload_copy() -> dict[str, object]:
     return copy.deepcopy(current_recovery_session_host_cli_readiness_payload())
+
+
+def _collect_phase_checkpoint_payloads(
+    db_path: Path, task_id: str
+) -> dict[str, dict[str, object]]:
+    readiness = recovery_session_host_cli_readiness()
+    smoke = current_recovery_session_host_cli_readiness_smoke()
+    missing_path = db_path.with_name("phase-checkpoint-missing.db")
+
+    factory_valid_code, factory_valid_stdout, factory_valid_stderr = _invoke(
+        ["factory-check", "--db", str(db_path)]
+    )
+    if factory_valid_code != EXIT_OK or factory_valid_stderr != "":
+        raise AssertionError(
+            "factory-check valid DB did not produce expected JSON"
+        )
+
+    evaluate_valid_code, evaluate_valid_stdout, evaluate_valid_stderr = (
+        _invoke(["evaluate", "--db", str(db_path), "--task-id", task_id])
+    )
+    if evaluate_valid_code != EXIT_OK or evaluate_valid_stderr != "":
+        raise AssertionError("evaluate valid DB did not produce expected JSON")
+
+    factory_missing_code, factory_missing_stdout, factory_missing_stderr = (
+        _invoke(["factory-check", "--db", str(missing_path)])
+    )
+    if (
+        factory_missing_code != EXIT_FACTORY_ERROR
+        or factory_missing_stderr != ""
+    ):
+        raise AssertionError(
+            "factory-check missing DB did not produce expected JSON"
+        )
+
+    evaluate_missing_code, evaluate_missing_stdout, evaluate_missing_stderr = (
+        _invoke(
+            [
+                "evaluate",
+                "--db",
+                str(missing_path),
+                "--task-id",
+                "missing-task",
+            ]
+        )
+    )
+    if (
+        evaluate_missing_code != EXIT_FACTORY_ERROR
+        or evaluate_missing_stderr != ""
+    ):
+        raise AssertionError(
+            "evaluate missing DB did not produce expected JSON"
+        )
+
+    return {
+        "manifest": session_host_cli_contract_manifest(),
+        "readiness": render_recovery_session_host_cli_readiness(readiness),
+        "current_readiness": (
+            current_recovery_session_host_cli_readiness_payload()
+        ),
+        "smoke": render_recovery_session_host_cli_readiness_smoke(smoke),
+        "factory_check_valid": _assert_single_json_line(
+            factory_valid_stdout
+        ),
+        "evaluate_valid": _assert_single_json_line(evaluate_valid_stdout),
+        "factory_check_missing": _assert_single_json_line(
+            factory_missing_stdout
+        ),
+        "evaluate_missing": _assert_single_json_line(
+            evaluate_missing_stdout
+        ),
+    }
 
 
 def _insert_duplicate_intent_anchor(db_path: Path, task_id: str) -> None:
@@ -3281,6 +3372,362 @@ class TestRecoverySessionHostCli(unittest.TestCase):
         self.assertEqual(code, 4)
         self.assertEqual(stdout, "")
         self.assertIn("unexpected defect", stderr)
+
+    def test_phase_checkpoint_operator_surface_is_frozen_read_only(
+        self,
+    ) -> None:
+        from kernel.lifecycle.recovery_cli import (
+            build_parser as build_legacy_parser,
+        )
+
+        session_host_choices = _subparser_choices(build_parser())
+        legacy_choices = _subparser_choices(build_legacy_parser())
+        manifest = session_host_cli_contract_manifest()
+        readiness = recovery_session_host_cli_readiness()
+        readiness_payload = render_recovery_session_host_cli_readiness(
+            readiness
+        )
+        current_payload = current_recovery_session_host_cli_readiness_payload()
+        smoke = current_recovery_session_host_cli_readiness_smoke()
+        smoke_payload = render_recovery_session_host_cli_readiness_smoke(
+            smoke
+        )
+
+        self.assertEqual(session_host_choices, {"factory-check", "evaluate"})
+        self.assertEqual(legacy_choices, {"evaluate", "restore-dry-run"})
+        self.assertEqual(manifest["commands"], ["evaluate", "factory-check"])
+        self.assertIs(readiness.ready, True)
+        self.assertEqual(readiness.failures, ())
+        self.assertIs(current_payload["ready"], True)
+        self.assertIs(smoke.passed, True)
+        self.assertEqual(smoke.failures, ())
+
+        operator_command_surfaces = [
+            session_host_choices,
+            manifest["commands"],
+            readiness.manifest["commands"],
+            readiness_payload["manifest"]["commands"],
+            current_payload["manifest"]["commands"],
+            smoke.payload["manifest"]["commands"],
+            smoke_payload["payload"]["manifest"]["commands"],
+        ]
+        for commands in operator_command_surfaces:
+            with self.subTest(commands=commands):
+                self.assertNotIn("restore", commands)
+                self.assertNotIn("restore-dry-run", commands)
+
+        manifests = [
+            manifest,
+            readiness.manifest,
+            readiness_payload["manifest"],
+            current_payload["manifest"],
+            smoke.payload["manifest"],
+            smoke_payload["payload"]["manifest"],
+        ]
+        for payload_manifest in manifests:
+            with self.subTest(payload_manifest=payload_manifest):
+                self.assertIs(payload_manifest["restore_supported"], False)
+                self.assertIs(payload_manifest["durable_writes"], False)
+
+    def test_phase_checkpoint_operator_surface_has_no_runtime_mutation_paths(
+        self,
+    ) -> None:
+        db_path = self.tmpdir / "factory.db"
+        task_id = f"task-{uuid4().hex[:8]}"
+        missing_path = self.tmpdir / "missing.db"
+        _initialize_empty_db(db_path)
+        _seed_inference_stage(db_path, task_id)
+        before_counts = _table_row_counts(db_path)
+
+        session_host_cli_contract_manifest()
+        readiness = recovery_session_host_cli_readiness()
+        render_recovery_session_host_cli_readiness(readiness)
+        current_recovery_session_host_cli_readiness_payload()
+        smoke = current_recovery_session_host_cli_readiness_smoke()
+        render_recovery_session_host_cli_readiness_smoke(smoke)
+
+        cases = [
+            (
+                ["factory-check", "--db", str(db_path)],
+                EXIT_OK,
+            ),
+            (
+                ["evaluate", "--db", str(db_path), "--task-id", task_id],
+                EXIT_OK,
+            ),
+            (
+                [
+                    "evaluate",
+                    "--db",
+                    str(db_path),
+                    "--task-id",
+                    "unknown-task",
+                ],
+                EXIT_OK,
+            ),
+            (
+                ["factory-check", "--db", str(missing_path)],
+                EXIT_FACTORY_ERROR,
+            ),
+            (
+                [
+                    "evaluate",
+                    "--db",
+                    str(missing_path),
+                    "--task-id",
+                    "unknown-task",
+                ],
+                EXIT_FACTORY_ERROR,
+            ),
+        ]
+
+        for argv, expected_code in cases:
+            with self.subTest(argv=argv):
+                code, stdout, stderr = _invoke(argv)
+                self.assertEqual(code, expected_code)
+                self.assertEqual(stderr, "")
+                _assert_single_json_line(stdout)
+
+        self.assertEqual(_table_row_counts(db_path), before_counts)
+        self.assertFalse(missing_path.exists())
+
+    def test_phase_checkpoint_operator_surface_runtime_paths_are_read_only_and_bounded(
+        self,
+    ) -> None:
+        db_path = self.tmpdir / "factory.db"
+        task_id = f"task-{uuid4().hex[:8]}"
+        missing_factory_path = self.tmpdir / "missing-factory.db"
+        missing_evaluate_path = self.tmpdir / "missing-evaluate.db"
+        _initialize_empty_db(db_path)
+        _seed_inference_stage(db_path, task_id)
+
+        cases: list[tuple[str, int, str, str]] = []
+        for label, argv in (
+            ("factory-check valid DB", ["factory-check", "--db", str(db_path)]),
+            (
+                "evaluate safe_to_resume task",
+                ["evaluate", "--db", str(db_path), "--task-id", task_id],
+            ),
+            (
+                "evaluate unknown task",
+                [
+                    "evaluate",
+                    "--db",
+                    str(db_path),
+                    "--task-id",
+                    "unknown-task",
+                ],
+            ),
+            (
+                "factory-check missing DB",
+                ["factory-check", "--db", str(missing_factory_path)],
+            ),
+            (
+                "evaluate missing DB",
+                [
+                    "evaluate",
+                    "--db",
+                    str(missing_evaluate_path),
+                    "--task-id",
+                    "unknown-task",
+                ],
+            ),
+            (
+                "invalid args",
+                ["evaluate", "--db", str(db_path)],
+            ),
+        ):
+            code, stdout, stderr = _invoke(argv)
+            cases.append((label, code, stdout, stderr))
+
+        with mock.patch(
+            "kernel.lifecycle.recovery_session_host_cli."
+            "try_build_recovery_session_host_from_sqlite",
+            side_effect=RuntimeError("phase checkpoint unexpected"),
+        ):
+            code, stdout, stderr = _invoke(
+                ["factory-check", "--db", str(db_path)]
+            )
+        cases.append(("unexpected factory error", code, stdout, stderr))
+
+        observed_exit_codes = {code for _label, code, _stdout, _stderr in cases}
+        self.assertEqual(
+            observed_exit_codes,
+            {EXIT_OK, EXIT_INVALID_ARGS, EXIT_FACTORY_ERROR, EXIT_UNEXPECTED},
+        )
+
+        for label, code, stdout, stderr in cases:
+            with self.subTest(label=label):
+                if code in (EXIT_OK, EXIT_FACTORY_ERROR):
+                    payload = _assert_single_json_line(stdout)
+                    self.assertEqual(stderr, "")
+                    self.assertNotIn(
+                        payload.get("command"),
+                        {"restore", "restore-dry-run"},
+                    )
+                elif code in (EXIT_INVALID_ARGS, EXIT_UNEXPECTED):
+                    self.assertEqual(stdout, "")
+                    self.assertTrue(stderr)
+                else:
+                    self.fail(f"unexpected exit code {code}")
+
+        self.assertFalse(missing_factory_path.exists())
+        self.assertFalse(missing_evaluate_path.exists())
+
+    def test_phase_checkpoint_operator_surface_public_payloads_are_json_safe_and_defensive(
+        self,
+    ) -> None:
+        db_path = self.tmpdir / "factory.db"
+        task_id = f"task-{uuid4().hex[:8]}"
+        _initialize_empty_db(db_path)
+        _seed_inference_stage(db_path, task_id)
+
+        payloads = _collect_phase_checkpoint_payloads(db_path, task_id)
+        for label, payload in payloads.items():
+            with self.subTest(label=label):
+                _assert_json_safe_no_runtime_types(payload)
+                _assert_no_runtime_repr_strings(payload)
+
+        current_payload = current_recovery_session_host_cli_readiness_payload()
+        smoke_payload = render_recovery_session_host_cli_readiness_smoke(
+            current_recovery_session_host_cli_readiness_smoke()
+        )
+        current_payload["manifest"]["commands"].append("restore")
+        current_payload["failures"].append("mutated")
+        smoke_payload["payload"]["manifest"]["commands"].append("restore")
+        smoke_payload["failures"].append("mutated")
+
+        fresh_current = current_recovery_session_host_cli_readiness_payload()
+        fresh_smoke = render_recovery_session_host_cli_readiness_smoke(
+            current_recovery_session_host_cli_readiness_smoke()
+        )
+
+        self.assertIs(fresh_current["ready"], True)
+        self.assertEqual(fresh_current["failures"], [])
+        self.assertNotIn("restore", fresh_current["manifest"]["commands"])
+        self.assertIs(fresh_smoke["passed"], True)
+        self.assertEqual(fresh_smoke["failures"], [])
+        self.assertNotIn(
+            "restore", fresh_smoke["payload"]["manifest"]["commands"]
+        )
+
+    def test_phase_checkpoint_operator_surface_import_and_manifest_are_side_effect_free(
+        self,
+    ) -> None:
+        import kernel.lifecycle.recovery_session_host_cli as module
+
+        stdout = io.StringIO()
+        stderr = io.StringIO()
+        with redirect_stdout(stdout), redirect_stderr(stderr):
+            reloaded = importlib.reload(module)
+            with mock.patch.object(
+                reloaded,
+                "main",
+                side_effect=AssertionError("CLI main must not be invoked"),
+            ) as main_mock, mock.patch.object(
+                reloaded,
+                "build_parser",
+                side_effect=AssertionError("CLI parser must not be invoked"),
+            ) as parser_mock, mock.patch.object(
+                reloaded,
+                "_render_factory_check",
+                side_effect=AssertionError(
+                    "factory-check command must not be invoked"
+                ),
+            ) as factory_mock, mock.patch.object(
+                reloaded,
+                "_render_evaluate",
+                side_effect=AssertionError(
+                    "evaluate command must not be invoked"
+                ),
+            ) as evaluate_mock:
+                reloaded.session_host_cli_contract_manifest()
+                reloaded.recovery_session_host_cli_readiness()
+                reloaded.current_recovery_session_host_cli_readiness_payload()
+                reloaded.current_recovery_session_host_cli_readiness_smoke()
+
+        self.assertEqual(stdout.getvalue(), "")
+        self.assertEqual(stderr.getvalue(), "")
+        self.assertEqual(list(self.tmpdir.iterdir()), [])
+        main_mock.assert_not_called()
+        parser_mock.assert_not_called()
+        factory_mock.assert_not_called()
+        evaluate_mock.assert_not_called()
+
+    def test_phase_checkpoint_operator_surface_contract_summary_is_internally_consistent(
+        self,
+    ) -> None:
+        manifest = session_host_cli_contract_manifest()
+        readiness = recovery_session_host_cli_readiness()
+        smoke = current_recovery_session_host_cli_readiness_smoke()
+        summary = {
+            "commands": manifest["commands"],
+            "exit_codes": manifest["exit_codes"],
+            "top_level_keys": manifest["top_level_keys"],
+            "factory_keys": manifest["factory_keys"],
+            "host_state_keys": manifest["host_state_keys"],
+            "recovery_keys": manifest["recovery_keys"],
+            "restore_supported": manifest["restore_supported"],
+            "durable_writes": manifest["durable_writes"],
+            "readiness_ready": readiness.ready,
+            "smoke_passed": smoke.passed,
+        }
+
+        self.assertEqual(summary["commands"], ["evaluate", "factory-check"])
+        self.assertEqual(
+            summary["exit_codes"],
+            {
+                "ok": 0,
+                "invalid_args": 2,
+                "factory_error": 3,
+                "unexpected": 4,
+            },
+        )
+        self.assertIs(summary["restore_supported"], False)
+        self.assertIs(summary["durable_writes"], False)
+        self.assertIs(summary["readiness_ready"], True)
+        self.assertIs(summary["smoke_passed"], True)
+        _assert_json_safe_no_runtime_types(summary)
+        _assert_no_runtime_repr_strings(summary)
+        self.assertNotIn("restore", summary["commands"])
+        self.assertNotIn("restore-dry-run", summary["commands"])
+
+    def test_phase_checkpoint_operator_surface_does_not_require_production_change(
+        self,
+    ) -> None:
+        from kernel.lifecycle.recovery_cli import (
+            build_parser as build_legacy_parser,
+        )
+
+        parser_choices = _subparser_choices(build_parser())
+        legacy_choices = _subparser_choices(build_legacy_parser())
+        manifest = session_host_cli_contract_manifest()
+        readiness = recovery_session_host_cli_readiness()
+        current_payload = current_recovery_session_host_cli_readiness_payload()
+        smoke_payload = render_recovery_session_host_cli_readiness_smoke(
+            current_recovery_session_host_cli_readiness_smoke()
+        )
+
+        self.assertLessEqual(parser_choices, {"factory-check", "evaluate"})
+        self.assertEqual(parser_choices, {"factory-check", "evaluate"})
+        self.assertEqual(manifest["commands"], ["evaluate", "factory-check"])
+        self.assertNotIn("readiness", parser_choices)
+        self.assertNotIn("smoke", parser_choices)
+        self.assertNotIn("readiness", manifest["commands"])
+        self.assertNotIn("smoke", manifest["commands"])
+        self.assertEqual(legacy_choices, {"evaluate", "restore-dry-run"})
+
+        helper_outputs = [
+            manifest,
+            render_recovery_session_host_cli_readiness(readiness),
+            current_payload,
+            smoke_payload,
+        ]
+        for payload in helper_outputs:
+            with self.subTest(payload=payload):
+                encoded = json.dumps(payload, sort_keys=True)
+                self.assertNotIn('"restore_supported": true', encoded)
+                self.assertNotIn('"durable_writes": true', encoded)
 
 
 if __name__ == "__main__":
