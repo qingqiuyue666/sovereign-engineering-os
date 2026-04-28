@@ -83,6 +83,337 @@ _REQUIRED_RECOVERY_SESSION_HOST_TABLES: frozenset[str] = frozenset(
 )
 
 
+# P0-12 — schema identity contract.
+#
+# Required column sets per factory-wired table. Sourced directly from
+# ``kernel/stores/sqlite/migrations/0001_core_signable_path.sql``. The
+# factory's read-only validator inspects ``PRAGMA table_info(<table>)``
+# for each entry and refuses to construct a host when any required
+# column is absent. Column lists mirror the migration exactly — the
+# validator is a schema-identity check, not a "minimum useful subset"
+# heuristic.
+_REQUIRED_RECOVERY_SESSION_HOST_COLUMNS: dict[str, frozenset[str]] = {
+    "revisions": frozenset(
+        {
+            "revision_id",
+            "parent_revision_id",
+            "project_id",
+            "task_id",
+            "state",
+            "root_hash",
+            "snapshot_root_id",
+            "intent_id",
+            "originating_context_artifact_id",
+            "approval_id",
+            "logical_sequence_at_seal",
+            "version_tuple_hash",
+            "taint_set_json",
+            "created_at",
+            "sealed_at",
+            "abandonment_reason",
+            "recovery_note",
+        }
+    ),
+    "journal_entries": frozenset(
+        {
+            "journal_entry_id",
+            "logical_sequence",
+            "entry_type",
+            "revision_id",
+            "parent_revision_id",
+            "project_id",
+            "task_id",
+            "causality_ref",
+            "payload_hash",
+            "version_tuple_hash",
+            "taint_set_json",
+            "created_at",
+            "barrier_status",
+            "replay_class",
+            "failure_bundle_id",
+            "drift_event_id",
+        }
+    ),
+    "snapshot_roots": frozenset(
+        {
+            "snapshot_root_id",
+            "revision_id",
+            "root_hash",
+            "file_manifest_hash",
+            "artifact_manifest_hash",
+            "parent_snapshot_root_id",
+            "version_tuple_hash",
+            "created_at",
+            "storage_locator",
+            "compaction_generation",
+        }
+    ),
+    "context_artifacts": frozenset(
+        {
+            "context_artifact_id",
+            "task_id",
+            "root_revision_id",
+            "repo_graph_version",
+            "symbol_index_version",
+            "candidate_file_ids",
+            "symbol_frontier_ids",
+            "memory_item_ids",
+            "packing_policy_version",
+            "hard_budget_tokens",
+            "effective_budget_tokens",
+            "actual_tokens",
+            "truncation_reason",
+            "deferred_retrieval_items",
+            "provenance_refs",
+            "taint_set_json",
+            "content_hash",
+            "created_at",
+            "version_tuple_hash",
+        }
+    ),
+    "inference_artifacts": frozenset(
+        {
+            "inference_artifact_id",
+            "task_id",
+            "root_revision_id",
+            "context_artifact_id",
+            "worker_run_id",
+            "worker_profile",
+            "model_route_id",
+            "output_hash",
+            "provenance_refs",
+            "taint_set_json",
+            "created_at",
+            "version_tuple_hash",
+            "token_usage_json",
+            "latency_ms",
+            "fallback_route_id",
+        }
+    ),
+    "patch_proposals": frozenset(
+        {
+            "patch_proposal_id",
+            "task_id",
+            "root_revision_id",
+            "inference_artifact_id",
+            "target_file_ids",
+            "patch_group_hash",
+            "side_effect_class_proposal",
+            "capability_requirements",
+            "taint_set_json",
+            "created_at",
+            "version_tuple_hash",
+        }
+    ),
+    "validation_receipts": frozenset(
+        {
+            "validation_receipt_id",
+            "task_id",
+            "root_revision_id",
+            "receipt_type",
+            "validator_identity",
+            "validator_version",
+            "input_hash",
+            "result",
+            "diagnostics_hash",
+            "taint_set_json",
+            "created_at",
+            "version_tuple_hash",
+            "invalidated_at",
+            "invalidation_reason",
+        }
+    ),
+    "review_artifacts": frozenset(
+        {
+            "review_artifact_id",
+            "task_id",
+            "root_revision_id",
+            "patch_proposal_id",
+            "diff_hash",
+            "semantic_impact_hash",
+            "risk_class",
+            "rendering_provenance",
+            "taint_set_json",
+            "created_at",
+            "version_tuple_hash",
+        }
+    ),
+    "approval_artifacts": frozenset(
+        {
+            "approval_id",
+            "task_id",
+            "originating_root_revision_id",
+            "reviewed_patch_hash",
+            "reviewed_context_artifact_id",
+            "required_receipt_ids",
+            "approval_scope",
+            "approver_identity",
+            "approval_state",
+            "policy_version",
+            "created_at",
+            "expires_at",
+            "version_tuple_hash",
+            "invalidated_at",
+            "invalidation_reason",
+            "conflict_group_id",
+        }
+    ),
+    "capability_tokens": frozenset(
+        {
+            "capability_token_id",
+            "subject_identity",
+            "capability_name",
+            "scope_hash",
+            "issued_at",
+            "expires_at",
+            "issuer_identity",
+            "token_mac_or_signature",
+            "version_tuple_hash",
+            "single_use_flag",
+            "consumed_at",
+            "revoked_at",
+            "revocation_reason",
+            "bound_task_id",
+            "bound_root_revision_id",
+        }
+    ),
+    "replay_anchors": frozenset(
+        {
+            "replay_anchor_id",
+            "root_revision_id",
+            "project_id",
+            "task_id",
+            "replay_class_claim",
+            "required_artifact_ids",
+            "version_tuple_hash",
+            "environment_fingerprint_hash",
+            "created_at",
+            "degradation_reason",
+            "unreplayable_reason",
+        }
+    ),
+    "audit_records": frozenset(
+        {
+            "audit_record_id",
+            "task_id",
+            "root_revision_id",
+            "record_type",
+            "causality_ref",
+            "actor_identity",
+            "artifact_refs",
+            "version_tuple_hash",
+            "taint_set_json",
+            "created_at",
+            "payload_json",
+            "failure_bundle_id",
+            "replay_anchor_id",
+            "approval_id",
+            "sequence",
+        }
+    ),
+    "failure_bundles": frozenset(
+        {
+            "failure_bundle_id",
+            "task_id",
+            "root_revision_id",
+            "failure_class",
+            "cause_hash",
+            "evidence_refs",
+            "taint_set_json",
+            "created_at",
+            "incident_id",
+            "retained_for_forensics_flag",
+            "recovery_action_ref",
+        }
+    ),
+    "drift_event_records": frozenset(
+        {
+            "drift_event_id",
+            "task_id",
+            "root_revision_id",
+            "drift_class",
+            "detected_at",
+            "affected_artifact_ids",
+            "consequence_class",
+            "approval_id",
+            "replay_anchor_id",
+            "required_reconciliation_action",
+        }
+    ),
+    "taint_records": frozenset(
+        {
+            "taint_record_id",
+            "subject_id",
+            "taint_class",
+            "taint_state",
+            "source_ref",
+            "created_at",
+            "cleared_at",
+            "clearing_identity",
+            "clearing_reason",
+        }
+    ),
+    "budget_records": frozenset(
+        {
+            "budget_record_id",
+            "task_id",
+            "budget_class",
+            "allocated_amount",
+            "consumed_amount",
+            "remaining_amount",
+            "budget_state",
+            "created_at",
+            "suspended_at",
+            "replenished_at",
+            "close_reason",
+        }
+    ),
+    "intent_anchor_records": frozenset(
+        {
+            "intent_id",
+            "task_id",
+            "state",
+            "created_at",
+        }
+    ),
+}
+
+
+# P0-12 — required append-only / immutability triggers. Sourced directly
+# from ``kernel/stores/sqlite/migrations/0001_core_signable_path.sql``.
+# Their absence means INV-004 / INV-005 / INV-026 / §23.15 / §23.17 /
+# §23.19 enforcement is silently disabled — a wired host over such a DB
+# would accept writes the constitution forbids. The factory must refuse.
+_REQUIRED_RECOVERY_SESSION_HOST_TRIGGERS: frozenset[str] = frozenset(
+    {
+        "revisions_sealed_immutable_update",
+        "revisions_sealed_immutable_delete",
+        "journal_entries_append_only_update",
+        "journal_entries_append_only_delete",
+        "audit_records_append_only_update",
+        "audit_records_append_only_delete",
+        "failure_bundles_append_only_update",
+        "failure_bundles_append_only_delete",
+        "drift_event_records_append_only_update",
+        "drift_event_records_append_only_delete",
+        "taint_records_append_only_update",
+        "taint_records_append_only_delete",
+    }
+)
+
+
+# P0-12 — required critical indexes. Sourced directly from
+# ``kernel/stores/sqlite/migrations/0001_core_signable_path.sql``. The
+# audit-sequence index is UNIQUE and is the substrate for monotonic
+# append order; the journal-sequence index supports recovery readers.
+_REQUIRED_RECOVERY_SESSION_HOST_INDEXES: frozenset[str] = frozenset(
+    {
+        "idx_journal_entries_sequence",
+        "idx_audit_records_sequence",
+    }
+)
+
+
 class RecoverySessionHostClosed(RuntimeError):
     """Raised when a public `RecoverySessionHost` operation is
     attempted after `close()` has run.
@@ -214,24 +545,115 @@ class RecoverySessionHost:
 def _validate_factory_schema_ready(
     conn: sqlite3.Connection, *, db_path: Path
 ) -> None:
-    """Read-only schema readiness check for the recovery factory.
+    """Read-only schema identity check for the recovery factory.
 
-    Inspects ``sqlite_master`` only — never writes, never creates
-    tables, never calls ``apply_migrations``. If any table required
-    by the repositories the factory is about to wire is absent, raises
+    P0-11 verified that every required table exists. P0-12 widens the
+    contract to "the factory's identity dependencies are present":
+
+    - every required table exists (P0-11 baseline)
+    - every required column on every factory-wired table exists
+    - every required append-only / immutability trigger exists
+    - every required critical index exists
+
+    Inspects ``sqlite_master`` and ``PRAGMA table_info`` only — never
+    writes, never creates tables, never calls ``apply_migrations``,
+    never repairs malformed schema. Any deviation raises
     `RecoverySessionHostFactoryError` so the factory fails closed
-    before constructing repositories or services.
+    before constructing repositories, services, the orchestrator, or
+    the gate.
+
+    SQL safety: PRAGMA does not parameterize the table name, so the
+    validator iterates only over the names declared in the private
+    ``_REQUIRED_RECOVERY_SESSION_HOST_COLUMNS`` constant. Arbitrary
+    external table names are never substituted into the PRAGMA call.
     """
-    rows = conn.execute(
-        "SELECT name FROM sqlite_master WHERE type = 'table';"
-    ).fetchall()
-    present = {row[0] for row in rows}
-    missing = _REQUIRED_RECOVERY_SESSION_HOST_TABLES - present
-    if missing:
+    try:
+        table_rows = conn.execute(
+            "SELECT name FROM sqlite_master WHERE type = 'table';"
+        ).fetchall()
+    except sqlite3.Error as exc:
+        raise RecoverySessionHostFactoryError(
+            f"recovery session host factory failed to read sqlite "
+            f"table metadata for {db_path}: {exc}"
+        ) from exc
+    present_tables = {row[0] for row in table_rows}
+    missing_tables = (
+        _REQUIRED_RECOVERY_SESSION_HOST_TABLES - present_tables
+    )
+    if missing_tables:
         raise RecoverySessionHostFactoryError(
             f"recovery session host factory refused to construct host: "
             f"SQLite database at {db_path} is missing required schema "
-            f"table(s): {sorted(missing)!r}"
+            f"table(s): {sorted(missing_tables)!r}"
+        )
+
+    # Column existence per factory-wired table. Column names sourced
+    # from migration 0001; never accept external table names here.
+    for table_name in sorted(_REQUIRED_RECOVERY_SESSION_HOST_COLUMNS):
+        required_columns = _REQUIRED_RECOVERY_SESSION_HOST_COLUMNS[
+            table_name
+        ]
+        try:
+            info_rows = conn.execute(
+                f"PRAGMA table_info({table_name});"
+            ).fetchall()
+        except sqlite3.Error as exc:
+            raise RecoverySessionHostFactoryError(
+                f"recovery session host factory failed to read column "
+                f"metadata for table {table_name!r} in {db_path}: {exc}"
+            ) from exc
+        # PRAGMA table_info returns rows of (cid, name, type, notnull,
+        # dflt_value, pk).
+        present_columns = {row[1] for row in info_rows}
+        missing_columns = required_columns - present_columns
+        if missing_columns:
+            raise RecoverySessionHostFactoryError(
+                f"recovery session host factory refused to construct "
+                f"host: SQLite database at {db_path} table "
+                f"{table_name!r} is missing required column(s): "
+                f"{sorted(missing_columns)!r}"
+            )
+
+    # Append-only / immutability triggers.
+    try:
+        trigger_rows = conn.execute(
+            "SELECT name FROM sqlite_master WHERE type = 'trigger';"
+        ).fetchall()
+    except sqlite3.Error as exc:
+        raise RecoverySessionHostFactoryError(
+            f"recovery session host factory failed to read sqlite "
+            f"trigger metadata for {db_path}: {exc}"
+        ) from exc
+    present_triggers = {row[0] for row in trigger_rows}
+    missing_triggers = (
+        _REQUIRED_RECOVERY_SESSION_HOST_TRIGGERS - present_triggers
+    )
+    if missing_triggers:
+        raise RecoverySessionHostFactoryError(
+            f"recovery session host factory refused to construct host: "
+            f"SQLite database at {db_path} is missing required "
+            f"append-only trigger(s): {sorted(missing_triggers)!r}"
+        )
+
+    # Critical indexes.
+    try:
+        index_rows = conn.execute(
+            "SELECT name FROM sqlite_master WHERE type = 'index';"
+        ).fetchall()
+    except sqlite3.Error as exc:
+        raise RecoverySessionHostFactoryError(
+            f"recovery session host factory failed to read sqlite "
+            f"index metadata for {db_path}: {exc}"
+        ) from exc
+    present_indexes = {row[0] for row in index_rows}
+    missing_indexes = (
+        _REQUIRED_RECOVERY_SESSION_HOST_INDEXES - present_indexes
+    )
+    if missing_indexes:
+        raise RecoverySessionHostFactoryError(
+            f"recovery session host factory refused to construct host: "
+            f"SQLite database at {db_path} is missing required "
+            f"critical index(es): {sorted(missing_indexes)!r}"
         )
 
 
