@@ -34,6 +34,7 @@ from kernel.lifecycle.recovery_session_host_cli import (
     EXIT_INVALID_ARGS,
     EXIT_OK,
     EXIT_UNEXPECTED,
+    RecoverySessionHostCliReadiness,
     SESSION_HOST_CLI_COMMANDS,
     SESSION_HOST_CLI_EXIT_CODES,
     SESSION_HOST_CLI_FACTORY_KEYS,
@@ -44,6 +45,7 @@ from kernel.lifecycle.recovery_session_host_cli import (
     build_parser,
     main,
     recovery_session_host_cli_readiness,
+    render_recovery_session_host_cli_readiness,
     session_host_cli_contract_manifest,
 )
 from kernel.lifecycle.recovery_session_host import (
@@ -1781,6 +1783,183 @@ class TestRecoverySessionHostCli(unittest.TestCase):
         encoded = json.dumps(payload, sort_keys=True)
 
         self.assertEqual(json.loads(encoded), payload)
+
+    def test_render_recovery_session_host_cli_readiness_ready_payload_shape(
+        self,
+    ) -> None:
+        readiness = recovery_session_host_cli_readiness()
+        payload = render_recovery_session_host_cli_readiness(readiness)
+
+        self.assertEqual(
+            set(payload), {"ready", "reason_code", "failures", "manifest"}
+        )
+        self.assertIs(payload["ready"], True)
+        self.assertEqual(payload["reason_code"], "ready")
+        self.assertEqual(payload["failures"], [])
+        self.assertEqual(payload["manifest"], readiness.manifest)
+        self.assertIsInstance(json.dumps(payload, sort_keys=True), str)
+
+    def test_render_recovery_session_host_cli_readiness_not_ready_payload_shape(
+        self,
+    ) -> None:
+        manifest = _valid_manifest_copy()
+        manifest["commands"] = ["evaluate", "factory-check", "restore"]
+
+        with mock.patch(
+            "kernel.lifecycle.recovery_session_host_cli."
+            "session_host_cli_contract_manifest",
+            return_value=manifest,
+        ):
+            readiness = recovery_session_host_cli_readiness()
+
+        self.assertIs(readiness.ready, False)
+
+        payload = render_recovery_session_host_cli_readiness(readiness)
+
+        self.assertIs(payload["ready"], False)
+        self.assertEqual(payload["reason_code"], "not_ready")
+        self.assertIn("commands_mismatch", payload["failures"])
+        self.assertIn("restore_command_present", payload["failures"])
+        self.assertEqual(payload["manifest"], manifest)
+
+    def test_render_recovery_session_host_cli_readiness_manifest_is_deep_copied(
+        self,
+    ) -> None:
+        readiness = recovery_session_host_cli_readiness()
+        payload = render_recovery_session_host_cli_readiness(readiness)
+        manifest = payload["manifest"]
+        self.assertIsInstance(manifest, dict)
+
+        manifest["commands"].append("restore")
+        manifest["stdio_contract"]["0"]["stdout_json"] = False
+
+        self.assertNotIn("restore", readiness.manifest["commands"])
+        self.assertIs(
+            readiness.manifest["stdio_contract"]["0"]["stdout_json"],
+            True,
+        )
+
+    def test_render_recovery_session_host_cli_readiness_failures_are_list_copy(
+        self,
+    ) -> None:
+        readiness = RecoverySessionHostCliReadiness(
+            ready=False,
+            reason_code="not_ready",
+            failures=("commands_mismatch",),
+            manifest=session_host_cli_contract_manifest(),
+        )
+
+        payload = render_recovery_session_host_cli_readiness(readiness)
+
+        self.assertEqual(payload["failures"], ["commands_mismatch"])
+        payload["failures"].append("x")
+        self.assertEqual(readiness.failures, ("commands_mismatch",))
+
+    def test_render_recovery_session_host_cli_readiness_is_pure(self) -> None:
+        with mock.patch(
+            "kernel.lifecycle.recovery_session_host_cli."
+            "recovery_session_host_cli_readiness",
+            side_effect=RuntimeError(
+                "readiness helper should not be called"
+            ),
+        ), mock.patch(
+            "kernel.lifecycle.recovery_session_host_cli.build_parser",
+            side_effect=RuntimeError("parser should not be called"),
+        ), mock.patch(
+            "kernel.lifecycle.recovery_session_host_cli."
+            "try_build_recovery_session_host_from_sqlite",
+            side_effect=RuntimeError("factory should not be called"),
+        ), mock.patch(
+            "kernel.lifecycle.recovery_session_host_cli.main",
+            side_effect=RuntimeError("main should not be called"),
+        ), mock.patch(
+            "kernel.lifecycle.recovery_session_host_cli."
+            "render_factory_result",
+            side_effect=RuntimeError(
+                "render_factory_result should not be called"
+            ),
+        ), mock.patch(
+            "kernel.lifecycle.recovery_session_host_cli."
+            "render_recovery_gate_result",
+            side_effect=RuntimeError(
+                "render_recovery_gate_result should not be called"
+            ),
+        ), mock.patch(
+            "kernel.lifecycle.recovery_session_host_cli."
+            "render_session_host_state",
+            side_effect=RuntimeError(
+                "render_session_host_state should not be called"
+            ),
+        ):
+            payload = render_recovery_session_host_cli_readiness(
+                RecoverySessionHostCliReadiness(
+                    ready=True,
+                    reason_code="ready",
+                    failures=(),
+                    manifest=session_host_cli_contract_manifest(),
+                )
+            )
+
+        self.assertIs(payload["ready"], True)
+        self.assertEqual(payload["failures"], [])
+
+    def test_render_recovery_session_host_cli_readiness_does_not_touch_stdout_stderr_filesystem_db(
+        self,
+    ) -> None:
+        missing_path = self.tmpdir / "missing.db"
+        db_path = self.tmpdir / "factory.db"
+        _initialize_empty_db(db_path)
+        before_counts = _table_row_counts(db_path)
+        readiness = RecoverySessionHostCliReadiness(
+            ready=True,
+            reason_code="ready",
+            failures=(),
+            manifest=session_host_cli_contract_manifest(),
+        )
+        stdout = io.StringIO()
+        stderr = io.StringIO()
+
+        with redirect_stdout(stdout), redirect_stderr(stderr):
+            for _ in range(5):
+                render_recovery_session_host_cli_readiness(readiness)
+
+        self.assertEqual(stdout.getvalue(), "")
+        self.assertEqual(stderr.getvalue(), "")
+        self.assertFalse(missing_path.exists())
+        self.assertEqual(_table_row_counts(db_path), before_counts)
+
+    def test_render_recovery_session_host_cli_readiness_round_trips_through_json(
+        self,
+    ) -> None:
+        readiness = recovery_session_host_cli_readiness()
+        payload = render_recovery_session_host_cli_readiness(readiness)
+
+        encoded = json.dumps(payload, sort_keys=True)
+        decoded = json.loads(encoded)
+
+        self.assertEqual(decoded, payload)
+
+    def test_render_recovery_session_host_cli_readiness_has_no_restore_surface(
+        self,
+    ) -> None:
+        from kernel.lifecycle.recovery_cli import (
+            build_parser as build_legacy_parser,
+        )
+
+        readiness = recovery_session_host_cli_readiness()
+        payload = render_recovery_session_host_cli_readiness(readiness)
+
+        self.assertIs(payload["ready"], True)
+        self.assertIs(payload["manifest"]["restore_supported"], False)
+        self.assertNotIn("restore", payload["manifest"]["commands"])
+        self.assertNotIn("restore-dry-run", payload["manifest"]["commands"])
+        self.assertEqual(
+            _subparser_choices(build_parser()), {"factory-check", "evaluate"}
+        )
+        self.assertEqual(
+            _subparser_choices(build_legacy_parser()),
+            {"evaluate", "restore-dry-run"},
+        )
 
     def test_recovery_session_host_cli_readiness_is_pure(self) -> None:
         with mock.patch(
