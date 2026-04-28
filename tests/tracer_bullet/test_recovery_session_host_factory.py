@@ -53,6 +53,7 @@ from kernel.lifecycle.recovery_session_host import (
     RecoverySessionHostClosed,
     RecoverySessionHostFactoryError,
     build_recovery_session_host_from_sqlite,
+    try_build_recovery_session_host_from_sqlite,
 )
 from kernel.lifecycle.signable_path_orchestrator import (
     SignablePathOrchestrator,
@@ -1265,6 +1266,212 @@ class TestRecoverySessionHostFactory(unittest.TestCase):
         self.assertEqual(exc.details["error_type"], "RuntimeError")
         self.assertIsInstance(exc.__cause__, RuntimeError)
         self.assertIn("forced wiring failure", str(exc.__cause__))
+
+    # ------------------------------------------------------------------
+    # P0-15 — non-exception operator result surface
+    # ------------------------------------------------------------------
+
+    def test_factory_result_success_contains_open_host(self) -> None:
+        db_path = self.tmpdir / "factory.db"
+        _initialize_empty_db(db_path)
+
+        result = try_build_recovery_session_host_from_sqlite(
+            db_path=db_path
+        )
+
+        self.assertIs(result.ok, True)
+        self.assertIsNotNone(result.host)
+        self.assertIsNone(result.reason_code)
+        self.assertIsNone(result.message)
+        self.assertEqual(result.details, {})
+
+        host = result.host
+        if host is None:
+            self.fail("success result must include an open host")
+        self.assertFalse(host.closed)
+        verdict = host.evaluate_task("unknown")
+        self.assertEqual(
+            verdict.recovery_class, RecoveryClass.UNRECOVERABLE
+        )
+
+        host.close()
+        self.assertTrue(host.closed)
+
+    def test_factory_result_missing_db_file_returns_failure_without_creating_file(
+        self,
+    ) -> None:
+        missing_path = self.tmpdir / "missing.db"
+        self.assertFalse(missing_path.exists())
+
+        result = try_build_recovery_session_host_from_sqlite(
+            db_path=missing_path
+        )
+
+        self.assertIs(result.ok, False)
+        self.assertIsNone(result.host)
+        self.assertEqual(result.reason_code, "missing_db_file")
+        self.assertIsNotNone(result.message)
+        self.assertIn("database file does not exist", result.message)
+        self.assertEqual(result.details["db_path"], str(missing_path))
+        self.assertFalse(missing_path.exists())
+
+    def test_factory_result_missing_required_columns_returns_failure_surface(
+        self,
+    ) -> None:
+        db_path = self.tmpdir / "factory.db"
+        _initialize_empty_db(db_path)
+
+        raw = sqlite3.connect(str(db_path))
+        try:
+            raw.execute("DROP TABLE intent_anchor_records;")
+            raw.execute(
+                "CREATE TABLE intent_anchor_records ("
+                "intent_id TEXT PRIMARY KEY, "
+                "task_id TEXT NOT NULL, "
+                "state TEXT NOT NULL"
+                ");"
+            )
+            raw.commit()
+        finally:
+            raw.close()
+
+        result = try_build_recovery_session_host_from_sqlite(
+            db_path=db_path
+        )
+
+        self.assertIs(result.ok, False)
+        self.assertIsNone(result.host)
+        self.assertEqual(result.reason_code, "missing_required_columns")
+        self.assertEqual(
+            result.details["table"], "intent_anchor_records"
+        )
+        self.assertIn("created_at", result.details["missing_columns"])
+
+    def test_factory_result_invalid_trigger_body_returns_failure_surface(
+        self,
+    ) -> None:
+        db_path = self.tmpdir / "factory.db"
+        _initialize_empty_db(db_path)
+
+        raw = sqlite3.connect(str(db_path))
+        try:
+            raw.execute(
+                "DROP TRIGGER audit_records_append_only_update;"
+            )
+            raw.execute(
+                "CREATE TRIGGER audit_records_append_only_update "
+                "BEFORE UPDATE ON audit_records "
+                "BEGIN "
+                "  SELECT 1; "
+                "END;"
+            )
+            raw.commit()
+        finally:
+            raw.close()
+
+        result = try_build_recovery_session_host_from_sqlite(
+            db_path=db_path
+        )
+
+        self.assertIs(result.ok, False)
+        self.assertIsNone(result.host)
+        self.assertEqual(result.reason_code, "invalid_trigger_body")
+        self.assertEqual(
+            result.details["trigger"],
+            "audit_records_append_only_update",
+        )
+        self.assertIn("missing_snippet", result.details)
+
+    def test_factory_result_wrong_index_uniqueness_returns_failure_surface(
+        self,
+    ) -> None:
+        db_path = self.tmpdir / "factory.db"
+        _initialize_empty_db(db_path)
+
+        raw = sqlite3.connect(str(db_path))
+        try:
+            raw.execute("DROP INDEX idx_audit_records_sequence;")
+            raw.execute(
+                "CREATE INDEX idx_audit_records_sequence "
+                "ON audit_records(sequence);"
+            )
+            raw.commit()
+        finally:
+            raw.close()
+
+        result = try_build_recovery_session_host_from_sqlite(
+            db_path=db_path
+        )
+
+        self.assertIs(result.ok, False)
+        self.assertIsNone(result.host)
+        self.assertEqual(result.reason_code, "wrong_index_uniqueness")
+        self.assertEqual(
+            result.details["index"], "idx_audit_records_sequence"
+        )
+        self.assertIs(result.details["expected_unique"], True)
+        self.assertIs(result.details["actual_unique"], False)
+
+    def test_factory_result_details_are_copied_from_exception(self) -> None:
+        missing_path = self.tmpdir / "missing.db"
+        self.assertFalse(missing_path.exists())
+
+        captured_exc: RecoverySessionHostFactoryError | None = None
+
+        def _raise_factory_error(
+            *, db_path: str | Path
+        ) -> RecoverySessionHost:
+            nonlocal captured_exc
+            captured_exc = RecoverySessionHostFactoryError(
+                "database file does not exist: x",
+                reason_code="missing_db_file",
+                details={"db_path": str(db_path)},
+            )
+            raise captured_exc
+
+        with mock.patch(
+            "kernel.lifecycle.recovery_session_host."
+            "build_recovery_session_host_from_sqlite",
+            side_effect=_raise_factory_error,
+        ):
+            result = try_build_recovery_session_host_from_sqlite(
+                db_path=missing_path
+            )
+
+        self.assertIs(result.ok, False)
+        self.assertIsInstance(result.details, dict)
+        self.assertIsNotNone(captured_exc)
+        if captured_exc is None:
+            self.fail("test helper must capture the raised exception")
+        self.assertIsNot(result.details, captured_exc.details)
+        result.details["db_path"] = "mutated"
+        self.assertEqual(captured_exc.details["db_path"], str(missing_path))
+
+    def test_try_build_does_not_swallow_unexpected_exception(self) -> None:
+        with mock.patch(
+            "kernel.lifecycle.recovery_session_host."
+            "build_recovery_session_host_from_sqlite",
+            side_effect=RuntimeError("unexpected defect"),
+        ):
+            with self.assertRaises(RuntimeError) as ctx:
+                try_build_recovery_session_host_from_sqlite(
+                    db_path=self.tmpdir / "factory.db"
+                )
+
+        self.assertEqual(str(ctx.exception), "unexpected defect")
+
+    def test_factory_result_does_not_add_cli_restore(self) -> None:
+        import argparse as _argparse
+
+        parser = build_parser()
+        sub_actions = [
+            action
+            for action in parser._actions
+            if isinstance(action, _argparse._SubParsersAction)
+        ]
+        self.assertEqual(len(sub_actions), 1)
+        registered = set(sub_actions[0].choices.keys())
+        self.assertEqual(registered, {"evaluate", "restore-dry-run"})
 
 
 if __name__ == "__main__":

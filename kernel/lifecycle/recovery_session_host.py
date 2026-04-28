@@ -44,6 +44,7 @@ stays a thin runtime boundary rather than a wiring graph.
 from __future__ import annotations
 
 import sqlite3
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Mapping, Optional, Protocol, Union
 
@@ -999,6 +1000,20 @@ class RecoverySessionHostFactoryError(RuntimeError):
         )
 
 
+@dataclass(frozen=True)
+class RecoverySessionHostFactoryResult:
+    """Non-exception operator result for factory construction."""
+
+    ok: bool
+    host: RecoverySessionHost | None
+    reason_code: str | None
+    message: str | None
+    details: dict[str, object]
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "details", dict(self.details))
+
+
 def build_recovery_session_host_from_sqlite(
     *,
     db_path: Union[str, Path],
@@ -1291,4 +1306,33 @@ def build_recovery_session_host_from_sqlite(
         recovery_gate=recovery_gate,
         orchestrator=orchestrator,
         close_callback=conn.close,
+    )
+
+
+def try_build_recovery_session_host_from_sqlite(
+    *,
+    db_path: str | Path,
+) -> RecoverySessionHostFactoryResult:
+    """Return an operator-readable result for factory construction.
+
+    Catches only `RecoverySessionHostFactoryError`; unexpected defects
+    propagate so programming errors are not converted into recoverable
+    operator failures.
+    """
+    try:
+        host = build_recovery_session_host_from_sqlite(db_path=db_path)
+    except RecoverySessionHostFactoryError as exc:
+        return RecoverySessionHostFactoryResult(
+            ok=False,
+            host=None,
+            reason_code=exc.reason_code,
+            message=str(exc),
+            details=dict(exc.details),
+        )
+    return RecoverySessionHostFactoryResult(
+        ok=True,
+        host=host,
+        reason_code=None,
+        message=None,
+        details={},
     )
