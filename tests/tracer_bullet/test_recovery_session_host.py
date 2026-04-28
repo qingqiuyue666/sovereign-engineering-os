@@ -428,6 +428,59 @@ class TestRecoverySessionHost(unittest.TestCase):
             _ = host.orchestrator
 
     # ------------------------------------------------------------------
+    # I'. close_callback exception leaves host closed; callback runs once
+    # ------------------------------------------------------------------
+
+    def test_session_host_close_callback_exception_marks_closed_and_runs_once(
+        self,
+    ) -> None:
+        """A failing close_callback must propagate, leave the host
+        closed, run exactly once, and block all subsequent public
+        operations.
+
+        Pins the production-code comment that intentionally marks the
+        host closed BEFORE invoking the callback so that a callback
+        exception does not leave the host in a half-open state.
+        """
+        gate = _gate_from_harness(self.harness)
+        fresh_orch = _fresh_orchestrator_from_harness(self.harness)
+
+        callback_calls = {"count": 0}
+
+        def _on_close() -> None:
+            callback_calls["count"] += 1
+            raise RuntimeError("close failed")
+
+        host = RecoverySessionHost(
+            recovery_gate=gate,
+            orchestrator=fresh_orch,
+            close_callback=_on_close,
+        )
+
+        self.assertFalse(host.closed)
+
+        with self.assertRaises(RuntimeError) as ctx:
+            host.close()
+        self.assertEqual(str(ctx.exception), "close failed")
+
+        self.assertTrue(host.closed)
+        self.assertEqual(callback_calls["count"], 1)
+
+        # Second close() is a no-op even though the first raised.
+        host.close()
+        self.assertTrue(host.closed)
+        self.assertEqual(callback_calls["count"], 1)
+
+        with self.assertRaises(RecoverySessionHostClosed):
+            host.evaluate_task("any")
+        with self.assertRaises(RecoverySessionHostClosed):
+            host.restore_task("any")
+        with self.assertRaises(RecoverySessionHostClosed):
+            host.current_stage("any")
+        with self.assertRaises(RecoverySessionHostClosed):
+            _ = host.orchestrator
+
+    # ------------------------------------------------------------------
     # J. P0-9 does not add a CLI `restore` subcommand
     # ------------------------------------------------------------------
 
