@@ -242,6 +242,8 @@ def check_recovery_session_host_verdict_cross_phase_digest_contract(
             and not _hazard_flags_are_consistent(digest)
         ):
             failures.append("hazard_flag_inconsistent")
+        elif _has_typed_hazard_flag_inconsistency(digest):
+            failures.append("hazard_flag_inconsistent")
 
     operator_safe = digest["operator_safe"] if digest_shape_valid else False
     return _contract_check(failures, contract, operator_safe=operator_safe)
@@ -296,8 +298,12 @@ def _is_int(value: object) -> bool:
     return type(value) is int
 
 
+def _is_bool(value: object) -> bool:
+    return isinstance(value, bool)
+
+
 def _has_valid_bool_fields(digest: dict[str, object]) -> bool:
-    return all(isinstance(digest[key], bool) for key in _BOOL_FIELDS)
+    return all(_is_bool(digest[key]) for key in _BOOL_FIELDS)
 
 
 def _has_valid_string_fields(digest: dict[str, object]) -> bool:
@@ -396,3 +402,71 @@ def _hazard_flags_are_consistent(digest: dict[str, object]) -> bool:
             or digest["comparison_change_count"] > 0
         )
     )
+
+
+def _has_typed_hazard_flag_inconsistency(
+    digest: dict[str, object]
+) -> bool:
+    runtime_dependency_count = digest["runtime_dependency_count"]
+    has_runtime_dependencies = digest["has_runtime_dependencies"]
+    if _is_int(runtime_dependency_count) and _is_bool(
+        has_runtime_dependencies
+    ):
+        if has_runtime_dependencies != (runtime_dependency_count > 0):
+            return True
+
+    cli_command_count = digest["cli_command_count"]
+    has_cli_commands = digest["has_cli_commands"]
+    if _is_int(cli_command_count) and _is_bool(has_cli_commands):
+        if has_cli_commands != (cli_command_count > 0):
+            return True
+
+    restore_supported = digest["restore_supported"]
+    durable_writes = digest["durable_writes"]
+    has_restore_or_durable_surface = digest[
+        "has_restore_or_durable_surface"
+    ]
+    if (
+        _is_bool(restore_supported)
+        and _is_bool(durable_writes)
+        and _is_bool(has_restore_or_durable_surface)
+    ):
+        if has_restore_or_durable_surface != (
+            restore_supported or durable_writes
+        ):
+            return True
+
+    contract_ready = digest["contract_ready"]
+    contract_failure_count = digest["contract_failure_count"]
+    comparison_ok = digest["comparison_ok"]
+    comparison_failure_count = digest["comparison_failure_count"]
+    has_contract_failure = digest["has_contract_failure"]
+    if (
+        _is_bool(contract_ready)
+        and _is_int(contract_failure_count)
+        and _is_bool(comparison_ok)
+        and _is_int(comparison_failure_count)
+        and _is_bool(has_contract_failure)
+    ):
+        if has_contract_failure != (
+            contract_ready is False
+            or contract_failure_count > 0
+            or comparison_ok is False
+            or comparison_failure_count > 0
+        ):
+            return True
+
+    comparison_changed = digest["comparison_changed"]
+    comparison_change_count = digest["comparison_change_count"]
+    has_drift = digest["has_drift"]
+    if (
+        (comparison_changed is None or _is_bool(comparison_changed))
+        and _is_int(comparison_change_count)
+        and _is_bool(has_drift)
+    ):
+        if has_drift != (
+            comparison_changed is True or comparison_change_count > 0
+        ):
+            return True
+
+    return False
