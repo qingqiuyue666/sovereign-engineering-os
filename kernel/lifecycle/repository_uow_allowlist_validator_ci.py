@@ -672,8 +672,8 @@ def _result(
     output["ci_ok"] = ci_ok
     output["reason_code"] = reason_code
     output["failures"] = list(failures)
-    output["surface"] = _VALIDATOR_SURFACE
-    output["version"] = _VALIDATOR_VERSION
+    output["surface"] = _SURFACE
+    output["version"] = _VERSION
     for name, _expected, _failure in _SOURCE_BINDINGS:
         output[name] = fields[name]
     output["allowlist_ready"] = allowlist_ready

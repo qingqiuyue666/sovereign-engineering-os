@@ -538,7 +538,7 @@ def _expected_happy_output() -> dict[str, object]:
         "ci_ok": True,
         "reason_code": "ready",
         "failures": [],
-        "surface": "repository_uow_allowlist_validator",
+        "surface": "repository_uow_allowlist_validator_ci",
         "version": 1,
     }
     output.update(SOURCE_BINDING_VALUES)
@@ -634,6 +634,51 @@ class HappyPathTests(unittest.TestCase):
         result = consume_repository_uow_allowlist_validator_ci(_payload())
 
         self.assertEqual(list(result.keys()), EXPECTED_OUTPUT_KEYS)
+
+    def test_output_surface_identifies_ci_consumer(self) -> None:
+        result = consume_repository_uow_allowlist_validator_ci(_payload())
+
+        self.assertEqual(
+            result["surface"], "repository_uow_allowlist_validator_ci"
+        )
+        self.assertEqual(result["version"], 1)
+        self.assertNotEqual(
+            result["surface"], "repository_uow_allowlist_validator"
+        )
+
+    def test_output_surface_identifies_ci_consumer_on_rejection(
+        self,
+    ) -> None:
+        result = consume_repository_uow_allowlist_validator_ci(None)
+
+        self.assertEqual(
+            result["surface"], "repository_uow_allowlist_validator_ci"
+        )
+        self.assertEqual(result["version"], 1)
+
+    def test_input_validator_surface_still_required(self) -> None:
+        payload = _payload()
+
+        self.assertEqual(
+            payload["surface"], "repository_uow_allowlist_validator"
+        )
+
+        result = consume_repository_uow_allowlist_validator_ci(payload)
+
+        self.assertIs(result["ci_ok"], True)
+        self.assertNotIn("validator_surface_invalid", result["failures"])
+
+    def test_wrong_input_validator_surface_still_fails(self) -> None:
+        result = consume_repository_uow_allowlist_validator_ci(
+            _payload(surface="repository_uow_allowlist_validator_ci")
+        )
+
+        self.assertIs(result["ci_ok"], False)
+        self.assertIn("validator_surface_invalid", result["failures"])
+        self.assertEqual(result["reason_code"], "invalid_ci_payload")
+        self.assertEqual(
+            result["surface"], "repository_uow_allowlist_validator_ci"
+        )
 
 
 class PayloadShapeTests(unittest.TestCase):
