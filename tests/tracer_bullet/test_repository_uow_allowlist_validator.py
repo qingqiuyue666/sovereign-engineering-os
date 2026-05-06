@@ -540,7 +540,7 @@ def _entry(**overrides: object) -> dict[str, object]:
         "allowed_for_executor": False,
         "allowed_for_restore": False,
         "allowed_for_write_side_recovery": False,
-        "required_uow_context": "kernel_owned_uow",
+        "required_uow_context": "kernel_owned_attempt_uow",
         "required_transaction_owner": "kernel",
         "required_idempotency_binding": True,
         "required_evidence_output_fields": list(
@@ -549,7 +549,7 @@ def _entry(**overrides: object) -> dict[str, object]:
         "required_mutation_summary_fields": list(
             REQUIRED_MUTATION_SUMMARY_FIELDS
         ),
-        "rollback_behavior": "rollback_required",
+        "rollback_behavior": "declared_only_runtime_unauthorized",
         "allowed_failure_modes": [
             "expected_rejection",
             "unexpected_failure",
@@ -883,6 +883,36 @@ class EntryStructureTests(unittest.TestCase):
                         _payload(allowlist=allowlist),
                         failure,
                     )
+
+    def test_required_semantic_string_values_rejected_when_wrong(self) -> None:
+        cases = (
+            (
+                "required_uow_context",
+                "wrong_context",
+                "required_uow_context_invalid",
+            ),
+            (
+                "required_transaction_owner",
+                "executor",
+                "required_transaction_owner_invalid",
+            ),
+            (
+                "rollback_behavior",
+                "rollback_required",
+                "rollback_behavior_invalid",
+            ),
+        )
+        for field, value, failure in cases:
+            with self.subTest(field=field):
+                entry = _entry(**{field: value})
+                allowlist = _allowlist(allowlist_entries=[entry])
+                result = _assert_rejected_with(
+                    _payload(allowlist=allowlist),
+                    failure,
+                )
+                self.assertIs(result["allowlist_ready"], False)
+                self.assertIs(result["allowlist"]["allowlist_ready"], False)
+                self.assertEqual(result["reason_code"], "not_ready")
 
     def test_wildcard_and_private_methods_rejected(self) -> None:
         for overrides in (
