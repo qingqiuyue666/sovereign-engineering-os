@@ -169,26 +169,19 @@ ENTRY_KEYS = (
     "db_repair_forbidden",
 )
 
-ENTRY_STRING_FIELDS = (
-    "repository_class",
-    "method_name",
-    "method_owner",
-    "required_uow_context",
-    "required_transaction_owner",
-    "required_idempotency_binding",
-    "rollback_behavior",
-)
+ENTRY_STRING_FAILURES = {
+    "repository_class": "repository_class_invalid",
+    "method_name": "method_name_invalid",
+    "method_owner": "method_owner_invalid",
+    "required_uow_context": "required_uow_context_invalid",
+    "required_transaction_owner": "required_transaction_owner_invalid",
+    "rollback_behavior": "rollback_behavior_invalid",
+}
 
-ENTRY_BOOL_FIELDS = (
+ENTRY_AUTHORIZATION_FLAGS = (
     "allowed_for_executor",
     "allowed_for_restore",
     "allowed_for_write_side_recovery",
-    "json_safe_result_required",
-    "filesystem_side_effects_forbidden",
-    "external_network_forbidden",
-    "services_forbidden",
-    "schema_migration_forbidden",
-    "db_repair_forbidden",
 )
 
 ENTRY_REQUIRED_TRUE_FLAGS = (
@@ -198,13 +191,6 @@ ENTRY_REQUIRED_TRUE_FLAGS = (
     "services_forbidden",
     "schema_migration_forbidden",
     "db_repair_forbidden",
-)
-
-ENTRY_LIST_FIELDS = (
-    "required_evidence_output_fields",
-    "required_mutation_summary_fields",
-    "allowed_failure_modes",
-    "forbidden_side_effects",
 )
 
 REQUIRED_EVIDENCE_OUTPUT_FIELDS = [
@@ -231,32 +217,44 @@ REQUIRED_MUTATION_SUMMARY_FIELDS = [
     "rollback_summary_requirement",
 ]
 
+ALLOWED_FAILURE_MODES = [
+    "expected_rejection",
+    "unexpected_failure",
+]
+
+FORBIDDEN_SIDE_EFFECTS = [
+    "filesystem",
+    "external_network",
+    "services",
+    "schema_migration",
+    "db_repair",
+    "raw_sql",
+    "direct_sqlite",
+]
+
 REQUIRED_TRUE_FLAGS = (
-    "exact_repository_method_allowlist_required",
-    "class_level_allow_forbidden",
-    "module_level_allow_forbidden",
-    "wildcard_methods_forbidden",
-    "dynamic_method_resolution_forbidden",
-    "runtime_method_introspection_forbidden",
-    "one_uow_boundary_per_attempt_required",
-    "kernel_owned_transaction_required",
-    "executor_transaction_ownership_forbidden",
-    "uncontrolled_nested_uow_forbidden",
-    "repository_uow_boundary_required",
-    "idempotency_key_binding_required",
-    "evidence_bearing_return_required",
-    "mutation_summary_required",
-    "rollback_behavior_declared",
-    "no_partial_success_required",
-    "no_ambiguous_success_required",
     "direct_sql_forbidden",
     "raw_sqlite_forbidden",
     "ad_hoc_sql_forbidden",
-    "runtime_db_schema_inspection_forbidden",
-    "service_side_effects_forbidden",
-    "filesystem_side_effects_forbidden",
+    "raw_connection_forbidden",
+    "runtime_method_introspection_forbidden",
+    "wildcard_methods_forbidden",
+    "dynamic_method_resolution_forbidden",
+    "class_level_allow_forbidden",
+    "module_level_allow_forbidden",
+    "private_internal_methods_forbidden_unless_named",
+    "filesystem_side_channels_forbidden",
     "external_network_forbidden",
+    "services_forbidden",
+    "schema_migration_forbidden",
+    "db_repair_forbidden",
+    "restore_recovery_orchestrator_forbidden",
     "evidence_audit_append_forbidden",
+    "exactly_one_kernel_owned_uow_boundary_required",
+    "executor_transaction_ownership_forbidden",
+    "uncontrolled_nested_uow_forbidden",
+    "long_lived_uow_forbidden",
+    "daemon_queue_crossing_uow_forbidden",
     "fail_closed_declared",
 )
 
@@ -314,14 +312,26 @@ FAILURE_ORDER = [
     "allowlist_entries_invalid",
     "allowlist_entry_not_mapping",
     "allowlist_entry_shape_mismatch",
-    "allowlist_entry_string_invalid",
     "allowlist_entry_method_forbidden",
-    "allowlist_entry_classification_invalid",
-    "allowlist_entry_bool_invalid",
-    "allowlist_entry_required_declaration_false",
-    "allowlist_entry_list_invalid",
-    "allowlist_entry_required_evidence_fields_invalid",
-    "allowlist_entry_required_mutation_summary_fields_invalid",
+    "repository_class_invalid",
+    "method_name_invalid",
+    "method_owner_invalid",
+    "read_write_classification_invalid",
+    "entry_authorization_flag_invalid",
+    "entry_authorization_flag_true",
+    "required_uow_context_invalid",
+    "required_transaction_owner_invalid",
+    "required_idempotency_binding_invalid",
+    "required_idempotency_binding_false",
+    "required_evidence_output_fields_invalid",
+    "required_mutation_summary_fields_invalid",
+    "rollback_behavior_invalid",
+    "allowed_failure_modes_invalid",
+    "forbidden_side_effects_invalid",
+    "json_safe_result_required_invalid",
+    "json_safe_result_required_false",
+    "entry_required_declaration_invalid",
+    "entry_required_declaration_false",
     "allowlist_entry_duplicate",
     "required_declaration_invalid",
     "required_declaration_false",
@@ -408,7 +418,13 @@ EXPECTED_OUTPUT_KEYS = [
 EXPECTED_ALLOWLIST_OUTPUT_KEYS = (
     ["surface", "version"]
     + list(SOURCE_BINDING_VALUES.keys())
-    + ["allowlist_entry_count", "allowlist_entries"]
+    + [
+        "allowlist_entry_count",
+        "read_only_entry_count",
+        "mutation_declared_but_not_authorized_entry_count",
+        "future_write_candidate_entry_count",
+        "allowlist_entries",
+    ]
     + list(REQUIRED_TRUE_FLAGS)
     + list(AUTHORIZATION_FLAGS)
     + [
@@ -526,7 +542,7 @@ def _entry(**overrides: object) -> dict[str, object]:
         "allowed_for_write_side_recovery": False,
         "required_uow_context": "kernel_owned_uow",
         "required_transaction_owner": "kernel",
-        "required_idempotency_binding": "idempotency_key",
+        "required_idempotency_binding": True,
         "required_evidence_output_fields": list(
             REQUIRED_EVIDENCE_OUTPUT_FIELDS
         ),
@@ -537,7 +553,6 @@ def _entry(**overrides: object) -> dict[str, object]:
         "allowed_failure_modes": [
             "expected_rejection",
             "unexpected_failure",
-            "rollback_failure_incident",
         ],
         "forbidden_side_effects": [
             "filesystem",
@@ -545,6 +560,8 @@ def _entry(**overrides: object) -> dict[str, object]:
             "services",
             "schema_migration",
             "db_repair",
+            "raw_sql",
+            "direct_sqlite",
         ],
         "json_safe_result_required": True,
         "filesystem_side_effects_forbidden": True,
@@ -591,6 +608,9 @@ def _expected_happy_output() -> dict[str, object]:
     for name, value in SOURCE_BINDING_VALUES.items():
         allowlist[name] = value
     allowlist["allowlist_entry_count"] = 1
+    allowlist["read_only_entry_count"] = 0
+    allowlist["mutation_declared_but_not_authorized_entry_count"] = 0
+    allowlist["future_write_candidate_entry_count"] = 1
     allowlist["allowlist_entries"] = [_entry()]
     for flag in REQUIRED_TRUE_FLAGS:
         allowlist[flag] = True
@@ -692,6 +712,44 @@ class HappyPathTests(unittest.TestCase):
         self.assertEqual(
             list(result["allowlist"].keys()),
             EXPECTED_ALLOWLIST_OUTPUT_KEYS,
+        )
+
+    def test_classification_counts_are_exposed(self) -> None:
+        entries = [
+            _entry(
+                repository_class="ReadOnlyRepository",
+                method_name="load_task",
+                read_write_classification="read_only",
+            ),
+            _entry(
+                repository_class="DeclaredMutationRepository",
+                method_name="record_declared_mutation",
+                read_write_classification=(
+                    "mutation_declared_but_not_authorized"
+                ),
+            ),
+            _entry(
+                repository_class="FutureWriteRepository",
+                method_name="record_future_write",
+                read_write_classification="future_write_candidate",
+            ),
+        ]
+        result = validate_repository_uow_allowlist(
+            _payload(allowlist=_allowlist(allowlist_entries=entries))
+        )
+        allowlist = result["allowlist"]
+        self.assertTrue(result["allowlist_ready"])
+        self.assertEqual(allowlist["allowlist_entry_count"], 3)
+        self.assertEqual(allowlist["read_only_entry_count"], 1)
+        self.assertEqual(
+            allowlist[
+                "mutation_declared_but_not_authorized_entry_count"
+            ],
+            1,
+        )
+        self.assertEqual(
+            allowlist["future_write_candidate_entry_count"],
+            1,
         )
 
 
@@ -807,14 +865,14 @@ class EntryStructureTests(unittest.TestCase):
         )
 
     def test_required_entry_strings_rejected_when_invalid(self) -> None:
-        for field in ENTRY_STRING_FIELDS:
+        for field, failure in ENTRY_STRING_FAILURES.items():
             for bad in (None, "", 1, True, [], {}):
                 with self.subTest(field=field, bad=type(bad).__name__):
                     entry = _entry(**{field: bad})
                     allowlist = _allowlist(allowlist_entries=[entry])
                     _assert_rejected_with(
                         _payload(allowlist=allowlist),
-                        "allowlist_entry_string_invalid",
+                        failure,
                     )
 
     def test_wildcard_and_private_methods_rejected(self) -> None:
@@ -836,39 +894,201 @@ class EntryStructureTests(unittest.TestCase):
         allowlist = _allowlist(allowlist_entries=[entry])
         _assert_rejected_with(
             _payload(allowlist=allowlist),
-            "allowlist_entry_classification_invalid",
+            "read_write_classification_invalid",
         )
 
-    def test_entry_bool_fields_rejected_when_not_bool(self) -> None:
-        for field in ENTRY_BOOL_FIELDS:
+    def test_entry_authorization_flags_rejected_when_not_bool(self) -> None:
+        for field in ENTRY_AUTHORIZATION_FLAGS:
             for bad in (None, "false", 1, 0, [], {}):
                 with self.subTest(field=field, bad=type(bad).__name__):
                     entry = _entry(**{field: bad})
                     allowlist = _allowlist(allowlist_entries=[entry])
                     _assert_rejected_with(
                         _payload(allowlist=allowlist),
-                        "allowlist_entry_bool_invalid",
+                        "entry_authorization_flag_invalid",
                     )
+
+    def test_entry_authorization_flags_rejected_when_true(self) -> None:
+        for field in ENTRY_AUTHORIZATION_FLAGS:
+            with self.subTest(field=field):
+                entry = _entry(**{field: True})
+                allowlist = _allowlist(allowlist_entries=[entry])
+                _assert_rejected_with(
+                    _payload(allowlist=allowlist),
+                    "entry_authorization_flag_true",
+                )
+
+    def test_required_idempotency_binding_rejected_when_not_bool(self) -> None:
+        for bad in (None, "idempotency_key", 1, 0, [], {}):
+            with self.subTest(bad=type(bad).__name__):
+                entry = _entry(required_idempotency_binding=bad)
+                allowlist = _allowlist(allowlist_entries=[entry])
+                _assert_rejected_with(
+                    _payload(allowlist=allowlist),
+                    "required_idempotency_binding_invalid",
+                )
+
+    def test_required_idempotency_binding_rejected_when_false(self) -> None:
+        entry = _entry(required_idempotency_binding=False)
+        allowlist = _allowlist(allowlist_entries=[entry])
+        _assert_rejected_with(
+            _payload(allowlist=allowlist),
+            "required_idempotency_binding_false",
+        )
+
+    def test_json_safe_result_required_rejected_when_not_bool(self) -> None:
+        for bad in (None, "true", 1, 0, [], {}):
+            with self.subTest(bad=type(bad).__name__):
+                entry = _entry(json_safe_result_required=bad)
+                allowlist = _allowlist(allowlist_entries=[entry])
+                _assert_rejected_with(
+                    _payload(allowlist=allowlist),
+                    "json_safe_result_required_invalid",
+                )
+
+    def test_json_safe_result_required_rejected_when_false(self) -> None:
+        entry = _entry(json_safe_result_required=False)
+        allowlist = _allowlist(allowlist_entries=[entry])
+        _assert_rejected_with(
+            _payload(allowlist=allowlist),
+            "json_safe_result_required_false",
+        )
 
     def test_entry_required_true_flags_rejected_when_false(self) -> None:
         for field in ENTRY_REQUIRED_TRUE_FLAGS:
+            if field == "json_safe_result_required":
+                continue
             with self.subTest(field=field):
                 entry = _entry(**{field: False})
                 allowlist = _allowlist(allowlist_entries=[entry])
                 _assert_rejected_with(
                     _payload(allowlist=allowlist),
-                    "allowlist_entry_required_declaration_false",
+                    "entry_required_declaration_false",
                 )
 
-    def test_entry_list_fields_rejected_when_invalid(self) -> None:
-        for field in ENTRY_LIST_FIELDS:
-            for bad in (None, "x", [""], [1], {}, True):
+    def test_entry_required_true_flags_rejected_when_not_bool(self) -> None:
+        for field in ENTRY_REQUIRED_TRUE_FLAGS:
+            if field == "json_safe_result_required":
+                continue
+            for bad in (None, "true", 1, 0, [], {}):
                 with self.subTest(field=field, bad=type(bad).__name__):
                     entry = _entry(**{field: bad})
                     allowlist = _allowlist(allowlist_entries=[entry])
                     _assert_rejected_with(
                         _payload(allowlist=allowlist),
+                        "entry_required_declaration_invalid",
+                    )
+
+    def test_required_evidence_fields_rejected_when_invalid_shape(self) -> None:
+        for bad in (None, "x", [""], [1], {}, True):
+            with self.subTest(bad=type(bad).__name__):
+                entry = _entry(required_evidence_output_fields=bad)
+                allowlist = _allowlist(allowlist_entries=[entry])
+                _assert_rejected_with(
+                    _payload(allowlist=allowlist),
+                    "required_evidence_output_fields_invalid",
+                )
+
+    def test_required_mutation_summary_fields_rejected_when_invalid_shape(
+        self,
+    ) -> None:
+        for bad in (None, "x", [""], [1], {}, True):
+            with self.subTest(bad=type(bad).__name__):
+                entry = _entry(required_mutation_summary_fields=bad)
+                allowlist = _allowlist(allowlist_entries=[entry])
+                _assert_rejected_with(
+                    _payload(allowlist=allowlist),
+                    "required_mutation_summary_fields_invalid",
+                )
+
+    def test_allowed_failure_modes_rejected_when_invalid(self) -> None:
+        bad_values = (
+            None,
+            "expected_rejection",
+            [""],
+            [1],
+            {},
+            True,
+            ["expected_rejection"],
+            ["expected_rejection", "unexpected_failure", "extra"],
+            ["unexpected_failure", "expected_rejection", "expected_rejection"],
+        )
+        for bad in bad_values:
+            with self.subTest(bad=bad):
+                entry = _entry(allowed_failure_modes=bad)
+                allowlist = _allowlist(allowlist_entries=[entry])
+                _assert_rejected_with(
+                    _payload(allowlist=allowlist),
+                    "allowed_failure_modes_invalid",
+                )
+
+    def test_allowed_failure_modes_accepts_list_equivalent_order(self) -> None:
+        entry = _entry(
+            allowed_failure_modes=[
+                "unexpected_failure",
+                "expected_rejection",
+            ],
+        )
+        result = validate_repository_uow_allowlist(
+            _payload(allowlist=_allowlist(allowlist_entries=[entry]))
+        )
+        self.assertTrue(result["allowlist_ready"])
+
+    def test_forbidden_side_effects_rejected_when_invalid(self) -> None:
+        bad_values = (
+            None,
+            "filesystem",
+            [""],
+            [1],
+            {},
+            True,
+            ["filesystem"],
+            FORBIDDEN_SIDE_EFFECTS + ["extra"],
+            FORBIDDEN_SIDE_EFFECTS[:-1],
+            FORBIDDEN_SIDE_EFFECTS[:-1] + ["filesystem"],
+        )
+        for bad in bad_values:
+            with self.subTest(bad=bad):
+                entry = _entry(forbidden_side_effects=bad)
+                allowlist = _allowlist(allowlist_entries=[entry])
+                _assert_rejected_with(
+                    _payload(allowlist=allowlist),
+                    "forbidden_side_effects_invalid",
+                )
+
+    def test_forbidden_side_effects_accepts_list_equivalent_order(self) -> None:
+        entry = _entry(
+            forbidden_side_effects=list(reversed(FORBIDDEN_SIDE_EFFECTS)),
+        )
+        result = validate_repository_uow_allowlist(
+            _payload(allowlist=_allowlist(allowlist_entries=[entry]))
+        )
+        self.assertTrue(result["allowlist_ready"])
+
+    def test_legacy_generic_entry_list_failure_not_used(self) -> None:
+        for field, failure in (
+            (
+                "required_evidence_output_fields",
+                "required_evidence_output_fields_invalid",
+            ),
+            (
+                "required_mutation_summary_fields",
+                "required_mutation_summary_fields_invalid",
+            ),
+            ("allowed_failure_modes", "allowed_failure_modes_invalid"),
+            ("forbidden_side_effects", "forbidden_side_effects_invalid"),
+        ):
+            for bad in (None, "x", [""], [1], {}, True):
+                with self.subTest(field=field, bad=type(bad).__name__):
+                    entry = _entry(**{field: bad})
+                    allowlist = _allowlist(allowlist_entries=[entry])
+                    result = _assert_rejected_with(
+                        _payload(allowlist=allowlist),
+                        failure,
+                    )
+                    self.assertNotIn(
                         "allowlist_entry_list_invalid",
+                        result["failures"],
                     )
 
     def test_required_evidence_fields_must_match_spec(self) -> None:
@@ -878,7 +1098,7 @@ class EntryStructureTests(unittest.TestCase):
         allowlist = _allowlist(allowlist_entries=[entry])
         _assert_rejected_with(
             _payload(allowlist=allowlist),
-            "allowlist_entry_required_evidence_fields_invalid",
+            "required_evidence_output_fields_invalid",
         )
 
     def test_required_mutation_summary_fields_must_match_spec(self) -> None:
@@ -888,7 +1108,7 @@ class EntryStructureTests(unittest.TestCase):
         allowlist = _allowlist(allowlist_entries=[entry])
         _assert_rejected_with(
             _payload(allowlist=allowlist),
-            "allowlist_entry_required_mutation_summary_fields_invalid",
+            "required_mutation_summary_fields_invalid",
         )
 
     def test_duplicate_repository_method_pair_rejected(self) -> None:

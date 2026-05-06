@@ -197,26 +197,19 @@ _ENTRY_KEYS = (
     "db_repair_forbidden",
 )
 
-_ENTRY_STRING_FIELDS = (
-    "repository_class",
-    "method_name",
-    "method_owner",
-    "required_uow_context",
-    "required_transaction_owner",
-    "required_idempotency_binding",
-    "rollback_behavior",
+_ENTRY_STRING_FAILURES = (
+    ("repository_class", "repository_class_invalid"),
+    ("method_name", "method_name_invalid"),
+    ("method_owner", "method_owner_invalid"),
+    ("required_uow_context", "required_uow_context_invalid"),
+    ("required_transaction_owner", "required_transaction_owner_invalid"),
+    ("rollback_behavior", "rollback_behavior_invalid"),
 )
 
-_ENTRY_BOOL_FIELDS = (
+_ENTRY_AUTHORIZATION_FLAGS = (
     "allowed_for_executor",
     "allowed_for_restore",
     "allowed_for_write_side_recovery",
-    "json_safe_result_required",
-    "filesystem_side_effects_forbidden",
-    "external_network_forbidden",
-    "services_forbidden",
-    "schema_migration_forbidden",
-    "db_repair_forbidden",
 )
 
 _ENTRY_REQUIRED_TRUE_FLAGS = (
@@ -226,13 +219,6 @@ _ENTRY_REQUIRED_TRUE_FLAGS = (
     "services_forbidden",
     "schema_migration_forbidden",
     "db_repair_forbidden",
-)
-
-_ENTRY_LIST_FIELDS = (
-    "required_evidence_output_fields",
-    "required_mutation_summary_fields",
-    "allowed_failure_modes",
-    "forbidden_side_effects",
 )
 
 _READ_WRITE_CLASSIFICATIONS = (
@@ -265,32 +251,44 @@ _REQUIRED_MUTATION_SUMMARY_FIELDS = (
     "rollback_summary_requirement",
 )
 
+_ALLOWED_FAILURE_MODES = (
+    "expected_rejection",
+    "unexpected_failure",
+)
+
+_FORBIDDEN_SIDE_EFFECTS = (
+    "filesystem",
+    "external_network",
+    "services",
+    "schema_migration",
+    "db_repair",
+    "raw_sql",
+    "direct_sqlite",
+)
+
 _REQUIRED_TRUE_FLAGS = (
-    "exact_repository_method_allowlist_required",
-    "class_level_allow_forbidden",
-    "module_level_allow_forbidden",
-    "wildcard_methods_forbidden",
-    "dynamic_method_resolution_forbidden",
-    "runtime_method_introspection_forbidden",
-    "one_uow_boundary_per_attempt_required",
-    "kernel_owned_transaction_required",
-    "executor_transaction_ownership_forbidden",
-    "uncontrolled_nested_uow_forbidden",
-    "repository_uow_boundary_required",
-    "idempotency_key_binding_required",
-    "evidence_bearing_return_required",
-    "mutation_summary_required",
-    "rollback_behavior_declared",
-    "no_partial_success_required",
-    "no_ambiguous_success_required",
     "direct_sql_forbidden",
     "raw_sqlite_forbidden",
     "ad_hoc_sql_forbidden",
-    "runtime_db_schema_inspection_forbidden",
-    "service_side_effects_forbidden",
-    "filesystem_side_effects_forbidden",
+    "raw_connection_forbidden",
+    "runtime_method_introspection_forbidden",
+    "wildcard_methods_forbidden",
+    "dynamic_method_resolution_forbidden",
+    "class_level_allow_forbidden",
+    "module_level_allow_forbidden",
+    "private_internal_methods_forbidden_unless_named",
+    "filesystem_side_channels_forbidden",
     "external_network_forbidden",
+    "services_forbidden",
+    "schema_migration_forbidden",
+    "db_repair_forbidden",
+    "restore_recovery_orchestrator_forbidden",
     "evidence_audit_append_forbidden",
+    "exactly_one_kernel_owned_uow_boundary_required",
+    "executor_transaction_ownership_forbidden",
+    "uncontrolled_nested_uow_forbidden",
+    "long_lived_uow_forbidden",
+    "daemon_queue_crossing_uow_forbidden",
     "fail_closed_declared",
 )
 
@@ -330,7 +328,13 @@ _ALLOWLIST_KEYS = (
 _ALLOWLIST_OUTPUT_KEYS = (
     ("surface", "version")
     + tuple(name for name, _expected, _failure in _SOURCE_BINDINGS)
-    + ("allowlist_entry_count", "allowlist_entries")
+    + (
+        "allowlist_entry_count",
+        "read_only_entry_count",
+        "mutation_declared_but_not_authorized_entry_count",
+        "future_write_candidate_entry_count",
+        "allowlist_entries",
+    )
     + _REQUIRED_TRUE_FLAGS
     + _AUTHORIZATION_FLAGS
     + (
@@ -382,14 +386,26 @@ _FAILURE_ORDER = (
     "allowlist_entries_invalid",
     "allowlist_entry_not_mapping",
     "allowlist_entry_shape_mismatch",
-    "allowlist_entry_string_invalid",
     "allowlist_entry_method_forbidden",
-    "allowlist_entry_classification_invalid",
-    "allowlist_entry_bool_invalid",
-    "allowlist_entry_required_declaration_false",
-    "allowlist_entry_list_invalid",
-    "allowlist_entry_required_evidence_fields_invalid",
-    "allowlist_entry_required_mutation_summary_fields_invalid",
+    "repository_class_invalid",
+    "method_name_invalid",
+    "method_owner_invalid",
+    "read_write_classification_invalid",
+    "entry_authorization_flag_invalid",
+    "entry_authorization_flag_true",
+    "required_uow_context_invalid",
+    "required_transaction_owner_invalid",
+    "required_idempotency_binding_invalid",
+    "required_idempotency_binding_false",
+    "required_evidence_output_fields_invalid",
+    "required_mutation_summary_fields_invalid",
+    "rollback_behavior_invalid",
+    "allowed_failure_modes_invalid",
+    "forbidden_side_effects_invalid",
+    "json_safe_result_required_invalid",
+    "json_safe_result_required_false",
+    "entry_required_declaration_invalid",
+    "entry_required_declaration_false",
     "allowlist_entry_duplicate",
     "required_declaration_invalid",
     "required_declaration_false",
@@ -409,13 +425,22 @@ _STRUCTURAL_FAILURES = frozenset(
         "allowlist_entries_invalid",
         "allowlist_entry_not_mapping",
         "allowlist_entry_shape_mismatch",
-        "allowlist_entry_string_invalid",
         "allowlist_entry_method_forbidden",
-        "allowlist_entry_classification_invalid",
-        "allowlist_entry_bool_invalid",
-        "allowlist_entry_list_invalid",
-        "allowlist_entry_required_evidence_fields_invalid",
-        "allowlist_entry_required_mutation_summary_fields_invalid",
+        "repository_class_invalid",
+        "method_name_invalid",
+        "method_owner_invalid",
+        "read_write_classification_invalid",
+        "entry_authorization_flag_invalid",
+        "required_uow_context_invalid",
+        "required_transaction_owner_invalid",
+        "required_idempotency_binding_invalid",
+        "required_evidence_output_fields_invalid",
+        "required_mutation_summary_fields_invalid",
+        "rollback_behavior_invalid",
+        "allowed_failure_modes_invalid",
+        "forbidden_side_effects_invalid",
+        "json_safe_result_required_invalid",
+        "entry_required_declaration_invalid",
         "allowlist_entry_duplicate",
         "required_declaration_invalid",
         "authorization_flag_invalid",
@@ -628,13 +653,13 @@ def _normalize_entry(
 ) -> dict[str, object]:
     normalized: dict[str, object] = {}
 
-    for field in _ENTRY_STRING_FIELDS:
+    for field, failure in _ENTRY_STRING_FAILURES:
         candidate = entry.get(field)
         if isinstance(candidate, str) and candidate != "":
             normalized[field] = candidate
         else:
             normalized[field] = None
-            _append(failures, "allowlist_entry_string_invalid")
+            _append(failures, failure)
 
     method_name = normalized["method_name"]
     repository_class = normalized["repository_class"]
@@ -649,27 +674,80 @@ def _normalize_entry(
         normalized["read_write_classification"] = classification
     else:
         normalized["read_write_classification"] = None
-        _append(failures, "allowlist_entry_classification_invalid")
+        _append(failures, "read_write_classification_invalid")
 
-    for field in _ENTRY_BOOL_FIELDS:
+    for field in _ENTRY_AUTHORIZATION_FLAGS:
         candidate = entry.get(field)
         if type(candidate) is bool:
             normalized[field] = candidate
-            if field in _ENTRY_REQUIRED_TRUE_FLAGS and candidate is False:
-                _append(failures, "allowlist_entry_required_declaration_false")
+            if candidate is True:
+                _append(failures, "entry_authorization_flag_true")
         else:
             normalized[field] = None
-            _append(failures, "allowlist_entry_bool_invalid")
+            _append(failures, "entry_authorization_flag_invalid")
 
-    for field in _ENTRY_LIST_FIELDS:
+    idempotency_binding = entry.get("required_idempotency_binding")
+    if type(idempotency_binding) is not bool:
+        normalized["required_idempotency_binding"] = None
+        _append(failures, "required_idempotency_binding_invalid")
+    else:
+        normalized["required_idempotency_binding"] = idempotency_binding
+        if idempotency_binding is False:
+            _append(failures, "required_idempotency_binding_false")
+
+    json_safe_result = entry.get("json_safe_result_required")
+    if type(json_safe_result) is not bool:
+        normalized["json_safe_result_required"] = None
+        _append(failures, "json_safe_result_required_invalid")
+    else:
+        normalized["json_safe_result_required"] = json_safe_result
+        if json_safe_result is False:
+            _append(failures, "json_safe_result_required_false")
+
+    for field in _ENTRY_REQUIRED_TRUE_FLAGS:
+        if field == "json_safe_result_required":
+            continue
         candidate = entry.get(field)
-        if _is_string_list(candidate):
-            assert isinstance(candidate, list)
-            normalized[field] = list(candidate)
-            _validate_exact_entry_list(field, candidate, failures)
+        if type(candidate) is bool:
+            normalized[field] = candidate
+            if candidate is False:
+                _append(failures, "entry_required_declaration_false")
         else:
-            normalized[field] = []
-            _append(failures, "allowlist_entry_list_invalid")
+            normalized[field] = None
+            _append(failures, "entry_required_declaration_invalid")
+
+    _validate_entry_list(
+        normalized,
+        entry,
+        "required_evidence_output_fields",
+        _REQUIRED_EVIDENCE_OUTPUT_FIELDS,
+        "required_evidence_output_fields_invalid",
+        failures,
+    )
+    _validate_entry_list(
+        normalized,
+        entry,
+        "required_mutation_summary_fields",
+        _REQUIRED_MUTATION_SUMMARY_FIELDS,
+        "required_mutation_summary_fields_invalid",
+        failures,
+    )
+    _validate_entry_list(
+        normalized,
+        entry,
+        "allowed_failure_modes",
+        _ALLOWED_FAILURE_MODES,
+        "allowed_failure_modes_invalid",
+        failures,
+    )
+    _validate_entry_list(
+        normalized,
+        entry,
+        "forbidden_side_effects",
+        _FORBIDDEN_SIDE_EFFECTS,
+        "forbidden_side_effects_invalid",
+        failures,
+    )
 
     output: dict[str, object] = {}
     for field in _ENTRY_KEYS:
@@ -677,29 +755,41 @@ def _normalize_entry(
     return output
 
 
-def _validate_exact_entry_list(
+def _validate_entry_list(
+    normalized: dict[str, object],
+    entry: _Mapping[str, object],
     field: str,
-    candidate: list[object],
+    expected: tuple[str, ...],
+    failure: str,
     failures: list[str],
 ) -> None:
-    if field == "required_evidence_output_fields":
-        if candidate != list(_REQUIRED_EVIDENCE_OUTPUT_FIELDS):
-            _append(
-                failures,
-                "allowlist_entry_required_evidence_fields_invalid",
-            )
-    elif field == "required_mutation_summary_fields":
-        if candidate != list(_REQUIRED_MUTATION_SUMMARY_FIELDS):
-            _append(
-                failures,
-                "allowlist_entry_required_mutation_summary_fields_invalid",
-            )
+    candidate = entry.get(field)
+    if _is_string_list(candidate):
+        assert isinstance(candidate, list)
+        normalized[field] = list(candidate)
+        if not _same_string_items(candidate, expected):
+            _append(failures, failure)
+    else:
+        normalized[field] = []
+        _append(failures, failure)
 
 
 def _is_string_list(candidate: object) -> bool:
     if not isinstance(candidate, list):
         return False
     return all(isinstance(item, str) and item != "" for item in candidate)
+
+
+def _same_string_items(candidate: list[object], expected: tuple[str, ...]) -> bool:
+    if len(candidate) != len(expected):
+        return False
+    for item in candidate:
+        if item not in expected:
+            return False
+    for item in expected:
+        if item not in candidate:
+            return False
+    return True
 
 
 def _result(
@@ -731,6 +821,20 @@ def _allowlist_output(
     for name, _expected, _failure in _SOURCE_BINDINGS:
         output[name] = fields[name]
     output["allowlist_entry_count"] = len(entries)
+    output["read_only_entry_count"] = _classification_count(
+        entries,
+        "read_only",
+    )
+    output["mutation_declared_but_not_authorized_entry_count"] = (
+        _classification_count(
+            entries,
+            "mutation_declared_but_not_authorized",
+        )
+    )
+    output["future_write_candidate_entry_count"] = _classification_count(
+        entries,
+        "future_write_candidate",
+    )
     output["allowlist_entries"] = entries
     for name in _REQUIRED_TRUE_FLAGS:
         output[name] = fields[name]
@@ -746,6 +850,18 @@ def _allowlist_output(
     output["appends_evidence"] = False
     assert tuple(output.keys()) == _ALLOWLIST_OUTPUT_KEYS
     return output
+
+
+def _classification_count(
+    entries: list[object],
+    classification: str,
+) -> int:
+    count = 0
+    for entry in entries:
+        if isinstance(entry, _Mapping):
+            if entry.get("read_write_classification") == classification:
+                count = count + 1
+    return count
 
 
 def _empty_allowlist_fields() -> dict[str, object]:
