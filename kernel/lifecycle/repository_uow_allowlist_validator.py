@@ -206,6 +206,16 @@ _ENTRY_STRING_FAILURES = (
     ("rollback_behavior", "rollback_behavior_invalid"),
 )
 
+_REQUIRED_UOW_CONTEXT = "kernel_owned_attempt_uow"
+_REQUIRED_TRANSACTION_OWNER = "kernel"
+_ROLLBACK_BEHAVIOR = "declared_only_runtime_unauthorized"
+
+_ENTRY_EXACT_STRING_VALUES = {
+    "required_uow_context": _REQUIRED_UOW_CONTEXT,
+    "required_transaction_owner": _REQUIRED_TRANSACTION_OWNER,
+    "rollback_behavior": _ROLLBACK_BEHAVIOR,
+}
+
 _ENTRY_AUTHORIZATION_FLAGS = (
     "allowed_for_executor",
     "allowed_for_restore",
@@ -533,17 +543,29 @@ def validate_repository_uow_allowlist(payload: object) -> dict[str, object]:
         )
 
     failures: list[str] = []
+    semantic_failures: list[str] = []
+    exact_string_shape_failures: list[str] = []
     if set(payload.keys()) != set(_INPUT_KEYS):
         _append(failures, "payload_shape_mismatch")
 
     allowlist = payload.get("repository_uow_allowlist")
-    _validate_allowlist(allowlist, failures, fields)
+    _validate_allowlist(
+        allowlist,
+        failures,
+        fields,
+        semantic_failures,
+        exact_string_shape_failures,
+    )
 
     ordered_failures = _ordered_failures(failures)
     ready = ordered_failures == []
     if ready:
         reason_code = _REASON_READY
-    elif any(item in _STRUCTURAL_FAILURES for item in ordered_failures):
+    elif _has_structural_failure(
+        ordered_failures,
+        semantic_failures,
+        exact_string_shape_failures,
+    ):
         reason_code = _REASON_INVALID
     else:
         reason_code = _REASON_NOT_READY
@@ -560,6 +582,8 @@ def _validate_allowlist(
     allowlist: object,
     failures: list[str],
     fields: dict[str, object],
+    semantic_failures: list[str],
+    exact_string_shape_failures: list[str],
 ) -> None:
     if not isinstance(allowlist, _Mapping):
         _append(failures, "allowlist_not_mapping")
@@ -587,6 +611,8 @@ def _validate_allowlist(
     fields["allowlist_entries"] = _validate_entries(
         allowlist.get("allowlist_entries"),
         failures,
+        semantic_failures,
+        exact_string_shape_failures,
     )
 
     for flag in _REQUIRED_TRUE_FLAGS:
@@ -619,6 +645,8 @@ def _validate_allowlist(
 def _validate_entries(
     entries: object,
     failures: list[str],
+    semantic_failures: list[str],
+    exact_string_shape_failures: list[str],
 ) -> list[dict[str, object]]:
     if not isinstance(entries, list):
         _append(failures, "allowlist_entries_invalid")
@@ -638,7 +666,12 @@ def _validate_entries(
         if set(entry.keys()) != set(_ENTRY_KEYS):
             _append(failures, "allowlist_entry_shape_mismatch")
 
-        normalized = _normalize_entry(entry, failures)
+        normalized = _normalize_entry(
+            entry,
+            failures,
+            semantic_failures,
+            exact_string_shape_failures,
+        )
         pair = (normalized["repository_class"], normalized["method_name"])
         if isinstance(pair[0], str) and isinstance(pair[1], str):
             if pair in seen_methods:
@@ -653,6 +686,8 @@ def _validate_entries(
 def _normalize_entry(
     entry: _Mapping[str, object],
     failures: list[str],
+    semantic_failures: list[str],
+    exact_string_shape_failures: list[str],
 ) -> dict[str, object]:
     normalized: dict[str, object] = {}
 
@@ -660,9 +695,15 @@ def _normalize_entry(
         candidate = entry.get(field)
         if isinstance(candidate, str) and candidate != "":
             normalized[field] = candidate
+            expected = _ENTRY_EXACT_STRING_VALUES.get(field)
+            if expected is not None and candidate != expected:
+                _append(failures, failure)
+                _append(semantic_failures, failure)
         else:
             normalized[field] = None
             _append(failures, failure)
+            if field in _ENTRY_EXACT_STRING_VALUES:
+                _append(exact_string_shape_failures, failure)
 
     method_name = normalized["method_name"]
     repository_class = normalized["repository_class"]
@@ -876,6 +917,22 @@ def _empty_allowlist_fields() -> dict[str, object]:
         fields[name] = None
     fields["json_safe"] = None
     return fields
+
+
+def _has_structural_failure(
+    ordered_failures: list[str],
+    semantic_failures: list[str],
+    exact_string_shape_failures: list[str],
+) -> bool:
+    for failure in ordered_failures:
+        if failure not in _STRUCTURAL_FAILURES:
+            continue
+        if failure in exact_string_shape_failures:
+            return True
+        if failure in semantic_failures:
+            continue
+        return True
+    return False
 
 
 def _append(failures: list[str], failure: str) -> None:
