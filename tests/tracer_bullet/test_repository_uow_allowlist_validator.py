@@ -841,6 +841,15 @@ class EntryStructureTests(unittest.TestCase):
                     "allowlist_entries_invalid",
                 )
 
+    def test_empty_entries_rejected_as_invalid_payload(self) -> None:
+        allowlist = _allowlist(allowlist_entries=[])
+        result = validate_repository_uow_allowlist(
+            _payload(allowlist=allowlist)
+        )
+        self.assertIs(result["allowlist_ready"], False)
+        self.assertEqual(result["reason_code"], "invalid_allowlist_payload")
+        self.assertIn("allowlist_entries_invalid", result["failures"])
+
     def test_entry_must_be_mapping(self) -> None:
         allowlist = _allowlist(allowlist_entries=["not-mapping"])
         _assert_rejected_with(

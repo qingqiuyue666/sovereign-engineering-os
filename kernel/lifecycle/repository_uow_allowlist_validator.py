@@ -623,6 +623,9 @@ def _validate_entries(
     if not isinstance(entries, list):
         _append(failures, "allowlist_entries_invalid")
         return []
+    if entries == []:
+        _append(failures, "allowlist_entries_invalid")
+        return []
 
     normalized_entries: list[dict[str, object]] = []
     seen_methods = set()
