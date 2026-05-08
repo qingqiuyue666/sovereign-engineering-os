@@ -415,7 +415,6 @@ _STRUCTURAL_FAILURES = frozenset(
         "boundary_shape_mismatch",
         "boundary_surface_invalid",
         "boundary_version_invalid",
-        "source_ref_mismatch",
         "declaration_group_invalid",
         "json_safe_invalid",
     }
@@ -521,7 +520,7 @@ def _validate_boundary(
     if type(version) is bool or type(version) is not int or version != _VERSION:
         _append(failures, "boundary_version_invalid")
 
-    _validate_source_refs(boundary.get("source_refs"), failures, fields)
+    _validate_source_refs(boundary.get("source_refs"), failures)
 
     for group_name, expected_declarations in _DECLARATION_GROUPS.items():
         _validate_declaration_group(
@@ -550,13 +549,11 @@ def _validate_boundary(
 def _validate_source_refs(
     candidate: object,
     failures: list[str],
-    fields: dict[str, object],
 ) -> None:
     if not isinstance(candidate, Mapping):
         _append(failures, "source_ref_mismatch")
         return
 
-    fields["source_refs"] = dict(candidate)
     if set(candidate.keys()) != set(_SOURCE_REFS.keys()):
         _append(failures, "source_ref_mismatch")
         return

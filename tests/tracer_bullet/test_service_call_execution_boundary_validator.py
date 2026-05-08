@@ -83,6 +83,7 @@ class PublicAPITests(unittest.TestCase):
 
     def test_manifest_exact_shape_and_defensive_copy(self) -> None:
         manifest = service_call_execution_boundary_validator_manifest()
+        json.dumps(manifest, sort_keys=True)
         self.assertEqual(
             set(manifest),
             {
@@ -308,12 +309,28 @@ class PayloadAndBoundaryShapeTests(unittest.TestCase):
 
 
 class SourceRefTests(unittest.TestCase):
+    def contains_identity(self, value: object, target: object) -> bool:
+        if value is target:
+            return True
+        if isinstance(value, dict):
+            return any(
+                self.contains_identity(key, target)
+                or self.contains_identity(item, target)
+                for key, item in value.items()
+            )
+        if isinstance(value, (list, tuple)):
+            return any(self.contains_identity(item, target) for item in value)
+        return False
+
     def assert_source_failure(self, source_refs: object) -> None:
         payload = valid_payload()
         payload["service_call_execution_boundary"]["source_refs"] = source_refs
         result = validate_service_call_execution_boundary(payload)
         self.assertIs(result[READY_FIELD], False)
-        self.assertIn("source_ref_mismatch", result["failures"])
+        self.assertEqual(result["reason_code"], "not_ready")
+        self.assertEqual(result["failures"], ["source_ref_mismatch"])
+        self.assertEqual(result["boundary"]["source_refs"], SOURCE_REFS)
+        json.dumps(result, sort_keys=True)
 
     def test_source_ref_mismatch(self) -> None:
         source_refs = copy.deepcopy(SOURCE_REFS)
@@ -331,6 +348,28 @@ class SourceRefTests(unittest.TestCase):
 
     def test_source_refs_non_mapping_rejected(self) -> None:
         self.assert_source_failure([])
+
+    def test_source_refs_object_value_is_not_echoed(self) -> None:
+        sentinel = object()
+        payload = valid_payload()
+        payload["service_call_execution_boundary"]["source_refs"][
+            "read-only-governance-layer-v1"
+        ] = sentinel
+
+        result = validate_service_call_execution_boundary(payload)
+
+        self.assertIs(result[READY_FIELD], False)
+        self.assertEqual(result["reason_code"], "not_ready")
+        self.assertEqual(result["failures"], ["source_ref_mismatch"])
+        self.assertEqual(result["boundary"]["source_refs"], SOURCE_REFS)
+        self.assertFalse(self.contains_identity(result, sentinel))
+        self.assertIs(
+            payload["service_call_execution_boundary"]["source_refs"][
+                "read-only-governance-layer-v1"
+            ],
+            sentinel,
+        )
+        json.dumps(result, sort_keys=True)
 
 
 class DeclarationGroupTests(unittest.TestCase):
@@ -533,6 +572,19 @@ class JsonSafetyTests(unittest.TestCase):
 
 
 class SafetyAndDeterminismTests(unittest.TestCase):
+    def contains_identity(self, value: object, target: object) -> bool:
+        if value is target:
+            return True
+        if isinstance(value, dict):
+            return any(
+                self.contains_identity(key, target)
+                or self.contains_identity(item, target)
+                for key, item in value.items()
+            )
+        if isinstance(value, (list, tuple)):
+            return any(self.contains_identity(item, target) for item in value)
+        return False
+
     def test_deterministic_failure_ordering(self) -> None:
         payload = valid_payload()
         payload["extra"] = {}
@@ -596,6 +648,47 @@ class SafetyAndDeterminismTests(unittest.TestCase):
             ]["exact_service_identity_required"],
             True,
         )
+
+    def test_invalid_adjacent_mapping_values_do_not_leak(self) -> None:
+        declaration_object = object()
+        false_authority_object = object()
+        true_declaration_object = object()
+        extra_object = object()
+        payload = valid_payload()
+        boundary = payload["service_call_execution_boundary"]
+        boundary["service_call_attempt_boundary"][
+            "exact_service_identity_required"
+        ] = declaration_object
+        boundary["service_call_attempt_boundary"]["extra"] = extra_object
+        boundary["required_false_authority_flags"][
+            "service_call_execution_authorized"
+        ] = false_authority_object
+        boundary["required_false_authority_flags"]["extra"] = extra_object
+        boundary["required_true_declarations"][
+            "spec_only_non_executable"
+        ] = true_declaration_object
+        boundary["required_true_declarations"]["extra"] = extra_object
+
+        result = validate_service_call_execution_boundary(payload)
+
+        self.assertIs(result[READY_FIELD], False)
+        self.assertIn("declaration_group_invalid", result["failures"])
+        self.assertIn("required_declaration_invalid", result["failures"])
+        self.assertIn("authorization_flag_invalid", result["failures"])
+        for sentinel in (
+            declaration_object,
+            false_authority_object,
+            true_declaration_object,
+            extra_object,
+        ):
+            self.assertFalse(self.contains_identity(result, sentinel))
+        self.assertIs(
+            payload["service_call_execution_boundary"][
+                "service_call_attempt_boundary"
+            ]["exact_service_identity_required"],
+            declaration_object,
+        )
+        json.dumps(result, sort_keys=True)
 
 
 class SourceBoundaryTests(unittest.TestCase):
