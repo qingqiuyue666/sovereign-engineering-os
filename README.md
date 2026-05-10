@@ -2,7 +2,7 @@
 
 Sovereign Engineering OS is an AI execution control kernel and local-first governance kernel.
 
-Current phase/state: post `single-file-lifecycle-post-adapter-design-consolidation-audit-v1`.
+Current phase/state: post `single-file-lifecycle-dry-run-manifest-fixture-v1`.
 
 Completed milestones:
 
@@ -22,6 +22,8 @@ Completed milestones:
 - `single-file-lifecycle-narrow-adapter-design-v1`
 - `update-current-phase-after-narrow-adapter-design-v1`
 - `single-file-lifecycle-post-adapter-design-consolidation-audit-v1`
+- `single-file-lifecycle-dry-run-manifest-fixture-decision-audit-v1`
+- `single-file-lifecycle-dry-run-manifest-fixture-v1`
 
 Current capability:
 
@@ -42,6 +44,10 @@ Current capability:
 - demo hardening
 - docs/design-only narrow adapter concept
 - post-adapter-design consolidation audit
+- docs-only dry-run manifest fixture decision audit
+- bounded non-executing dry-run manifest fixture
+- hard-false authority manifest posture
+- dry-run manifest acceptance smoke
 - acceptance smoke
 
 Controlled demo proves:
@@ -66,14 +72,28 @@ Post-adapter-design consolidation audit:
 - verdict: `STOP_BEFORE_ADAPTER_IMPLEMENTATION`
 - adapter implementation remains not authorized by default
 - current narrow adapter design does not authorize implementation
-- current completed chain proves only controlled single-file lifecycle capability, replay verification, controlled demo fixture, demo usage documentation, demo hardening, and docs/design-only narrow adapter concept
+- current completed chain proves only controlled single-file lifecycle capability, replay verification, controlled demo fixture, demo usage documentation, demo hardening, docs/design-only narrow adapter concept, post-adapter-design consolidation audit, docs-only dry-run manifest fixture decision audit, and bounded non-executing dry-run manifest fixture output
 - current completed chain does not prove general runtime, service runtime, DB/UoW runtime, executor runtime, multi-file lifecycle, broad physical I/O, autonomous agent runtime, production automation platform readiness, or Business / Personal / Creative / Research OS readiness
+
+Dry-run manifest fixture:
+
+- fixture: `single-file-lifecycle-dry-run-manifest-fixture-v1`
+- examples-level plus acceptance-smoke coverage only
+- returns bounded JSON-safe manifest output
+- preserves hard-false authority posture
+- preserves `STOP_BEFORE_ADAPTER_IMPLEMENTATION`
+- preserves `APPROVE_DRY_RUN_MANIFEST_FIXTURE_NEXT`
+- direct adapter implementation remains rejected
+- adapter implementation remains not authorized by default
+- non-executing and manifest-only
+- does not introduce adapter code, CLI, service calls, DB/repository/UoW, evidence/audit append, executor dispatch, subprocess, network, tool execution, multi-file lifecycle, broad physical I/O, durable writes, irreversible actions, or new governance boundary family
 
 Do not proceed directly to adapter implementation.
 
 Still not authorized:
 
 - adapter implementation
+- adapter code
 - CLI adapter
 - service runtime
 - service calls
@@ -105,9 +125,10 @@ The local reference interpreter for this phase is Python 3.14.4, and GitHub CI u
 
 Next decision:
 
-- dry-run manifest fixture decision audit
+- dry-run manifest fixture usage doc decision
+- dry-run manifest fixture hardening decision only if concrete defects exist
 - adapter implementation decision audit with expected rejection unless concrete hard blockers are proven
-- additional demo/replay verifier hardening only if concrete defects exist
+- stop/consolidation audit before any adapter implementation
 
 Explicit stop rules:
 
@@ -117,5 +138,7 @@ Explicit stop rules:
 - no tool, shell/subprocess, or network execution by default
 - no multi-file expansion by default
 - no broad physical I/O by default
+- no durable writes by default
+- no irreversible actions by default
 - no new governance boundary family by default
 - Business / Personal / Creative / Research OS remain later
