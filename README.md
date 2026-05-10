@@ -2,7 +2,7 @@
 
 Sovereign Engineering OS is an AI execution control kernel and local-first governance kernel.
 
-Current phase/state: post `single-file-lifecycle-dry-run-manifest-fixture-v1`.
+Current phase/state: post `single-file-lifecycle-dry-run-manifest-fixture-usage-doc-v1`.
 
 Completed milestones:
 
@@ -24,6 +24,8 @@ Completed milestones:
 - `single-file-lifecycle-post-adapter-design-consolidation-audit-v1`
 - `single-file-lifecycle-dry-run-manifest-fixture-decision-audit-v1`
 - `single-file-lifecycle-dry-run-manifest-fixture-v1`
+- `single-file-lifecycle-dry-run-manifest-fixture-usage-doc-decision-audit-v1`
+- `single-file-lifecycle-dry-run-manifest-fixture-usage-doc-v1`
 
 Current capability:
 
@@ -48,6 +50,7 @@ Current capability:
 - bounded non-executing dry-run manifest fixture
 - hard-false authority manifest posture
 - dry-run manifest acceptance smoke
+- dry-run manifest fixture usage documentation
 - acceptance smoke
 
 Controlled demo proves:
@@ -72,7 +75,7 @@ Post-adapter-design consolidation audit:
 - verdict: `STOP_BEFORE_ADAPTER_IMPLEMENTATION`
 - adapter implementation remains not authorized by default
 - current narrow adapter design does not authorize implementation
-- current completed chain proves only controlled single-file lifecycle capability, replay verification, controlled demo fixture, demo usage documentation, demo hardening, docs/design-only narrow adapter concept, post-adapter-design consolidation audit, docs-only dry-run manifest fixture decision audit, and bounded non-executing dry-run manifest fixture output
+- current completed chain proves only controlled single-file lifecycle capability, replay verification, controlled demo fixture, demo usage documentation, demo hardening, docs/design-only narrow adapter concept, post-adapter-design consolidation audit, docs-only dry-run manifest fixture decision audit, bounded non-executing dry-run manifest fixture output, and dry-run manifest fixture usage documentation
 - current completed chain does not prove general runtime, service runtime, DB/UoW runtime, executor runtime, multi-file lifecycle, broad physical I/O, autonomous agent runtime, production automation platform readiness, or Business / Personal / Creative / Research OS readiness
 
 Dry-run manifest fixture:
@@ -87,6 +90,23 @@ Dry-run manifest fixture:
 - adapter implementation remains not authorized by default
 - non-executing and manifest-only
 - does not introduce adapter code, CLI, service calls, DB/repository/UoW, evidence/audit append, executor dispatch, subprocess, network, tool execution, multi-file lifecycle, broad physical I/O, durable writes, irreversible actions, or new governance boundary family
+
+Dry-run manifest fixture usage documentation:
+
+- usage doc: `single-file-lifecycle-dry-run-manifest-fixture-usage-doc-v1`
+- target file: `examples/dry_run_manifest_fixture_usage.md`
+- documentation-only
+- human-readable usage document for the existing dry-run manifest fixture
+- explains safe import/read usage
+- explains what the fixture proves
+- explains what the fixture does not prove
+- preserves `STOP_BEFORE_ADAPTER_IMPLEMENTATION`
+- preserves `APPROVE_DRY_RUN_MANIFEST_FIXTURE_NEXT`
+- preserves `APPROVE_DRY_RUN_MANIFEST_FIXTURE_USAGE_DOC_NEXT`
+- adapter implementation remains not authorized by default
+- direct adapter implementation remains rejected
+- fixture remains non-executing and manifest-only
+- usage doc does not introduce adapter code, CLI, service calls, DB/repository/UoW, evidence/audit append, executor dispatch, subprocess, network, tool execution, multi-file lifecycle, broad physical I/O, durable writes, irreversible actions, or new governance boundary family
 
 Do not proceed directly to adapter implementation.
 
@@ -125,8 +145,7 @@ The local reference interpreter for this phase is Python 3.14.4, and GitHub CI u
 
 Next decision:
 
-- dry-run manifest fixture usage doc decision
-- dry-run manifest fixture hardening decision only if concrete defects exist
+- dry-run manifest fixture usage doc hardening decision only if concrete defects exist
 - adapter implementation decision audit with expected rejection unless concrete hard blockers are proven
 - stop/consolidation audit before any adapter implementation
 
