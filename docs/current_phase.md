@@ -1,11 +1,11 @@
 # Current Phase
 
-Current phase: post `single-file-lifecycle-post-adapter-design-consolidation-audit-v1`.
+Current phase: post `single-file-lifecycle-dry-run-manifest-fixture-v1`.
 
 Current checkpoint:
 
-- `single-file-lifecycle-post-adapter-design-consolidation-audit-v1`
-  - target: `c767e56266bb69a93a0ab444318a3365ef15a6e9`
+- `single-file-lifecycle-dry-run-manifest-fixture-v1`
+  - target: `d8ca1516ba92115563c8a5be18443b1cdcfd5cfb`
 
 Completed milestones:
 
@@ -41,6 +41,10 @@ Completed milestones:
   - target: `50cba16a473e6c3e552855ae0e60e9685961021b`
 - `single-file-lifecycle-post-adapter-design-consolidation-audit-v1`
   - target: `c767e56266bb69a93a0ab444318a3365ef15a6e9`
+- `single-file-lifecycle-dry-run-manifest-fixture-decision-audit-v1`
+  - target: `3cda7dbd80568ced72d0248cf49cdf42faf67c5c`
+- `single-file-lifecycle-dry-run-manifest-fixture-v1`
+  - target: `d8ca1516ba92115563c8a5be18443b1cdcfd5cfb`
 
 Current system capability:
 
@@ -63,14 +67,30 @@ Current system capability:
 - demo hardening
 - docs/design-only narrow adapter concept
 - post-adapter-design consolidation audit
+- docs-only dry-run manifest fixture decision audit
+- bounded non-executing dry-run manifest fixture
+- hard-false authority manifest posture
+- dry-run manifest acceptance smoke
 
 Post-adapter-design consolidation audit:
 
 - verdict: `STOP_BEFORE_ADAPTER_IMPLEMENTATION`
 - adapter implementation: not authorized by default
 - direct adapter implementation: rejected
-- current chain proves bounded single-file lifecycle only
+- current chain proves bounded single-file lifecycle, replay verification, controlled demo fixture, demo documentation, demo hardening, docs/design-only narrow adapter concept, and bounded dry-run manifest shape only
 - current chain does not prove general runtime readiness
+
+Dry-run manifest fixture:
+
+- fixture: `single-file-lifecycle-dry-run-manifest-fixture-v1`
+- status: non-executing
+- mode: dry-run manifest only
+- authority posture: hard false
+- adapter implementation: not authorized by default
+- direct adapter implementation: rejected
+- current fixture proves bounded manifest shape only
+- current fixture does not prove adapter/runtime readiness
+- preserved verdict: `APPROVE_DRY_RUN_MANIFEST_FIXTURE_NEXT`
 
 Runtime eligibility:
 
@@ -81,6 +101,7 @@ Runtime eligibility:
 - executor dispatch: not eligible
 - restore service execution: not eligible
 - adapter implementation: not eligible by default
+- adapter code: not eligible
 - CLI adapter: not eligible by default
 - subprocess/tool execution: not eligible
 - network execution: not eligible
@@ -88,17 +109,22 @@ Runtime eligibility:
 - multi-file lifecycle: not eligible by default
 - autonomous agent runtime: not eligible
 - production automation platform: not eligible
+- durable writes: not eligible
+- irreversible actions: not eligible
 
 Next decision:
 
-- dry-run manifest fixture decision audit
+- dry-run manifest fixture usage doc decision
+- dry-run manifest fixture hardening decision only if concrete defects exist
 - adapter implementation decision audit with expected rejection unless concrete hard blockers are proven
-- additional demo/replay verifier hardening only if concrete defects exist
+- stop/consolidation audit before any adapter implementation
 
 Forbidden jumps:
 
 - direct adapter implementation
 - adapter implementation without decision audit
+- adapter code
+- CLI adapter
 - service runtime
 - DB/repository/UoW
 - evidence/audit append
@@ -106,8 +132,11 @@ Forbidden jumps:
 - restore service
 - subprocess/tool execution
 - network execution
+- tool execution
 - multi-file lifecycle
 - broad physical I/O
+- durable writes
+- irreversible actions
 - new governance boundary family
 - autonomous agent runtime
 - production automation platform
