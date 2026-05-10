@@ -1,0 +1,133 @@
+"""Bounded non-executing dry-run manifest fixture."""
+
+from copy import deepcopy
+
+
+_FIXTURE = {
+    "ok": True,
+    "fixture_id": "single-file-lifecycle-dry-run-manifest-fixture-v1",
+    "fixture_version": "v1",
+    "mode": "dry_run_manifest_only",
+    "status": "non_executing",
+    "description": (
+        "a bounded non-executing dry-run manifest fixture for the controlled "
+        "single-file lifecycle line"
+    ),
+    "manifest": {
+        "manifest_id": "single-file-lifecycle-dry-run-manifest-v1",
+        "manifest_version": "v1",
+        "lifecycle_line": "controlled_single_file_lifecycle",
+        "intended_operation": "dry_run_planning_only",
+        "target_scope": "repo_contained_single_text_file",
+        "execution_mode": "non_executing_manifest_only",
+        "planned_inputs": {
+            "proposal_id": "placeholder-proposal-id",
+            "patch_id": "placeholder-patch-id",
+            "target_path": "placeholder/target.txt",
+            "expected_preimage_identity": "placeholder-preimage-identity",
+            "validation_profile": "placeholder-validation-profile",
+            "approval_mapping_required": "placeholder-approval-mapping-required",
+        },
+        "planned_outputs": {
+            "would_create_proposal_record": True,
+            "would_create_patch_body_record": True,
+            "would_create_preimage_record": True,
+            "would_create_validation_result_record": True,
+            "would_create_final_seal_record": True,
+            "would_create_replay_summary": True,
+        },
+        "planned_verification": {
+            "would_require_existing_lifecycle": True,
+            "would_require_existing_replay_verifier": True,
+            "would_require_explicit_approval_mapping": True,
+            "would_require_validation_callable": True,
+            "would_require_bounded_json_safe_output": True,
+        },
+        "json_safe": True,
+        "bounded": True,
+    },
+    "authority": {
+        "adapter_implementation_authorized": False,
+        "adapter_runtime_authorized": False,
+        "runtime_authorized": False,
+        "service_calls_authorized": False,
+        "db_repository_uow_authorized": False,
+        "evidence_audit_append_authorized": False,
+        "executor_dispatch_authorized": False,
+        "restore_service_authorized": False,
+        "cli_authorized": False,
+        "subprocess_authorized": False,
+        "network_authorized": False,
+        "tool_execution_authorized": False,
+        "multi_file_lifecycle_authorized": False,
+        "broad_physical_io_authorized": False,
+        "durable_writes_authorized": False,
+        "irreversible_actions_authorized": False,
+        "autonomous_agent_runtime_authorized": False,
+        "production_automation_platform_authorized": False,
+        "business_delivery_os_authorized": False,
+        "personal_ai_execution_os_authorized": False,
+        "creative_production_os_authorized": False,
+        "research_decision_os_authorized": False,
+        "new_governance_boundary_family_authorized": False,
+    },
+    "forbidden_operations": [
+        "adapter implementation",
+        "adapter runtime",
+        "service calls",
+        "DB/repository/UoW",
+        "evidence/audit append",
+        "executor dispatch",
+        "restore service",
+        "CLI integration",
+        "subprocess",
+        "network",
+        "tool execution",
+        "multi-file lifecycle",
+        "broad physical I/O",
+        "durable writes",
+        "irreversible actions",
+        "autonomous agent runtime",
+        "production automation platform",
+        "Business Delivery OS",
+        "Personal AI Execution OS",
+        "Creative Production OS",
+        "Research Decision OS",
+        "new governance boundary family",
+    ],
+    "proves": [
+        "bounded manifest shape",
+        "hard-false authority posture",
+        "non-execution claim",
+        "JSON-safe fixture output",
+        "dry-run manifest wording",
+    ],
+    "does_not_prove": [
+        "adapter implementation readiness",
+        "adapter runtime readiness",
+        "general runtime readiness",
+        "service runtime readiness",
+        "DB/repository/UoW readiness",
+        "executor runtime readiness",
+        "evidence/audit append readiness",
+        "multi-file lifecycle readiness",
+        "broad physical I/O readiness",
+        "autonomous agent runtime readiness",
+        "production automation platform readiness",
+        "Business Delivery OS readiness",
+        "Personal AI Execution OS readiness",
+        "Creative Production OS readiness",
+        "Research Decision OS readiness",
+    ],
+    "bounded_summary": {
+        "summary": "bounded non-executing dry-run manifest fixture only",
+        "stop_rule": "STOP_BEFORE_ADAPTER_IMPLEMENTATION",
+        "next_step_boundary": (
+            "no adapter implementation without later explicit decision audit"
+        ),
+    },
+}
+
+
+def run_single_file_lifecycle_dry_run_manifest_fixture():
+    return deepcopy(_FIXTURE)
