@@ -1,11 +1,11 @@
 # Current Phase
 
-Current phase: post `single-file-lifecycle-controlled-demo-fixture-v1`.
+Current phase: post `single-file-lifecycle-narrow-adapter-design-v1`.
 
 Current checkpoint:
 
-- `single-file-lifecycle-controlled-demo-fixture-v1`
-  - target: `d852e3f6e7f07d8414433101bcd822e7f2c8f583`
+- `single-file-lifecycle-narrow-adapter-design-v1`
+  - target: `43f8c61db9a4ecc1d66f2ed166b5493f6adceba8`
 
 Completed milestones:
 
@@ -23,6 +23,20 @@ Completed milestones:
   - target: `cc5ab348b42754c591ba1872b070578e6081fc46`
 - `single-file-lifecycle-controlled-demo-fixture-v1`
   - target: `d852e3f6e7f07d8414433101bcd822e7f2c8f583`
+- `single-file-lifecycle-demo-current-phase-update-v1`
+  - target: `ca02abdf9de9442ba1edef1480cddc8366f9c601`
+- `single-file-lifecycle-demo-usage-doc-decision-audit-v1`
+  - target: `2e788eef8ada73164e8ff134c8c7757ec4b3a0fa`
+- `single-file-lifecycle-demo-usage-doc-v1`
+  - target: `d53e9ccbbe89cd81b526cb657baca01271849d4f`
+- `single-file-lifecycle-demo-hardening-decision-audit-v1`
+  - target: `32a89b30313fe89c0806b0a0cb7e88f6d6bf6e60`
+- `single-file-lifecycle-demo-hardening-v1`
+  - target: `2cebb0eb9bca470202199127c228a794a08291c7`
+- `single-file-lifecycle-narrow-adapter-decision-audit-v1`
+  - target: `082cfff8107cfb9736ed5c0c4a362595fd3a6655`
+- `single-file-lifecycle-narrow-adapter-design-v1`
+  - target: `43f8c61db9a4ecc1d66f2ed166b5493f6adceba8`
 
 Current system capability:
 
@@ -41,6 +55,9 @@ Current system capability:
 - successful apply path proof
 - validation-failure rollback proof
 - replay verifier success proof
+- demo usage documentation
+- demo hardening
+- docs/design-only narrow adapter concept
 - acceptance smoke
 
 Runtime eligibility:
@@ -51,22 +68,29 @@ Runtime eligibility:
 - evidence/audit append: not eligible
 - executor dispatch: not eligible
 - restore service execution: not eligible
+- adapter implementation: not eligible by default
+- CLI adapter: not eligible by default
+- subprocess/tool execution: not eligible
+- network execution: not eligible
 - broad physical I/O: not eligible
 - multi-file lifecycle: not eligible by default
 
 Next decision:
 
-- demo hardening
-- demo usage doc
-- narrow adapter decision audit
+- narrow adapter implementation decision audit
+- dry-run manifest fixture decision audit
+- stop/consolidation audit before adapter implementation
 
 Forbidden jumps:
 
+- adapter implementation without decision audit
 - service runtime
 - DB/repository/UoW
 - evidence/audit append
 - executor dispatch
 - restore service
+- subprocess/tool execution
+- network execution
 - multi-file lifecycle
 - broad physical I/O
 - new governance boundary family
