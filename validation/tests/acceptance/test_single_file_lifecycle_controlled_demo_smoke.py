@@ -25,6 +25,62 @@ _EXPECTED_FILES = {
     "artifacts/controlled-demo-rollback/final_seal.json",
 }
 
+_EXPECTED_TOP_LEVEL_KEYS = {
+    "demo",
+    "description",
+    "ok",
+    "paths",
+    "apply",
+    "rollback",
+    "rollback_path",
+    "verifier",
+    "authority",
+    "json_safe",
+}
+
+_EXPECTED_CONTROLLED_DEMO_FILES = {
+    "apply_target.txt",
+    "rollback_target.txt",
+}
+
+_EXPECTED_ARTIFACT_DIRS = {
+    "controlled-demo-apply",
+    "controlled-demo-rollback",
+}
+
+_EXPECTED_APPLY_ARTIFACT_FILES = {
+    "proposal.json",
+    "patch_body.txt",
+    "preimage.txt",
+    "validation_result.json",
+    "final_seal.json",
+}
+
+_EXPECTED_ROLLBACK_ARTIFACT_FILES = _EXPECTED_APPLY_ARTIFACT_FILES | {
+    "rollback.json",
+}
+
+_EXPECTED_AUTHORITY_KEYS = {
+    "service_calls_authorized",
+    "db_repository_uow_authorized",
+    "executor_dispatch_authorized",
+    "multi_file_lifecycle_authorized",
+    "evidence_audit_append_authorized",
+    "restore_service_authorized",
+    "subprocess_authorized",
+    "network_authorized",
+    "cli_authorized",
+    "adapter_authorized",
+    "broad_physical_io_authorized",
+    "durable_writes_authorized",
+    "irreversible_actions_authorized",
+    "authority_grant_usage_authorized",
+    "capability_token_authorized",
+    "new_governance_boundary_family_authorized",
+    "autonomous_agent_runtime_authorized",
+    "production_automation_platform_authorized",
+}
+
 _FORBIDDEN_IMPORTS = {
     "os",
     "sys",
@@ -42,9 +98,15 @@ _FORBIDDEN_IMPORTS = {
     "kernel.repositories",
     "kernel.executor",
     "kernel.recovery",
+    "kernel.approval",
+    "kernel.evidence",
+    "kernel.review",
+    "kernel.revision",
+    "kernel.capability",
+    "kernel.authority",
 }
 
-_FORBIDDEN_WORDING = (
+_FORBIDDEN_POSITIVE_WORDING = (
     "general runtime",
     "agent runtime",
     "service runtime",
@@ -52,6 +114,23 @@ _FORBIDDEN_WORDING = (
     "full AI execution OS",
     "multi-file patch system",
     "production automation platform",
+    "runtime ready",
+    "service ready",
+    "DB ready",
+    "executor ready",
+    "multi-file ready",
+    "production automation ready",
+)
+
+_DENIAL_WORDING = (
+    "does not prove",
+    "does not add",
+    "do not treat",
+    "not authorized",
+    "not ready",
+    "not approval",
+    "remain later",
+    "remains bounded",
 )
 
 
@@ -67,13 +146,16 @@ class SingleFileLifecycleControlledDemoSmokeTest(unittest.TestCase):
                 artifact_root=artifact_root,
             )
 
+            self.assertEqual(set(result), _EXPECTED_TOP_LEVEL_KEYS)
             self.assertTrue(result["ok"])
             self.assertEqual(
                 result["demo"],
                 "controlled single-file lifecycle demonstration",
             )
             self.assertIs(result["json_safe"], True)
-            json.dumps(result, sort_keys=True, allow_nan=False)
+            result_json = json.dumps(result, sort_keys=True, allow_nan=False)
+            self.assertEqual(json.loads(result_json), result)
+            self._assert_json_safe(result)
 
             self.assertEqual(result["apply"]["lifecycle_status"], "applied")
             self.assertIs(result["apply"]["verifier_ok"], True)
@@ -89,6 +171,17 @@ class SingleFileLifecycleControlledDemoSmokeTest(unittest.TestCase):
             self.assertEqual(
                 result["rollback"]["target_content_observed"],
                 "controlled demo original content\n",
+            )
+            self.assertEqual(
+                result["rollback_path"],
+                {
+                    "validation_reason_code": "controlled_demo_validation_failed",
+                    "validation_failures": ["validation_failed"],
+                    "failure_reason_summary": "controlled_demo_validation_failed",
+                    "rollback_status": "succeeded",
+                    "target_restored": True,
+                    "observed_target_content_matches_preimage": True,
+                },
             )
 
             self.assertEqual(result["verifier"]["apply"]["final_status"], "applied")
@@ -110,8 +203,16 @@ class SingleFileLifecycleControlledDemoSmokeTest(unittest.TestCase):
                 "succeeded",
             )
 
+            self.assertEqual(set(result["authority"]), _EXPECTED_AUTHORITY_KEYS)
             for value in result["authority"].values():
+                self.assertIs(type(value), bool)
                 self.assertIs(value, False)
+
+            self.assertIsNone(result["paths"]["apply"]["artifacts"]["rollback"])
+            self.assertEqual(
+                result["paths"]["rollback"]["artifacts"]["rollback"],
+                "artifacts/controlled-demo-rollback/rollback.json",
+            )
 
             observed_files = {
                 path.relative_to(repo_root).as_posix()
@@ -119,6 +220,44 @@ class SingleFileLifecycleControlledDemoSmokeTest(unittest.TestCase):
                 if path.is_file()
             }
             self.assertEqual(observed_files, _EXPECTED_FILES)
+            self.assertEqual(
+                {
+                    path.name
+                    for path in (repo_root / "controlled_demo").iterdir()
+                    if path.is_file()
+                },
+                _EXPECTED_CONTROLLED_DEMO_FILES,
+            )
+            self.assertEqual(
+                {
+                    path.name
+                    for path in artifact_root.iterdir()
+                    if path.is_dir()
+                },
+                _EXPECTED_ARTIFACT_DIRS,
+            )
+            self.assertEqual(
+                {
+                    path.name
+                    for path in (artifact_root / "controlled-demo-apply").iterdir()
+                    if path.is_file()
+                },
+                _EXPECTED_APPLY_ARTIFACT_FILES,
+            )
+            self.assertEqual(
+                {
+                    path.name
+                    for path in (artifact_root / "controlled-demo-rollback").iterdir()
+                    if path.is_file()
+                },
+                _EXPECTED_ROLLBACK_ARTIFACT_FILES,
+            )
+            self.assertFalse(
+                (artifact_root / "controlled-demo-apply" / "rollback.json").exists()
+            )
+            self.assertTrue(
+                (artifact_root / "controlled-demo-rollback" / "rollback.json").is_file()
+            )
             for path_value in json.dumps(result, sort_keys=True).split('"'):
                 if "/" in path_value:
                     self.assertFalse(Path(path_value).is_absolute(), path_value)
@@ -154,13 +293,61 @@ class SingleFileLifecycleControlledDemoSmokeTest(unittest.TestCase):
             self.assertNotIn("executor", imported)
             self.assertNotIn("recovery", imported)
 
+        readme_path = Path(__file__).resolve().parents[3] / "examples/README.md"
+        readme = readme_path.read_text(encoding="utf-8")
+
         self.assertIn("controlled single-file lifecycle demonstration", source)
-        for wording in _FORBIDDEN_WORDING:
-            self.assertNotIn(wording, source)
+        self.assertIn("controlled single-file lifecycle demonstration", readme)
+        self._assert_no_positive_forbidden_wording(source, module_path.as_posix())
+        self._assert_no_positive_forbidden_wording(readme, readme_path.as_posix())
 
     def test_smoke_file_is_acceptance_discovery_compatible(self):
         self.assertTrue(Path(__file__).name.startswith("test_"))
         self.assertIn("validation/tests/acceptance", Path(__file__).as_posix())
+
+    def _assert_json_safe(self, value):
+        self.assertNotIsInstance(value, Path)
+        self.assertNotIsInstance(value, bytes)
+        self.assertNotIsInstance(value, BaseException)
+        self.assertFalse(callable(value))
+
+        if value is None:
+            return
+        if type(value) is bool:
+            return
+        if isinstance(value, str):
+            return
+        if isinstance(value, int):
+            return
+        if isinstance(value, float):
+            self.assertEqual(value, value)
+            self.assertNotEqual(value, float("inf"))
+            self.assertNotEqual(value, float("-inf"))
+            return
+        if isinstance(value, list):
+            for item in value:
+                self._assert_json_safe(item)
+            return
+        if isinstance(value, dict):
+            for key, item in value.items():
+                self.assertIsInstance(key, str)
+                self._assert_json_safe(item)
+            return
+
+        self.fail(f"non-JSON-safe value leaked: {type(value).__name__}")
+
+    def _assert_no_positive_forbidden_wording(self, text, source_name):
+        for line_number, line in enumerate(text.splitlines(), start=1):
+            lowered = line.lower()
+            for wording in _FORBIDDEN_POSITIVE_WORDING:
+                if wording.lower() not in lowered:
+                    continue
+                if any(denial in lowered for denial in _DENIAL_WORDING):
+                    continue
+                self.fail(
+                    f"positive forbidden wording in {source_name}:{line_number}: "
+                    f"{wording}"
+                )
 
 
 if __name__ == "__main__":

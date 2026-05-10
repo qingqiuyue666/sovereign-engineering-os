@@ -76,7 +76,9 @@ def run_controlled_single_file_lifecycle_demo(*, repo_root, artifact_root):
         and rollback_verifier.get("ok") is True
         and rollback_observed == _ORIGINAL
     )
-    ok = apply_ok and rollback_ok and all(value is False for value in authority.values())
+    ok = apply_ok and rollback_ok and all(
+        type(value) is bool and value is False for value in authority.values()
+    )
 
     return {
         "demo": _DEMO,
@@ -98,6 +100,10 @@ def run_controlled_single_file_lifecycle_demo(*, repo_root, artifact_root):
             "verifier_status": _bounded_string(rollback_verifier.get("status")),
             "target_content_observed": _bounded_string(rollback_observed),
         },
+        "rollback_path": _rollback_path_summary(
+            rollback_result=rollback_result,
+            rollback_observed=rollback_observed,
+        ),
         "verifier": {
             "apply": _verifier_summary(apply_verifier),
             "rollback": _verifier_summary(rollback_verifier),
@@ -198,6 +204,44 @@ def _verifier_summary(verifier_result):
     }
 
 
+def _rollback_path_summary(*, rollback_result, rollback_observed):
+    failures = rollback_result.get("failures")
+    if not isinstance(failures, list):
+        failures = []
+    bounded_failures = [
+        _bounded_string(failure) for failure in failures if isinstance(failure, str)
+    ][:8]
+    validation_reason_code = _bounded_string(
+        rollback_result.get("validation", {}).get("reason_code")
+    )
+    rollback_status = _bounded_string(
+        rollback_result.get("replay", {}).get("rollback_status")
+    )
+    target_restored = rollback_result.get("rollback", {}).get("ok") is True
+    observed_target_content_matches_preimage = rollback_observed == _ORIGINAL
+    return {
+        "validation_reason_code": validation_reason_code,
+        "validation_failures": bounded_failures,
+        "failure_reason_summary": _failure_reason_summary(
+            validation_reason_code,
+            bounded_failures,
+        ),
+        "rollback_status": rollback_status,
+        "target_restored": target_restored,
+        "observed_target_content_matches_preimage": (
+            observed_target_content_matches_preimage
+        ),
+    }
+
+
+def _failure_reason_summary(reason_code, failures):
+    if reason_code:
+        return reason_code
+    if failures:
+        return failures[0]
+    return ""
+
+
 def _hard_false_authority():
     return {
         "service_calls_authorized": False,
@@ -205,7 +249,19 @@ def _hard_false_authority():
         "executor_dispatch_authorized": False,
         "multi_file_lifecycle_authorized": False,
         "evidence_audit_append_authorized": False,
+        "restore_service_authorized": False,
+        "subprocess_authorized": False,
+        "network_authorized": False,
+        "cli_authorized": False,
+        "adapter_authorized": False,
         "broad_physical_io_authorized": False,
+        "durable_writes_authorized": False,
+        "irreversible_actions_authorized": False,
+        "authority_grant_usage_authorized": False,
+        "capability_token_authorized": False,
+        "new_governance_boundary_family_authorized": False,
+        "autonomous_agent_runtime_authorized": False,
+        "production_automation_platform_authorized": False,
     }
 
 
