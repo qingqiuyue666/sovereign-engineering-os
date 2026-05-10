@@ -1,0 +1,5 @@
+[project]
+name = "sovereign-engineering-os"
+version = "0.0.0"
+description = "Local-first AI execution governance kernel."
+requires-python = ">=3.13"
