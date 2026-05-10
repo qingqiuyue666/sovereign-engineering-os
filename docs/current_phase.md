@@ -1,11 +1,11 @@
 # Current Phase
 
-Current phase: post `single-file-lifecycle-hardening-smoke-v1`.
+Current phase: post `single-file-lifecycle-controlled-demo-fixture-v1`.
 
 Current checkpoint:
 
-- `single-file-lifecycle-hardening-smoke-v1`
-  - target: `2f0c8f91f53a1bee0a9dd5fd40e3e3872a0b7cf2`
+- `single-file-lifecycle-controlled-demo-fixture-v1`
+  - target: `d852e3f6e7f07d8414433101bcd822e7f2c8f583`
 
 Completed milestones:
 
@@ -15,16 +15,19 @@ Completed milestones:
   - target: `7edcbc69534845a6bb3c870b370daedf38db9662`
 - `single-file-lifecycle-hardening-smoke-v1`
   - target: `2f0c8f91f53a1bee0a9dd5fd40e3e3872a0b7cf2`
-
-Previous authority milestone:
-
-- `runtime-authority-grant-usage-boundary-read-only-stack-v1`
-  - target: `4bd3f16eab8eb4f29157e053f0f2983f04f0c966`
+- `single-file-lifecycle-current-phase-update-v1`
+  - target: `5efc8eaa68a3ea57a23282dfa61c523fb7cde9e5`
+- `single-file-lifecycle-replay-verifier-v1`
+  - target: `22a1a6f512dfc999df0399bef4b4f2dd7c170b10`
+- `single-file-lifecycle-controlled-demo-decision-audit-v1`
+  - target: `cc5ab348b42754c591ba1872b070578e6081fc46`
+- `single-file-lifecycle-controlled-demo-fixture-v1`
+  - target: `d852e3f6e7f07d8414433101bcd822e7f2c8f583`
 
 Current system capability:
 
 - canonical CI health gate
-- one repo-contained text file lifecycle
+- controlled single-file lifecycle
 - explicit approval mapping
 - preimage capture
 - patch body persistence
@@ -33,7 +36,11 @@ Current system capability:
 - rollback
 - final seal
 - replay summary
-- hardening tests
+- read-only replay verifier
+- controlled demo fixture
+- successful apply path proof
+- validation-failure rollback proof
+- replay verifier success proof
 - acceptance smoke
 
 Runtime eligibility:
@@ -49,18 +56,18 @@ Runtime eligibility:
 
 Next decision:
 
-- controlled demo fixture
-- replay verifier design
-- narrow adapter design
+- demo hardening
+- demo usage doc
+- narrow adapter decision audit
 
 Forbidden jumps:
 
-- multi-file lifecycle
 - service runtime
 - DB/repository/UoW
 - evidence/audit append
 - executor dispatch
 - restore service
+- multi-file lifecycle
 - broad physical I/O
 - new governance boundary family
 - Business Delivery OS
