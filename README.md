@@ -2,7 +2,7 @@
 
 Sovereign Engineering OS is an AI execution control kernel and local-first governance kernel.
 
-Current phase/state: post `seos-narrow-kernel-release-checkpoint-consolidation-audit-v1`.
+Current phase/state: post `seos-narrow-kernel-public-overview-alignment-v1`.
 
 Completed milestones:
 
@@ -29,6 +29,8 @@ Completed milestones:
 - `single-file-lifecycle-dry-run-manifest-line-consolidation-audit-v1`
 - `repository-trajectory-audit-after-dry-run-manifest-line-closure-v1`
 - `seos-narrow-kernel-release-checkpoint-consolidation-audit-v1`
+- `public-overview-alignment-decision-audit-v1`
+- `seos-narrow-kernel-public-overview-alignment-v1`
 
 Current capability:
 
@@ -57,6 +59,8 @@ Current capability:
 - dry-run manifest line consolidation audit
 - repository trajectory audit after dry-run manifest line closure
 - SEOS narrow kernel release/checkpoint consolidation audit
+- public overview alignment decision audit
+- SEOS narrow kernel public overview
 - acceptance smoke
 
 Controlled demo proves:
@@ -184,6 +188,25 @@ SEOS narrow kernel checkpoint consolidation:
 - direct adapter implementation remains rejected
 - no concrete repository defect blocks checkpoint consolidation
 
+Public overview:
+
+- public overview: `seos-narrow-kernel-public-overview-alignment-v1`
+- target file: `docs/overview/seos_narrow_kernel_public_overview_v1.md`
+- overview status: documentation only
+- checkpoint candidate: `seos-narrow-kernel-checkpoint-v1-candidate`
+- repository maturity classification: narrow controlled execution kernel with replay verification, controlled demo proof, bounded dry-run manifest fixture, usage documentation, CI health gate, and strict stop rules
+- overview explains what has been proven
+- overview explains what has not been proven
+- overview states repository is not a general runtime platform
+- overview states repository is not adapter implementation ready
+- overview states no git tag was created
+- overview states no GitHub release was created
+- overview states no runtime authority was created
+- overview states no adapter implementation was authorized
+- overview states no execution capability was created
+- adapter implementation remains not authorized by default
+- direct adapter implementation remains rejected
+
 Preserved verdicts:
 
 - `STOP_BEFORE_ADAPTER_IMPLEMENTATION`
@@ -192,6 +215,7 @@ Preserved verdicts:
 - `DRY_RUN_MANIFEST_LINE_COMPLETE_STOP_BEFORE_ADAPTER_IMPLEMENTATION`
 - `RECOMMEND_RELEASE_CHECKPOINT_CONSOLIDATION_NEXT`
 - `SEOS_NARROW_KERNEL_CHECKPOINT_CONSOLIDATED_STOP_BEFORE_ADAPTER_IMPLEMENTATION`
+- `APPROVE_PUBLIC_OVERVIEW_ALIGNMENT_NEXT`
 
 Current non-capabilities:
 
@@ -220,6 +244,7 @@ Current non-capabilities:
 Do not proceed directly to adapter implementation.
 Do not create a git tag without a separate decision audit.
 Do not create a GitHub release without a separate decision audit.
+Do not claim runtime authority or execution capability from the public overview.
 
 Still not authorized:
 
@@ -258,8 +283,9 @@ The local reference interpreter for this phase is Python 3.14.4, and GitHub CI u
 
 Next decision:
 
+- README/public overview link decision audit
 - checkpoint tag decision audit
-- public overview alignment decision audit
+- GitHub release decision audit
 - adapter implementation decision audit with expected rejection unless concrete hard blockers are proven
 - stop/consolidation audit before any adapter implementation
 

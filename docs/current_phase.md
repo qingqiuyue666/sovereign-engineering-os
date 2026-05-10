@@ -1,11 +1,11 @@
 # Current Phase
 
-Current phase: post `seos-narrow-kernel-release-checkpoint-consolidation-audit-v1`.
+Current phase: post `seos-narrow-kernel-public-overview-alignment-v1`.
 
 Current checkpoint:
 
-- `seos-narrow-kernel-release-checkpoint-consolidation-audit-v1`
-  - target: `bc1461e87f12232e833f5b0fe135934c735ffdb3`
+- `seos-narrow-kernel-public-overview-alignment-v1`
+  - target: `de1a99c977ac1a1f3ae52c535e16d2c15f9c0593`
 
 Completed milestones:
 
@@ -55,6 +55,10 @@ Completed milestones:
   - target: `a4feac33693108de0e82527073401a20aadcb0fc`
 - `seos-narrow-kernel-release-checkpoint-consolidation-audit-v1`
   - target: `bc1461e87f12232e833f5b0fe135934c735ffdb3`
+- `public-overview-alignment-decision-audit-v1`
+  - target: `258e02d5c48400ab864ddf56db0355e7f5e72762`
+- `seos-narrow-kernel-public-overview-alignment-v1`
+  - target: `de1a99c977ac1a1f3ae52c535e16d2c15f9c0593`
 
 Current system capability:
 
@@ -85,6 +89,8 @@ Current system capability:
 - dry-run manifest line consolidation audit
 - repository trajectory audit after dry-run manifest line closure
 - SEOS narrow kernel release/checkpoint consolidation audit
+- public overview alignment decision audit
+- SEOS narrow kernel public overview
 
 Post-adapter-design consolidation audit:
 
@@ -177,6 +183,21 @@ SEOS narrow kernel checkpoint consolidation:
 - Business / Personal / Creative / Research OS authorized: no
 - concrete repository defect blocking checkpoint consolidation: none
 
+Public overview:
+
+- public overview: `seos-narrow-kernel-public-overview-alignment-v1`
+- target file: `docs/overview/seos_narrow_kernel_public_overview_v1.md`
+- status: documentation only
+- checkpoint candidate: `seos-narrow-kernel-checkpoint-v1-candidate`
+- maturity classification: narrow controlled execution kernel with replay verification, controlled demo proof, bounded dry-run manifest fixture, usage documentation, CI health gate, and strict stop rules
+- no git tag created
+- no GitHub release created
+- no runtime authority created
+- no adapter implementation authorized
+- no execution capability created
+- adapter implementation: not authorized by default
+- direct adapter implementation: rejected
+
 Preserved verdicts:
 
 - `STOP_BEFORE_ADAPTER_IMPLEMENTATION`
@@ -185,6 +206,7 @@ Preserved verdicts:
 - `DRY_RUN_MANIFEST_LINE_COMPLETE_STOP_BEFORE_ADAPTER_IMPLEMENTATION`
 - `RECOMMEND_RELEASE_CHECKPOINT_CONSOLIDATION_NEXT`
 - `SEOS_NARROW_KERNEL_CHECKPOINT_CONSOLIDATED_STOP_BEFORE_ADAPTER_IMPLEMENTATION`
+- `APPROVE_PUBLIC_OVERVIEW_ALIGNMENT_NEXT`
 
 Runtime eligibility:
 
@@ -207,11 +229,14 @@ Runtime eligibility:
 - irreversible actions: not eligible
 - git tag creation: not eligible without separate decision audit
 - GitHub release creation: not eligible without separate decision audit
+- runtime authority from public overview: not eligible
+- execution capability from public overview: not eligible
 
 Next decision:
 
+- README/public overview link decision audit
 - checkpoint tag decision audit
-- public overview alignment decision audit
+- GitHub release decision audit
 - adapter implementation decision audit with expected rejection unless concrete hard blockers are proven
 - stop/consolidation audit before any adapter implementation
 
@@ -238,6 +263,8 @@ Forbidden jumps:
 - production automation platform
 - git tag creation without separate decision audit
 - GitHub release creation without separate decision audit
+- runtime authority claim from public overview
+- execution capability claim from public overview
 - Business Delivery OS
 - Personal AI Execution OS
 - Creative Production OS
