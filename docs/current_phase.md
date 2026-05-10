@@ -1,11 +1,11 @@
 # Current Phase
 
-Current phase: post `single-file-lifecycle-dry-run-manifest-fixture-v1`.
+Current phase: post `single-file-lifecycle-dry-run-manifest-fixture-usage-doc-v1`.
 
 Current checkpoint:
 
-- `single-file-lifecycle-dry-run-manifest-fixture-v1`
-  - target: `d8ca1516ba92115563c8a5be18443b1cdcfd5cfb`
+- `single-file-lifecycle-dry-run-manifest-fixture-usage-doc-v1`
+  - target: `d2c4ce9f3762bd58639e20826770426740d393b4`
 
 Completed milestones:
 
@@ -45,6 +45,10 @@ Completed milestones:
   - target: `3cda7dbd80568ced72d0248cf49cdf42faf67c5c`
 - `single-file-lifecycle-dry-run-manifest-fixture-v1`
   - target: `d8ca1516ba92115563c8a5be18443b1cdcfd5cfb`
+- `single-file-lifecycle-dry-run-manifest-fixture-usage-doc-decision-audit-v1`
+  - target: `a2f22318625a07c6ced1ba6c83efff3231c00af8`
+- `single-file-lifecycle-dry-run-manifest-fixture-usage-doc-v1`
+  - target: `d2c4ce9f3762bd58639e20826770426740d393b4`
 
 Current system capability:
 
@@ -71,13 +75,14 @@ Current system capability:
 - bounded non-executing dry-run manifest fixture
 - hard-false authority manifest posture
 - dry-run manifest acceptance smoke
+- dry-run manifest fixture usage documentation
 
 Post-adapter-design consolidation audit:
 
 - verdict: `STOP_BEFORE_ADAPTER_IMPLEMENTATION`
 - adapter implementation: not authorized by default
 - direct adapter implementation: rejected
-- current chain proves bounded single-file lifecycle, replay verification, controlled demo fixture, demo documentation, demo hardening, docs/design-only narrow adapter concept, and bounded dry-run manifest shape only
+- current chain proves bounded single-file lifecycle, replay verification, controlled demo fixture, demo documentation, demo hardening, docs/design-only narrow adapter concept, bounded dry-run manifest shape, and dry-run manifest fixture usage documentation only
 - current chain does not prove general runtime readiness
 
 Dry-run manifest fixture:
@@ -91,6 +96,22 @@ Dry-run manifest fixture:
 - current fixture proves bounded manifest shape only
 - current fixture does not prove adapter/runtime readiness
 - preserved verdict: `APPROVE_DRY_RUN_MANIFEST_FIXTURE_NEXT`
+
+Dry-run manifest fixture usage documentation:
+
+- usage doc: `single-file-lifecycle-dry-run-manifest-fixture-usage-doc-v1`
+- target file: `examples/dry_run_manifest_fixture_usage.md`
+- status: documentation-only
+- scope: human-readable usage for existing dry-run manifest fixture
+- fixture remains non-executing
+- fixture remains manifest-only
+- adapter implementation: not authorized by default
+- direct adapter implementation: rejected
+- preserved verdict: `STOP_BEFORE_ADAPTER_IMPLEMENTATION`
+- preserved verdict: `APPROVE_DRY_RUN_MANIFEST_FIXTURE_NEXT`
+- preserved verdict: `APPROVE_DRY_RUN_MANIFEST_FIXTURE_USAGE_DOC_NEXT`
+- usage doc proves no new runtime capability
+- usage doc does not prove adapter/runtime readiness
 
 Runtime eligibility:
 
@@ -114,8 +135,7 @@ Runtime eligibility:
 
 Next decision:
 
-- dry-run manifest fixture usage doc decision
-- dry-run manifest fixture hardening decision only if concrete defects exist
+- dry-run manifest fixture usage doc hardening decision only if concrete defects exist
 - adapter implementation decision audit with expected rejection unless concrete hard blockers are proven
 - stop/consolidation audit before any adapter implementation
 
