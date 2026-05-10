@@ -32,6 +32,9 @@ The controlled single-file lifecycle demonstration uses:
 * explicit approval mapping
 * caller-provided validation callable behavior
 * bounded JSON-safe output
+* complete hard-false authority flags for the demo boundary
+* bounded validation-failure reason reporting
+* bounded rollback target restoration reporting
 
 ## What the demo proves
 
@@ -85,7 +88,8 @@ Expected result, at a high level:
 * apply path should report `applied`.
 * rollback path should report `rolled_back`.
 * both verifier results should be ok.
-* authority flags should remain false.
+* authority flags should cover the full demo boundary and remain false.
+* rollback path should report the validation reason and restored target summary.
 
 ## Safe interpretation rules
 
@@ -109,6 +113,5 @@ Expected result, at a high level:
 
 Existing canonical command remains `make ci`.
 
-This docs-only package adds no tests.
-
-The existing acceptance smoke covers the controlled demo fixture.
+The existing acceptance smoke covers the controlled demo fixture and the
+hardened bounded result shape.
