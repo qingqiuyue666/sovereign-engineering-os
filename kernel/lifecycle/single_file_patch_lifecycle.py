@@ -12,6 +12,7 @@ __all__ = [
 _SURFACE = "single_file_patch_lifecycle"
 _VERSION = 1
 _MAX_TEXT_CHARS = 200000
+_MAX_IDENTIFIER_CHARS = 128
 _MAX_STRING_CHARS = 4096
 _MAX_LIST_ITEMS = 25
 _MAX_MAPPING_ITEMS = 25
@@ -447,14 +448,16 @@ def _validate_artifact_root(repo_path, artifact_root):
 def _validate_target_path(repo_path, target_path):
     if not isinstance(target_path, str) or not target_path:
         return False, None, None, "target_path_invalid"
+    if "\\" in target_path:
+        return False, None, None, "target_path_invalid"
     relative = Path(target_path)
     if relative.is_absolute():
-        return False, None, target_path, "target_path_invalid"
+        return False, None, None, "target_path_invalid"
     if any(part == ".." for part in relative.parts):
-        return False, None, target_path, "target_path_invalid"
+        return False, None, None, "target_path_invalid"
     target_rel = "/".join(relative.parts)
     if not target_rel:
-        return False, None, target_rel, "target_path_invalid"
+        return False, None, None, "target_path_invalid"
     candidate = repo_path / relative
     if candidate.is_symlink():
         return False, None, target_rel, "target_is_symlink"
@@ -502,8 +505,8 @@ def _validate_proposal(proposal, target_rel):
     proposal_id = copied.get("proposal_id")
     patch_id = copied.get("patch_id")
     proposal_target = copied.get("target_path")
-    if not _non_empty_string(proposal_id):
-        return False, {}, "proposal_invalid"
+    if not _safe_identifier(proposal_id):
+        return False, {}, "proposal_id_invalid"
     if not _safe_patch_id(patch_id):
         return False, {}, "patch_id_invalid"
     if not _single_target_list(copied, "target_paths", target_rel):
@@ -511,7 +514,7 @@ def _validate_proposal(proposal, target_rel):
     if not _single_target_list(copied, "target_file_ids", target_rel):
         return False, {}, "proposal_invalid"
     if proposal_target != target_rel:
-        return False, {}, "approval_target_mismatch"
+        return False, {}, "proposal_target_mismatch"
     return (
         True,
         {
@@ -529,8 +532,8 @@ def _validate_approval(approval, proposal_data, target_rel, preimage_identity):
     copied = deepcopy(approval)
     approval_data = {
         "approved": False,
-        "proposal_id": copied.get("proposal_id"),
-        "patch_id": copied.get("patch_id"),
+        "proposal_id": _bounded_identifier_or_none(copied.get("proposal_id")),
+        "patch_id": _bounded_patch_id_or_none(copied.get("patch_id")),
         "target_path": copied.get("target_path"),
         "expected_preimage_identity": copied.get("expected_preimage_identity"),
     }
@@ -680,7 +683,7 @@ def _write_json(path, payload):
 
 
 def _write_text(path, text):
-    path.write_text(text, encoding="utf-8")
+    path.write_bytes(text.encode("utf-8"))
 
 
 def _identity(text):
@@ -688,11 +691,27 @@ def _identity(text):
 
 
 def _safe_patch_id(value):
-    if not _non_empty_string(value):
+    if not _safe_identifier(value):
         return False
-    if len(value) > 128 or value in (".", ".."):
+    if value in (".", ".."):
         return False
     return all(char in _SAFE_PATCH_ID_CHARS for char in value)
+
+
+def _safe_identifier(value):
+    return _non_empty_string(value) and len(value) <= _MAX_IDENTIFIER_CHARS
+
+
+def _bounded_identifier_or_none(value):
+    if _safe_identifier(value):
+        return value
+    return None
+
+
+def _bounded_patch_id_or_none(value):
+    if _safe_patch_id(value):
+        return value
+    return None
 
 
 def _single_target_list(mapping, key, target_rel):
