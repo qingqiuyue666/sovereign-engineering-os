@@ -5,6 +5,7 @@ import unittest
 from hashlib import sha256
 from pathlib import Path
 
+from kernel.lifecycle import single_file_patch_lifecycle as lifecycle_module
 from kernel.lifecycle.single_file_patch_lifecycle import (
     run_single_file_patch_lifecycle,
     single_file_patch_lifecycle_manifest,
@@ -95,6 +96,11 @@ class SingleFilePatchLifecycleTest(unittest.TestCase):
         self.assertEqual(replay["final_status"], "applied")
         self.assertEqual(len(replay["artifact_paths"]), 5)
 
+    def test_final_seal_status_matches_returned_status(self):
+        result = self.run_lifecycle()
+        seal = json.loads(self.artifact_path(result, "final_seal").read_text())
+        self.assertEqual(seal["replay"]["final_status"], result["status"])
+
     def test_approval_required(self):
         result = self.run_lifecycle(approval={})
         self.assertEqual(result["status"], "rejected")
@@ -121,6 +127,12 @@ class SingleFilePatchLifecycleTest(unittest.TestCase):
         self.assertEqual(result["status"], "rejected")
         self.assertEqual(result["reason_code"], "approval_target_mismatch")
 
+    def test_proposal_target_path_mismatch_rejected_separately(self):
+        proposal = dict(self.proposal, target_path="other.txt")
+        result = self.run_lifecycle(proposal=proposal)
+        self.assertEqual(result["status"], "rejected")
+        self.assertEqual(result["reason_code"], "proposal_target_mismatch")
+
     def test_proposal_mismatch_rejected(self):
         approval = dict(self.approval)
         approval["proposal_id"] = "proposal-2"
@@ -135,6 +147,15 @@ class SingleFilePatchLifecycleTest(unittest.TestCase):
         self.assertEqual(result["status"], "rejected")
         self.assertEqual(result["reason_code"], "approval_patch_mismatch")
 
+    def test_unsafe_approval_patch_id_not_echoed(self):
+        approval = dict(self.approval)
+        approval["patch_id"] = "bad/id"
+        result = self.run_lifecycle(approval=approval)
+        self.assertEqual(result["status"], "rejected")
+        self.assertEqual(result["reason_code"], "approval_patch_mismatch")
+        self.assertIsNone(result["approval"]["patch_id"])
+        self.assertNotIn("bad/id", json.dumps(result, sort_keys=True))
+
     def test_preimage_mismatch_rejected(self):
         approval = dict(self.approval)
         approval["expected_preimage_identity"] = "wrong"
@@ -146,11 +167,25 @@ class SingleFilePatchLifecycleTest(unittest.TestCase):
         result = self.run_lifecycle(target_path=str(self.target))
         self.assertEqual(result["status"], "rejected")
         self.assertEqual(result["reason_code"], "target_path_invalid")
+        self.assertIsNone(result["target"]["path"])
+        self.assertIsNone(result["replay"]["target_path"])
+        self.assertNotIn(str(self.tmp.name), json.dumps(result, sort_keys=True))
 
     def test_traversal_target_path_rejected(self):
         result = self.run_lifecycle(target_path="../target.txt")
         self.assertEqual(result["status"], "rejected")
         self.assertEqual(result["reason_code"], "target_path_invalid")
+        self.assertIsNone(result["target"]["path"])
+        self.assertIsNone(result["replay"]["target_path"])
+        self.assertNotIn("../target.txt", json.dumps(result, sort_keys=True))
+
+    def test_windows_separator_target_path_rejected_without_echo(self):
+        result = self.run_lifecycle(target_path="nested\\target.txt")
+        self.assertEqual(result["status"], "rejected")
+        self.assertEqual(result["reason_code"], "target_path_invalid")
+        self.assertIsNone(result["target"]["path"])
+        self.assertIsNone(result["replay"]["target_path"])
+        self.assertNotIn("nested\\target.txt", json.dumps(result, sort_keys=True))
 
     def test_symlink_target_rejected(self):
         link = self.repo_root / "link.txt"
@@ -206,6 +241,31 @@ class SingleFilePatchLifecycleTest(unittest.TestCase):
         self.assertEqual(result["status"], "rejected")
         self.assertEqual(result["reason_code"], "patch_id_invalid")
 
+    def test_too_long_proposal_id_rejected(self):
+        proposal = dict(self.proposal, proposal_id="p" * 129)
+        approval = dict(self.approval, proposal_id="p" * 129)
+        result = self.run_lifecycle(proposal=proposal, approval=approval)
+        self.assertEqual(result["status"], "rejected")
+        self.assertEqual(result["reason_code"], "proposal_id_invalid")
+        self.assertIsNone(result["replay"]["proposal_id"])
+
+    def test_too_long_patch_id_rejected(self):
+        patch_id = "p" * 129
+        proposal = dict(self.proposal, patch_id=patch_id)
+        approval = dict(self.approval, patch_id=patch_id)
+        result = self.run_lifecycle(proposal=proposal, approval=approval)
+        self.assertEqual(result["status"], "rejected")
+        self.assertEqual(result["reason_code"], "patch_id_invalid")
+        self.assertIsNone(result["replay"]["patch_id"])
+
+    def test_returned_identifiers_are_bounded(self):
+        result = self.run_lifecycle()
+        encoded = json.dumps(result, sort_keys=True)
+        self.assertIn('"proposal_id": "proposal-1"', encoded)
+        self.assertIn('"patch_id": "patch-1"', encoded)
+        self.assertLessEqual(len(result["replay"]["proposal_id"]), 128)
+        self.assertLessEqual(len(result["replay"]["patch_id"]), 128)
+
     def test_multi_file_patch_rejected(self):
         proposal = dict(
             self.proposal,
@@ -220,6 +280,25 @@ class SingleFilePatchLifecycleTest(unittest.TestCase):
         result = self.run_lifecycle()
         self.assertEqual(result["status"], "rejected")
         self.assertEqual(result["reason_code"], "artifact_destination_exists")
+
+    def test_artifact_write_failure_before_mutation_rejected(self):
+        original_write_json = lifecycle_module._write_json
+
+        def fail_proposal_write(path, payload):
+            if path.name == "proposal.json":
+                raise OSError("secret artifact path")
+            original_write_json(path, payload)
+
+        lifecycle_module._write_json = fail_proposal_write
+        try:
+            result = self.run_lifecycle()
+        finally:
+            lifecycle_module._write_json = original_write_json
+
+        self.assertEqual(result["status"], "rejected")
+        self.assertEqual(result["reason_code"], "artifact_write_failed")
+        self.assertEqual(self.target.read_text(encoding="utf-8"), "before\n")
+        self.assertNotIn("secret artifact path", json.dumps(result, sort_keys=True))
 
     def test_validation_callable_required(self):
         result = self.run_lifecycle(validation_callable=None)
@@ -263,6 +342,30 @@ class SingleFilePatchLifecycleTest(unittest.TestCase):
         self.assertEqual(result["rollback"], {"attempted": True, "ok": True})
         self.assertEqual(self.target.read_text(encoding="utf-8"), "before\n")
 
+    def test_rollback_failure_after_validation_failure_is_reported(self):
+        original_write_text = lifecycle_module._write_text
+        restore_attempts = []
+        target_resolved = self.target.resolve(strict=True)
+
+        def fail_restore_once(path, text):
+            if path.resolve(strict=False) == target_resolved and text == "before\n":
+                restore_attempts.append(path)
+                raise OSError("secret rollback path")
+            original_write_text(path, text)
+
+        lifecycle_module._write_text = fail_restore_once
+        try:
+            result = self.run_lifecycle(validation_callable=lambda context: {"ok": False})
+        finally:
+            lifecycle_module._write_text = original_write_text
+
+        self.assertEqual(result["status"], "rollback_failed")
+        self.assertEqual(result["reason_code"], "rollback_failed")
+        self.assertIn("rollback_failed", result["failures"])
+        self.assertEqual(len(restore_attempts), 1)
+        self.assertEqual(self.target.read_text(encoding="utf-8"), "after\n")
+        self.assertNotIn("secret rollback path", json.dumps(result, sort_keys=True))
+
     def test_rollback_result_artifact_recorded(self):
         result = self.run_lifecycle(validation_callable=lambda context: {"ok": False})
         rollback = json.loads(self.artifact_path(result, "rollback").read_text())
@@ -273,6 +376,16 @@ class SingleFilePatchLifecycleTest(unittest.TestCase):
         result = self.run_lifecycle()
         encoded = json.dumps(result, sort_keys=True, allow_nan=False)
         self.assertIn('"json_safe": true', encoded)
+
+    def test_utf8_write_identity_matches_final_file_bytes(self):
+        content = "after\nsnowman: \u2603\n"
+        result = self.run_lifecycle(new_content=content)
+        seal = json.loads(self.artifact_path(result, "final_seal").read_text())
+        self.assertEqual(
+            sha256(self.target.read_bytes()).hexdigest(),
+            seal["target"]["postimage_identity"],
+        )
+        self.assertEqual(self.target.read_bytes(), content.encode("utf-8"))
 
     def test_output_bounded(self):
         result = self.run_lifecycle(
