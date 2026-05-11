@@ -2,7 +2,7 @@
 
 Sovereign Engineering OS is an AI execution control kernel and local-first governance kernel.
 
-Current phase/state: post `checkpoint-tag-v1`.
+Current phase/state: post `github-release-v1`.
 
 Completed milestones:
 
@@ -34,6 +34,7 @@ Completed milestones:
 - `README-public-overview-link-decision-audit-v1`
 - `readme-public-overview-link-v1`
 - `checkpoint-tag-v1`
+- `github-release-v1`
 
 Current capability:
 
@@ -66,6 +67,7 @@ Current capability:
 - SEOS narrow kernel public overview
 - README public overview link
 - annotated checkpoint tag
+- draft GitHub Release
 - acceptance smoke
 
 Controlled demo proves:
@@ -156,7 +158,7 @@ Repository trajectory audit after dry-run manifest line closure:
 
 - trajectory audit: `repository-trajectory-audit-after-dry-run-manifest-line-closure-v1`
 - verdict: `RECOMMEND_RELEASE_CHECKPOINT_CONSOLIDATION_NEXT`
-- repository maturity is narrow controlled execution kernel only
+- repository maturity is narrow controlled execution kernel with replay verification, controlled demo proof, bounded dry-run manifest fixture, usage documentation, CI health gate, annotated checkpoint tag, draft GitHub Release, and strict stop rules
 - release/checkpoint consolidation was recommended before adapter implementation
 - adapter implementation remains not authorized by default
 - direct adapter implementation remains rejected
@@ -166,7 +168,7 @@ SEOS narrow kernel checkpoint consolidation:
 - consolidation audit: `seos-narrow-kernel-release-checkpoint-consolidation-audit-v1`
 - verdict: `SEOS_NARROW_KERNEL_CHECKPOINT_CONSOLIDATED_STOP_BEFORE_ADAPTER_IMPLEMENTATION`
 - checkpoint candidate: `seos-narrow-kernel-checkpoint-v1-candidate`
-- repository maturity classification: narrow controlled execution kernel with replay verification, controlled demo proof, bounded dry-run manifest fixture, usage documentation, CI health gate, and strict stop rules
+- repository maturity classification: narrow controlled execution kernel with replay verification, controlled demo proof, bounded dry-run manifest fixture, usage documentation, CI health gate, annotated checkpoint tag, draft GitHub Release, and strict stop rules
 - checkpoint is documentation/checkpoint purposes only
 - no git tag was created
 - no GitHub release was created
@@ -199,7 +201,7 @@ Public overview:
 - target file: [SEOS narrow kernel public overview](docs/overview/seos_narrow_kernel_public_overview_v1.md)
 - overview status: documentation only
 - checkpoint candidate: `seos-narrow-kernel-checkpoint-v1-candidate`
-- repository maturity classification: narrow controlled execution kernel with replay verification, controlled demo proof, bounded dry-run manifest fixture, usage documentation, CI health gate, and strict stop rules
+- repository maturity classification: narrow controlled execution kernel with replay verification, controlled demo proof, bounded dry-run manifest fixture, usage documentation, CI health gate, annotated checkpoint tag, draft GitHub Release, and strict stop rules
 - overview explains what has been proven
 - overview explains what has not been proven
 - overview states repository is not a general runtime platform
@@ -263,6 +265,43 @@ Checkpoint tag:
 - adapter implementation remains not authorized by default
 - direct adapter implementation remains rejected
 
+GitHub Release:
+
+- release milestone: `github-release-v1`
+- release id: `320261350`
+- release title: `SEOS narrow kernel checkpoint v1`
+- release target tag: `seos-narrow-kernel-checkpoint-v1`
+- release state: draft
+- release latest status: not latest by draft state / API did not expose make_latest
+- release assets: none
+- release purpose: checkpoint marker only
+- release does not create or move a git tag
+- release does not authorize runtime authority
+- release does not authorize execution capability
+- release does not authorize adapter implementation
+- release does not authorize adapter runtime
+- release does not authorize service runtime
+- release does not authorize DB/repository/UoW runtime
+- release does not authorize evidence/audit append runtime
+- release does not authorize executor runtime
+- release does not authorize restore runtime
+- release does not authorize CLI/tool execution
+- release does not authorize subprocess execution
+- release does not authorize network execution
+- release does not authorize external tool control
+- release does not authorize multi-file lifecycle
+- release does not authorize broad physical I/O
+- release does not authorize durable writes
+- release does not authorize irreversible actions
+- release does not authorize autonomous agent runtime
+- release does not authorize production automation platform
+- release does not authorize Business Delivery OS
+- release does not authorize Personal AI Execution OS
+- release does not authorize Creative Production OS
+- release does not authorize Research Decision OS
+- adapter implementation remains not authorized by default
+- direct adapter implementation remains rejected
+
 Preserved verdicts:
 
 - `STOP_BEFORE_ADAPTER_IMPLEMENTATION`
@@ -274,6 +313,7 @@ Preserved verdicts:
 - `APPROVE_PUBLIC_OVERVIEW_ALIGNMENT_NEXT`
 - `APPROVE_README_PUBLIC_OVERVIEW_LINK_NEXT`
 - `APPROVE_CHECKPOINT_TAG_NEXT`
+- `APPROVE_GITHUB_RELEASE_NEXT`
 
 Current non-capabilities:
 
@@ -288,6 +328,7 @@ Current non-capabilities:
 - not a CLI/tool execution layer
 - not a shell/subprocess layer
 - not a network layer
+- not an external tool control layer
 - not a multi-file lifecycle
 - not broad physical I/O
 - not durable writes
@@ -300,10 +341,11 @@ Current non-capabilities:
 - not Research Decision OS
 
 Do not proceed directly to adapter implementation.
-Do not create a GitHub release without a separate decision audit.
+Do not create another GitHub release without a separate decision audit.
 Do not claim runtime authority or execution capability from the public overview.
 Do not claim runtime authority or execution capability from the README public overview link.
 Do not claim runtime authority or execution capability from the checkpoint tag.
+Do not claim runtime authority or execution capability from the GitHub Release.
 
 Still not authorized:
 
@@ -319,13 +361,14 @@ Still not authorized:
 - tool execution
 - shell/subprocess execution
 - network execution
+- external tool control
 - multi-file lifecycle
 - broad physical I/O
 - durable writes
 - irreversible actions
 - autonomous agent runtime
 - production automation platform
-- GitHub release creation by current phase
+- additional GitHub release creation by current phase
 - Business Delivery OS
 - Personal AI Execution OS
 - Creative Production OS
@@ -341,7 +384,6 @@ The local reference interpreter for this phase is Python 3.14.4, and GitHub CI u
 
 Next decision:
 
-- GitHub release decision audit
 - adapter implementation decision audit with expected rejection unless concrete hard blockers are proven
 - stop/consolidation audit before any adapter implementation
 
@@ -355,7 +397,8 @@ Explicit stop rules:
 - no broad physical I/O by default
 - no durable writes by default
 - no irreversible actions by default
-- no GitHub release without a separate decision audit
+- no additional GitHub release without a separate decision audit
 - no runtime authority or execution capability from the checkpoint tag
+- no runtime authority or execution capability from the GitHub Release
 - no new governance boundary family by default
 - Business / Personal / Creative / Research OS remain later

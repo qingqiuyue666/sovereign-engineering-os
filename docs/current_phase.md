@@ -1,11 +1,11 @@
 # Current Phase
 
-Current phase: post `checkpoint-tag-v1`.
+Current phase: post `github-release-v1`.
 
 Current checkpoint:
 
-- `checkpoint-tag-v1`
-  - target: `bb9e6f6bfe79d1d5a6aa14810b3a517fb6af6e58`
+- `github-release-v1`
+  - target: `487ce0bf155ece0def931207f7fe122cf6b952c9`
 
 Completed milestones:
 
@@ -65,6 +65,8 @@ Completed milestones:
   - target: `f7e847c5add2a2a62ce25373a64f332fa0bea4fd`
 - `checkpoint-tag-v1`
   - target: `bb9e6f6bfe79d1d5a6aa14810b3a517fb6af6e58`
+- `github-release-v1`
+  - target: `487ce0bf155ece0def931207f7fe122cf6b952c9`
 
 Current system capability:
 
@@ -99,6 +101,7 @@ Current system capability:
 - SEOS narrow kernel public overview
 - README public overview link
 - annotated checkpoint tag
+- draft GitHub Release
 
 Post-adapter-design consolidation audit:
 
@@ -163,7 +166,7 @@ Repository trajectory audit after dry-run manifest line closure:
 
 - trajectory audit: `repository-trajectory-audit-after-dry-run-manifest-line-closure-v1`
 - verdict: `RECOMMEND_RELEASE_CHECKPOINT_CONSOLIDATION_NEXT`
-- repository maturity: narrow controlled execution kernel with replay verification, controlled demo proof, bounded dry-run manifest fixture, usage documentation, CI health gate, and strict stop rules
+- repository maturity: narrow controlled execution kernel with replay verification, controlled demo proof, bounded dry-run manifest fixture, usage documentation, CI health gate, annotated checkpoint tag, draft GitHub Release, and strict stop rules
 - release/checkpoint consolidation audit: recommended
 - adapter implementation: not authorized by default
 - direct adapter implementation: rejected
@@ -173,7 +176,7 @@ SEOS narrow kernel checkpoint consolidation:
 - consolidation audit: `seos-narrow-kernel-release-checkpoint-consolidation-audit-v1`
 - verdict: `SEOS_NARROW_KERNEL_CHECKPOINT_CONSOLIDATED_STOP_BEFORE_ADAPTER_IMPLEMENTATION`
 - checkpoint candidate: `seos-narrow-kernel-checkpoint-v1-candidate`
-- maturity classification: narrow controlled execution kernel with replay verification, controlled demo proof, bounded dry-run manifest fixture, usage documentation, CI health gate, and strict stop rules
+- maturity classification: narrow controlled execution kernel with replay verification, controlled demo proof, bounded dry-run manifest fixture, usage documentation, CI health gate, annotated checkpoint tag, draft GitHub Release, and strict stop rules
 - checkpoint status: candidate description only
 - git tag created: no
 - GitHub release created: no
@@ -197,7 +200,7 @@ Public overview:
 - target file: `docs/overview/seos_narrow_kernel_public_overview_v1.md`
 - status: documentation only
 - checkpoint candidate: `seos-narrow-kernel-checkpoint-v1-candidate`
-- maturity classification: narrow controlled execution kernel with replay verification, controlled demo proof, bounded dry-run manifest fixture, usage documentation, CI health gate, and strict stop rules
+- maturity classification: narrow controlled execution kernel with replay verification, controlled demo proof, bounded dry-run manifest fixture, usage documentation, CI health gate, annotated checkpoint tag, draft GitHub Release, and strict stop rules
 - no git tag created
 - no GitHub release created
 - no runtime authority created
@@ -251,6 +254,39 @@ Checkpoint tag:
 - production automation platform authorized: no
 - Business / Personal / Creative / Research OS authorized: no
 
+GitHub Release:
+
+- release milestone: `github-release-v1`
+- release id: `320261350`
+- release title: `SEOS narrow kernel checkpoint v1`
+- release target tag: `seos-narrow-kernel-checkpoint-v1`
+- release state: draft
+- release latest status: not latest by draft state / API did not expose make_latest
+- release assets: none
+- release purpose: checkpoint marker only
+- new git tag created: no
+- existing git tag moved: no
+- runtime authority created: no
+- execution capability created: no
+- adapter implementation authorized: no
+- adapter runtime authorized: no
+- service runtime authorized: no
+- DB/repository/UoW runtime authorized: no
+- evidence/audit append runtime authorized: no
+- executor runtime authorized: no
+- restore runtime authorized: no
+- CLI/tool execution authorized: no
+- subprocess execution authorized: no
+- network execution authorized: no
+- external tool control authorized: no
+- multi-file lifecycle authorized: no
+- broad physical I/O authorized: no
+- durable writes authorized: no
+- irreversible actions authorized: no
+- autonomous agent runtime authorized: no
+- production automation platform authorized: no
+- Business / Personal / Creative / Research OS authorized: no
+
 Preserved verdicts:
 
 - `STOP_BEFORE_ADAPTER_IMPLEMENTATION`
@@ -262,6 +298,7 @@ Preserved verdicts:
 - `APPROVE_PUBLIC_OVERVIEW_ALIGNMENT_NEXT`
 - `APPROVE_README_PUBLIC_OVERVIEW_LINK_NEXT`
 - `APPROVE_CHECKPOINT_TAG_NEXT`
+- `APPROVE_GITHUB_RELEASE_NEXT`
 
 Runtime eligibility:
 
@@ -276,23 +313,25 @@ Runtime eligibility:
 - CLI adapter: not eligible by default
 - subprocess/tool execution: not eligible
 - network execution: not eligible
+- external tool control: not eligible
 - broad physical I/O: not eligible
 - multi-file lifecycle: not eligible by default
 - autonomous agent runtime: not eligible
 - production automation platform: not eligible
 - durable writes: not eligible
 - irreversible actions: not eligible
-- GitHub release creation: not eligible without separate decision audit
+- additional GitHub release creation: not eligible without separate decision audit
 - runtime authority from public overview: not eligible
 - execution capability from public overview: not eligible
 - runtime authority from README link: not eligible
 - execution capability from README link: not eligible
 - runtime authority from checkpoint tag: not eligible
 - execution capability from checkpoint tag: not eligible
+- runtime authority from GitHub Release: not eligible
+- execution capability from GitHub Release: not eligible
 
 Next decision:
 
-- GitHub release decision audit
 - adapter implementation decision audit with expected rejection unless concrete hard blockers are proven
 - stop/consolidation audit before any adapter implementation
 
@@ -309,6 +348,7 @@ Forbidden jumps:
 - restore service
 - subprocess/tool execution
 - network execution
+- external tool control
 - tool execution
 - multi-file lifecycle
 - broad physical I/O
@@ -317,13 +357,15 @@ Forbidden jumps:
 - new governance boundary family
 - autonomous agent runtime
 - production automation platform
-- GitHub release creation without separate decision audit
+- additional GitHub release creation without separate decision audit
 - runtime authority claim from public overview
 - execution capability claim from public overview
 - runtime authority claim from README link
 - execution capability claim from README link
 - runtime authority claim from checkpoint tag
 - execution capability claim from checkpoint tag
+- runtime authority claim from GitHub Release
+- execution capability claim from GitHub Release
 - Business Delivery OS
 - Personal AI Execution OS
 - Creative Production OS
