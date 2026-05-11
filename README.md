@@ -2,7 +2,7 @@
 
 Sovereign Engineering OS is an AI execution control kernel and local-first governance kernel.
 
-Current phase/state: post `seos-narrow-kernel-public-overview-alignment-v1`.
+Current phase/state: post `readme-public-overview-link-v1`.
 
 Completed milestones:
 
@@ -31,6 +31,8 @@ Completed milestones:
 - `seos-narrow-kernel-release-checkpoint-consolidation-audit-v1`
 - `public-overview-alignment-decision-audit-v1`
 - `seos-narrow-kernel-public-overview-alignment-v1`
+- `README-public-overview-link-decision-audit-v1`
+- `readme-public-overview-link-v1`
 
 Current capability:
 
@@ -61,6 +63,7 @@ Current capability:
 - SEOS narrow kernel release/checkpoint consolidation audit
 - public overview alignment decision audit
 - SEOS narrow kernel public overview
+- README public overview link
 - acceptance smoke
 
 Controlled demo proves:
@@ -207,6 +210,23 @@ Public overview:
 - adapter implementation remains not authorized by default
 - direct adapter implementation remains rejected
 
+README public overview link:
+
+- link milestone: `readme-public-overview-link-v1`
+- link target: `docs/overview/seos_narrow_kernel_public_overview_v1.md`
+- link label: `SEOS narrow kernel public overview`
+- README link status: documentation only
+- README now links to the existing public overview
+- public overview document was not modified
+- docs/current_phase.md alignment is handled by this package only as current-phase documentation alignment
+- no git tag was created
+- no GitHub release was created
+- no runtime authority was created
+- no execution capability was created
+- no adapter implementation was authorized
+- adapter implementation remains not authorized by default
+- direct adapter implementation remains rejected
+
 Preserved verdicts:
 
 - `STOP_BEFORE_ADAPTER_IMPLEMENTATION`
@@ -216,6 +236,7 @@ Preserved verdicts:
 - `RECOMMEND_RELEASE_CHECKPOINT_CONSOLIDATION_NEXT`
 - `SEOS_NARROW_KERNEL_CHECKPOINT_CONSOLIDATED_STOP_BEFORE_ADAPTER_IMPLEMENTATION`
 - `APPROVE_PUBLIC_OVERVIEW_ALIGNMENT_NEXT`
+- `APPROVE_README_PUBLIC_OVERVIEW_LINK_NEXT`
 
 Current non-capabilities:
 
@@ -245,6 +266,7 @@ Do not proceed directly to adapter implementation.
 Do not create a git tag without a separate decision audit.
 Do not create a GitHub release without a separate decision audit.
 Do not claim runtime authority or execution capability from the public overview.
+Do not claim runtime authority or execution capability from the README public overview link.
 
 Still not authorized:
 
@@ -283,7 +305,6 @@ The local reference interpreter for this phase is Python 3.14.4, and GitHub CI u
 
 Next decision:
 
-- README/public overview link decision audit
 - checkpoint tag decision audit
 - GitHub release decision audit
 - adapter implementation decision audit with expected rejection unless concrete hard blockers are proven

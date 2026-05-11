@@ -1,11 +1,11 @@
 # Current Phase
 
-Current phase: post `seos-narrow-kernel-public-overview-alignment-v1`.
+Current phase: post `readme-public-overview-link-v1`.
 
 Current checkpoint:
 
-- `seos-narrow-kernel-public-overview-alignment-v1`
-  - target: `de1a99c977ac1a1f3ae52c535e16d2c15f9c0593`
+- `readme-public-overview-link-v1`
+  - target: `f7e847c5add2a2a62ce25373a64f332fa0bea4fd`
 
 Completed milestones:
 
@@ -59,6 +59,10 @@ Completed milestones:
   - target: `258e02d5c48400ab864ddf56db0355e7f5e72762`
 - `seos-narrow-kernel-public-overview-alignment-v1`
   - target: `de1a99c977ac1a1f3ae52c535e16d2c15f9c0593`
+- `README-public-overview-link-decision-audit-v1`
+  - target: `1eb166b9b48d7ed861b7b38d2bff04c10caf7ebd`
+- `readme-public-overview-link-v1`
+  - target: `f7e847c5add2a2a62ce25373a64f332fa0bea4fd`
 
 Current system capability:
 
@@ -91,6 +95,7 @@ Current system capability:
 - SEOS narrow kernel release/checkpoint consolidation audit
 - public overview alignment decision audit
 - SEOS narrow kernel public overview
+- README public overview link
 
 Post-adapter-design consolidation audit:
 
@@ -198,6 +203,22 @@ Public overview:
 - adapter implementation: not authorized by default
 - direct adapter implementation: rejected
 
+README public overview link:
+
+- link milestone: `readme-public-overview-link-v1`
+- link target: `docs/overview/seos_narrow_kernel_public_overview_v1.md`
+- link label: `SEOS narrow kernel public overview`
+- status: documentation only
+- public overview document changed: no
+- README changed: yes
+- no git tag created
+- no GitHub release created
+- no runtime authority created
+- no adapter implementation authorized
+- no execution capability created
+- adapter implementation: not authorized by default
+- direct adapter implementation: rejected
+
 Preserved verdicts:
 
 - `STOP_BEFORE_ADAPTER_IMPLEMENTATION`
@@ -207,6 +228,7 @@ Preserved verdicts:
 - `RECOMMEND_RELEASE_CHECKPOINT_CONSOLIDATION_NEXT`
 - `SEOS_NARROW_KERNEL_CHECKPOINT_CONSOLIDATED_STOP_BEFORE_ADAPTER_IMPLEMENTATION`
 - `APPROVE_PUBLIC_OVERVIEW_ALIGNMENT_NEXT`
+- `APPROVE_README_PUBLIC_OVERVIEW_LINK_NEXT`
 
 Runtime eligibility:
 
@@ -231,10 +253,11 @@ Runtime eligibility:
 - GitHub release creation: not eligible without separate decision audit
 - runtime authority from public overview: not eligible
 - execution capability from public overview: not eligible
+- runtime authority from README link: not eligible
+- execution capability from README link: not eligible
 
 Next decision:
 
-- README/public overview link decision audit
 - checkpoint tag decision audit
 - GitHub release decision audit
 - adapter implementation decision audit with expected rejection unless concrete hard blockers are proven
@@ -265,6 +288,8 @@ Forbidden jumps:
 - GitHub release creation without separate decision audit
 - runtime authority claim from public overview
 - execution capability claim from public overview
+- runtime authority claim from README link
+- execution capability claim from README link
 - Business Delivery OS
 - Personal AI Execution OS
 - Creative Production OS
