@@ -1,11 +1,11 @@
 # Current Phase
 
-Current phase: post `readme-public-overview-link-v1`.
+Current phase: post `checkpoint-tag-v1`.
 
 Current checkpoint:
 
-- `readme-public-overview-link-v1`
-  - target: `f7e847c5add2a2a62ce25373a64f332fa0bea4fd`
+- `checkpoint-tag-v1`
+  - target: `bb9e6f6bfe79d1d5a6aa14810b3a517fb6af6e58`
 
 Completed milestones:
 
@@ -63,6 +63,8 @@ Completed milestones:
   - target: `1eb166b9b48d7ed861b7b38d2bff04c10caf7ebd`
 - `readme-public-overview-link-v1`
   - target: `f7e847c5add2a2a62ce25373a64f332fa0bea4fd`
+- `checkpoint-tag-v1`
+  - target: `bb9e6f6bfe79d1d5a6aa14810b3a517fb6af6e58`
 
 Current system capability:
 
@@ -96,6 +98,7 @@ Current system capability:
 - public overview alignment decision audit
 - SEOS narrow kernel public overview
 - README public overview link
+- annotated checkpoint tag
 
 Post-adapter-design consolidation audit:
 
@@ -219,6 +222,35 @@ README public overview link:
 - adapter implementation: not authorized by default
 - direct adapter implementation: rejected
 
+Checkpoint tag:
+
+- tag milestone: `checkpoint-tag-v1`
+- tag name: `seos-narrow-kernel-checkpoint-v1`
+- tag type: annotated
+- tagged commit: `bb9e6f6bfe79d1d5a6aa14810b3a517fb6af6e58`
+- tag status: created and pushed
+- tag purpose: checkpoint marker only
+- GitHub release created: no
+- runtime authority created: no
+- execution capability created: no
+- adapter implementation authorized: no
+- adapter runtime authorized: no
+- service runtime authorized: no
+- DB/repository/UoW runtime authorized: no
+- evidence/audit append runtime authorized: no
+- executor runtime authorized: no
+- restore runtime authorized: no
+- CLI/tool execution authorized: no
+- subprocess execution authorized: no
+- network execution authorized: no
+- multi-file lifecycle authorized: no
+- broad physical I/O authorized: no
+- durable writes authorized: no
+- irreversible actions authorized: no
+- autonomous agent runtime authorized: no
+- production automation platform authorized: no
+- Business / Personal / Creative / Research OS authorized: no
+
 Preserved verdicts:
 
 - `STOP_BEFORE_ADAPTER_IMPLEMENTATION`
@@ -229,6 +261,7 @@ Preserved verdicts:
 - `SEOS_NARROW_KERNEL_CHECKPOINT_CONSOLIDATED_STOP_BEFORE_ADAPTER_IMPLEMENTATION`
 - `APPROVE_PUBLIC_OVERVIEW_ALIGNMENT_NEXT`
 - `APPROVE_README_PUBLIC_OVERVIEW_LINK_NEXT`
+- `APPROVE_CHECKPOINT_TAG_NEXT`
 
 Runtime eligibility:
 
@@ -249,16 +282,16 @@ Runtime eligibility:
 - production automation platform: not eligible
 - durable writes: not eligible
 - irreversible actions: not eligible
-- git tag creation: not eligible without separate decision audit
 - GitHub release creation: not eligible without separate decision audit
 - runtime authority from public overview: not eligible
 - execution capability from public overview: not eligible
 - runtime authority from README link: not eligible
 - execution capability from README link: not eligible
+- runtime authority from checkpoint tag: not eligible
+- execution capability from checkpoint tag: not eligible
 
 Next decision:
 
-- checkpoint tag decision audit
 - GitHub release decision audit
 - adapter implementation decision audit with expected rejection unless concrete hard blockers are proven
 - stop/consolidation audit before any adapter implementation
@@ -284,12 +317,13 @@ Forbidden jumps:
 - new governance boundary family
 - autonomous agent runtime
 - production automation platform
-- git tag creation without separate decision audit
 - GitHub release creation without separate decision audit
 - runtime authority claim from public overview
 - execution capability claim from public overview
 - runtime authority claim from README link
 - execution capability claim from README link
+- runtime authority claim from checkpoint tag
+- execution capability claim from checkpoint tag
 - Business Delivery OS
 - Personal AI Execution OS
 - Creative Production OS

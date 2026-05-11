@@ -2,7 +2,7 @@
 
 Sovereign Engineering OS is an AI execution control kernel and local-first governance kernel.
 
-Current phase/state: post `readme-public-overview-link-v1`.
+Current phase/state: post `checkpoint-tag-v1`.
 
 Completed milestones:
 
@@ -33,6 +33,7 @@ Completed milestones:
 - `seos-narrow-kernel-public-overview-alignment-v1`
 - `README-public-overview-link-decision-audit-v1`
 - `readme-public-overview-link-v1`
+- `checkpoint-tag-v1`
 
 Current capability:
 
@@ -64,6 +65,7 @@ Current capability:
 - public overview alignment decision audit
 - SEOS narrow kernel public overview
 - README public overview link
+- annotated checkpoint tag
 - acceptance smoke
 
 Controlled demo proves:
@@ -227,6 +229,40 @@ README public overview link:
 - adapter implementation remains not authorized by default
 - direct adapter implementation remains rejected
 
+Checkpoint tag:
+
+- tag milestone: `checkpoint-tag-v1`
+- tag name: `seos-narrow-kernel-checkpoint-v1`
+- tag type: annotated
+- tagged commit: `bb9e6f6bfe79d1d5a6aa14810b3a517fb6af6e58`
+- tag status: created and pushed
+- tag purpose: checkpoint marker only
+- tag does not create a GitHub release
+- tag does not authorize runtime authority
+- tag does not authorize execution capability
+- tag does not authorize adapter implementation
+- tag does not authorize adapter runtime
+- tag does not authorize service runtime
+- tag does not authorize DB/repository/UoW runtime
+- tag does not authorize evidence/audit append runtime
+- tag does not authorize executor runtime
+- tag does not authorize restore runtime
+- tag does not authorize CLI/tool execution
+- tag does not authorize subprocess execution
+- tag does not authorize network execution
+- tag does not authorize multi-file lifecycle
+- tag does not authorize broad physical I/O
+- tag does not authorize durable writes
+- tag does not authorize irreversible actions
+- tag does not authorize autonomous agent runtime
+- tag does not authorize production automation platform
+- tag does not authorize Business Delivery OS
+- tag does not authorize Personal AI Execution OS
+- tag does not authorize Creative Production OS
+- tag does not authorize Research Decision OS
+- adapter implementation remains not authorized by default
+- direct adapter implementation remains rejected
+
 Preserved verdicts:
 
 - `STOP_BEFORE_ADAPTER_IMPLEMENTATION`
@@ -237,6 +273,7 @@ Preserved verdicts:
 - `SEOS_NARROW_KERNEL_CHECKPOINT_CONSOLIDATED_STOP_BEFORE_ADAPTER_IMPLEMENTATION`
 - `APPROVE_PUBLIC_OVERVIEW_ALIGNMENT_NEXT`
 - `APPROVE_README_PUBLIC_OVERVIEW_LINK_NEXT`
+- `APPROVE_CHECKPOINT_TAG_NEXT`
 
 Current non-capabilities:
 
@@ -263,10 +300,10 @@ Current non-capabilities:
 - not Research Decision OS
 
 Do not proceed directly to adapter implementation.
-Do not create a git tag without a separate decision audit.
 Do not create a GitHub release without a separate decision audit.
 Do not claim runtime authority or execution capability from the public overview.
 Do not claim runtime authority or execution capability from the README public overview link.
+Do not claim runtime authority or execution capability from the checkpoint tag.
 
 Still not authorized:
 
@@ -288,7 +325,6 @@ Still not authorized:
 - irreversible actions
 - autonomous agent runtime
 - production automation platform
-- Git tag creation by current phase
 - GitHub release creation by current phase
 - Business Delivery OS
 - Personal AI Execution OS
@@ -305,7 +341,6 @@ The local reference interpreter for this phase is Python 3.14.4, and GitHub CI u
 
 Next decision:
 
-- checkpoint tag decision audit
 - GitHub release decision audit
 - adapter implementation decision audit with expected rejection unless concrete hard blockers are proven
 - stop/consolidation audit before any adapter implementation
@@ -320,7 +355,7 @@ Explicit stop rules:
 - no broad physical I/O by default
 - no durable writes by default
 - no irreversible actions by default
-- no git tag without a separate decision audit
 - no GitHub release without a separate decision audit
+- no runtime authority or execution capability from the checkpoint tag
 - no new governance boundary family by default
 - Business / Personal / Creative / Research OS remain later
