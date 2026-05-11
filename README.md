@@ -191,7 +191,7 @@ SEOS narrow kernel checkpoint consolidation:
 Public overview:
 
 - public overview: `seos-narrow-kernel-public-overview-alignment-v1`
-- target file: `docs/overview/seos_narrow_kernel_public_overview_v1.md`
+- target file: [SEOS narrow kernel public overview](docs/overview/seos_narrow_kernel_public_overview_v1.md)
 - overview status: documentation only
 - checkpoint candidate: `seos-narrow-kernel-checkpoint-v1-candidate`
 - repository maturity classification: narrow controlled execution kernel with replay verification, controlled demo proof, bounded dry-run manifest fixture, usage documentation, CI health gate, and strict stop rules
