@@ -1,11 +1,11 @@
 # Current Phase
 
-Current phase: post `github-release-v1`.
+Current phase: post `skeleton-code-design-consolidation-audit-v1`.
 
 Current checkpoint:
 
-- `github-release-v1`
-  - target: `487ce0bf155ece0def931207f7fe122cf6b952c9`
+- `skeleton-code-design-consolidation-audit-v1`
+  - target: `e7e8ebe2731cefb838acadd65ce7b8cb90fbf7aa`
 
 Completed milestones:
 
@@ -67,6 +67,14 @@ Completed milestones:
   - target: `bb9e6f6bfe79d1d5a6aa14810b3a517fb6af6e58`
 - `github-release-v1`
   - target: `487ce0bf155ece0def931207f7fe122cf6b952c9`
+- `non-runtime-adapter-skeleton-code-decision-audit-v1`
+  - target: `e86859f1124ea6ca146dadfa10a649ebc3e4b954`
+- `non-runtime-adapter-skeleton-code-design-audit-v1`
+  - target: `fb674007e59db5341cedb6c3c46fda745a028e7b`
+- `non-runtime-adapter-skeleton-code-design-spec-v1`
+  - target: `5349ccc5ed3dd33ef3373071db3434486f3dd755`
+- `skeleton-code-design-consolidation-audit-v1`
+  - target: `e7e8ebe2731cefb838acadd65ce7b8cb90fbf7aa`
 
 Current system capability:
 
@@ -102,6 +110,10 @@ Current system capability:
 - README public overview link
 - annotated checkpoint tag
 - draft GitHub Release
+- non-runtime adapter skeleton code decision audit
+- non-runtime adapter skeleton code design audit
+- docs-only non-runtime adapter skeleton code design
+- skeleton code design consolidation audit
 
 Post-adapter-design consolidation audit:
 
@@ -287,6 +299,36 @@ GitHub Release:
 - production automation platform authorized: no
 - Business / Personal / Creative / Research OS authorized: no
 
+Non-runtime adapter skeleton code design line:
+
+- current checkpoint: `skeleton-code-design-consolidation-audit-v1`
+- completed line: non-runtime adapter skeleton code design line
+- completed artifacts:
+  - `docs/decisions/non_runtime_adapter_skeleton_code_decision_audit_v1.md`
+  - `docs/decisions/non_runtime_adapter_skeleton_code_design_audit_v1.md`
+  - `docs/design/non_runtime_adapter_skeleton_code_design_v1.md`
+  - `docs/decisions/skeleton_code_design_consolidation_audit_v1.md`
+- consolidation verdict: `SKELETON_CODE_DESIGN_LINE_COMPLETE_STOP_BEFORE_IMPLEMENTATION`
+- current safe shape: Docs-only contracts, designs, and relocated marker artifacts.
+- Python skeleton code: rejected for current phase
+- adapter implementation: not eligible by default
+- runtime authority: not eligible
+- execution capability: not eligible
+- external tool control: not eligible
+- Business / Personal / Creative / Research OS: not eligible
+- existing adapter baseline: `PRE_EXISTING_PHASE1_REAL_MODEL_IGNITION_ADAPTER_LANE`
+- relocated marker root: `docs/markers/adapters/narrow/`
+- non-runtime adapter skeleton code design target: `docs/design/non_runtime_adapter_skeleton_code_design_v1.md`
+- existing adapter files remain unchanged:
+  - `kernel/adapters/__init__.py`
+  - `kernel/adapters/anthropic_adapter.py`
+- relocated marker files remain unchanged
+- direct Python skeleton implementation remains rejected
+- direct adapter implementation remains rejected
+- external tool control remains rejected
+- The next step should remain stop/consolidation or a separate implementation decision audit only if concrete necessity is proven.
+- next recommendation: remain stopped for consolidation, or require a separate implementation decision audit only if concrete necessity is proven
+
 Preserved verdicts:
 
 - `STOP_BEFORE_ADAPTER_IMPLEMENTATION`
@@ -299,9 +341,11 @@ Preserved verdicts:
 - `APPROVE_README_PUBLIC_OVERVIEW_LINK_NEXT`
 - `APPROVE_CHECKPOINT_TAG_NEXT`
 - `APPROVE_GITHUB_RELEASE_NEXT`
+- `SKELETON_CODE_DESIGN_LINE_COMPLETE_STOP_BEFORE_IMPLEMENTATION`
 
 Runtime eligibility:
 
+- Python skeleton code: rejected for current phase
 - service runtime: not eligible
 - service calls: not eligible
 - DB/repository/UoW writes: not eligible
@@ -332,14 +376,23 @@ Runtime eligibility:
 
 Next decision:
 
-- adapter implementation decision audit with expected rejection unless concrete hard blockers are proven
-- stop/consolidation audit before any adapter implementation
+- stop/consolidation remains the default next posture
+- The next step should remain stop/consolidation or a separate implementation decision audit only if concrete necessity is proven.
+- separate implementation decision audit only if concrete necessity is proven
+- no direct Python skeleton implementation
+- no direct adapter implementation
+- no external tool control
 
 Forbidden jumps:
 
+- direct Python skeleton implementation
 - direct adapter implementation
 - adapter implementation without decision audit
 - adapter code
+- adapter interface code
+- adapter skeleton code
+- files under kernel/adapters/
+- relocated marker changes
 - CLI adapter
 - service runtime
 - DB/repository/UoW
