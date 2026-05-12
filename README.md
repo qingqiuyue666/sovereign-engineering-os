@@ -2,7 +2,7 @@
 
 Sovereign Engineering OS is an AI execution control kernel and local-first governance kernel.
 
-Current phase/state: post `github-release-v1`.
+Current phase/state: post `skeleton-code-design-consolidation-audit-v1`.
 
 Completed milestones:
 
@@ -35,6 +35,10 @@ Completed milestones:
 - `readme-public-overview-link-v1`
 - `checkpoint-tag-v1`
 - `github-release-v1`
+- `non-runtime-adapter-skeleton-code-decision-audit-v1`
+- `non-runtime-adapter-skeleton-code-design-audit-v1`
+- `non-runtime-adapter-skeleton-code-design-spec-v1`
+- `skeleton-code-design-consolidation-audit-v1`
 
 Current capability:
 
@@ -68,6 +72,10 @@ Current capability:
 - README public overview link
 - annotated checkpoint tag
 - draft GitHub Release
+- non-runtime adapter skeleton code decision audit
+- non-runtime adapter skeleton code design audit
+- docs-only non-runtime adapter skeleton code design
+- skeleton code design consolidation audit
 - acceptance smoke
 
 Controlled demo proves:
@@ -302,6 +310,36 @@ GitHub Release:
 - adapter implementation remains not authorized by default
 - direct adapter implementation remains rejected
 
+Non-runtime adapter skeleton code design line:
+
+- current checkpoint: `skeleton-code-design-consolidation-audit-v1`
+- completed line: non-runtime adapter skeleton code design line
+- completed artifacts:
+  - `docs/decisions/non_runtime_adapter_skeleton_code_decision_audit_v1.md`
+  - `docs/decisions/non_runtime_adapter_skeleton_code_design_audit_v1.md`
+  - `docs/design/non_runtime_adapter_skeleton_code_design_v1.md`
+  - `docs/decisions/skeleton_code_design_consolidation_audit_v1.md`
+- consolidation verdict: `SKELETON_CODE_DESIGN_LINE_COMPLETE_STOP_BEFORE_IMPLEMENTATION`
+- current safe shape: Docs-only contracts, designs, and relocated marker artifacts.
+- Python skeleton code: rejected for current phase
+- adapter implementation: not eligible by default
+- runtime authority: not eligible
+- execution capability: not eligible
+- external tool control: not eligible
+- Business / Personal / Creative / Research OS: not eligible
+- existing adapter baseline: `PRE_EXISTING_PHASE1_REAL_MODEL_IGNITION_ADAPTER_LANE`
+- relocated marker root: `docs/markers/adapters/narrow/`
+- non-runtime adapter skeleton code design target: `docs/design/non_runtime_adapter_skeleton_code_design_v1.md`
+- existing adapter files remain unchanged:
+  - `kernel/adapters/__init__.py`
+  - `kernel/adapters/anthropic_adapter.py`
+- relocated marker files remain unchanged
+- direct Python skeleton implementation remains rejected
+- direct adapter implementation remains rejected
+- external tool control remains rejected
+- The next step should remain stop/consolidation or a separate implementation decision audit only if concrete necessity is proven.
+- next recommendation: remain stopped for consolidation, or require a separate implementation decision audit only if concrete necessity is proven
+
 Preserved verdicts:
 
 - `STOP_BEFORE_ADAPTER_IMPLEMENTATION`
@@ -314,11 +352,14 @@ Preserved verdicts:
 - `APPROVE_README_PUBLIC_OVERVIEW_LINK_NEXT`
 - `APPROVE_CHECKPOINT_TAG_NEXT`
 - `APPROVE_GITHUB_RELEASE_NEXT`
+- `SKELETON_CODE_DESIGN_LINE_COMPLETE_STOP_BEFORE_IMPLEMENTATION`
 
 Current non-capabilities:
 
 - not a general runtime platform
+- not Python skeleton code
 - not an adapter runtime
+- not adapter skeleton code
 - not adapter implementation ready
 - not a service runtime
 - not a DB/repository/UoW runtime
@@ -340,17 +381,25 @@ Current non-capabilities:
 - not Creative Production OS
 - not Research Decision OS
 
+Do not proceed directly to Python skeleton implementation.
 Do not proceed directly to adapter implementation.
 Do not create another GitHub release without a separate decision audit.
 Do not claim runtime authority or execution capability from the public overview.
 Do not claim runtime authority or execution capability from the README public overview link.
 Do not claim runtime authority or execution capability from the checkpoint tag.
 Do not claim runtime authority or execution capability from the GitHub Release.
+Do not change `kernel/adapters/` by default.
+Do not change relocated marker files by default.
 
 Still not authorized:
 
+- Python skeleton code
 - adapter implementation
 - adapter code
+- adapter interface code
+- adapter skeleton code
+- files under `kernel/adapters/`
+- relocated marker changes
 - CLI adapter
 - service runtime
 - service calls
@@ -384,13 +433,22 @@ The local reference interpreter for this phase is Python 3.14.4, and GitHub CI u
 
 Next decision:
 
-- adapter implementation decision audit with expected rejection unless concrete hard blockers are proven
-- stop/consolidation audit before any adapter implementation
+- stop/consolidation remains the default next posture
+- The next step should remain stop/consolidation or a separate implementation decision audit only if concrete necessity is proven.
+- separate implementation decision audit only if concrete necessity is proven
+- no direct Python skeleton implementation
+- no direct adapter implementation
+- no external tool control
 
 Explicit stop rules:
 
 - no service/DB/executor by default
+- no Python skeleton code by default
 - no adapter implementation by default
+- no adapter interface code by default
+- no adapter skeleton code by default
+- no `kernel/adapters/` changes by default
+- no relocated marker changes by default
 - no CLI adapter by default
 - no tool, shell/subprocess, or network execution by default
 - no multi-file expansion by default
