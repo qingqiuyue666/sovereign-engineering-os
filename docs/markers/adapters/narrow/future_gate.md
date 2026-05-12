@@ -12,7 +12,7 @@ The later audit must define:
 - whether tests are authorized
 - whether imports are authorized
 - whether classes are authorized
-- whether Dataclasses are authorized
+- whether dataclasses are authorized
 - whether protocols are authorized
 - whether schemas are authorized
 - whether validators are authorized
@@ -56,7 +56,7 @@ This is not a Python package.
 
 This is not Python classes.
 
-This is not Dataclasses.
+This is not dataclasses.
 
 This is not protocols.
 

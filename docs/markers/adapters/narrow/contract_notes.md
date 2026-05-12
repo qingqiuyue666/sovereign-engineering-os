@@ -48,7 +48,7 @@ This is not a Python package.
 
 This is not Python classes.
 
-This is not Dataclasses.
+This is not dataclasses.
 
 This is not protocols.
 

@@ -12,7 +12,7 @@ The following operations are forbidden:
 - Python modules
 - Python packages
 - Python classes
-- Dataclasses
+- dataclasses
 - protocols
 - schemas
 - validators
@@ -80,7 +80,7 @@ This is not a Python package.
 
 This is not Python classes.
 
-This is not Dataclasses.
+This is not dataclasses.
 
 This is not protocols.
 

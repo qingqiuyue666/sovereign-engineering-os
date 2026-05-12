@@ -1,6 +1,6 @@
 # Relocated Narrow Adapter Non-Authority Marker
 
-This relocated marker is not runtime authority. This relocated marker is not execution authorization. This relocated marker is not adapter implementation. This relocated marker does not create adapter code, adapter interface code, adapter skeleton code, Python files, Python modules, Python packages, Python classes, Dataclasses, protocols, schemas, validators, tests, runtime functions, CLI commands, repository calls, service calls, executor hooks, subprocess/network/tool execution, external tool control, durable writes, irreversible actions, or broad physical I/O. Any skeleton code or adapter implementation requires a later explicit audit.
+This relocated marker is not runtime authority. This relocated marker is not execution authorization. This relocated marker is not adapter implementation. This relocated marker does not create adapter code, adapter interface code, adapter skeleton code, Python files, Python modules, Python packages, Python classes, dataclasses, protocols, schemas, validators, tests, runtime functions, CLI commands, repository calls, service calls, executor hooks, subprocess/network/tool execution, external tool control, durable writes, irreversible actions, or broad physical I/O. Any skeleton code or adapter implementation requires a later explicit audit.
 
 Contract validity is not runtime authority.
 
@@ -44,7 +44,7 @@ This is not a Python package.
 
 This is not Python classes.
 
-This is not Dataclasses.
+This is not dataclasses.
 
 This is not protocols.
 
