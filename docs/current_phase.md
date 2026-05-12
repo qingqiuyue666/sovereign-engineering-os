@@ -1,11 +1,14 @@
 # Current Phase
 
-Current phase: post `skeleton-code-design-consolidation-audit-v1`.
+Current phase: post `checkpoint-refresh-after-skeleton-code-design-line-v1`.
 
 Current checkpoint:
 
-- `skeleton-code-design-consolidation-audit-v1`
-  - target: `e7e8ebe2731cefb838acadd65ce7b8cb90fbf7aa`
+- `checkpoint-refresh-after-skeleton-code-design-line-v1`
+  - target: `3e94fb89b68b8c9e739b987aa2eeeec5c0b79ce2`
+  - refreshed checkpoint tag: `seos-narrow-kernel-post-skeleton-code-design-v1`
+  - refreshed checkpoint tag type: annotated
+  - refreshed checkpoint tag target: `3e94fb89b68b8c9e739b987aa2eeeec5c0b79ce2`
 
 Completed milestones:
 
@@ -75,6 +78,8 @@ Completed milestones:
   - target: `5349ccc5ed3dd33ef3373071db3434486f3dd755`
 - `skeleton-code-design-consolidation-audit-v1`
   - target: `e7e8ebe2731cefb838acadd65ce7b8cb90fbf7aa`
+- `checkpoint-refresh-after-skeleton-code-design-line-v1`
+  - target: `3e94fb89b68b8c9e739b987aa2eeeec5c0b79ce2`
 
 Current system capability:
 
@@ -114,6 +119,8 @@ Current system capability:
 - non-runtime adapter skeleton code design audit
 - docs-only non-runtime adapter skeleton code design
 - skeleton code design consolidation audit
+- checkpoint refresh after skeleton-code-design line
+- refreshed annotated checkpoint tag
 
 Post-adapter-design consolidation audit:
 
@@ -301,7 +308,7 @@ GitHub Release:
 
 Non-runtime adapter skeleton code design line:
 
-- current checkpoint: `skeleton-code-design-consolidation-audit-v1`
+- skeleton-code-design checkpoint: `skeleton-code-design-consolidation-audit-v1`
 - completed line: non-runtime adapter skeleton code design line
 - completed artifacts:
   - `docs/decisions/non_runtime_adapter_skeleton_code_decision_audit_v1.md`
@@ -326,8 +333,44 @@ Non-runtime adapter skeleton code design line:
 - direct Python skeleton implementation remains rejected
 - direct adapter implementation remains rejected
 - external tool control remains rejected
-- The next step should remain stop/consolidation or a separate implementation decision audit only if concrete necessity is proven.
-- next recommendation: remain stopped for consolidation, or require a separate implementation decision audit only if concrete necessity is proven
+- next recommendation: `release-refresh-decision-audit-after-post-skeleton-checkpoint-v1` or stop/consolidation
+
+Checkpoint refresh after skeleton-code-design line:
+
+- current checkpoint: `checkpoint-refresh-after-skeleton-code-design-line-v1`
+- checkpoint refresh decision audit: `docs/decisions/checkpoint_refresh_decision_audit_after_skeleton_code_design_line_v1.md`
+- checkpoint refresh decision verdict: `APPROVE_CHECKPOINT_REFRESH_NEXT`
+- refreshed checkpoint tag: `seos-narrow-kernel-post-skeleton-code-design-v1`
+- refreshed checkpoint tag type: annotated
+- refreshed checkpoint tag target: `3e94fb89b68b8c9e739b987aa2eeeec5c0b79ce2`
+- prior checkpoint tag preserved: `seos-narrow-kernel-checkpoint-v1`
+- prior checkpoint tag target: `bb9e6f6bfe79d1d5a6aa14810b3a517fb6af6e58`
+- prior GitHub Release unchanged:
+  - release id: `320261350`
+  - release title: `SEOS narrow kernel checkpoint v1`
+  - release target tag: `seos-narrow-kernel-checkpoint-v1`
+  - release state: draft
+  - release assets: none
+- completed line: non-runtime adapter skeleton code design line
+- consolidation verdict: `SKELETON_CODE_DESIGN_LINE_COMPLETE_STOP_BEFORE_IMPLEMENTATION`
+- current safe shape: Docs-only contracts, designs, and relocated marker artifacts.
+- Python skeleton code: rejected for current phase
+- adapter implementation: not eligible by default
+- direct adapter implementation: rejected
+- runtime authority: not eligible
+- execution capability: not eligible
+- external tool control: not eligible
+- Business / Personal / Creative / Research OS: not eligible
+- existing adapter baseline: `PRE_EXISTING_PHASE1_REAL_MODEL_IGNITION_ADAPTER_LANE`
+- relocated marker root: `docs/markers/adapters/narrow/`
+- non-runtime adapter skeleton code design target: `docs/design/non_runtime_adapter_skeleton_code_design_v1.md`
+- GitHub Release was not created or edited for the refreshed checkpoint
+- prior checkpoint tag was not moved
+- next recommendation: `release-refresh-decision-audit-after-post-skeleton-checkpoint-v1` or stop/consolidation
+- no direct Python skeleton implementation
+- no direct adapter implementation
+- no external tool control
+- no GitHub Release creation or edit without a separate decision audit
 
 Preserved verdicts:
 
@@ -342,6 +385,7 @@ Preserved verdicts:
 - `APPROVE_CHECKPOINT_TAG_NEXT`
 - `APPROVE_GITHUB_RELEASE_NEXT`
 - `SKELETON_CODE_DESIGN_LINE_COMPLETE_STOP_BEFORE_IMPLEMENTATION`
+- `APPROVE_CHECKPOINT_REFRESH_NEXT`
 
 Runtime eligibility:
 
@@ -377,11 +421,11 @@ Runtime eligibility:
 Next decision:
 
 - stop/consolidation remains the default next posture
-- The next step should remain stop/consolidation or a separate implementation decision audit only if concrete necessity is proven.
-- separate implementation decision audit only if concrete necessity is proven
+- The next step should be `release-refresh-decision-audit-after-post-skeleton-checkpoint-v1` or stop/consolidation.
 - no direct Python skeleton implementation
 - no direct adapter implementation
 - no external tool control
+- no GitHub Release creation or edit without a separate decision audit
 
 Forbidden jumps:
 
