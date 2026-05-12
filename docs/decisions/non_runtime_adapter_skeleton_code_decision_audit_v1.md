@@ -457,10 +457,8 @@ Answer: No, unless Codex finds exact evidence. No exact evidence found.
 
 ## Code Authorization Finding
 
-No concrete hard blocker currently proves that actual non-runtime adapter
-skeleton code is required. Therefore this audit rejects skeleton code for the
-next package and recommends a narrower skeleton code design audit before any
-Python file is authorized.
+No concrete hard blocker currently proves that actual non-runtime adapter skeleton code is required.
+Therefore this audit rejects skeleton code for the next package and recommends a narrower skeleton code design audit before any Python file is authorized.
 
 ## Required Verdict Options
 
