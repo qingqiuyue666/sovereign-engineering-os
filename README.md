@@ -2,7 +2,7 @@
 
 Sovereign Engineering OS is an AI execution control kernel and local-first governance kernel.
 
-Current phase/state: post `checkpoint-refresh-after-skeleton-code-design-line-v1`.
+Current phase/state: post `release-refresh-after-post-skeleton-checkpoint-v1`.
 
 Completed milestones:
 
@@ -40,6 +40,7 @@ Completed milestones:
 - `non-runtime-adapter-skeleton-code-design-spec-v1`
 - `skeleton-code-design-consolidation-audit-v1`
 - `checkpoint-refresh-after-skeleton-code-design-line-v1`
+- `release-refresh-after-post-skeleton-checkpoint-v1`
 
 Current capability:
 
@@ -79,6 +80,7 @@ Current capability:
 - skeleton code design consolidation audit
 - checkpoint refresh after skeleton-code-design line
 - refreshed annotated checkpoint tag
+- release refresh after post-skeleton checkpoint
 - acceptance smoke
 
 Controlled demo proves:
@@ -340,7 +342,7 @@ Non-runtime adapter skeleton code design line:
 - direct Python skeleton implementation remains rejected
 - direct adapter implementation remains rejected
 - external tool control remains rejected
-- next recommendation: `release-refresh-decision-audit-after-post-skeleton-checkpoint-v1` or stop/consolidation
+- next recommendation: `release-refresh-consolidation-audit-v1` or stop/consolidation
 
 Checkpoint refresh after skeleton-code-design line:
 
@@ -373,11 +375,52 @@ Checkpoint refresh after skeleton-code-design line:
 - non-runtime adapter skeleton code design target: `docs/design/non_runtime_adapter_skeleton_code_design_v1.md`
 - GitHub Release was not created or edited for the refreshed checkpoint
 - prior checkpoint tag was not moved
-- next recommendation: `release-refresh-decision-audit-after-post-skeleton-checkpoint-v1` or stop/consolidation
+- release refresh after post-skeleton checkpoint is recorded separately below
+- next recommendation: `release-refresh-consolidation-audit-v1` or stop/consolidation
 - no direct Python skeleton implementation
 - no direct adapter implementation
 - no external tool control
-- no GitHub Release creation or edit without a separate decision audit
+- no additional GitHub Release creation or edit without a separate decision audit
+
+Release refresh after post-skeleton checkpoint:
+
+- current checkpoint: `release-refresh-after-post-skeleton-checkpoint-v1`
+- release refresh decision audit: `docs/decisions/release_refresh_decision_audit_after_post_skeleton_checkpoint_v1.md`
+- release refresh decision verdict: `APPROVE_RELEASE_REFRESH_NEXT`
+- new GitHub Release:
+  - release id: `321576116`
+  - release title: `SEOS narrow kernel post skeleton-code-design checkpoint v1`
+  - release target tag: `seos-narrow-kernel-post-skeleton-code-design-v1`
+  - release state: draft
+  - release latest status: not latest by draft state / published_at null
+  - release assets: none / assets count 0
+  - published_at: null
+- prior GitHub Release preserved:
+  - release id: `320261350`
+  - release title: `SEOS narrow kernel checkpoint v1`
+  - release target tag: `seos-narrow-kernel-checkpoint-v1`
+  - release state: draft
+  - release assets: none / assets count 0
+- refreshed checkpoint tag: `seos-narrow-kernel-post-skeleton-code-design-v1`
+- refreshed checkpoint tag target: `3e94fb89b68b8c9e739b987aa2eeeec5c0b79ce2`
+- prior checkpoint tag preserved: `seos-narrow-kernel-checkpoint-v1`
+- prior checkpoint tag target: `bb9e6f6bfe79d1d5a6aa14810b3a517fb6af6e58`
+- Python skeleton code: rejected for current phase
+- adapter implementation: not eligible by default
+- direct adapter implementation: rejected
+- runtime authority: not eligible
+- execution capability: not eligible
+- external tool control: not eligible
+- Business / Personal / Creative / Research OS: not eligible
+- release remains draft-only
+- no release assets were attached
+- prior GitHub Release was not edited or replaced
+- no git tag was created, moved, or deleted
+- no direct Python skeleton implementation
+- no direct adapter implementation
+- no external tool control
+- next recommendation: `release-refresh-consolidation-audit-v1` or stop/consolidation
+- do not publish the release
 
 Preserved verdicts:
 
@@ -393,6 +436,7 @@ Preserved verdicts:
 - `APPROVE_GITHUB_RELEASE_NEXT`
 - `SKELETON_CODE_DESIGN_LINE_COMPLETE_STOP_BEFORE_IMPLEMENTATION`
 - `APPROVE_CHECKPOINT_REFRESH_NEXT`
+- `APPROVE_RELEASE_REFRESH_NEXT`
 
 Current non-capabilities:
 
@@ -457,7 +501,7 @@ Still not authorized:
 - irreversible actions
 - autonomous agent runtime
 - production automation platform
-- additional GitHub release creation by current phase
+- additional GitHub release creation without separate authorization
 - Business Delivery OS
 - Personal AI Execution OS
 - Creative Production OS
@@ -474,11 +518,12 @@ The local reference interpreter for this phase is Python 3.14.4, and GitHub CI u
 Next decision:
 
 - stop/consolidation remains the default next posture
-- The next step should be `release-refresh-decision-audit-after-post-skeleton-checkpoint-v1` or stop/consolidation.
+- The next step should be `release-refresh-consolidation-audit-v1` or stop/consolidation.
 - no direct Python skeleton implementation
 - no direct adapter implementation
 - no external tool control
-- no GitHub Release creation or edit without a separate decision audit
+- no additional GitHub Release creation or edit without a separate decision audit
+- no release publication
 
 Explicit stop rules:
 
@@ -496,6 +541,7 @@ Explicit stop rules:
 - no durable writes by default
 - no irreversible actions by default
 - no additional GitHub release without a separate decision audit
+- no release publication by default
 - no runtime authority or execution capability from the checkpoint tag
 - no runtime authority or execution capability from the GitHub Release
 - no new governance boundary family by default
