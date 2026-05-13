@@ -1,15 +1,16 @@
 # Current Phase
 
 Current phase: post
-`final-stop-state-consolidation-batch-v1`, with the first bounded
-Personal AI Execution OS local foundation MVP implementation bridge.
+`final-stop-state-consolidation-batch-v1`, with the second bounded
+Personal AI Execution OS local pipeline MVP implementation bridge.
 
 Current checkpoint:
 
-- `personal-ai-execution-os-local-foundation-mvp-v1`
+- `personal-ai-local-pipeline-mvp-v1`
   - Phase 2 selected lane: Personal AI Execution OS
-  - implemented first local foundation MVP: local intake ledger + artifact
-    profiler + work-order proposal + human review packet
+  - implemented second local foundation MVP: end-to-end local review pipeline
+  - pipeline stages: local intake ledger → artifact profile → work-order
+    proposal → human review packet → pipeline manifest
   - physical contact type: local filesystem read + SHA-256 hash +
     deterministic JSONL/JSON output outside input directory
   - authority status: non-authority
@@ -20,12 +21,12 @@ Current checkpoint:
   - API calls: not introduced
   - AI classification: not introduced
   - adapter implementation: not introduced
-  - `kernel/adapters/`: unchanged
+  - kernel/adapters: unchanged
   - input files: never modified / moved / deleted / renamed
   - output: deterministic JSONL / JSON artifacts
   - required human approval: true
   - next recommendation:
-    `personal-ai-local-foundation-review-audit-v1` or stop/consolidation
+    `personal-ai-local-pipeline-review-audit-v1` or stop/consolidation
   - Business Delivery OS: not started
   - Creative Production OS: not started
   - Research Decision OS: not started
@@ -166,6 +167,13 @@ Completed milestones:
   - runtime authority: not introduced
   - external tool control: not introduced
   - network/API usage: not introduced
+- `personal-ai-local-pipeline-mvp-v1`
+  - Phase 2 selected lane: Personal AI Execution OS
+  - authority status: non-authority
+  - execution capability: not introduced
+  - runtime authority: not introduced
+  - external tool control: not introduced
+  - network/API usage: not introduced
 
 Current system capability:
 
@@ -214,6 +222,8 @@ Current system capability:
 - Personal AI artifact profiler
 - Personal AI non-executing work-order proposal
 - Personal AI human review packet
+- Personal AI end-to-end local review pipeline
+- Personal AI pipeline manifest
 
 Post-adapter-design consolidation audit:
 
@@ -630,17 +640,18 @@ Runtime eligibility:
 - runtime authority from GitHub Release: not eligible
 - execution capability from GitHub Release: not eligible
 
-Personal AI local foundation MVP:
+Personal AI local pipeline MVP:
 
-- checkpoint: `personal-ai-execution-os-local-foundation-mvp-v1`
+- checkpoint: `personal-ai-local-pipeline-mvp-v1`
 - Phase 2 selected lane: Personal AI Execution OS
-- local foundation components: local intake ledger + artifact profiler +
-  work-order proposal + human review packet
+- implemented second local foundation MVP: end-to-end local review pipeline
+- pipeline stages: local intake ledger → artifact profile → work-order
+  proposal → human review packet → pipeline manifest
 - physical contact type: local filesystem read + SHA-256 hash +
   deterministic JSONL/JSON output outside input directory
 - authority status: non-authority
-- execution capability: not introduced
-- runtime authority: not introduced
+- execution status: no execution capability
+- runtime status: no runtime authority
 - external tool control: not introduced
 - network: not introduced
 - API calls: not introduced
@@ -649,7 +660,7 @@ Personal AI local foundation MVP:
 - input files: never modified / moved / deleted / renamed
 - output: deterministic JSONL / JSON artifacts
 - required human approval: true
-- `kernel/adapters/`: unchanged
+- kernel/adapters: unchanged
 - Business Delivery OS: not started
 - Creative Production OS: not started
 - Research Decision OS: not started
@@ -657,7 +668,7 @@ Personal AI local foundation MVP:
 
 Next decision:
 
-- `personal-ai-local-foundation-review-audit-v1` or stop/consolidation
+- `personal-ai-local-pipeline-review-audit-v1` or stop/consolidation
 - final repository trajectory: `RECOMMEND_STOP_ONLY`
 - no release publication by default
 - no additional implementation by default

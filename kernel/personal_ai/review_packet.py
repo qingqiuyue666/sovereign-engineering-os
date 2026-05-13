@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from pathlib import Path
 import json
 
+from kernel.personal_ai.io_utils import write_json_atomically
+
 __all__ = [
     "ReviewPacketResult",
     "build_review_packet",
@@ -77,10 +79,7 @@ def build_review_packet(
         "next_allowed_action": "human_review_only",
     }
 
-    output_path.write_text(
-        json.dumps(packet, indent=2) + "\n",
-        encoding="utf-8",
-    )
+    write_json_atomically(output_path, packet)
 
     return ReviewPacketResult(
         output_review_packet_path=output_path,

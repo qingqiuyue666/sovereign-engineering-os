@@ -45,10 +45,10 @@ class LocalFileIntakeTests(unittest.TestCase):
             self.assertEqual(
                 list(entries[0]),
                 [
-                    "relative_path",
-                    "size_bytes",
-                    "sha256",
                     "modified_time_ns",
+                    "relative_path",
+                    "sha256",
+                    "size_bytes",
                 ],
             )
             self.assertEqual(len(entries[0]["sha256"]), 64)

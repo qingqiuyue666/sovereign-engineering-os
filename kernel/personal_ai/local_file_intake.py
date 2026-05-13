@@ -3,8 +3,8 @@
 from dataclasses import dataclass
 from hashlib import sha256
 from pathlib import Path
-import json
-import tempfile
+
+from kernel.personal_ai.io_utils import write_jsonl_atomically
 
 __all__ = [
     "LocalFileIntakeResult",
@@ -51,7 +51,7 @@ def build_local_file_intake_ledger(
     )
     entries.sort(key=lambda entry: entry["relative_path"])
 
-    _write_jsonl_atomically(output_path, entries)
+    write_jsonl_atomically(output_path, entries)
 
     return LocalFileIntakeResult(
         input_dir=input_path,
@@ -145,21 +145,3 @@ def _modified_time_ns(file_stat):
             int(file_stat.st_mtime * 1_000_000_000),
         )
     )
-
-
-def _write_jsonl_atomically(output_path, entries):
-    with tempfile.NamedTemporaryFile(
-        "w",
-        encoding="utf-8",
-        dir=output_path.parent,
-        prefix=f".{output_path.name}.",
-        suffix=".tmp",
-        delete=False,
-    ) as temporary_file:
-        temporary_path = Path(temporary_file.name)
-        for entry in entries:
-            temporary_file.write(json.dumps(entry, separators=(",", ":")))
-            temporary_file.write("\n")
-        temporary_file.flush()
-
-    temporary_path.replace(output_path)

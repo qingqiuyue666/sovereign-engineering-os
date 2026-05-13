@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from pathlib import Path
 import json
 
+from kernel.personal_ai.io_utils import write_json_atomically
+
 __all__ = [
     "ArtifactProfileResult",
     "build_artifact_profile",
@@ -116,10 +118,7 @@ def build_artifact_profile(
         "entries": profile_entries,
     }
 
-    output_path.write_text(
-        json.dumps(profile, indent=2) + "\n",
-        encoding="utf-8",
-    )
+    write_json_atomically(output_path, profile)
 
     return ArtifactProfileResult(
         ledger_path=ledger,

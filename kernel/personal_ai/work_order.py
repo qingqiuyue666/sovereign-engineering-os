@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from pathlib import Path
 import json
 
+from kernel.personal_ai.io_utils import write_json_atomically
+
 __all__ = [
     "WorkOrderProposalResult",
     "build_work_order_proposal",
@@ -81,10 +83,7 @@ def build_work_order_proposal(
         },
     }
 
-    output_path.write_text(
-        json.dumps(proposal, indent=2) + "\n",
-        encoding="utf-8",
-    )
+    write_json_atomically(output_path, proposal)
 
     return WorkOrderProposalResult(
         profile_path=profile_file,
