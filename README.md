@@ -2,7 +2,19 @@
 
 Sovereign Engineering OS is an AI execution control kernel and local-first governance kernel.
 
-Current phase/state: post `release-refresh-consolidation-audit-v1`.
+Current phase/state: post
+`public-overview-alignment-after-release-refresh-compound-v1`.
+
+Current checkpoint:
+
+- `public-overview-alignment-after-release-refresh-compound-v1`
+  - public overview alignment after release refresh completed
+  - current public overview:
+    [SEOS narrow kernel public overview](docs/overview/seos_narrow_kernel_public_overview_v1.md)
+  - public overview now records post-skeleton checkpoint/release state
+  - public overview still preserves no-publication/no-implementation/no-runtime
+    boundaries
+  - next recommendation: stop/consolidation by default
 
 Completed milestones:
 
@@ -42,6 +54,7 @@ Completed milestones:
 - `checkpoint-refresh-after-skeleton-code-design-line-v1`
 - `release-refresh-after-post-skeleton-checkpoint-v1`
 - `release-refresh-consolidation-audit-v1`
+- `public-overview-alignment-after-release-refresh-compound-v1`
 
 Current capability:
 
@@ -83,6 +96,7 @@ Current capability:
 - refreshed annotated checkpoint tag
 - release refresh after post-skeleton checkpoint
 - release refresh consolidation audit
+- public overview alignment after release refresh
 - acceptance smoke
 
 Controlled demo proves:
@@ -452,6 +466,28 @@ Release refresh consolidation:
 - next recommendation:
   `repository-trajectory-audit-after-release-refresh-line-v1` or
   stop/consolidation
+
+Public overview alignment after release refresh:
+
+- current checkpoint: `public-overview-alignment-after-release-refresh-compound-v1`
+- alignment status: completed
+- current public overview:
+  `docs/overview/seos_narrow_kernel_public_overview_v1.md`
+- public overview now records post-skeleton checkpoint/release state
+- public overview records release `321576116` as draft, unpublished, and
+  assets 0
+- public overview records prior release `320261350` as draft, untouched, and
+  assets 0
+- public overview preserves no-publication/no-implementation/no-runtime
+  boundaries
+- Python skeleton code: rejected for current phase
+- adapter implementation: not eligible by default
+- direct adapter implementation: rejected
+- runtime authority: not eligible
+- execution capability: not eligible
+- external tool control: not eligible
+- Business / Personal / Creative / Research OS: not eligible
+- next recommendation: stop/consolidation by default
 
 Preserved verdicts:
 
