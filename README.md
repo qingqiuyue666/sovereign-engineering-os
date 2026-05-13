@@ -2,7 +2,7 @@
 
 Sovereign Engineering OS is an AI execution control kernel and local-first governance kernel.
 
-Current phase/state: post `release-refresh-after-post-skeleton-checkpoint-v1`.
+Current phase/state: post `release-refresh-consolidation-audit-v1`.
 
 Completed milestones:
 
@@ -41,6 +41,7 @@ Completed milestones:
 - `skeleton-code-design-consolidation-audit-v1`
 - `checkpoint-refresh-after-skeleton-code-design-line-v1`
 - `release-refresh-after-post-skeleton-checkpoint-v1`
+- `release-refresh-consolidation-audit-v1`
 
 Current capability:
 
@@ -81,6 +82,7 @@ Current capability:
 - checkpoint refresh after skeleton-code-design line
 - refreshed annotated checkpoint tag
 - release refresh after post-skeleton checkpoint
+- release refresh consolidation audit
 - acceptance smoke
 
 Controlled demo proves:
@@ -342,7 +344,7 @@ Non-runtime adapter skeleton code design line:
 - direct Python skeleton implementation remains rejected
 - direct adapter implementation remains rejected
 - external tool control remains rejected
-- next recommendation: `release-refresh-consolidation-audit-v1` or stop/consolidation
+- release refresh consolidation is recorded separately below
 
 Checkpoint refresh after skeleton-code-design line:
 
@@ -376,7 +378,7 @@ Checkpoint refresh after skeleton-code-design line:
 - GitHub Release was not created or edited for the refreshed checkpoint
 - prior checkpoint tag was not moved
 - release refresh after post-skeleton checkpoint is recorded separately below
-- next recommendation: `release-refresh-consolidation-audit-v1` or stop/consolidation
+- release refresh consolidation is recorded separately below
 - no direct Python skeleton implementation
 - no direct adapter implementation
 - no external tool control
@@ -419,8 +421,37 @@ Release refresh after post-skeleton checkpoint:
 - no direct Python skeleton implementation
 - no direct adapter implementation
 - no external tool control
-- next recommendation: `release-refresh-consolidation-audit-v1` or stop/consolidation
+- release refresh consolidation is recorded separately below
 - do not publish the release
+
+Release refresh consolidation:
+
+- current checkpoint: `release-refresh-consolidation-audit-v1`
+- consolidation audit: `docs/decisions/release_refresh_consolidation_audit_v1.md`
+- consolidation verdict: `RELEASE_REFRESH_LINE_COMPLETE_STOP_BEFORE_PUBLICATION`
+- release `321576116`:
+  - release state: draft
+  - release target tag: `seos-narrow-kernel-post-skeleton-code-design-v1`
+  - release assets: none / assets count 0
+  - published_at: null
+  - release status: not published
+- prior release `320261350`:
+  - untouched by the consolidation audit
+  - release state: draft
+  - release target tag: `seos-narrow-kernel-checkpoint-v1`
+  - release assets: none / assets count 0
+- Python skeleton code: rejected for current phase
+- adapter implementation: not eligible by default
+- direct adapter implementation: rejected
+- runtime authority: not eligible
+- execution capability: not eligible
+- external tool control: not eligible
+- Business / Personal / Creative / Research OS: not eligible
+- no release publication by default
+- no implementation by default
+- next recommendation:
+  `repository-trajectory-audit-after-release-refresh-line-v1` or
+  stop/consolidation
 
 Preserved verdicts:
 
@@ -437,6 +468,7 @@ Preserved verdicts:
 - `SKELETON_CODE_DESIGN_LINE_COMPLETE_STOP_BEFORE_IMPLEMENTATION`
 - `APPROVE_CHECKPOINT_REFRESH_NEXT`
 - `APPROVE_RELEASE_REFRESH_NEXT`
+- `RELEASE_REFRESH_LINE_COMPLETE_STOP_BEFORE_PUBLICATION`
 
 Current non-capabilities:
 
@@ -518,7 +550,9 @@ The local reference interpreter for this phase is Python 3.14.4, and GitHub CI u
 Next decision:
 
 - stop/consolidation remains the default next posture
-- The next step should be `release-refresh-consolidation-audit-v1` or stop/consolidation.
+- The next step should be
+  `repository-trajectory-audit-after-release-refresh-line-v1` or
+  stop/consolidation.
 - no direct Python skeleton implementation
 - no direct adapter implementation
 - no external tool control
