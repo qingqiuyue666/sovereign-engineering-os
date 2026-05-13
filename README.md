@@ -3,10 +3,35 @@
 Sovereign Engineering OS is an AI execution control kernel and local-first governance kernel.
 
 Current phase/state: post
-`final-stop-state-consolidation-batch-v1`.
+`final-stop-state-consolidation-batch-v1`, with the first bounded
+Personal AI Execution OS local foundation MVP implementation bridge.
 
 Current checkpoint:
 
+- `personal-ai-execution-os-local-foundation-mvp-v1`
+  - Phase 2 selected lane: Personal AI Execution OS
+  - implemented first local foundation MVP: local intake ledger + artifact
+    profiler + work-order proposal + human review packet
+  - physical contact type: local filesystem read + SHA-256 hash +
+    deterministic JSONL/JSON output outside input directory
+  - authority status: non-authority
+  - execution status: no execution capability
+  - runtime status: no runtime authority
+  - external tool control: not introduced
+  - network: not introduced
+  - API calls: not introduced
+  - AI classification: not introduced
+  - adapter implementation: not introduced
+  - `kernel/adapters/`: unchanged
+  - input files: never modified / moved / deleted / renamed
+  - output: deterministic JSONL / JSON artifacts
+  - required human approval: true
+  - next recommendation:
+    `personal-ai-local-foundation-review-audit-v1` or stop/consolidation
+  - Business Delivery OS: not started
+  - Creative Production OS: not started
+  - Research Decision OS: not started
+  - full Personal AI Execution OS: not implemented
 - `final-stop-state-consolidation-batch-v1`
   - final stop-state consolidation: completed
   - final repository trajectory: STOP_ONLY
@@ -74,6 +99,7 @@ Completed milestones:
 - `release-refresh-consolidation-audit-v1`
 - `public-overview-alignment-after-release-refresh-compound-v1`
 - `final-stop-state-consolidation-batch-v1`
+- `personal-ai-execution-os-local-foundation-mvp-v1`
 
 Current capability:
 
@@ -117,6 +143,10 @@ Current capability:
 - release refresh consolidation audit
 - public overview alignment after release refresh
 - acceptance smoke
+- Personal AI local intake ledger
+- Personal AI artifact profiler
+- Personal AI non-executing work-order proposal
+- Personal AI human review packet
 
 Controlled demo proves:
 
@@ -634,12 +664,37 @@ make ci
 
 The local reference interpreter for this phase is Python 3.14.4, and GitHub CI uses the hosted Python 3.14 line through `actions/setup-python`.
 
+Personal AI local foundation MVP:
+
+- checkpoint: `personal-ai-execution-os-local-foundation-mvp-v1`
+- Phase 2 selected lane: Personal AI Execution OS
+- local foundation components: local intake ledger + artifact profiler +
+  work-order proposal + human review packet
+- physical contact type: local filesystem read + SHA-256 hash +
+  deterministic JSONL/JSON output outside input directory
+- authority status: non-authority
+- execution capability: not introduced
+- runtime authority: not introduced
+- external tool control: not introduced
+- network: not introduced
+- API calls: not introduced
+- adapter implementation: not introduced
+- AI classification: not introduced
+- input files: never modified / moved / deleted / renamed
+- output: deterministic JSONL / JSON artifacts
+- required human approval: true
+- `kernel/adapters/`: unchanged
+- Business Delivery OS: not started
+- Creative Production OS: not started
+- Research Decision OS: not started
+- full Personal AI Execution OS: not implemented
+
 Next decision:
 
-- stop/consolidation remains the default next posture
+- `personal-ai-local-foundation-review-audit-v1` or stop/consolidation
 - final repository trajectory: STOP_ONLY
 - no release publication by default
-- no implementation by default
+- no additional implementation by default
 - no direct Python skeleton implementation
 - no direct adapter implementation
 - no external tool control
@@ -666,4 +721,6 @@ Explicit stop rules:
 - no runtime authority or execution capability from the checkpoint tag
 - no runtime authority or execution capability from the GitHub Release
 - no new governance boundary family by default
-- Business / Personal / Creative / Research OS remain later
+- Business / Creative / Research OS remain later
+- Personal AI beyond this bounded local-only foundation remains later and
+  requires separate authorization
