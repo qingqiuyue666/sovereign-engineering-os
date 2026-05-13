@@ -17,6 +17,7 @@ EXPECTED_JOB_FILES = {
     "review_packet.json",
     "pipeline_manifest.json",
     "task_route.json",
+    "spreadsheet_processor_plan.json",
     "job_summary.json",
     "human_next_steps.md",
 }
@@ -89,6 +90,10 @@ class LocalJobPackageTests(unittest.TestCase):
             result.job_dir / "pipeline_manifest.json",
         )
         self.assertEqual(result.task_route_path, result.job_dir / "task_route.json")
+        self.assertEqual(
+            result.spreadsheet_processor_plan_path,
+            result.job_dir / "spreadsheet_processor_plan.json",
+        )
         self.assertEqual(result.job_summary_path, result.job_dir / "job_summary.json")
         self.assertEqual(
             result.human_next_steps_path,
@@ -108,6 +113,8 @@ class LocalJobPackageTests(unittest.TestCase):
             result.recommended_processor_lane,
             "mixed_file_inventory_planning_only",
         )
+        self.assertEqual(result.spreadsheet_plan_status, "planning_ready")
+        self.assertEqual(result.spreadsheet_artifact_count, 1)
         self.assertIs(result.required_human_approval, True)
         self.assertTrue(result.job_dir.exists())
 
@@ -145,6 +152,25 @@ class LocalJobPackageTests(unittest.TestCase):
         )
         self.assertEqual(task_route["authority"], "non_authority")
         self.assertEqual(task_route["execution_capability"], "not_introduced")
+
+    def test_job_package_creates_spreadsheet_processor_plan_json(self):
+        input_dir, output_root_dir = self.build_workspace()
+        (input_dir / "data.csv").write_text("a,b\n1,2\n", encoding="utf-8")
+
+        result = build_local_job_package(
+            input_dir,
+            output_root_dir,
+            job_id="job-001",
+        )
+        spreadsheet_plan = read_json(result.spreadsheet_processor_plan_path)
+
+        self.assertTrue(result.spreadsheet_processor_plan_path.exists())
+        self.assertEqual(
+            spreadsheet_plan["plan_type"],
+            "personal_ai_local_spreadsheet_processor_plan",
+        )
+        self.assertEqual(spreadsheet_plan["plan_status"], "planning_ready")
+        self.assertEqual(spreadsheet_plan["artifact_count"], 1)
 
     def test_input_snapshot_records_non_authority_metadata_only_capture(self):
         input_dir, output_root_dir = self.build_workspace()
@@ -202,6 +228,8 @@ class LocalJobPackageTests(unittest.TestCase):
                 "candidate_tasks",
                 "route_type",
                 "recommended_processor_lane",
+                "spreadsheet_plan_status",
+                "spreadsheet_artifact_count",
                 "required_human_approval",
                 "boundaries",
                 "next_allowed_action",
@@ -214,6 +242,8 @@ class LocalJobPackageTests(unittest.TestCase):
             summary["recommended_processor_lane"],
             "document_processor_planning_only",
         )
+        self.assertEqual(summary["spreadsheet_plan_status"], "not_applicable")
+        self.assertEqual(summary["spreadsheet_artifact_count"], 0)
         self.assertIs(summary["required_human_approval"], True)
         self.assertEqual(summary["next_allowed_action"], "human_review_only")
         self.assertEqual(set(summary["boundaries"]), EXPECTED_BOUNDARIES)
@@ -238,6 +268,43 @@ class LocalJobPackageTests(unittest.TestCase):
             task_route["recommended_processor_lane"],
         )
 
+    def test_spreadsheet_plan_status_propagates_to_job_summary(self):
+        input_dir, output_root_dir = self.build_workspace()
+        (input_dir / "data.csv").write_text("a,b\n1,2\n", encoding="utf-8")
+
+        result = build_local_job_package(
+            input_dir,
+            output_root_dir,
+            job_id="job-001",
+        )
+        spreadsheet_plan = read_json(result.spreadsheet_processor_plan_path)
+        summary = read_json(result.job_summary_path)
+
+        self.assertEqual(
+            summary["spreadsheet_plan_status"],
+            spreadsheet_plan["plan_status"],
+        )
+        self.assertEqual(summary["spreadsheet_plan_status"], "planning_ready")
+
+    def test_spreadsheet_artifact_count_propagates_to_job_summary(self):
+        input_dir, output_root_dir = self.build_workspace()
+        (input_dir / "data.csv").write_text("a,b\n1,2\n", encoding="utf-8")
+        (input_dir / "other.xlsx").write_text("not inspected", encoding="utf-8")
+
+        result = build_local_job_package(
+            input_dir,
+            output_root_dir,
+            job_id="job-001",
+        )
+        spreadsheet_plan = read_json(result.spreadsheet_processor_plan_path)
+        summary = read_json(result.job_summary_path)
+
+        self.assertEqual(
+            summary["spreadsheet_artifact_count"],
+            spreadsheet_plan["artifact_count"],
+        )
+        self.assertEqual(summary["spreadsheet_artifact_count"], 2)
+
     def test_human_next_steps_records_review_boundary_and_forbidden_actions(self):
         input_dir, output_root_dir = self.build_workspace()
         (input_dir / "notes.md").write_text("notes", encoding="utf-8")
@@ -260,6 +327,8 @@ class LocalJobPackageTests(unittest.TestCase):
             "recommended processor lane: document_processor_planning_only",
             markdown,
         )
+        self.assertIn("spreadsheet plan status: not_applicable", markdown)
+        self.assertIn("spreadsheet artifact count: 0", markdown)
         for action in (
             "modify input files",
             "delete input files",
@@ -516,6 +585,24 @@ class LocalJobPackageTests(unittest.TestCase):
             self.assertEqual(
                 read_json(first.task_route_path)["recommended_processor_lane"],
                 read_json(second.task_route_path)["recommended_processor_lane"],
+            )
+            first_plan = read_json(first.spreadsheet_processor_plan_path)
+            second_plan = read_json(second.spreadsheet_processor_plan_path)
+            self.assertEqual(
+                first_plan["plan_status"],
+                second_plan["plan_status"],
+            )
+            self.assertEqual(
+                first_plan["artifact_count"],
+                second_plan["artifact_count"],
+            )
+            self.assertEqual(
+                first_plan["selected_spreadsheet_artifacts"],
+                second_plan["selected_spreadsheet_artifacts"],
+            )
+            self.assertEqual(
+                first_plan["non_executing_plan"],
+                second_plan["non_executing_plan"],
             )
             self.assertEqual(
                 _stable_ledger(read_jsonl(first.intake_ledger_path)),

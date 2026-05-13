@@ -7,6 +7,7 @@ import re
 
 from kernel.personal_ai.io_utils import write_json_atomically
 from kernel.personal_ai.local_pipeline import build_local_review_pipeline
+from kernel.personal_ai.spreadsheet_planner import build_spreadsheet_processor_plan
 from kernel.personal_ai.task_router import build_task_route
 
 __all__ = [
@@ -24,6 +25,7 @@ _ARTIFACT_FILES = {
     "review_packet": "review_packet.json",
     "pipeline_manifest": "pipeline_manifest.json",
     "task_route": "task_route.json",
+    "spreadsheet_processor_plan": "spreadsheet_processor_plan.json",
     "job_summary": "job_summary.json",
     "human_next_steps": "human_next_steps.md",
 }
@@ -69,12 +71,15 @@ class LocalJobPackageResult:
     review_packet_path: Path
     pipeline_manifest_path: Path
     task_route_path: Path
+    spreadsheet_processor_plan_path: Path
     job_summary_path: Path
     human_next_steps_path: Path
     files_recorded: int
     candidate_tasks: list[str]
     route_type: str
     recommended_processor_lane: str
+    spreadsheet_plan_status: str
+    spreadsheet_artifact_count: int
     required_human_approval: bool
 
 
@@ -103,6 +108,9 @@ def build_local_job_package(
     review_packet_path = job_dir / _ARTIFACT_FILES["review_packet"]
     pipeline_manifest_path = job_dir / _ARTIFACT_FILES["pipeline_manifest"]
     task_route_path = job_dir / _ARTIFACT_FILES["task_route"]
+    spreadsheet_processor_plan_path = (
+        job_dir / _ARTIFACT_FILES["spreadsheet_processor_plan"]
+    )
     job_summary_path = job_dir / _ARTIFACT_FILES["job_summary"]
     human_next_steps_path = job_dir / _ARTIFACT_FILES["human_next_steps"]
 
@@ -134,6 +142,11 @@ def build_local_job_package(
         work_order_proposal_path,
         task_route_path,
     )
+    spreadsheet_plan_result = build_spreadsheet_processor_plan(
+        artifact_profile_path,
+        task_route_path,
+        spreadsheet_processor_plan_path,
+    )
 
     artifacts = {
         "input_snapshot": input_snapshot_path.as_posix(),
@@ -143,6 +156,7 @@ def build_local_job_package(
         "review_packet": review_packet_path.as_posix(),
         "pipeline_manifest": pipeline_manifest_path.as_posix(),
         "task_route": task_route_path.as_posix(),
+        "spreadsheet_processor_plan": spreadsheet_processor_plan_path.as_posix(),
         "job_summary": job_summary_path.as_posix(),
         "human_next_steps": human_next_steps_path.as_posix(),
     }
@@ -165,6 +179,10 @@ def build_local_job_package(
             "recommended_processor_lane": (
                 task_route_result.recommended_processor_lane
             ),
+            "spreadsheet_plan_status": spreadsheet_plan_result.plan_status,
+            "spreadsheet_artifact_count": (
+                spreadsheet_plan_result.artifact_count
+            ),
             "required_human_approval": True,
             "boundaries": dict(_BOUNDARIES),
             "next_allowed_action": "human_review_only",
@@ -177,6 +195,8 @@ def build_local_job_package(
             candidate_tasks,
             task_route_result.route_type,
             task_route_result.recommended_processor_lane,
+            spreadsheet_plan_result.plan_status,
+            spreadsheet_plan_result.artifact_count,
         ),
         encoding="utf-8",
     )
@@ -193,12 +213,15 @@ def build_local_job_package(
         review_packet_path=review_packet_path,
         pipeline_manifest_path=pipeline_manifest_path,
         task_route_path=task_route_path,
+        spreadsheet_processor_plan_path=spreadsheet_processor_plan_path,
         job_summary_path=job_summary_path,
         human_next_steps_path=human_next_steps_path,
         files_recorded=pipeline_result.files_recorded,
         candidate_tasks=candidate_tasks,
         route_type=task_route_result.route_type,
         recommended_processor_lane=task_route_result.recommended_processor_lane,
+        spreadsheet_plan_status=spreadsheet_plan_result.plan_status,
+        spreadsheet_artifact_count=spreadsheet_plan_result.artifact_count,
         required_human_approval=True,
     )
 
@@ -252,6 +275,8 @@ def _render_human_next_steps(
     candidate_tasks,
     route_type,
     recommended_processor_lane,
+    spreadsheet_plan_status,
+    spreadsheet_artifact_count,
 ):
     lines = [
         "# Personal AI Local Job Package Review",
@@ -263,6 +288,8 @@ def _render_human_next_steps(
         "- next allowed action: human_review_only",
         f"- route type: {route_type}",
         f"- recommended processor lane: {recommended_processor_lane}",
+        f"- spreadsheet plan status: {spreadsheet_plan_status}",
+        f"- spreadsheet artifact count: {spreadsheet_artifact_count}",
         "",
         "## Generated artifacts",
     ]
