@@ -3,15 +3,14 @@
 Sovereign Engineering OS is an AI execution control kernel and local-first governance kernel.
 
 Current phase/state: post
-`final-stop-state-consolidation-batch-v1`, with the third bounded
-Personal AI Execution OS local job package MVP implementation bridge.
+`final-stop-state-consolidation-batch-v1`, with the fourth bounded
+Personal AI Execution OS local task router MVP implementation bridge.
 
 Current checkpoint:
 
-- `personal-ai-local-job-package-mvp-v1`
+- `personal-ai-local-task-router-mvp-v1`
   - Phase 2 selected lane: Personal AI Execution OS
-  - implemented third local foundation MVP: deterministic local job package
-    builder
+  - implemented fourth local foundation MVP: deterministic local task router
   - job package contents:
     - `input_snapshot.json`
     - `intake_ledger.jsonl`
@@ -19,8 +18,19 @@ Current checkpoint:
     - `work_order_proposal.json`
     - `review_packet.json`
     - `pipeline_manifest.json`
+    - `task_route.json`
     - `job_summary.json`
     - `human_next_steps.md`
+  - route output: route_type + recommended_processor_lane + non-executing
+    action plan
+  - supported routes:
+    - `spreadsheet_route`
+    - `document_route`
+    - `media_inventory_route`
+    - `code_inventory_route`
+    - `archive_inventory_route`
+    - `mixed_inventory_route`
+    - `unknown_inventory_route`
   - physical contact type: local filesystem read + SHA-256 hash +
     deterministic JSONL/JSON/Markdown output outside input directory
   - authority status: non-authority
@@ -30,14 +40,16 @@ Current checkpoint:
   - network: not introduced
   - API calls: not introduced
   - AI classification: not introduced
+  - semantic classification: not introduced
   - adapter implementation: not introduced
   - kernel/adapters: unchanged
   - input files: never modified / moved / deleted / renamed
   - input file contents: not copied into job package
-  - output: deterministic local job package artifacts
+  - output: deterministic local job package artifacts with task route
   - required human approval: true
   - next recommendation:
-    `personal-ai-local-job-package-review-audit-v1` or stop/consolidation
+    `personal-ai-local-task-router-review-audit-v1` or
+    `local-spreadsheet-processor-planning-mvp-v1`
   - Business Delivery OS: not started
   - Creative Production OS: not started
   - Research Decision OS: not started
@@ -112,6 +124,7 @@ Completed milestones:
 - `personal-ai-execution-os-local-foundation-mvp-v1`
 - `personal-ai-local-pipeline-mvp-v1`
 - `personal-ai-local-job-package-mvp-v1`
+- `personal-ai-local-task-router-mvp-v1`
 
 Current capability:
 
@@ -163,6 +176,8 @@ Current capability:
 - Personal AI pipeline manifest
 - Personal AI deterministic local job package builder
 - Personal AI input snapshot, job summary, and human next steps artifacts
+- Personal AI deterministic local task router
+- Personal AI task route JSON artifact
 
 Controlled demo proves:
 
