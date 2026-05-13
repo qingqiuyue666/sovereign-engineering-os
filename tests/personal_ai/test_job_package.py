@@ -16,6 +16,7 @@ EXPECTED_JOB_FILES = {
     "work_order_proposal.json",
     "review_packet.json",
     "pipeline_manifest.json",
+    "task_route.json",
     "job_summary.json",
     "human_next_steps.md",
 }
@@ -29,6 +30,7 @@ EXPECTED_BOUNDARIES = {
     "no_subprocess",
     "no_adapter_implementation",
     "no_ai_classification",
+    "no_semantic_classification",
     "no_input_file_mutation",
     "no_input_content_copy",
     "no_destructive_actions",
@@ -86,6 +88,7 @@ class LocalJobPackageTests(unittest.TestCase):
             result.pipeline_manifest_path,
             result.job_dir / "pipeline_manifest.json",
         )
+        self.assertEqual(result.task_route_path, result.job_dir / "task_route.json")
         self.assertEqual(result.job_summary_path, result.job_dir / "job_summary.json")
         self.assertEqual(
             result.human_next_steps_path,
@@ -99,6 +102,11 @@ class LocalJobPackageTests(unittest.TestCase):
                 "document_review",
                 "mixed_file_inventory",
             ],
+        )
+        self.assertEqual(result.route_type, "mixed_inventory_route")
+        self.assertEqual(
+            result.recommended_processor_lane,
+            "mixed_file_inventory_planning_only",
         )
         self.assertIs(result.required_human_approval, True)
         self.assertTrue(result.job_dir.exists())
@@ -117,6 +125,26 @@ class LocalJobPackageTests(unittest.TestCase):
             {path.name for path in result.job_dir.iterdir()},
             EXPECTED_JOB_FILES,
         )
+
+    def test_job_package_creates_task_route_json(self):
+        input_dir, output_root_dir = self.build_workspace()
+        (input_dir / "data.csv").write_text("a,b\n1,2\n", encoding="utf-8")
+
+        result = build_local_job_package(
+            input_dir,
+            output_root_dir,
+            job_id="job-001",
+        )
+        task_route = read_json(result.task_route_path)
+
+        self.assertTrue(result.task_route_path.exists())
+        self.assertEqual(task_route["route_type"], "spreadsheet_route")
+        self.assertEqual(
+            task_route["recommended_processor_lane"],
+            "spreadsheet_processor_planning_only",
+        )
+        self.assertEqual(task_route["authority"], "non_authority")
+        self.assertEqual(task_route["execution_capability"], "not_introduced")
 
     def test_input_snapshot_records_non_authority_metadata_only_capture(self):
         input_dir, output_root_dir = self.build_workspace()
@@ -172,6 +200,8 @@ class LocalJobPackageTests(unittest.TestCase):
                 "artifacts",
                 "counts",
                 "candidate_tasks",
+                "route_type",
+                "recommended_processor_lane",
                 "required_human_approval",
                 "boundaries",
                 "next_allowed_action",
@@ -179,10 +209,34 @@ class LocalJobPackageTests(unittest.TestCase):
         )
         self.assertEqual(summary["authority"], "non_authority")
         self.assertEqual(summary["execution_capability"], "not_introduced")
+        self.assertEqual(summary["route_type"], "document_route")
+        self.assertEqual(
+            summary["recommended_processor_lane"],
+            "document_processor_planning_only",
+        )
         self.assertIs(summary["required_human_approval"], True)
         self.assertEqual(summary["next_allowed_action"], "human_review_only")
         self.assertEqual(set(summary["boundaries"]), EXPECTED_BOUNDARIES)
         self.assertTrue(all(summary["boundaries"].values()))
+
+    def test_task_route_fields_propagate_to_job_summary(self):
+        input_dir, output_root_dir = self.build_workspace()
+        (input_dir / "notes.md").write_text("notes", encoding="utf-8")
+        (input_dir / "data.csv").write_text("a,b\n1,2\n", encoding="utf-8")
+
+        result = build_local_job_package(
+            input_dir,
+            output_root_dir,
+            job_id="job-001",
+        )
+        task_route = read_json(result.task_route_path)
+        summary = read_json(result.job_summary_path)
+
+        self.assertEqual(summary["route_type"], task_route["route_type"])
+        self.assertEqual(
+            summary["recommended_processor_lane"],
+            task_route["recommended_processor_lane"],
+        )
 
     def test_human_next_steps_records_review_boundary_and_forbidden_actions(self):
         input_dir, output_root_dir = self.build_workspace()
@@ -201,6 +255,11 @@ class LocalJobPackageTests(unittest.TestCase):
         self.assertIn("not_introduced", markdown)
         self.assertIn("required human approval: true", markdown)
         self.assertIn("human_review_only", markdown)
+        self.assertIn("route type: document_route", markdown)
+        self.assertIn(
+            "recommended processor lane: document_processor_planning_only",
+            markdown,
+        )
         for action in (
             "modify input files",
             "delete input files",
@@ -444,6 +503,19 @@ class LocalJobPackageTests(unittest.TestCase):
             self.assertEqual(
                 first_summary["boundaries"],
                 second_summary["boundaries"],
+            )
+            self.assertEqual(first_summary["route_type"], second_summary["route_type"])
+            self.assertEqual(
+                first_summary["recommended_processor_lane"],
+                second_summary["recommended_processor_lane"],
+            )
+            self.assertEqual(
+                read_json(first.task_route_path)["route_type"],
+                read_json(second.task_route_path)["route_type"],
+            )
+            self.assertEqual(
+                read_json(first.task_route_path)["recommended_processor_lane"],
+                read_json(second.task_route_path)["recommended_processor_lane"],
             )
             self.assertEqual(
                 _stable_ledger(read_jsonl(first.intake_ledger_path)),
