@@ -1,14 +1,21 @@
 # Current Phase
 
-Current phase: post `checkpoint-refresh-after-skeleton-code-design-line-v1`.
+Current phase: post `release-refresh-after-post-skeleton-checkpoint-v1`.
 
 Current checkpoint:
 
-- `checkpoint-refresh-after-skeleton-code-design-line-v1`
-  - target: `3e94fb89b68b8c9e739b987aa2eeeec5c0b79ce2`
+- `release-refresh-after-post-skeleton-checkpoint-v1`
+  - release id: `321576116`
+  - release title: `SEOS narrow kernel post skeleton-code-design checkpoint v1`
+  - release target tag: `seos-narrow-kernel-post-skeleton-code-design-v1`
+  - release state: draft
+  - release latest status: not latest by draft state / published_at null
+  - release assets: none / assets count 0
   - refreshed checkpoint tag: `seos-narrow-kernel-post-skeleton-code-design-v1`
   - refreshed checkpoint tag type: annotated
   - refreshed checkpoint tag target: `3e94fb89b68b8c9e739b987aa2eeeec5c0b79ce2`
+  - prior checkpoint tag preserved: `seos-narrow-kernel-checkpoint-v1`
+  - prior checkpoint tag target: `bb9e6f6bfe79d1d5a6aa14810b3a517fb6af6e58`
 
 Completed milestones:
 
@@ -80,6 +87,9 @@ Completed milestones:
   - target: `e7e8ebe2731cefb838acadd65ce7b8cb90fbf7aa`
 - `checkpoint-refresh-after-skeleton-code-design-line-v1`
   - target: `3e94fb89b68b8c9e739b987aa2eeeec5c0b79ce2`
+- `release-refresh-after-post-skeleton-checkpoint-v1`
+  - release id: `321576116`
+  - release target tag: `seos-narrow-kernel-post-skeleton-code-design-v1`
 
 Current system capability:
 
@@ -121,6 +131,7 @@ Current system capability:
 - skeleton code design consolidation audit
 - checkpoint refresh after skeleton-code-design line
 - refreshed annotated checkpoint tag
+- release refresh after post-skeleton checkpoint
 
 Post-adapter-design consolidation audit:
 
@@ -333,7 +344,7 @@ Non-runtime adapter skeleton code design line:
 - direct Python skeleton implementation remains rejected
 - direct adapter implementation remains rejected
 - external tool control remains rejected
-- next recommendation: `release-refresh-decision-audit-after-post-skeleton-checkpoint-v1` or stop/consolidation
+- next recommendation: `release-refresh-consolidation-audit-v1` or stop/consolidation
 
 Checkpoint refresh after skeleton-code-design line:
 
@@ -366,11 +377,52 @@ Checkpoint refresh after skeleton-code-design line:
 - non-runtime adapter skeleton code design target: `docs/design/non_runtime_adapter_skeleton_code_design_v1.md`
 - GitHub Release was not created or edited for the refreshed checkpoint
 - prior checkpoint tag was not moved
-- next recommendation: `release-refresh-decision-audit-after-post-skeleton-checkpoint-v1` or stop/consolidation
+- release refresh after post-skeleton checkpoint is recorded separately below
+- next recommendation: `release-refresh-consolidation-audit-v1` or stop/consolidation
 - no direct Python skeleton implementation
 - no direct adapter implementation
 - no external tool control
-- no GitHub Release creation or edit without a separate decision audit
+- no additional GitHub Release creation or edit without a separate decision audit
+
+Release refresh after post-skeleton checkpoint:
+
+- current checkpoint: `release-refresh-after-post-skeleton-checkpoint-v1`
+- release refresh decision audit: `docs/decisions/release_refresh_decision_audit_after_post_skeleton_checkpoint_v1.md`
+- release refresh decision verdict: `APPROVE_RELEASE_REFRESH_NEXT`
+- new GitHub Release:
+  - release id: `321576116`
+  - release title: `SEOS narrow kernel post skeleton-code-design checkpoint v1`
+  - release target tag: `seos-narrow-kernel-post-skeleton-code-design-v1`
+  - release state: draft
+  - release latest status: not latest by draft state / published_at null
+  - release assets: none / assets count 0
+  - published_at: null
+- prior GitHub Release preserved:
+  - release id: `320261350`
+  - release title: `SEOS narrow kernel checkpoint v1`
+  - release target tag: `seos-narrow-kernel-checkpoint-v1`
+  - release state: draft
+  - release assets: none / assets count 0
+- refreshed checkpoint tag: `seos-narrow-kernel-post-skeleton-code-design-v1`
+- refreshed checkpoint tag target: `3e94fb89b68b8c9e739b987aa2eeeec5c0b79ce2`
+- prior checkpoint tag preserved: `seos-narrow-kernel-checkpoint-v1`
+- prior checkpoint tag target: `bb9e6f6bfe79d1d5a6aa14810b3a517fb6af6e58`
+- Python skeleton code: rejected for current phase
+- adapter implementation: not eligible by default
+- direct adapter implementation: rejected
+- runtime authority: not eligible
+- execution capability: not eligible
+- external tool control: not eligible
+- Business / Personal / Creative / Research OS: not eligible
+- release remains draft-only
+- no release assets were attached
+- prior GitHub Release was not edited or replaced
+- no git tag was created, moved, or deleted
+- no direct Python skeleton implementation
+- no direct adapter implementation
+- no external tool control
+- next recommendation: `release-refresh-consolidation-audit-v1` or stop/consolidation
+- do not publish the release
 
 Preserved verdicts:
 
@@ -386,6 +438,7 @@ Preserved verdicts:
 - `APPROVE_GITHUB_RELEASE_NEXT`
 - `SKELETON_CODE_DESIGN_LINE_COMPLETE_STOP_BEFORE_IMPLEMENTATION`
 - `APPROVE_CHECKPOINT_REFRESH_NEXT`
+- `APPROVE_RELEASE_REFRESH_NEXT`
 
 Runtime eligibility:
 
@@ -408,7 +461,7 @@ Runtime eligibility:
 - production automation platform: not eligible
 - durable writes: not eligible
 - irreversible actions: not eligible
-- additional GitHub release creation: not eligible without separate decision audit
+- additional GitHub release creation: not eligible without separate authorization
 - runtime authority from public overview: not eligible
 - execution capability from public overview: not eligible
 - runtime authority from README link: not eligible
@@ -421,11 +474,12 @@ Runtime eligibility:
 Next decision:
 
 - stop/consolidation remains the default next posture
-- The next step should be `release-refresh-decision-audit-after-post-skeleton-checkpoint-v1` or stop/consolidation.
+- The next step should be `release-refresh-consolidation-audit-v1` or stop/consolidation.
 - no direct Python skeleton implementation
 - no direct adapter implementation
 - no external tool control
-- no GitHub Release creation or edit without a separate decision audit
+- no additional GitHub Release creation or edit without a separate decision audit
+- no release publication
 
 Forbidden jumps:
 
