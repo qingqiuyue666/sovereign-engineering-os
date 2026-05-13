@@ -1,16 +1,25 @@
 # Current Phase
 
-Current phase: post `release-refresh-after-post-skeleton-checkpoint-v1`.
+Current phase: post `release-refresh-consolidation-audit-v1`.
 
 Current checkpoint:
 
-- `release-refresh-after-post-skeleton-checkpoint-v1`
+- `release-refresh-consolidation-audit-v1`
+  - consolidation verdict: `RELEASE_REFRESH_LINE_COMPLETE_STOP_BEFORE_PUBLICATION`
   - release id: `321576116`
   - release title: `SEOS narrow kernel post skeleton-code-design checkpoint v1`
   - release target tag: `seos-narrow-kernel-post-skeleton-code-design-v1`
   - release state: draft
   - release latest status: not latest by draft state / published_at null
   - release assets: none / assets count 0
+  - published_at: null
+  - release status: not published
+  - prior release id: `320261350`
+  - prior release title: `SEOS narrow kernel checkpoint v1`
+  - prior release target tag: `seos-narrow-kernel-checkpoint-v1`
+  - prior release state: draft
+  - prior release assets: none / assets count 0
+  - prior release status: untouched by the consolidation audit
   - refreshed checkpoint tag: `seos-narrow-kernel-post-skeleton-code-design-v1`
   - refreshed checkpoint tag type: annotated
   - refreshed checkpoint tag target: `3e94fb89b68b8c9e739b987aa2eeeec5c0b79ce2`
@@ -90,6 +99,9 @@ Completed milestones:
 - `release-refresh-after-post-skeleton-checkpoint-v1`
   - release id: `321576116`
   - release target tag: `seos-narrow-kernel-post-skeleton-code-design-v1`
+- `release-refresh-consolidation-audit-v1`
+  - consolidation verdict: `RELEASE_REFRESH_LINE_COMPLETE_STOP_BEFORE_PUBLICATION`
+  - target: `6430d3d4db7cb68693354f6db50b66cc862994d8`
 
 Current system capability:
 
@@ -132,6 +144,7 @@ Current system capability:
 - checkpoint refresh after skeleton-code-design line
 - refreshed annotated checkpoint tag
 - release refresh after post-skeleton checkpoint
+- release refresh consolidation audit
 
 Post-adapter-design consolidation audit:
 
@@ -344,7 +357,7 @@ Non-runtime adapter skeleton code design line:
 - direct Python skeleton implementation remains rejected
 - direct adapter implementation remains rejected
 - external tool control remains rejected
-- next recommendation: `release-refresh-consolidation-audit-v1` or stop/consolidation
+- release refresh consolidation is recorded separately below
 
 Checkpoint refresh after skeleton-code-design line:
 
@@ -378,7 +391,7 @@ Checkpoint refresh after skeleton-code-design line:
 - GitHub Release was not created or edited for the refreshed checkpoint
 - prior checkpoint tag was not moved
 - release refresh after post-skeleton checkpoint is recorded separately below
-- next recommendation: `release-refresh-consolidation-audit-v1` or stop/consolidation
+- release refresh consolidation is recorded separately below
 - no direct Python skeleton implementation
 - no direct adapter implementation
 - no external tool control
@@ -421,8 +434,28 @@ Release refresh after post-skeleton checkpoint:
 - no direct Python skeleton implementation
 - no direct adapter implementation
 - no external tool control
-- next recommendation: `release-refresh-consolidation-audit-v1` or stop/consolidation
+- release refresh consolidation is recorded separately below
 - do not publish the release
+
+Release refresh consolidation:
+
+- current checkpoint: `release-refresh-consolidation-audit-v1`
+- consolidation audit: `docs/decisions/release_refresh_consolidation_audit_v1.md`
+- consolidation verdict: `RELEASE_REFRESH_LINE_COMPLETE_STOP_BEFORE_PUBLICATION`
+- release `321576116`: draft, target tag `seos-narrow-kernel-post-skeleton-code-design-v1`, assets 0, not published
+- prior release `320261350`: untouched, draft, target tag `seos-narrow-kernel-checkpoint-v1`, assets 0
+- Python skeleton code: rejected for current phase
+- adapter implementation: not eligible by default
+- direct adapter implementation: rejected
+- runtime authority: not eligible
+- execution capability: not eligible
+- external tool control: not eligible
+- Business / Personal / Creative / Research OS: not eligible
+- no publication by default
+- no implementation by default
+- next recommendation:
+  `repository-trajectory-audit-after-release-refresh-line-v1` or
+  stop/consolidation
 
 Preserved verdicts:
 
@@ -439,6 +472,7 @@ Preserved verdicts:
 - `SKELETON_CODE_DESIGN_LINE_COMPLETE_STOP_BEFORE_IMPLEMENTATION`
 - `APPROVE_CHECKPOINT_REFRESH_NEXT`
 - `APPROVE_RELEASE_REFRESH_NEXT`
+- `RELEASE_REFRESH_LINE_COMPLETE_STOP_BEFORE_PUBLICATION`
 
 Runtime eligibility:
 
@@ -474,7 +508,9 @@ Runtime eligibility:
 Next decision:
 
 - stop/consolidation remains the default next posture
-- The next step should be `release-refresh-consolidation-audit-v1` or stop/consolidation.
+- The next step should be
+  `repository-trajectory-audit-after-release-refresh-line-v1` or
+  stop/consolidation.
 - no direct Python skeleton implementation
 - no direct adapter implementation
 - no external tool control
