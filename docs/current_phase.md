@@ -7,6 +7,31 @@ integration sprint for the local-only Personal AI Execution OS local MVP v1.
 
 Current checkpoint:
 
+- `personal-ai-execution-os-v2-system-longrun-v1`
+  - current phase verdict: `APPROVE_PERSONAL_AI_EXECUTION_OS_V2_SYSTEM_LONGRUN_FOUNDATION`
+  - decision audit: `docs/decisions/personal_ai_execution_os_v2_system_longrun_decision_audit_v1.md`
+  - adapter contracts and registry: introduced under `kernel/personal_ai/adapters/`
+  - runtime tool admission register: introduced at `governance/integration/runtime_tool_admission_register.yaml`
+  - XLSX readonly runtime: introduced for local `.xlsx` metadata inspection
+  - approved XLSX output writer: introduced for new derived summary workbooks only
+  - mock typed-schema model runtime: introduced as deterministic local fixture only
+  - browser local fixture runtime: introduced as deterministic local HTML fixture only
+  - creative adapter policy layer: introduced as policy-only deferred runtime controls
+  - runtime delivery package: introduced with hash-bound manifest and validation
+  - end-to-end local demo: introduced at `examples/personal_ai_execution_os_v2_demo/`
+  - dependency additions: `openpyxl>=3.1,<4`
+  - third-party source vendoring: none
+  - runtime authority: not introduced
+  - arbitrary execution: not introduced
+  - unrestricted external tool control: not introduced
+  - network/API runtime: not introduced
+  - browser external-network runtime: not introduced
+  - live-provider model runtime: not introduced
+  - creative software runtime: not introduced
+  - input mutation: forbidden
+  - existing output overwrite: forbidden
+  - raw value copying into audit artifacts: forbidden
+  - spreadsheet output writing: approved new outputs only, outside input directories, with explicit reviewer approval and input/plan/approval hash binding; no default or implicit approval
 - `oss-top-repo-integration-autonomous-sprint`
   - OSS intake audit: introduced at `docs/decisions/oss_top_repo_integration_intake_audit_v1.md`
   - OSS integration plan: introduced at `docs/design/oss_integration_plan_v1.md`

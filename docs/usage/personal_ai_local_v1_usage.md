@@ -7,6 +7,38 @@ JSON/Markdown artifacts outside the input directory. It also writes a
 metadata-only artifact index and local validation report for generated package
 artifacts.
 
+## Personal AI Execution OS v2 runtime extension
+
+The `personal-ai-execution-os-v2-system-longrun-v1` branch adds a bounded local
+runtime foundation beside the v1 job package flow. The v1 package remains
+non-authority and human-review-only; the v2 runtime commands add local `.xlsx`
+metadata inspection, approved new `.xlsx` summary workbook generation, a
+deterministic mock typed-schema model fixture, a deterministic local HTML
+fixture browser runtime, and runtime delivery package validation.
+
+V2 runtime commands:
+
+- `inspect-xlsx`
+- `plan-xlsx-output`
+- `approve-xlsx-output`
+- `create-approved-xlsx-output`
+- `validate-xlsx-output`
+- `run-model-fixture`
+- `run-browser-fixture`
+- `validate-runtime-delivery`
+- `show-adapter-registry`
+- `validate-tool-intake`
+
+V2 XLSX output writing is fail-closed: `approve-xlsx-output` requires
+explicit `--approved true`, `--human-reviewed true`, and a non-placeholder
+`--reviewer-id` before `create-approved-xlsx-output` can write a new workbook.
+There is no default or implicit approval path.
+
+The v2 runtime foundation adds `openpyxl>=3.1,<4` for bounded local XLSX
+read/write operations. It does not add live model providers, external network
+browser automation, creative software runtime, subprocess runtime, unrestricted
+external tool control, secrets, or third-party source vendoring.
+
 Run:
 
 ```bash
@@ -186,7 +218,10 @@ Spreadsheet boundary:
 
 - CSV and TSV are the only spreadsheet formats inspected.
 - XLSX, XLSM, and XLS are not read.
-- No spreadsheet output files are written.
+- V1 job packages do not write spreadsheet output files; v2 approved XLSX
+  output writing creates only new derived summary workbooks outside input
+  directories after explicit reviewer approval with no default or implicit
+  approval.
 - No spreadsheet cleaning or transformation is performed.
 - Raw cell values and raw header values are not copied into job artifacts.
 
@@ -207,10 +242,11 @@ Boundary:
 - No semantic classification.
 - No issue severity assignment.
 - No business semantic interpretation.
-- No external OSS dependency is required for the index, validators, snapshot
+- No external OSS dependency is required for the v1 index, validators, snapshot
   helpers, or registry.
-- No pandas, openpyxl, xlrd, or pyarrow.
-- No kernel/adapters integration or changes.
+- No pandas, xlrd, or pyarrow.
+- V2 adds `openpyxl>=3.1,<4` and `kernel/personal_ai/adapters/` for bounded
+  local runtime adapters.
 
 This is not a full external-tool OS. It does not control browsers, operating
 system apps, APIs, LLM agents, adapters, or external tools. It does not modify

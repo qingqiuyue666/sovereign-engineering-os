@@ -15,6 +15,28 @@ from kernel.personal_ai.local_mvp_runner import (
 from kernel.personal_ai.output_package import build_approved_output_package
 from kernel.personal_ai.output_validator import build_approved_output_validation
 from kernel.personal_ai.package_validator import build_job_package_validation
+from kernel.personal_ai.adapters.xlsx_readonly_runtime import inspect_xlsx_readonly
+from kernel.personal_ai.adapters.xlsx_output_writer import (
+    approve_xlsx_output,
+    create_approved_xlsx_output,
+    plan_xlsx_output,
+    validate_xlsx_output,
+)
+from kernel.personal_ai.adapters.model_typed_schema_runtime import run_model_fixture
+from kernel.personal_ai.adapters.browser_fixture_runtime import (
+    run_browser_fixture_from_actions_file,
+)
+from kernel.personal_ai.adapters.adapter_registry import (
+    DEFAULT_ADAPTER_REGISTRY,
+    validate_adapter_registry_entry,
+)
+from kernel.personal_ai.adapters.tool_intake_register import (
+    validate_runtime_tool_admission_register_file,
+)
+from kernel.personal_ai.runtime_delivery_package import (
+    validate_runtime_delivery_package,
+)
+from kernel.personal_ai.io_utils import write_json_atomically
 
 __all__ = [
     "main",
@@ -48,6 +70,16 @@ _SUBCOMMANDS = {
     "validate-job",
     "validate-output",
     "index-artifacts",
+    "inspect-xlsx",
+    "plan-xlsx-output",
+    "approve-xlsx-output",
+    "create-approved-xlsx-output",
+    "validate-xlsx-output",
+    "run-model-fixture",
+    "run-browser-fixture",
+    "validate-runtime-delivery",
+    "show-adapter-registry",
+    "validate-tool-intake",
 }
 
 
@@ -349,6 +381,212 @@ def _main_subcommand(argv) -> int:
                 }
             )
             return 0
+        if args.command == "inspect-xlsx":
+            result = inspect_xlsx_readonly(
+                Path(args.input_workbook),
+                Path(args.output_dir),
+            )
+            _print_command_payload(
+                {
+                    "complete": True,
+                    "input_workbook_path": result.input_workbook_path.as_posix(),
+                    "output_dir": result.output_dir.as_posix(),
+                    "xlsx_inspection_path": (
+                        result.xlsx_inspection_path.as_posix()
+                    ),
+                    "xlsx_inspection_summary_path": (
+                        result.xlsx_inspection_summary_path.as_posix()
+                    ),
+                    "input_sha256": result.input_sha256,
+                    "sheet_count": result.sheet_count,
+                    "required_human_approval": result.required_human_approval,
+                }
+            )
+            return 0
+        if args.command == "plan-xlsx-output":
+            result = plan_xlsx_output(
+                Path(args.input_workbook),
+                Path(args.xlsx_inspection),
+                Path(args.output_dir),
+                output_workbook_name=args.output_workbook_name,
+            )
+            _print_command_payload(
+                {
+                    "complete": True,
+                    "xlsx_output_plan_path": result.plan_path.as_posix(),
+                    "input_sha256": result.input_sha256,
+                    "xlsx_inspection_sha256": result.xlsx_inspection_sha256,
+                    "plan_sha256": result.plan_sha256,
+                    "required_human_approval": result.required_human_approval,
+                }
+            )
+            return 0
+        if args.command == "approve-xlsx-output":
+            result = approve_xlsx_output(
+                Path(args.plan_path),
+                Path(args.output_path),
+                approved=_parse_exact_true(args.approved, "--approved"),
+                human_reviewed=_parse_exact_true(
+                    args.human_reviewed, "--human-reviewed"
+                ),
+                reviewer_id=args.reviewer_id,
+            )
+            _print_command_payload(
+                {
+                    "complete": result.approved,
+                    "xlsx_output_approval_path": result.approval_path.as_posix(),
+                    "approved": result.approved,
+                    "plan_sha256": result.plan_sha256,
+                    "approval_sha256": result.approval_sha256,
+                    "required_human_approval": result.required_human_approval,
+                }
+            )
+            return 0 if result.approved else 1
+        if args.command == "create-approved-xlsx-output":
+            result = create_approved_xlsx_output(
+                Path(args.input_workbook),
+                Path(args.plan_path),
+                Path(args.approval_path),
+                Path(args.output_dir),
+            )
+            _print_command_payload(
+                {
+                    "complete": result.complete,
+                    "output_workbook_path": result.output_workbook_path.as_posix(),
+                    "xlsx_output_manifest_path": (
+                        result.output_manifest_path.as_posix()
+                    ),
+                    "xlsx_output_delivery_summary_path": (
+                        result.delivery_summary_path.as_posix()
+                    ),
+                    "xlsx_output_validation_path": (
+                        result.validation_report_path.as_posix()
+                    ),
+                    "output_sha256": result.output_sha256,
+                    "required_human_approval": result.required_human_approval,
+                }
+            )
+            return 0 if result.complete else 1
+        if args.command == "validate-xlsx-output":
+            result = validate_xlsx_output(
+                Path(args.output_dir),
+                _optional_path(args.output_path),
+            )
+            _print_command_payload(
+                {
+                    "complete": result.complete,
+                    "output_dir": result.output_dir.as_posix(),
+                    "xlsx_output_validation_path": (
+                        result.validation_report_path.as_posix()
+                    ),
+                    "manifest_hash_verified": result.manifest_hash_verified,
+                    "output_workbook_exists": result.output_workbook_exists,
+                    "raw_value_leakage_detected": (
+                        result.raw_value_leakage_detected
+                    ),
+                    "required_human_approval": True,
+                }
+            )
+            return 0 if result.complete else 1
+        if args.command == "run-model-fixture":
+            result = run_model_fixture(
+                Path(args.request_path),
+                Path(args.output_dir),
+            )
+            _print_command_payload(
+                {
+                    "complete": result.success,
+                    "request_path": result.request_path.as_posix(),
+                    "output_dir": result.output_dir.as_posix(),
+                    "model_inference_artifact_path": None
+                    if result.inference_artifact_path is None
+                    else result.inference_artifact_path.as_posix(),
+                    "model_failure_bundle_path": None
+                    if result.failure_bundle_path is None
+                    else result.failure_bundle_path.as_posix(),
+                    "schema_name": result.schema_name,
+                    "required_human_approval": result.required_human_approval,
+                }
+            )
+            return 0 if result.success else 1
+        if args.command == "run-browser-fixture":
+            result = run_browser_fixture_from_actions_file(
+                Path(args.fixture_path),
+                Path(args.actions_path),
+                Path(args.output_dir),
+            )
+            _print_command_payload(
+                {
+                    "complete": True,
+                    "fixture_path": result.fixture_path.as_posix(),
+                    "output_dir": result.output_dir.as_posix(),
+                    "browser_action_log_path": result.action_log_path.as_posix(),
+                    "browser_evidence_manifest_path": (
+                        result.evidence_manifest_path.as_posix()
+                    ),
+                    "action_count": result.action_count,
+                    "required_human_approval": result.required_human_approval,
+                }
+            )
+            return 0
+        if args.command == "validate-runtime-delivery":
+            result = validate_runtime_delivery_package(
+                Path(args.package_dir),
+                Path(args.output_path),
+            )
+            _print_command_payload(
+                {
+                    "complete": result.complete,
+                    "package_dir": result.package_dir.as_posix(),
+                    "runtime_delivery_manifest_path": (
+                        result.runtime_delivery_manifest_path.as_posix()
+                    ),
+                    "runtime_delivery_validation_path": (
+                        result.runtime_delivery_validation_path.as_posix()
+                    ),
+                    "packaged_artifacts": list(result.packaged_artifacts),
+                    "raw_value_leakage_detected": (
+                        result.raw_value_leakage_detected
+                    ),
+                    "required_human_approval": result.required_human_approval,
+                }
+            )
+            return 0 if result.complete else 1
+        if args.command == "show-adapter-registry":
+            payload = {
+                "complete": True,
+                "registry_type": "personal_ai_execution_os_v2_adapter_registry",
+                "entries": [
+                    entry.to_dict()
+                    for entry in DEFAULT_ADAPTER_REGISTRY
+                ],
+                "validation_failures": {
+                    entry.adapter_id: list(validate_adapter_registry_entry(entry))
+                    for entry in DEFAULT_ADAPTER_REGISTRY
+                },
+                "required_human_approval": True,
+            }
+            _write_optional_cli_output(payload, _optional_path(args.output_path))
+            _print_command_payload(payload)
+            return 0
+        if args.command == "validate-tool-intake":
+            result = validate_runtime_tool_admission_register_file(
+                Path(args.register_path)
+            )
+            payload = {
+                "complete": result.accepted,
+                "register_path": None
+                if result.register_path is None
+                else result.register_path.as_posix(),
+                "entry_count": result.entry_count,
+                "failures": list(result.failures),
+                "admitted_projects": list(result.admitted_projects),
+                "deferred_projects": list(result.deferred_projects),
+                "required_human_approval": True,
+            }
+            _write_optional_cli_output(payload, _optional_path(args.output_path))
+            _print_command_payload(payload)
+            return 0 if result.accepted else 1
     except ValueError as error:
         _print_command_payload(
             {
@@ -401,6 +639,56 @@ def _build_subcommand_parser():
     index_parser.add_argument("--output-path")
     index_parser.add_argument("--manifest-output-path")
 
+    inspect_xlsx_parser = subparsers.add_parser("inspect-xlsx")
+    inspect_xlsx_parser.add_argument("--input-workbook", required=True)
+    inspect_xlsx_parser.add_argument("--output-dir", required=True)
+
+    plan_xlsx_parser = subparsers.add_parser("plan-xlsx-output")
+    plan_xlsx_parser.add_argument("--input-workbook", required=True)
+    plan_xlsx_parser.add_argument("--xlsx-inspection", required=True)
+    plan_xlsx_parser.add_argument("--output-dir", required=True)
+    plan_xlsx_parser.add_argument(
+        "--output-workbook-name",
+        default="derived_xlsx_summary.xlsx",
+    )
+
+    approve_xlsx_parser = subparsers.add_parser("approve-xlsx-output")
+    approve_xlsx_parser.add_argument("--plan-path", required=True)
+    approve_xlsx_parser.add_argument("--output-path", required=True)
+    approve_xlsx_parser.add_argument("--approved", required=True)
+    approve_xlsx_parser.add_argument("--human-reviewed", required=True)
+    approve_xlsx_parser.add_argument("--reviewer-id", required=True)
+
+    create_xlsx_parser = subparsers.add_parser("create-approved-xlsx-output")
+    create_xlsx_parser.add_argument("--input-workbook", required=True)
+    create_xlsx_parser.add_argument("--plan-path", required=True)
+    create_xlsx_parser.add_argument("--approval-path", required=True)
+    create_xlsx_parser.add_argument("--output-dir", required=True)
+
+    validate_xlsx_parser = subparsers.add_parser("validate-xlsx-output")
+    validate_xlsx_parser.add_argument("--output-dir", required=True)
+    validate_xlsx_parser.add_argument("--output-path")
+
+    model_fixture_parser = subparsers.add_parser("run-model-fixture")
+    model_fixture_parser.add_argument("--request-path", required=True)
+    model_fixture_parser.add_argument("--output-dir", required=True)
+
+    browser_fixture_parser = subparsers.add_parser("run-browser-fixture")
+    browser_fixture_parser.add_argument("--fixture-path", required=True)
+    browser_fixture_parser.add_argument("--actions-path", required=True)
+    browser_fixture_parser.add_argument("--output-dir", required=True)
+
+    runtime_delivery_parser = subparsers.add_parser("validate-runtime-delivery")
+    runtime_delivery_parser.add_argument("--package-dir", required=True)
+    runtime_delivery_parser.add_argument("--output-path", required=True)
+
+    adapter_registry_parser = subparsers.add_parser("show-adapter-registry")
+    adapter_registry_parser.add_argument("--output-path")
+
+    tool_intake_parser = subparsers.add_parser("validate-tool-intake")
+    tool_intake_parser.add_argument("--register-path", required=True)
+    tool_intake_parser.add_argument("--output-path")
+
     return parser
 
 
@@ -449,6 +737,20 @@ def _optional_path(value):
     if value is None:
         return None
     return Path(value)
+
+
+def _parse_exact_true(value, flag_name):
+    if value != "true":
+        raise ValueError(f"{flag_name} must be exactly true")
+    return True
+
+
+def _write_optional_cli_output(payload, output_path):
+    if output_path is None:
+        return
+    if output_path.exists():
+        raise ValueError("output_path already exists")
+    write_json_atomically(output_path, payload)
 
 
 def _run_or_verify_local_mvp(
