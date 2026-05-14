@@ -77,6 +77,24 @@ def build_default_adapter_registry() -> tuple[AdapterRegistryEntry, ...]:
             notes="Deterministic local mock provider; no live model access.",
         ),
         AdapterRegistryEntry(
+            adapter_id="live_model_provider_boundary",
+            adapter_name="Live Model Provider Boundary",
+            mode=AdapterMode.FUTURE_EXTERNAL,
+            risk_class=AdapterRiskClass.LIVE_MODEL_PROVIDER,
+            admission_status=AdapterAdmissionStatus.DEFERRED,
+            capabilities=("call_typed_schema_provider",),
+            required_controls=_REQUIRED_CONTROLS
+            + (
+                "environment_only_api_key",
+                "budget_gate",
+                "timeout_policy",
+                "schema_validation",
+                "future_admission",
+            ),
+            boundary=AdapterExecutionBoundary(network_allowed=True),
+            notes="Disabled-by-default live provider boundary; no real calls admitted.",
+        ),
+        AdapterRegistryEntry(
             adapter_id="browser_fixture_runtime",
             adapter_name="Browser Local Fixture Runtime",
             mode=AdapterMode.LOCAL_FIXTURE,
