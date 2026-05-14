@@ -22,6 +22,7 @@ EXPECTED_JOB_FILES = {
     "spreadsheet_report_plan.json",
     "spreadsheet_structural_report.json",
     "spreadsheet_structural_report.md",
+    "final_job_manifest.json",
     "job_summary.json",
     "human_next_steps.md",
 }
@@ -117,6 +118,10 @@ class LocalJobPackageTests(unittest.TestCase):
         self.assertEqual(
             result.spreadsheet_structural_report_markdown_path,
             result.job_dir / "spreadsheet_structural_report.md",
+        )
+        self.assertEqual(
+            result.final_job_manifest_path,
+            result.job_dir / "final_job_manifest.json",
         )
         self.assertEqual(result.job_summary_path, result.job_dir / "job_summary.json")
         self.assertEqual(
@@ -557,6 +562,7 @@ class LocalJobPackageTests(unittest.TestCase):
         self.assertIn("spreadsheet_report_plan.json", markdown)
         self.assertIn("spreadsheet_structural_report.json", markdown)
         self.assertIn("spreadsheet_structural_report.md", markdown)
+        self.assertIn("final_job_manifest.json", markdown)
         self.assertIn("spreadsheet inspected files: 1", markdown)
         self.assertIn("spreadsheet unsupported files: 1", markdown)
         self.assertIn("spreadsheet parse error files: 0", markdown)

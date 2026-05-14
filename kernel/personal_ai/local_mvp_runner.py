@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from pathlib import Path
 
-from kernel.personal_ai.job_package import build_local_job_package
+from kernel.personal_ai.job_package import build_local_job_package, validate_job_id
 
 __all__ = [
     "PersonalAILocalMVPResult",
@@ -23,6 +23,7 @@ _REQUIRED_ARTIFACTS = [
     "spreadsheet_report_plan.json",
     "spreadsheet_structural_report.json",
     "spreadsheet_structural_report.md",
+    "final_job_manifest.json",
     "job_summary.json",
     "human_next_steps.md",
 ]
@@ -51,8 +52,15 @@ def run_personal_ai_local_mvp(
 
     if not input_path.exists():
         raise ValueError("input_dir is missing")
+    if not input_path.is_dir():
+        raise ValueError("input_dir is not a directory")
     if not output_root_path.exists():
         raise ValueError("output_root_dir is missing")
+    if not output_root_path.is_dir():
+        raise ValueError("output_root_dir is not a directory")
+    if _path_is_inside(output_root_path, input_path):
+        raise ValueError("output_root_dir must be outside input_dir")
+    validate_job_id(job_id)
 
     job_package_result = build_local_job_package(
         input_path,
@@ -66,6 +74,7 @@ def run_personal_ai_local_mvp(
         for artifact_name in _REQUIRED_ARTIFACTS
         if not (job_package_result.job_dir / artifact_name).exists()
     ]
+    missing_artifacts.sort()
 
     return PersonalAILocalMVPResult(
         job_id=job_id,
@@ -75,3 +84,13 @@ def run_personal_ai_local_mvp(
         complete=not missing_artifacts,
         required_human_approval=job_package_result.required_human_approval,
     )
+
+
+def _path_is_inside(candidate_path, root_path):
+    resolved_candidate = candidate_path.resolve(strict=True)
+    resolved_root = root_path.resolve(strict=True)
+    try:
+        resolved_candidate.relative_to(resolved_root)
+    except ValueError:
+        return False
+    return True

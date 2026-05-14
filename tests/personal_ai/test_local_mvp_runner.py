@@ -3,6 +3,7 @@ import re
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from kernel.personal_ai.local_mvp_runner import (
     PersonalAILocalMVPResult,
@@ -23,6 +24,7 @@ EXPECTED_REQUIRED_ARTIFACTS = [
     "spreadsheet_report_plan.json",
     "spreadsheet_structural_report.json",
     "spreadsheet_structural_report.md",
+    "final_job_manifest.json",
     "job_summary.json",
     "human_next_steps.md",
 ]
@@ -116,13 +118,86 @@ class LocalMVPRunnerTests(unittest.TestCase):
                 job_id="job-001",
             )
 
+    def test_runner_rejects_non_directory_input(self):
+        input_dir, output_root_dir = self.build_workspace()
+        file_input = input_dir / "not-a-dir.txt"
+        file_input.write_text("not a directory", encoding="utf-8")
+
+        with self.assertRaisesRegex(ValueError, "input_dir is not a directory"):
+            run_personal_ai_local_mvp(
+                file_input,
+                output_root_dir,
+                job_id="job-001",
+            )
+
+    def test_runner_rejects_non_directory_output_root(self):
+        input_dir, output_root_dir = self.build_workspace()
+        output_file = output_root_dir / "not-a-dir.txt"
+        output_file.write_text("not a directory", encoding="utf-8")
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "output_root_dir is not a directory",
+        ):
+            run_personal_ai_local_mvp(
+                input_dir,
+                output_file,
+                job_id="job-001",
+            )
+
+    def test_runner_rejects_output_root_inside_input_dir(self):
+        input_dir, _ = self.build_workspace()
+        output_root_dir = input_dir / "packages"
+        output_root_dir.mkdir()
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "output_root_dir must be outside input_dir",
+        ):
+            run_personal_ai_local_mvp(
+                input_dir,
+                output_root_dir,
+                job_id="job-001",
+            )
+
+    def test_runner_rejects_bad_job_id(self):
+        input_dir, output_root_dir = self.build_workspace()
+
+        with self.assertRaisesRegex(ValueError, "job_id is invalid"):
+            run_personal_ai_local_mvp(
+                input_dir,
+                output_root_dir,
+                job_id="../bad",
+            )
+
+    def test_runner_detects_missing_artifact_after_package_build(self):
+        input_dir, output_root_dir = self.build_workspace()
+        self.write_inputs(input_dir, "RAW_SENTINEL_CELL_VALUE_DO_NOT_COPY")
+
+        import kernel.personal_ai.local_mvp_runner as runner_module
+
+        real_builder = runner_module.build_local_job_package
+
+        def build_and_remove_human_next_steps(*args, **kwargs):
+            result = real_builder(*args, **kwargs)
+            (result.job_dir / "human_next_steps.md").unlink()
+            return result
+
+        with patch(
+            "kernel.personal_ai.local_mvp_runner.build_local_job_package",
+            side_effect=build_and_remove_human_next_steps,
+        ):
+            result = run_personal_ai_local_mvp(
+                input_dir,
+                output_root_dir,
+                job_id="job-001",
+            )
+
+        self.assertIs(result.complete, False)
+        self.assertEqual(result.missing_artifacts, ["human_next_steps.md"])
+
     def test_no_network_api_subprocess_or_external_tool_imports_are_added(self):
-        production_files = [
-            Path("kernel/personal_ai/local_mvp_runner.py"),
-            Path("kernel/personal_ai/spreadsheet_report_planner.py"),
-            Path("kernel/personal_ai/spreadsheet_structural_report.py"),
-            Path("kernel/personal_ai/job_package.py"),
-        ]
+        production_files = sorted(Path("kernel/personal_ai").glob("*.py"))
 
         for production_file in production_files:
             with self.subTest(production_file=production_file.as_posix()):

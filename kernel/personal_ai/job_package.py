@@ -6,7 +6,9 @@ import json
 import re
 
 from kernel.personal_ai.io_utils import write_json_atomically
+from kernel.personal_ai.job_manifest import build_final_job_manifest
 from kernel.personal_ai.local_pipeline import build_local_review_pipeline
+from kernel.personal_ai.markdown_utils import write_markdown_atomically
 from kernel.personal_ai.spreadsheet_readonly_inspector import (
     build_spreadsheet_readonly_inspection,
 )
@@ -22,6 +24,7 @@ from kernel.personal_ai.task_router import build_task_route
 __all__ = [
     "LocalJobPackageResult",
     "build_local_job_package",
+    "validate_job_id",
 ]
 
 _JOB_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
@@ -39,6 +42,7 @@ _ARTIFACT_FILES = {
     "spreadsheet_report_plan": "spreadsheet_report_plan.json",
     "spreadsheet_structural_report_json": "spreadsheet_structural_report.json",
     "spreadsheet_structural_report_markdown": "spreadsheet_structural_report.md",
+    "final_job_manifest": "final_job_manifest.json",
     "job_summary": "job_summary.json",
     "human_next_steps": "human_next_steps.md",
 }
@@ -97,6 +101,7 @@ class LocalJobPackageResult:
     spreadsheet_report_plan_path: Path
     spreadsheet_structural_report_json_path: Path
     spreadsheet_structural_report_markdown_path: Path
+    final_job_manifest_path: Path
     job_summary_path: Path
     human_next_steps_path: Path
     files_recorded: int
@@ -154,6 +159,7 @@ def build_local_job_package(
     spreadsheet_structural_report_markdown_path = (
         job_dir / _ARTIFACT_FILES["spreadsheet_structural_report_markdown"]
     )
+    final_job_manifest_path = job_dir / _ARTIFACT_FILES["final_job_manifest"]
     job_summary_path = job_dir / _ARTIFACT_FILES["job_summary"]
     human_next_steps_path = job_dir / _ARTIFACT_FILES["human_next_steps"]
 
@@ -225,6 +231,7 @@ def build_local_job_package(
         "spreadsheet_structural_report_markdown": (
             spreadsheet_structural_report_markdown_path.as_posix()
         ),
+        "final_job_manifest": final_job_manifest_path.as_posix(),
         "job_summary": job_summary_path.as_posix(),
         "human_next_steps": human_next_steps_path.as_posix(),
     }
@@ -274,7 +281,8 @@ def build_local_job_package(
             "next_allowed_action": "human_review_only",
         },
     )
-    human_next_steps_path.write_text(
+    write_markdown_atomically(
+        human_next_steps_path,
         _render_human_next_steps(
             job_id,
             artifacts,
@@ -290,8 +298,8 @@ def build_local_job_package(
             spreadsheet_report_plan_result.issue_categories,
             spreadsheet_structural_report_result.report_status,
         ),
-        encoding="utf-8",
     )
+    build_final_job_manifest(job_dir, final_job_manifest_path)
 
     return LocalJobPackageResult(
         job_id=job_id,
@@ -314,6 +322,7 @@ def build_local_job_package(
         spreadsheet_structural_report_markdown_path=(
             spreadsheet_structural_report_markdown_path
         ),
+        final_job_manifest_path=final_job_manifest_path,
         job_summary_path=job_summary_path,
         human_next_steps_path=human_next_steps_path,
         files_recorded=pipeline_result.files_recorded,
@@ -347,6 +356,10 @@ def _validate_job_package_inputs(input_path, output_root_path, job_id):
         raise ValueError("output_root_dir is not a directory")
     if _path_is_inside(output_root_path, input_path):
         raise ValueError("output_root_dir must be outside input_dir")
+    validate_job_id(job_id)
+
+
+def validate_job_id(job_id):
     if not _valid_job_id(job_id):
         raise ValueError("job_id is invalid")
 
