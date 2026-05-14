@@ -16,6 +16,12 @@ from kernel.personal_ai.output_package import build_approved_output_package
 from kernel.personal_ai.output_validator import build_approved_output_validation
 from kernel.personal_ai.package_validator import build_job_package_validation
 from kernel.personal_ai.adapters.xlsx_readonly_runtime import inspect_xlsx_readonly
+from kernel.personal_ai.adapters.xlsx_output_writer import (
+    approve_xlsx_output,
+    create_approved_xlsx_output,
+    plan_xlsx_output,
+    validate_xlsx_output,
+)
 
 __all__ = [
     "main",
@@ -50,6 +56,10 @@ _SUBCOMMANDS = {
     "validate-output",
     "index-artifacts",
     "inspect-xlsx",
+    "plan-xlsx-output",
+    "approve-xlsx-output",
+    "create-approved-xlsx-output",
+    "validate-xlsx-output",
 }
 
 
@@ -373,6 +383,89 @@ def _main_subcommand(argv) -> int:
                 }
             )
             return 0
+        if args.command == "plan-xlsx-output":
+            result = plan_xlsx_output(
+                Path(args.input_workbook),
+                Path(args.xlsx_inspection),
+                Path(args.output_dir),
+                output_workbook_name=args.output_workbook_name,
+            )
+            _print_command_payload(
+                {
+                    "complete": True,
+                    "xlsx_output_plan_path": result.plan_path.as_posix(),
+                    "input_sha256": result.input_sha256,
+                    "xlsx_inspection_sha256": result.xlsx_inspection_sha256,
+                    "plan_sha256": result.plan_sha256,
+                    "required_human_approval": result.required_human_approval,
+                }
+            )
+            return 0
+        if args.command == "approve-xlsx-output":
+            result = approve_xlsx_output(
+                Path(args.plan_path),
+                Path(args.output_path),
+                approved=_parse_bool(args.approved),
+                human_reviewed=_parse_bool(args.human_reviewed),
+                reviewer_id=args.reviewer_id,
+            )
+            _print_command_payload(
+                {
+                    "complete": result.approved,
+                    "xlsx_output_approval_path": result.approval_path.as_posix(),
+                    "approved": result.approved,
+                    "plan_sha256": result.plan_sha256,
+                    "approval_sha256": result.approval_sha256,
+                    "required_human_approval": result.required_human_approval,
+                }
+            )
+            return 0 if result.approved else 1
+        if args.command == "create-approved-xlsx-output":
+            result = create_approved_xlsx_output(
+                Path(args.input_workbook),
+                Path(args.plan_path),
+                Path(args.approval_path),
+                Path(args.output_dir),
+            )
+            _print_command_payload(
+                {
+                    "complete": result.complete,
+                    "output_workbook_path": result.output_workbook_path.as_posix(),
+                    "xlsx_output_manifest_path": (
+                        result.output_manifest_path.as_posix()
+                    ),
+                    "xlsx_output_delivery_summary_path": (
+                        result.delivery_summary_path.as_posix()
+                    ),
+                    "xlsx_output_validation_path": (
+                        result.validation_report_path.as_posix()
+                    ),
+                    "output_sha256": result.output_sha256,
+                    "required_human_approval": result.required_human_approval,
+                }
+            )
+            return 0 if result.complete else 1
+        if args.command == "validate-xlsx-output":
+            result = validate_xlsx_output(
+                Path(args.output_dir),
+                _optional_path(args.output_path),
+            )
+            _print_command_payload(
+                {
+                    "complete": result.complete,
+                    "output_dir": result.output_dir.as_posix(),
+                    "xlsx_output_validation_path": (
+                        result.validation_report_path.as_posix()
+                    ),
+                    "manifest_hash_verified": result.manifest_hash_verified,
+                    "output_workbook_exists": result.output_workbook_exists,
+                    "raw_value_leakage_detected": (
+                        result.raw_value_leakage_detected
+                    ),
+                    "required_human_approval": True,
+                }
+            )
+            return 0 if result.complete else 1
     except ValueError as error:
         _print_command_payload(
             {
@@ -429,6 +522,35 @@ def _build_subcommand_parser():
     inspect_xlsx_parser.add_argument("--input-workbook", required=True)
     inspect_xlsx_parser.add_argument("--output-dir", required=True)
 
+    plan_xlsx_parser = subparsers.add_parser("plan-xlsx-output")
+    plan_xlsx_parser.add_argument("--input-workbook", required=True)
+    plan_xlsx_parser.add_argument("--xlsx-inspection", required=True)
+    plan_xlsx_parser.add_argument("--output-dir", required=True)
+    plan_xlsx_parser.add_argument(
+        "--output-workbook-name",
+        default="derived_xlsx_summary.xlsx",
+    )
+
+    approve_xlsx_parser = subparsers.add_parser("approve-xlsx-output")
+    approve_xlsx_parser.add_argument("--plan-path", required=True)
+    approve_xlsx_parser.add_argument("--output-path", required=True)
+    approve_xlsx_parser.add_argument("--approved", default="true")
+    approve_xlsx_parser.add_argument("--human-reviewed", default="true")
+    approve_xlsx_parser.add_argument(
+        "--reviewer-id",
+        default="local_human_review",
+    )
+
+    create_xlsx_parser = subparsers.add_parser("create-approved-xlsx-output")
+    create_xlsx_parser.add_argument("--input-workbook", required=True)
+    create_xlsx_parser.add_argument("--plan-path", required=True)
+    create_xlsx_parser.add_argument("--approval-path", required=True)
+    create_xlsx_parser.add_argument("--output-dir", required=True)
+
+    validate_xlsx_parser = subparsers.add_parser("validate-xlsx-output")
+    validate_xlsx_parser.add_argument("--output-dir", required=True)
+    validate_xlsx_parser.add_argument("--output-path")
+
     return parser
 
 
@@ -477,6 +599,15 @@ def _optional_path(value):
     if value is None:
         return None
     return Path(value)
+
+
+def _parse_bool(value):
+    normalized = str(value).strip().lower()
+    if normalized == "true":
+        return True
+    if normalized == "false":
+        return False
+    raise ValueError("boolean argument must be true or false")
 
 
 def _run_or_verify_local_mvp(
