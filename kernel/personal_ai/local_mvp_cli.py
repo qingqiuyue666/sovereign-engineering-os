@@ -26,6 +26,17 @@ from kernel.personal_ai.adapters.model_typed_schema_runtime import run_model_fix
 from kernel.personal_ai.adapters.browser_fixture_runtime import (
     run_browser_fixture_from_actions_file,
 )
+from kernel.personal_ai.adapters.adapter_registry import (
+    DEFAULT_ADAPTER_REGISTRY,
+    validate_adapter_registry_entry,
+)
+from kernel.personal_ai.adapters.tool_intake_register import (
+    validate_runtime_tool_admission_register_file,
+)
+from kernel.personal_ai.runtime_delivery_package import (
+    validate_runtime_delivery_package,
+)
+from kernel.personal_ai.io_utils import write_json_atomically
 
 __all__ = [
     "main",
@@ -66,6 +77,9 @@ _SUBCOMMANDS = {
     "validate-xlsx-output",
     "run-model-fixture",
     "run-browser-fixture",
+    "validate-runtime-delivery",
+    "show-adapter-registry",
+    "validate-tool-intake",
 }
 
 
@@ -513,6 +527,64 @@ def _main_subcommand(argv) -> int:
                 }
             )
             return 0
+        if args.command == "validate-runtime-delivery":
+            result = validate_runtime_delivery_package(
+                Path(args.package_dir),
+                Path(args.output_path),
+            )
+            _print_command_payload(
+                {
+                    "complete": result.complete,
+                    "package_dir": result.package_dir.as_posix(),
+                    "runtime_delivery_manifest_path": (
+                        result.runtime_delivery_manifest_path.as_posix()
+                    ),
+                    "runtime_delivery_validation_path": (
+                        result.runtime_delivery_validation_path.as_posix()
+                    ),
+                    "packaged_artifacts": list(result.packaged_artifacts),
+                    "raw_value_leakage_detected": (
+                        result.raw_value_leakage_detected
+                    ),
+                    "required_human_approval": result.required_human_approval,
+                }
+            )
+            return 0 if result.complete else 1
+        if args.command == "show-adapter-registry":
+            payload = {
+                "complete": True,
+                "registry_type": "personal_ai_execution_os_v2_adapter_registry",
+                "entries": [
+                    entry.to_dict()
+                    for entry in DEFAULT_ADAPTER_REGISTRY
+                ],
+                "validation_failures": {
+                    entry.adapter_id: list(validate_adapter_registry_entry(entry))
+                    for entry in DEFAULT_ADAPTER_REGISTRY
+                },
+                "required_human_approval": True,
+            }
+            _write_optional_cli_output(payload, _optional_path(args.output_path))
+            _print_command_payload(payload)
+            return 0
+        if args.command == "validate-tool-intake":
+            result = validate_runtime_tool_admission_register_file(
+                Path(args.register_path)
+            )
+            payload = {
+                "complete": result.accepted,
+                "register_path": None
+                if result.register_path is None
+                else result.register_path.as_posix(),
+                "entry_count": result.entry_count,
+                "failures": list(result.failures),
+                "admitted_projects": list(result.admitted_projects),
+                "deferred_projects": list(result.deferred_projects),
+                "required_human_approval": True,
+            }
+            _write_optional_cli_output(payload, _optional_path(args.output_path))
+            _print_command_payload(payload)
+            return 0 if result.accepted else 1
     except ValueError as error:
         _print_command_payload(
             {
@@ -607,6 +679,17 @@ def _build_subcommand_parser():
     browser_fixture_parser.add_argument("--actions-path", required=True)
     browser_fixture_parser.add_argument("--output-dir", required=True)
 
+    runtime_delivery_parser = subparsers.add_parser("validate-runtime-delivery")
+    runtime_delivery_parser.add_argument("--package-dir", required=True)
+    runtime_delivery_parser.add_argument("--output-path", required=True)
+
+    adapter_registry_parser = subparsers.add_parser("show-adapter-registry")
+    adapter_registry_parser.add_argument("--output-path")
+
+    tool_intake_parser = subparsers.add_parser("validate-tool-intake")
+    tool_intake_parser.add_argument("--register-path", required=True)
+    tool_intake_parser.add_argument("--output-path")
+
     return parser
 
 
@@ -664,6 +747,14 @@ def _parse_bool(value):
     if normalized == "false":
         return False
     raise ValueError("boolean argument must be true or false")
+
+
+def _write_optional_cli_output(payload, output_path):
+    if output_path is None:
+        return
+    if output_path.exists():
+        raise ValueError("output_path already exists")
+    write_json_atomically(output_path, payload)
 
 
 def _run_or_verify_local_mvp(
