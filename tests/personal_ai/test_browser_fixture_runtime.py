@@ -60,15 +60,22 @@ class BrowserFixtureRuntimeTests(unittest.TestCase):
                 },
                 {"action": "click_allowed_button", "button_id": "go"},
             ],
+            allow_form_submit=True,
         )
         action_log = read_json(result.action_log_path)
         evidence = read_json(result.evidence_manifest_path)
 
         self.assertEqual(result.action_count, 5)
         self.assertFalse(action_log["external_network_used"])
+        self.assertFalse(action_log["real_browser_runtime_used"])
+        self.assertFalse(action_log["playwright_runtime_used"])
+        self.assertTrue(action_log["external_navigation_denied_by_default"])
         self.assertFalse(action_log["credential_storage_used"])
         self.assertEqual(evidence["before_dom_snapshot"]["title"], "Local Fixture")
         self.assertEqual(evidence["after_dom_snapshot"]["filled_fields"]["query"]["value_length"], 15)
+        self.assertEqual(evidence["screenshot_evidence"]["mode"], "dom_metadata_only_fixture")
+        self.assertFalse(evidence["real_screenshot_captured"])
+        self.assertTrue(evidence["timeout_quarantine_policy"]["failure_quarantine_required"])
         self.assertNotIn(
             "RAW_TYPED_VALUE",
             result.action_log_path.read_text(encoding="utf-8"),
@@ -89,6 +96,28 @@ class BrowserFixtureRuntimeTests(unittest.TestCase):
                 output_dir,
                 [{"action": "open_local_fixture", "url": "https://example.com"}],
             )
+
+    def test_rejects_external_fixture_link_unless_domain_allowlisted(self):
+        _, fixture_path, output_dir = self.build_workspace(
+            """
+<html><head><title>Fixture</title></head><body>
+<a href="https://example.test/page">External</a>
+</body></html>
+"""
+        )
+
+        with self.assertRaisesRegex(ValueError, "domain allowlist"):
+            run_browser_fixture(fixture_path, output_dir, [{"action": "inspect_links"}])
+
+        result = run_browser_fixture(
+            fixture_path,
+            output_dir,
+            [{"action": "inspect_links"}],
+            allowed_domains=("example.test",),
+        )
+        evidence = read_json(result.evidence_manifest_path)
+
+        self.assertEqual(evidence["domain_allowlist"], ["example.test"])
 
     def test_rejects_unallowed_actions(self):
         _, fixture_path, output_dir = self.build_workspace()
@@ -122,6 +151,35 @@ class BrowserFixtureRuntimeTests(unittest.TestCase):
                 ],
             )
 
+    def test_rejects_payment_and_account_creation_actions(self):
+        _, fixture_path, output_dir = self.build_workspace(
+            """
+<html><head><title>Fixture</title></head><body>
+<button id="checkout" data-seos-allowed-button="true">Pay</button>
+<input name="api_key" data-seos-allowed-field="true" />
+</body></html>
+"""
+        )
+
+        with self.assertRaisesRegex(ValueError, "sensitive browser action"):
+            run_browser_fixture(
+                fixture_path,
+                output_dir,
+                [{"action": "click_allowed_button", "button_id": "checkout"}],
+            )
+        with self.assertRaisesRegex(ValueError, "sensitive browser action"):
+            run_browser_fixture(
+                fixture_path,
+                output_dir,
+                [
+                    {
+                        "action": "fill_allowed_field",
+                        "field_name": "api_key",
+                        "value": "dummy",
+                    }
+                ],
+            )
+
     def test_rejects_form_submission_without_explicit_fixture_policy(self):
         _, fixture_path, output_dir = self.build_workspace(
             """
@@ -136,6 +194,27 @@ class BrowserFixtureRuntimeTests(unittest.TestCase):
                 fixture_path,
                 output_dir,
                 [{"action": "click_allowed_button", "button_id": "go"}],
+            )
+
+    def test_rejects_submit_without_explicit_approval_gate_even_when_fixture_allows_it(self):
+        _, fixture_path, output_dir = self.build_workspace()
+
+        with self.assertRaisesRegex(ValueError, "explicit approval gate"):
+            run_browser_fixture(
+                fixture_path,
+                output_dir,
+                [{"action": "click_allowed_button", "button_id": "go"}],
+            )
+
+    def test_rejects_timeout_policy_outside_fixture_bounds(self):
+        _, fixture_path, output_dir = self.build_workspace()
+
+        with self.assertRaisesRegex(ValueError, "timeout_seconds exceeds"):
+            run_browser_fixture(
+                fixture_path,
+                output_dir,
+                [{"action": "open_local_fixture"}],
+                timeout_seconds=31,
             )
 
     def test_refuses_output_overwrite_and_fixture_directory_output(self):
@@ -155,7 +234,10 @@ class BrowserFixtureRuntimeTests(unittest.TestCase):
         actions_path = root / "actions.json"
         write_json_atomically(
             actions_path,
-            {"actions": [{"action": "open_local_fixture"}]},
+            {
+                "policy": {"timeout_seconds": 3},
+                "actions": [{"action": "open_local_fixture"}],
+            },
         )
         bad_actions_path = root / "bad_actions.json"
         bad_actions_path.write_text("{bad", encoding="utf-8")
