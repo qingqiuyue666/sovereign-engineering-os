@@ -3,12 +3,20 @@
 Personal AI Local MVP v1 builds a deterministic local job package from a real
 folder. It records local file metadata, proposes non-executing review work,
 routes the package, inspects CSV/TSV spreadsheet structure read-only, and writes
-JSON/Markdown artifacts outside the input directory.
+JSON/Markdown artifacts outside the input directory. It also writes a
+metadata-only artifact index and local validation report for generated package
+artifacts.
 
 Run:
 
 ```bash
 python3 -m kernel.personal_ai.local_mvp_cli --input-dir ./input-folder --output-root-dir ./job-packages --job-id local-job-001
+```
+
+Equivalent explicit subcommand:
+
+```bash
+python3 -m kernel.personal_ai.local_mvp_cli run-local --input-dir ./input-folder --output-root-dir ./job-packages --job-id local-job-001
 ```
 
 Optional flags:
@@ -31,6 +39,31 @@ Outputs:
 - The CLI writes one job directory under the output root using `--job-id`.
 - CLI failures write `_failed_jobs/<job-id>/failure_manifest.json` only when the
   output root exists.
+
+## Local artifact index and validation
+
+Each job package includes:
+
+- `artifact_index.json`
+- `artifact_index_manifest.json`
+- `job_package_validation.json`
+
+The artifact index records generated artifact names, relative paths, sizes,
+hashes, extensions, and filename-derived search terms only. It does not index
+raw file contents, raw input contents, raw cell values, or source spreadsheet
+values.
+
+Validate an existing job package:
+
+```bash
+python3 -m kernel.personal_ai.local_mvp_cli validate-job --job-dir ./job-packages/local-job-001
+```
+
+Rebuild the metadata-only index for an existing job package:
+
+```bash
+python3 -m kernel.personal_ai.local_mvp_cli index-artifacts --job-dir ./job-packages/local-job-001
+```
 
 ## Approval-gated output package
 
@@ -57,6 +90,12 @@ python3 -m kernel.personal_ai.local_mvp_cli --input-dir ./input-folder --output-
 
 ```bash
 python3 -m kernel.personal_ai.local_mvp_cli --input-dir ./input-folder --output-root-dir ./job-packages --job-id local-job-001 --write-approval-request ./approval_request.json
+```
+
+Equivalent explicit subcommand for an existing job package:
+
+```bash
+python3 -m kernel.personal_ai.local_mvp_cli write-approval-request --job-dir ./job-packages/local-job-001 --output-path ./approval_request.json
 ```
 
 3. Read the approval request hashes from the CLI output and from
@@ -87,7 +126,19 @@ Example `approval_decision.json`:
 python3 -m kernel.personal_ai.local_mvp_cli --input-dir ./input-folder --output-root-dir ./job-packages --job-id local-job-001 --approval-request ./approval_request.json --approval-decision ./approval_decision.json --output-package-root-dir ./approved-output-packages --output-package-id approved-local-job-001
 ```
 
-6. Inspect `provenance_chain.json` in the approved output package.
+Equivalent explicit subcommand for an existing job package:
+
+```bash
+python3 -m kernel.personal_ai.local_mvp_cli create-approved-output --job-dir ./job-packages/local-job-001 --approval-request ./approval_request.json --approval-decision ./approval_decision.json --output-package-root-dir ./approved-output-packages --output-package-id approved-local-job-001
+```
+
+6. Inspect `provenance_chain.json` and `approved_output_validation.json` in the approved output package.
+
+Validate an existing approved output package:
+
+```bash
+python3 -m kernel.personal_ai.local_mvp_cli validate-output --output-package-dir ./approved-output-packages/approved-local-job-001
+```
 
 Approved output package artifacts:
 
@@ -98,6 +149,7 @@ Approved output package artifacts:
 - `spreadsheet_structural_report.json`
 - `spreadsheet_structural_report.md`
 - `final_job_manifest.json`
+- `approved_output_validation.json`
 
 Approval-gated output package boundaries:
 
@@ -123,9 +175,12 @@ Final artifacts:
 - `spreadsheet_report_plan.json`
 - `spreadsheet_structural_report.json`
 - `spreadsheet_structural_report.md`
+- `artifact_index.json`
+- `artifact_index_manifest.json`
 - `final_job_manifest.json`
 - `job_summary.json`
 - `human_next_steps.md`
+- `job_package_validation.json`
 
 Spreadsheet boundary:
 
@@ -152,6 +207,8 @@ Boundary:
 - No semantic classification.
 - No issue severity assignment.
 - No business semantic interpretation.
+- No external OSS dependency is required for the index, validators, snapshot
+  helpers, or registry.
 - No pandas, openpyxl, xlrd, or pyarrow.
 - No kernel/adapters integration or changes.
 

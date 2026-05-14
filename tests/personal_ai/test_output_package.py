@@ -19,6 +19,7 @@ EXPECTED_OUTPUT_FILES = {
     "spreadsheet_structural_report.json",
     "spreadsheet_structural_report.md",
     "final_job_manifest.json",
+    "approved_output_validation.json",
 }
 
 SPREADSHEET_OUTPUT_SUFFIXES = {
@@ -131,6 +132,7 @@ class OutputPackageTests(unittest.TestCase):
         self.assertTrue(result.delivery_summary_path.exists())
         self.assertTrue(result.approval_receipt_path.exists())
         self.assertTrue(result.provenance_chain_path.exists())
+        self.assertTrue(result.approved_output_validation_path.exists())
         self.assertIs(result.required_human_approval, True)
         self.assertIs(result.approval_verified, True)
         self.assertIs(result.complete, True)

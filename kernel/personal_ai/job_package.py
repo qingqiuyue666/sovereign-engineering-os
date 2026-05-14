@@ -5,10 +5,12 @@ from pathlib import Path
 import json
 import re
 
+from kernel.personal_ai.artifact_index import build_artifact_index
 from kernel.personal_ai.io_utils import write_json_atomically
 from kernel.personal_ai.job_manifest import build_final_job_manifest
 from kernel.personal_ai.local_pipeline import build_local_review_pipeline
 from kernel.personal_ai.markdown_utils import write_markdown_atomically
+from kernel.personal_ai.package_validator import build_job_package_validation
 from kernel.personal_ai.spreadsheet_readonly_inspector import (
     build_spreadsheet_readonly_inspection,
 )
@@ -42,9 +44,15 @@ _ARTIFACT_FILES = {
     "spreadsheet_report_plan": "spreadsheet_report_plan.json",
     "spreadsheet_structural_report_json": "spreadsheet_structural_report.json",
     "spreadsheet_structural_report_markdown": "spreadsheet_structural_report.md",
+    "artifact_index": "artifact_index.json",
+    "artifact_index_manifest": "artifact_index_manifest.json",
     "final_job_manifest": "final_job_manifest.json",
     "job_summary": "job_summary.json",
     "human_next_steps": "human_next_steps.md",
+}
+
+_SUPPLEMENTAL_ARTIFACT_FILES = {
+    "job_package_validation": "job_package_validation.json",
 }
 
 _BOUNDARIES = {
@@ -101,9 +109,12 @@ class LocalJobPackageResult:
     spreadsheet_report_plan_path: Path
     spreadsheet_structural_report_json_path: Path
     spreadsheet_structural_report_markdown_path: Path
+    artifact_index_path: Path
+    artifact_index_manifest_path: Path
     final_job_manifest_path: Path
     job_summary_path: Path
     human_next_steps_path: Path
+    job_package_validation_path: Path
     files_recorded: int
     candidate_tasks: list[str]
     route_type: str
@@ -159,9 +170,16 @@ def build_local_job_package(
     spreadsheet_structural_report_markdown_path = (
         job_dir / _ARTIFACT_FILES["spreadsheet_structural_report_markdown"]
     )
+    artifact_index_path = job_dir / _ARTIFACT_FILES["artifact_index"]
+    artifact_index_manifest_path = (
+        job_dir / _ARTIFACT_FILES["artifact_index_manifest"]
+    )
     final_job_manifest_path = job_dir / _ARTIFACT_FILES["final_job_manifest"]
     job_summary_path = job_dir / _ARTIFACT_FILES["job_summary"]
     human_next_steps_path = job_dir / _ARTIFACT_FILES["human_next_steps"]
+    job_package_validation_path = (
+        job_dir / _SUPPLEMENTAL_ARTIFACT_FILES["job_package_validation"]
+    )
 
     write_json_atomically(
         input_snapshot_path,
@@ -231,12 +249,17 @@ def build_local_job_package(
         "spreadsheet_structural_report_markdown": (
             spreadsheet_structural_report_markdown_path.as_posix()
         ),
+        "artifact_index": artifact_index_path.as_posix(),
+        "artifact_index_manifest": artifact_index_manifest_path.as_posix(),
         "final_job_manifest": final_job_manifest_path.as_posix(),
         "job_summary": job_summary_path.as_posix(),
         "human_next_steps": human_next_steps_path.as_posix(),
     }
+    supplemental_artifacts = {
+        "job_package_validation": job_package_validation_path.as_posix(),
+    }
     counts = dict(pipeline_manifest.get("counts", {}))
-    counts["job_artifacts"] = len(artifacts)
+    counts["job_artifacts"] = len(artifacts) + len(supplemental_artifacts)
 
     write_json_atomically(
         job_summary_path,
@@ -248,6 +271,7 @@ def build_local_job_package(
             "job_dir": job_dir.as_posix(),
             "input_dir": input_path.as_posix(),
             "artifacts": artifacts,
+            "supplemental_artifacts": supplemental_artifacts,
             "counts": counts,
             "candidate_tasks": candidate_tasks,
             "route_type": task_route_result.route_type,
@@ -299,7 +323,18 @@ def build_local_job_package(
             spreadsheet_structural_report_result.report_status,
         ),
     )
+    build_artifact_index(
+        job_dir,
+        artifact_index_path,
+        artifact_index_manifest_path,
+    )
     build_final_job_manifest(job_dir, final_job_manifest_path)
+    build_artifact_index(
+        job_dir,
+        artifact_index_path,
+        artifact_index_manifest_path,
+    )
+    build_job_package_validation(job_dir, job_package_validation_path)
 
     return LocalJobPackageResult(
         job_id=job_id,
@@ -322,9 +357,12 @@ def build_local_job_package(
         spreadsheet_structural_report_markdown_path=(
             spreadsheet_structural_report_markdown_path
         ),
+        artifact_index_path=artifact_index_path,
+        artifact_index_manifest_path=artifact_index_manifest_path,
         final_job_manifest_path=final_job_manifest_path,
         job_summary_path=job_summary_path,
         human_next_steps_path=human_next_steps_path,
+        job_package_validation_path=job_package_validation_path,
         files_recorded=pipeline_result.files_recorded,
         candidate_tasks=candidate_tasks,
         route_type=task_route_result.route_type,
@@ -432,6 +470,10 @@ def _render_human_next_steps(
     ]
     for artifact_name in _ARTIFACT_FILES:
         lines.append(f"- {artifact_name}: {Path(artifacts[artifact_name]).name}")
+
+    lines.extend(["", "## Supplemental validation artifacts"])
+    for artifact_name, artifact_file in _SUPPLEMENTAL_ARTIFACT_FILES.items():
+        lines.append(f"- {artifact_name}: {artifact_file}")
 
     lines.extend(["", "## Candidate tasks"])
     if candidate_tasks:

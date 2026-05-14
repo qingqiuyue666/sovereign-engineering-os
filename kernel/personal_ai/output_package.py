@@ -19,6 +19,7 @@ from kernel.personal_ai.output_package_manifest import (
     build_approved_output_manifest,
     planned_approved_output_manifest_sha256,
 )
+from kernel.personal_ai.output_validator import build_approved_output_validation
 
 __all__ = [
     "ApprovedOutputPackageResult",
@@ -39,6 +40,7 @@ _APPROVED_OUTPUT_FILES = [
     "spreadsheet_structural_report.json",
     "spreadsheet_structural_report.md",
     "final_job_manifest.json",
+    "approved_output_validation.json",
 ]
 
 _BOUNDARIES = {
@@ -80,6 +82,7 @@ class ApprovedOutputPackageResult:
     delivery_summary_path: Path
     approval_receipt_path: Path
     provenance_chain_path: Path
+    approved_output_validation_path: Path
     required_human_approval: bool
     approval_verified: bool
     complete: bool
@@ -211,6 +214,13 @@ def build_approved_output_package(
         output_package_dir,
         approved_output_manifest_path,
     )
+    approved_output_validation_path = (
+        output_package_dir / "approved_output_validation.json"
+    )
+    build_approved_output_validation(
+        output_package_dir,
+        approved_output_validation_path,
+    )
 
     return ApprovedOutputPackageResult(
         output_package_id=output_package_id,
@@ -219,6 +229,7 @@ def build_approved_output_package(
         delivery_summary_path=delivery_summary_path,
         approval_receipt_path=approval_receipt_path,
         provenance_chain_path=provenance_chain_path,
+        approved_output_validation_path=approved_output_validation_path,
         required_human_approval=True,
         approval_verified=manifest_result.approval_verified,
         complete=manifest_result.complete,
