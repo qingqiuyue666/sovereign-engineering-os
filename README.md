@@ -9,6 +9,26 @@ integration sprint for the local-only Personal AI Execution OS local MVP v1.
 
 Current checkpoint:
 
+- `personal-ai-execution-os-v2-system-longrun-v1`
+  - verdict: `APPROVE_PERSONAL_AI_EXECUTION_OS_V2_SYSTEM_LONGRUN_FOUNDATION`
+  - decision audit: `docs/decisions/personal_ai_execution_os_v2_system_longrun_decision_audit_v1.md`
+  - adapter core foundation: introduced under `kernel/personal_ai/adapters/`
+  - runtime tool admission register: introduced at `governance/integration/runtime_tool_admission_register.yaml`
+  - XLSX readonly runtime: introduced with bounded metadata inspection only
+  - approved XLSX output writer: introduced for new hash-bound derived summary workbooks
+  - mock typed-schema model runtime: introduced as deterministic local fixture only
+  - browser local fixture runtime: introduced as deterministic HTML fixture interpreter only
+  - creative adapter policy layer: introduced as deferred policy only
+  - runtime delivery package: introduced for hash-bound runtime artifact delivery
+  - end-to-end local demo: introduced at `examples/personal_ai_execution_os_v2_demo/`
+  - dependency additions: `openpyxl>=3.1,<4`
+  - vendored external source code: none
+  - runtime authority: still not introduced
+  - unrestricted arbitrary execution: not introduced
+  - external network/browser/model/creative runtime: not introduced
+  - input mutation: still forbidden
+  - raw value copying into audit artifacts: still forbidden
+  - spreadsheet output writing: approved new output files only, outside input directories, after hash-bound approval
 - `oss-top-repo-integration-autonomous-sprint`
   - OSS intake audit: introduced at `docs/decisions/oss_top_repo_integration_intake_audit_v1.md`
   - OSS integration plan: introduced at `docs/design/oss_integration_plan_v1.md`
