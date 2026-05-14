@@ -5,6 +5,7 @@ from pathlib import Path
 import json
 
 from kernel.personal_ai.io_utils import write_json_atomically
+from kernel.personal_ai.markdown_utils import write_markdown_atomically
 
 __all__ = [
     "SpreadsheetStructuralReportResult",
@@ -135,7 +136,8 @@ def build_spreadsheet_structural_report(
         "next_allowed_action": "human_review_only",
     }
     write_json_atomically(json_path, report)
-    markdown_path.write_text(
+    write_markdown_atomically(
+        markdown_path,
         _render_markdown_report(
             report_status,
             issue_categories,
@@ -143,7 +145,6 @@ def build_spreadsheet_structural_report(
             file_status_summary,
             structural_metrics,
         ),
-        encoding="utf-8",
     )
 
     return SpreadsheetStructuralReportResult(

@@ -3,14 +3,19 @@
 Sovereign Engineering OS is an AI execution control kernel and local-first governance kernel.
 
 Current phase/state: post
-`final-stop-state-consolidation-batch-v1`, with the completed local-only
+`final-stop-state-consolidation-batch-v1`, with the productionized local-only
 Personal AI Execution OS local MVP v1 implementation sprint.
 
 Current checkpoint:
 
-- `personal-ai-local-mvp-completion-sprint-v1`
+- `personal-ai-local-v1-productionization-sprint`
   - Phase 2 selected lane: Personal AI Execution OS
-  - completed local MVP v1: local non-authority job package pipeline with CSV/TSV readonly inspection and spreadsheet structural report generation
+  - Local MVP v1 status: productionized local-only MVP
+  - safe local CLI: introduced via `python3 -m kernel.personal_ai.local_mvp_cli`
+  - function runner: retained via `run_personal_ai_local_mvp`
+  - failure quarantine: introduced for CLI failures only
+  - Markdown atomic writer: introduced for generated Markdown artifacts
+  - local usage doc: `docs/usage/personal_ai_local_v1_usage.md`
   - final local MVP artifacts:
     - `input_snapshot.json`
     - `intake_ledger.jsonl`
@@ -24,6 +29,7 @@ Current checkpoint:
     - `spreadsheet_report_plan.json`
     - `spreadsheet_structural_report.json`
     - `spreadsheet_structural_report.md`
+    - `final_job_manifest.json`
     - `job_summary.json`
     - `human_next_steps.md`
   - route output: route_type + recommended_processor_lane + non-executing
@@ -43,7 +49,7 @@ Current checkpoint:
   - supported readonly extensions:
     - `.csv`
     - `.tsv`
-  - unsupported spreadsheet extensions in this package:
+  - unsupported spreadsheet extensions in this package; no XLSX/XLSM/XLS reading:
     - `.xlsx`
     - `.xlsm`
     - `.xls`
@@ -53,22 +59,25 @@ Current checkpoint:
   - semantic/business interpretation: not introduced
   - raw cell value copying: not introduced
   - spreadsheet output write: not introduced
+  - spreadsheet cleaning/transformation: not introduced
   - authority status: non-authority
   - execution status: no arbitrary execution capability
   - runtime status: no runtime authority
   - external tool control: not introduced
   - network: not introduced
   - API calls: not introduced
+  - browser automation: not introduced
   - adapter implementation: not introduced
   - AI classification: not introduced
   - semantic classification: not introduced
   - pandas/openpyxl/xlrd/pyarrow: not introduced
   - kernel/adapters: unchanged
+  - destructive file operations: not introduced
   - input files: never modified / moved / deleted / renamed
   - input file contents: raw contents not copied into job package
   - output: deterministic local job package artifacts
   - required human approval: true
-  - next recommendation: personal-ai-local-mvp-completion-review-audit-v1 or local-runner-usability-hardening-v1
+  - next recommendation: high-level production readiness review only
   - Business Delivery OS: not started
   - Creative Production OS: not started
   - Research Decision OS: not started
@@ -147,6 +156,7 @@ Completed milestones:
 - `local-spreadsheet-processor-planning-mvp-v1`
 - `local-spreadsheet-readonly-inspector-mvp-v1`
 - `personal-ai-local-mvp-completion-sprint-v1`
+- `personal-ai-local-v1-productionization-sprint`
 
 Current capability:
 
@@ -209,6 +219,11 @@ Current capability:
 - Personal AI deterministic spreadsheet structural report generator
 - Personal AI spreadsheet structural report JSON and Markdown artifacts
 - Personal AI function-level local MVP runner
+- Personal AI safe local CLI
+- Personal AI final job manifest
+- Personal AI CLI failure quarantine
+- Personal AI atomic Markdown artifact writer
+- Personal AI local v1 usage documentation
 
 Controlled demo proves:
 
