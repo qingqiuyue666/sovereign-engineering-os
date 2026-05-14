@@ -18,6 +18,7 @@ EXPECTED_JOB_FILES = {
     "pipeline_manifest.json",
     "task_route.json",
     "spreadsheet_processor_plan.json",
+    "spreadsheet_readonly_inspection.json",
     "job_summary.json",
     "human_next_steps.md",
 }
@@ -32,8 +33,10 @@ EXPECTED_BOUNDARIES = {
     "no_adapter_implementation",
     "no_ai_classification",
     "no_semantic_classification",
+    "no_spreadsheet_output_write",
     "no_input_file_mutation",
     "no_input_content_copy",
+    "no_raw_cell_value_copy",
     "no_destructive_actions",
 }
 
@@ -94,6 +97,10 @@ class LocalJobPackageTests(unittest.TestCase):
             result.spreadsheet_processor_plan_path,
             result.job_dir / "spreadsheet_processor_plan.json",
         )
+        self.assertEqual(
+            result.spreadsheet_readonly_inspection_path,
+            result.job_dir / "spreadsheet_readonly_inspection.json",
+        )
         self.assertEqual(result.job_summary_path, result.job_dir / "job_summary.json")
         self.assertEqual(
             result.human_next_steps_path,
@@ -115,6 +122,9 @@ class LocalJobPackageTests(unittest.TestCase):
         )
         self.assertEqual(result.spreadsheet_plan_status, "planning_ready")
         self.assertEqual(result.spreadsheet_artifact_count, 1)
+        self.assertEqual(result.spreadsheet_inspected_files, 1)
+        self.assertEqual(result.spreadsheet_unsupported_files, 0)
+        self.assertEqual(result.spreadsheet_parse_error_files, 0)
         self.assertIs(result.required_human_approval, True)
         self.assertTrue(result.job_dir.exists())
 
@@ -171,6 +181,29 @@ class LocalJobPackageTests(unittest.TestCase):
         )
         self.assertEqual(spreadsheet_plan["plan_status"], "planning_ready")
         self.assertEqual(spreadsheet_plan["artifact_count"], 1)
+
+    def test_job_package_creates_spreadsheet_readonly_inspection_json(self):
+        input_dir, output_root_dir = self.build_workspace()
+        (input_dir / "data.csv").write_text("a,b\n1,2\n", encoding="utf-8")
+
+        result = build_local_job_package(
+            input_dir,
+            output_root_dir,
+            job_id="job-001",
+        )
+        spreadsheet_inspection = read_json(
+            result.spreadsheet_readonly_inspection_path
+        )
+
+        self.assertTrue(result.spreadsheet_readonly_inspection_path.exists())
+        self.assertEqual(
+            spreadsheet_inspection["inspection_type"],
+            "personal_ai_local_spreadsheet_readonly_inspection",
+        )
+        self.assertEqual(
+            spreadsheet_inspection["summary"]["inspected_files"],
+            1,
+        )
 
     def test_input_snapshot_records_non_authority_metadata_only_capture(self):
         input_dir, output_root_dir = self.build_workspace()
@@ -230,6 +263,9 @@ class LocalJobPackageTests(unittest.TestCase):
                 "recommended_processor_lane",
                 "spreadsheet_plan_status",
                 "spreadsheet_artifact_count",
+                "spreadsheet_inspected_files",
+                "spreadsheet_unsupported_files",
+                "spreadsheet_parse_error_files",
                 "required_human_approval",
                 "boundaries",
                 "next_allowed_action",
@@ -244,6 +280,9 @@ class LocalJobPackageTests(unittest.TestCase):
         )
         self.assertEqual(summary["spreadsheet_plan_status"], "not_applicable")
         self.assertEqual(summary["spreadsheet_artifact_count"], 0)
+        self.assertEqual(summary["spreadsheet_inspected_files"], 0)
+        self.assertEqual(summary["spreadsheet_unsupported_files"], 0)
+        self.assertEqual(summary["spreadsheet_parse_error_files"], 0)
         self.assertIs(summary["required_human_approval"], True)
         self.assertEqual(summary["next_allowed_action"], "human_review_only")
         self.assertEqual(set(summary["boundaries"]), EXPECTED_BOUNDARIES)
@@ -305,6 +344,38 @@ class LocalJobPackageTests(unittest.TestCase):
         )
         self.assertEqual(summary["spreadsheet_artifact_count"], 2)
 
+    def test_spreadsheet_inspection_summary_propagates_to_job_summary(self):
+        input_dir, output_root_dir = self.build_workspace()
+        (input_dir / "data.csv").write_text("a,b\n1,2\n", encoding="utf-8")
+        (input_dir / "bad.csv").write_bytes(b"\xff\xfeinvalid")
+        (input_dir / "book.xlsx").write_text("unsupported", encoding="utf-8")
+
+        result = build_local_job_package(
+            input_dir,
+            output_root_dir,
+            job_id="job-001",
+        )
+        spreadsheet_inspection = read_json(
+            result.spreadsheet_readonly_inspection_path
+        )
+        summary = read_json(result.job_summary_path)
+
+        self.assertEqual(
+            spreadsheet_inspection["summary"]["inspected_files"],
+            1,
+        )
+        self.assertEqual(
+            spreadsheet_inspection["summary"]["unsupported_files"],
+            1,
+        )
+        self.assertEqual(
+            spreadsheet_inspection["summary"]["parse_error_files"],
+            1,
+        )
+        self.assertEqual(summary["spreadsheet_inspected_files"], 1)
+        self.assertEqual(summary["spreadsheet_unsupported_files"], 1)
+        self.assertEqual(summary["spreadsheet_parse_error_files"], 1)
+
     def test_human_next_steps_records_review_boundary_and_forbidden_actions(self):
         input_dir, output_root_dir = self.build_workspace()
         (input_dir / "notes.md").write_text("notes", encoding="utf-8")
@@ -329,18 +400,40 @@ class LocalJobPackageTests(unittest.TestCase):
         )
         self.assertIn("spreadsheet plan status: not_applicable", markdown)
         self.assertIn("spreadsheet artifact count: 0", markdown)
+        self.assertIn("spreadsheet inspected files: 0", markdown)
+        self.assertIn("spreadsheet unsupported files: 0", markdown)
+        self.assertIn("spreadsheet parse error files: 0", markdown)
         for action in (
             "modify input files",
             "delete input files",
             "move input files",
             "rename input files",
             "execute files",
+            "write spreadsheet outputs",
+            "copy raw cell values",
             "call network",
             "call AI APIs",
             "run subprocess",
             "control external tools",
         ):
             self.assertIn(action, markdown)
+
+    def test_human_next_steps_records_spreadsheet_inspection_summary(self):
+        input_dir, output_root_dir = self.build_workspace()
+        (input_dir / "data.csv").write_text("a,b\n1,2\n", encoding="utf-8")
+        (input_dir / "book.xlsx").write_text("unsupported", encoding="utf-8")
+
+        result = build_local_job_package(
+            input_dir,
+            output_root_dir,
+            job_id="job-001",
+        )
+        markdown = result.human_next_steps_path.read_text(encoding="utf-8")
+
+        self.assertIn("spreadsheet_readonly_inspection.json", markdown)
+        self.assertIn("spreadsheet inspected files: 1", markdown)
+        self.assertIn("spreadsheet unsupported files: 1", markdown)
+        self.assertIn("spreadsheet parse error files: 0", markdown)
 
     def test_candidate_tasks_propagate_to_result_summary_and_human_next_steps(self):
         input_dir, output_root_dir = self.build_workspace()
@@ -386,6 +479,10 @@ class LocalJobPackageTests(unittest.TestCase):
         sentinel = "SECRET_SENTINEL_DO_NOT_COPY_7f5c5e2d"
         (input_dir / "notes.md").write_text("notes", encoding="utf-8")
         (input_dir / "secret.txt").write_text(sentinel, encoding="utf-8")
+        (input_dir / "data.csv").write_text(
+            f"header\n{sentinel}\n",
+            encoding="utf-8",
+        )
 
         result = build_local_job_package(
             input_dir,
@@ -603,6 +700,24 @@ class LocalJobPackageTests(unittest.TestCase):
             self.assertEqual(
                 first_plan["non_executing_plan"],
                 second_plan["non_executing_plan"],
+            )
+            first_inspection = read_json(
+                first.spreadsheet_readonly_inspection_path
+            )
+            second_inspection = read_json(
+                second.spreadsheet_readonly_inspection_path
+            )
+            self.assertEqual(
+                first_inspection["summary"],
+                second_inspection["summary"],
+            )
+            self.assertEqual(
+                first_inspection["supported_extensions"],
+                second_inspection["supported_extensions"],
+            )
+            self.assertEqual(
+                first_inspection["unsupported_extensions"],
+                second_inspection["unsupported_extensions"],
             )
             self.assertEqual(
                 _stable_ledger(read_jsonl(first.intake_ledger_path)),

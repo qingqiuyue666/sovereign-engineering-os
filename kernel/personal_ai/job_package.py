@@ -7,6 +7,9 @@ import re
 
 from kernel.personal_ai.io_utils import write_json_atomically
 from kernel.personal_ai.local_pipeline import build_local_review_pipeline
+from kernel.personal_ai.spreadsheet_readonly_inspector import (
+    build_spreadsheet_readonly_inspection,
+)
 from kernel.personal_ai.spreadsheet_planner import build_spreadsheet_processor_plan
 from kernel.personal_ai.task_router import build_task_route
 
@@ -26,6 +29,7 @@ _ARTIFACT_FILES = {
     "pipeline_manifest": "pipeline_manifest.json",
     "task_route": "task_route.json",
     "spreadsheet_processor_plan": "spreadsheet_processor_plan.json",
+    "spreadsheet_readonly_inspection": "spreadsheet_readonly_inspection.json",
     "job_summary": "job_summary.json",
     "human_next_steps": "human_next_steps.md",
 }
@@ -40,8 +44,10 @@ _BOUNDARIES = {
     "no_adapter_implementation": True,
     "no_ai_classification": True,
     "no_semantic_classification": True,
+    "no_spreadsheet_output_write": True,
     "no_input_file_mutation": True,
     "no_input_content_copy": True,
+    "no_raw_cell_value_copy": True,
     "no_destructive_actions": True,
 }
 
@@ -51,6 +57,8 @@ _FORBIDDEN_ACTIONS = (
     "move input files",
     "rename input files",
     "execute files",
+    "write spreadsheet outputs",
+    "copy raw cell values",
     "call network",
     "call AI APIs",
     "run subprocess",
@@ -72,6 +80,7 @@ class LocalJobPackageResult:
     pipeline_manifest_path: Path
     task_route_path: Path
     spreadsheet_processor_plan_path: Path
+    spreadsheet_readonly_inspection_path: Path
     job_summary_path: Path
     human_next_steps_path: Path
     files_recorded: int
@@ -80,6 +89,9 @@ class LocalJobPackageResult:
     recommended_processor_lane: str
     spreadsheet_plan_status: str
     spreadsheet_artifact_count: int
+    spreadsheet_inspected_files: int
+    spreadsheet_unsupported_files: int
+    spreadsheet_parse_error_files: int
     required_human_approval: bool
 
 
@@ -110,6 +122,9 @@ def build_local_job_package(
     task_route_path = job_dir / _ARTIFACT_FILES["task_route"]
     spreadsheet_processor_plan_path = (
         job_dir / _ARTIFACT_FILES["spreadsheet_processor_plan"]
+    )
+    spreadsheet_readonly_inspection_path = (
+        job_dir / _ARTIFACT_FILES["spreadsheet_readonly_inspection"]
     )
     job_summary_path = job_dir / _ARTIFACT_FILES["job_summary"]
     human_next_steps_path = job_dir / _ARTIFACT_FILES["human_next_steps"]
@@ -147,6 +162,11 @@ def build_local_job_package(
         task_route_path,
         spreadsheet_processor_plan_path,
     )
+    spreadsheet_inspection_result = build_spreadsheet_readonly_inspection(
+        input_path,
+        spreadsheet_processor_plan_path,
+        spreadsheet_readonly_inspection_path,
+    )
 
     artifacts = {
         "input_snapshot": input_snapshot_path.as_posix(),
@@ -157,6 +177,9 @@ def build_local_job_package(
         "pipeline_manifest": pipeline_manifest_path.as_posix(),
         "task_route": task_route_path.as_posix(),
         "spreadsheet_processor_plan": spreadsheet_processor_plan_path.as_posix(),
+        "spreadsheet_readonly_inspection": (
+            spreadsheet_readonly_inspection_path.as_posix()
+        ),
         "job_summary": job_summary_path.as_posix(),
         "human_next_steps": human_next_steps_path.as_posix(),
     }
@@ -183,6 +206,15 @@ def build_local_job_package(
             "spreadsheet_artifact_count": (
                 spreadsheet_plan_result.artifact_count
             ),
+            "spreadsheet_inspected_files": (
+                spreadsheet_inspection_result.inspected_files
+            ),
+            "spreadsheet_unsupported_files": (
+                spreadsheet_inspection_result.unsupported_files
+            ),
+            "spreadsheet_parse_error_files": (
+                spreadsheet_inspection_result.parse_error_files
+            ),
             "required_human_approval": True,
             "boundaries": dict(_BOUNDARIES),
             "next_allowed_action": "human_review_only",
@@ -197,6 +229,9 @@ def build_local_job_package(
             task_route_result.recommended_processor_lane,
             spreadsheet_plan_result.plan_status,
             spreadsheet_plan_result.artifact_count,
+            spreadsheet_inspection_result.inspected_files,
+            spreadsheet_inspection_result.unsupported_files,
+            spreadsheet_inspection_result.parse_error_files,
         ),
         encoding="utf-8",
     )
@@ -214,6 +249,7 @@ def build_local_job_package(
         pipeline_manifest_path=pipeline_manifest_path,
         task_route_path=task_route_path,
         spreadsheet_processor_plan_path=spreadsheet_processor_plan_path,
+        spreadsheet_readonly_inspection_path=spreadsheet_readonly_inspection_path,
         job_summary_path=job_summary_path,
         human_next_steps_path=human_next_steps_path,
         files_recorded=pipeline_result.files_recorded,
@@ -222,6 +258,9 @@ def build_local_job_package(
         recommended_processor_lane=task_route_result.recommended_processor_lane,
         spreadsheet_plan_status=spreadsheet_plan_result.plan_status,
         spreadsheet_artifact_count=spreadsheet_plan_result.artifact_count,
+        spreadsheet_inspected_files=spreadsheet_inspection_result.inspected_files,
+        spreadsheet_unsupported_files=spreadsheet_inspection_result.unsupported_files,
+        spreadsheet_parse_error_files=spreadsheet_inspection_result.parse_error_files,
         required_human_approval=True,
     )
 
@@ -277,6 +316,9 @@ def _render_human_next_steps(
     recommended_processor_lane,
     spreadsheet_plan_status,
     spreadsheet_artifact_count,
+    spreadsheet_inspected_files,
+    spreadsheet_unsupported_files,
+    spreadsheet_parse_error_files,
 ):
     lines = [
         "# Personal AI Local Job Package Review",
@@ -290,6 +332,9 @@ def _render_human_next_steps(
         f"- recommended processor lane: {recommended_processor_lane}",
         f"- spreadsheet plan status: {spreadsheet_plan_status}",
         f"- spreadsheet artifact count: {spreadsheet_artifact_count}",
+        f"- spreadsheet inspected files: {spreadsheet_inspected_files}",
+        f"- spreadsheet unsupported files: {spreadsheet_unsupported_files}",
+        f"- spreadsheet parse error files: {spreadsheet_parse_error_files}",
         "",
         "## Generated artifacts",
     ]

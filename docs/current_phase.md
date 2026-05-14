@@ -1,16 +1,15 @@
 # Current Phase
 
 Current phase: post
-`final-stop-state-consolidation-batch-v1`, with the fifth bounded
-Personal AI Execution OS local spreadsheet processor planning MVP
+`final-stop-state-consolidation-batch-v1`, with the sixth bounded
+Personal AI Execution OS local spreadsheet readonly inspector MVP
 implementation bridge.
 
 Current checkpoint:
 
-- `local-spreadsheet-processor-planning-mvp-v1`
+- `local-spreadsheet-readonly-inspector-mvp-v1`
   - Phase 2 selected lane: Personal AI Execution OS
-  - implemented fifth local foundation MVP: deterministic local spreadsheet
-    processor planning layer
+  - implemented sixth local foundation MVP: deterministic local CSV/TSV spreadsheet readonly inspector
   - job package contents:
     - `input_snapshot.json`
     - `intake_ledger.jsonl`
@@ -20,13 +19,15 @@ Current checkpoint:
     - `pipeline_manifest.json`
     - `task_route.json`
     - `spreadsheet_processor_plan.json`
+    - `spreadsheet_readonly_inspection.json`
     - `job_summary.json`
     - `human_next_steps.md`
-  - job package now includes: `spreadsheet_processor_plan.json`
+  - job package now includes: `spreadsheet_readonly_inspection.json`
   - route output: route_type + recommended_processor_lane + non-executing
     action plan
   - spreadsheet planning output: plan_status + selected_spreadsheet_artifacts
     + non-executing spreadsheet plan
+  - spreadsheet inspection output: structural CSV/TSV metrics only; no raw cell values copied
   - supported routes:
     - `spreadsheet_route`
     - `document_route`
@@ -35,15 +36,16 @@ Current checkpoint:
     - `archive_inventory_route`
     - `mixed_inventory_route`
     - `unknown_inventory_route`
-  - supported spreadsheet-like extensions:
+  - supported readonly extensions:
     - `.csv`
     - `.tsv`
+  - unsupported spreadsheet extensions in this package:
     - `.xlsx`
     - `.xlsm`
     - `.xls`
-  - physical contact type: local filesystem read + SHA-256 hash +
-    deterministic JSONL/JSON/Markdown output outside input directory
-  - spreadsheet content read: not introduced
+  - physical contact type: local filesystem read + SHA-256 hash + bounded read-only CSV/TSV structural inspection + deterministic JSONL/JSON/Markdown output outside input directory
+  - spreadsheet content read: bounded CSV/TSV structural inspection only
+  - raw cell value copying: not introduced
   - spreadsheet output write: not introduced
   - authority status: non-authority
   - execution status: no execution capability
@@ -53,16 +55,14 @@ Current checkpoint:
   - API calls: not introduced
   - AI classification: not introduced
   - semantic classification: not introduced
+  - pandas/openpyxl/xlrd/pyarrow: not introduced
   - adapter implementation: not introduced
   - kernel/adapters: unchanged
   - input files: never modified / moved / deleted / renamed
-  - input file contents: not copied into job package
-  - output: deterministic local job package artifacts with spreadsheet
-    planning
+  - input file contents: raw contents not copied into job package
+  - output: deterministic local job package artifacts with spreadsheet readonly inspection
   - required human approval: true
-  - next recommendation:
-    `local-spreadsheet-inspection-planning-review-audit-v1` or
-    `local-spreadsheet-readonly-inspector-mvp-v1`
+  - next recommendation: local-spreadsheet-readonly-inspector-review-audit-v1 or local-spreadsheet-report-planning-mvp-v1
   - Business Delivery OS: not started
   - Creative Production OS: not started
   - Research Decision OS: not started
@@ -293,6 +293,8 @@ Current system capability:
 - Personal AI task route JSON artifact
 - Personal AI deterministic local spreadsheet processor planner
 - Personal AI spreadsheet processor plan JSON artifact
+- Personal AI deterministic local CSV/TSV spreadsheet readonly inspector
+- Personal AI spreadsheet readonly inspection JSON artifact
 
 Post-adapter-design consolidation audit:
 
