@@ -80,6 +80,7 @@ def plan_xlsx_output(
     output_dir: Path,
     *,
     output_workbook_name: str = "derived_xlsx_summary.xlsx",
+    redact_input_path: bool = False,
 ) -> XlsxOutputPlanResult:
     workbook_path = Path(input_workbook_path)
     inspection_path = Path(xlsx_inspection_path)
@@ -96,6 +97,7 @@ def plan_xlsx_output(
         "personal_ai_execution_os_v2_xlsx_readonly_inspection"
     ):
         raise ValueError("xlsx_inspection_path has unexpected type")
+    _validate_inspection_shape(inspection)
     input_sha256 = sha256_file(workbook_path)
     if inspection.get("input_workbook", {}).get("sha256") != input_sha256:
         raise ValueError("xlsx inspection input hash mismatch")
@@ -107,7 +109,10 @@ def plan_xlsx_output(
         "execution_capability": "bounded_approved_output_write",
         "adapter_id": "xlsx_output_writer",
         "approved_action": _APPROVED_ACTION,
-        "input_workbook_path": workbook_path.as_posix(),
+        "input_workbook_path": (
+            "[redacted-input-path]" if redact_input_path else workbook_path.as_posix()
+        ),
+        "input_workbook_path_redacted": redact_input_path,
         "input_sha256": input_sha256,
         "xlsx_inspection_path": inspection_path.as_posix(),
         "xlsx_inspection_sha256": sha256_file(inspection_path),
@@ -230,6 +235,7 @@ def create_approved_xlsx_output(
         _require_no_overwrite(target_path)
 
     inspection = _read_json(Path(plan["xlsx_inspection_path"]))
+    _validate_inspection_shape(inspection)
     _write_summary_workbook(output_workbook_path, inspection)
     output_sha256 = sha256_file(output_workbook_path)
     manifest = {
@@ -239,7 +245,8 @@ def create_approved_xlsx_output(
         "execution_capability": "bounded_approved_output_write",
         "adapter_id": "xlsx_output_writer",
         "approved_action": _APPROVED_ACTION,
-        "input_workbook_path": workbook_path.as_posix(),
+        "input_workbook_path": plan["input_workbook_path"],
+        "input_workbook_path_redacted": bool(plan["input_workbook_path_redacted"]),
         "input_sha256": sha256_file(workbook_path),
         "plan_path": plan_file.as_posix(),
         "plan_sha256": sha256_file(plan_file),
@@ -259,6 +266,11 @@ def create_approved_xlsx_output(
         "overwrite_performed": False,
         "raw_source_cell_values_in_audit_artifacts": False,
         "source_cell_values_read": False,
+        "output_workbook_metadata_policy": {
+            "creator": "personal_ai_local_runtime",
+            "last_modified_by": "personal_ai_local_runtime",
+            "raw_source_metadata_copied": False,
+        },
         "required_human_approval": True,
         "approval_verified": True,
         "hash_binding_verified": True,
@@ -297,6 +309,7 @@ def validate_xlsx_output(
     _require_no_overwrite(report_path)
 
     manifest = _read_json(manifest_path)
+    _validate_output_manifest_shape(manifest)
     output_workbook_path = Path(str(manifest.get("output_workbook_path", "")))
     output_exists = output_workbook_path.exists() and output_workbook_path.is_file()
     manifest_hash_verified = (
@@ -403,6 +416,16 @@ def _validate_plan_shape(plan):
     ):
         if not isinstance(plan.get(field_name), str) or not plan[field_name]:
             raise ValueError("xlsx output plan is malformed")
+    if not isinstance(plan.get("input_workbook_path_redacted"), bool):
+        raise ValueError("xlsx output plan is malformed")
+    if plan.get("authority") != "non_authority":
+        raise ValueError("xlsx output plan authority mismatch")
+    if plan.get("required_human_approval") is not True:
+        raise ValueError("xlsx output plan must require human approval")
+    if plan.get("source_cell_values_read") is not False:
+        raise ValueError("xlsx output plan source read flag mismatch")
+    if plan.get("raw_source_cell_values_in_audit_artifacts") is not False:
+        raise ValueError("xlsx output plan raw leakage flag mismatch")
 
 
 def _validate_approval_shape(approval):
@@ -416,6 +439,10 @@ def _validate_approval_shape(approval):
         raise ValueError("approval human_reviewed must be true")
     if not isinstance(approval.get("plan_sha256"), str):
         raise ValueError("approval plan_sha256 is malformed")
+    if approval.get("authority") != "non_authority":
+        raise ValueError("approval authority mismatch")
+    if approval.get("required_human_approval") is not True:
+        raise ValueError("approval must preserve human approval requirement")
 
 
 def _validate_hash_bindings(workbook_path, plan_file, approval_file, plan, approval):
@@ -434,8 +461,90 @@ def _validate_hash_bindings(workbook_path, plan_file, approval_file, plan, appro
         raise ValueError("approval_path is missing")
 
 
+def _validate_inspection_shape(inspection):
+    if inspection.get("inspection_type") != (
+        "personal_ai_execution_os_v2_xlsx_readonly_inspection"
+    ):
+        raise ValueError("xlsx inspection type mismatch")
+    input_workbook = inspection.get("input_workbook")
+    if not isinstance(input_workbook, dict):
+        raise ValueError("xlsx inspection input_workbook is malformed")
+    if not isinstance(input_workbook.get("sha256"), str) or not input_workbook["sha256"]:
+        raise ValueError("xlsx inspection input_workbook sha256 is malformed")
+    if not isinstance(inspection.get("sheet_count"), int):
+        raise ValueError("xlsx inspection sheet_count is malformed")
+    sheets = inspection.get("sheets")
+    if not isinstance(sheets, list):
+        raise ValueError("xlsx inspection sheets is malformed")
+    if len(sheets) != inspection["sheet_count"]:
+        raise ValueError("xlsx inspection sheet_count mismatch")
+    for sheet in sheets:
+        if not isinstance(sheet, dict):
+            raise ValueError("xlsx inspection sheet entry is malformed")
+        for field_name in ("sheet_name", "max_row", "max_column"):
+            if field_name not in sheet:
+                raise ValueError("xlsx inspection sheet entry is malformed")
+        if not isinstance(sheet["sheet_name"], str) or not sheet["sheet_name"]:
+            raise ValueError("xlsx inspection sheet_name is malformed")
+        if not isinstance(sheet["max_row"], int) or not isinstance(
+            sheet["max_column"], int
+        ):
+            raise ValueError("xlsx inspection sheet dimensions are malformed")
+    if inspection.get("raw_cell_values_copied") is not False:
+        raise ValueError("xlsx inspection raw cell boundary mismatch")
+    if inspection.get("required_human_approval") is not True:
+        raise ValueError("xlsx inspection must require human approval")
+
+
+def _validate_output_manifest_shape(manifest):
+    if manifest.get("manifest_type") != _MANIFEST_TYPE:
+        raise ValueError("xlsx output manifest type mismatch")
+    required_strings = (
+        "authority",
+        "execution_capability",
+        "adapter_id",
+        "approved_action",
+        "input_sha256",
+        "output_workbook_path",
+        "output_workbook_sha256",
+    )
+    for field_name in required_strings:
+        if not isinstance(manifest.get(field_name), str) or not manifest[field_name]:
+            raise ValueError("xlsx output manifest is malformed")
+    if manifest.get("authority") != "non_authority":
+        raise ValueError("xlsx output manifest authority mismatch")
+    for field_name in (
+        "input_workbook_path_redacted",
+        "input_mutation_performed",
+        "overwrite_performed",
+        "raw_source_cell_values_in_audit_artifacts",
+        "source_cell_values_read",
+        "required_human_approval",
+        "approval_verified",
+        "hash_binding_verified",
+    ):
+        if not isinstance(manifest.get(field_name), bool):
+            raise ValueError("xlsx output manifest is malformed")
+    if manifest["input_mutation_performed"] is not False:
+        raise ValueError("xlsx output manifest input mutation mismatch")
+    if manifest["overwrite_performed"] is not False:
+        raise ValueError("xlsx output manifest overwrite mismatch")
+    if manifest["raw_source_cell_values_in_audit_artifacts"] is not False:
+        raise ValueError("xlsx output manifest raw leakage mismatch")
+    metadata_policy = manifest.get("output_workbook_metadata_policy")
+    if not isinstance(metadata_policy, dict):
+        raise ValueError("xlsx output manifest metadata policy is malformed")
+    if metadata_policy.get("raw_source_metadata_copied") is not False:
+        raise ValueError("xlsx output manifest metadata policy mismatch")
+
+
 def _write_summary_workbook(output_workbook_path, inspection):
     workbook = Workbook()
+    workbook.properties.creator = "personal_ai_local_runtime"
+    workbook.properties.lastModifiedBy = "personal_ai_local_runtime"
+    workbook.properties.title = "Personal AI XLSX metadata summary"
+    workbook.properties.subject = "metadata-only derived workbook"
+    workbook.properties.description = "No raw source cell values copied."
     sheet = workbook.active
     sheet.title = "RuntimeSummary"
     rows = [

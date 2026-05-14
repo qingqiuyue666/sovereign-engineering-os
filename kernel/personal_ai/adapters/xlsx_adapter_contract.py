@@ -21,6 +21,7 @@ class XlsxReadonlyLimits:
     max_header_columns: int = 8
     max_formula_scan_cells: int = 1000
     max_style_scan_cells: int = 1000
+    max_workbook_bytes: int = 5_000_000
 
     def validate(self) -> None:
         if self.max_header_rows <= 0:
@@ -31,6 +32,8 @@ class XlsxReadonlyLimits:
             raise ValueError("max_formula_scan_cells must be greater than zero")
         if self.max_style_scan_cells <= 0:
             raise ValueError("max_style_scan_cells must be greater than zero")
+        if self.max_workbook_bytes <= 0:
+            raise ValueError("max_workbook_bytes must be greater than zero")
 
 
 def build_xlsx_readonly_capability_request() -> AdapterCapabilityRequest:
