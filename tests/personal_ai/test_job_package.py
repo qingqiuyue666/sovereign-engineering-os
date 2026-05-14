@@ -19,6 +19,9 @@ EXPECTED_JOB_FILES = {
     "task_route.json",
     "spreadsheet_processor_plan.json",
     "spreadsheet_readonly_inspection.json",
+    "spreadsheet_report_plan.json",
+    "spreadsheet_structural_report.json",
+    "spreadsheet_structural_report.md",
     "job_summary.json",
     "human_next_steps.md",
 }
@@ -34,6 +37,8 @@ EXPECTED_BOUNDARIES = {
     "no_ai_classification",
     "no_semantic_classification",
     "no_spreadsheet_output_write",
+    "no_issue_severity_assignment",
+    "no_business_semantic_interpretation",
     "no_input_file_mutation",
     "no_input_content_copy",
     "no_raw_cell_value_copy",
@@ -101,6 +106,18 @@ class LocalJobPackageTests(unittest.TestCase):
             result.spreadsheet_readonly_inspection_path,
             result.job_dir / "spreadsheet_readonly_inspection.json",
         )
+        self.assertEqual(
+            result.spreadsheet_report_plan_path,
+            result.job_dir / "spreadsheet_report_plan.json",
+        )
+        self.assertEqual(
+            result.spreadsheet_structural_report_json_path,
+            result.job_dir / "spreadsheet_structural_report.json",
+        )
+        self.assertEqual(
+            result.spreadsheet_structural_report_markdown_path,
+            result.job_dir / "spreadsheet_structural_report.md",
+        )
         self.assertEqual(result.job_summary_path, result.job_dir / "job_summary.json")
         self.assertEqual(
             result.human_next_steps_path,
@@ -125,6 +142,15 @@ class LocalJobPackageTests(unittest.TestCase):
         self.assertEqual(result.spreadsheet_inspected_files, 1)
         self.assertEqual(result.spreadsheet_unsupported_files, 0)
         self.assertEqual(result.spreadsheet_parse_error_files, 0)
+        self.assertEqual(result.spreadsheet_report_status, "report_planning_ready")
+        self.assertEqual(
+            result.spreadsheet_issue_categories,
+            ["no_structural_issues_detected"],
+        )
+        self.assertEqual(
+            result.spreadsheet_structural_report_status,
+            "report_planning_ready",
+        )
         self.assertIs(result.required_human_approval, True)
         self.assertTrue(result.job_dir.exists())
 
@@ -205,6 +231,53 @@ class LocalJobPackageTests(unittest.TestCase):
             1,
         )
 
+    def test_job_package_creates_spreadsheet_report_plan_json(self):
+        input_dir, output_root_dir = self.build_workspace()
+        (input_dir / "data.csv").write_text("a,b\n1,2\n", encoding="utf-8")
+
+        result = build_local_job_package(
+            input_dir,
+            output_root_dir,
+            job_id="job-001",
+        )
+        spreadsheet_report_plan = read_json(result.spreadsheet_report_plan_path)
+
+        self.assertTrue(result.spreadsheet_report_plan_path.exists())
+        self.assertEqual(
+            spreadsheet_report_plan["plan_type"],
+            "personal_ai_local_spreadsheet_report_plan",
+        )
+        self.assertEqual(
+            spreadsheet_report_plan["report_status"],
+            "report_planning_ready",
+        )
+
+    def test_job_package_creates_spreadsheet_structural_reports(self):
+        input_dir, output_root_dir = self.build_workspace()
+        (input_dir / "data.csv").write_text("a,b\n1,2\n", encoding="utf-8")
+
+        result = build_local_job_package(
+            input_dir,
+            output_root_dir,
+            job_id="job-001",
+        )
+        spreadsheet_structural_report = read_json(
+            result.spreadsheet_structural_report_json_path
+        )
+        markdown = result.spreadsheet_structural_report_markdown_path.read_text(
+            encoding="utf-8",
+        )
+
+        self.assertTrue(result.spreadsheet_structural_report_json_path.exists())
+        self.assertTrue(
+            result.spreadsheet_structural_report_markdown_path.exists()
+        )
+        self.assertEqual(
+            spreadsheet_structural_report["report_type"],
+            "personal_ai_local_spreadsheet_structural_report",
+        )
+        self.assertIn("# Spreadsheet Structural Report", markdown)
+
     def test_input_snapshot_records_non_authority_metadata_only_capture(self):
         input_dir, output_root_dir = self.build_workspace()
         (input_dir / "notes.md").write_text("notes", encoding="utf-8")
@@ -266,6 +339,9 @@ class LocalJobPackageTests(unittest.TestCase):
                 "spreadsheet_inspected_files",
                 "spreadsheet_unsupported_files",
                 "spreadsheet_parse_error_files",
+                "spreadsheet_report_status",
+                "spreadsheet_issue_categories",
+                "spreadsheet_structural_report_status",
                 "required_human_approval",
                 "boundaries",
                 "next_allowed_action",
@@ -283,6 +359,15 @@ class LocalJobPackageTests(unittest.TestCase):
         self.assertEqual(summary["spreadsheet_inspected_files"], 0)
         self.assertEqual(summary["spreadsheet_unsupported_files"], 0)
         self.assertEqual(summary["spreadsheet_parse_error_files"], 0)
+        self.assertEqual(summary["spreadsheet_report_status"], "no_inspection_data")
+        self.assertEqual(
+            summary["spreadsheet_issue_categories"],
+            ["no_csv_tsv_files_inspected", "no_structural_issues_detected"],
+        )
+        self.assertEqual(
+            summary["spreadsheet_structural_report_status"],
+            "no_inspection_data",
+        )
         self.assertIs(summary["required_human_approval"], True)
         self.assertEqual(summary["next_allowed_action"], "human_review_only")
         self.assertEqual(set(summary["boundaries"]), EXPECTED_BOUNDARIES)
@@ -376,6 +461,32 @@ class LocalJobPackageTests(unittest.TestCase):
         self.assertEqual(summary["spreadsheet_unsupported_files"], 1)
         self.assertEqual(summary["spreadsheet_parse_error_files"], 1)
 
+    def test_spreadsheet_report_summary_propagates_to_job_summary(self):
+        input_dir, output_root_dir = self.build_workspace()
+        (input_dir / "data.csv").write_text("a,b\n1,2\n", encoding="utf-8")
+
+        result = build_local_job_package(
+            input_dir,
+            output_root_dir,
+            job_id="job-001",
+        )
+        report_plan = read_json(result.spreadsheet_report_plan_path)
+        structural_report = read_json(result.spreadsheet_structural_report_json_path)
+        summary = read_json(result.job_summary_path)
+
+        self.assertEqual(
+            summary["spreadsheet_report_status"],
+            report_plan["report_status"],
+        )
+        self.assertEqual(
+            summary["spreadsheet_issue_categories"],
+            report_plan["issue_categories"],
+        )
+        self.assertEqual(
+            summary["spreadsheet_structural_report_status"],
+            structural_report["report_status"],
+        )
+
     def test_human_next_steps_records_review_boundary_and_forbidden_actions(self):
         input_dir, output_root_dir = self.build_workspace()
         (input_dir / "notes.md").write_text("notes", encoding="utf-8")
@@ -403,6 +514,16 @@ class LocalJobPackageTests(unittest.TestCase):
         self.assertIn("spreadsheet inspected files: 0", markdown)
         self.assertIn("spreadsheet unsupported files: 0", markdown)
         self.assertIn("spreadsheet parse error files: 0", markdown)
+        self.assertIn("spreadsheet report status: no_inspection_data", markdown)
+        self.assertIn(
+            "spreadsheet issue categories: "
+            "no_csv_tsv_files_inspected, no_structural_issues_detected",
+            markdown,
+        )
+        self.assertIn(
+            "spreadsheet structural report status: no_inspection_data",
+            markdown,
+        )
         for action in (
             "modify input files",
             "delete input files",
@@ -411,6 +532,8 @@ class LocalJobPackageTests(unittest.TestCase):
             "execute files",
             "write spreadsheet outputs",
             "copy raw cell values",
+            "infer semantic meaning",
+            "assign issue severity",
             "call network",
             "call AI APIs",
             "run subprocess",
@@ -431,9 +554,21 @@ class LocalJobPackageTests(unittest.TestCase):
         markdown = result.human_next_steps_path.read_text(encoding="utf-8")
 
         self.assertIn("spreadsheet_readonly_inspection.json", markdown)
+        self.assertIn("spreadsheet_report_plan.json", markdown)
+        self.assertIn("spreadsheet_structural_report.json", markdown)
+        self.assertIn("spreadsheet_structural_report.md", markdown)
         self.assertIn("spreadsheet inspected files: 1", markdown)
         self.assertIn("spreadsheet unsupported files: 1", markdown)
         self.assertIn("spreadsheet parse error files: 0", markdown)
+        self.assertIn("spreadsheet report status: report_planning_ready", markdown)
+        self.assertIn(
+            "spreadsheet issue categories: unsupported_spreadsheet_extension",
+            markdown,
+        )
+        self.assertIn(
+            "spreadsheet structural report status: report_planning_ready",
+            markdown,
+        )
 
     def test_candidate_tasks_propagate_to_result_summary_and_human_next_steps(self):
         input_dir, output_root_dir = self.build_workspace()
@@ -718,6 +853,42 @@ class LocalJobPackageTests(unittest.TestCase):
             self.assertEqual(
                 first_inspection["unsupported_extensions"],
                 second_inspection["unsupported_extensions"],
+            )
+            first_report_plan = read_json(first.spreadsheet_report_plan_path)
+            second_report_plan = read_json(second.spreadsheet_report_plan_path)
+            self.assertEqual(
+                first_report_plan["report_status"],
+                second_report_plan["report_status"],
+            )
+            self.assertEqual(
+                first_report_plan["issue_categories"],
+                second_report_plan["issue_categories"],
+            )
+            self.assertEqual(
+                first_report_plan["planned_sections"],
+                second_report_plan["planned_sections"],
+            )
+            first_structural_report = read_json(
+                first.spreadsheet_structural_report_json_path
+            )
+            second_structural_report = read_json(
+                second.spreadsheet_structural_report_json_path
+            )
+            self.assertEqual(
+                first_structural_report["report_status"],
+                second_structural_report["report_status"],
+            )
+            self.assertEqual(
+                first_structural_report["issue_categories"],
+                second_structural_report["issue_categories"],
+            )
+            self.assertEqual(
+                first_structural_report["summary"],
+                second_structural_report["summary"],
+            )
+            self.assertEqual(
+                first_structural_report["structural_metrics"],
+                second_structural_report["structural_metrics"],
             )
             self.assertEqual(
                 _stable_ledger(read_jsonl(first.intake_ledger_path)),

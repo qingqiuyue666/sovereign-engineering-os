@@ -11,6 +11,12 @@ from kernel.personal_ai.spreadsheet_readonly_inspector import (
     build_spreadsheet_readonly_inspection,
 )
 from kernel.personal_ai.spreadsheet_planner import build_spreadsheet_processor_plan
+from kernel.personal_ai.spreadsheet_report_planner import (
+    build_spreadsheet_report_plan,
+)
+from kernel.personal_ai.spreadsheet_structural_report import (
+    build_spreadsheet_structural_report,
+)
 from kernel.personal_ai.task_router import build_task_route
 
 __all__ = [
@@ -30,6 +36,9 @@ _ARTIFACT_FILES = {
     "task_route": "task_route.json",
     "spreadsheet_processor_plan": "spreadsheet_processor_plan.json",
     "spreadsheet_readonly_inspection": "spreadsheet_readonly_inspection.json",
+    "spreadsheet_report_plan": "spreadsheet_report_plan.json",
+    "spreadsheet_structural_report_json": "spreadsheet_structural_report.json",
+    "spreadsheet_structural_report_markdown": "spreadsheet_structural_report.md",
     "job_summary": "job_summary.json",
     "human_next_steps": "human_next_steps.md",
 }
@@ -45,6 +54,8 @@ _BOUNDARIES = {
     "no_ai_classification": True,
     "no_semantic_classification": True,
     "no_spreadsheet_output_write": True,
+    "no_issue_severity_assignment": True,
+    "no_business_semantic_interpretation": True,
     "no_input_file_mutation": True,
     "no_input_content_copy": True,
     "no_raw_cell_value_copy": True,
@@ -59,6 +70,8 @@ _FORBIDDEN_ACTIONS = (
     "execute files",
     "write spreadsheet outputs",
     "copy raw cell values",
+    "infer semantic meaning",
+    "assign issue severity",
     "call network",
     "call AI APIs",
     "run subprocess",
@@ -81,6 +94,9 @@ class LocalJobPackageResult:
     task_route_path: Path
     spreadsheet_processor_plan_path: Path
     spreadsheet_readonly_inspection_path: Path
+    spreadsheet_report_plan_path: Path
+    spreadsheet_structural_report_json_path: Path
+    spreadsheet_structural_report_markdown_path: Path
     job_summary_path: Path
     human_next_steps_path: Path
     files_recorded: int
@@ -92,6 +108,9 @@ class LocalJobPackageResult:
     spreadsheet_inspected_files: int
     spreadsheet_unsupported_files: int
     spreadsheet_parse_error_files: int
+    spreadsheet_report_status: str
+    spreadsheet_issue_categories: list[str]
+    spreadsheet_structural_report_status: str
     required_human_approval: bool
 
 
@@ -125,6 +144,15 @@ def build_local_job_package(
     )
     spreadsheet_readonly_inspection_path = (
         job_dir / _ARTIFACT_FILES["spreadsheet_readonly_inspection"]
+    )
+    spreadsheet_report_plan_path = (
+        job_dir / _ARTIFACT_FILES["spreadsheet_report_plan"]
+    )
+    spreadsheet_structural_report_json_path = (
+        job_dir / _ARTIFACT_FILES["spreadsheet_structural_report_json"]
+    )
+    spreadsheet_structural_report_markdown_path = (
+        job_dir / _ARTIFACT_FILES["spreadsheet_structural_report_markdown"]
     )
     job_summary_path = job_dir / _ARTIFACT_FILES["job_summary"]
     human_next_steps_path = job_dir / _ARTIFACT_FILES["human_next_steps"]
@@ -167,6 +195,16 @@ def build_local_job_package(
         spreadsheet_processor_plan_path,
         spreadsheet_readonly_inspection_path,
     )
+    spreadsheet_report_plan_result = build_spreadsheet_report_plan(
+        spreadsheet_readonly_inspection_path,
+        spreadsheet_report_plan_path,
+    )
+    spreadsheet_structural_report_result = build_spreadsheet_structural_report(
+        spreadsheet_readonly_inspection_path,
+        spreadsheet_report_plan_path,
+        spreadsheet_structural_report_json_path,
+        spreadsheet_structural_report_markdown_path,
+    )
 
     artifacts = {
         "input_snapshot": input_snapshot_path.as_posix(),
@@ -179,6 +217,13 @@ def build_local_job_package(
         "spreadsheet_processor_plan": spreadsheet_processor_plan_path.as_posix(),
         "spreadsheet_readonly_inspection": (
             spreadsheet_readonly_inspection_path.as_posix()
+        ),
+        "spreadsheet_report_plan": spreadsheet_report_plan_path.as_posix(),
+        "spreadsheet_structural_report_json": (
+            spreadsheet_structural_report_json_path.as_posix()
+        ),
+        "spreadsheet_structural_report_markdown": (
+            spreadsheet_structural_report_markdown_path.as_posix()
         ),
         "job_summary": job_summary_path.as_posix(),
         "human_next_steps": human_next_steps_path.as_posix(),
@@ -215,6 +260,15 @@ def build_local_job_package(
             "spreadsheet_parse_error_files": (
                 spreadsheet_inspection_result.parse_error_files
             ),
+            "spreadsheet_report_status": (
+                spreadsheet_report_plan_result.report_status
+            ),
+            "spreadsheet_issue_categories": list(
+                spreadsheet_report_plan_result.issue_categories
+            ),
+            "spreadsheet_structural_report_status": (
+                spreadsheet_structural_report_result.report_status
+            ),
             "required_human_approval": True,
             "boundaries": dict(_BOUNDARIES),
             "next_allowed_action": "human_review_only",
@@ -232,6 +286,9 @@ def build_local_job_package(
             spreadsheet_inspection_result.inspected_files,
             spreadsheet_inspection_result.unsupported_files,
             spreadsheet_inspection_result.parse_error_files,
+            spreadsheet_report_plan_result.report_status,
+            spreadsheet_report_plan_result.issue_categories,
+            spreadsheet_structural_report_result.report_status,
         ),
         encoding="utf-8",
     )
@@ -250,6 +307,13 @@ def build_local_job_package(
         task_route_path=task_route_path,
         spreadsheet_processor_plan_path=spreadsheet_processor_plan_path,
         spreadsheet_readonly_inspection_path=spreadsheet_readonly_inspection_path,
+        spreadsheet_report_plan_path=spreadsheet_report_plan_path,
+        spreadsheet_structural_report_json_path=(
+            spreadsheet_structural_report_json_path
+        ),
+        spreadsheet_structural_report_markdown_path=(
+            spreadsheet_structural_report_markdown_path
+        ),
         job_summary_path=job_summary_path,
         human_next_steps_path=human_next_steps_path,
         files_recorded=pipeline_result.files_recorded,
@@ -261,6 +325,13 @@ def build_local_job_package(
         spreadsheet_inspected_files=spreadsheet_inspection_result.inspected_files,
         spreadsheet_unsupported_files=spreadsheet_inspection_result.unsupported_files,
         spreadsheet_parse_error_files=spreadsheet_inspection_result.parse_error_files,
+        spreadsheet_report_status=spreadsheet_report_plan_result.report_status,
+        spreadsheet_issue_categories=list(
+            spreadsheet_report_plan_result.issue_categories
+        ),
+        spreadsheet_structural_report_status=(
+            spreadsheet_structural_report_result.report_status
+        ),
         required_human_approval=True,
     )
 
@@ -319,6 +390,9 @@ def _render_human_next_steps(
     spreadsheet_inspected_files,
     spreadsheet_unsupported_files,
     spreadsheet_parse_error_files,
+    spreadsheet_report_status,
+    spreadsheet_issue_categories,
+    spreadsheet_structural_report_status,
 ):
     lines = [
         "# Personal AI Local Job Package Review",
@@ -335,6 +409,11 @@ def _render_human_next_steps(
         f"- spreadsheet inspected files: {spreadsheet_inspected_files}",
         f"- spreadsheet unsupported files: {spreadsheet_unsupported_files}",
         f"- spreadsheet parse error files: {spreadsheet_parse_error_files}",
+        f"- spreadsheet report status: {spreadsheet_report_status}",
+        "- spreadsheet issue categories: "
+        + ", ".join(spreadsheet_issue_categories),
+        "- spreadsheet structural report status: "
+        + spreadsheet_structural_report_status,
         "",
         "## Generated artifacts",
     ]
