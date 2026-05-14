@@ -3,16 +3,19 @@
 Sovereign Engineering OS is an AI execution control kernel and local-first governance kernel.
 
 Current phase/state: post
-`final-stop-state-consolidation-batch-v1`, with the productionized local-only
-Personal AI Execution OS local MVP v1 implementation sprint.
+`final-stop-state-consolidation-batch-v1`, with the approval-gated output
+package sprint for the local-only Personal AI Execution OS local MVP v1.
 
 Current checkpoint:
 
-- `personal-ai-local-v1-productionization-sprint`
+- `personal-ai-local-v1-approval-gated-output-package-sprint`
   - Phase 2 selected lane: Personal AI Execution OS
   - Local MVP v1 status: productionized local-only MVP
   - safe local CLI: introduced via `python3 -m kernel.personal_ai.local_mvp_cli`
   - function runner: retained via `run_personal_ai_local_mvp`
+  - approval gate: introduced
+  - approved output package: introduced
+  - output package writes: allowed only outside input directory after explicit approval decision
   - failure quarantine: introduced for CLI failures only
   - Markdown atomic writer: introduced for generated Markdown artifacts
   - local usage doc: `docs/usage/personal_ai_local_v1_usage.md`
@@ -59,6 +62,7 @@ Current checkpoint:
   - semantic/business interpretation: not introduced
   - raw cell value copying: not introduced
   - spreadsheet output write: not introduced
+  - input mutation: still forbidden
   - spreadsheet cleaning/transformation: not introduced
   - authority status: non-authority
   - execution status: no arbitrary execution capability
@@ -66,6 +70,7 @@ Current checkpoint:
   - external tool control: not introduced
   - network: not introduced
   - API calls: not introduced
+  - API/LLM runtime: still absent
   - browser automation: not introduced
   - adapter implementation: not introduced
   - AI classification: not introduced
@@ -157,6 +162,7 @@ Completed milestones:
 - `local-spreadsheet-readonly-inspector-mvp-v1`
 - `personal-ai-local-mvp-completion-sprint-v1`
 - `personal-ai-local-v1-productionization-sprint`
+- `personal-ai-local-v1-approval-gated-output-package-sprint`
 
 Current capability:
 
@@ -224,6 +230,8 @@ Current capability:
 - Personal AI CLI failure quarantine
 - Personal AI atomic Markdown artifact writer
 - Personal AI local v1 usage documentation
+- Personal AI approval-gated output package approval gate
+- Personal AI approved output package manifest, delivery summary, and approval receipt
 
 Controlled demo proves:
 
