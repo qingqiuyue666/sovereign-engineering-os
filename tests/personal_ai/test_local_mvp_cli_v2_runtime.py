@@ -3,6 +3,7 @@ import io
 import json
 import tempfile
 import unittest
+import uuid
 from pathlib import Path
 
 from openpyxl import Workbook
@@ -485,6 +486,43 @@ class LocalMVPCLIV2RuntimeTests(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         self.assertTrue(payload["complete"])
         self.assertTrue(validation_path.exists())
+
+    def test_validate_runtime_delivery_cli_accepts_dynamic_leakage_sentinel(self):
+        root, input_dir, workbook_path, xlsx_dir, _, _, package_root = self.build_workspace()
+        self.run_cli(
+            [
+                "inspect-xlsx",
+                "--input-workbook",
+                workbook_path.as_posix(),
+                "--output-dir",
+                xlsx_dir.as_posix(),
+            ]
+        )
+        package = build_runtime_delivery_package(
+            xlsx_dir,
+            package_root,
+            package_id="runtime-delivery-001",
+            input_dir=input_dir,
+        )
+        dynamic_sentinel = "secret_" + uuid.uuid4().hex
+        (package.package_dir / "leak.md").write_text(dynamic_sentinel, encoding="utf-8")
+        validation_path = root / "runtime_delivery_validation_leak.json"
+
+        exit_code, payload = self.run_cli(
+            [
+                "validate-runtime-delivery",
+                "--package-dir",
+                package.package_dir.as_posix(),
+                "--output-path",
+                validation_path.as_posix(),
+                "--raw-sentinel",
+                dynamic_sentinel,
+            ]
+        )
+
+        self.assertEqual(exit_code, 1)
+        self.assertFalse(payload["complete"])
+        self.assertTrue(payload["raw_value_leakage_detected"])
 
 
 if __name__ == "__main__":

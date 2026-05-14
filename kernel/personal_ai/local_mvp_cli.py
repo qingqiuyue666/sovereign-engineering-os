@@ -533,6 +533,7 @@ def _main_subcommand(argv) -> int:
             result = validate_runtime_delivery_package(
                 Path(args.package_dir),
                 Path(args.output_path),
+                raw_sentinel_values=args.raw_sentinel or [],
             )
             _print_command_payload(
                 {
@@ -681,6 +682,7 @@ def _build_subcommand_parser():
     runtime_delivery_parser = subparsers.add_parser("validate-runtime-delivery")
     runtime_delivery_parser.add_argument("--package-dir", required=True)
     runtime_delivery_parser.add_argument("--output-path", required=True)
+    runtime_delivery_parser.add_argument("--raw-sentinel", action="append")
 
     adapter_registry_parser = subparsers.add_parser("show-adapter-registry")
     adapter_registry_parser.add_argument("--output-path")
