@@ -141,9 +141,9 @@ def approve_xlsx_output(
     plan_path: Path,
     approval_path: Path,
     *,
-    approved: bool = True,
-    human_reviewed: bool = True,
-    reviewer_id: str = "local_human_review",
+    approved: bool | None = None,
+    human_reviewed: bool | None = None,
+    reviewer_id: str | None = None,
 ) -> XlsxOutputApprovalResult:
     plan_file = Path(plan_path)
     approval_file = Path(approval_path)
@@ -151,6 +151,15 @@ def approve_xlsx_output(
     if not approval_file.parent.exists() or not approval_file.parent.is_dir():
         raise ValueError("approval_path parent is missing")
     _require_no_overwrite(approval_file)
+    if approved is not True:
+        raise ValueError("explicit approved true is required")
+    if human_reviewed is not True:
+        raise ValueError("explicit human_reviewed true is required")
+    if reviewer_id is None or not reviewer_id.strip():
+        raise ValueError("explicit reviewer_id is required")
+    stripped_reviewer_id = reviewer_id.strip()
+    if stripped_reviewer_id in {"local_human_review", "default", "anonymous"}:
+        raise ValueError("placeholder reviewer_id is not allowed")
     plan = _read_json(plan_file)
     _validate_plan_shape(plan)
     approval = {
@@ -158,22 +167,20 @@ def approve_xlsx_output(
         "approval_version": 1,
         "authority": "non_authority",
         "approved_action": _APPROVED_ACTION,
-        "approved": bool(approved),
-        "human_reviewed": bool(human_reviewed),
-        "reviewer_id": reviewer_id,
+        "approved": True,
+        "human_reviewed": True,
+        "reviewer_id": stripped_reviewer_id,
         "plan_path": plan_file.as_posix(),
         "plan_sha256": sha256_file(plan_file),
         "input_sha256": plan["input_sha256"],
         "xlsx_inspection_sha256": plan["xlsx_inspection_sha256"],
         "required_human_approval": True,
-        "next_allowed_action": "create_approved_xlsx_output"
-        if approved and human_reviewed
-        else "human_review_required",
+        "next_allowed_action": "create_approved_xlsx_output",
     }
     write_json_atomically(approval_file, approval)
     return XlsxOutputApprovalResult(
         approval_path=approval_file,
-        approved=bool(approved),
+        approved=True,
         plan_sha256=approval["plan_sha256"],
         approval_sha256=sha256_file(approval_file),
         required_human_approval=True,

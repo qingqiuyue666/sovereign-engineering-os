@@ -31,7 +31,7 @@ Current checkpoint:
   - input mutation: forbidden
   - existing output overwrite: forbidden
   - raw value copying into audit artifacts: forbidden
-  - spreadsheet output writing: approved new outputs only, outside input directories, with input/plan/approval hash binding
+  - spreadsheet output writing: approved new outputs only, outside input directories, with explicit reviewer approval and input/plan/approval hash binding; no default or implicit approval
 - `oss-top-repo-integration-autonomous-sprint`
   - OSS intake audit: introduced at `docs/decisions/oss_top_repo_integration_intake_audit_v1.md`
   - OSS integration plan: introduced at `docs/design/oss_integration_plan_v1.md`

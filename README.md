@@ -28,7 +28,7 @@ Current checkpoint:
   - external network/browser/model/creative runtime: not introduced
   - input mutation: still forbidden
   - raw value copying into audit artifacts: still forbidden
-  - spreadsheet output writing: approved new output files only, outside input directories, after hash-bound approval
+  - spreadsheet output writing: approved new output files only, outside input directories, after explicit reviewer approval with no default or implicit approval
 - `oss-top-repo-integration-autonomous-sprint`
   - OSS intake audit: introduced at `docs/decisions/oss_top_repo_integration_intake_audit_v1.md`
   - OSS integration plan: introduced at `docs/design/oss_integration_plan_v1.md`

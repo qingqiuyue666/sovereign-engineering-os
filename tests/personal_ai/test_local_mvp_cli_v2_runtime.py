@@ -21,11 +21,22 @@ def read_json(path):
 
 
 class LocalMVPCLIV2RuntimeTests(unittest.TestCase):
-    def run_cli(self, args):
+    def run_cli_raw(self, args):
         stdout = io.StringIO()
-        with contextlib.redirect_stdout(stdout):
-            exit_code = main(args)
-        return exit_code, json.loads(stdout.getvalue())
+        stderr = io.StringIO()
+        with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+            try:
+                exit_code = main(args)
+            except SystemExit as error:
+                exit_code = error.code if isinstance(error.code, int) else 1
+        output = stdout.getvalue()
+        payload = json.loads(output) if output.strip() else None
+        return exit_code, payload, stderr.getvalue()
+
+    def run_cli(self, args):
+        exit_code, payload, _ = self.run_cli_raw(args)
+        self.assertIsNotNone(payload)
+        return exit_code, payload
 
     def build_workspace(self):
         temp_dir = tempfile.TemporaryDirectory()
@@ -78,6 +89,12 @@ class LocalMVPCLIV2RuntimeTests(unittest.TestCase):
                 plan_payload["xlsx_output_plan_path"],
                 "--output-path",
                 approval_path.as_posix(),
+                "--approved",
+                "true",
+                "--human-reviewed",
+                "true",
+                "--reviewer-id",
+                "reviewer-001",
             ]
         )
         create_code, create_payload = self.run_cli(
@@ -110,6 +127,222 @@ class LocalMVPCLIV2RuntimeTests(unittest.TestCase):
         self.assertEqual(validate_code, 0)
         self.assertTrue(create_payload["complete"])
         self.assertTrue(validate_payload["manifest_hash_verified"])
+
+    def test_approve_xlsx_output_cli_requires_approved_flag(self):
+        _, _, workbook_path, xlsx_dir, _, _, _ = self.build_workspace()
+        plan_payload = self.build_xlsx_output_plan(workbook_path, xlsx_dir)
+
+        exit_code, payload, stderr = self.run_cli_raw(
+            [
+                "approve-xlsx-output",
+                "--plan-path",
+                plan_payload["xlsx_output_plan_path"],
+                "--output-path",
+                (xlsx_dir / "approval.json").as_posix(),
+                "--human-reviewed",
+                "true",
+                "--reviewer-id",
+                "reviewer-001",
+            ]
+        )
+
+        self.assertNotEqual(exit_code, 0)
+        self.assertIsNone(payload)
+        self.assertIn("--approved", stderr)
+
+    def test_approve_xlsx_output_cli_requires_human_reviewed_flag(self):
+        _, _, workbook_path, xlsx_dir, _, _, _ = self.build_workspace()
+        plan_payload = self.build_xlsx_output_plan(workbook_path, xlsx_dir)
+
+        exit_code, payload, stderr = self.run_cli_raw(
+            [
+                "approve-xlsx-output",
+                "--plan-path",
+                plan_payload["xlsx_output_plan_path"],
+                "--output-path",
+                (xlsx_dir / "approval.json").as_posix(),
+                "--approved",
+                "true",
+                "--reviewer-id",
+                "reviewer-001",
+            ]
+        )
+
+        self.assertNotEqual(exit_code, 0)
+        self.assertIsNone(payload)
+        self.assertIn("--human-reviewed", stderr)
+
+    def test_approve_xlsx_output_cli_requires_reviewer_id_flag(self):
+        _, _, workbook_path, xlsx_dir, _, _, _ = self.build_workspace()
+        plan_payload = self.build_xlsx_output_plan(workbook_path, xlsx_dir)
+
+        exit_code, payload, stderr = self.run_cli_raw(
+            [
+                "approve-xlsx-output",
+                "--plan-path",
+                plan_payload["xlsx_output_plan_path"],
+                "--output-path",
+                (xlsx_dir / "approval.json").as_posix(),
+                "--approved",
+                "true",
+                "--human-reviewed",
+                "true",
+            ]
+        )
+
+        self.assertNotEqual(exit_code, 0)
+        self.assertIsNone(payload)
+        self.assertIn("--reviewer-id", stderr)
+
+    def test_approve_xlsx_output_cli_rejects_approved_false(self):
+        _, _, workbook_path, xlsx_dir, _, _, _ = self.build_workspace()
+        plan_payload = self.build_xlsx_output_plan(workbook_path, xlsx_dir)
+
+        exit_code, payload, _ = self.run_cli_raw(
+            [
+                "approve-xlsx-output",
+                "--plan-path",
+                plan_payload["xlsx_output_plan_path"],
+                "--output-path",
+                (xlsx_dir / "approval.json").as_posix(),
+                "--approved",
+                "false",
+                "--human-reviewed",
+                "true",
+                "--reviewer-id",
+                "reviewer-001",
+            ]
+        )
+
+        self.assertNotEqual(exit_code, 0)
+        self.assertFalse(payload["complete"])
+        self.assertIn("--approved must be exactly true", payload["error_message"])
+
+    def test_approve_xlsx_output_cli_rejects_human_reviewed_false(self):
+        _, _, workbook_path, xlsx_dir, _, _, _ = self.build_workspace()
+        plan_payload = self.build_xlsx_output_plan(workbook_path, xlsx_dir)
+
+        exit_code, payload, _ = self.run_cli_raw(
+            [
+                "approve-xlsx-output",
+                "--plan-path",
+                plan_payload["xlsx_output_plan_path"],
+                "--output-path",
+                (xlsx_dir / "approval.json").as_posix(),
+                "--approved",
+                "true",
+                "--human-reviewed",
+                "false",
+                "--reviewer-id",
+                "reviewer-001",
+            ]
+        )
+
+        self.assertNotEqual(exit_code, 0)
+        self.assertFalse(payload["complete"])
+        self.assertIn(
+            "--human-reviewed must be exactly true",
+            payload["error_message"],
+        )
+
+    def test_approve_xlsx_output_cli_rejects_placeholder_reviewer_id(self):
+        _, _, workbook_path, xlsx_dir, _, _, _ = self.build_workspace()
+        plan_payload = self.build_xlsx_output_plan(workbook_path, xlsx_dir)
+
+        for reviewer_id in ("local_human_review", "default", "anonymous"):
+            with self.subTest(reviewer_id=reviewer_id):
+                exit_code, payload, _ = self.run_cli_raw(
+                    [
+                        "approve-xlsx-output",
+                        "--plan-path",
+                        plan_payload["xlsx_output_plan_path"],
+                        "--output-path",
+                        (xlsx_dir / f"approval-{reviewer_id}.json").as_posix(),
+                        "--approved",
+                        "true",
+                        "--human-reviewed",
+                        "true",
+                        "--reviewer-id",
+                        reviewer_id,
+                    ]
+                )
+
+                self.assertNotEqual(exit_code, 0)
+                self.assertFalse(payload["complete"])
+                self.assertIn(
+                    "placeholder reviewer_id is not allowed",
+                    payload["error_message"],
+                )
+
+    def test_approve_xlsx_output_cli_rejects_blank_reviewer_id(self):
+        _, _, workbook_path, xlsx_dir, _, _, _ = self.build_workspace()
+        plan_payload = self.build_xlsx_output_plan(workbook_path, xlsx_dir)
+
+        exit_code, payload, _ = self.run_cli_raw(
+            [
+                "approve-xlsx-output",
+                "--plan-path",
+                plan_payload["xlsx_output_plan_path"],
+                "--output-path",
+                (xlsx_dir / "approval.json").as_posix(),
+                "--approved",
+                "true",
+                "--human-reviewed",
+                "true",
+                "--reviewer-id",
+                "  ",
+            ]
+        )
+
+        self.assertNotEqual(exit_code, 0)
+        self.assertFalse(payload["complete"])
+        self.assertIn("explicit reviewer_id is required", payload["error_message"])
+
+    def test_approve_xlsx_output_cli_accepts_explicit_reviewer_approval(self):
+        _, _, workbook_path, xlsx_dir, _, _, _ = self.build_workspace()
+        plan_payload = self.build_xlsx_output_plan(workbook_path, xlsx_dir)
+
+        exit_code, payload = self.run_cli(
+            [
+                "approve-xlsx-output",
+                "--plan-path",
+                plan_payload["xlsx_output_plan_path"],
+                "--output-path",
+                (xlsx_dir / "approval.json").as_posix(),
+                "--approved",
+                "true",
+                "--human-reviewed",
+                "true",
+                "--reviewer-id",
+                "reviewer-001",
+            ]
+        )
+
+        self.assertEqual(exit_code, 0)
+        self.assertTrue(payload["approved"])
+
+    def build_xlsx_output_plan(self, workbook_path, xlsx_dir):
+        _, inspect_payload = self.run_cli(
+            [
+                "inspect-xlsx",
+                "--input-workbook",
+                workbook_path.as_posix(),
+                "--output-dir",
+                xlsx_dir.as_posix(),
+            ]
+        )
+        _, plan_payload = self.run_cli(
+            [
+                "plan-xlsx-output",
+                "--input-workbook",
+                workbook_path.as_posix(),
+                "--xlsx-inspection",
+                inspect_payload["xlsx_inspection_path"],
+                "--output-dir",
+                xlsx_dir.as_posix(),
+            ]
+        )
+        return plan_payload
 
     def test_model_and_browser_fixture_cli_commands(self):
         root, _, _, _, model_dir, browser_dir, _ = self.build_workspace()

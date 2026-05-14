@@ -425,8 +425,10 @@ def _main_subcommand(argv) -> int:
             result = approve_xlsx_output(
                 Path(args.plan_path),
                 Path(args.output_path),
-                approved=_parse_bool(args.approved),
-                human_reviewed=_parse_bool(args.human_reviewed),
+                approved=_parse_exact_true(args.approved, "--approved"),
+                human_reviewed=_parse_exact_true(
+                    args.human_reviewed, "--human-reviewed"
+                ),
                 reviewer_id=args.reviewer_id,
             )
             _print_command_payload(
@@ -653,12 +655,9 @@ def _build_subcommand_parser():
     approve_xlsx_parser = subparsers.add_parser("approve-xlsx-output")
     approve_xlsx_parser.add_argument("--plan-path", required=True)
     approve_xlsx_parser.add_argument("--output-path", required=True)
-    approve_xlsx_parser.add_argument("--approved", default="true")
-    approve_xlsx_parser.add_argument("--human-reviewed", default="true")
-    approve_xlsx_parser.add_argument(
-        "--reviewer-id",
-        default="local_human_review",
-    )
+    approve_xlsx_parser.add_argument("--approved", required=True)
+    approve_xlsx_parser.add_argument("--human-reviewed", required=True)
+    approve_xlsx_parser.add_argument("--reviewer-id", required=True)
 
     create_xlsx_parser = subparsers.add_parser("create-approved-xlsx-output")
     create_xlsx_parser.add_argument("--input-workbook", required=True)
@@ -740,13 +739,10 @@ def _optional_path(value):
     return Path(value)
 
 
-def _parse_bool(value):
-    normalized = str(value).strip().lower()
-    if normalized == "true":
-        return True
-    if normalized == "false":
-        return False
-    raise ValueError("boolean argument must be true or false")
+def _parse_exact_true(value, flag_name):
+    if value != "true":
+        raise ValueError(f"{flag_name} must be exactly true")
+    return True
 
 
 def _write_optional_cli_output(payload, output_path):

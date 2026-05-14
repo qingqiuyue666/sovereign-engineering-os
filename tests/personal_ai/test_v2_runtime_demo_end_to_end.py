@@ -52,6 +52,9 @@ class V2RuntimeDemoEndToEndTests(unittest.TestCase):
         approval = approve_xlsx_output(
             plan.plan_path,
             runtime_dir / "xlsx_output_approval.json",
+            approved=True,
+            human_reviewed=True,
+            reviewer_id="demo-reviewer-001",
         )
         output = create_approved_xlsx_output(
             workbook_path,

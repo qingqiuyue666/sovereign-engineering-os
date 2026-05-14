@@ -29,6 +29,11 @@ V2 runtime commands:
 - `show-adapter-registry`
 - `validate-tool-intake`
 
+V2 XLSX output writing is fail-closed: `approve-xlsx-output` requires
+explicit `--approved true`, `--human-reviewed true`, and a non-placeholder
+`--reviewer-id` before `create-approved-xlsx-output` can write a new workbook.
+There is no default or implicit approval path.
+
 The v2 runtime foundation adds `openpyxl>=3.1,<4` for bounded local XLSX
 read/write operations. It does not add live model providers, external network
 browser automation, creative software runtime, subprocess runtime, unrestricted
@@ -215,7 +220,8 @@ Spreadsheet boundary:
 - XLSX, XLSM, and XLS are not read.
 - V1 job packages do not write spreadsheet output files; v2 approved XLSX
   output writing creates only new derived summary workbooks outside input
-  directories after hash-bound approval.
+  directories after explicit reviewer approval with no default or implicit
+  approval.
 - No spreadsheet cleaning or transformation is performed.
 - Raw cell values and raw header values are not copied into job artifacts.
 

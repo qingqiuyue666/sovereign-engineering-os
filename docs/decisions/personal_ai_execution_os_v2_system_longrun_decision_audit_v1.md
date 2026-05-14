@@ -34,7 +34,9 @@ None.
 ## Runtime Capabilities Added
 
 - Bounded local `.xlsx` metadata inspection using `openpyxl`
-- Approved new `.xlsx` metadata summary output writer using `openpyxl`
+- Approved new `.xlsx` metadata summary output writer using `openpyxl`; XLSX
+  output approval requires explicit reviewer approval with no default or
+  implicit approval path
 - Deterministic mock typed-schema model fixture runtime
 - Deterministic local HTML fixture browser interpreter
 - Runtime delivery package manifest and validation
@@ -58,7 +60,8 @@ No candidate tool source was copied into the repository.
 - model runtime status: deterministic mock provider only; no live provider
 - browser runtime status: local fixture interpreter only; no external URL access
 - creative software runtime status: not admitted; policy-only deferred layer
-- approval/provenance/manifest posture: required for output writing and runtime delivery
+- approval/provenance/manifest posture: explicit reviewer approval is required
+  before XLSX output writing; no default or implicit approval path is admitted
 
 ## Admission Summary
 

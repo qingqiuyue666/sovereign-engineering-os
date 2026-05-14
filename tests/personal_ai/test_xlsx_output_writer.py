@@ -20,7 +20,7 @@ def read_json(path):
 
 
 class XlsxOutputWriterTests(unittest.TestCase):
-    def build_workspace(self):
+    def build_planned_workspace(self):
         temp_dir = tempfile.TemporaryDirectory()
         self.addCleanup(temp_dir.cleanup)
         root = Path(temp_dir.name)
@@ -43,8 +43,20 @@ class XlsxOutputWriterTests(unittest.TestCase):
             inspection.xlsx_inspection_path,
             output_dir,
         )
+        return root, input_dir, workbook_path, inspection, output_dir, plan
+
+    def build_workspace(self):
+        root, input_dir, workbook_path, inspection, output_dir, plan = (
+            self.build_planned_workspace()
+        )
         approval_path = root / "approval.json"
-        approval = approve_xlsx_output(plan.plan_path, approval_path)
+        approval = approve_xlsx_output(
+            plan.plan_path,
+            approval_path,
+            approved=True,
+            human_reviewed=True,
+            reviewer_id="reviewer-001",
+        )
         return root, input_dir, workbook_path, inspection, output_dir, plan, approval
 
     def test_plan_requires_hash_bound_inspection(self):
@@ -77,6 +89,112 @@ class XlsxOutputWriterTests(unittest.TestCase):
                 missing_approval_path,
                 output_dir,
             )
+
+    def test_approve_xlsx_output_requires_explicit_approved(self):
+        root, _, _, _, _, plan = self.build_planned_workspace()
+
+        with self.assertRaisesRegex(ValueError, "explicit approved true is required"):
+            approve_xlsx_output(
+                plan.plan_path,
+                root / "approval.json",
+                human_reviewed=True,
+                reviewer_id="reviewer-001",
+            )
+
+    def test_approve_xlsx_output_requires_explicit_human_reviewed(self):
+        root, _, _, _, _, plan = self.build_planned_workspace()
+
+        with self.assertRaisesRegex(
+            ValueError, "explicit human_reviewed true is required"
+        ):
+            approve_xlsx_output(
+                plan.plan_path,
+                root / "approval.json",
+                approved=True,
+                reviewer_id="reviewer-001",
+            )
+
+    def test_approve_xlsx_output_requires_explicit_reviewer_id(self):
+        root, _, _, _, _, plan = self.build_planned_workspace()
+
+        with self.assertRaisesRegex(ValueError, "explicit reviewer_id is required"):
+            approve_xlsx_output(
+                plan.plan_path,
+                root / "approval.json",
+                approved=True,
+                human_reviewed=True,
+            )
+
+    def test_approve_xlsx_output_rejects_blank_reviewer_id(self):
+        root, _, _, _, _, plan = self.build_planned_workspace()
+
+        with self.assertRaisesRegex(ValueError, "explicit reviewer_id is required"):
+            approve_xlsx_output(
+                plan.plan_path,
+                root / "approval.json",
+                approved=True,
+                human_reviewed=True,
+                reviewer_id="  ",
+            )
+
+    def test_approve_xlsx_output_rejects_placeholder_reviewer_id(self):
+        root, _, _, _, _, plan = self.build_planned_workspace()
+
+        for reviewer_id in ("local_human_review", "default", "anonymous"):
+            with self.subTest(reviewer_id=reviewer_id):
+                with self.assertRaisesRegex(
+                    ValueError, "placeholder reviewer_id is not allowed"
+                ):
+                    approve_xlsx_output(
+                        plan.plan_path,
+                        root / f"approval-{reviewer_id}.json",
+                        approved=True,
+                        human_reviewed=True,
+                        reviewer_id=reviewer_id,
+                    )
+
+    def test_approve_xlsx_output_rejects_approved_false(self):
+        root, _, _, _, _, plan = self.build_planned_workspace()
+
+        with self.assertRaisesRegex(ValueError, "explicit approved true is required"):
+            approve_xlsx_output(
+                plan.plan_path,
+                root / "approval.json",
+                approved=False,
+                human_reviewed=True,
+                reviewer_id="reviewer-001",
+            )
+
+    def test_approve_xlsx_output_rejects_human_reviewed_false(self):
+        root, _, _, _, _, plan = self.build_planned_workspace()
+
+        with self.assertRaisesRegex(
+            ValueError, "explicit human_reviewed true is required"
+        ):
+            approve_xlsx_output(
+                plan.plan_path,
+                root / "approval.json",
+                approved=True,
+                human_reviewed=False,
+                reviewer_id="reviewer-001",
+            )
+
+    def test_approve_xlsx_output_accepts_explicit_reviewer_approval(self):
+        root, _, _, _, _, plan = self.build_planned_workspace()
+
+        result = approve_xlsx_output(
+            plan.plan_path,
+            root / "approval.json",
+            approved=True,
+            human_reviewed=True,
+            reviewer_id=" reviewer-001 ",
+        )
+        approval = read_json(result.approval_path)
+
+        self.assertTrue(result.approved)
+        self.assertTrue(approval["approved"])
+        self.assertTrue(approval["human_reviewed"])
+        self.assertEqual(approval["reviewer_id"], "reviewer-001")
 
     def test_hash_mismatch_rejected(self):
         _, _, workbook_path, _, output_dir, plan, approval = self.build_workspace()
