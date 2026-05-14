@@ -32,6 +32,52 @@ Outputs:
 - CLI failures write `_failed_jobs/<job-id>/failure_manifest.json` only when the
   output root exists.
 
+## Approval-gated output package
+
+The approval-gated output package creates a delivery directory only after an
+explicit human approval decision validates the local v1 job id and approved
+action. It packages approved generated delivery artifacts from an existing job
+package into a separate output package directory outside the input directory.
+It does not write spreadsheet outputs and does not copy raw input file contents
+or raw cell values.
+
+Example `approval_decision.json`:
+
+```json
+{
+  "approved": true,
+  "approved_action": "create_approved_output_package",
+  "decision_type": "personal_ai_local_output_approval_decision",
+  "human_reviewed": true,
+  "job_id": "local-job-001"
+}
+```
+
+Run approval-gated output package mode:
+
+```bash
+python3 -m kernel.personal_ai.local_mvp_cli --input-dir ./input-folder --output-root-dir ./job-packages --job-id local-job-001 --approval-decision ./approval_decision.json --output-package-root-dir ./approved-output-packages --output-package-id approved-local-job-001
+```
+
+Approved output package artifacts:
+
+- `approved_output_manifest.json`
+- `delivery_summary.json`
+- `approval_receipt.json`
+- `spreadsheet_structural_report.json`
+- `spreadsheet_structural_report.md`
+- `final_job_manifest.json`
+
+Approval-gated output package boundaries:
+
+- No input mutation.
+- No raw cell value copy.
+- No spreadsheet output writing.
+- No spreadsheet cleaning or transformation.
+- No API or network calls.
+- No external tool control.
+- Human review only.
+
 Final artifacts:
 
 - `input_snapshot.json`
