@@ -23,9 +23,12 @@ _REQUIRED_ARTIFACTS = [
     "spreadsheet_report_plan.json",
     "spreadsheet_structural_report.json",
     "spreadsheet_structural_report.md",
+    "artifact_index.json",
+    "artifact_index_manifest.json",
     "final_job_manifest.json",
     "job_summary.json",
     "human_next_steps.md",
+    "job_package_validation.json",
 ]
 
 

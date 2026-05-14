@@ -43,6 +43,7 @@ EXPECTED_OUTPUT_CONTENTS = [
     "final_job_manifest.json",
     "approval_receipt.json",
     "provenance_chain.json",
+    "approved_output_validation.json",
 ]
 
 

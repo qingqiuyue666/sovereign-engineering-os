@@ -22,9 +22,12 @@ EXPECTED_JOB_FILES = {
     "spreadsheet_report_plan.json",
     "spreadsheet_structural_report.json",
     "spreadsheet_structural_report.md",
+    "artifact_index.json",
+    "artifact_index_manifest.json",
     "final_job_manifest.json",
     "job_summary.json",
     "human_next_steps.md",
+    "job_package_validation.json",
 }
 
 EXPECTED_BOUNDARIES = {
@@ -119,6 +122,11 @@ class LocalJobPackageTests(unittest.TestCase):
             result.spreadsheet_structural_report_markdown_path,
             result.job_dir / "spreadsheet_structural_report.md",
         )
+        self.assertEqual(result.artifact_index_path, result.job_dir / "artifact_index.json")
+        self.assertEqual(
+            result.artifact_index_manifest_path,
+            result.job_dir / "artifact_index_manifest.json",
+        )
         self.assertEqual(
             result.final_job_manifest_path,
             result.job_dir / "final_job_manifest.json",
@@ -127,6 +135,10 @@ class LocalJobPackageTests(unittest.TestCase):
         self.assertEqual(
             result.human_next_steps_path,
             result.job_dir / "human_next_steps.md",
+        )
+        self.assertEqual(
+            result.job_package_validation_path,
+            result.job_dir / "job_package_validation.json",
         )
         self.assertEqual(result.files_recorded, 2)
         self.assertEqual(
@@ -335,6 +347,7 @@ class LocalJobPackageTests(unittest.TestCase):
                 "job_dir",
                 "input_dir",
                 "artifacts",
+                "supplemental_artifacts",
                 "counts",
                 "candidate_tasks",
                 "route_type",

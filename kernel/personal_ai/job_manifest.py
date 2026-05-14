@@ -24,6 +24,8 @@ _FINAL_ARTIFACT_FILES = {
     "spreadsheet_report_plan": "spreadsheet_report_plan.json",
     "spreadsheet_structural_report_json": "spreadsheet_structural_report.json",
     "spreadsheet_structural_report_markdown": "spreadsheet_structural_report.md",
+    "artifact_index": "artifact_index.json",
+    "artifact_index_manifest": "artifact_index_manifest.json",
     "final_job_manifest": "final_job_manifest.json",
     "job_summary": "job_summary.json",
     "human_next_steps": "human_next_steps.md",

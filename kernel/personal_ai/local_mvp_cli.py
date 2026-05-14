@@ -2,8 +2,10 @@
 
 import argparse
 import json
+import sys
 from pathlib import Path
 
+from kernel.personal_ai.artifact_index import build_artifact_index
 from kernel.personal_ai.failure_quarantine import write_failure_quarantine
 from kernel.personal_ai.approval_gate import build_output_approval_request
 from kernel.personal_ai.local_mvp_runner import (
@@ -11,6 +13,8 @@ from kernel.personal_ai.local_mvp_runner import (
     run_personal_ai_local_mvp,
 )
 from kernel.personal_ai.output_package import build_approved_output_package
+from kernel.personal_ai.output_validator import build_approved_output_validation
+from kernel.personal_ai.package_validator import build_job_package_validation
 
 __all__ = [
     "main",
@@ -29,13 +33,32 @@ _REQUIRED_JOB_ARTIFACTS = [
     "spreadsheet_report_plan.json",
     "spreadsheet_structural_report.json",
     "spreadsheet_structural_report.md",
+    "artifact_index.json",
+    "artifact_index_manifest.json",
     "final_job_manifest.json",
     "job_summary.json",
     "human_next_steps.md",
+    "job_package_validation.json",
 ]
+
+_SUBCOMMANDS = {
+    "run-local",
+    "write-approval-request",
+    "create-approved-output",
+    "validate-job",
+    "validate-output",
+    "index-artifacts",
+}
 
 
 def main(argv=None) -> int:
+    effective_argv = list(sys.argv[1:] if argv is None else argv)
+    if effective_argv and effective_argv[0] in _SUBCOMMANDS:
+        return _main_subcommand(effective_argv)
+    return _main_run_local(effective_argv)
+
+
+def _main_run_local(argv=None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
     input_dir = Path(args.input_dir)
@@ -210,6 +233,177 @@ def main(argv=None) -> int:
     return 0
 
 
+def _main_subcommand(argv) -> int:
+    command = argv[0]
+    if command == "run-local":
+        return _main_run_local(argv[1:])
+
+    parser = _build_subcommand_parser()
+    args = parser.parse_args(argv)
+
+    try:
+        if args.command == "write-approval-request":
+            result = build_output_approval_request(
+                Path(args.job_dir),
+                Path(args.output_path),
+            )
+            _print_command_payload(
+                {
+                    "complete": True,
+                    "job_dir": Path(args.job_dir).as_posix(),
+                    "approval_request_path": result.output_request_path.as_posix(),
+                    "approval_request_sha256": result.approval_request_sha256,
+                    "required_human_approval": True,
+                }
+            )
+            return 0
+        if args.command == "create-approved-output":
+            result = build_approved_output_package(
+                Path(args.job_dir),
+                Path(args.output_package_root_dir),
+                Path(args.approval_decision),
+                output_package_id=args.output_package_id,
+                approval_request_path=Path(args.approval_request),
+            )
+            _print_command_payload(
+                {
+                    "complete": result.complete,
+                    "job_dir": Path(args.job_dir).as_posix(),
+                    "approved_output_package_dir": (
+                        result.output_package_dir.as_posix()
+                    ),
+                    "approval_verified": result.approval_verified,
+                    "output_package_missing_artifacts": (
+                        result.missing_artifacts
+                    ),
+                    "approved_output_validation_path": (
+                        result.approved_output_validation_path.as_posix()
+                    ),
+                    "required_human_approval": result.required_human_approval,
+                }
+            )
+            return 0 if result.complete else 1
+        if args.command == "validate-job":
+            result = build_job_package_validation(
+                Path(args.job_dir),
+                _optional_path(args.output_path),
+            )
+            _print_command_payload(
+                {
+                    "complete": result.complete,
+                    "job_dir": result.job_dir.as_posix(),
+                    "job_package_validation_path": (
+                        result.output_validation_path.as_posix()
+                    ),
+                    "missing_artifacts": result.missing_artifacts,
+                    "malformed_artifacts": result.malformed_artifacts,
+                    "boundaries_verified": result.boundaries_verified,
+                    "raw_sentinel_leakage_detected": (
+                        result.raw_sentinel_leakage_detected
+                    ),
+                    "spreadsheet_output_files": result.spreadsheet_output_files,
+                }
+            )
+            return 0 if result.complete else 1
+        if args.command == "validate-output":
+            result = build_approved_output_validation(
+                Path(args.output_package_dir),
+                _optional_path(args.output_path),
+            )
+            _print_command_payload(
+                {
+                    "complete": result.complete,
+                    "output_package_dir": result.output_package_dir.as_posix(),
+                    "approved_output_validation_path": (
+                        result.output_validation_path.as_posix()
+                    ),
+                    "missing_artifacts": result.missing_artifacts,
+                    "malformed_artifacts": result.malformed_artifacts,
+                    "manifest_hashes_verified": result.manifest_hashes_verified,
+                    "approval_verified": result.approval_verified,
+                    "provenance_verified": result.provenance_verified,
+                    "boundaries_verified": result.boundaries_verified,
+                    "raw_sentinel_leakage_detected": (
+                        result.raw_sentinel_leakage_detected
+                    ),
+                    "spreadsheet_output_files": result.spreadsheet_output_files,
+                }
+            )
+            return 0 if result.complete else 1
+        if args.command == "index-artifacts":
+            result = build_artifact_index(
+                Path(args.job_dir),
+                _optional_path(args.output_path),
+                _optional_path(args.manifest_output_path),
+            )
+            _print_command_payload(
+                {
+                    "complete": True,
+                    "job_dir": result.job_dir.as_posix(),
+                    "artifact_index_path": result.artifact_index_path.as_posix(),
+                    "artifact_index_manifest_path": (
+                        result.artifact_index_manifest_path.as_posix()
+                    ),
+                    "indexed_artifacts": result.indexed_artifacts,
+                    "required_human_approval": True,
+                }
+            )
+            return 0
+    except ValueError as error:
+        _print_command_payload(
+            {
+                "complete": False,
+                "error_type": error.__class__.__name__,
+                "error_message": str(error),
+                "required_human_approval": True,
+            }
+        )
+        return 1
+
+    _print_command_payload(
+        {
+            "complete": False,
+            "error_type": "UnsupportedCommand",
+            "error_message": command,
+            "required_human_approval": True,
+        }
+    )
+    return 1
+
+
+def _build_subcommand_parser():
+    parser = argparse.ArgumentParser(
+        description="Run safe Personal AI local v1 helper commands.",
+    )
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    approval_request_parser = subparsers.add_parser("write-approval-request")
+    approval_request_parser.add_argument("--job-dir", required=True)
+    approval_request_parser.add_argument("--output-path", required=True)
+
+    approved_output_parser = subparsers.add_parser("create-approved-output")
+    approved_output_parser.add_argument("--job-dir", required=True)
+    approved_output_parser.add_argument("--approval-decision", required=True)
+    approved_output_parser.add_argument("--approval-request", required=True)
+    approved_output_parser.add_argument("--output-package-root-dir", required=True)
+    approved_output_parser.add_argument("--output-package-id", required=True)
+
+    validate_job_parser = subparsers.add_parser("validate-job")
+    validate_job_parser.add_argument("--job-dir", required=True)
+    validate_job_parser.add_argument("--output-path")
+
+    validate_output_parser = subparsers.add_parser("validate-output")
+    validate_output_parser.add_argument("--output-package-dir", required=True)
+    validate_output_parser.add_argument("--output-path")
+
+    index_parser = subparsers.add_parser("index-artifacts")
+    index_parser.add_argument("--job-dir", required=True)
+    index_parser.add_argument("--output-path")
+    index_parser.add_argument("--manifest-output-path")
+
+    return parser
+
+
 def _build_parser():
     parser = argparse.ArgumentParser(
         description="Run the Personal AI local-only MVP safely.",
@@ -249,6 +443,12 @@ def _approval_output_flags_complete(args):
             args.output_package_id,
         )
     )
+
+
+def _optional_path(value):
+    if value is None:
+        return None
+    return Path(value)
 
 
 def _run_or_verify_local_mvp(
@@ -321,6 +521,10 @@ def _write_failure_if_possible(
     return result.quarantine_dir.as_posix()
 
 
+def _print_command_payload(payload):
+    print(json.dumps(payload, sort_keys=True))
+
+
 def _print_result(
     *,
     job_dir,
@@ -345,6 +549,13 @@ def _print_result(
         payload["approved_output_package_dir"] = (
             Path(approved_output_package_dir).as_posix()
         )
+        approved_output_validation_path = (
+            Path(approved_output_package_dir) / "approved_output_validation.json"
+        )
+        if approved_output_validation_path.exists():
+            payload["approved_output_validation_path"] = (
+                approved_output_validation_path.as_posix()
+            )
     if approval_verified is not None:
         payload["approval_verified"] = bool(approval_verified)
     if output_package_complete is not None:
@@ -359,6 +570,16 @@ def _print_result(
         payload["approval_request_sha256"] = approval_request_sha256
     if failure_quarantine_path is not None:
         payload["failure_quarantine_path"] = failure_quarantine_path
+    if job_dir is not None:
+        supplemental_paths = {
+            "artifact_index_path": "artifact_index.json",
+            "artifact_index_manifest_path": "artifact_index_manifest.json",
+            "job_package_validation_path": "job_package_validation.json",
+        }
+        for payload_key, artifact_file in supplemental_paths.items():
+            supplemental_path = Path(job_dir) / artifact_file
+            if supplemental_path.exists():
+                payload[payload_key] = supplemental_path.as_posix()
     print(json.dumps(payload, sort_keys=True))
 
 

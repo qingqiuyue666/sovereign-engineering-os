@@ -4,15 +4,34 @@ Sovereign Engineering OS is an AI execution control kernel and local-first gover
 
 Current phase/state: post
 `final-stop-state-consolidation-batch-v1`, with the approval-gated output
-package sprint and approval provenance hash chain sprint for the local-only
-Personal AI Execution OS local MVP v1.
+package sprint, approval provenance hash chain sprint, and OSS top repo
+integration sprint for the local-only Personal AI Execution OS local MVP v1.
 
 Current checkpoint:
 
+- `oss-top-repo-integration-autonomous-sprint`
+  - OSS intake audit: introduced at `docs/decisions/oss_top_repo_integration_intake_audit_v1.md`
+  - OSS integration plan: introduced at `docs/design/oss_integration_plan_v1.md`
+  - repositories reviewed: 42
+  - strong candidates shortlisted: 17
+  - selected safe integrations: 7
+  - dependency additions: none
+  - vendored external source code: none
+  - local artifact index: introduced
+  - job package validator: introduced
+  - approved output validator: introduced
+  - snapshot/golden normalization helper: introduced
+  - safe CLI subcommands: introduced while preserving the legacy CLI invocation
+  - static OSS integration registry: introduced
+  - runtime authority / external tool control / API: still absent
+  - input mutation: still forbidden
+  - raw cell value copying: not introduced
+  - spreadsheet output write: not introduced
+  - kernel/adapters: unchanged
 - `approval-provenance-hash-chain-sprint`
   - approval provenance: introduced
   - approval decision: hash-bound to approval_request and generated artifacts
-  - approved output package: includes `provenance_chain.json`
+  - approved output package: includes `provenance_chain.json` and `approved_output_validation.json`
   - cryptographic private-key signing: not introduced
   - secrets / credentials: not introduced
   - runtime authority / external tool control / API: still absent
@@ -43,9 +62,12 @@ Current checkpoint:
     - `spreadsheet_report_plan.json`
     - `spreadsheet_structural_report.json`
     - `spreadsheet_structural_report.md`
+    - `artifact_index.json`
+    - `artifact_index_manifest.json`
     - `final_job_manifest.json`
     - `job_summary.json`
     - `human_next_steps.md`
+    - `job_package_validation.json`
   - route output: route_type + recommended_processor_lane + non-executing
     action plan
   - spreadsheet planning output: plan_status + selected_spreadsheet_artifacts
@@ -238,6 +260,11 @@ Current capability:
 - Personal AI function-level local MVP runner
 - Personal AI safe local CLI
 - Personal AI final job manifest
+- Personal AI metadata-only artifact index and artifact index manifest
+- Personal AI job package validation report
+- Personal AI approved output validation report
+- Personal AI snapshot/golden normalization helper
+- Personal AI static OSS integration registry
 - Personal AI CLI failure quarantine
 - Personal AI atomic Markdown artifact writer
 - Personal AI local v1 usage documentation

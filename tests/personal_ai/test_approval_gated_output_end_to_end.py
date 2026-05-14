@@ -17,6 +17,7 @@ EXPECTED_OUTPUT_FILES = {
     "spreadsheet_structural_report.json",
     "spreadsheet_structural_report.md",
     "final_job_manifest.json",
+    "approved_output_validation.json",
 }
 
 SPREADSHEET_OUTPUT_SUFFIXES = {
