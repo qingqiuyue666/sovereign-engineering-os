@@ -23,6 +23,9 @@ from kernel.personal_ai.adapters.xlsx_output_writer import (
     validate_xlsx_output,
 )
 from kernel.personal_ai.adapters.model_typed_schema_runtime import run_model_fixture
+from kernel.personal_ai.adapters.browser_fixture_runtime import (
+    run_browser_fixture_from_actions_file,
+)
 
 __all__ = [
     "main",
@@ -62,6 +65,7 @@ _SUBCOMMANDS = {
     "create-approved-xlsx-output",
     "validate-xlsx-output",
     "run-model-fixture",
+    "run-browser-fixture",
 }
 
 
@@ -489,6 +493,26 @@ def _main_subcommand(argv) -> int:
                 }
             )
             return 0 if result.success else 1
+        if args.command == "run-browser-fixture":
+            result = run_browser_fixture_from_actions_file(
+                Path(args.fixture_path),
+                Path(args.actions_path),
+                Path(args.output_dir),
+            )
+            _print_command_payload(
+                {
+                    "complete": True,
+                    "fixture_path": result.fixture_path.as_posix(),
+                    "output_dir": result.output_dir.as_posix(),
+                    "browser_action_log_path": result.action_log_path.as_posix(),
+                    "browser_evidence_manifest_path": (
+                        result.evidence_manifest_path.as_posix()
+                    ),
+                    "action_count": result.action_count,
+                    "required_human_approval": result.required_human_approval,
+                }
+            )
+            return 0
     except ValueError as error:
         _print_command_payload(
             {
@@ -577,6 +601,11 @@ def _build_subcommand_parser():
     model_fixture_parser = subparsers.add_parser("run-model-fixture")
     model_fixture_parser.add_argument("--request-path", required=True)
     model_fixture_parser.add_argument("--output-dir", required=True)
+
+    browser_fixture_parser = subparsers.add_parser("run-browser-fixture")
+    browser_fixture_parser.add_argument("--fixture-path", required=True)
+    browser_fixture_parser.add_argument("--actions-path", required=True)
+    browser_fixture_parser.add_argument("--output-dir", required=True)
 
     return parser
 
