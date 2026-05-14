@@ -15,6 +15,7 @@ from kernel.personal_ai.local_mvp_runner import (
 from kernel.personal_ai.output_package import build_approved_output_package
 from kernel.personal_ai.output_validator import build_approved_output_validation
 from kernel.personal_ai.package_validator import build_job_package_validation
+from kernel.personal_ai.adapters.xlsx_readonly_runtime import inspect_xlsx_readonly
 
 __all__ = [
     "main",
@@ -48,6 +49,7 @@ _SUBCOMMANDS = {
     "validate-job",
     "validate-output",
     "index-artifacts",
+    "inspect-xlsx",
 }
 
 
@@ -349,6 +351,28 @@ def _main_subcommand(argv) -> int:
                 }
             )
             return 0
+        if args.command == "inspect-xlsx":
+            result = inspect_xlsx_readonly(
+                Path(args.input_workbook),
+                Path(args.output_dir),
+            )
+            _print_command_payload(
+                {
+                    "complete": True,
+                    "input_workbook_path": result.input_workbook_path.as_posix(),
+                    "output_dir": result.output_dir.as_posix(),
+                    "xlsx_inspection_path": (
+                        result.xlsx_inspection_path.as_posix()
+                    ),
+                    "xlsx_inspection_summary_path": (
+                        result.xlsx_inspection_summary_path.as_posix()
+                    ),
+                    "input_sha256": result.input_sha256,
+                    "sheet_count": result.sheet_count,
+                    "required_human_approval": result.required_human_approval,
+                }
+            )
+            return 0
     except ValueError as error:
         _print_command_payload(
             {
@@ -400,6 +424,10 @@ def _build_subcommand_parser():
     index_parser.add_argument("--job-dir", required=True)
     index_parser.add_argument("--output-path")
     index_parser.add_argument("--manifest-output-path")
+
+    inspect_xlsx_parser = subparsers.add_parser("inspect-xlsx")
+    inspect_xlsx_parser.add_argument("--input-workbook", required=True)
+    inspect_xlsx_parser.add_argument("--output-dir", required=True)
 
     return parser
 
