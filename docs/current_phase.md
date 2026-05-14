@@ -2,10 +2,21 @@
 
 Current phase: post
 `final-stop-state-consolidation-batch-v1`, with the approval-gated output
-package sprint for the local-only Personal AI Execution OS local MVP v1.
+package sprint and approval provenance hash chain sprint for the local-only
+Personal AI Execution OS local MVP v1.
 
 Current checkpoint:
 
+- `approval-provenance-hash-chain-sprint`
+  - approval provenance: introduced
+  - approval decision: hash-bound to approval_request and generated artifacts
+  - approved output package: includes `provenance_chain.json`
+  - cryptographic private-key signing: not introduced
+  - secrets / credentials: not introduced
+  - runtime authority / external tool control / API: still absent
+  - input mutation: still forbidden
+  - raw cell value copying: not introduced
+  - spreadsheet output write: not introduced
 - `personal-ai-local-v1-approval-gated-output-package-sprint`
   - Phase 2 selected lane: Personal AI Execution OS
   - Local MVP v1 status: productionized local-only MVP

@@ -34,12 +34,35 @@ Outputs:
 
 ## Approval-gated output package
 
-The approval-gated output package creates a delivery directory only after an
-explicit human approval decision validates the local v1 job id and approved
-action. It packages approved generated delivery artifacts from an existing job
-package into a separate output package directory outside the input directory.
-It does not write spreadsheet outputs and does not copy raw input file contents
-or raw cell values.
+The approval-gated output package creates a delivery directory only after a
+hash-bound human approval decision validates the local v1 job id, approval
+request hash, and generated artifact hashes. It packages approved generated
+delivery artifacts from an existing job package into a separate output package
+directory outside the input directory. It does not write spreadsheet outputs
+and does not copy raw input file contents or raw cell values.
+
+## Hash-bound approval provenance
+
+This is local hash-bound provenance. It is not private-key cryptographic
+signing. It uses no secrets, credentials, network, API, external tool control,
+input mutation, raw cell value copying, or spreadsheet output writing.
+
+1. Run the local MVP:
+
+```bash
+python3 -m kernel.personal_ai.local_mvp_cli --input-dir ./input-folder --output-root-dir ./job-packages --job-id local-job-001
+```
+
+2. Write `approval_request.json`:
+
+```bash
+python3 -m kernel.personal_ai.local_mvp_cli --input-dir ./input-folder --output-root-dir ./job-packages --job-id local-job-001 --write-approval-request ./approval_request.json
+```
+
+3. Read the approval request hashes from the CLI output and from
+   `approval_request.json`.
+
+4. Create `approval_decision.json` with the required hash fields:
 
 Example `approval_decision.json`:
 
@@ -47,23 +70,31 @@ Example `approval_decision.json`:
 {
   "approved": true,
   "approved_action": "create_approved_output_package",
+  "approval_request_sha256": "<approval_request_sha256_excluding_self>",
   "decision_type": "personal_ai_local_output_approval_decision",
+  "decision_version": 1,
+  "final_job_manifest_sha256": "<final_job_manifest_sha256>",
   "human_reviewed": true,
-  "job_id": "local-job-001"
+  "job_id": "local-job-001",
+  "spreadsheet_structural_report_json_sha256": "<spreadsheet_structural_report_json_sha256>",
+  "spreadsheet_structural_report_md_sha256": "<spreadsheet_structural_report_md_sha256>"
 }
 ```
 
-Run approval-gated output package mode:
+5. Run approval-gated output package mode:
 
 ```bash
-python3 -m kernel.personal_ai.local_mvp_cli --input-dir ./input-folder --output-root-dir ./job-packages --job-id local-job-001 --approval-decision ./approval_decision.json --output-package-root-dir ./approved-output-packages --output-package-id approved-local-job-001
+python3 -m kernel.personal_ai.local_mvp_cli --input-dir ./input-folder --output-root-dir ./job-packages --job-id local-job-001 --approval-request ./approval_request.json --approval-decision ./approval_decision.json --output-package-root-dir ./approved-output-packages --output-package-id approved-local-job-001
 ```
+
+6. Inspect `provenance_chain.json` in the approved output package.
 
 Approved output package artifacts:
 
 - `approved_output_manifest.json`
 - `delivery_summary.json`
 - `approval_receipt.json`
+- `provenance_chain.json`
 - `spreadsheet_structural_report.json`
 - `spreadsheet_structural_report.md`
 - `final_job_manifest.json`

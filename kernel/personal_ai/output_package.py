@@ -4,12 +4,20 @@ from dataclasses import dataclass
 from pathlib import Path
 import json
 
-from kernel.personal_ai.approval_gate import validate_output_approval_decision
+from kernel.personal_ai.approval_gate import (
+    build_output_approval_request,
+    validate_output_approval_decision,
+)
+from kernel.personal_ai.approval_provenance import (
+    _build_approval_provenance_chain_with_manifest_sha256,
+)
+from kernel.personal_ai.hash_utils import sha256_file
 from kernel.personal_ai.io_utils import write_json_atomically
 from kernel.personal_ai.job_package import validate_job_id
 from kernel.personal_ai.markdown_utils import write_markdown_atomically
 from kernel.personal_ai.output_package_manifest import (
     build_approved_output_manifest,
+    planned_approved_output_manifest_sha256,
 )
 
 __all__ = [
@@ -27,6 +35,7 @@ _APPROVED_OUTPUT_FILES = [
     "approved_output_manifest.json",
     "delivery_summary.json",
     "approval_receipt.json",
+    "provenance_chain.json",
     "spreadsheet_structural_report.json",
     "spreadsheet_structural_report.md",
     "final_job_manifest.json",
@@ -70,6 +79,7 @@ class ApprovedOutputPackageResult:
     approved_output_manifest_path: Path
     delivery_summary_path: Path
     approval_receipt_path: Path
+    provenance_chain_path: Path
     required_human_approval: bool
     approval_verified: bool
     complete: bool
@@ -82,6 +92,7 @@ def build_approved_output_package(
     approval_decision_path: Path,
     *,
     output_package_id: str,
+    approval_request_path: Path,
 ) -> ApprovedOutputPackageResult:
     job_path = Path(job_dir)
     output_root_path = Path(output_root_dir)
@@ -92,11 +103,23 @@ def build_approved_output_package(
     if input_dir is not None and _path_is_inside(output_root_path, input_dir):
         raise ValueError("output_root_dir must be outside input_dir")
 
+    _validate_source_artifacts(job_path)
+    request_path = Path(approval_request_path)
+    if not request_path.exists():
+        build_output_approval_request(job_path, request_path)
+
     decision = validate_output_approval_decision(
         approval_decision_path,
         expected_job_id=job_id,
+        approval_request_path=request_path,
+        final_job_manifest_path=job_path / "final_job_manifest.json",
+        spreadsheet_structural_report_json_path=(
+            job_path / "spreadsheet_structural_report.json"
+        ),
+        spreadsheet_structural_report_markdown_path=(
+            job_path / "spreadsheet_structural_report.md"
+        ),
     )
-    _validate_source_artifacts(job_path)
 
     output_package_dir = output_root_path / output_package_id
     if output_package_dir.exists():
@@ -121,9 +144,11 @@ def build_approved_output_package(
 
     delivery_summary_path = output_package_dir / "delivery_summary.json"
     approval_receipt_path = output_package_dir / "approval_receipt.json"
+    provenance_chain_path = output_package_dir / "provenance_chain.json"
     approved_output_manifest_path = (
         output_package_dir / "approved_output_manifest.json"
     )
+    decision_sha256 = sha256_file(approval_decision_path)
 
     write_json_atomically(
         delivery_summary_path,
@@ -136,6 +161,9 @@ def build_approved_output_package(
             "delivered_artifacts": list(_APPROVED_OUTPUT_FILES),
             "required_human_approval": True,
             "approval_verified": True,
+            "approval_request_sha256": decision.approval_request_sha256,
+            "approval_decision_sha256": decision_sha256,
+            "hash_binding_verified": True,
             "boundaries": dict(_BOUNDARIES),
             "forbidden_actions": list(_FORBIDDEN_ACTIONS),
             "next_allowed_action": "human_review_only",
@@ -152,10 +180,33 @@ def build_approved_output_package(
             "approved_action": decision.approved_action,
             "human_reviewed": decision.human_reviewed,
             "approval_verified": True,
+            "approval_request_sha256": decision.approval_request_sha256,
+            "approval_decision_sha256": decision_sha256,
+            "final_job_manifest_sha256": decision.final_job_manifest_sha256,
+            "spreadsheet_structural_report_json_sha256": (
+                decision.spreadsheet_structural_report_json_sha256
+            ),
+            "spreadsheet_structural_report_md_sha256": (
+                decision.spreadsheet_structural_report_md_sha256
+            ),
+            "hash_binding_verified": True,
             "next_allowed_action": "human_review_only",
         },
     )
 
+    planned_manifest_sha256 = planned_approved_output_manifest_sha256(
+        output_package_dir,
+        approved_output_manifest_path,
+    )
+    _build_approval_provenance_chain_with_manifest_sha256(
+        job_path,
+        request_path,
+        approval_decision_path,
+        output_package_dir,
+        provenance_chain_path,
+        approved_output_manifest_sha256=planned_manifest_sha256,
+        assume_approved_output_manifest_present=True,
+    )
     manifest_result = build_approved_output_manifest(
         output_package_dir,
         approved_output_manifest_path,
@@ -167,6 +218,7 @@ def build_approved_output_package(
         approved_output_manifest_path=approved_output_manifest_path,
         delivery_summary_path=delivery_summary_path,
         approval_receipt_path=approval_receipt_path,
+        provenance_chain_path=provenance_chain_path,
         required_human_approval=True,
         approval_verified=manifest_result.approval_verified,
         complete=manifest_result.complete,

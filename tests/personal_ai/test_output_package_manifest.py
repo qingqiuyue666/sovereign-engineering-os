@@ -3,6 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from kernel.personal_ai.hash_utils import sha256_file
 from kernel.personal_ai.output_package_manifest import (
     ApprovedOutputManifestResult,
     build_approved_output_manifest,
@@ -16,6 +17,8 @@ EXPECTED_MANIFEST_KEYS = {
     "output_package_dir",
     "artifacts",
     "artifact_presence",
+    "artifact_hashes",
+    "approved_output_manifest_sha256_excluding_self",
     "complete",
     "missing_artifacts",
     "approval_verified",
@@ -28,6 +31,7 @@ REQUIRED_OUTPUT_FILES = {
     "approved_output_manifest.json",
     "delivery_summary.json",
     "approval_receipt.json",
+    "provenance_chain.json",
     "spreadsheet_structural_report.json",
     "spreadsheet_structural_report.md",
     "final_job_manifest.json",
@@ -58,7 +62,11 @@ class OutputPackageManifestTests(unittest.TestCase):
         )
         write_json(
             output_package_dir / "approval_receipt.json",
-            {"approval_verified": True},
+            {"approval_verified": True, "hash_binding_verified": True},
+        )
+        write_json(
+            output_package_dir / "provenance_chain.json",
+            {"provenance_type": "personal_ai_local_v1_approval_provenance_chain"},
         )
         write_json(
             output_package_dir / "spreadsheet_structural_report.json",
@@ -94,7 +102,7 @@ class OutputPackageManifestTests(unittest.TestCase):
             "personal_ai_local_v1_approved_output_manifest",
         )
 
-    def test_complete_true_when_all_files_present(self):
+    def test_complete_true_when_all_files_present_including_provenance(self):
         output_package_dir = self.build_output_package_dir()
 
         result = build_approved_output_manifest(
@@ -107,6 +115,7 @@ class OutputPackageManifestTests(unittest.TestCase):
         self.assertIs(manifest["complete"], True)
         self.assertEqual(manifest["missing_artifacts"], [])
         self.assertTrue(all(manifest["artifact_presence"].values()))
+        self.assertIs(manifest["artifact_presence"]["provenance_chain"], True)
 
     def test_missing_artifact_recorded_when_file_missing(self):
         output_package_dir = self.build_output_package_dir()
@@ -141,24 +150,49 @@ class OutputPackageManifestTests(unittest.TestCase):
                 "approved_output_manifest",
                 "delivery_summary",
                 "approval_receipt",
+                "provenance_chain",
                 "spreadsheet_structural_report_json",
                 "spreadsheet_structural_report_markdown",
                 "final_job_manifest",
             },
         )
 
-    def test_manifest_does_not_copy_raw_sentinel_value(self):
+    def test_manifest_includes_artifact_hashes_without_raw_content(self):
         sentinel = "RAW_SENTINEL_CELL_VALUE_DO_NOT_COPY"
         output_package_dir = self.build_output_package_dir(
             final_manifest_payload={"source_note": sentinel},
         )
         output_manifest_path = output_package_dir / "approved_output_manifest.json"
 
-        build_approved_output_manifest(output_package_dir, output_manifest_path)
+        result = build_approved_output_manifest(output_package_dir, output_manifest_path)
+        manifest = read_json(output_manifest_path)
 
-        self.assertNotIn(
-            sentinel,
-            output_manifest_path.read_text(encoding="utf-8"),
+        self.assertEqual(result.artifact_hashes, manifest["artifact_hashes"])
+        self.assertIn("provenance_chain", manifest["artifact_hashes"])
+        self.assertNotIn("approved_output_manifest", manifest["artifact_hashes"])
+        self.assertNotIn(sentinel, output_manifest_path.read_text(encoding="utf-8"))
+
+    def test_artifact_hash_changes_if_copied_artifact_changes(self):
+        output_package_dir = self.build_output_package_dir()
+        output_manifest_path = output_package_dir / "approved_output_manifest.json"
+
+        build_approved_output_manifest(output_package_dir, output_manifest_path)
+        first_hash = read_json(output_manifest_path)["artifact_hashes"][
+            "spreadsheet_structural_report_json"
+        ]
+        write_json(
+            output_package_dir / "spreadsheet_structural_report.json",
+            {"report_status": "changed"},
+        )
+        build_approved_output_manifest(output_package_dir, output_manifest_path)
+        second_hash = read_json(output_manifest_path)["artifact_hashes"][
+            "spreadsheet_structural_report_json"
+        ]
+
+        self.assertNotEqual(first_hash, second_hash)
+        self.assertEqual(
+            second_hash,
+            sha256_file(output_package_dir / "spreadsheet_structural_report.json"),
         )
 
     def test_manifest_is_non_authority(self):
