@@ -22,6 +22,7 @@ from kernel.personal_ai.adapters.xlsx_output_writer import (
     plan_xlsx_output,
     validate_xlsx_output,
 )
+from kernel.personal_ai.adapters.model_typed_schema_runtime import run_model_fixture
 
 __all__ = [
     "main",
@@ -60,6 +61,7 @@ _SUBCOMMANDS = {
     "approve-xlsx-output",
     "create-approved-xlsx-output",
     "validate-xlsx-output",
+    "run-model-fixture",
 }
 
 
@@ -466,6 +468,27 @@ def _main_subcommand(argv) -> int:
                 }
             )
             return 0 if result.complete else 1
+        if args.command == "run-model-fixture":
+            result = run_model_fixture(
+                Path(args.request_path),
+                Path(args.output_dir),
+            )
+            _print_command_payload(
+                {
+                    "complete": result.success,
+                    "request_path": result.request_path.as_posix(),
+                    "output_dir": result.output_dir.as_posix(),
+                    "model_inference_artifact_path": None
+                    if result.inference_artifact_path is None
+                    else result.inference_artifact_path.as_posix(),
+                    "model_failure_bundle_path": None
+                    if result.failure_bundle_path is None
+                    else result.failure_bundle_path.as_posix(),
+                    "schema_name": result.schema_name,
+                    "required_human_approval": result.required_human_approval,
+                }
+            )
+            return 0 if result.success else 1
     except ValueError as error:
         _print_command_payload(
             {
@@ -550,6 +573,10 @@ def _build_subcommand_parser():
     validate_xlsx_parser = subparsers.add_parser("validate-xlsx-output")
     validate_xlsx_parser.add_argument("--output-dir", required=True)
     validate_xlsx_parser.add_argument("--output-path")
+
+    model_fixture_parser = subparsers.add_parser("run-model-fixture")
+    model_fixture_parser.add_argument("--request-path", required=True)
+    model_fixture_parser.add_argument("--output-dir", required=True)
 
     return parser
 
