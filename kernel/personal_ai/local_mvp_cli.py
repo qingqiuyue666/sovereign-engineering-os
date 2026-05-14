@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 from kernel.personal_ai.failure_quarantine import write_failure_quarantine
+from kernel.personal_ai.approval_gate import build_output_approval_request
 from kernel.personal_ai.local_mvp_runner import (
     PersonalAILocalMVPResult,
     run_personal_ai_local_mvp,
@@ -40,6 +41,25 @@ def main(argv=None) -> int:
     input_dir = Path(args.input_dir)
     output_root_dir = Path(args.output_root_dir)
     approval_mode = _approval_output_mode_requested(args)
+    approval_request_mode = args.write_approval_request is not None
+
+    if approval_mode and approval_request_mode:
+        failure_path = _write_failure_if_possible(
+            output_root_dir,
+            job_id=args.job_id,
+            error_type="ApprovalOutputPackageFlags",
+            error_message="approval request mode cannot be combined with approval output package mode",
+        )
+        _print_result(
+            job_dir=None,
+            complete=False,
+            missing_artifacts=[],
+            required_human_approval=True,
+            approval_verified=False,
+            output_package_complete=False,
+            failure_quarantine_path=failure_path,
+        )
+        return 1
 
     if approval_mode and not _approval_output_flags_complete(args):
         failure_path = _write_failure_if_possible(
@@ -66,7 +86,7 @@ def main(argv=None) -> int:
             job_id=args.job_id,
             recursive=args.recursive,
             include_hidden=args.include_hidden,
-            verify_existing=approval_mode,
+            verify_existing=approval_mode or approval_request_mode,
         )
     except ValueError as error:
         failure_path = _write_failure_if_possible(
@@ -104,6 +124,42 @@ def main(argv=None) -> int:
         )
         return 1
 
+    if approval_request_mode:
+        try:
+            approval_request_result = build_output_approval_request(
+                result.job_dir,
+                Path(args.write_approval_request),
+            )
+        except ValueError as error:
+            failure_path = _write_failure_if_possible(
+                output_root_dir,
+                job_id=args.job_id,
+                error_type=error.__class__.__name__,
+                error_message=str(error),
+            )
+            _print_result(
+                job_dir=result.job_dir,
+                complete=True,
+                missing_artifacts=result.missing_artifacts,
+                required_human_approval=result.required_human_approval,
+                approval_verified=False,
+                output_package_complete=False,
+                failure_quarantine_path=failure_path,
+            )
+            return 1
+
+        _print_result(
+            job_dir=result.job_dir,
+            complete=True,
+            missing_artifacts=result.missing_artifacts,
+            required_human_approval=result.required_human_approval,
+            approval_request_path=approval_request_result.output_request_path,
+            approval_request_sha256=(
+                approval_request_result.approval_request_sha256
+            ),
+        )
+        return 0
+
     if approval_mode:
         try:
             output_package_result = build_approved_output_package(
@@ -111,6 +167,7 @@ def main(argv=None) -> int:
                 Path(args.output_package_root_dir),
                 Path(args.approval_decision),
                 output_package_id=args.output_package_id,
+                approval_request_path=Path(args.approval_request),
             )
         except ValueError as error:
             failure_path = _write_failure_if_possible(
@@ -163,8 +220,10 @@ def _build_parser():
     parser.add_argument("--recursive", action="store_true")
     parser.add_argument("--include-hidden", action="store_true")
     parser.add_argument("--approval-decision")
+    parser.add_argument("--approval-request")
     parser.add_argument("--output-package-root-dir")
     parser.add_argument("--output-package-id")
+    parser.add_argument("--write-approval-request")
     return parser
 
 
@@ -173,6 +232,7 @@ def _approval_output_mode_requested(args):
         value is not None
         for value in (
             args.approval_decision,
+            args.approval_request,
             args.output_package_root_dir,
             args.output_package_id,
         )
@@ -184,6 +244,7 @@ def _approval_output_flags_complete(args):
         value is not None
         for value in (
             args.approval_decision,
+            args.approval_request,
             args.output_package_root_dir,
             args.output_package_id,
         )
@@ -270,6 +331,8 @@ def _print_result(
     approval_verified=None,
     output_package_complete=None,
     output_package_missing_artifacts=None,
+    approval_request_path=None,
+    approval_request_sha256=None,
     failure_quarantine_path=None,
 ):
     payload = {
@@ -290,6 +353,10 @@ def _print_result(
         payload["output_package_missing_artifacts"] = list(
             output_package_missing_artifacts
         )
+    if approval_request_path is not None:
+        payload["approval_request_path"] = Path(approval_request_path).as_posix()
+    if approval_request_sha256 is not None:
+        payload["approval_request_sha256"] = approval_request_sha256
     if failure_quarantine_path is not None:
         payload["failure_quarantine_path"] = failure_quarantine_path
     print(json.dumps(payload, sort_keys=True))

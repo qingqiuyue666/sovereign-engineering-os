@@ -3,6 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from kernel.personal_ai.approval_gate import build_output_approval_request
 from kernel.personal_ai.job_package import build_local_job_package
 from kernel.personal_ai.output_package import (
     ApprovedOutputPackageResult,
@@ -14,6 +15,7 @@ EXPECTED_OUTPUT_FILES = {
     "approved_output_manifest.json",
     "delivery_summary.json",
     "approval_receipt.json",
+    "provenance_chain.json",
     "spreadsheet_structural_report.json",
     "spreadsheet_structural_report.md",
     "final_job_manifest.json",
@@ -62,37 +64,61 @@ class OutputPackageTests(unittest.TestCase):
             job_output_root_dir,
             job_id="job-001",
         )
+        approval_request_path = root / "approval_request.json"
+        approval_request_result = build_output_approval_request(
+            job_result.job_dir,
+            approval_request_path,
+        )
         approval_decision_path = root / "approval_decision.json"
         write_json(
             approval_decision_path,
-            self.valid_decision(),
+            self.valid_decision(approval_request_result),
         )
         return (
             root,
             input_dir,
             output_package_root_dir,
+            approval_request_path,
             approval_decision_path,
             job_result,
         )
 
-    def valid_decision(self):
+    def valid_decision(self, approval_request_result):
+        hashes = approval_request_result.source_artifact_hashes
         return {
             "decision_type": "personal_ai_local_output_approval_decision",
+            "decision_version": 1,
             "job_id": "job-001",
             "approved": True,
             "approved_action": "create_approved_output_package",
             "human_reviewed": True,
+            "approval_request_sha256": (
+                approval_request_result.approval_request_sha256
+            ),
+            "final_job_manifest_sha256": hashes["final_job_manifest"],
+            "spreadsheet_structural_report_json_sha256": hashes[
+                "spreadsheet_structural_report_json"
+            ],
+            "spreadsheet_structural_report_md_sha256": hashes[
+                "spreadsheet_structural_report_markdown"
+            ],
         }
 
     def build_output_package(self):
-        _, _, output_root_dir, approval_decision_path, job_result = (
-            self.build_workspace()
-        )
+        (
+            _,
+            _,
+            output_root_dir,
+            approval_request_path,
+            approval_decision_path,
+            job_result,
+        ) = self.build_workspace()
         return build_approved_output_package(
             job_result.job_dir,
             output_root_dir,
             approval_decision_path,
             output_package_id="approved-001",
+            approval_request_path=approval_request_path,
         )
 
     def test_builds_approved_output_package_after_valid_approval(self):
@@ -104,6 +130,7 @@ class OutputPackageTests(unittest.TestCase):
         self.assertTrue(result.approved_output_manifest_path.exists())
         self.assertTrue(result.delivery_summary_path.exists())
         self.assertTrue(result.approval_receipt_path.exists())
+        self.assertTrue(result.provenance_chain_path.exists())
         self.assertIs(result.required_human_approval, True)
         self.assertIs(result.approval_verified, True)
         self.assertIs(result.complete, True)
@@ -118,7 +145,14 @@ class OutputPackageTests(unittest.TestCase):
         )
 
     def test_rejects_missing_job_dir(self):
-        root, _, output_root_dir, approval_decision_path, _ = self.build_workspace()
+        (
+            root,
+            _,
+            output_root_dir,
+            approval_request_path,
+            approval_decision_path,
+            _,
+        ) = self.build_workspace()
 
         with self.assertRaisesRegex(ValueError, "job_dir is missing"):
             build_approved_output_package(
@@ -126,12 +160,18 @@ class OutputPackageTests(unittest.TestCase):
                 output_root_dir,
                 approval_decision_path,
                 output_package_id="approved-001",
+                approval_request_path=approval_request_path,
             )
 
     def test_rejects_missing_output_root_dir(self):
-        root, _, output_root_dir, approval_decision_path, job_result = (
-            self.build_workspace()
-        )
+        (
+            _,
+            _,
+            output_root_dir,
+            approval_request_path,
+            approval_decision_path,
+            job_result,
+        ) = self.build_workspace()
 
         with self.assertRaisesRegex(ValueError, "output_root_dir is missing"):
             build_approved_output_package(
@@ -139,12 +179,18 @@ class OutputPackageTests(unittest.TestCase):
                 output_root_dir / "missing-root",
                 approval_decision_path,
                 output_package_id="approved-001",
+                approval_request_path=approval_request_path,
             )
 
     def test_rejects_invalid_output_package_id(self):
-        _, _, output_root_dir, approval_decision_path, job_result = (
-            self.build_workspace()
-        )
+        (
+            _,
+            _,
+            output_root_dir,
+            approval_request_path,
+            approval_decision_path,
+            job_result,
+        ) = self.build_workspace()
 
         with self.assertRaisesRegex(ValueError, "output_package_id is invalid"):
             build_approved_output_package(
@@ -152,12 +198,18 @@ class OutputPackageTests(unittest.TestCase):
                 output_root_dir,
                 approval_decision_path,
                 output_package_id="../bad",
+                approval_request_path=approval_request_path,
             )
 
     def test_rejects_existing_output_package_dir(self):
-        _, _, output_root_dir, approval_decision_path, job_result = (
-            self.build_workspace()
-        )
+        (
+            _,
+            _,
+            output_root_dir,
+            approval_request_path,
+            approval_decision_path,
+            job_result,
+        ) = self.build_workspace()
         (output_root_dir / "approved-001").mkdir()
 
         with self.assertRaisesRegex(ValueError, "output_package_dir already exists"):
@@ -166,13 +218,19 @@ class OutputPackageTests(unittest.TestCase):
                 output_root_dir,
                 approval_decision_path,
                 output_package_id="approved-001",
+                approval_request_path=approval_request_path,
             )
 
     def test_rejects_invalid_approval(self):
-        root, _, output_root_dir, approval_decision_path, job_result = (
-            self.build_workspace()
-        )
-        invalid_decision = self.valid_decision()
+        (
+            _,
+            _,
+            output_root_dir,
+            approval_request_path,
+            approval_decision_path,
+            job_result,
+        ) = self.build_workspace()
+        invalid_decision = read_json(approval_decision_path)
         invalid_decision["approved"] = False
         write_json(approval_decision_path, invalid_decision)
 
@@ -180,21 +238,57 @@ class OutputPackageTests(unittest.TestCase):
             build_approved_output_package(
                 job_result.job_dir,
                 output_root_dir,
-                root / "approval_decision.json",
+                approval_decision_path,
                 output_package_id="approved-001",
+                approval_request_path=approval_request_path,
+            )
+
+    def test_rejects_old_unbound_approval_decision_without_hashes(self):
+        (
+            _,
+            _,
+            output_root_dir,
+            approval_request_path,
+            approval_decision_path,
+            job_result,
+        ) = self.build_workspace()
+        write_json(
+            approval_decision_path,
+            {
+                "decision_type": "personal_ai_local_output_approval_decision",
+                "job_id": "job-001",
+                "approved": True,
+                "approved_action": "create_approved_output_package",
+                "human_reviewed": True,
+            },
+        )
+
+        with self.assertRaisesRegex(ValueError, "missing required keys"):
+            build_approved_output_package(
+                job_result.job_dir,
+                output_root_dir,
+                approval_decision_path,
+                output_package_id="approved-001",
+                approval_request_path=approval_request_path,
             )
 
     def test_does_not_copy_raw_sentinel_value(self):
         sentinel = "RAW_SENTINEL_CELL_VALUE_DO_NOT_COPY"
-        _, _, output_root_dir, approval_decision_path, job_result = (
-            self.build_workspace(sentinel=sentinel)
-        )
+        (
+            _,
+            _,
+            output_root_dir,
+            approval_request_path,
+            approval_decision_path,
+            job_result,
+        ) = self.build_workspace(sentinel=sentinel)
 
         result = build_approved_output_package(
             job_result.job_dir,
             output_root_dir,
             approval_decision_path,
             output_package_id="approved-001",
+            approval_request_path=approval_request_path,
         )
 
         for artifact_path in result.output_package_dir.iterdir():
@@ -205,9 +299,14 @@ class OutputPackageTests(unittest.TestCase):
             )
 
     def test_does_not_modify_input_files(self):
-        _, input_dir, output_root_dir, approval_decision_path, job_result = (
-            self.build_workspace()
-        )
+        (
+            _,
+            input_dir,
+            output_root_dir,
+            approval_request_path,
+            approval_decision_path,
+            job_result,
+        ) = self.build_workspace()
         before = {
             path: (path.read_bytes(), path.stat().st_mtime_ns)
             for path in input_dir.iterdir()
@@ -219,6 +318,7 @@ class OutputPackageTests(unittest.TestCase):
             output_root_dir,
             approval_decision_path,
             output_package_id="approved-001",
+            approval_request_path=approval_request_path,
         )
 
         for path, (expected_bytes, expected_mtime) in before.items():
@@ -233,6 +333,78 @@ class OutputPackageTests(unittest.TestCase):
         self.assertEqual(manifest["missing_artifacts"], [])
         self.assertIs(manifest["approval_verified"], True)
 
+    def test_approval_receipt_contains_hash_fields(self):
+        result = self.build_output_package()
+        receipt = read_json(result.approval_receipt_path)
+
+        self.assertIn("approval_request_sha256", receipt)
+        self.assertIn("approval_decision_sha256", receipt)
+        self.assertIn("final_job_manifest_sha256", receipt)
+        self.assertIn("spreadsheet_structural_report_json_sha256", receipt)
+        self.assertIn("spreadsheet_structural_report_md_sha256", receipt)
+        self.assertIs(receipt["hash_binding_verified"], True)
+
+    def test_delivery_summary_includes_approval_hash_fields(self):
+        result = self.build_output_package()
+        delivery_summary = read_json(result.delivery_summary_path)
+
+        self.assertIn("approval_request_sha256", delivery_summary)
+        self.assertIn("approval_decision_sha256", delivery_summary)
+        self.assertIs(delivery_summary["hash_binding_verified"], True)
+        self.assertNotIn("provenance_chain_sha256", delivery_summary)
+
+    def test_approved_output_manifest_includes_provenance_and_artifact_hashes(self):
+        result = self.build_output_package()
+        manifest = read_json(result.approved_output_manifest_path)
+
+        self.assertIs(manifest["artifact_presence"]["provenance_chain"], True)
+        self.assertIn("artifact_hashes", manifest)
+        self.assertIn("provenance_chain", manifest["artifact_hashes"])
+        self.assertNotIn("approved_output_manifest", manifest["artifact_hashes"])
+
+    def test_tampered_final_job_manifest_causes_approval_rejection(self):
+        (
+            _,
+            _,
+            output_root_dir,
+            approval_request_path,
+            approval_decision_path,
+            job_result,
+        ) = self.build_workspace()
+        write_json(job_result.final_job_manifest_path, {"manifest_type": "tampered"})
+
+        with self.assertRaisesRegex(ValueError, "final_job_manifest"):
+            build_approved_output_package(
+                job_result.job_dir,
+                output_root_dir,
+                approval_decision_path,
+                output_package_id="approved-001",
+                approval_request_path=approval_request_path,
+            )
+
+    def test_tampered_structural_report_causes_approval_rejection(self):
+        (
+            _,
+            _,
+            output_root_dir,
+            approval_request_path,
+            approval_decision_path,
+            job_result,
+        ) = self.build_workspace()
+        write_json(
+            job_result.spreadsheet_structural_report_json_path,
+            {"report_status": "tampered"},
+        )
+
+        with self.assertRaisesRegex(ValueError, "spreadsheet_structural_report"):
+            build_approved_output_package(
+                job_result.job_dir,
+                output_root_dir,
+                approval_decision_path,
+                output_package_id="approved-001",
+                approval_request_path=approval_request_path,
+            )
+
     def test_no_spreadsheet_output_file_is_written(self):
         result = self.build_output_package()
 
@@ -246,9 +418,14 @@ class OutputPackageTests(unittest.TestCase):
         )
 
     def test_output_package_metadata_is_deterministic(self):
-        root, _, output_root_dir, approval_decision_path, job_result = (
-            self.build_workspace()
-        )
+        (
+            root,
+            _,
+            output_root_dir,
+            approval_request_path,
+            approval_decision_path,
+            job_result,
+        ) = self.build_workspace()
         first_root = output_root_dir / "first"
         second_root = output_root_dir / "second"
         first_root.mkdir()
@@ -259,12 +436,14 @@ class OutputPackageTests(unittest.TestCase):
             first_root,
             approval_decision_path,
             output_package_id="approved-001",
+            approval_request_path=approval_request_path,
         )
         second = build_approved_output_package(
             job_result.job_dir,
             second_root,
             approval_decision_path,
             output_package_id="approved-001",
+            approval_request_path=approval_request_path,
         )
 
         self.assertEqual(
@@ -275,6 +454,18 @@ class OutputPackageTests(unittest.TestCase):
             read_json(first.approval_receipt_path),
             read_json(second.approval_receipt_path),
         )
+        first_provenance = read_json(first.provenance_chain_path)
+        second_provenance = read_json(second.provenance_chain_path)
+        self.assertEqual(
+            first_provenance["approval_request_sha256"],
+            second_provenance["approval_request_sha256"],
+        )
+        self.assertEqual(
+            first_provenance["approval_decision_sha256"],
+            second_provenance["approval_decision_sha256"],
+        )
+        self.assertIs(first_provenance["hash_binding_verified"], True)
+        self.assertIs(second_provenance["hash_binding_verified"], True)
         self.assertTrue(root.exists())
 
 

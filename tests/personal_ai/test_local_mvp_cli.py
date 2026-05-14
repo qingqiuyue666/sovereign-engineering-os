@@ -13,6 +13,7 @@ EXPECTED_APPROVED_OUTPUT_FILES = {
     "approved_output_manifest.json",
     "delivery_summary.json",
     "approval_receipt.json",
+    "provenance_chain.json",
     "spreadsheet_structural_report.json",
     "spreadsheet_structural_report.md",
     "final_job_manifest.json",
@@ -21,7 +22,8 @@ EXPECTED_APPROVED_OUTPUT_FILES = {
 FORBIDDEN_IMPORT_PATTERN = re.compile(
     r"^\s*(?:import|from)\s+"
     r"(?:requests|urllib|httpx|anthropic|openai|google|subprocess|"
-    r"multiprocessing|playwright|selenium|socket|pandas|openpyxl|xlrd|pyarrow)\b",
+    r"multiprocessing|playwright|selenium|socket|pandas|openpyxl|xlrd|"
+    r"pyarrow|cryptography|nacl|OpenSSL)\b",
     re.MULTILINE,
 )
 
@@ -56,13 +58,33 @@ class LocalMVPCLITests(unittest.TestCase):
         output_root_dir.mkdir()
         return input_dir, output_root_dir
 
-    def valid_decision(self, job_id="job-001", approved=True):
+    def valid_decision_from_request(
+        self,
+        approval_request_path,
+        *,
+        job_id="job-001",
+        approved=True,
+        human_reviewed=True,
+    ):
+        request = read_json(approval_request_path)
+        hashes = request["source_artifact_hashes"]
         return {
             "decision_type": "personal_ai_local_output_approval_decision",
+            "decision_version": 1,
             "job_id": job_id,
             "approved": approved,
             "approved_action": "create_approved_output_package",
-            "human_reviewed": True,
+            "human_reviewed": human_reviewed,
+            "approval_request_sha256": request[
+                "approval_request_sha256_excluding_self"
+            ],
+            "final_job_manifest_sha256": hashes["final_job_manifest"],
+            "spreadsheet_structural_report_json_sha256": hashes[
+                "spreadsheet_structural_report_json"
+            ],
+            "spreadsheet_structural_report_md_sha256": hashes[
+                "spreadsheet_structural_report_markdown"
+            ],
         }
 
     def run_cli(self, args):
@@ -70,6 +92,20 @@ class LocalMVPCLITests(unittest.TestCase):
         with contextlib.redirect_stdout(stdout):
             exit_code = main(args)
         return exit_code, stdout.getvalue()
+
+    def write_approval_request(self, input_dir, output_root_dir, approval_request_path):
+        return self.run_cli(
+            [
+                "--input-dir",
+                input_dir.as_posix(),
+                "--output-root-dir",
+                output_root_dir.as_posix(),
+                "--job-id",
+                "job-001",
+                "--write-approval-request",
+                approval_request_path.as_posix(),
+            ]
+        )
 
     def test_cli_runs_full_local_mvp_and_exits_zero(self):
         input_dir, output_root_dir = self.build_workspace()
@@ -103,7 +139,51 @@ class LocalMVPCLITests(unittest.TestCase):
         self.assertNotIn("approval_verified", payload)
         self.assertNotIn(sentinel, output)
 
-    def test_cli_approval_output_mode_works_with_valid_decision(self):
+    def test_cli_write_approval_request_mode_works_and_prints_hash(self):
+        input_dir, output_root_dir = self.build_workspace()
+        root = input_dir.parent
+        sentinel = "RAW_SENTINEL_CELL_VALUE_DO_NOT_COPY"
+        (input_dir / "data.csv").write_text(
+            "account,value\n"
+            f"alpha,{sentinel}\n",
+            encoding="utf-8",
+        )
+        approval_request_path = root / "approval_request.json"
+
+        exit_code, output = self.write_approval_request(
+            input_dir,
+            output_root_dir,
+            approval_request_path,
+        )
+        payload = json.loads(output)
+        request = read_json(approval_request_path)
+
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(payload["approval_request_path"], approval_request_path.as_posix())
+        self.assertEqual(
+            payload["approval_request_sha256"],
+            request["approval_request_sha256_excluding_self"],
+        )
+        self.assertNotIn("approved_output_package_dir", payload)
+        self.assertNotIn(sentinel, output)
+
+    def test_cli_approval_request_mode_does_not_create_output_package(self):
+        input_dir, output_root_dir = self.build_workspace()
+        root = input_dir.parent
+        output_package_root_dir = root / "approved"
+        output_package_root_dir.mkdir()
+        (input_dir / "data.csv").write_text("a,b\n1,2\n", encoding="utf-8")
+
+        exit_code, _ = self.write_approval_request(
+            input_dir,
+            output_root_dir,
+            root / "approval_request.json",
+        )
+
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(list(output_package_root_dir.iterdir()), [])
+
+    def test_cli_approval_output_mode_works_with_valid_hash_bound_decision(self):
         input_dir, output_root_dir = self.build_workspace()
         root = input_dir.parent
         output_package_root_dir = root / "approved"
@@ -114,19 +194,18 @@ class LocalMVPCLITests(unittest.TestCase):
             f"alpha,{sentinel}\n",
             encoding="utf-8",
         )
-        first_exit_code, first_output = self.run_cli(
-            [
-                "--input-dir",
-                input_dir.as_posix(),
-                "--output-root-dir",
-                output_root_dir.as_posix(),
-                "--job-id",
-                "job-001",
-            ]
+        approval_request_path = root / "approval_request.json"
+        first_exit_code, first_output = self.write_approval_request(
+            input_dir,
+            output_root_dir,
+            approval_request_path,
         )
         first_payload = json.loads(first_output)
         approval_decision_path = root / "approval_decision.json"
-        write_json(approval_decision_path, self.valid_decision())
+        write_json(
+            approval_decision_path,
+            self.valid_decision_from_request(approval_request_path),
+        )
 
         second_exit_code, second_output = self.run_cli(
             [
@@ -136,6 +215,8 @@ class LocalMVPCLITests(unittest.TestCase):
                 output_root_dir.as_posix(),
                 "--job-id",
                 "job-001",
+                "--approval-request",
+                approval_request_path.as_posix(),
                 "--approval-decision",
                 approval_decision_path.as_posix(),
                 "--output-package-root-dir",
@@ -148,7 +229,7 @@ class LocalMVPCLITests(unittest.TestCase):
         output_package_dir = Path(second_payload["approved_output_package_dir"])
 
         self.assertEqual(first_exit_code, 0)
-        self.assertIs(first_payload["complete"], True)
+        self.assertIn("approval_request_sha256", first_payload)
         self.assertEqual(second_exit_code, 0)
         self.assertIs(second_payload["complete"], True)
         self.assertIs(second_payload["approval_verified"], True)
@@ -182,24 +263,11 @@ class LocalMVPCLITests(unittest.TestCase):
         self.assertIs(payload["output_package_complete"], False)
         self.assertIn("failure_quarantine_path", payload)
 
-    def test_cli_rejects_approval_decision_approved_false(self):
+    def test_cli_approval_output_mode_requires_approval_request(self):
         input_dir, output_root_dir = self.build_workspace()
         root = input_dir.parent
         output_package_root_dir = root / "approved"
         output_package_root_dir.mkdir()
-        (input_dir / "data.csv").write_text("a,b\n1,2\n", encoding="utf-8")
-        self.run_cli(
-            [
-                "--input-dir",
-                input_dir.as_posix(),
-                "--output-root-dir",
-                output_root_dir.as_posix(),
-                "--job-id",
-                "job-001",
-            ]
-        )
-        approval_decision_path = root / "approval_decision.json"
-        write_json(approval_decision_path, self.valid_decision(approved=False))
 
         exit_code, output = self.run_cli(
             [
@@ -209,6 +277,88 @@ class LocalMVPCLITests(unittest.TestCase):
                 output_root_dir.as_posix(),
                 "--job-id",
                 "job-001",
+                "--approval-decision",
+                (root / "approval_decision.json").as_posix(),
+                "--output-package-root-dir",
+                output_package_root_dir.as_posix(),
+                "--output-package-id",
+                "approved-001",
+            ]
+        )
+        payload = json.loads(output)
+
+        self.assertNotEqual(exit_code, 0)
+        self.assertIs(payload["approval_verified"], False)
+        self.assertIs(payload["output_package_complete"], False)
+
+    def test_cli_rejects_approval_decision_without_hashes(self):
+        input_dir, output_root_dir = self.build_workspace()
+        root = input_dir.parent
+        output_package_root_dir = root / "approved"
+        output_package_root_dir.mkdir()
+        (input_dir / "data.csv").write_text("a,b\n1,2\n", encoding="utf-8")
+        approval_request_path = root / "approval_request.json"
+        self.write_approval_request(input_dir, output_root_dir, approval_request_path)
+        approval_decision_path = root / "approval_decision.json"
+        write_json(
+            approval_decision_path,
+            {
+                "decision_type": "personal_ai_local_output_approval_decision",
+                "job_id": "job-001",
+                "approved": True,
+                "approved_action": "create_approved_output_package",
+                "human_reviewed": True,
+            },
+        )
+
+        exit_code, output = self.run_cli(
+            [
+                "--input-dir",
+                input_dir.as_posix(),
+                "--output-root-dir",
+                output_root_dir.as_posix(),
+                "--job-id",
+                "job-001",
+                "--approval-request",
+                approval_request_path.as_posix(),
+                "--approval-decision",
+                approval_decision_path.as_posix(),
+                "--output-package-root-dir",
+                output_package_root_dir.as_posix(),
+                "--output-package-id",
+                "approved-001",
+            ]
+        )
+        payload = json.loads(output)
+
+        self.assertNotEqual(exit_code, 0)
+        self.assertIs(payload["approval_verified"], False)
+        self.assertIs(payload["output_package_complete"], False)
+
+    def test_cli_rejects_approval_decision_approved_false(self):
+        input_dir, output_root_dir = self.build_workspace()
+        root = input_dir.parent
+        output_package_root_dir = root / "approved"
+        output_package_root_dir.mkdir()
+        (input_dir / "data.csv").write_text("a,b\n1,2\n", encoding="utf-8")
+        approval_request_path = root / "approval_request.json"
+        self.write_approval_request(input_dir, output_root_dir, approval_request_path)
+        approval_decision_path = root / "approval_decision.json"
+        write_json(
+            approval_decision_path,
+            self.valid_decision_from_request(approval_request_path, approved=False),
+        )
+
+        exit_code, output = self.run_cli(
+            [
+                "--input-dir",
+                input_dir.as_posix(),
+                "--output-root-dir",
+                output_root_dir.as_posix(),
+                "--job-id",
+                "job-001",
+                "--approval-request",
+                approval_request_path.as_posix(),
                 "--approval-decision",
                 approval_decision_path.as_posix(),
                 "--output-package-root-dir",
@@ -230,18 +380,16 @@ class LocalMVPCLITests(unittest.TestCase):
         output_package_root_dir = root / "approved"
         output_package_root_dir.mkdir()
         (input_dir / "data.csv").write_text("a,b\n1,2\n", encoding="utf-8")
-        self.run_cli(
-            [
-                "--input-dir",
-                input_dir.as_posix(),
-                "--output-root-dir",
-                output_root_dir.as_posix(),
-                "--job-id",
-                "job-001",
-            ]
-        )
+        approval_request_path = root / "approval_request.json"
+        self.write_approval_request(input_dir, output_root_dir, approval_request_path)
         approval_decision_path = root / "approval_decision.json"
-        write_json(approval_decision_path, self.valid_decision(job_id="other-job"))
+        write_json(
+            approval_decision_path,
+            self.valid_decision_from_request(
+                approval_request_path,
+                job_id="other-job",
+            ),
+        )
 
         exit_code, output = self.run_cli(
             [
@@ -251,6 +399,8 @@ class LocalMVPCLITests(unittest.TestCase):
                 output_root_dir.as_posix(),
                 "--job-id",
                 "job-001",
+                "--approval-request",
+                approval_request_path.as_posix(),
                 "--approval-decision",
                 approval_decision_path.as_posix(),
                 "--output-package-root-dir",
@@ -266,24 +416,23 @@ class LocalMVPCLITests(unittest.TestCase):
         self.assertIs(payload["approval_verified"], False)
         self.assertIs(payload["output_package_complete"], False)
 
-    def test_cli_approval_mode_reports_output_package_complete_true(self):
+    def test_cli_rejects_tampered_artifact_after_approval_request(self):
         input_dir, output_root_dir = self.build_workspace()
         root = input_dir.parent
         output_package_root_dir = root / "approved"
         output_package_root_dir.mkdir()
         (input_dir / "data.csv").write_text("a,b\n1,2\n", encoding="utf-8")
-        self.run_cli(
-            [
-                "--input-dir",
-                input_dir.as_posix(),
-                "--output-root-dir",
-                output_root_dir.as_posix(),
-                "--job-id",
-                "job-001",
-            ]
-        )
+        approval_request_path = root / "approval_request.json"
+        self.write_approval_request(input_dir, output_root_dir, approval_request_path)
         approval_decision_path = root / "approval_decision.json"
-        write_json(approval_decision_path, self.valid_decision())
+        write_json(
+            approval_decision_path,
+            self.valid_decision_from_request(approval_request_path),
+        )
+        write_json(
+            output_root_dir / "job-001" / "final_job_manifest.json",
+            {"manifest_type": "tampered"},
+        )
 
         exit_code, output = self.run_cli(
             [
@@ -293,6 +442,46 @@ class LocalMVPCLITests(unittest.TestCase):
                 output_root_dir.as_posix(),
                 "--job-id",
                 "job-001",
+                "--approval-request",
+                approval_request_path.as_posix(),
+                "--approval-decision",
+                approval_decision_path.as_posix(),
+                "--output-package-root-dir",
+                output_package_root_dir.as_posix(),
+                "--output-package-id",
+                "approved-001",
+            ]
+        )
+        payload = json.loads(output)
+
+        self.assertNotEqual(exit_code, 0)
+        self.assertIs(payload["approval_verified"], False)
+        self.assertIs(payload["output_package_complete"], False)
+
+    def test_cli_approval_mode_reports_output_package_complete_true(self):
+        input_dir, output_root_dir = self.build_workspace()
+        root = input_dir.parent
+        output_package_root_dir = root / "approved"
+        output_package_root_dir.mkdir()
+        (input_dir / "data.csv").write_text("a,b\n1,2\n", encoding="utf-8")
+        approval_request_path = root / "approval_request.json"
+        self.write_approval_request(input_dir, output_root_dir, approval_request_path)
+        approval_decision_path = root / "approval_decision.json"
+        write_json(
+            approval_decision_path,
+            self.valid_decision_from_request(approval_request_path),
+        )
+
+        exit_code, output = self.run_cli(
+            [
+                "--input-dir",
+                input_dir.as_posix(),
+                "--output-root-dir",
+                output_root_dir.as_posix(),
+                "--job-id",
+                "job-001",
+                "--approval-request",
+                approval_request_path.as_posix(),
                 "--approval-decision",
                 approval_decision_path.as_posix(),
                 "--output-package-root-dir",
