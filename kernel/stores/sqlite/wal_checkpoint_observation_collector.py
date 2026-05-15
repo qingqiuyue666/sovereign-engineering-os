@@ -98,6 +98,7 @@ def collect_wal_checkpoint_observation(
         "dirty_tail_detected": dirty_tail_detected,
         "mid_segment_corruption_detected": mid_segment_corruption_detected,
         "database_opened_read_only": database_opened_read_only,
+        "database_opened_for_write": False,
         "readonly_page_size_query_allowed": allow_readonly_page_size_query,
         "checkpoint_executed": False,
         "pragma_wal_checkpoint_executed": False,
