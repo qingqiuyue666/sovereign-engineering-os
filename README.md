@@ -9,6 +9,19 @@ integration sprint for the local-only Personal AI Execution OS local MVP v1.
 
 Current checkpoint:
 
+- `personal-ai-execution-os-full-landing-autonomous-v1`
+  - verdict: `PARTIAL_LANDING_READY_WITH_DEFERRED_ITEMS`
+  - decision audit: `docs/decisions/personal_ai_execution_os_full_landing_decision_audit_v1.md`
+  - merge readiness audit: `docs/decisions/personal_ai_execution_os_full_landing_merge_readiness_audit_v1.md`
+  - deferred items: `docs/decisions/full_landing_autonomous_deferred_items.md`
+  - roadmap: `docs/roadmap/personal_ai_execution_os_next_roadmap_v1.md`
+  - completed landing surfaces: hardened XLSX runtime, hardened runtime delivery package, typed-schema model adapter foundation, controlled browser fixture, ComfyUI fixture, Blender fixture, creative software policy layer, unified task graph, local launcher, and end-to-end task battery
+  - redacted sheet-name mode: emits no raw sheet names or stable sheet-name hashes
+  - delivery validation: scans generated XLSX artifacts for dynamic sentinel leakage
+  - local launcher usage: `docs/usage/personal_ai_execution_os_local_launcher.md`
+  - real runtime posture: live model providers, real browsers, Playwright/Selenium, ComfyUI endpoints, Blender, creative software, OS automation, unrestricted network, and arbitrary subprocess execution remain disabled by default and deferred
+  - runtime authority: still not introduced
+  - input mutation and existing output overwrite: still forbidden
 - `personal-ai-execution-os-v2-system-longrun-v1`
   - verdict: `APPROVE_PERSONAL_AI_EXECUTION_OS_V2_SYSTEM_LONGRUN_FOUNDATION`
   - decision audit: `docs/decisions/personal_ai_execution_os_v2_system_longrun_decision_audit_v1.md`

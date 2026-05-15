@@ -40,6 +40,9 @@ class AdapterRegistryTests(unittest.TestCase):
 
         self.assertEqual(entry.admission_status, AdapterAdmissionStatus.DEFERRED)
         self.assertTrue(entry.boundary.requires_explicit_future_admission())
+        self.assertIn("explicit_adapter_admission", entry.required_controls)
+        self.assertIn("operation_allowlist", entry.required_controls)
+        self.assertIn("source_asset_overwrite_forbidden", entry.required_controls)
         self.assertIn("adapter_not_admitted", admit_adapter_capability(
             AdapterCapabilityRequest(
                 adapter_id=entry.adapter_id,
@@ -49,6 +52,47 @@ class AdapterRegistryTests(unittest.TestCase):
                 boundary=AdapterExecutionBoundary(external_tool_control_allowed=True),
             )
         ).reason_codes)
+
+    def test_live_model_provider_boundary_is_deferred_not_runtime_admitted(self):
+        entry = find_adapter_entry("live_model_provider_boundary")
+
+        self.assertEqual(entry.admission_status, AdapterAdmissionStatus.DEFERRED)
+        self.assertEqual(entry.mode, AdapterMode.FUTURE_EXTERNAL)
+        self.assertEqual(entry.risk_class, AdapterRiskClass.LIVE_MODEL_PROVIDER)
+        self.assertTrue(entry.boundary.requires_explicit_future_admission())
+        decision = admit_adapter_capability(
+            AdapterCapabilityRequest(
+                adapter_id=entry.adapter_id,
+                capability="call_typed_schema_provider",
+                mode=entry.mode,
+                risk_class=entry.risk_class,
+                boundary=AdapterExecutionBoundary(network_allowed=True),
+            )
+        )
+        self.assertFalse(decision.admitted)
+        self.assertIn("adapter_not_admitted", decision.reason_codes)
+
+    def test_real_browser_runtime_boundary_is_deferred_not_runtime_admitted(self):
+        entry = find_adapter_entry("real_browser_runtime_boundary")
+
+        self.assertEqual(entry.admission_status, AdapterAdmissionStatus.DEFERRED)
+        self.assertEqual(entry.mode, AdapterMode.FUTURE_EXTERNAL)
+        self.assertEqual(entry.risk_class, AdapterRiskClass.EXTERNAL_BROWSER)
+        self.assertTrue(entry.boundary.requires_explicit_future_admission())
+        decision = admit_adapter_capability(
+            AdapterCapabilityRequest(
+                adapter_id=entry.adapter_id,
+                capability="drive_real_browser_with_allowlist",
+                mode=entry.mode,
+                risk_class=entry.risk_class,
+                boundary=AdapterExecutionBoundary(
+                    network_allowed=True,
+                    external_tool_control_allowed=True,
+                ),
+            )
+        )
+        self.assertFalse(decision.admitted)
+        self.assertIn("adapter_not_admitted", decision.reason_codes)
 
     def test_admits_registered_safe_capability(self):
         decision = admit_adapter_capability(

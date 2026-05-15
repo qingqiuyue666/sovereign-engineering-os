@@ -1,6 +1,7 @@
 import json
 import tempfile
 import unittest
+import uuid
 from pathlib import Path
 
 from openpyxl import Workbook
@@ -19,7 +20,7 @@ def read_json(path):
 
 
 class RuntimeDeliveryPackageTests(unittest.TestCase):
-    def build_workspace(self):
+    def build_workspace(self, *, workbook_cell_value="metadata only"):
         temp_dir = tempfile.TemporaryDirectory()
         self.addCleanup(temp_dir.cleanup)
         root = Path(temp_dir.name)
@@ -31,7 +32,7 @@ class RuntimeDeliveryPackageTests(unittest.TestCase):
         package_root.mkdir()
         workbook_path = runtime_dir / "derived_xlsx_summary.xlsx"
         workbook = Workbook()
-        workbook.active["A1"] = "metadata only"
+        workbook.active["A1"] = workbook_cell_value
         workbook.save(workbook_path)
 
         write_json_atomically(
@@ -92,6 +93,24 @@ class RuntimeDeliveryPackageTests(unittest.TestCase):
         self.assertTrue(result.complete)
         self.assertFalse(result.raw_value_leakage_detected)
         self.assertIn("generated_output_xlsx", result.packaged_artifacts)
+        self.assertTrue(manifest["delivery_policy"]["requires_replay_verification"])
+        self.assertFalse(manifest["delivery_policy"]["raw_derived_allowed"])
+        self.assertEqual(
+            manifest["artifact_order"],
+            sorted(manifest["artifact_order"]),
+        )
+        self.assertEqual(manifest["artifact_count"], len(manifest["artifacts"]))
+        self.assertEqual(
+            manifest["package_replay"]["artifact_set_sha256"],
+            read_json(result.runtime_delivery_validation_path)
+            and manifest["package_replay"]["artifact_set_sha256"],
+        )
+        artifact_categories = {
+            artifact["artifact_name"]: artifact["output_category"]
+            for artifact in manifest["artifacts"]
+        }
+        self.assertEqual(artifact_categories["generated_output_xlsx"], "derived_data")
+        self.assertEqual(artifact_categories["xlsx_inspection_json"], "metadata_only")
         self.assertEqual(
             manifest["generated_output_xlsx_hash"],
             sha256_file(workbook_path),
@@ -101,6 +120,9 @@ class RuntimeDeliveryPackageTests(unittest.TestCase):
             sorted(artifact["artifact_name"] for artifact in manifest["artifacts"]),
         )
         self.assertTrue(validation["complete"])
+        self.assertTrue(validation["artifact_hashes_verified"])
+        self.assertTrue(validation["package_replay_verified"])
+        self.assertTrue(validation["policy_verified"])
         self.assertIn("approval_sha256", manifest["provenance_chain_references"])
 
     def test_refuses_overwrite_and_output_inside_input_dir(self):
@@ -140,6 +162,140 @@ class RuntimeDeliveryPackageTests(unittest.TestCase):
 
         self.assertFalse(validation.complete)
         self.assertTrue(validation.raw_value_leakage_detected)
+
+    def test_validation_detects_dynamic_raw_sentinel_leakage(self):
+        _, runtime_dir, package_root, _ = self.build_workspace()
+        result = build_runtime_delivery_package(
+            runtime_dir,
+            package_root,
+            package_id="runtime-delivery-001",
+        )
+        dynamic_sentinel = "secret_" + uuid.uuid4().hex
+        write_markdown_atomically(result.package_dir / "notes.md", dynamic_sentinel)
+        rerun_path = package_root / "dynamic_validation.json"
+
+        validation = validate_runtime_delivery_package(
+            result.package_dir,
+            rerun_path,
+            raw_sentinel_values=[dynamic_sentinel],
+        )
+        validation_payload = read_json(rerun_path)
+
+        self.assertFalse(validation.complete)
+        self.assertTrue(validation.raw_value_leakage_detected)
+        self.assertTrue(validation_payload["raw_value_leakage_detected"])
+
+    def test_validation_scans_safe_generated_xlsx_without_false_positive(self):
+        _, runtime_dir, package_root, _ = self.build_workspace()
+        result = build_runtime_delivery_package(
+            runtime_dir,
+            package_root,
+            package_id="runtime-delivery-001",
+        )
+        dynamic_sentinel = "xlsx_safe_scan_" + uuid.uuid4().hex
+        rerun_path = package_root / "safe_xlsx_validation.json"
+
+        validation = validate_runtime_delivery_package(
+            result.package_dir,
+            rerun_path,
+            raw_sentinel_values=[dynamic_sentinel],
+        )
+        validation_payload = read_json(rerun_path)
+
+        self.assertTrue(validation.complete)
+        self.assertFalse(validation.raw_value_leakage_detected)
+        self.assertFalse(validation_payload["raw_value_leakage_detected"])
+
+    def test_validation_detects_dynamic_sentinel_inside_generated_xlsx(self):
+        _, runtime_dir, package_root, _ = self.build_workspace()
+        result = build_runtime_delivery_package(
+            runtime_dir,
+            package_root,
+            package_id="runtime-delivery-001",
+        )
+        dynamic_sentinel = "xlsx_leak_" + uuid.uuid4().hex
+        leaking_workbook_path = result.package_dir / "derived_xlsx_summary.xlsx"
+        workbook = Workbook()
+        workbook.active["A1"] = dynamic_sentinel
+        workbook.save(leaking_workbook_path)
+        rerun_path = package_root / "leaking_xlsx_validation.json"
+
+        validation = validate_runtime_delivery_package(
+            result.package_dir,
+            rerun_path,
+            raw_sentinel_values=[dynamic_sentinel],
+        )
+        validation_payload = read_json(rerun_path)
+
+        self.assertFalse(validation.complete)
+        self.assertTrue(validation.raw_value_leakage_detected)
+        self.assertTrue(validation_payload["raw_value_leakage_detected"])
+
+    def test_validation_detects_tampered_artifact_and_replay_mismatch(self):
+        _, runtime_dir, package_root, _ = self.build_workspace()
+        result = build_runtime_delivery_package(
+            runtime_dir,
+            package_root,
+            package_id="runtime-delivery-001",
+        )
+        copied_artifact = result.package_dir / "model_inference_artifact.json"
+        write_json_atomically(
+            copied_artifact,
+            {"artifact_type": "personal_ai_execution_os_v2_model_inference_artifact", "tampered": True},
+        )
+        rerun_path = package_root / "tamper_validation.json"
+
+        validation = validate_runtime_delivery_package(result.package_dir, rerun_path)
+        validation_payload = read_json(rerun_path)
+
+        self.assertFalse(validation.complete)
+        self.assertIn("model_inference_artifact", validation_payload["hash_mismatches"])
+        self.assertFalse(validation_payload["package_replay_verified"])
+
+    def test_validation_rejects_malformed_manifest_schema(self):
+        _, runtime_dir, package_root, _ = self.build_workspace()
+        result = build_runtime_delivery_package(
+            runtime_dir,
+            package_root,
+            package_id="runtime-delivery-001",
+        )
+        manifest = read_json(result.runtime_delivery_manifest_path)
+        manifest.pop("artifact_hashes")
+        result.runtime_delivery_manifest_path.write_text(
+            json.dumps(manifest, sort_keys=True), encoding="utf-8"
+        )
+
+        with self.assertRaisesRegex(ValueError, "artifact_hashes malformed"):
+            validate_runtime_delivery_package(
+                result.package_dir,
+                package_root / "malformed_validation.json",
+            )
+
+    def test_validation_enforces_raw_derived_policy_gate(self):
+        _, runtime_dir, package_root, _ = self.build_workspace()
+        result = build_runtime_delivery_package(
+            runtime_dir,
+            package_root,
+            package_id="runtime-delivery-001",
+        )
+        manifest = read_json(result.runtime_delivery_manifest_path)
+        for artifact in manifest["artifacts"]:
+            if artifact["artifact_name"] == "browser_evidence_manifest":
+                artifact["output_category"] = "raw_derived"
+        result.runtime_delivery_manifest_path.write_text(
+            json.dumps(manifest, sort_keys=True), encoding="utf-8"
+        )
+        rerun_path = package_root / "policy_validation.json"
+
+        validation = validate_runtime_delivery_package(result.package_dir, rerun_path)
+        validation_payload = read_json(rerun_path)
+
+        self.assertFalse(validation.complete)
+        self.assertFalse(validation_payload["policy_verified"])
+        self.assertIn(
+            "browser_evidence_manifest:raw_derived",
+            validation_payload["policy_failures"],
+        )
 
 
 if __name__ == "__main__":

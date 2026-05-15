@@ -12,6 +12,12 @@ from kernel.personal_ai.local_mvp_runner import (
     PersonalAILocalMVPResult,
     run_personal_ai_local_mvp,
 )
+from kernel.personal_ai.local_launcher import (
+    run_browser_fixture_launcher,
+    run_local_office_launcher,
+    run_model_fixture_launcher,
+    run_runtime_delivery_validation_launcher,
+)
 from kernel.personal_ai.output_package import build_approved_output_package
 from kernel.personal_ai.output_validator import build_approved_output_validation
 from kernel.personal_ai.package_validator import build_job_package_validation
@@ -36,6 +42,7 @@ from kernel.personal_ai.adapters.tool_intake_register import (
 from kernel.personal_ai.runtime_delivery_package import (
     validate_runtime_delivery_package,
 )
+from kernel.personal_ai.task_graph import run_local_task_graph_fixture
 from kernel.personal_ai.io_utils import write_json_atomically
 
 __all__ = [
@@ -78,6 +85,11 @@ _SUBCOMMANDS = {
     "run-model-fixture",
     "run-browser-fixture",
     "validate-runtime-delivery",
+    "run-task-graph-fixture",
+    "launch-office-workflow",
+    "launch-model-fixture",
+    "launch-browser-fixture",
+    "launch-runtime-delivery-validation",
     "show-adapter-registry",
     "validate-tool-intake",
 }
@@ -533,6 +545,7 @@ def _main_subcommand(argv) -> int:
             result = validate_runtime_delivery_package(
                 Path(args.package_dir),
                 Path(args.output_path),
+                raw_sentinel_values=args.raw_sentinel or [],
             )
             _print_command_payload(
                 {
@@ -551,6 +564,62 @@ def _main_subcommand(argv) -> int:
                     "required_human_approval": result.required_human_approval,
                 }
             )
+            return 0 if result.complete else 1
+        if args.command == "run-task-graph-fixture":
+            result = run_local_task_graph_fixture(
+                Path(args.graph_path),
+                Path(args.output_dir),
+            )
+            _print_command_payload(
+                {
+                    "complete": result.success,
+                    "graph_path": result.graph_path.as_posix(),
+                    "output_dir": result.output_dir.as_posix(),
+                    "task_graph_execution_manifest_path": None
+                    if result.execution_manifest_path is None
+                    else result.execution_manifest_path.as_posix(),
+                    "task_graph_replay_manifest_path": None
+                    if result.replay_manifest_path is None
+                    else result.replay_manifest_path.as_posix(),
+                    "task_graph_failure_bundle_path": None
+                    if result.failure_bundle_path is None
+                    else result.failure_bundle_path.as_posix(),
+                    "node_order": list(result.node_order),
+                    "required_human_approval": result.required_human_approval,
+                }
+            )
+            return 0 if result.success else 1
+        if args.command == "launch-office-workflow":
+            result = run_local_office_launcher(
+                Path(args.input_workbook),
+                Path(args.output_dir),
+                output_workbook_name=args.output_workbook_name,
+            )
+            _print_command_payload(result.to_cli_payload())
+            return 0 if result.complete else 1
+        if args.command == "launch-model-fixture":
+            result = run_model_fixture_launcher(
+                Path(args.input_artifact_path),
+                Path(args.output_dir),
+                schema_name=args.schema_name,
+            )
+            _print_command_payload(result.to_cli_payload())
+            return 0 if result.complete else 1
+        if args.command == "launch-browser-fixture":
+            result = run_browser_fixture_launcher(
+                Path(args.fixture_path),
+                Path(args.actions_path),
+                Path(args.output_dir),
+            )
+            _print_command_payload(result.to_cli_payload())
+            return 0 if result.complete else 1
+        if args.command == "launch-runtime-delivery-validation":
+            result = run_runtime_delivery_validation_launcher(
+                Path(args.package_dir),
+                Path(args.output_dir),
+                raw_sentinel_values=args.raw_sentinel or [],
+            )
+            _print_command_payload(result.to_cli_payload())
             return 0 if result.complete else 1
         if args.command == "show-adapter-registry":
             payload = {
@@ -681,6 +750,36 @@ def _build_subcommand_parser():
     runtime_delivery_parser = subparsers.add_parser("validate-runtime-delivery")
     runtime_delivery_parser.add_argument("--package-dir", required=True)
     runtime_delivery_parser.add_argument("--output-path", required=True)
+    runtime_delivery_parser.add_argument("--raw-sentinel", action="append")
+
+    task_graph_parser = subparsers.add_parser("run-task-graph-fixture")
+    task_graph_parser.add_argument("--graph-path", required=True)
+    task_graph_parser.add_argument("--output-dir", required=True)
+
+    launch_office_parser = subparsers.add_parser("launch-office-workflow")
+    launch_office_parser.add_argument("--input-workbook", required=True)
+    launch_office_parser.add_argument("--output-dir", required=True)
+    launch_office_parser.add_argument(
+        "--output-workbook-name",
+        default="derived_xlsx_summary.xlsx",
+    )
+
+    launch_model_parser = subparsers.add_parser("launch-model-fixture")
+    launch_model_parser.add_argument("--input-artifact-path", required=True)
+    launch_model_parser.add_argument("--output-dir", required=True)
+    launch_model_parser.add_argument("--schema-name", required=True)
+
+    launch_browser_parser = subparsers.add_parser("launch-browser-fixture")
+    launch_browser_parser.add_argument("--fixture-path", required=True)
+    launch_browser_parser.add_argument("--actions-path", required=True)
+    launch_browser_parser.add_argument("--output-dir", required=True)
+
+    launch_delivery_parser = subparsers.add_parser(
+        "launch-runtime-delivery-validation"
+    )
+    launch_delivery_parser.add_argument("--package-dir", required=True)
+    launch_delivery_parser.add_argument("--output-dir", required=True)
+    launch_delivery_parser.add_argument("--raw-sentinel", action="append")
 
     adapter_registry_parser = subparsers.add_parser("show-adapter-registry")
     adapter_registry_parser.add_argument("--output-path")

@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from pathlib import Path
 from zipfile import BadZipFile
-import json
+import hashlib
 
 from openpyxl import load_workbook
 from openpyxl.utils.exceptions import InvalidFileException
@@ -20,6 +20,7 @@ from kernel.personal_ai.markdown_utils import write_markdown_atomically
 __all__ = [
     "XlsxReadonlyInspectionResult",
     "inspect_xlsx_readonly",
+    "xlsx_artifact_contains_sentinel",
 ]
 
 _INSPECTION_FILE = "xlsx_inspection.json"
@@ -42,6 +43,8 @@ def inspect_xlsx_readonly(
     output_dir: Path,
     *,
     limits: XlsxReadonlyLimits | None = None,
+    redact_sheet_names: bool = False,
+    redact_input_path: bool = False,
 ) -> XlsxReadonlyInspectionResult:
     workbook_path = Path(input_workbook_path)
     output_path = Path(output_dir)
@@ -65,40 +68,60 @@ def inspect_xlsx_readonly(
             data_only=False,
             keep_links=False,
         )
-    except (InvalidFileException, BadZipFile, OSError) as error:
+    except (InvalidFileException, BadZipFile, EOFError, KeyError, OSError) as error:
         raise ValueError("input_workbook_path is not a valid xlsx file") from error
 
     warnings = []
     try:
         sheets = [
-            _inspect_sheet(sheet, effective_limits, warnings)
-            for sheet in workbook.worksheets
+            _inspect_sheet(
+                sheet,
+                effective_limits,
+                warnings,
+                sheet_index=sheet_index,
+                redact_sheet_names=redact_sheet_names,
+            )
+            for sheet_index, sheet in enumerate(workbook.worksheets, start=1)
         ]
     finally:
         workbook.close()
 
+    input_workbook_record = {
+        "file_name": (
+            "[redacted-input-file-name]"
+            if redact_input_path
+            else workbook_path.name
+        ),
+        "path": "[redacted-input-path]" if redact_input_path else workbook_path.as_posix(),
+        "sha256": input_sha256,
+        "path_redacted": redact_input_path,
+        "file_name_redacted": redact_input_path,
+    }
     payload = {
         "inspection_type": "personal_ai_execution_os_v2_xlsx_readonly_inspection",
         "authority": "non_authority",
         "execution_capability": "bounded_local_readonly_runtime",
-        "input_workbook": {
-            "file_name": workbook_path.name,
-            "path": workbook_path.as_posix(),
-            "sha256": input_sha256,
-        },
+        "input_workbook": input_workbook_record,
         "input_mutation_performed": False,
         "output_overwrite_performed": False,
         "raw_cell_values_copied": False,
+        "raw_sheet_names_copied": not redact_sheet_names,
         "required_human_approval": True,
         "adapter_id": "xlsx_readonly_runtime",
         "sheet_count": len(sheets),
         "sheet_names": [sheet["sheet_name"] for sheet in sheets],
+        "redaction": {
+            "input_path_redacted": redact_input_path,
+            "input_file_name_redacted": redact_input_path,
+            "sheet_names_redacted": redact_sheet_names,
+        },
         "sheets": sheets,
         "extraction_limits": {
             "max_header_rows": effective_limits.max_header_rows,
             "max_header_columns": effective_limits.max_header_columns,
             "max_formula_scan_cells": effective_limits.max_formula_scan_cells,
             "max_style_scan_cells": effective_limits.max_style_scan_cells,
+            "max_workbook_bytes": effective_limits.max_workbook_bytes,
             "header_preview_raw_values": False,
         },
         "warnings": sorted(set(warnings)),
@@ -143,12 +166,18 @@ def _validate_paths(workbook_path, output_path, limits):
         raise ValueError("input_workbook_path is missing")
     if not workbook_path.is_file():
         raise ValueError("input_workbook_path is not a file")
+    if workbook_path.is_symlink():
+        raise ValueError("input_workbook_path must not be a symlink")
     if workbook_path.suffix.lower() != ".xlsx":
         raise ValueError("input_workbook_path must have .xlsx extension")
+    if workbook_path.stat().st_size > limits.max_workbook_bytes:
+        raise ValueError("input_workbook_path exceeds max_workbook_bytes")
     if not output_path.exists():
         raise ValueError("output_dir is missing")
     if not output_path.is_dir():
         raise ValueError("output_dir is not a directory")
+    if output_path.is_symlink():
+        raise ValueError("output_dir must not be a symlink")
     if _path_is_inside(output_path, workbook_path.parent):
         raise ValueError("output_dir must be outside input_dir")
 
@@ -168,12 +197,20 @@ def _path_is_inside(candidate_path, root_path):
     return True
 
 
-def _inspect_sheet(sheet, limits, warnings):
+def _inspect_sheet(sheet, limits, warnings, *, sheet_index, redact_sheet_names):
     formula_stats = _scan_formula_stats(sheet, limits.max_formula_scan_cells)
     style_stats = _scan_style_stats(sheet, limits.max_style_scan_cells)
     merged_count = _merged_range_count(sheet, warnings)
-    return {
-        "sheet_name": sheet.title,
+    raw_sheet_name = sheet.title
+    safe_sheet_name = (
+        _redacted_sheet_label(sheet_index) if redact_sheet_names else raw_sheet_name
+    )
+    sheet_record = {
+        "sheet_name": safe_sheet_name,
+        "sheet_index": sheet_index,
+        "sheet_name_redacted": redact_sheet_names,
+        "raw_sheet_name_included": not redact_sheet_names,
+        "sheet_name_hash_included": not redact_sheet_names,
         "max_row": int(sheet.max_row or 0),
         "max_column": int(sheet.max_column or 0),
         "merged_cell_range_count": merged_count,
@@ -184,6 +221,15 @@ def _inspect_sheet(sheet, limits, warnings):
         "style_scan_truncated": style_stats["style_scan_truncated"],
         "header_preview": _header_preview(sheet, limits),
     }
+    if not redact_sheet_names:
+        sheet_record["sheet_name_sha256"] = hashlib.sha256(
+            raw_sheet_name.encode("utf-8")
+        ).hexdigest()
+    return sheet_record
+
+
+def _redacted_sheet_label(sheet_index):
+    return "sheet_" + str(sheet_index)
 
 
 def _merged_range_count(sheet, warnings):
@@ -275,6 +321,40 @@ def _cell_has_formula(cell):
         return True
     value = getattr(cell, "value", None)
     return isinstance(value, str) and value.startswith("=")
+
+
+def xlsx_artifact_contains_sentinel(
+    workbook_path,
+    sentinels,
+    *,
+    max_rows,
+    max_columns,
+):
+    try:
+        workbook = load_workbook(
+            Path(workbook_path),
+            read_only=True,
+            data_only=False,
+            keep_links=False,
+        )
+    except (InvalidFileException, BadZipFile, EOFError, KeyError, OSError):
+        return True
+    try:
+        for worksheet in workbook.worksheets:
+            for row in worksheet.iter_rows(
+                max_row=max_rows,
+                max_col=max_columns,
+                values_only=True,
+            ):
+                for value in row:
+                    if value is None:
+                        continue
+                    value_text = str(value)
+                    if any(sentinel in value_text for sentinel in sentinels):
+                        return True
+    finally:
+        workbook.close()
+    return False
 
 
 def _safe_value_type(value):

@@ -8,6 +8,8 @@ from kernel.personal_ai.adapters.model_adapter_contract import (
     ModelFixtureSchema,
     ModelRuntimePaths,
     build_model_fixture_capability_request,
+    build_model_provider_registry,
+    find_model_provider,
 )
 
 
@@ -33,6 +35,22 @@ class ModelAdapterContractTests(unittest.TestCase):
             ModelRuntimePaths().inference_artifact_file,
             "model_inference_artifact.json",
         )
+
+    def test_provider_registry_keeps_live_provider_disabled_by_default(self):
+        registry = build_model_provider_registry()
+        providers = {entry.provider_id: entry for entry in registry}
+
+        self.assertTrue(providers["deterministic_mock"].admitted)
+        self.assertTrue(providers["deterministic_mock"].enabled_by_default)
+        self.assertFalse(providers["deterministic_mock"].live_provider_runtime)
+        self.assertFalse(providers["openai"].admitted)
+        self.assertFalse(providers["openai"].enabled_by_default)
+        self.assertTrue(providers["openai"].live_provider_runtime)
+        self.assertEqual(providers["openai"].api_key_env_var, "OPENAI_API_KEY")
+        self.assertFalse(providers["openai"].policy["api_key_persistence_allowed"])
+        self.assertFalse(providers["openai"].policy["api_key_logging_allowed"])
+        self.assertFalse(providers["openai"].policy["real_provider_calls_allowed"])
+        self.assertEqual(find_model_provider("openai").provider_kind, "live")
 
 
 if __name__ == "__main__":

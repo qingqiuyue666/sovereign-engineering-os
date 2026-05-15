@@ -39,6 +39,29 @@ read/write operations. It does not add live model providers, external network
 browser automation, creative software runtime, subprocess runtime, unrestricted
 external tool control, secrets, or third-party source vendoring.
 
+## Personal AI Execution OS full landing local launcher
+
+The full landing branch adds local launcher wrappers and a unified task graph
+fixture while preserving the v1/v2 approval and runtime boundaries. Launcher
+commands print JSON to stdout and write a local `launcher_summary.md` file.
+
+Launcher command details:
+
+- `docs/usage/personal_ai_execution_os_local_launcher.md`
+
+Additional full landing commands:
+
+- `launch-office-workflow`
+- `launch-model-fixture`
+- `launch-browser-fixture`
+- `launch-runtime-delivery-validation`
+- `run-task-graph-fixture`
+
+These commands do not activate live model providers, real browser automation,
+Playwright/Selenium, real ComfyUI endpoint calls, Blender runtime calls,
+creative software control, OS automation, network runtime, or arbitrary
+subprocess execution.
+
 Run:
 
 ```bash

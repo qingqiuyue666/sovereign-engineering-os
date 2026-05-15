@@ -77,6 +77,24 @@ def build_default_adapter_registry() -> tuple[AdapterRegistryEntry, ...]:
             notes="Deterministic local mock provider; no live model access.",
         ),
         AdapterRegistryEntry(
+            adapter_id="live_model_provider_boundary",
+            adapter_name="Live Model Provider Boundary",
+            mode=AdapterMode.FUTURE_EXTERNAL,
+            risk_class=AdapterRiskClass.LIVE_MODEL_PROVIDER,
+            admission_status=AdapterAdmissionStatus.DEFERRED,
+            capabilities=("call_typed_schema_provider",),
+            required_controls=_REQUIRED_CONTROLS
+            + (
+                "environment_only_api_key",
+                "budget_gate",
+                "timeout_policy",
+                "schema_validation",
+                "future_admission",
+            ),
+            boundary=AdapterExecutionBoundary(network_allowed=True),
+            notes="Disabled-by-default live provider boundary; no real calls admitted.",
+        ),
+        AdapterRegistryEntry(
             adapter_id="browser_fixture_runtime",
             adapter_name="Browser Local Fixture Runtime",
             mode=AdapterMode.LOCAL_FIXTURE,
@@ -87,13 +105,41 @@ def build_default_adapter_registry() -> tuple[AdapterRegistryEntry, ...]:
             notes="Local HTML fixture interpretation only; no external URLs.",
         ),
         AdapterRegistryEntry(
+            adapter_id="real_browser_runtime_boundary",
+            adapter_name="Real Browser Runtime Boundary",
+            mode=AdapterMode.FUTURE_EXTERNAL,
+            risk_class=AdapterRiskClass.EXTERNAL_BROWSER,
+            admission_status=AdapterAdmissionStatus.DEFERRED,
+            capabilities=("drive_real_browser_with_allowlist",),
+            required_controls=_REQUIRED_CONTROLS
+            + (
+                "domain_allowlist",
+                "network_disabled_by_default",
+                "form_submit_approval_gate",
+                "no_credential_storage",
+                "future_admission",
+            ),
+            boundary=AdapterExecutionBoundary(
+                network_allowed=True,
+                external_tool_control_allowed=True,
+            ),
+            notes="Disabled-by-default real browser boundary; no Playwright/Selenium runtime admitted.",
+        ),
+        AdapterRegistryEntry(
             adapter_id="creative_adapter_policy",
             adapter_name="Creative Adapter Policy Foundation",
             mode=AdapterMode.POLICY_ONLY,
             risk_class=AdapterRiskClass.CREATIVE_EXTERNAL_TOOL,
             admission_status=AdapterAdmissionStatus.DEFERRED,
             capabilities=("record_future_creative_controls",),
-            required_controls=_REQUIRED_CONTROLS + ("future_admission",),
+            required_controls=_REQUIRED_CONTROLS
+            + (
+                "future_admission",
+                "explicit_adapter_admission",
+                "operation_allowlist",
+                "source_asset_overwrite_forbidden",
+                "preview_render_evidence",
+            ),
             boundary=AdapterExecutionBoundary(external_tool_control_allowed=True),
             notes="Policy only; no creative software runtime admitted.",
         ),
