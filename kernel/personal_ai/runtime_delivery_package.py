@@ -32,6 +32,9 @@ _KNOWN_RUNTIME_ARTIFACTS = (
     ("comfyui_output_manifest", "comfyui_output_manifest.json"),
     ("comfyui_preview_evidence", "comfyui_preview_evidence.json"),
     ("comfyui_failure_bundle", "comfyui_failure_bundle.json"),
+    ("blender_output_manifest", "blender_output_manifest.json"),
+    ("blender_preview_evidence", "blender_preview_evidence.json"),
+    ("blender_failure_bundle", "blender_failure_bundle.json"),
 )
 
 _ARTIFACT_POLICIES = {
@@ -48,6 +51,9 @@ _ARTIFACT_POLICIES = {
     "comfyui_output_manifest": ("metadata_only", "medium"),
     "comfyui_preview_evidence": ("metadata_only", "medium"),
     "comfyui_failure_bundle": ("metadata_only", "medium"),
+    "blender_output_manifest": ("metadata_only", "medium"),
+    "blender_preview_evidence": ("metadata_only", "medium"),
+    "blender_failure_bundle": ("metadata_only", "medium"),
     "generated_output_xlsx": ("derived_data", "medium"),
 }
 
