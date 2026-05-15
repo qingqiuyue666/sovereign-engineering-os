@@ -70,19 +70,24 @@ class PostManualSmokePreflightMainHealthTests(unittest.TestCase):
     def test_preflight_rejects_unsafe_browser_comfyui_and_blender_posture(self):
         module = self.read("kernel/personal_ai/real_runtime_manual_smoke_preflight.py")
         for marker in (
-            "external_network_allowed_must_be_false",
-            "real_user_profile_allowed_must_be_false",
-            "credential_persistence_allowed_must_be_false",
-            "login_allowed_must_be_false",
-            "signup_allowed_must_be_false",
-            "account_creation_allowed_must_be_false",
-            "payment_allowed_must_be_false",
+            "external_network_allowed",
+            "real_user_profile_allowed",
+            "credential_persistence_allowed",
+            "login_allowed",
+            "signup_allowed",
+            "account_creation_allowed",
+            "payment_allowed",
+            "_must_be_false",
             "comfyui_endpoint_not_loopback",
             "comfyui_workflow_forbidden_node_type",
             "blender_operation_forbidden_token",
             "blender_operation_not_allowed",
         ):
             self.assertIn(marker, module)
+
+    def test_preflight_test_suite_proves_generated_browser_failure_markers(self):
+        tests = self.read("tests/personal_ai/test_real_runtime_manual_smoke_preflight.py")
+        self.assertIn("external_network_allowed_must_be_false", tests)
 
     def test_preflight_module_does_not_import_or_launch_external_runtimes(self):
         module = self.read("kernel/personal_ai/real_runtime_manual_smoke_preflight.py")
