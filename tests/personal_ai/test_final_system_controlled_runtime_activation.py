@@ -137,7 +137,7 @@ class FinalSystemControlledRuntimeActivationTests(unittest.TestCase):
             output_dir / "operations.json",
             {
                 "operations": [
-                    {"operation": "inspect_scene"},
+                    {"operation": "add_camera"},
                     {"operation": "render_preview"},
                 ]
             },
