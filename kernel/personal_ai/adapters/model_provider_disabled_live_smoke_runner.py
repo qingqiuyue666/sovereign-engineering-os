@@ -15,6 +15,9 @@ import os
 from kernel.personal_ai.adapters.model_provider_live_smoke import (
     validate_disabled_model_provider_live_smoke_plan,
 )
+from kernel.personal_ai.adapters.model_provider_transport_adapter import (
+    build_live_smoke_transport_request,
+)
 from kernel.personal_ai.hash_utils import sha256_file
 from kernel.personal_ai.io_utils import write_json_atomically
 
@@ -226,21 +229,14 @@ def _build_transport_request(
     plan: dict[str, object],
     plan_file: Path,
 ) -> dict[str, object]:
-    return {
-        "request_type": "personal_ai_model_provider_live_smoke_transport_request_v1",
-        "provider_id": plan.get("provider_id"),
-        "plan_sha256": sha256_file(plan_file),
-        "schema_validation_required": True,
-        "tool_calls_allowed": False,
-        "file_edits_allowed": False,
-        "raw_prompt_contains_secret": False,
-        "prompt": "Return a minimal valid live-smoke JSON object with status ok.",
-        "expected_schema": {
-            "type": "object",
-            "required_keys": ["status", "provider_id"],
-            "status_allowed_values": ["ok"],
-        },
-    }
+    provider_id = _require_string(plan, "provider_id")
+    return build_live_smoke_transport_request(
+        provider_id=provider_id,
+        plan_sha256=sha256_file(plan_file),
+        timeout_seconds=20,
+        max_budget_usd=0.01,
+        schema_name="live_smoke_status_v1",
+    )
 
 
 def _validate_transport_response(response: dict[str, object]) -> dict[str, object]:
