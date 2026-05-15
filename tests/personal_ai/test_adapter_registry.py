@@ -40,6 +40,9 @@ class AdapterRegistryTests(unittest.TestCase):
 
         self.assertEqual(entry.admission_status, AdapterAdmissionStatus.DEFERRED)
         self.assertTrue(entry.boundary.requires_explicit_future_admission())
+        self.assertIn("explicit_adapter_admission", entry.required_controls)
+        self.assertIn("operation_allowlist", entry.required_controls)
+        self.assertIn("source_asset_overwrite_forbidden", entry.required_controls)
         self.assertIn("adapter_not_admitted", admit_adapter_capability(
             AdapterCapabilityRequest(
                 adapter_id=entry.adapter_id,

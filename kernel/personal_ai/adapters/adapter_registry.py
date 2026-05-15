@@ -132,7 +132,14 @@ def build_default_adapter_registry() -> tuple[AdapterRegistryEntry, ...]:
             risk_class=AdapterRiskClass.CREATIVE_EXTERNAL_TOOL,
             admission_status=AdapterAdmissionStatus.DEFERRED,
             capabilities=("record_future_creative_controls",),
-            required_controls=_REQUIRED_CONTROLS + ("future_admission",),
+            required_controls=_REQUIRED_CONTROLS
+            + (
+                "future_admission",
+                "explicit_adapter_admission",
+                "operation_allowlist",
+                "source_asset_overwrite_forbidden",
+                "preview_render_evidence",
+            ),
             boundary=AdapterExecutionBoundary(external_tool_control_allowed=True),
             notes="Policy only; no creative software runtime admitted.",
         ),
