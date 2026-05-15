@@ -1,8 +1,8 @@
 """SQLite WAL checkpoint policy audit.
 
 This module audits whether the repository declares a WAL checkpoint policy. It
-never opens a live database connection, never runs PRAGMA wal_checkpoint, never
-truncates WAL files, and never mutates SQLite state.
+never opens a live database connection, never invokes SQLite checkpointing,
+never truncates WAL files, and never mutates SQLite state.
 """
 
 from __future__ import annotations
@@ -34,14 +34,6 @@ _CHECKPOINT_POLICY_MARKERS = (
     "max_wal_bytes",
     "trigger_on_snapshot",
     "checkpoint_before_snapshot",
-)
-
-_MUTATING_CHECKPOINT_MARKERS = (
-    "PRAGMA wal_checkpoint",
-    "wal_checkpoint(",
-    "sqlite3_wal_checkpoint",
-    "SQLITE_CHECKPOINT_TRUNCATE",
-    "TRUNCATE",
 )
 
 
@@ -98,7 +90,7 @@ def run_wal_checkpoint_policy_audit(
         "repo_root": root.as_posix(),
         "wal_mode_declared": wal_mode_declared,
         "synchronous_normal_declared": synchronous_normal_declared,
-        "opener_path": opener_path.as_posix(),
+        "opener_path": _relative_path(root, opener_path),
         "opener_required_markers": opener_markers,
         "migration_mentions_wal_posture": "journal_mode = WAL" in migration_text,
         "snapshot_schema_has_root_hash": "root_hash" in snapshot_schema_text,
@@ -170,3 +162,7 @@ def _read_text(path: Path) -> str:
     if not path.exists() or not path.is_file():
         raise ValueError(path.as_posix() + " is missing")
     return path.read_text(encoding="utf-8")
+
+
+def _relative_path(root: Path, path: Path) -> str:
+    return path.relative_to(root).as_posix()
