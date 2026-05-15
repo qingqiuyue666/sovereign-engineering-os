@@ -7,6 +7,30 @@ integration sprint for the local-only Personal AI Execution OS local MVP v1.
 
 Current checkpoint:
 
+- `personal-ai-execution-os-full-landing-autonomous-v1`
+  - current phase verdict: `PARTIAL_LANDING_READY_WITH_DEFERRED_ITEMS`
+  - decision audit: `docs/decisions/personal_ai_execution_os_full_landing_decision_audit_v1.md`
+  - merge readiness audit: `docs/decisions/personal_ai_execution_os_full_landing_merge_readiness_audit_v1.md`
+  - deferred items: `docs/decisions/full_landing_autonomous_deferred_items.md`
+  - next roadmap: `docs/roadmap/personal_ai_execution_os_next_roadmap_v1.md`
+  - XLSX runtime hardening: completed
+  - runtime delivery hardening: completed
+  - model adapter foundation: completed with live providers disabled by default
+  - browser runtime foundation: completed as local fixture only
+  - ComfyUI runtime foundation: completed as local fixture only
+  - Blender runtime foundation: completed as local fixture only
+  - creative software policy layer: completed for After Effects, Unreal, Houdini, ZBrush, ComfyUI, and Blender
+  - unified task graph: completed as local fixture graph
+  - local launcher: completed with office, model fixture, browser fixture, and runtime delivery validation commands
+  - end-to-end task battery: completed
+  - runtime authority: not introduced
+  - live model provider runtime: not introduced
+  - real browser / Playwright / Selenium runtime: not introduced
+  - real ComfyUI endpoint calls: not introduced
+  - real Blender runtime calls: not introduced
+  - creative software control: not introduced
+  - OS automation / unrestricted network / arbitrary subprocess: not introduced
+  - input mutation and existing output overwrite: forbidden
 - `personal-ai-execution-os-v2-system-longrun-v1`
   - current phase verdict: `APPROVE_PERSONAL_AI_EXECUTION_OS_V2_SYSTEM_LONGRUN_FOUNDATION`
   - decision audit: `docs/decisions/personal_ai_execution_os_v2_system_longrun_decision_audit_v1.md`

@@ -54,3 +54,16 @@ python3 -m kernel.personal_ai.local_mvp_cli launch-runtime-delivery-validation \
 
 This validates the delivery manifest, artifact hashes, replay hash, package
 policy, and leakage scan locally.
+
+## Task Graph Fixture
+
+```bash
+python3 -m kernel.personal_ai.local_mvp_cli run-task-graph-fixture \
+  --graph-path /path/to/task_graph.json \
+  --output-dir /path/to/output
+```
+
+This validates a local task graph, resolves adapter routes, checks dependency
+ordering, records approval checkpoints, and writes execution and replay
+manifests. It can invoke the existing local runtime delivery validator for graph
+nodes that explicitly route to `runtime_delivery_package`.
