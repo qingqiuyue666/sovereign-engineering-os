@@ -1,0 +1,122 @@
+policy_id: repo_local_agent_execution_policy_v1
+policy_type: local_agent_execution_boundary
+version: 1
+
+scope:
+  repository_only: true
+  feature_branch_only: true
+  main_branch_write_forbidden: true
+  merge_forbidden: true
+  delete_branch_forbidden: true
+  tag_release_forbidden: true
+  live_runtime_forbidden_by_default: true
+
+allowed_auto_paths:
+  - docs/
+  - tests/
+  - examples/
+  - scripts/agent_run_checks.py
+  - policy/agent_execution_policy.yaml
+
+review_required_paths:
+  - kernel/
+  - validation/
+  - governance/
+  - pyproject.toml
+  - Makefile
+  - requirements.txt
+  - setup.py
+  - setup.cfg
+
+high_risk_paths:
+  - kernel/personal_ai/runtime_admission_gate.py
+  - kernel/personal_ai/adapters/openai_explicit_transport.py
+  - kernel/personal_ai/adapters/model_provider_disabled_live_smoke_runner.py
+  - kernel/personal_ai/adapters/model_provider_transport_adapter.py
+  - kernel/personal_ai/task_graph.py
+  - kernel/personal_ai/local_mvp_cli.py
+  - kernel/personal_ai/local_launcher.py
+
+forbidden_paths:
+  - .env
+  - .env.local
+  - .ssh/
+  - ~/.ssh/
+  - ~/Desktop/
+  - ~/Downloads/
+  - ~/Documents/
+  - ~/Pictures/
+  - ~/Movies/
+  - ~/Music/
+  - /Applications/
+  - /System/
+  - /Library/
+  - /usr/
+  - /bin/
+  - /sbin/
+  - /etc/
+
+forbidden_commands:
+  - sudo
+  - rm -rf
+  - chmod -R
+  - chown -R
+  - killall
+  - pkill
+  - launchctl
+  - osascript
+  - defaults write
+  - security
+  - ssh-keygen
+  - curl | sh
+  - wget | sh
+  - pip install --user
+  - pip install -g
+  - npm install -g
+  - brew install
+
+forbidden_import_markers:
+  - requests
+  - urllib.request.urlopen
+  - subprocess.Popen
+  - os.system
+  - eval(
+  - exec(
+
+normal_check_commands:
+  - python3 -m unittest discover -s tests/personal_ai -v
+  - make ci
+  - git diff --check
+  - git status --short
+
+forbidden_runtime_activation:
+  - live_model_api_default_call
+  - real_browser_automation
+  - playwright_or_selenium_launch
+  - real_comfyui_endpoint_call
+  - real_blender_subprocess
+  - creative_software_control
+  - os_automation
+  - unrestricted_network
+  - arbitrary_subprocess
+  - model_output_tool_call
+  - model_output_file_edit
+
+required_evidence:
+  - repository_root
+  - current_branch
+  - git_head
+  - policy_sha256
+  - command_results
+  - forbidden_scan_results
+  - git_status_before
+  - git_status_after
+  - completed_at_utc
+
+auto_approval_rules:
+  docs_tests_policy_only_can_auto_commit: true
+  kernel_runtime_changes_require_human_review: true
+  live_runtime_changes_require_human_review: true
+  secret_handling_changes_require_human_review: true
+  admission_or_approval_changes_require_human_review: true
+  ci_failure_blocks_auto_commit: true
