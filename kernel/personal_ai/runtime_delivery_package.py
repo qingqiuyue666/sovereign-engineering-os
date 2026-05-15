@@ -29,6 +29,9 @@ _KNOWN_RUNTIME_ARTIFACTS = (
     ("model_failure_bundle", "model_failure_bundle.json"),
     ("browser_action_log", "browser_action_log.json"),
     ("browser_evidence_manifest", "browser_evidence_manifest.json"),
+    ("comfyui_output_manifest", "comfyui_output_manifest.json"),
+    ("comfyui_preview_evidence", "comfyui_preview_evidence.json"),
+    ("comfyui_failure_bundle", "comfyui_failure_bundle.json"),
 )
 
 _ARTIFACT_POLICIES = {
@@ -42,6 +45,9 @@ _ARTIFACT_POLICIES = {
     "model_failure_bundle": ("metadata_only", "medium"),
     "browser_action_log": ("metadata_only", "medium"),
     "browser_evidence_manifest": ("metadata_only", "medium"),
+    "comfyui_output_manifest": ("metadata_only", "medium"),
+    "comfyui_preview_evidence": ("metadata_only", "medium"),
+    "comfyui_failure_bundle": ("metadata_only", "medium"),
     "generated_output_xlsx": ("derived_data", "medium"),
 }
 
