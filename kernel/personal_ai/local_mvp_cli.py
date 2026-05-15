@@ -14,9 +14,16 @@ from kernel.personal_ai.local_mvp_runner import (
 )
 from kernel.personal_ai.local_launcher import (
     run_browser_fixture_launcher,
+    run_browser_runtime_dry_run_launcher,
+    run_blender_dry_run_launcher,
+    run_comfyui_dry_run_launcher,
+    run_creative_handoff_launcher,
     run_local_office_launcher,
     run_model_fixture_launcher,
+    run_model_provider_dry_run_launcher,
+    run_product_health_check_launcher,
     run_runtime_delivery_validation_launcher,
+    run_task_graph_launcher,
 )
 from kernel.personal_ai.output_package import build_approved_output_package
 from kernel.personal_ai.output_validator import build_approved_output_validation
@@ -88,8 +95,15 @@ _SUBCOMMANDS = {
     "run-task-graph-fixture",
     "launch-office-workflow",
     "launch-model-fixture",
+    "launch-model-provider-dry-run",
     "launch-browser-fixture",
+    "launch-browser-dry-run",
+    "launch-comfyui-dry-run",
+    "launch-blender-dry-run",
+    "launch-creative-handoff",
+    "launch-task-graph",
     "launch-runtime-delivery-validation",
+    "launch-product-health-check",
     "show-adapter-registry",
     "validate-tool-intake",
 }
@@ -605,10 +619,59 @@ def _main_subcommand(argv) -> int:
             )
             _print_command_payload(result.to_cli_payload())
             return 0 if result.complete else 1
+        if args.command == "launch-model-provider-dry-run":
+            result = run_model_provider_dry_run_launcher(
+                Path(args.input_artifact_path),
+                Path(args.output_dir),
+                schema_name=args.schema_name,
+                provider_id=args.provider_id,
+            )
+            _print_command_payload(result.to_cli_payload())
+            return 0 if result.complete else 1
         if args.command == "launch-browser-fixture":
             result = run_browser_fixture_launcher(
                 Path(args.fixture_path),
                 Path(args.actions_path),
+                Path(args.output_dir),
+            )
+            _print_command_payload(result.to_cli_payload())
+            return 0 if result.complete else 1
+        if args.command == "launch-browser-dry-run":
+            result = run_browser_runtime_dry_run_launcher(
+                Path(args.actions_path),
+                Path(args.output_dir),
+                target_url=args.target_url,
+            )
+            _print_command_payload(result.to_cli_payload())
+            return 0 if result.complete else 1
+        if args.command == "launch-comfyui-dry-run":
+            result = run_comfyui_dry_run_launcher(
+                Path(args.workflow_path),
+                Path(args.output_dir),
+                input_asset_paths=tuple(Path(path) for path in args.input_asset),
+            )
+            _print_command_payload(result.to_cli_payload())
+            return 0 if result.complete else 1
+        if args.command == "launch-blender-dry-run":
+            result = run_blender_dry_run_launcher(
+                Path(args.scene_path),
+                Path(args.operation_plan_path),
+                Path(args.output_dir),
+            )
+            _print_command_payload(result.to_cli_payload())
+            return 0 if result.complete else 1
+        if args.command == "launch-creative-handoff":
+            result = run_creative_handoff_launcher(
+                args.family,
+                tuple(Path(path) for path in args.source_asset),
+                Path(args.output_dir),
+                package_id=args.package_id,
+            )
+            _print_command_payload(result.to_cli_payload())
+            return 0 if result.complete else 1
+        if args.command == "launch-task-graph":
+            result = run_task_graph_launcher(
+                Path(args.graph_path),
                 Path(args.output_dir),
             )
             _print_command_payload(result.to_cli_payload())
@@ -619,6 +682,10 @@ def _main_subcommand(argv) -> int:
                 Path(args.output_dir),
                 raw_sentinel_values=args.raw_sentinel or [],
             )
+            _print_command_payload(result.to_cli_payload())
+            return 0 if result.complete else 1
+        if args.command == "launch-product-health-check":
+            result = run_product_health_check_launcher(Path(args.output_dir))
             _print_command_payload(result.to_cli_payload())
             return 0 if result.complete else 1
         if args.command == "show-adapter-registry":
@@ -769,10 +836,49 @@ def _build_subcommand_parser():
     launch_model_parser.add_argument("--output-dir", required=True)
     launch_model_parser.add_argument("--schema-name", required=True)
 
+    launch_model_dry_run_parser = subparsers.add_parser(
+        "launch-model-provider-dry-run"
+    )
+    launch_model_dry_run_parser.add_argument("--input-artifact-path", required=True)
+    launch_model_dry_run_parser.add_argument("--output-dir", required=True)
+    launch_model_dry_run_parser.add_argument("--schema-name", required=True)
+    launch_model_dry_run_parser.add_argument("--provider-id", default="openai")
+
     launch_browser_parser = subparsers.add_parser("launch-browser-fixture")
     launch_browser_parser.add_argument("--fixture-path", required=True)
     launch_browser_parser.add_argument("--actions-path", required=True)
     launch_browser_parser.add_argument("--output-dir", required=True)
+
+    launch_browser_dry_run_parser = subparsers.add_parser("launch-browser-dry-run")
+    launch_browser_dry_run_parser.add_argument("--actions-path", required=True)
+    launch_browser_dry_run_parser.add_argument("--output-dir", required=True)
+    launch_browser_dry_run_parser.add_argument(
+        "--target-url",
+        default="http://127.0.0.1",
+    )
+
+    launch_comfyui_parser = subparsers.add_parser("launch-comfyui-dry-run")
+    launch_comfyui_parser.add_argument("--workflow-path", required=True)
+    launch_comfyui_parser.add_argument("--output-dir", required=True)
+    launch_comfyui_parser.add_argument("--input-asset", action="append", default=[])
+
+    launch_blender_parser = subparsers.add_parser("launch-blender-dry-run")
+    launch_blender_parser.add_argument("--scene-path", required=True)
+    launch_blender_parser.add_argument("--operation-plan-path", required=True)
+    launch_blender_parser.add_argument("--output-dir", required=True)
+
+    launch_handoff_parser = subparsers.add_parser("launch-creative-handoff")
+    launch_handoff_parser.add_argument("--family", required=True)
+    launch_handoff_parser.add_argument("--source-asset", action="append", required=True)
+    launch_handoff_parser.add_argument("--output-dir", required=True)
+    launch_handoff_parser.add_argument(
+        "--package-id",
+        default="creative-handoff-package",
+    )
+
+    launch_task_graph_parser = subparsers.add_parser("launch-task-graph")
+    launch_task_graph_parser.add_argument("--graph-path", required=True)
+    launch_task_graph_parser.add_argument("--output-dir", required=True)
 
     launch_delivery_parser = subparsers.add_parser(
         "launch-runtime-delivery-validation"
@@ -780,6 +886,9 @@ def _build_subcommand_parser():
     launch_delivery_parser.add_argument("--package-dir", required=True)
     launch_delivery_parser.add_argument("--output-dir", required=True)
     launch_delivery_parser.add_argument("--raw-sentinel", action="append")
+
+    launch_health_parser = subparsers.add_parser("launch-product-health-check")
+    launch_health_parser.add_argument("--output-dir", required=True)
 
     adapter_registry_parser = subparsers.add_parser("show-adapter-registry")
     adapter_registry_parser.add_argument("--output-path")

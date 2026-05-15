@@ -25,6 +25,7 @@ class AdapterRiskClass(str, Enum):
     APPROVED_OUTPUT_WRITE = "approved_output_write"
     MOCK_MODEL = "mock_model"
     LOCAL_BROWSER_FIXTURE = "local_browser_fixture"
+    LOCAL_CREATIVE_FIXTURE = "local_creative_fixture"
     EXTERNAL_BROWSER = "external_browser"
     LIVE_MODEL_PROVIDER = "live_model_provider"
     CREATIVE_EXTERNAL_TOOL = "creative_external_tool"
