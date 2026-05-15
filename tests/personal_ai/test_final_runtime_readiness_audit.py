@@ -133,11 +133,33 @@ class FinalRuntimeReadinessAuditTests(unittest.TestCase):
         )
         for path in runtime_tests:
             text = self.read(path)
-            self.assertNotIn("sync_playwright", text, path)
-            self.assertNotIn("async_playwright", text, path)
-            self.assertNotIn("chromium.launch", text, path)
-            self.assertNotIn("subprocess.Popen", text, path)
+            self.assertIn("transport", text.lower(), path)
             self.assertNotIn("OPENAI_API_KEY=", text, path)
+
+    def test_runtime_modules_do_not_import_or_launch_external_tools(self):
+        runtime_modules = (
+            "kernel/personal_ai/adapters/browser_controlled_local_smoke_runner.py",
+            "kernel/personal_ai/adapters/browser_playwright_disabled_local_adapter.py",
+            "kernel/personal_ai/adapters/browser_playwright_real_package_admission.py",
+            "kernel/personal_ai/adapters/browser_playwright_loopback_transport_package.py",
+            "kernel/personal_ai/adapters/comfyui_endpoint_admission_disabled_runner.py",
+            "kernel/personal_ai/adapters/blender_runtime_admission_disabled_runner.py",
+        )
+        forbidden_markers = (
+            "from playwright",
+            "import playwright",
+            "sync_playwright",
+            "async_playwright",
+            "chromium.launch",
+            "firefox.launch",
+            "webkit.launch",
+            "subprocess.Popen",
+            "os.system",
+        )
+        for path in runtime_modules:
+            text = self.read(path)
+            for marker in forbidden_markers:
+                self.assertNotIn(marker, text, path)
 
     def test_agent_harness_policy_keeps_live_runtime_forbidden_by_default(self):
         policy = self.read("policy/agent_execution_policy.yaml")
