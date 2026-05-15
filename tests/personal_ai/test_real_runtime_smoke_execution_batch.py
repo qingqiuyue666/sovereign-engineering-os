@@ -63,6 +63,12 @@ class RealRuntimeSmokeExecutionBatchTests(unittest.TestCase):
         payload = json.loads(result.failure_path.read_text(encoding="utf-8"))
         self.assertIn("browser_admission_path", payload["reason"])
 
+    def test_batch_requires_preexisting_output_directory(self):
+        root = self.make_output_dir()
+
+        with self.assertRaisesRegex(ValueError, "output_dir is missing"):
+            run_real_runtime_smoke_execution_batch(output_dir=root / "missing-run-dir")
+
     def test_batch_runs_fake_browser_comfyui_and_blender_entries_after_gates(self):
         root = self.make_output_dir()
         admission_dir = root / "admission"
@@ -101,27 +107,7 @@ class RealRuntimeSmokeExecutionBatchTests(unittest.TestCase):
             self.assertFalse(request["external_network_allowed"])
             return {"status": "ok"}
 
-        result = run_real_runtime_smoke_execution_batch(
-            output_dir=root / "run",
-            environ={"SEOS_ENABLE_REAL_RUNTIME_SMOKE_EXECUTION_BATCH": "true"},
-            allow_batch=True,
-            browser_admission_path=admission.admission_path,
-            allow_browser_smoke=True,
-            browser_transport=browser_transport,
-            comfyui_workflow_path=workflow,
-            allow_comfyui_smoke=True,
-            comfyui_transport=comfyui_transport,
-            blender_scene_path=scene,
-            blender_operation_plan_path=operation_plan,
-            allow_blender_smoke=True,
-            blender_transport=blender_transport,
-        )
-
-        self.assertEqual(result.status, "failed_closed")
-        # output_dir must preexist; this guards accidental implicit directory creation.
-        self.assertFalse(result.real_browser_smoke_entry_called)
-
-        run_dir = root / "run2"
+        run_dir = root / "run"
         run_dir.mkdir()
         result = run_real_runtime_smoke_execution_batch(
             output_dir=run_dir,
