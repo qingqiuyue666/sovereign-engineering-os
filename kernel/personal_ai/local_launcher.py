@@ -36,6 +36,7 @@ from kernel.personal_ai.adapters.xlsx_output_writer import plan_xlsx_output
 from kernel.personal_ai.adapters.xlsx_readonly_runtime import inspect_xlsx_readonly
 from kernel.personal_ai.io_utils import write_json_atomically
 from kernel.personal_ai.markdown_utils import write_markdown_atomically
+from kernel.personal_ai.product_health_check import write_product_health_check
 from kernel.personal_ai.runtime_delivery_package import validate_runtime_delivery_package
 from kernel.personal_ai.task_graph import run_local_task_graph_fixture
 
@@ -649,58 +650,17 @@ def run_runtime_delivery_validation_launcher(
 
 def run_product_health_check_launcher(output_dir: Path) -> LauncherWorkflowResult:
     output_path = _validate_output_dir(output_dir)
-    summary_path = output_path / _SUMMARY_FILE
-    health_path = output_path / _PRODUCT_HEALTH_FILE
-    _require_no_overwrite(summary_path)
-    _require_no_overwrite(health_path)
-    health = {
-        "health_type": "personal_ai_execution_os_product_health_v1",
-        "complete": True,
-        "authority": "non_authority",
-        "runtime_activation_performed": False,
-        "launcher_workflows": [
-            "local_office_workflow",
-            "model_fixture_workflow",
-            "model_provider_dry_run_workflow",
-            "browser_fixture_workflow",
-            "browser_runtime_dry_run_workflow",
-            "comfyui_dry_run_workflow",
-            "blender_dry_run_workflow",
-            "creative_handoff_workflow",
-            "task_graph_workflow",
-            "runtime_delivery_validation_workflow",
-        ],
-        "deferred_real_runtimes": [
-            "live_model_provider",
-            "external_browser",
-            "comfyui_endpoint",
-            "blender_runtime",
-            "creative_external_tool",
-        ],
-        "network_runtime_allowed_by_default": False,
-        "subprocess_runtime_allowed_by_default": False,
-        "browser_runtime_allowed_by_default": False,
-        "model_api_runtime_allowed_by_default": False,
-        "creative_runtime_allowed_by_default": False,
-        "required_human_approval": True,
-    }
-    write_json_atomically(health_path, health)
-    _write_summary(
-        summary_path,
-        title="Product Health Check",
-        lines=[
-            "Status: complete",
-            "Runtime activation performed: false",
-            "Real runtimes remain deferred by default",
-            "Next action: human review of product health report",
-        ],
+    result = write_product_health_check(
+        output_path,
+        report_file_name=_PRODUCT_HEALTH_FILE,
+        summary_file_name=_SUMMARY_FILE,
     )
     return LauncherWorkflowResult(
         workflow="product_health_check_workflow",
         output_dir=output_path,
-        complete=True,
-        payload={"product_health_report_path": health_path.as_posix()},
-        summary_path=summary_path,
+        complete=result.complete,
+        payload={"product_health_report_path": result.product_health_report_path.as_posix()},
+        summary_path=result.product_health_summary_path,
         required_human_approval=True,
     )
 
