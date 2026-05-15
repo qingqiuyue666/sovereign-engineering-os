@@ -35,6 +35,9 @@ _KNOWN_RUNTIME_ARTIFACTS = (
     ("blender_output_manifest", "blender_output_manifest.json"),
     ("blender_preview_evidence", "blender_preview_evidence.json"),
     ("blender_failure_bundle", "blender_failure_bundle.json"),
+    ("task_graph_execution_manifest", "task_graph_execution_manifest.json"),
+    ("task_graph_replay_manifest", "task_graph_replay_manifest.json"),
+    ("task_graph_failure_bundle", "task_graph_failure_bundle.json"),
 )
 
 _ARTIFACT_POLICIES = {
@@ -54,6 +57,9 @@ _ARTIFACT_POLICIES = {
     "blender_output_manifest": ("metadata_only", "medium"),
     "blender_preview_evidence": ("metadata_only", "medium"),
     "blender_failure_bundle": ("metadata_only", "medium"),
+    "task_graph_execution_manifest": ("metadata_only", "medium"),
+    "task_graph_replay_manifest": ("metadata_only", "medium"),
+    "task_graph_failure_bundle": ("metadata_only", "medium"),
     "generated_output_xlsx": ("derived_data", "medium"),
 }
 
