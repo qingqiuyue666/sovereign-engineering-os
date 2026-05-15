@@ -14,6 +14,7 @@ Current checkpoint:
   - usage guide: `docs/usage/personal_ai_execution_os_product_usage_v1.md`
   - roadmap: `docs/roadmap/personal_ai_execution_os_post_completion_roadmap_v1.md`
   - product surfaces: office/data runtime, model runtime boundary, browser runtime boundary, ComfyUI runtime boundary, Blender runtime boundary, creative handoff, unified task graph, local launcher, product health, and final E2E battery
+  - product health scope: static structural report only; it does not execute full launcher workflows, and full runtime correctness is supported by tests plus human review
   - real runtime posture: live model providers, real browsers, Playwright/Selenium, ComfyUI endpoints, Blender, creative software, unrestricted network, and arbitrary subprocess execution remain disabled by default and require future explicit admission
   - runtime authority: still not introduced
   - input mutation and existing output overwrite: still forbidden

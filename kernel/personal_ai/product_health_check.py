@@ -20,18 +20,34 @@ __all__ = [
 
 _REPORT_FILE = "product_health_report.json"
 _SUMMARY_FILE = "product_health_summary.md"
-_LAUNCHER_WORKFLOWS = (
-    "local_office_workflow",
-    "model_fixture_workflow",
-    "model_provider_dry_run_workflow",
-    "browser_fixture_workflow",
-    "browser_runtime_dry_run_workflow",
-    "comfyui_dry_run_workflow",
-    "blender_dry_run_workflow",
-    "creative_handoff_workflow",
-    "task_graph_workflow",
-    "runtime_delivery_validation_workflow",
-    "product_health_check_workflow",
+_LAUNCHER_WORKFLOW_CALLABLES = (
+    ("local_office_workflow", "run_local_office_launcher"),
+    ("model_fixture_workflow", "run_model_fixture_launcher"),
+    ("model_provider_dry_run_workflow", "run_model_provider_dry_run_launcher"),
+    ("browser_fixture_workflow", "run_browser_fixture_launcher"),
+    ("browser_runtime_dry_run_workflow", "run_browser_runtime_dry_run_launcher"),
+    ("comfyui_dry_run_workflow", "run_comfyui_dry_run_launcher"),
+    ("blender_dry_run_workflow", "run_blender_dry_run_launcher"),
+    ("creative_handoff_workflow", "run_creative_handoff_launcher"),
+    ("task_graph_workflow", "run_task_graph_launcher"),
+    ("runtime_delivery_validation_workflow", "run_runtime_delivery_validation_launcher"),
+    ("product_health_check_workflow", "run_product_health_check_launcher"),
+)
+_LAUNCHER_WORKFLOWS = tuple(
+    workflow for workflow, _callable_name in _LAUNCHER_WORKFLOW_CALLABLES
+)
+_REQUIRED_CLI_SUBCOMMANDS = (
+    "launch-office-workflow",
+    "launch-model-fixture",
+    "launch-model-provider-dry-run",
+    "launch-browser-fixture",
+    "launch-browser-dry-run",
+    "launch-comfyui-dry-run",
+    "launch-blender-dry-run",
+    "launch-creative-handoff",
+    "launch-task-graph",
+    "launch-runtime-delivery-validation",
+    "launch-product-health-check",
 )
 _CORE_DOCS = (
     "README.md",
@@ -69,6 +85,7 @@ def build_product_health_report(repo_root: Path | None = None) -> dict[str, obje
     runtime_defaults = _runtime_admission_defaults()
     docs = _docs_state(root)
     tests = _tests_state(root)
+    launcher_static_checks = _launcher_static_state(root)
     adapter_registry_valid = all(
         not entry["validation_failures"] for entry in adapter_entries
     )
@@ -76,22 +93,36 @@ def build_product_health_report(repo_root: Path | None = None) -> dict[str, obje
         not runtime_defaults[runtime_class]["activation_allowed_by_default"]
         for runtime_class in _REQUIRED_RUNTIME_CLASSES
     )
-    launcher_workflows_complete = all(_LAUNCHER_WORKFLOWS)
+    launcher_workflows_complete = bool(
+        launcher_static_checks["launcher_workflows_declared_complete"]
+    )
+    cli_subcommands_complete = bool(
+        launcher_static_checks["required_cli_subcommands_declared_complete"]
+    )
     core_docs_present = all(docs["core_docs"].values())
     tests_metadata_available = tests["personal_ai_test_files_count"] > 0
-    complete = all(
+    structural_complete = all(
         (
             dependencies["openpyxl"]["available"],
             adapter_registry_valid,
             runtime_defaults_fail_closed,
             launcher_workflows_complete,
+            cli_subcommands_complete,
             core_docs_present,
             tests_metadata_available,
         )
     )
+    runtime_workflow_smoke_verified = False
+    final_product_health_complete = (
+        structural_complete and runtime_workflow_smoke_verified
+    )
     return {
         "health_type": "personal_ai_execution_os_product_health_v1",
-        "complete": complete,
+        "complete": structural_complete,
+        "structural_complete": structural_complete,
+        "runtime_workflow_smoke_verified": runtime_workflow_smoke_verified,
+        "final_product_health_complete": final_product_health_complete,
+        "completion_scope": "static_structural_health_only",
         "authority": "non_authority",
         "repo_root": root.as_posix(),
         "dependencies": dependencies,
@@ -101,9 +132,15 @@ def build_product_health_report(repo_root: Path | None = None) -> dict[str, obje
         "runtime_admission_defaults_fail_closed": runtime_defaults_fail_closed,
         "runtime_admission_defaults": runtime_defaults,
         "runtime_activation_performed": False,
+        "does_not_execute_launcher_workflows": True,
+        "does_not_execute_real_runtime": True,
+        "human_review_required_before_final_product_claim": True,
         "deferred_real_runtimes": list(_REQUIRED_RUNTIME_CLASSES),
         "launcher_workflows": list(_LAUNCHER_WORKFLOWS),
         "launcher_workflows_complete": launcher_workflows_complete,
+        "required_cli_subcommands": list(_REQUIRED_CLI_SUBCOMMANDS),
+        "cli_subcommands_complete": cli_subcommands_complete,
+        "launcher_static_checks": launcher_static_checks,
         "docs": docs,
         "tests": tests,
         "network_runtime_allowed_by_default": False,
@@ -204,14 +241,74 @@ def _tests_state(root: Path) -> dict[str, object]:
     }
 
 
+def _launcher_static_state(root: Path) -> dict[str, object]:
+    launcher_path = root / "kernel" / "personal_ai" / "local_launcher.py"
+    cli_path = root / "kernel" / "personal_ai" / "local_mvp_cli.py"
+    launcher_text = _read_text_if_present(launcher_path)
+    cli_text = _read_text_if_present(cli_path)
+    workflow_names_declared = {
+        workflow: workflow in launcher_text
+        for workflow in _LAUNCHER_WORKFLOWS
+    }
+    workflow_callables_declared = {
+        workflow: callable_name in launcher_text
+        for workflow, callable_name in _LAUNCHER_WORKFLOW_CALLABLES
+    }
+    launcher_workflows_declared = {
+        workflow: (
+            workflow_names_declared[workflow]
+            and workflow_callables_declared[workflow]
+        )
+        for workflow in _LAUNCHER_WORKFLOWS
+    }
+    cli_subcommands_declared = {
+        subcommand: '"' + subcommand + '"' in cli_text
+        for subcommand in _REQUIRED_CLI_SUBCOMMANDS
+    }
+    return {
+        "launcher_source_path": launcher_path.as_posix(),
+        "cli_source_path": cli_path.as_posix(),
+        "launcher_source_present": bool(launcher_text),
+        "cli_source_present": bool(cli_text),
+        "workflow_names_declared": workflow_names_declared,
+        "workflow_callables_declared": workflow_callables_declared,
+        "launcher_workflows_declared": launcher_workflows_declared,
+        "launcher_workflows_declared_complete": all(
+            launcher_workflows_declared.values()
+        ),
+        "required_cli_subcommands_declared": cli_subcommands_declared,
+        "required_cli_subcommands_declared_complete": all(
+            cli_subcommands_declared.values()
+        ),
+        "workflows_executed": False,
+    }
+
+
+def _read_text_if_present(path: Path) -> str:
+    if not path.is_file():
+        return ""
+    return path.read_text(encoding="utf-8")
+
+
 def _render_summary(report: dict[str, object]) -> str:
     docs = report["docs"]
     tests = report["tests"]
     lines = [
         "# Product Health Check",
         "",
-        "Status: complete" if report["complete"] else "Status: incomplete",
+        "Status: static structural complete"
+        if report["complete"]
+        else "Status: static structural incomplete",
+        "Completion scope: " + str(report["completion_scope"]),
+        "Structural complete: "
+        + str(report["structural_complete"]).lower(),
+        "Runtime workflow smoke verified: "
+        + str(report["runtime_workflow_smoke_verified"]).lower(),
+        "Final product health complete: "
+        + str(report["final_product_health_complete"]).lower(),
+        "Launcher workflows executed: false",
         "Runtime activation performed: false",
+        "Real runtime executed: false",
         "Adapter registry valid: "
         + str(report["adapter_registry_valid"]).lower(),
         "Runtime defaults fail closed: "
@@ -224,7 +321,8 @@ def _render_summary(report: dict[str, object]) -> str:
         + str(tests["personal_ai_test_files_count"]),
         "Next action: human review of product health report",
         "",
-        "Boundary: local health inspection only; human approval required.",
+        "Boundary: static structural health inspection only; full runtime "
+        "correctness is supported by tests, not this report alone.",
     ]
     return "\n".join(lines)
 

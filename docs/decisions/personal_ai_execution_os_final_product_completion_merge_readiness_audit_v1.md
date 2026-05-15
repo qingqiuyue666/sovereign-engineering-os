@@ -39,6 +39,11 @@ Review these surfaces first:
   `kernel/personal_ai/local_mvp_cli.py`
 - product health:
   `kernel/personal_ai/product_health_check.py`
+  Product health is a static structural report only. It checks dependency,
+  adapter, fail-closed default, docs, tests metadata, launcher callable, and
+  CLI subcommand presence. It does not execute launcher workflows, runtime
+  admission denial paths, task graph dry-run paths, delivery validation
+  fixtures, or any real runtime.
 - final battery:
   `tests/personal_ai/test_final_product_e2e_battery.py`
 
@@ -58,6 +63,9 @@ Review these surfaces first:
 - Unrestricted creative runtime: not introduced.
 - Approval/provenance/manifest posture: explicit approval, hash binding,
   manifests, evidence, replay, and quarantine remain the default posture.
+- Product health wording: `complete` means static structural completion for
+  the health report scope. Full runtime correctness is supported by tests and
+  human review before any final product claim.
 
 ## Merge Preconditions
 

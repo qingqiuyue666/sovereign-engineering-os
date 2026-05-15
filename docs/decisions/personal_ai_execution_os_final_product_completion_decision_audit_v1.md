@@ -55,8 +55,13 @@ external automation.
     human-readable summaries.
 - Product Health:
   - dependency state, adapter health, runtime admission defaults, deferred
-    runtimes, launcher workflows, docs state, and Personal AI test metadata are
-    reported.
+    runtimes, static launcher/CLI declarations, docs state, and Personal AI
+    test metadata are reported.
+  - product health is a static structural health report. It does not execute
+    full launcher workflows, runtime admission denial paths, task graph dry-run
+    paths, or delivery validation fixtures. Full runtime correctness is
+    supported by the test suite and human review, not by
+    `product_health_check.py` alone.
 - End-to-End Product Battery:
   - realistic office, malformed workbook, redaction, approved output, model
     schema failure, browser allow/deny, ComfyUI fixture, Blender fixture,
@@ -96,6 +101,8 @@ unless explicitly configured and admitted.
   external activation remains fail-closed.
 - Product health reports final freeze docs as present only after this final
   documentation package lands.
+- Product health reports static structural completion only; workflow smoke
+  verification remains false unless a separate explicit smoke runner is added.
 - Optional live smoke paths remain disabled by default and are not part of
   normal tests.
 

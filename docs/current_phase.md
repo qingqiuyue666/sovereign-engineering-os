@@ -20,7 +20,7 @@ Current checkpoint:
   - unified task graph: completed with runtime admission references, dry-run planning, replay manifest, delivery integration, and quarantine
   - local product launcher: completed for office, model, browser, ComfyUI, Blender, creative handoff, task graph, delivery validation, and product health workflows
   - final product E2E battery: completed
-  - product health check: completed
+  - product health check: completed as a static structural health report only; it does not execute full launcher workflows, and full runtime correctness remains supported by tests plus human review
   - runtime authority: not introduced
   - live model provider runtime calls: not introduced
   - real browser / Playwright / Selenium runtime calls: not introduced
