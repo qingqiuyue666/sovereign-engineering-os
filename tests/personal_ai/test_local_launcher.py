@@ -82,6 +82,49 @@ class LocalLauncherTests(unittest.TestCase):
                 "policy": {"timeout_seconds": 5},
             },
         )
+        browser_dry_run_actions_path = input_dir / "browser_dry_run_actions.json"
+        write_json_atomically(
+            browser_dry_run_actions_path,
+            {
+                "actions": [
+                    {"action": "navigate"},
+                    {"action": "inspect_title"},
+                    {"action": "capture_screenshot"},
+                ]
+            },
+        )
+        comfyui_workflow_path = input_dir / "comfyui_workflow.json"
+        comfyui_asset_path = input_dir / "comfyui_asset.png"
+        comfyui_asset_path.write_bytes(b"COMFYUI_LAUNCHER_ASSET")
+        write_json_atomically(
+            comfyui_workflow_path,
+            {
+                "nodes": [
+                    {
+                        "id": "load",
+                        "type": "LoadImage",
+                        "inputs": {"image": "comfyui_asset.png"},
+                    },
+                    {
+                        "id": "preview",
+                        "type": "PreviewImage",
+                        "inputs": {"source": "load"},
+                    },
+                ]
+            },
+        )
+        blender_scene_path = input_dir / "scene.blend"
+        blender_scene_path.write_bytes(b"BLENDER_LAUNCHER_SCENE")
+        blender_plan_path = input_dir / "blender_plan.json"
+        write_json_atomically(
+            blender_plan_path,
+            {
+                "operations": [
+                    {"operation": "add_camera", "parameters": {"name": "Camera"}},
+                    {"operation": "render_preview", "parameters": {"samples": 16}},
+                ]
+            },
+        )
         write_json_atomically(
             delivery_source_dir / "model_inference_artifact.json",
             {
@@ -102,6 +145,11 @@ class LocalLauncherTests(unittest.TestCase):
             "model_dir": model_dir,
             "fixture_path": fixture_path,
             "actions_path": actions_path,
+            "browser_dry_run_actions_path": browser_dry_run_actions_path,
+            "comfyui_workflow_path": comfyui_workflow_path,
+            "comfyui_asset_path": comfyui_asset_path,
+            "blender_scene_path": blender_scene_path,
+            "blender_plan_path": blender_plan_path,
             "browser_dir": browser_dir,
             "package": package,
             "delivery_validation_dir": delivery_validation_dir,
@@ -196,6 +244,161 @@ class LocalLauncherTests(unittest.TestCase):
         self.assertFalse(payload["raw_value_leakage_detected"])
         self.assertTrue(Path(payload["runtime_delivery_validation_path"]).exists())
         self.assertTrue(Path(payload["human_summary_path"]).exists())
+
+    def test_launch_product_runtime_dry_run_workflows(self):
+        workspace = self.build_workspace()
+        root = workspace["root"]
+        model_provider_dir = root / "model-provider-dry-run"
+        browser_dry_run_dir = root / "browser-dry-run"
+        comfyui_dir = root / "comfyui-dry-run"
+        blender_dir = root / "blender-dry-run"
+        handoff_dir = root / "creative-handoff"
+        health_dir = root / "product-health"
+        for path in (
+            model_provider_dir,
+            browser_dry_run_dir,
+            comfyui_dir,
+            blender_dir,
+            handoff_dir,
+            health_dir,
+        ):
+            path.mkdir()
+
+        model_code, model_payload = self.run_cli(
+            [
+                "launch-model-provider-dry-run",
+                "--input-artifact-path",
+                workspace["model_input_path"].as_posix(),
+                "--output-dir",
+                model_provider_dir.as_posix(),
+                "--schema-name",
+                "job_route_classification_v1",
+            ]
+        )
+        browser_code, browser_payload = self.run_cli(
+            [
+                "launch-browser-dry-run",
+                "--actions-path",
+                workspace["browser_dry_run_actions_path"].as_posix(),
+                "--output-dir",
+                browser_dry_run_dir.as_posix(),
+                "--target-url",
+                "http://127.0.0.1",
+            ]
+        )
+        comfyui_code, comfyui_payload = self.run_cli(
+            [
+                "launch-comfyui-dry-run",
+                "--workflow-path",
+                workspace["comfyui_workflow_path"].as_posix(),
+                "--input-asset",
+                workspace["comfyui_asset_path"].as_posix(),
+                "--output-dir",
+                comfyui_dir.as_posix(),
+            ]
+        )
+        blender_code, blender_payload = self.run_cli(
+            [
+                "launch-blender-dry-run",
+                "--scene-path",
+                workspace["blender_scene_path"].as_posix(),
+                "--operation-plan-path",
+                workspace["blender_plan_path"].as_posix(),
+                "--output-dir",
+                blender_dir.as_posix(),
+            ]
+        )
+        handoff_code, handoff_payload = self.run_cli(
+            [
+                "launch-creative-handoff",
+                "--family",
+                "blender_python_mcp",
+                "--source-asset",
+                workspace["blender_scene_path"].as_posix(),
+                "--output-dir",
+                handoff_dir.as_posix(),
+                "--package-id",
+                "launcher-handoff",
+            ]
+        )
+        health_code, health_payload = self.run_cli(
+            [
+                "launch-product-health-check",
+                "--output-dir",
+                health_dir.as_posix(),
+            ]
+        )
+
+        self.assertEqual(model_code, 0)
+        self.assertEqual(browser_code, 0)
+        self.assertEqual(comfyui_code, 0)
+        self.assertEqual(blender_code, 0)
+        self.assertEqual(handoff_code, 0)
+        self.assertEqual(health_code, 0)
+        self.assertFalse(model_payload["live_model_provider_called"])
+        self.assertFalse(browser_payload["real_browser_called"])
+        self.assertFalse(comfyui_payload["real_comfyui_endpoint_called"])
+        self.assertFalse(blender_payload["real_blender_called"])
+        self.assertFalse(handoff_payload["external_tool_control_performed"])
+        self.assertTrue(Path(model_payload["model_provider_dry_run_plan_path"]).exists())
+        self.assertTrue(Path(browser_payload["browser_runtime_dry_run_plan_path"]).exists())
+        self.assertTrue(Path(comfyui_payload["comfyui_endpoint_dry_run_plan_path"]).exists())
+        self.assertTrue(Path(blender_payload["blender_runtime_dry_run_plan_path"]).exists())
+        self.assertTrue(Path(handoff_payload["creative_handoff_manifest_path"]).exists())
+        self.assertTrue(Path(health_payload["product_health_report_path"]).exists())
+
+    def test_launch_task_graph_workflow(self):
+        workspace = self.build_workspace()
+        graph_dir = workspace["root"] / "launcher-task-graph"
+        graph_dir.mkdir()
+        graph_path = workspace["root"] / "launcher_task_graph.json"
+        write_json_atomically(
+            graph_path,
+            {
+                "graph_type": "personal_ai_execution_os_unified_task_graph_v1",
+                "graph_id": "launcher-graph",
+                "authority": "non_authority",
+                "required_human_approval": True,
+                "nodes": [
+                    {
+                        "node_id": "model_contract",
+                        "adapter_id": "mock_model_typed_schema_runtime",
+                        "capability": "classify_local_job_package",
+                        "depends_on": [],
+                        "approval_checkpoint_required": True,
+                        "inputs": {},
+                    },
+                    {
+                        "node_id": "delivery_validation",
+                        "adapter_id": "runtime_delivery_package",
+                        "capability": "validate_runtime_delivery",
+                        "depends_on": ["model_contract"],
+                        "approval_checkpoint_required": True,
+                        "inputs": {
+                            "package_dir": workspace["package"].package_dir.as_posix(),
+                            "output_path": (
+                                graph_dir / "runtime_delivery_validation.json"
+                            ).as_posix(),
+                        },
+                    },
+                ],
+            },
+        )
+
+        exit_code, payload = self.run_cli(
+            [
+                "launch-task-graph",
+                "--graph-path",
+                graph_path.as_posix(),
+                "--output-dir",
+                graph_dir.as_posix(),
+            ]
+        )
+
+        self.assertEqual(exit_code, 0)
+        self.assertTrue(payload["complete"])
+        self.assertEqual(payload["node_order"], ["model_contract", "delivery_validation"])
+        self.assertTrue(Path(payload["task_graph_execution_manifest_path"]).exists())
 
     def test_launcher_refuses_summary_overwrite(self):
         workspace = self.build_workspace()

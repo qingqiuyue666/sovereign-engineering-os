@@ -442,6 +442,26 @@ class LocalMVPCLIV2RuntimeTests(unittest.TestCase):
             [entry["adapter_id"] for entry in registry_payload["entries"]],
         )
 
+    def test_product_health_launcher_cli_command(self):
+        root, _, _, _, _, _, _ = self.build_workspace()
+        health_dir = root / "product-health"
+        health_dir.mkdir()
+
+        exit_code, payload = self.run_cli(
+            [
+                "launch-product-health-check",
+                "--output-dir",
+                health_dir.as_posix(),
+            ]
+        )
+        report = read_json(payload["product_health_report_path"])
+
+        self.assertEqual(exit_code, 0)
+        self.assertTrue(payload["complete"])
+        self.assertIn("product_health_report_path", payload)
+        self.assertFalse(report["runtime_activation_performed"])
+        self.assertIn("model_provider_dry_run_workflow", report["launcher_workflows"])
+
     def test_validate_runtime_delivery_cli(self):
         root, input_dir, workbook_path, xlsx_dir, model_dir, browser_dir, package_root = self.build_workspace()
         self.run_cli(
