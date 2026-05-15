@@ -20,7 +20,7 @@ def read_json(path):
 
 
 class RuntimeDeliveryPackageTests(unittest.TestCase):
-    def build_workspace(self):
+    def build_workspace(self, *, workbook_cell_value="metadata only"):
         temp_dir = tempfile.TemporaryDirectory()
         self.addCleanup(temp_dir.cleanup)
         root = Path(temp_dir.name)
@@ -32,7 +32,7 @@ class RuntimeDeliveryPackageTests(unittest.TestCase):
         package_root.mkdir()
         workbook_path = runtime_dir / "derived_xlsx_summary.xlsx"
         workbook = Workbook()
-        workbook.active["A1"] = "metadata only"
+        workbook.active["A1"] = workbook_cell_value
         workbook.save(workbook_path)
 
         write_json_atomically(
@@ -173,6 +173,52 @@ class RuntimeDeliveryPackageTests(unittest.TestCase):
         dynamic_sentinel = "secret_" + uuid.uuid4().hex
         write_markdown_atomically(result.package_dir / "notes.md", dynamic_sentinel)
         rerun_path = package_root / "dynamic_validation.json"
+
+        validation = validate_runtime_delivery_package(
+            result.package_dir,
+            rerun_path,
+            raw_sentinel_values=[dynamic_sentinel],
+        )
+        validation_payload = read_json(rerun_path)
+
+        self.assertFalse(validation.complete)
+        self.assertTrue(validation.raw_value_leakage_detected)
+        self.assertTrue(validation_payload["raw_value_leakage_detected"])
+
+    def test_validation_scans_safe_generated_xlsx_without_false_positive(self):
+        _, runtime_dir, package_root, _ = self.build_workspace()
+        result = build_runtime_delivery_package(
+            runtime_dir,
+            package_root,
+            package_id="runtime-delivery-001",
+        )
+        dynamic_sentinel = "xlsx_safe_scan_" + uuid.uuid4().hex
+        rerun_path = package_root / "safe_xlsx_validation.json"
+
+        validation = validate_runtime_delivery_package(
+            result.package_dir,
+            rerun_path,
+            raw_sentinel_values=[dynamic_sentinel],
+        )
+        validation_payload = read_json(rerun_path)
+
+        self.assertTrue(validation.complete)
+        self.assertFalse(validation.raw_value_leakage_detected)
+        self.assertFalse(validation_payload["raw_value_leakage_detected"])
+
+    def test_validation_detects_dynamic_sentinel_inside_generated_xlsx(self):
+        _, runtime_dir, package_root, _ = self.build_workspace()
+        result = build_runtime_delivery_package(
+            runtime_dir,
+            package_root,
+            package_id="runtime-delivery-001",
+        )
+        dynamic_sentinel = "xlsx_leak_" + uuid.uuid4().hex
+        leaking_workbook_path = result.package_dir / "derived_xlsx_summary.xlsx"
+        workbook = Workbook()
+        workbook.active["A1"] = dynamic_sentinel
+        workbook.save(leaking_workbook_path)
+        rerun_path = package_root / "leaking_xlsx_validation.json"
 
         validation = validate_runtime_delivery_package(
             result.package_dir,

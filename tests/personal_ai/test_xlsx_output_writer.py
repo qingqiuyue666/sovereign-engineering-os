@@ -1,3 +1,4 @@
+import hashlib
 import json
 import tempfile
 import unittest
@@ -19,6 +20,31 @@ from kernel.personal_ai.hash_utils import sha256_file
 
 def read_json(path):
     return json.loads(Path(path).read_text(encoding="utf-8"))
+
+
+def workbook_text_payload(workbook_path):
+    loaded = load_workbook(workbook_path, read_only=True, data_only=False)
+    try:
+        values = []
+        properties = loaded.properties
+        for value in (
+            properties.creator,
+            properties.lastModifiedBy,
+            properties.title,
+            properties.subject,
+            properties.description,
+        ):
+            if value is not None:
+                values.append(str(value))
+        for sheet in loaded.worksheets:
+            values.append(sheet.title)
+            for row in sheet.iter_rows(values_only=True):
+                for value in row:
+                    if value is not None:
+                        values.append(str(value))
+        return "\n".join(values)
+    finally:
+        loaded.close()
 
 
 class XlsxOutputWriterTests(unittest.TestCase):
@@ -333,6 +359,9 @@ class XlsxOutputWriterTests(unittest.TestCase):
     def test_dynamic_sentinel_values_do_not_leak_to_json_or_markdown_artifacts(self):
         root, input_dir, workbook_path, _, output_dir, _, _ = self.build_workspace()
         secret_sheet = "S" + uuid.uuid4().hex[:20]
+        secret_sheet_sha256 = hashlib.sha256(
+            secret_sheet.encode("utf-8")
+        ).hexdigest()
         secret_header = "header_" + uuid.uuid4().hex
         secret_cell = "cell_" + uuid.uuid4().hex
         workbook = Workbook()
@@ -372,16 +401,28 @@ class XlsxOutputWriterTests(unittest.TestCase):
             plan_dir,
         )
 
-        for path in sorted(plan_dir.iterdir()) + [approval.approval_path]:
+        forbidden_values = (
+            secret_sheet,
+            secret_sheet_sha256,
+            secret_header,
+            secret_cell,
+            workbook_path.as_posix(),
+            input_dir.as_posix(),
+        )
+        workbook_payload = workbook_text_payload(result.output_workbook_path)
+        for sentinel in forbidden_values:
+            self.assertNotIn(sentinel, workbook_payload)
+
+        audit_paths = (
+            sorted(inspection_dir.iterdir())
+            + sorted(plan_dir.iterdir())
+            + [approval.approval_path]
+        )
+        for path in audit_paths:
             if path.suffix.lower() not in (".json", ".md"):
                 continue
             text = path.read_text(encoding="utf-8")
-            for sentinel in (
-                secret_sheet,
-                secret_header,
-                secret_cell,
-                input_dir.as_posix(),
-            ):
+            for sentinel in forbidden_values:
                 self.assertNotIn(sentinel, text)
         self.assertTrue(result.complete)
 

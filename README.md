@@ -16,6 +16,8 @@ Current checkpoint:
   - deferred items: `docs/decisions/full_landing_autonomous_deferred_items.md`
   - roadmap: `docs/roadmap/personal_ai_execution_os_next_roadmap_v1.md`
   - completed landing surfaces: hardened XLSX runtime, hardened runtime delivery package, typed-schema model adapter foundation, controlled browser fixture, ComfyUI fixture, Blender fixture, creative software policy layer, unified task graph, local launcher, and end-to-end task battery
+  - redacted sheet-name mode: emits no raw sheet names or stable sheet-name hashes
+  - delivery validation: scans generated XLSX artifacts for dynamic sentinel leakage
   - local launcher usage: `docs/usage/personal_ai_execution_os_local_launcher.md`
   - real runtime posture: live model providers, real browsers, Playwright/Selenium, ComfyUI endpoints, Blender, creative software, OS automation, unrestricted network, and arbitrary subprocess execution remain disabled by default and deferred
   - runtime authority: still not introduced

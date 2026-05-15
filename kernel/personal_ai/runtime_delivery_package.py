@@ -5,6 +5,9 @@ from pathlib import Path
 import json
 import shutil
 
+from kernel.personal_ai.adapters.xlsx_readonly_runtime import (
+    xlsx_artifact_contains_sentinel,
+)
 from kernel.personal_ai.hash_utils import sha256_canonical_json, sha256_file
 from kernel.personal_ai.io_utils import write_json_atomically
 from kernel.personal_ai.job_package import validate_job_id
@@ -81,6 +84,9 @@ _DEFAULT_FORBIDDEN_LEAKAGE_TOKENS = (
     "RAW_HEADER_SECRET",
     "RAW_CELL_SECRET",
 )
+_TEXT_LEAKAGE_SUFFIXES = (".csv", ".html", ".json", ".md", ".tsv", ".txt")
+_XLSX_LEAKAGE_MAX_ROWS = 200
+_XLSX_LEAKAGE_MAX_COLUMNS = 50
 
 
 @dataclass(frozen=True)
@@ -489,9 +495,26 @@ def _raw_value_leakage_detected(package_dir, raw_sentinel_values):
     if not sentinels:
         return False
     for path in sorted(Path(package_dir).iterdir()):
-        if path.suffix.lower() not in (".csv", ".html", ".json", ".md", ".tsv", ".txt"):
-            continue
-        text = path.read_text(encoding="utf-8")
-        if any(sentinel in text for sentinel in sentinels):
+        suffix = path.suffix.lower()
+        if suffix in _TEXT_LEAKAGE_SUFFIXES and _text_artifact_leaks(path, sentinels):
+            return True
+        if suffix == ".xlsx" and _xlsx_artifact_leaks(path, sentinels):
             return True
     return False
+
+
+def _text_artifact_leaks(path, sentinels):
+    try:
+        text = Path(path).read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        return True
+    return any(sentinel in text for sentinel in sentinels)
+
+
+def _xlsx_artifact_leaks(path, sentinels):
+    return xlsx_artifact_contains_sentinel(
+        path,
+        sentinels,
+        max_rows=_XLSX_LEAKAGE_MAX_ROWS,
+        max_columns=_XLSX_LEAKAGE_MAX_COLUMNS,
+    )

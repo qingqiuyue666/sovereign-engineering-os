@@ -20,6 +20,7 @@ from kernel.personal_ai.markdown_utils import write_markdown_atomically
 __all__ = [
     "XlsxReadonlyInspectionResult",
     "inspect_xlsx_readonly",
+    "xlsx_artifact_contains_sentinel",
 ]
 
 _INSPECTION_FILE = "xlsx_inspection.json"
@@ -204,14 +205,12 @@ def _inspect_sheet(sheet, limits, warnings, *, sheet_index, redact_sheet_names):
     safe_sheet_name = (
         _redacted_sheet_label(sheet_index) if redact_sheet_names else raw_sheet_name
     )
-    return {
+    sheet_record = {
         "sheet_name": safe_sheet_name,
         "sheet_index": sheet_index,
         "sheet_name_redacted": redact_sheet_names,
         "raw_sheet_name_included": not redact_sheet_names,
-        "sheet_name_sha256": hashlib.sha256(
-            raw_sheet_name.encode("utf-8")
-        ).hexdigest(),
+        "sheet_name_hash_included": not redact_sheet_names,
         "max_row": int(sheet.max_row or 0),
         "max_column": int(sheet.max_column or 0),
         "merged_cell_range_count": merged_count,
@@ -222,6 +221,11 @@ def _inspect_sheet(sheet, limits, warnings, *, sheet_index, redact_sheet_names):
         "style_scan_truncated": style_stats["style_scan_truncated"],
         "header_preview": _header_preview(sheet, limits),
     }
+    if not redact_sheet_names:
+        sheet_record["sheet_name_sha256"] = hashlib.sha256(
+            raw_sheet_name.encode("utf-8")
+        ).hexdigest()
+    return sheet_record
 
 
 def _redacted_sheet_label(sheet_index):
@@ -317,6 +321,40 @@ def _cell_has_formula(cell):
         return True
     value = getattr(cell, "value", None)
     return isinstance(value, str) and value.startswith("=")
+
+
+def xlsx_artifact_contains_sentinel(
+    workbook_path,
+    sentinels,
+    *,
+    max_rows,
+    max_columns,
+):
+    try:
+        workbook = load_workbook(
+            Path(workbook_path),
+            read_only=True,
+            data_only=False,
+            keep_links=False,
+        )
+    except (InvalidFileException, BadZipFile, EOFError, KeyError, OSError):
+        return True
+    try:
+        for worksheet in workbook.worksheets:
+            for row in worksheet.iter_rows(
+                max_row=max_rows,
+                max_col=max_columns,
+                values_only=True,
+            ):
+                for value in row:
+                    if value is None:
+                        continue
+                    value_text = str(value)
+                    if any(sentinel in value_text for sentinel in sentinels):
+                        return True
+    finally:
+        workbook.close()
+    return False
 
 
 def _safe_value_type(value):

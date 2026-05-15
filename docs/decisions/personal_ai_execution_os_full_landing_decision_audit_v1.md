@@ -43,6 +43,10 @@ arbitrary subprocess execution. Real runtimes remain deferred and recorded in
 - Existing output overwrite: forbidden.
 - Raw input, header, and cell leakage into JSON/Markdown audit artifacts:
   tested and forbidden.
+- Redacted sheet-name mode does not emit raw sheet names or stable sheet-name
+  hashes.
+- Runtime delivery validation scans generated XLSX artifacts for dynamic
+  sentinel leakage.
 - Network/API runtime: not admitted.
 - Subprocess runtime: not admitted.
 - Browser automation runtime: not admitted.

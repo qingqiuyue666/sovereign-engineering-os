@@ -15,6 +15,8 @@ Current checkpoint:
   - next roadmap: `docs/roadmap/personal_ai_execution_os_next_roadmap_v1.md`
   - XLSX runtime hardening: completed
   - runtime delivery hardening: completed
+  - redacted sheet-name mode: emits no raw sheet names or stable sheet-name hashes
+  - delivery validation: scans generated XLSX artifacts for dynamic sentinel leakage
   - model adapter foundation: completed with live providers disabled by default
   - browser runtime foundation: completed as local fixture only
   - ComfyUI runtime foundation: completed as local fixture only

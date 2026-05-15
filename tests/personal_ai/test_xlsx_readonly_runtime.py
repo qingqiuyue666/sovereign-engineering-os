@@ -1,3 +1,4 @@
+import hashlib
 import json
 import tempfile
 import unittest
@@ -16,6 +17,23 @@ from kernel.personal_ai.hash_utils import sha256_file
 
 def read_json(path):
     return json.loads(Path(path).read_text(encoding="utf-8"))
+
+
+def sheet_name_hash_fields(payload):
+    fields = []
+
+    def visit(value):
+        if isinstance(value, dict):
+            for key, nested_value in value.items():
+                if "sheet_name" in key and "hash" in key:
+                    fields.append((key, nested_value))
+                visit(nested_value)
+        elif isinstance(value, list):
+            for nested_value in value:
+                visit(nested_value)
+
+    visit(payload)
+    return fields
 
 
 class XlsxReadonlyRuntimeTests(unittest.TestCase):
@@ -112,6 +130,9 @@ class XlsxReadonlyRuntimeTests(unittest.TestCase):
     def test_redacts_sheet_names_and_input_path_when_requested(self):
         input_dir, workbook_path, output_dir = self.build_workspace()
         secret_sheet = "sheet_" + uuid.uuid4().hex[:20]
+        secret_sheet_sha256 = hashlib.sha256(
+            secret_sheet.encode("utf-8")
+        ).hexdigest()
         workbook = Workbook()
         workbook.active.title = secret_sheet
         workbook.active["A1"] = "safe"
@@ -131,6 +152,8 @@ class XlsxReadonlyRuntimeTests(unittest.TestCase):
         self.assertEqual(inspection["sheets"][0]["sheet_name"], "sheet_1")
         self.assertTrue(inspection["sheets"][0]["sheet_name_redacted"])
         self.assertFalse(inspection["sheets"][0]["raw_sheet_name_included"])
+        self.assertFalse(inspection["sheets"][0]["sheet_name_hash_included"])
+        self.assertNotIn("sheet_name_sha256", inspection["sheets"][0])
         self.assertEqual(inspection["input_workbook"]["path"], "[redacted-input-path]")
         self.assertEqual(
             inspection["input_workbook"]["file_name"], "[redacted-input-file-name]"
@@ -139,6 +162,14 @@ class XlsxReadonlyRuntimeTests(unittest.TestCase):
         self.assertTrue(inspection["redaction"]["input_path_redacted"])
         self.assertNotIn(secret_sheet, inspection_text)
         self.assertNotIn(secret_sheet, summary_text)
+        self.assertNotIn(secret_sheet_sha256, inspection_text)
+        self.assertNotIn(secret_sheet_sha256, summary_text)
+        self.assertNotIn("sheet_name_sha256", inspection_text)
+        self.assertNotIn("sheet_name_sha256", summary_text)
+        self.assertEqual(
+            sheet_name_hash_fields(inspection),
+            [("sheet_name_hash_included", False)],
+        )
         self.assertNotIn(input_dir.as_posix(), inspection_text)
         self.assertNotIn(input_dir.as_posix(), summary_text)
 

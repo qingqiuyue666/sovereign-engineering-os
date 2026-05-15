@@ -16,6 +16,10 @@ a review artifact only and does not authorize real runtime activation.
 - Local-first usability: ready for review.
 - XLSX runtime hardening: ready for review.
 - Runtime delivery package hardening: ready for review.
+- Redacted sheet-name mode does not emit raw sheet names or stable
+  sheet-name hashes.
+- Delivery validation scans generated XLSX artifacts for dynamic sentinel
+  leakage.
 - Typed-schema model adapter foundation: ready for review with mock provider
   admitted and live provider deferred.
 - Browser runtime foundation: ready for review as local HTML fixture runtime;
