@@ -19,6 +19,7 @@ REQUIRED_GATES = [
     "test-evidence-proof-contract",
     "test-evidence-proof-fixtures",
     "test-final-runtime-contracts",
+    "test-gated-provider-transport",
     "test-schemas",
     "test-tracer-bullet",
     "test-acceptance",
@@ -38,6 +39,7 @@ FORBIDDEN_FLAGS = (
     "production_autonomy_enabled",
     "raw_evidence_store_allowed",
 )
+EXPECTED_HEALTH = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-schemas test-tracer-bullet test-acceptance diff-check"
 
 
 class FinalRuntimeContractsTests(unittest.TestCase):
@@ -158,10 +160,10 @@ class FinalRuntimeContractsTests(unittest.TestCase):
 
     def test_post_run_health_rejects_missing_gate_result(self):
         data = self.valid_post_run_health()
-        data["gate_results"]["test-final-runtime-contracts"] = "missing"
+        data["gate_results"]["test-gated-provider-transport"] = "missing"
         result = validate_post_run_health(data)
         self.assertFalse(result.accepted)
-        self.assertIn("test-final-runtime-contracts_not_passed", result.failures)
+        self.assertIn("test-gated-provider-transport_not_passed", result.failures)
 
     def test_failure_link_rejects_wrong_policy_status(self):
         data = self.valid_failure_link()
@@ -197,8 +199,7 @@ class FinalRuntimeContractsTests(unittest.TestCase):
             "PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_final_runtime_contracts -v",
             text,
         )
-        expected = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-schemas test-tracer-bullet test-acceptance diff-check"
-        self.assertIn(expected, text)
+        self.assertIn(EXPECTED_HEALTH, text)
 
     def test_source_does_not_introduce_runtime_execution_surface(self):
         source = Path("kernel/runtime/final_runtime_contracts.py").read_text(encoding="utf-8")
