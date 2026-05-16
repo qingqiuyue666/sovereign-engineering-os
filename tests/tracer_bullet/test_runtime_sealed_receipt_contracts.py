@@ -56,7 +56,7 @@ class RuntimeSealedReceiptContractsTests(unittest.TestCase):
         payload["postcheck_result"] = "failed"
         result = validate_postcheck_receipt(payload)
         self.assertFalse(result.accepted)
-        self.assertIn("postcheck_result_invalid", result.failures)
+        self.assertIn("postcheck_result_not_passed", result.failures)
 
     def test_non_mapping_payload_raises(self):
         with self.assertRaises(RuntimeSealedReceiptContractViolation):
