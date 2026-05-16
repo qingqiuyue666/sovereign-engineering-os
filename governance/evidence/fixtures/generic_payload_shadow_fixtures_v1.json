@@ -7,6 +7,7 @@
       "fixture_id": "valid_policy_contract",
       "validator": "validate_generic_payload_shadow_policy",
       "expected_accepted": true,
+      "expected_category": "policy",
       "record": {
         "policy_type": "seos_generic_payload_shadow_v1",
         "status": "shadow_validation_only",
