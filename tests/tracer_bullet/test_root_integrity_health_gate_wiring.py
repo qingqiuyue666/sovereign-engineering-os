@@ -2,6 +2,9 @@ import unittest
 from pathlib import Path
 
 
+EXPECTED_HEALTH = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-schemas test-tracer-bullet test-acceptance diff-check"
+
+
 class RootIntegrityHealthGateWiringTests(unittest.TestCase):
     def read_makefile(self) -> str:
         path = Path("Makefile")
@@ -18,18 +21,19 @@ class RootIntegrityHealthGateWiringTests(unittest.TestCase):
 
     def test_health_runs_root_integrity_before_other_health_gates(self):
         text = self.read_makefile()
-        health_line = next(
-            line for line in text.splitlines() if line.startswith("health:")
-        )
-        expected = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-schemas test-tracer-bullet test-acceptance diff-check"
-        self.assertEqual(health_line, expected)
-        self.assertLess(health_line.index("test-root-integrity"), health_line.index("test-sealed-evidence-coverage"))
-        self.assertLess(health_line.index("test-sealed-evidence-coverage"), health_line.index("test-evidence-proof-contract"))
-        self.assertLess(health_line.index("test-evidence-proof-contract"), health_line.index("test-evidence-proof-fixtures"))
-        self.assertLess(health_line.index("test-evidence-proof-fixtures"), health_line.index("test-schemas"))
-        self.assertLess(health_line.index("test-schemas"), health_line.index("test-tracer-bullet"))
-        self.assertLess(health_line.index("test-tracer-bullet"), health_line.index("test-acceptance"))
-        self.assertLess(health_line.index("test-acceptance"), health_line.index("diff-check"))
+        health_line = next(line for line in text.splitlines() if line.startswith("health:"))
+        self.assertEqual(health_line, EXPECTED_HEALTH)
+        for earlier, later in (
+            ("test-root-integrity", "test-sealed-evidence-coverage"),
+            ("test-sealed-evidence-coverage", "test-evidence-proof-contract"),
+            ("test-evidence-proof-contract", "test-evidence-proof-fixtures"),
+            ("test-evidence-proof-fixtures", "test-final-runtime-contracts"),
+            ("test-final-runtime-contracts", "test-schemas"),
+            ("test-schemas", "test-tracer-bullet"),
+            ("test-tracer-bullet", "test-acceptance"),
+            ("test-acceptance", "diff-check"),
+        ):
+            self.assertLess(health_line.index(earlier), health_line.index(later))
 
     def test_ci_still_depends_on_health_only(self):
         text = self.read_makefile()
