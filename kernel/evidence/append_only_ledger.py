@@ -32,6 +32,7 @@ from datetime import datetime, timezone
 from typing import Any, Mapping, Sequence
 from uuid import uuid4
 
+from kernel.evidence.sealed_redaction_contract import validate_sealed_evidence_record
 from kernel.schemas import load_schema
 from kernel.schemas.validator import validate_artifact
 from kernel.stores.sqlite.repositories import AuditRepository
@@ -39,6 +40,25 @@ from kernel.version.version_tuple import compose_version_tuple_hash
 
 
 _AUDIT_RECORD_SCHEMA = load_schema("audit_record")
+_SEALED_EVIDENCE_CONTRACT = "sealed_redaction_v1"
+_HIGH_RISK_PAYLOAD_KEYS = frozenset(
+    {
+        "api_key",
+        "authorization",
+        "contains_sensitive_material",
+        "cookie",
+        "credential",
+        "evidence_id",
+        "password",
+        "private_key",
+        "raw_prompt",
+        "raw_provider_response",
+        "raw_value",
+        "secret",
+        "session_token",
+        "token",
+    }
+)
 
 
 class LedgerViolation(Exception):
@@ -82,6 +102,8 @@ class AppendOnlyLedger:
     ) -> str:
         if not record_type:
             raise LedgerViolation("record_type must be non-empty")
+        if payload is not None:
+            _validate_high_risk_payload(payload)
         audit_record_id = f"aud-{uuid4().hex}"
         version_tuple_hash = compose_version_tuple_hash(self._vt_overrides)
 
@@ -136,3 +158,30 @@ class AppendOnlyLedger:
             approval_id=approval_id,
         )
         return audit_record_id
+
+
+def _validate_high_risk_payload(payload: Mapping[str, Any]) -> None:
+    if not isinstance(payload, Mapping):
+        raise LedgerViolation("payload must be a mapping")
+    if not _requires_sealed_evidence_contract(payload):
+        return
+    evidence_record = payload.get("evidence")
+    if not isinstance(evidence_record, Mapping):
+        evidence_record = payload
+    result = validate_sealed_evidence_record(evidence_record)
+    if not result.accepted:
+        raise LedgerViolation(
+            "sealed evidence payload rejected: "
+            + "; ".join(result.failures[:5])
+        )
+
+
+def _requires_sealed_evidence_contract(payload: Mapping[str, Any]) -> bool:
+    if payload.get("evidence_contract") == _SEALED_EVIDENCE_CONTRACT:
+        return True
+    if any(str(key).lower() in _HIGH_RISK_PAYLOAD_KEYS for key in payload):
+        return True
+    nested = payload.get("evidence")
+    if isinstance(nested, Mapping):
+        return _requires_sealed_evidence_contract(nested)
+    return False
