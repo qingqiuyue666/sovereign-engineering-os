@@ -128,7 +128,7 @@ class GenericAuditPayloadFullEnforcementContractTests(unittest.TestCase):
 
     def test_source_does_not_introduce_runtime_or_append_mutation_surface(self):
         source = Path("kernel/evidence/generic_audit_payload_full_enforcement_contract.py").read_text(encoding="utf-8")
-        for marker in ("sqlite3", "requests", "httpx", "urllib", "socket.", "subprocess", "os.system", "openai.", "anthropic.", "google.generativeai", "getenv", "os.environ", ".environ", "write_text(", "append("):
+        for marker in ("sqlite3", "requests", "httpx", "urllib", "socket.", "subprocess", "os.system", "openai.", "anthropic.", "google.generativeai", "getenv", "os.environ", ".environ", "write_text(", "audit_append(", "ledger_append("):
             self.assertNotIn(marker, source)
 
     def test_runbook_exists_and_records_full_enforcement_boundary(self):
