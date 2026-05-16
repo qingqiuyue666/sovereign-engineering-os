@@ -1,0 +1,17 @@
+{
+  "policy_type": "seos_ai_context_firewall_policy_v1",
+  "version": "v1",
+  "status": "active_contract",
+  "scanner_engine": "CoreSecretScanner",
+  "read_only_gate": true,
+  "fail_closed_on_secret": true,
+  "preserve_json_shape_on_redaction": true,
+  "blocked_classifications": ["SECRET", "CROWN_JEWEL"],
+  "blocked_sinks": ["ai_context", "provider_request"],
+  "redaction_token": "[REDACTED]",
+  "allow_fake_secret_marker_only_in_tests": true,
+  "network_accessed": false,
+  "runtime_execution_performed": false,
+  "secret_value_read": false,
+  "secret_value_persisted": false
+}
