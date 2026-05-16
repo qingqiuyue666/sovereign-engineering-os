@@ -32,6 +32,7 @@
     "test-gated-provider-transport",
     "test-runtime-sealed-receipt",
     "test-generic-payload-shadow",
+    "test-protected-evidence-storage",
     "test-schemas",
     "test-tracer-bullet",
     "test-acceptance",
@@ -55,5 +56,5 @@
     "final_runtime_post_run_health_contract",
     "final_runtime_failure_quarantine_link_contract"
   ],
-  "next_allowed_track": "protected-evidence-storage-contract-bundle-v1"
+  "next_allowed_track": "real-hmac-policy-realization-contract-bundle-v1"
 }
