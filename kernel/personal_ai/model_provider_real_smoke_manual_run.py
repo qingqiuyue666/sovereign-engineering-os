@@ -13,16 +13,22 @@ from pathlib import Path
 from typing import Mapping
 import json
 
+from kernel.evidence.sealed_redaction_contract import (
+    redacted_digest,
+    validate_sealed_evidence_record,
+)
 from kernel.personal_ai.io_utils import write_json_atomically
 
 __all__ = [
     "ModelProviderManualSmokeRunResult",
     "build_model_provider_manual_smoke_run",
+    "build_model_provider_smoke_sealed_evidence_payload",
     "write_model_provider_manual_smoke_run",
 ]
 
 _RUN_FILE = "model_provider_real_smoke_manual_run_report.json"
 _RUN_TYPE = "personal_ai_model_provider_real_smoke_manual_run_v1"
+_SEALED_EVIDENCE_CONTRACT = "sealed_redaction_v1"
 _REQUIRED_MANUAL_FLAGS = (
     "SEOS_ENABLE_REAL_RUNTIME_SMOKE_EXECUTION_BATCH",
     "SEOS_ENABLE_MODEL_PROVIDER_LIVE_SMOKE",
@@ -36,6 +42,19 @@ _FORBIDDEN_PLAN_FIELDS = (
     "subprocess_commands",
     "creative_software_actions",
     "checkpoint_actions",
+)
+_BOUNDARY_FALSE_FLAGS = (
+    "secret_value_read",
+    "secret_value_persisted",
+    "secret_value_serialized",
+    "raw_prompt_persisted",
+    "raw_provider_response_persisted",
+    "runtime_execution_performed",
+    "model_api_called",
+    "external_network_accessed",
+    "file_or_tool_action_performed",
+    "output_triggered_tool_or_file_authority",
+    "automatic_runtime_authority_granted",
 )
 
 
@@ -118,6 +137,7 @@ def build_model_provider_manual_smoke_run(
         "required_human_approval": True,
         "next_allowed_action": "human_review_report_before_manual_provider_transport",
     }
+    report["sealed_evidence_payload"] = build_model_provider_smoke_sealed_evidence_payload(report)
     return ModelProviderManualSmokeRunResult(
         output_dir=Path("."),
         report_path=None,
@@ -130,6 +150,58 @@ def build_model_provider_manual_smoke_run(
         required_human_approval=True,
         report=report,
     )
+
+
+def build_model_provider_smoke_sealed_evidence_payload(
+    report: Mapping[str, object]
+) -> dict[str, object]:
+    """Build a sealed evidence payload for a manual model-provider smoke report.
+
+    The payload carries only hashes, booleans, and boundary metadata. It does not
+    include raw prompt text, raw provider response, secret values, or model API
+    output. The returned nested evidence object is validated by the sealed
+    evidence contract before being embedded in the report.
+    """
+
+    request_id = _required_string(report, "request_id")
+    evidence_payload = {
+        "request_id": request_id,
+        "provider_name": _required_string(report, "provider_name"),
+        "model_name": _required_string(report, "model_name"),
+        "prompt_sha256": _required_string(report, "prompt_sha256"),
+        "prompt_length_chars": _required_integer(report, "prompt_length_chars"),
+        "manual_flags": _required_mapping(report, "manual_flags"),
+        "secret_presence": _redact_secret_presence(_required_mapping(report, "secret_presence")),
+        "secret_value_read": _required_false(report, "secret_value_read"),
+        "secret_value_persisted": _required_false(report, "secret_value_persisted"),
+        "secret_value_serialized": _required_false(report, "secret_value_serialized"),
+        "raw_prompt_persisted": _required_false(report, "raw_prompt_persisted"),
+        "raw_provider_response_persisted": _required_false(report, "raw_provider_response_persisted"),
+        "runtime_execution_performed": _required_false(report, "runtime_execution_performed"),
+        "model_api_called": _required_false(report, "model_api_called"),
+        "external_network_accessed": _required_false(report, "external_network_accessed"),
+        "file_or_tool_action_performed": _required_false(report, "file_or_tool_action_performed"),
+        "output_triggered_tool_or_file_authority": _required_false(report, "output_triggered_tool_or_file_authority"),
+        "automatic_runtime_authority_granted": _required_false(report, "automatic_runtime_authority_granted"),
+        "required_human_approval": _required_true(report, "required_human_approval"),
+    }
+    evidence_record = {
+        "evidence_id": "ev-model-provider-smoke-" + request_id,
+        "classification": "secret",
+        "digest": redacted_digest(evidence_payload),
+        "representation": "redacted_digest",
+        "payload": evidence_payload,
+    }
+    validation = validate_sealed_evidence_record(evidence_record)
+    if not validation.accepted:
+        raise ValueError(
+            "model provider smoke sealed evidence contract failed: "
+            + "; ".join(validation.failures[:5])
+        )
+    return {
+        "evidence_contract": _SEALED_EVIDENCE_CONTRACT,
+        "evidence": evidence_record,
+    }
 
 
 def write_model_provider_manual_smoke_run(
@@ -213,3 +285,48 @@ def _validate_inputs(
                 if forbidden in expected_response_contract:
                     failures.append(forbidden + "_forbidden")
     return failures
+
+
+def _required_string(report: Mapping[str, object], key: str) -> str:
+    value = report.get(key)
+    if not isinstance(value, str) or not value:
+        raise ValueError(key + " is required")
+    return value
+
+
+def _required_integer(report: Mapping[str, object], key: str) -> int:
+    value = report.get(key)
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise ValueError(key + " must be an integer")
+    return value
+
+
+def _required_mapping(report: Mapping[str, object], key: str) -> Mapping[str, object]:
+    value = report.get(key)
+    if not isinstance(value, Mapping):
+        raise ValueError(key + " must be a mapping")
+    return value
+
+
+def _required_false(report: Mapping[str, object], key: str) -> bool:
+    value = report.get(key)
+    if value is not False:
+        raise ValueError(key + " must be false")
+    return False
+
+
+def _required_true(report: Mapping[str, object], key: str) -> bool:
+    value = report.get(key)
+    if value is not True:
+        raise ValueError(key + " must be true")
+    return True
+
+
+def _redact_secret_presence(secret_presence: Mapping[str, object]) -> dict[str, object]:
+    return {
+        "declared_secret_names_digest": redacted_digest(secret_presence),
+        "any_secret_present": any(value is True for value in secret_presence.values()),
+        "secret_value_read": False,
+        "secret_value_persisted": False,
+        "secret_value_serialized": False,
+    }

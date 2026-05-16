@@ -55,6 +55,36 @@ The planner records:
 - secret presence only
 - readiness status
 - failure codes
+- sealed evidence payload
+
+## Sealed Evidence Payload
+
+The report embeds `sealed_evidence_payload` using `evidence_contract: sealed_redaction_v1`.
+
+The sealed evidence payload records only:
+
+- request id
+- provider name
+- model name
+- prompt SHA-256
+- prompt character length
+- manual flag map
+- redacted secret-presence digest
+- no-runtime boundary flags
+- no-secret-read boundary flags
+- no-raw-prompt and no-raw-provider-response boundary flags
+- human review requirement
+
+The sealed evidence payload does not include:
+
+- raw prompt text
+- raw provider response
+- secret values
+- model API output
+- tool calls
+- file edits
+- browser actions
+- runtime authority
 
 ## Boundary Invariants
 
@@ -80,6 +110,8 @@ python3 -m unittest tests.personal_ai.test_model_provider_real_smoke_manual_run 
 python3 -m unittest tests.personal_ai.test_real_runtime_manual_smoke_preflight -v
 python3 -m unittest tests.personal_ai.test_post_manual_smoke_preflight_main_health -v
 python3 -m unittest tests.tracer_bullet.test_runtime_and_wal_main_health -v
+python3 -m unittest tests.tracer_bullet.test_sealed_evidence_redaction_contract -v
+python3 -m unittest tests.tracer_bullet.test_sealed_evidence_ledger_ingress -v
 python3 -m unittest discover -s tests/personal_ai -v
 python3 -m unittest discover -s tests/tracer_bullet -v
 make ci
@@ -94,17 +126,19 @@ This branch is merge-ready only if:
 1. Model provider manual smoke run tests pass.
 2. Existing real-runtime manual preflight tests pass.
 3. Runtime and WAL main health tests pass.
-4. Full Personal AI tests pass.
-5. Full tracer-bullet tests pass.
-6. `make ci` passes.
-7. No model API call is introduced.
-8. No secret value read or persistence is introduced.
-9. No output-triggered tool or file authority is introduced.
-10. No runtime execution is introduced.
-11. Worktree is clean.
+4. Sealed evidence contract tests pass.
+5. Sealed evidence ledger ingress tests pass.
+6. Full Personal AI tests pass.
+7. Full tracer-bullet tests pass.
+8. `make ci` passes.
+9. No model API call is introduced.
+10. No secret value read or persistence is introduced.
+11. No output-triggered tool or file authority is introduced.
+12. No runtime execution is introduced.
+13. Worktree is clean.
 
 ## Post-Merge Status
 
 After this branch merges, the runtime track may be described as:
 
-`Model Provider Real Smoke Manual Run Ready / Default Disabled / Manual Only / Human Review Required / No Model API Call`
+`Model Provider Real Smoke Manual Run Ready / Default Disabled / Manual Only / Human Review Required / No Model API Call / Sealed Evidence Payload Bound`

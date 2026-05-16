@@ -1,6 +1,6 @@
 {
   "automatic_repair_allowed": false,
-  "created_for_branch": "root-integrity-health-gate-wiring-v1",
+  "created_for_branch": "model-provider-smoke-sealed-evidence-wiring-v1",
   "critical_files": [
     {
       "git_blob_sha1": "afb068d9709aae31d51fac774ae43a26995bd726",
@@ -33,7 +33,7 @@
       "role": "openai_explicit_transport"
     },
     {
-      "git_blob_sha1": "8b3689b91bc45b75134f84847ca260c21c46af89",
+      "git_blob_sha1": "9fd4f4f1b9b09675950a0765e48d4c7221ad1f0c",
       "path": "kernel/personal_ai/model_provider_real_smoke_manual_run.py",
       "role": "model_provider_manual_smoke_planner"
     },
@@ -60,7 +60,7 @@
   "runtime_execution_performed": false,
   "secret_value_persisted": false,
   "secret_value_read": false,
-  "status": "root_integrity_health_gate_wiring",
+  "status": "model_provider_smoke_sealed_evidence_wiring",
   "version": "v1",
   "next_allowed_action_on_failure": "read_only_seed_recovery_required"
 }
