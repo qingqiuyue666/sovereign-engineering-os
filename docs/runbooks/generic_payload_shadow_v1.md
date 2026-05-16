@@ -19,7 +19,7 @@ This track does not allow:
 - full enforcement
 - ordinary payload behavior mutation
 - audit append behavior mutation
-- SQLite schema migration
+- no SQLite schema migration
 - network access
 - secret read
 - secret persistence
