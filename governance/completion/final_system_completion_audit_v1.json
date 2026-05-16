@@ -12,12 +12,12 @@
   "audit_append_performed": false,
   "raw_evidence_store_allowed": false,
   "verdict": "FINAL_COMPLETION_AUDIT_READY_NOT_100_PERCENT",
-  "readiness_band": "real_merkle_proof_realization_contract_ready",
-  "estimated_completion_percent": 95,
+  "readiness_band": "generic_payload_full_enforcement_contract_ready",
+  "estimated_completion_percent": 97,
   "canonical_health_gate": {
     "make_target": "health",
     "ci_target": "ci",
-    "ordered_gates": ["test-root-integrity", "test-sealed-evidence-coverage", "test-evidence-proof-contract", "test-evidence-proof-fixtures", "test-final-runtime-contracts", "test-gated-provider-transport", "test-runtime-sealed-receipt", "test-generic-payload-shadow", "test-protected-evidence-storage", "test-real-hmac-policy-realization", "test-real-merkle-proof-realization", "test-schemas", "test-tracer-bullet", "test-acceptance", "diff-check"],
+    "ordered_gates": ["test-root-integrity", "test-sealed-evidence-coverage", "test-evidence-proof-contract", "test-evidence-proof-fixtures", "test-final-runtime-contracts", "test-gated-provider-transport", "test-runtime-sealed-receipt", "test-generic-payload-shadow", "test-protected-evidence-storage", "test-real-hmac-policy-realization", "test-real-merkle-proof-realization", "test-generic-payload-full-enforcement", "test-schemas", "test-tracer-bullet", "test-acceptance", "diff-check"],
     "root_integrity_first": true,
     "worktree_cleanliness_required": true
   },
@@ -52,32 +52,32 @@
     {"surface_id": "real_merkle_proof_realization_contract_map", "status": "implemented_and_health_gated_contract_only", "evidence": "test-real-merkle-proof-realization"},
     {"surface_id": "real_merkle_proof_realization_contract", "status": "implemented_and_health_gated_contract_only", "evidence": "test-real-merkle-proof-realization"},
     {"surface_id": "real_merkle_proof_realization_fixtures", "status": "implemented_and_health_gated_fixture_only", "evidence": "test-real-merkle-proof-realization"},
-    {"surface_id": "real_merkle_proof_realization_runbook", "status": "implemented_runbook_only", "evidence": "docs/runbooks/real_merkle_proof_realization_contract_v1.md"}
+    {"surface_id": "real_merkle_proof_realization_runbook", "status": "implemented_runbook_only", "evidence": "docs/runbooks/real_merkle_proof_realization_contract_v1.md"},
+    {"surface_id": "generic_audit_payload_full_enforcement_policy", "status": "implemented_and_health_gated_contract_only", "evidence": "test-generic-payload-full-enforcement"},
+    {"surface_id": "generic_audit_payload_full_enforcement_contract", "status": "implemented_and_health_gated_contract_only", "evidence": "test-generic-payload-full-enforcement"},
+    {"surface_id": "generic_audit_payload_full_enforcement_fixtures", "status": "implemented_and_health_gated_fixture_only", "evidence": "test-generic-payload-full-enforcement"},
+    {"surface_id": "generic_audit_payload_full_enforcement_runbook", "status": "implemented_runbook_only", "evidence": "docs/runbooks/generic_audit_payload_full_enforcement_v1.md"}
   ],
   "not_implemented_surfaces": [
-    {"surface_id": "real_merkle_tree_execution", "status": "not_implemented_contract_only_currently", "required_before_100_percent": true},
-    {"surface_id": "real_hmac_signature_execution", "status": "not_implemented_contract_only_currently", "required_before_100_percent": true},
-    {"surface_id": "full_generic_audit_payload_typed_enforcement", "status": "not_implemented_shadow_only_currently", "required_before_100_percent": true},
     {"surface_id": "protected_evidence_storage_implementation", "status": "not_implemented_contract_only_currently", "required_before_100_percent": true},
     {"surface_id": "encrypted_evidence_vault", "status": "not_implemented_contract_only_currently", "required_before_100_percent": true},
     {"surface_id": "real_runtime_provider_transport_execution", "status": "not_implemented_disabled_by_default_contract_only_currently", "required_before_100_percent": true},
     {"surface_id": "production_autonomy", "status": "not_implemented_and_not_allowed", "required_before_100_percent": true}
   ],
   "forbidden_surfaces": [
-    "raw_evidence_store", "raw_prompt_persistence", "raw_provider_response_persistence", "raw_traceback_persistence", "raw_exception_dump_persistence", "secret_value_persistence", "key_material_read", "key_material_persistence", "plaintext_secret_storage", "real_hmac_signature_without_authorization", "real_merkle_tree_without_authorization", "real_merkle_tree_without_migration_receipt", "merkle_root_publication_without_authorization", "evidence_append_mutation_without_migration_receipt", "evidence_append_behavior_mutation_without_generic_payload_enforcement", "hmac_verification_without_constant_time_compare_policy", "ungated_runtime_authority", "network_access_without_explicit_transport_gate", "provider_live_call_without_transport_gate", "production_autonomy_without_final_authorization", "generic_payload_full_enforcement_without_migration_receipt"
+    "raw_evidence_store", "raw_prompt_persistence", "raw_provider_response_persistence", "raw_traceback_persistence", "raw_exception_dump_persistence", "secret_value_persistence", "key_material_read", "key_material_persistence", "plaintext_secret_storage", "audit_append_behavior_mutation_without_migration_receipt", "generic_payload_full_runtime_enforcement_without_migration_receipt", "full_enforcement_without_rollback_plan", "unknown_payload_acceptance_after_full_enforcement", "ungated_runtime_authority", "network_access_without_explicit_transport_gate", "provider_live_call_without_transport_gate", "production_autonomy_without_final_authorization"
   ],
   "readiness_decision": {
     "allow_claim_100_percent": false,
     "allow_final_runtime_completion_track": true,
     "allow_production_autonomy_claim": false,
     "allow_generic_payload_full_enforcement": false,
+    "allow_generic_payload_full_enforcement_contract": true,
     "allow_protected_storage_implementation": false,
     "allow_encrypted_vault_claim": false,
     "allow_key_material_access": false,
-    "allow_real_hmac_signature_execution": false,
-    "allow_real_merkle_tree_execution": false,
-    "allow_merkle_root_publication": false,
-    "required_next_branch": "generic-audit-payload-full-enforcement-bundle-v1"
+    "allow_runtime_provider_execution": false,
+    "required_next_branch": "protected-evidence-storage-implementation-v1"
   },
-  "next_required_slices_before_100_percent": ["generic-audit-payload-full-enforcement-bundle-v1", "protected-evidence-storage-implementation-v1", "real-runtime-provider-transport-execution-v1", "production-autonomy-final-gate-v1"]
+  "next_required_slices_before_100_percent": ["protected-evidence-storage-implementation-v1", "real-runtime-provider-transport-execution-v1", "production-autonomy-final-gate-v1"]
 }
