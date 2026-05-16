@@ -2,21 +2,21 @@ import unittest
 from pathlib import Path
 
 
-class SealedEvidenceCoverageHealthGateWiringTests(unittest.TestCase):
+class EvidenceProofContractHealthGateWiringTests(unittest.TestCase):
     def read_makefile(self) -> str:
         path = Path("Makefile")
         self.assertTrue(path.is_file(), "Makefile missing")
         return path.read_text(encoding="utf-8")
 
-    def test_makefile_declares_sealed_evidence_coverage_target(self):
+    def test_makefile_declares_evidence_proof_contract_target(self):
         text = self.read_makefile()
-        self.assertIn("test-sealed-evidence-coverage", text)
+        self.assertIn("test-evidence-proof-contract", text)
         self.assertIn(
-            "PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_sealed_evidence_coverage_map -v",
+            "PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_evidence_proof_contract -v",
             text,
         )
 
-    def test_health_runs_root_integrity_then_sealed_coverage_before_other_gates(self):
+    def test_health_runs_proof_contract_after_coverage_before_schemas(self):
         text = self.read_makefile()
         health_line = next(
             line for line in text.splitlines() if line.startswith("health:")
@@ -35,22 +35,22 @@ class SealedEvidenceCoverageHealthGateWiringTests(unittest.TestCase):
         ci_line = next(line for line in text.splitlines() if line.startswith("ci:"))
         self.assertEqual(ci_line, "ci: health")
 
-    def test_coverage_map_artifacts_exist(self):
+    def test_proof_contract_artifacts_exist(self):
         required_paths = (
-            "governance/evidence/sealed_evidence_coverage_map_v1.json",
-            "tests/tracer_bullet/test_sealed_evidence_coverage_map.py",
-            "docs/decisions/sealed_evidence_coverage_map_v1.md",
+            "kernel/evidence/evidence_proof_contract.py",
+            "tests/tracer_bullet/test_evidence_proof_contract.py",
+            "docs/decisions/evidence_proof_contract_foundation_v1.md",
         )
         for path in required_paths:
             self.assertTrue(Path(path).is_file(), path)
 
-    def test_decision_doc_exists_and_records_no_runtime_posture(self):
-        path = Path("docs/decisions/sealed_evidence_coverage_health_gate_v1.md")
+    def test_decision_doc_exists_and_records_no_crypto_runtime_posture(self):
+        path = Path("docs/decisions/evidence_proof_contract_health_gate_v1.md")
         self.assertTrue(path.is_file(), str(path))
         text = path.read_text(encoding="utf-8")
         for marker in (
-            "SEALED_EVIDENCE_COVERAGE_HEALTH_GATE_READY_FOR_LOCAL_TESTS",
-            "test-sealed-evidence-coverage",
+            "EVIDENCE_PROOF_CONTRACT_HEALTH_GATE_READY_FOR_LOCAL_TESTS",
+            "test-evidence-proof-contract",
             "health",
             "make ci",
             "no runtime execution",
@@ -58,8 +58,8 @@ class SealedEvidenceCoverageHealthGateWiringTests(unittest.TestCase):
             "no secret read",
             "no SQLite schema change",
             "no encrypted vault",
-            "no Merkle proof",
-            "no HMAC proof",
+            "no real HMAC",
+            "no real Merkle tree",
             "no zero-knowledge-like proof",
             "no raw evidence store",
         ):

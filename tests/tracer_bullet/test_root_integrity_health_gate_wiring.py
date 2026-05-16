@@ -21,10 +21,11 @@ class RootIntegrityHealthGateWiringTests(unittest.TestCase):
         health_line = next(
             line for line in text.splitlines() if line.startswith("health:")
         )
-        expected = "health: test-root-integrity test-sealed-evidence-coverage test-schemas test-tracer-bullet test-acceptance diff-check"
+        expected = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-schemas test-tracer-bullet test-acceptance diff-check"
         self.assertEqual(health_line, expected)
         self.assertLess(health_line.index("test-root-integrity"), health_line.index("test-sealed-evidence-coverage"))
-        self.assertLess(health_line.index("test-sealed-evidence-coverage"), health_line.index("test-schemas"))
+        self.assertLess(health_line.index("test-sealed-evidence-coverage"), health_line.index("test-evidence-proof-contract"))
+        self.assertLess(health_line.index("test-evidence-proof-contract"), health_line.index("test-schemas"))
         self.assertLess(health_line.index("test-schemas"), health_line.index("test-tracer-bullet"))
         self.assertLess(health_line.index("test-tracer-bullet"), health_line.index("test-acceptance"))
         self.assertLess(health_line.index("test-acceptance"), health_line.index("diff-check"))
