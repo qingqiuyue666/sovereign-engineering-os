@@ -12,8 +12,8 @@
   "audit_append_performed": false,
   "raw_evidence_store_allowed": false,
   "verdict": "FINAL_COMPLETION_AUDIT_READY_NOT_100_PERCENT",
-  "readiness_band": "final_runtime_track_contract_ready",
-  "estimated_completion_percent": 70,
+  "readiness_band": "gated_provider_transport_contract_ready",
+  "estimated_completion_percent": 76,
   "canonical_health_gate": {
     "make_target": "health",
     "ci_target": "ci",
@@ -23,6 +23,7 @@
       "test-evidence-proof-contract",
       "test-evidence-proof-fixtures",
       "test-final-runtime-contracts",
+      "test-gated-provider-transport",
       "test-schemas",
       "test-tracer-bullet",
       "test-acceptance",
@@ -37,26 +38,22 @@
     {"surface_id": "tracer_bullet_suite", "status": "implemented_and_health_gated", "evidence": "test-tracer-bullet"},
     {"surface_id": "acceptance_suite", "status": "implemented_and_health_gated", "evidence": "test-acceptance"},
     {"surface_id": "sealed_evidence_coverage_map", "status": "implemented_and_health_gated", "evidence": "test-sealed-evidence-coverage"},
-    {"surface_id": "sealed_redacted_evidence_contract", "status": "implemented_contract_surface", "evidence": "tests.tracer_bullet.test_sealed_evidence_redaction_contract"},
-    {"surface_id": "append_only_ledger_selected_high_risk_ingress", "status": "implemented_selected_high_risk_only", "evidence": "tests.tracer_bullet.test_sealed_evidence_ledger_ingress"},
-    {"surface_id": "model_provider_manual_smoke_sealed_payload", "status": "implemented_manual_only_default_disabled", "evidence": "tests.personal_ai.test_model_provider_real_smoke_manual_run"},
-    {"surface_id": "failure_quarantine_sealed_payload", "status": "implemented_local_only_non_authority", "evidence": "tests.personal_ai.test_failure_quarantine"},
     {"surface_id": "evidence_proof_contract_foundation", "status": "implemented_and_health_gated", "evidence": "test-evidence-proof-contract"},
     {"surface_id": "evidence_proof_fixtures", "status": "implemented_and_health_gated", "evidence": "test-evidence-proof-fixtures"},
-    {"surface_id": "generic_audit_payload_typed_enforcement_plan", "status": "implemented_contract_plan_only", "evidence": "tests.tracer_bullet.test_evidence_proof_hardening_bundle"},
-    {"surface_id": "protected_evidence_storage_policy_plan", "status": "implemented_policy_plan_only", "evidence": "tests.tracer_bullet.test_evidence_proof_hardening_bundle"},
-    {"surface_id": "proof_authority_policy_contracts", "status": "implemented_policy_contract_only", "evidence": "tests.tracer_bullet.test_evidence_proof_hardening_bundle"},
     {"surface_id": "final_runtime_completion_track_map", "status": "implemented_and_health_gated_contract_only", "evidence": "test-final-runtime-contracts"},
     {"surface_id": "final_runtime_contract_validators", "status": "implemented_and_health_gated_contract_only", "evidence": "test-final-runtime-contracts"},
-    {"surface_id": "final_runtime_runbook", "status": "implemented_runbook_only", "evidence": "docs/runbooks/final_runtime_completion_track_v1.md"}
+    {"surface_id": "gated_provider_transport_map", "status": "implemented_and_health_gated_contract_only", "evidence": "test-gated-provider-transport"},
+    {"surface_id": "gated_provider_transport_contracts", "status": "implemented_and_health_gated_contract_only", "evidence": "test-gated-provider-transport"},
+    {"surface_id": "gated_provider_transport_fixtures", "status": "implemented_and_health_gated_fixture_only", "evidence": "test-gated-provider-transport"},
+    {"surface_id": "gated_provider_transport_runbook", "status": "implemented_runbook_only", "evidence": "docs/runbooks/gated_provider_transport_v1.md"}
   ],
   "not_implemented_surfaces": [
+    {"surface_id": "runtime_sealed_receipt_implementation", "status": "not_implemented", "required_before_100_percent": true},
+    {"surface_id": "real_runtime_provider_transport_execution", "status": "not_implemented_disabled_by_default_contract_only_currently", "required_before_100_percent": true},
     {"surface_id": "protected_evidence_storage_implementation", "status": "not_implemented_policy_plan_only_currently", "required_before_100_percent": true},
     {"surface_id": "real_hmac_key_management_and_signing", "status": "not_implemented_policy_contract_only_currently", "required_before_100_percent": true},
     {"surface_id": "real_merkle_tree_and_proof_verification", "status": "not_implemented_policy_contract_only_currently", "required_before_100_percent": true},
-    {"surface_id": "zero_knowledge_like_evidence_proof", "status": "not_implemented", "required_before_100_percent": false},
     {"surface_id": "full_generic_audit_payload_typed_enforcement", "status": "not_implemented_plan_only_currently", "required_before_100_percent": true},
-    {"surface_id": "real_runtime_provider_transport_execution", "status": "not_implemented_disabled_by_default_contract_only_currently", "required_before_100_percent": true},
     {"surface_id": "production_autonomy", "status": "not_implemented_and_not_allowed", "required_before_100_percent": true}
   ],
   "forbidden_surfaces": [
@@ -76,10 +73,10 @@
     "allow_final_runtime_completion_track": true,
     "allow_production_autonomy_claim": false,
     "allow_manual_default_disabled_runtime_track": true,
-    "required_next_branch": "gated-provider-transport-contract-v1"
+    "required_next_branch": "runtime-sealed-receipt-bundle-v1"
   },
   "next_required_slices_before_100_percent": [
-    "gated-provider-transport-contract-v1",
+    "runtime-sealed-receipt-bundle-v1",
     "full-generic-audit-payload-typed-enforcement-v1",
     "protected-evidence-storage-implementation-v1",
     "real-hmac-policy-realization-v1",
