@@ -35,7 +35,7 @@ class SealedEvidenceLedgerIngressTests(unittest.TestCase):
                 record_type TEXT NOT NULL,
                 causality_ref TEXT,
                 actor_identity TEXT NOT NULL,
-                artifact_refs_json TEXT NOT NULL,
+                artifact_refs TEXT NOT NULL,
                 version_tuple_hash TEXT NOT NULL,
                 taint_set_json TEXT NOT NULL,
                 payload_json TEXT,
