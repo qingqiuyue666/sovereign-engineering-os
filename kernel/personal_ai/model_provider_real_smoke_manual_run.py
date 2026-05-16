@@ -43,6 +43,19 @@ _FORBIDDEN_PLAN_FIELDS = (
     "creative_software_actions",
     "checkpoint_actions",
 )
+_BOUNDARY_FALSE_FLAGS = (
+    "secret_value_read",
+    "secret_value_persisted",
+    "secret_value_serialized",
+    "raw_prompt_persisted",
+    "raw_provider_response_persisted",
+    "runtime_execution_performed",
+    "model_api_called",
+    "external_network_accessed",
+    "file_or_tool_action_performed",
+    "output_triggered_tool_or_file_authority",
+    "automatic_runtime_authority_granted",
+)
 
 
 @dataclass(frozen=True)
@@ -159,18 +172,18 @@ def build_model_provider_smoke_sealed_evidence_payload(
         "prompt_length_chars": _required_integer(report, "prompt_length_chars"),
         "manual_flags": _required_mapping(report, "manual_flags"),
         "secret_presence": _redact_secret_presence(_required_mapping(report, "secret_presence")),
-        "secret_value_read": False,
-        "secret_value_persisted": False,
-        "secret_value_serialized": False,
-        "raw_prompt_persisted": False,
-        "raw_provider_response_persisted": False,
-        "runtime_execution_performed": False,
-        "model_api_called": False,
-        "external_network_accessed": False,
-        "file_or_tool_action_performed": False,
-        "output_triggered_tool_or_file_authority": False,
-        "automatic_runtime_authority_granted": False,
-        "required_human_approval": True,
+        "secret_value_read": _required_false(report, "secret_value_read"),
+        "secret_value_persisted": _required_false(report, "secret_value_persisted"),
+        "secret_value_serialized": _required_false(report, "secret_value_serialized"),
+        "raw_prompt_persisted": _required_false(report, "raw_prompt_persisted"),
+        "raw_provider_response_persisted": _required_false(report, "raw_provider_response_persisted"),
+        "runtime_execution_performed": _required_false(report, "runtime_execution_performed"),
+        "model_api_called": _required_false(report, "model_api_called"),
+        "external_network_accessed": _required_false(report, "external_network_accessed"),
+        "file_or_tool_action_performed": _required_false(report, "file_or_tool_action_performed"),
+        "output_triggered_tool_or_file_authority": _required_false(report, "output_triggered_tool_or_file_authority"),
+        "automatic_runtime_authority_granted": _required_false(report, "automatic_runtime_authority_granted"),
+        "required_human_approval": _required_true(report, "required_human_approval"),
     }
     evidence_record = {
         "evidence_id": "ev-model-provider-smoke-" + request_id,
@@ -293,6 +306,20 @@ def _required_mapping(report: Mapping[str, object], key: str) -> Mapping[str, ob
     if not isinstance(value, Mapping):
         raise ValueError(key + " must be a mapping")
     return value
+
+
+def _required_false(report: Mapping[str, object], key: str) -> bool:
+    value = report.get(key)
+    if value is not False:
+        raise ValueError(key + " must be false")
+    return False
+
+
+def _required_true(report: Mapping[str, object], key: str) -> bool:
+    value = report.get(key)
+    if value is not True:
+        raise ValueError(key + " must be true")
+    return True
 
 
 def _redact_secret_presence(secret_presence: Mapping[str, object]) -> dict[str, object]:
