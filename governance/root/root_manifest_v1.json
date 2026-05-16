@@ -1,6 +1,6 @@
 {
   "automatic_repair_allowed": false,
-  "created_for_branch": "model-provider-smoke-sealed-evidence-wiring-v1",
+  "created_for_branch": "sealed-evidence-coverage-health-gate-v1",
   "critical_files": [
     {
       "git_blob_sha1": "afb068d9709aae31d51fac774ae43a26995bd726",
@@ -38,7 +38,7 @@
       "role": "model_provider_manual_smoke_planner"
     },
     {
-      "git_blob_sha1": "8e5b96c4adf45d87919f011c9c5403893fafc2e4",
+      "git_blob_sha1": "6877f9287646b125274462ad9c769e68e8c90a4b",
       "path": "Makefile",
       "role": "canonical_ci_gate"
     },
@@ -60,7 +60,7 @@
   "runtime_execution_performed": false,
   "secret_value_persisted": false,
   "secret_value_read": false,
-  "status": "model_provider_smoke_sealed_evidence_wiring",
+  "status": "sealed_evidence_coverage_health_gate_wiring",
   "version": "v1",
   "next_allowed_action_on_failure": "read_only_seed_recovery_required"
 }
