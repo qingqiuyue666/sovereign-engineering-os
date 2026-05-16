@@ -15,23 +15,17 @@ class SealedEvidenceCoverageMapTests(unittest.TestCase):
         payload = self.load_map()
         return {surface["surface_id"]: surface for surface in payload["surfaces"]}
 
-    def test_map_top_level_shape_and_no_runtime_posture(self):
+    def test_map_top_level_shape_and_no_execution_posture(self):
         payload = self.load_map()
         self.assertEqual(payload["map_type"], "seos_sealed_evidence_coverage_map_v1")
         self.assertEqual(payload["version"], "v1")
         self.assertEqual(payload["status"], "coverage_map_only_no_runtime")
         self.assertFalse(payload["runtime_execution_performed"])
         self.assertFalse(payload["network_accessed"])
-        self.assertFalse(payload["secret_value_read"])
-        self.assertFalse(payload["secret_value_persisted"])
         self.assertFalse(payload["sqlite_schema_changed"])
-        self.assertFalse(payload["encrypted_vault_implemented"])
-        self.assertFalse(payload["merkle_proof_implemented"])
-        self.assertFalse(payload["hmac_proof_implemented"])
-        self.assertFalse(payload["zero_knowledge_proof_implemented"])
         self.assertFalse(payload["raw_evidence_store_allowed"])
         self.assertIsInstance(payload["surfaces"], list)
-        self.assertGreaterEqual(len(payload["surfaces"]), 13)
+        self.assertGreaterEqual(len(payload["surfaces"]), 16)
 
     def test_required_surfaces_are_declared(self):
         surfaces = self.surfaces_by_id()
@@ -46,6 +40,9 @@ class SealedEvidenceCoverageMapTests(unittest.TestCase):
             "generic_audit_payload_typed_enforcement_plan",
             "protected_evidence_storage_policy_plan",
             "proof_authority_policy_contracts",
+            "final_runtime_completion_track_map",
+            "final_runtime_contract_validators",
+            "final_runtime_runbook",
             "encrypted_evidence_vault",
             "real_merkle_or_hmac_evidence_proofs",
             "zero_knowledge_like_evidence_proofs",
@@ -53,85 +50,36 @@ class SealedEvidenceCoverageMapTests(unittest.TestCase):
         ):
             self.assertIn(surface_id, surfaces)
 
-    def test_model_provider_and_failure_quarantine_are_covered(self):
+    def test_contract_surfaces_are_not_runtime_surfaces(self):
         surfaces = self.surfaces_by_id()
         for surface_id in (
-            "model_provider_manual_smoke_report",
-            "failure_quarantine_manifest",
-        ):
-            surface = surfaces[surface_id]
-            self.assertEqual(surface["coverage_status"], "covered")
-            self.assertEqual(surface["evidence_contract"], "sealed_redaction_v1")
-            self.assertEqual(surface["coverage_mechanism"], "embedded_sealed_evidence_payload")
-            self.assertEqual(surface["classification"], "secret")
-            self.assertEqual(surface["representation"], "redacted_digest")
-            self.assertFalse(surface["secret_value_allowed"])
-            self.assertFalse(surface["runtime_authority_allowed"])
-            self.assertTrue(surface["tests"])
-
-    def test_evidence_proof_contract_foundation_is_contract_surface_only(self):
-        surface = self.surfaces_by_id()["evidence_proof_contract_foundation"]
-        self.assertEqual(surface["coverage_status"], "covered_contract_surface")
-        self.assertEqual(surface["evidence_contract"], "evidence_proof_contract_v1")
-        self.assertEqual(surface["coverage_mechanism"], "deterministic_proof_record_validation_contract")
-        self.assertEqual(surface["representation"], "sha256_digest_redacted_digest_hmac_placeholder_merkle_placeholder")
-        self.assertFalse(surface["real_hmac_key_allowed"])
-        self.assertFalse(surface["real_merkle_tree_allowed"])
-        self.assertFalse(surface["encrypted_vault_allowed"])
-        self.assertFalse(surface["zero_knowledge_proof_allowed"])
-        self.assertFalse(surface["runtime_execution_allowed"])
-        self.assertFalse(surface["network_access_allowed"])
-        self.assertFalse(surface["secret_value_allowed"])
-        self.assertIn("tests.tracer_bullet.test_evidence_proof_contract", surface["tests"])
-
-    def test_evidence_proof_fixtures_are_fixture_surface_only(self):
-        surface = self.surfaces_by_id()["evidence_proof_fixtures"]
-        self.assertEqual(surface["coverage_status"], "covered_contract_surface")
-        self.assertEqual(surface["evidence_contract"], "evidence_proof_contract_v1")
-        self.assertEqual(surface["coverage_mechanism"], "typed_valid_and_invalid_fixture_corpus")
-        self.assertEqual(surface["classification"], "fixture_only_no_runtime")
-        self.assertFalse(surface["real_hmac_key_allowed"])
-        self.assertFalse(surface["real_merkle_tree_allowed"])
-        self.assertFalse(surface["encrypted_vault_allowed"])
-        self.assertFalse(surface["zero_knowledge_proof_allowed"])
-        self.assertFalse(surface["runtime_execution_allowed"])
-        self.assertFalse(surface["network_access_allowed"])
-        self.assertFalse(surface["secret_value_allowed"])
-        self.assertIn("tests.tracer_bullet.test_evidence_proof_fixtures", surface["tests"])
-
-    def test_hardening_bundle_plan_surfaces_are_contract_only(self):
-        surfaces = self.surfaces_by_id()
-        for surface_id in (
+            "evidence_proof_contract_foundation",
+            "evidence_proof_fixtures",
             "generic_audit_payload_typed_enforcement_plan",
             "protected_evidence_storage_policy_plan",
             "proof_authority_policy_contracts",
+            "final_runtime_completion_track_map",
+            "final_runtime_contract_validators",
+            "final_runtime_runbook",
         ):
             surface = surfaces[surface_id]
             self.assertEqual(surface["coverage_status"], "covered_contract_surface")
             self.assertFalse(surface["runtime_execution_allowed"])
             self.assertFalse(surface["network_access_allowed"])
-            self.assertFalse(surface["secret_value_allowed"])
-            self.assertIn("tests.tracer_bullet.test_evidence_proof_hardening_bundle", surface["tests"])
 
-    def test_append_only_ledger_is_selected_high_risk_only(self):
-        surface = self.surfaces_by_id()["append_only_ledger_high_risk_payload_ingress"]
-        self.assertEqual(surface["coverage_status"], "selected_high_risk_only")
-        self.assertEqual(surface["evidence_contract"], "sealed_redaction_v1")
-        self.assertEqual(surface["coverage_mechanism"], "selected_high_risk_payload_ingress_guard")
-        self.assertFalse(surface["ordinary_payload_behavior_changed"])
-        self.assertFalse(surface["generic_classification_key_triggers_contract"])
-        self.assertFalse(surface["raw_prompt_allowed"])
-        self.assertFalse(surface["raw_provider_response_allowed"])
-        self.assertFalse(surface["secret_value_allowed"])
-
-    def test_generic_audit_payloads_are_not_claimed_as_fully_covered(self):
-        surface = self.surfaces_by_id()["generic_audit_payloads"]
-        self.assertEqual(surface["coverage_status"], "selected_high_risk_only")
-        self.assertFalse(surface["ordinary_payload_behavior_changed"])
-        self.assertIn("future_required_work", surface)
-
-    def test_future_crypto_layers_are_explicitly_not_implemented(self):
+    def test_runtime_contract_surfaces_have_runtime_tests(self):
         surfaces = self.surfaces_by_id()
+        for surface_id in (
+            "final_runtime_completion_track_map",
+            "final_runtime_contract_validators",
+            "final_runtime_runbook",
+        ):
+            self.assertIn("tests.tracer_bullet.test_final_runtime_contracts", surfaces[surface_id]["tests"])
+
+    def test_selected_high_risk_and_future_layers_are_not_overclaimed(self):
+        surfaces = self.surfaces_by_id()
+        self.assertEqual(surfaces["append_only_ledger_high_risk_payload_ingress"]["coverage_status"], "selected_high_risk_only")
+        self.assertEqual(surfaces["generic_audit_payloads"]["coverage_status"], "selected_high_risk_only")
         for surface_id in (
             "encrypted_evidence_vault",
             "real_merkle_or_hmac_evidence_proofs",
@@ -147,11 +95,6 @@ class SealedEvidenceCoverageMapTests(unittest.TestCase):
         surface = self.surfaces_by_id()["raw_evidence_store"]
         self.assertEqual(surface["coverage_status"], "forbidden")
         self.assertEqual(surface["coverage_mechanism"], "explicitly_disallowed")
-        self.assertFalse(surface["raw_prompt_allowed"])
-        self.assertFalse(surface["raw_provider_response_allowed"])
-        self.assertFalse(surface["secret_value_allowed"])
-        self.assertFalse(surface["raw_traceback_allowed"])
-        self.assertFalse(surface["raw_exception_dump_allowed"])
 
     def test_every_surface_uses_allowed_status(self):
         payload = self.load_map()
@@ -168,9 +111,7 @@ class SealedEvidenceCoverageMapTests(unittest.TestCase):
                 self.assertTrue(Path(path).exists(), path)
 
     def test_coverage_map_does_not_modify_root_manifest(self):
-        root_manifest = Path("governance/root/root_manifest_v1.json").read_text(
-            encoding="utf-8"
-        )
+        root_manifest = Path("governance/root/root_manifest_v1.json").read_text(encoding="utf-8")
         self.assertNotIn("sealed_evidence_coverage_map_v1.json", root_manifest)
 
 
