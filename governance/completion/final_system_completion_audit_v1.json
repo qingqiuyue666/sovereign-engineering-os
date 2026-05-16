@@ -12,8 +12,8 @@
   "audit_append_performed": false,
   "raw_evidence_store_allowed": false,
   "verdict": "FINAL_COMPLETION_AUDIT_READY_NOT_100_PERCENT",
-  "readiness_band": "protected_evidence_storage_contract_ready",
-  "estimated_completion_percent": 90,
+  "readiness_band": "real_hmac_policy_realization_contract_ready",
+  "estimated_completion_percent": 93,
   "canonical_health_gate": {
     "make_target": "health",
     "ci_target": "ci",
@@ -27,6 +27,7 @@
       "test-runtime-sealed-receipt",
       "test-generic-payload-shadow",
       "test-protected-evidence-storage",
+      "test-real-hmac-policy-realization",
       "test-schemas",
       "test-tracer-bullet",
       "test-acceptance",
@@ -58,12 +59,16 @@
     {"surface_id": "protected_evidence_storage_contract_map", "status": "implemented_and_health_gated_contract_only", "evidence": "test-protected-evidence-storage"},
     {"surface_id": "protected_evidence_storage_contract", "status": "implemented_and_health_gated_contract_only", "evidence": "test-protected-evidence-storage"},
     {"surface_id": "protected_evidence_storage_fixtures", "status": "implemented_and_health_gated_fixture_only", "evidence": "test-protected-evidence-storage"},
-    {"surface_id": "protected_evidence_storage_runbook", "status": "implemented_runbook_only", "evidence": "docs/runbooks/protected_evidence_storage_contract_v1.md"}
+    {"surface_id": "protected_evidence_storage_runbook", "status": "implemented_runbook_only", "evidence": "docs/runbooks/protected_evidence_storage_contract_v1.md"},
+    {"surface_id": "real_hmac_policy_realization_contract_map", "status": "implemented_and_health_gated_contract_only", "evidence": "test-real-hmac-policy-realization"},
+    {"surface_id": "real_hmac_policy_realization_contract", "status": "implemented_and_health_gated_contract_only", "evidence": "test-real-hmac-policy-realization"},
+    {"surface_id": "real_hmac_policy_realization_fixtures", "status": "implemented_and_health_gated_fixture_only", "evidence": "test-real-hmac-policy-realization"},
+    {"surface_id": "real_hmac_policy_realization_runbook", "status": "implemented_runbook_only", "evidence": "docs/runbooks/real_hmac_policy_realization_contract_v1.md"}
   ],
   "not_implemented_surfaces": [
+    {"surface_id": "real_hmac_signature_execution", "status": "not_implemented_contract_only_currently", "required_before_100_percent": true},
     {"surface_id": "protected_evidence_storage_implementation", "status": "not_implemented_contract_only_currently", "required_before_100_percent": true},
     {"surface_id": "encrypted_evidence_vault", "status": "not_implemented_contract_only_currently", "required_before_100_percent": true},
-    {"surface_id": "real_hmac_key_management_and_signing", "status": "not_implemented_policy_contract_only_currently", "required_before_100_percent": true},
     {"surface_id": "real_merkle_tree_and_proof_verification", "status": "not_implemented_policy_contract_only_currently", "required_before_100_percent": true},
     {"surface_id": "full_generic_audit_payload_typed_enforcement", "status": "not_implemented_shadow_only_currently", "required_before_100_percent": true},
     {"surface_id": "real_runtime_provider_transport_execution", "status": "not_implemented_disabled_by_default_contract_only_currently", "required_before_100_percent": true},
@@ -79,6 +84,8 @@
     "key_material_read",
     "key_material_persistence",
     "plaintext_secret_storage",
+    "real_hmac_signature_without_authorization",
+    "hmac_verification_without_constant_time_compare_policy",
     "ungated_runtime_authority",
     "network_access_without_explicit_transport_gate",
     "provider_live_call_without_transport_gate",
@@ -94,13 +101,14 @@
     "allow_protected_storage_implementation": false,
     "allow_encrypted_vault_claim": false,
     "allow_key_material_access": false,
-    "required_next_branch": "real-hmac-policy-realization-contract-bundle-v1"
+    "allow_real_hmac_signature_execution": false,
+    "required_next_branch": "real-merkle-proof-realization-v1"
   },
   "next_required_slices_before_100_percent": [
-    "real-hmac-policy-realization-contract-bundle-v1",
     "real-merkle-proof-realization-v1",
     "generic-audit-payload-full-enforcement-bundle-v1",
     "protected-evidence-storage-implementation-v1",
-    "real-runtime-provider-transport-execution-v1"
+    "real-runtime-provider-transport-execution-v1",
+    "production-autonomy-final-gate-v1"
   ]
 }

@@ -2,7 +2,7 @@ import unittest
 from pathlib import Path
 
 
-EXPECTED_HEALTH = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-runtime-sealed-receipt test-generic-payload-shadow test-protected-evidence-storage test-schemas test-tracer-bullet test-acceptance diff-check"
+EXPECTED_HEALTH = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-runtime-sealed-receipt test-generic-payload-shadow test-protected-evidence-storage test-real-hmac-policy-realization test-schemas test-tracer-bullet test-acceptance diff-check"
 
 
 class RootIntegrityHealthGateWiringTests(unittest.TestCase):
@@ -29,7 +29,8 @@ class RootIntegrityHealthGateWiringTests(unittest.TestCase):
             ("test-gated-provider-transport", "test-runtime-sealed-receipt"),
             ("test-runtime-sealed-receipt", "test-generic-payload-shadow"),
             ("test-generic-payload-shadow", "test-protected-evidence-storage"),
-            ("test-protected-evidence-storage", "test-schemas"),
+            ("test-protected-evidence-storage", "test-real-hmac-policy-realization"),
+            ("test-real-hmac-policy-realization", "test-schemas"),
             ("test-schemas", "test-tracer-bullet"),
             ("test-tracer-bullet", "test-acceptance"),
             ("test-acceptance", "diff-check"),

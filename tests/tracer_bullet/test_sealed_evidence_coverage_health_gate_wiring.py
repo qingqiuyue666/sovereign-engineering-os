@@ -2,7 +2,7 @@ import unittest
 from pathlib import Path
 
 
-EXPECTED_HEALTH = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-runtime-sealed-receipt test-generic-payload-shadow test-protected-evidence-storage test-schemas test-tracer-bullet test-acceptance diff-check"
+EXPECTED_HEALTH = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-runtime-sealed-receipt test-generic-payload-shadow test-protected-evidence-storage test-real-hmac-policy-realization test-schemas test-tracer-bullet test-acceptance diff-check"
 
 
 class SealedEvidenceCoverageHealthGateWiringTests(unittest.TestCase):
@@ -17,8 +17,7 @@ class SealedEvidenceCoverageHealthGateWiringTests(unittest.TestCase):
         self.assertIn("PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_sealed_evidence_coverage_map -v", text)
 
     def test_health_runs_root_integrity_then_sealed_coverage_before_other_gates(self):
-        text = self.read_makefile()
-        health_line = next(line for line in text.splitlines() if line.startswith("health:"))
+        health_line = next(line for line in self.read_makefile().splitlines() if line.startswith("health:"))
         self.assertEqual(health_line, EXPECTED_HEALTH)
         for earlier, later in (
             ("test-root-integrity", "test-sealed-evidence-coverage"),
@@ -29,7 +28,8 @@ class SealedEvidenceCoverageHealthGateWiringTests(unittest.TestCase):
             ("test-gated-provider-transport", "test-runtime-sealed-receipt"),
             ("test-runtime-sealed-receipt", "test-generic-payload-shadow"),
             ("test-generic-payload-shadow", "test-protected-evidence-storage"),
-            ("test-protected-evidence-storage", "test-schemas"),
+            ("test-protected-evidence-storage", "test-real-hmac-policy-realization"),
+            ("test-real-hmac-policy-realization", "test-schemas"),
             ("test-schemas", "test-tracer-bullet"),
             ("test-tracer-bullet", "test-acceptance"),
             ("test-acceptance", "diff-check"),
@@ -37,8 +37,7 @@ class SealedEvidenceCoverageHealthGateWiringTests(unittest.TestCase):
             self.assertLess(health_line.index(earlier), health_line.index(later))
 
     def test_ci_still_depends_on_health_only(self):
-        text = self.read_makefile()
-        ci_line = next(line for line in text.splitlines() if line.startswith("ci:"))
+        ci_line = next(line for line in self.read_makefile().splitlines() if line.startswith("ci:"))
         self.assertEqual(ci_line, "ci: health")
 
     def test_coverage_map_artifacts_exist(self):
@@ -46,9 +45,7 @@ class SealedEvidenceCoverageHealthGateWiringTests(unittest.TestCase):
             self.assertTrue(Path(path).is_file(), path)
 
     def test_decision_doc_exists_and_records_no_runtime_posture(self):
-        path = Path("docs/decisions/sealed_evidence_coverage_health_gate_v1.md")
-        self.assertTrue(path.is_file(), str(path))
-        text = path.read_text(encoding="utf-8")
+        text = Path("docs/decisions/sealed_evidence_coverage_health_gate_v1.md").read_text(encoding="utf-8")
         for marker in ("SEALED_EVIDENCE_COVERAGE_HEALTH_GATE_READY_FOR_LOCAL_TESTS", "test-sealed-evidence-coverage", "health", "make ci", "no runtime execution", "no network access", "no secret read", "no SQLite schema change", "no encrypted vault", "no Merkle proof", "no HMAC proof", "no zero-knowledge-like proof", "no raw evidence store"):
             self.assertIn(marker, text)
 

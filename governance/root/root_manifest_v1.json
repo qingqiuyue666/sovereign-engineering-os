@@ -1,6 +1,6 @@
 {
   "automatic_repair_allowed": false,
-  "created_for_branch": "protected-evidence-storage-contract-bundle-v1",
+  "created_for_branch": "real-hmac-policy-realization-contract-bundle-v1",
   "critical_files": [
     {
       "git_blob_sha1": "afb068d9709aae31d51fac774ae43a26995bd726",
@@ -38,7 +38,7 @@
       "role": "model_provider_manual_smoke_planner"
     },
     {
-      "git_blob_sha1": "73e6cd56fcac9f1cd630f9e34a6099c2ec0973db",
+      "git_blob_sha1": "3f62e073af5614d2969d64bbdc481ba787f6d706",
       "path": "Makefile",
       "role": "canonical_ci_gate"
     },
@@ -60,7 +60,7 @@
   "runtime_execution_performed": false,
   "secret_value_persisted": false,
   "secret_value_read": false,
-  "status": "protected_evidence_storage_contract_health_gate_wiring",
+  "status": "real_hmac_policy_realization_contract_health_gate_wiring",
   "version": "v1",
   "next_allowed_action_on_failure": "read_only_seed_recovery_required"
 }

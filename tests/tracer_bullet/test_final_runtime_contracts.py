@@ -14,35 +14,17 @@ from kernel.runtime.final_runtime_contracts import (
 
 TRACK_MAP_PATH = Path("governance/runtime/final_runtime_completion_track_v1.json")
 REQUIRED_GATES = [
-    "test-root-integrity",
-    "test-sealed-evidence-coverage",
-    "test-evidence-proof-contract",
-    "test-evidence-proof-fixtures",
-    "test-final-runtime-contracts",
-    "test-gated-provider-transport",
-    "test-runtime-sealed-receipt",
-    "test-generic-payload-shadow",
-    "test-protected-evidence-storage",
-    "test-schemas",
-    "test-tracer-bullet",
-    "test-acceptance",
-    "diff-check",
+    "test-root-integrity", "test-sealed-evidence-coverage", "test-evidence-proof-contract",
+    "test-evidence-proof-fixtures", "test-final-runtime-contracts", "test-gated-provider-transport",
+    "test-runtime-sealed-receipt", "test-generic-payload-shadow", "test-protected-evidence-storage",
+    "test-real-hmac-policy-realization", "test-schemas", "test-tracer-bullet", "test-acceptance", "diff-check",
 ]
 FORBIDDEN_FLAGS = (
-    "provider_call_performed",
-    "network_accessed",
-    "secret_value_read",
-    "secret_value_persisted",
-    "sqlite_schema_changed",
-    "audit_append_performed",
-    "protected_storage_implemented",
-    "real_hmac_performed",
-    "real_merkle_tree_built",
-    "zero_knowledge_proof_built",
-    "production_autonomy_enabled",
-    "raw_evidence_store_allowed",
+    "provider_call_performed", "network_accessed", "secret_value_read", "secret_value_persisted",
+    "sqlite_schema_changed", "audit_append_performed", "protected_storage_implemented", "real_hmac_performed",
+    "real_merkle_tree_built", "zero_knowledge_proof_built", "production_autonomy_enabled", "raw_evidence_store_allowed",
 )
-EXPECTED_HEALTH = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-runtime-sealed-receipt test-generic-payload-shadow test-protected-evidence-storage test-schemas test-tracer-bullet test-acceptance diff-check"
+EXPECTED_HEALTH = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-runtime-sealed-receipt test-generic-payload-shadow test-protected-evidence-storage test-real-hmac-policy-realization test-schemas test-tracer-bullet test-acceptance diff-check"
 
 
 class FinalRuntimeContractsTests(unittest.TestCase):
@@ -79,54 +61,42 @@ class FinalRuntimeContractsTests(unittest.TestCase):
         self.assertEqual(result.verdict, "accepted_contract_only")
 
     def test_preflight_accepts_disabled_manual_dry_run_contract(self):
-        result = validate_runtime_preflight(self.valid_preflight())
-        self.assertTrue(result.accepted, result.failures)
+        self.assertTrue(validate_runtime_preflight(self.valid_preflight()).accepted)
 
     def test_receipt_accepts_no_execution_receipt(self):
-        result = validate_runtime_receipt(self.valid_receipt())
-        self.assertTrue(result.accepted, result.failures)
+        self.assertTrue(validate_runtime_receipt(self.valid_receipt()).accepted)
 
     def test_post_run_health_accepts_all_required_gates(self):
         result = validate_post_run_health(self.valid_post_run_health())
         self.assertTrue(result.accepted, result.failures)
 
     def test_failure_quarantine_link_accepts_contract_only_link(self):
-        result = validate_failure_quarantine_link(self.valid_failure_link())
-        self.assertTrue(result.accepted, result.failures)
+        self.assertTrue(validate_failure_quarantine_link(self.valid_failure_link()).accepted)
 
     def test_preflight_rejects_missing_operator_approval(self):
         data = self.valid_preflight(); data["operator_approval_present"] = False
-        result = validate_runtime_preflight(data)
-        self.assertFalse(result.accepted)
-        self.assertIn("operator_approval_missing", result.failures)
+        self.assertIn("operator_approval_missing", validate_runtime_preflight(data).failures)
 
     def test_preflight_rejects_enabled_provider_transport(self):
         data = self.valid_preflight(); data["provider_transport_status"] = "enabled"
-        result = validate_runtime_preflight(data)
-        self.assertFalse(result.accepted)
-        self.assertIn("provider_transport_must_be_disabled", result.failures)
+        self.assertIn("provider_transport_must_be_disabled", validate_runtime_preflight(data).failures)
 
     def test_receipt_rejects_execution_attempt(self):
         data = self.valid_receipt(); data["execution_attempted"] = True
-        result = validate_runtime_receipt(data)
-        self.assertFalse(result.accepted)
-        self.assertIn("execution_attempted_must_be_false", result.failures)
+        self.assertIn("execution_attempted_must_be_false", validate_runtime_receipt(data).failures)
 
     def test_post_run_health_rejects_missing_gate_result(self):
-        data = self.valid_post_run_health(); data["gate_results"]["test-protected-evidence-storage"] = "missing"
+        data = self.valid_post_run_health(); data["gate_results"]["test-real-hmac-policy-realization"] = "missing"
         result = validate_post_run_health(data)
         self.assertFalse(result.accepted)
-        self.assertIn("test-protected-evidence-storage_not_passed", result.failures)
+        self.assertIn("test-real-hmac-policy-realization_not_passed", result.failures)
 
     def test_failure_link_rejects_wrong_policy_status(self):
         data = self.valid_failure_link(); data["failure_quarantine_policy_status"] = "unlinked"
-        result = validate_failure_quarantine_link(data)
-        self.assertFalse(result.accepted)
-        self.assertIn("failure_quarantine_policy_status_invalid", result.failures)
+        self.assertIn("failure_quarantine_policy_status_invalid", validate_failure_quarantine_link(data).failures)
 
     def test_all_forbidden_true_flags_fail_closed_across_contracts(self):
-        validators_and_payloads = ((validate_runtime_preflight, self.valid_preflight), (validate_runtime_receipt, self.valid_receipt), (validate_post_run_health, self.valid_post_run_health), (validate_failure_quarantine_link, self.valid_failure_link))
-        for validator, factory in validators_and_payloads:
+        for validator, factory in ((validate_runtime_preflight, self.valid_preflight), (validate_runtime_receipt, self.valid_receipt), (validate_post_run_health, self.valid_post_run_health), (validate_failure_quarantine_link, self.valid_failure_link)):
             for flag in FORBIDDEN_FLAGS:
                 payload = factory(); payload[flag] = True
                 with self.subTest(validator=validator.__name__, flag=flag):
