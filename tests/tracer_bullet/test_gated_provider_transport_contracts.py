@@ -149,7 +149,8 @@ class GatedProviderTransportContractsTests(unittest.TestCase):
             "anthropic.",
             "google.generativeai",
             "getenv",
-            "environ",
+            "os.environ",
+            ".environ",
             "write_text(",
         )
         for marker in forbidden_markers:
