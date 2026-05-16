@@ -1,0 +1,56 @@
+{
+  "track_type": "seos_final_runtime_completion_track_v1",
+  "version": "v1",
+  "status": "disabled_by_default",
+  "runtime_mode": "manual_dry_run",
+  "default_disabled": true,
+  "manual_preflight_required": true,
+  "provider_call_performed": false,
+  "network_accessed": false,
+  "secret_value_read": false,
+  "secret_value_persisted": false,
+  "sqlite_schema_changed": false,
+  "audit_append_performed": false,
+  "protected_storage_implemented": false,
+  "real_hmac_performed": false,
+  "real_merkle_tree_built": false,
+  "zero_knowledge_proof_built": false,
+  "production_autonomy_enabled": false,
+  "raw_evidence_store_allowed": false,
+  "allowed_stages": [
+    "preflight",
+    "receipt",
+    "post_run_health",
+    "failure_quarantine_linkage"
+  ],
+  "required_health_gates": [
+    "test-root-integrity",
+    "test-sealed-evidence-coverage",
+    "test-evidence-proof-contract",
+    "test-evidence-proof-fixtures",
+    "test-final-runtime-contracts",
+    "test-schemas",
+    "test-tracer-bullet",
+    "test-acceptance",
+    "diff-check"
+  ],
+  "promotion_blockers": [
+    "operator_preflight_missing",
+    "health_gate_missing",
+    "sealed_evidence_policy_missing",
+    "proof_policy_missing",
+    "failure_quarantine_policy_missing",
+    "worktree_dirty",
+    "provider_transport_enabled",
+    "network_access_requested",
+    "secret_access_requested",
+    "production_autonomy_requested"
+  ],
+  "required_contracts": [
+    "final_runtime_preflight_contract",
+    "final_runtime_receipt_contract",
+    "final_runtime_post_run_health_contract",
+    "final_runtime_failure_quarantine_link_contract"
+  ],
+  "next_allowed_track": "gated-provider-transport-contract-v1"
+}

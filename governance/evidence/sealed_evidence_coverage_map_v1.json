@@ -26,9 +26,7 @@
       "raw_provider_response_allowed": false,
       "secret_value_allowed": false,
       "runtime_authority_allowed": false,
-      "tests": [
-        "tests.personal_ai.test_model_provider_real_smoke_manual_run"
-      ]
+      "tests": ["tests.personal_ai.test_model_provider_real_smoke_manual_run"]
     },
     {
       "surface_id": "failure_quarantine_manifest",
@@ -43,9 +41,7 @@
       "raw_exception_dump_allowed": false,
       "secret_value_allowed": false,
       "runtime_authority_allowed": false,
-      "tests": [
-        "tests.personal_ai.test_failure_quarantine"
-      ]
+      "tests": ["tests.personal_ai.test_failure_quarantine"]
     },
     {
       "surface_id": "append_only_ledger_high_risk_payload_ingress",
@@ -61,9 +57,7 @@
       "raw_prompt_allowed": false,
       "raw_provider_response_allowed": false,
       "secret_value_allowed": false,
-      "tests": [
-        "tests.tracer_bullet.test_sealed_evidence_ledger_ingress"
-      ]
+      "tests": ["tests.tracer_bullet.test_sealed_evidence_ledger_ingress"]
     },
     {
       "surface_id": "generic_audit_payloads",
@@ -85,9 +79,7 @@
       "coverage_mechanism": "deterministic_validation_contract",
       "classification": "public_restricted_secret",
       "representation": "sha256_salted_hash_hmac_placeholder_sealed_blob_ref_redacted_digest",
-      "tests": [
-        "tests.tracer_bullet.test_sealed_evidence_redaction_contract"
-      ]
+      "tests": ["tests.tracer_bullet.test_sealed_evidence_redaction_contract"]
     },
     {
       "surface_id": "evidence_proof_contract_foundation",
@@ -105,9 +97,7 @@
       "runtime_execution_allowed": false,
       "network_access_allowed": false,
       "secret_value_allowed": false,
-      "tests": [
-        "tests.tracer_bullet.test_evidence_proof_contract"
-      ]
+      "tests": ["tests.tracer_bullet.test_evidence_proof_contract"]
     },
     {
       "surface_id": "evidence_proof_fixtures",
@@ -125,9 +115,7 @@
       "runtime_execution_allowed": false,
       "network_access_allowed": false,
       "secret_value_allowed": false,
-      "tests": [
-        "tests.tracer_bullet.test_evidence_proof_fixtures"
-      ]
+      "tests": ["tests.tracer_bullet.test_evidence_proof_fixtures"]
     },
     {
       "surface_id": "generic_audit_payload_typed_enforcement_plan",
@@ -140,9 +128,7 @@
       "runtime_execution_allowed": false,
       "network_access_allowed": false,
       "secret_value_allowed": false,
-      "tests": [
-        "tests.tracer_bullet.test_evidence_proof_hardening_bundle"
-      ]
+      "tests": ["tests.tracer_bullet.test_evidence_proof_hardening_bundle"]
     },
     {
       "surface_id": "protected_evidence_storage_policy_plan",
@@ -155,9 +141,7 @@
       "runtime_execution_allowed": false,
       "network_access_allowed": false,
       "secret_value_allowed": false,
-      "tests": [
-        "tests.tracer_bullet.test_evidence_proof_hardening_bundle"
-      ]
+      "tests": ["tests.tracer_bullet.test_evidence_proof_hardening_bundle"]
     },
     {
       "surface_id": "proof_authority_policy_contracts",
@@ -170,9 +154,46 @@
       "runtime_execution_allowed": false,
       "network_access_allowed": false,
       "secret_value_allowed": false,
-      "tests": [
-        "tests.tracer_bullet.test_evidence_proof_hardening_bundle"
-      ]
+      "tests": ["tests.tracer_bullet.test_evidence_proof_hardening_bundle"]
+    },
+    {
+      "surface_id": "final_runtime_completion_track_map",
+      "path": "governance/runtime/final_runtime_completion_track_v1.json",
+      "artifact": "runtime_track_contract_map_only",
+      "coverage_status": "covered_contract_surface",
+      "evidence_contract": "final_runtime_completion_track_v1",
+      "coverage_mechanism": "disabled_by_default_track_map",
+      "classification": "contract_only_no_runtime",
+      "runtime_execution_allowed": false,
+      "network_access_allowed": false,
+      "secret_value_allowed": false,
+      "tests": ["tests.tracer_bullet.test_final_runtime_contracts"]
+    },
+    {
+      "surface_id": "final_runtime_contract_validators",
+      "path": "kernel/runtime/final_runtime_contracts.py",
+      "artifact": "runtime_contract_validators_only",
+      "coverage_status": "covered_contract_surface",
+      "evidence_contract": "final_runtime_contracts_v1",
+      "coverage_mechanism": "deterministic_contract_validation_only",
+      "classification": "contract_only_no_runtime",
+      "runtime_execution_allowed": false,
+      "network_access_allowed": false,
+      "secret_value_allowed": false,
+      "tests": ["tests.tracer_bullet.test_final_runtime_contracts"]
+    },
+    {
+      "surface_id": "final_runtime_runbook",
+      "path": "docs/runbooks/final_runtime_completion_track_v1.md",
+      "artifact": "manual_runbook_only",
+      "coverage_status": "covered_contract_surface",
+      "evidence_contract": "final_runtime_completion_track_v1",
+      "coverage_mechanism": "manual_disabled_by_default_runbook",
+      "classification": "runbook_only_no_runtime",
+      "runtime_execution_allowed": false,
+      "network_access_allowed": false,
+      "secret_value_allowed": false,
+      "tests": ["tests.tracer_bullet.test_final_runtime_contracts"]
     },
     {
       "surface_id": "encrypted_evidence_vault",
@@ -215,12 +236,6 @@
       "raw_exception_dump_allowed": false
     }
   ],
-  "required_status_values": [
-    "covered",
-    "selected_high_risk_only",
-    "covered_contract_surface",
-    "not_implemented",
-    "forbidden"
-  ],
-  "next_recommended_slice": "final-runtime-completion-track-v1"
+  "required_status_values": ["covered", "selected_high_risk_only", "covered_contract_surface", "not_implemented", "forbidden"],
+  "next_recommended_slice": "gated-provider-transport-contract-v1"
 }
