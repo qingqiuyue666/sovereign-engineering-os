@@ -15,7 +15,7 @@ from kernel.runtime.runtime_sealed_receipt_contracts import (
 
 POLICY_PATH = Path("governance/runtime/runtime_sealed_receipt_v1.json")
 FIXTURE_PATH = Path("governance/runtime/fixtures/runtime_sealed_receipt_fixtures_v1.json")
-EXPECTED_HEALTH = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-runtime-sealed-receipt test-schemas test-tracer-bullet test-acceptance diff-check"
+EXPECTED_HEALTH = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-runtime-sealed-receipt test-generic-payload-shadow test-schemas test-tracer-bullet test-acceptance diff-check"
 
 VALIDATORS = {
     "validate_runtime_sealed_receipt_policy": validate_runtime_sealed_receipt_policy,
@@ -132,7 +132,8 @@ class RuntimeSealedReceiptContractsTests(unittest.TestCase):
         )
         self.assertIn(EXPECTED_HEALTH, text)
         self.assertLess(EXPECTED_HEALTH.index("test-gated-provider-transport"), EXPECTED_HEALTH.index("test-runtime-sealed-receipt"))
-        self.assertLess(EXPECTED_HEALTH.index("test-runtime-sealed-receipt"), EXPECTED_HEALTH.index("test-schemas"))
+        self.assertLess(EXPECTED_HEALTH.index("test-runtime-sealed-receipt"), EXPECTED_HEALTH.index("test-generic-payload-shadow"))
+        self.assertLess(EXPECTED_HEALTH.index("test-generic-payload-shadow"), EXPECTED_HEALTH.index("test-schemas"))
 
     def test_source_does_not_introduce_live_transport_surface(self):
         source = Path("kernel/runtime/runtime_sealed_receipt_contracts.py").read_text(encoding="utf-8")
