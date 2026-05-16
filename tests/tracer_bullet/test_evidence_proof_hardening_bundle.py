@@ -6,6 +6,7 @@ from pathlib import Path
 GENERIC_PLAN = Path("governance/evidence/generic_audit_payload_typed_enforcement_plan_v1.json")
 STORAGE_PLAN = Path("governance/evidence/protected_evidence_storage_policy_plan_v1.json")
 PROOF_POLICY = Path("governance/evidence/proof_authority_policy_contracts_v1.json")
+EXPECTED_HEALTH = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-schemas test-tracer-bullet test-acceptance diff-check"
 
 
 class EvidenceProofHardeningBundleTests(unittest.TestCase):
@@ -62,13 +63,13 @@ class EvidenceProofHardeningBundleTests(unittest.TestCase):
         self.assertIn("protected_storage_implemented", forbidden)
         self.assertIn("runtime_transport_enabled", forbidden)
 
-    def test_makefile_health_runs_fixtures_before_schemas(self):
+    def test_makefile_health_runs_fixtures_then_final_runtime_before_schemas(self):
         text = Path("Makefile").read_text(encoding="utf-8")
-        expected = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-schemas test-tracer-bullet test-acceptance diff-check"
         health_line = next(line for line in text.splitlines() if line.startswith("health:"))
-        self.assertEqual(health_line, expected)
+        self.assertEqual(health_line, EXPECTED_HEALTH)
         self.assertLess(health_line.index("test-evidence-proof-contract"), health_line.index("test-evidence-proof-fixtures"))
-        self.assertLess(health_line.index("test-evidence-proof-fixtures"), health_line.index("test-schemas"))
+        self.assertLess(health_line.index("test-evidence-proof-fixtures"), health_line.index("test-final-runtime-contracts"))
+        self.assertLess(health_line.index("test-final-runtime-contracts"), health_line.index("test-schemas"))
 
     def test_decision_doc_exists_and_records_bundle_boundary(self):
         path = Path("docs/decisions/evidence_proof_hardening_bundle_v1.md")
