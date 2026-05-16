@@ -3,9 +3,11 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from kernel.evidence.sealed_redaction_contract import validate_sealed_evidence_record
 from kernel.personal_ai.model_provider_real_smoke_manual_run import (
     ModelProviderManualSmokeRunResult,
     build_model_provider_manual_smoke_run,
+    build_model_provider_smoke_sealed_evidence_payload,
     write_model_provider_manual_smoke_run,
 )
 
@@ -60,6 +62,52 @@ class ModelProviderManualSmokeRunTests(unittest.TestCase):
         self.assertFalse(report["file_or_tool_action_performed"])
         self.assertFalse(report["output_triggered_tool_or_file_authority"])
         self.assertFalse(report["automatic_runtime_authority_granted"])
+
+    def test_sealed_evidence_payload_is_embedded_and_contract_valid(self):
+        result = build_model_provider_manual_smoke_run(
+            environ=self.enabled_env(),
+            prompt_text="Return the word ok.",
+            provider_name="openai",
+            model_name="gpt-test",
+            max_output_tokens=16,
+            temperature=0.0,
+            request_id="manual-smoke-sealed-001",
+        )
+
+        sealed_payload = result.report["sealed_evidence_payload"]
+        self.assertEqual(sealed_payload["evidence_contract"], "sealed_redaction_v1")
+        evidence = sealed_payload["evidence"]
+        validation = validate_sealed_evidence_record(evidence)
+        self.assertTrue(validation.accepted, validation.failures)
+        self.assertEqual(evidence["classification"], "secret")
+        self.assertEqual(evidence["representation"], "redacted_digest")
+        self.assertTrue(str(evidence["digest"]).startswith("sha256:"))
+        evidence_payload = evidence["payload"]
+        self.assertEqual(evidence_payload["request_id"], "manual-smoke-sealed-001")
+        self.assertFalse(evidence_payload["raw_prompt_persisted"])
+        self.assertFalse(evidence_payload["raw_provider_response_persisted"])
+        self.assertFalse(evidence_payload["runtime_execution_performed"])
+        self.assertFalse(evidence_payload["model_api_called"])
+        self.assertFalse(evidence_payload["secret_value_read"])
+        self.assertFalse(evidence_payload["secret_value_persisted"])
+        self.assertNotIn("OPENAI_API_KEY", json.dumps(evidence, sort_keys=True))
+        self.assertNotIn("sk-test-secret-value-must-not-leak", json.dumps(evidence, sort_keys=True))
+        self.assertNotIn("Return the word ok.", json.dumps(evidence, sort_keys=True))
+
+    def test_build_model_provider_smoke_sealed_evidence_payload_rejects_raw_prompt(self):
+        report = {
+            "request_id": "manual-smoke-bad",
+            "provider_name": "openai",
+            "model_name": "gpt-test",
+            "prompt_sha256": "a" * 64,
+            "prompt_length_chars": 16,
+            "manual_flags": {},
+            "secret_presence": {},
+            "raw_prompt_persisted": True,
+        }
+
+        with self.assertRaisesRegex(ValueError, "model provider smoke sealed evidence contract failed"):
+            build_model_provider_smoke_sealed_evidence_payload(report)
 
     def test_missing_manual_flags_and_secret_block_readiness(self):
         result = build_model_provider_manual_smoke_run(
@@ -123,6 +171,7 @@ class ModelProviderManualSmokeRunTests(unittest.TestCase):
         self.assertTrue(payload["ready_for_manual_execution"])
         self.assertNotIn("Return ok.", json.dumps(payload, sort_keys=True))
         self.assertIn("prompt_sha256", payload)
+        self.assertIn("sealed_evidence_payload", payload)
         with self.assertRaisesRegex(ValueError, "already exists"):
             write_model_provider_manual_smoke_run(
                 output_dir=output_dir,
@@ -201,6 +250,7 @@ class ModelProviderManualSmokeRunTests(unittest.TestCase):
             "no secret persistence",
             "no output-triggered tool or file authority",
             "Human Review Required",
+            "sealed evidence payload",
         ):
             self.assertIn(marker, text)
 
