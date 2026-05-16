@@ -19,11 +19,11 @@ class FinalSystemCompletionAuditTests(unittest.TestCase):
         self.assertEqual(audit["audit_type"], "seos_final_system_completion_audit_v1")
         self.assertEqual(audit["status"], "final_completion_audit_only_no_runtime")
         self.assertEqual(audit["verdict"], "FINAL_COMPLETION_AUDIT_READY_NOT_100_PERCENT")
-        self.assertEqual(audit["readiness_band"], "runtime_sealed_receipt_contract_ready")
+        self.assertEqual(audit["readiness_band"], "generic_payload_full_typed_shadow_ready")
         self.assertFalse(audit["claim_100_percent_complete"])
         self.assertFalse(audit["final_system_fully_finished"])
         self.assertLess(audit["estimated_completion_percent"], 100)
-        self.assertGreaterEqual(audit["estimated_completion_percent"], 82)
+        self.assertGreaterEqual(audit["estimated_completion_percent"], 86)
 
     def test_audit_has_no_runtime_or_secret_posture(self):
         audit = self.load_audit()
@@ -52,6 +52,7 @@ class FinalSystemCompletionAuditTests(unittest.TestCase):
                 "test-final-runtime-contracts",
                 "test-gated-provider-transport",
                 "test-runtime-sealed-receipt",
+                "test-generic-payload-shadow",
                 "test-schemas",
                 "test-tracer-bullet",
                 "test-acceptance",
@@ -77,7 +78,10 @@ class FinalSystemCompletionAuditTests(unittest.TestCase):
             "runtime_sealed_receipt_map",
             "runtime_sealed_receipt_contracts",
             "runtime_sealed_receipt_fixtures",
-            "runtime_sealed_receipt_runbook",
+            "generic_payload_shadow_policy",
+            "generic_payload_shadow_contract",
+            "generic_payload_shadow_fixtures",
+            "generic_payload_shadow_runbook",
         ):
             self.assertIn(surface_id, implemented)
 
@@ -108,6 +112,7 @@ class FinalSystemCompletionAuditTests(unittest.TestCase):
             "network_access_without_explicit_transport_gate",
             "provider_live_call_without_transport_gate",
             "production_autonomy_without_final_authorization",
+            "generic_payload_full_enforcement_without_migration_receipt",
         ):
             self.assertIn(surface_id, forbidden)
 
@@ -117,24 +122,26 @@ class FinalSystemCompletionAuditTests(unittest.TestCase):
         self.assertTrue(decision["allow_final_runtime_completion_track"])
         self.assertFalse(decision["allow_production_autonomy_claim"])
         self.assertTrue(decision["allow_manual_default_disabled_runtime_track"])
-        self.assertEqual(decision["required_next_branch"], "generic-audit-payload-full-typed-shadow-bundle-v1")
+        self.assertFalse(decision["allow_generic_payload_full_enforcement"])
+        self.assertEqual(decision["required_next_branch"], "protected-evidence-storage-contract-bundle-v1")
 
     def test_next_required_slices_are_not_empty(self):
         slices = self.load_audit()["next_required_slices_before_100_percent"]
         self.assertGreaterEqual(len(slices), 5)
-        self.assertIn("generic-audit-payload-full-typed-shadow-bundle-v1", slices)
+        self.assertIn("protected-evidence-storage-contract-bundle-v1", slices)
+        self.assertIn("generic-audit-payload-full-enforcement-bundle-v1", slices)
         self.assertIn("real-merkle-proof-realization-v1", slices)
 
     def test_decision_doc_exists_and_records_non_100_percent_posture(self):
-        path = Path("docs/decisions/runtime_sealed_receipt_bundle_v1.md")
+        path = Path("docs/decisions/generic_payload_shadow_bundle_v1.md")
         self.assertTrue(path.is_file(), str(path))
         text = path.read_text(encoding="utf-8")
         for marker in (
-            "RUNTIME_SEALED_RECEIPT_BUNDLE_READY_FOR_LOCAL_TESTS",
-            "runtime_sealed_receipt_contract_ready",
+            "GENERIC_PAYLOAD_SHADOW_BUNDLE_READY_FOR_LOCAL_TESTS",
+            "generic_payload_full_typed_shadow_ready",
             "not 100%",
-            "test-runtime-sealed-receipt",
-            "generic-audit-payload-full-typed-shadow-bundle-v1",
+            "test-generic-payload-shadow",
+            "protected-evidence-storage-contract-bundle-v1",
         ):
             self.assertIn(marker, text)
 
