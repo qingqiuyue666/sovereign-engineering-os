@@ -1,0 +1,43 @@
+{
+  "contract_type": "seos_protected_evidence_storage_contract_v1",
+  "version": "v1",
+  "status": "contract_only",
+  "implementation_enabled": false,
+  "encrypted_vault_implemented": false,
+  "protected_storage_implemented": false,
+  "key_material_read": false,
+  "key_material_persisted": false,
+  "plaintext_secret_allowed": false,
+  "raw_prompt_allowed": false,
+  "raw_provider_response_allowed": false,
+  "runtime_execution_performed": false,
+  "network_accessed": false,
+  "sqlite_schema_changed": false,
+  "audit_append_performed": false,
+  "storage_manifest_required": true,
+  "access_policy_required": true,
+  "recovery_policy_required": true,
+  "deletion_policy_required": true,
+  "migration_receipt_required_before_implementation": true,
+  "allowed_contract_sections": [
+    "storage_manifest",
+    "access_policy",
+    "recovery_policy",
+    "deletion_policy",
+    "contract_report"
+  ],
+  "forbidden_claims": [
+    "encrypted_vault_implemented",
+    "protected_storage_implemented",
+    "key_material_read",
+    "key_material_persisted",
+    "plaintext_secret_allowed",
+    "raw_prompt_allowed",
+    "raw_provider_response_allowed",
+    "runtime_execution_performed",
+    "network_accessed",
+    "sqlite_schema_changed",
+    "audit_append_performed"
+  ],
+  "next_allowed_track": "real-hmac-policy-realization-contract-bundle-v1"
+}

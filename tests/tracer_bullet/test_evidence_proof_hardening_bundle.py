@@ -6,7 +6,7 @@ from pathlib import Path
 GENERIC_PLAN = Path("governance/evidence/generic_audit_payload_typed_enforcement_plan_v1.json")
 STORAGE_PLAN = Path("governance/evidence/protected_evidence_storage_policy_plan_v1.json")
 PROOF_POLICY = Path("governance/evidence/proof_authority_policy_contracts_v1.json")
-EXPECTED_HEALTH = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-runtime-sealed-receipt test-generic-payload-shadow test-schemas test-tracer-bullet test-acceptance diff-check"
+EXPECTED_HEALTH = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-runtime-sealed-receipt test-generic-payload-shadow test-protected-evidence-storage test-schemas test-tracer-bullet test-acceptance diff-check"
 
 
 class EvidenceProofHardeningBundleTests(unittest.TestCase):
@@ -72,7 +72,8 @@ class EvidenceProofHardeningBundleTests(unittest.TestCase):
         self.assertLess(health_line.index("test-final-runtime-contracts"), health_line.index("test-gated-provider-transport"))
         self.assertLess(health_line.index("test-gated-provider-transport"), health_line.index("test-runtime-sealed-receipt"))
         self.assertLess(health_line.index("test-runtime-sealed-receipt"), health_line.index("test-generic-payload-shadow"))
-        self.assertLess(health_line.index("test-generic-payload-shadow"), health_line.index("test-schemas"))
+        self.assertLess(health_line.index("test-generic-payload-shadow"), health_line.index("test-protected-evidence-storage"))
+        self.assertLess(health_line.index("test-protected-evidence-storage"), health_line.index("test-schemas"))
 
     def test_decision_doc_exists_and_records_bundle_boundary(self):
         path = Path("docs/decisions/evidence_proof_hardening_bundle_v1.md")

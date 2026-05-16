@@ -32,6 +32,7 @@ _REQUIRED_HEALTH_GATES = (
     "test-gated-provider-transport",
     "test-runtime-sealed-receipt",
     "test-generic-payload-shadow",
+    "test-protected-evidence-storage",
     "test-schemas",
     "test-tracer-bullet",
     "test-acceptance",
