@@ -2,7 +2,7 @@ import unittest
 from pathlib import Path
 
 
-EXPECTED_HEALTH = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-runtime-sealed-receipt test-generic-payload-shadow test-schemas test-tracer-bullet test-acceptance diff-check"
+EXPECTED_HEALTH = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-runtime-sealed-receipt test-generic-payload-shadow test-protected-evidence-storage test-schemas test-tracer-bullet test-acceptance diff-check"
 
 
 class RootIntegrityHealthGateWiringTests(unittest.TestCase):
@@ -14,10 +14,7 @@ class RootIntegrityHealthGateWiringTests(unittest.TestCase):
     def test_makefile_declares_root_integrity_target(self):
         text = self.read_makefile()
         self.assertIn("test-root-integrity", text)
-        self.assertIn(
-            "PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_root_integrity_verifier -v",
-            text,
-        )
+        self.assertIn("PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_root_integrity_verifier -v", text)
 
     def test_health_runs_root_integrity_before_other_health_gates(self):
         text = self.read_makefile()
@@ -31,7 +28,8 @@ class RootIntegrityHealthGateWiringTests(unittest.TestCase):
             ("test-final-runtime-contracts", "test-gated-provider-transport"),
             ("test-gated-provider-transport", "test-runtime-sealed-receipt"),
             ("test-runtime-sealed-receipt", "test-generic-payload-shadow"),
-            ("test-generic-payload-shadow", "test-schemas"),
+            ("test-generic-payload-shadow", "test-protected-evidence-storage"),
+            ("test-protected-evidence-storage", "test-schemas"),
             ("test-schemas", "test-tracer-bullet"),
             ("test-tracer-bullet", "test-acceptance"),
             ("test-acceptance", "diff-check"),
@@ -44,29 +42,14 @@ class RootIntegrityHealthGateWiringTests(unittest.TestCase):
         self.assertEqual(ci_line, "ci: health")
 
     def test_root_integrity_artifacts_exist_on_mainline_candidate(self):
-        required_paths = (
-            "governance/root/root_manifest_v1.json",
-            "kernel/bootstrap/root_integrity_verifier.py",
-            "tests/tracer_bullet/test_root_integrity_verifier.py",
-            "docs/decisions/root_integrity_verifier_foundation_v1.md",
-        )
-        for path in required_paths:
+        for path in ("governance/root/root_manifest_v1.json", "kernel/bootstrap/root_integrity_verifier.py", "tests/tracer_bullet/test_root_integrity_verifier.py", "docs/decisions/root_integrity_verifier_foundation_v1.md"):
             self.assertTrue(Path(path).is_file(), path)
 
     def test_root_integrity_health_gate_decision_exists(self):
         path = Path("docs/decisions/root_integrity_health_gate_wiring_v1.md")
         self.assertTrue(path.is_file(), str(path))
         text = path.read_text(encoding="utf-8")
-        for marker in (
-            "ROOT_INTEGRITY_HEALTH_GATE_WIRING_READY_FOR_LOCAL_TESTS",
-            "test-root-integrity",
-            "health",
-            "make ci",
-            "no runtime execution",
-            "no network access",
-            "no secret read",
-            "no automatic repair",
-        ):
+        for marker in ("ROOT_INTEGRITY_HEALTH_GATE_WIRING_READY_FOR_LOCAL_TESTS", "test-root-integrity", "health", "make ci", "no runtime execution", "no network access", "no secret read", "no automatic repair"):
             self.assertIn(marker, text)
 
 
