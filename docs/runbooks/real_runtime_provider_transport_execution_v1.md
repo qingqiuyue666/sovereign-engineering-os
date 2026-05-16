@@ -40,6 +40,7 @@ This track forbids:
 - SQLite mutation
 - runtime audit append
 - production autonomy
+- no production autonomy
 
 ## Execution posture
 
