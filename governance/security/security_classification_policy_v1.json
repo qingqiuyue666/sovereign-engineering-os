@@ -1,0 +1,21 @@
+{
+  "policy_type": "seos_security_classification_policy_v1",
+  "version": "v1",
+  "status": "active_contract",
+  "classification_levels": ["PUBLIC", "INTERNAL", "CONFIDENTIAL", "SECRET", "CROWN_JEWEL"],
+  "default_level": "INTERNAL",
+  "fail_closed_on_unknown_level": true,
+  "allowed_sinks": {
+    "PUBLIC": ["git_commit", "ai_context", "provider_request", "run_report", "exported_artifact", "ledger_record", "failure_bundle", "telegram_message"],
+    "INTERNAL": ["git_commit", "ai_context", "run_report", "exported_artifact", "ledger_record", "failure_bundle"],
+    "CONFIDENTIAL": ["run_report", "ledger_record", "failure_bundle"],
+    "SECRET": [],
+    "CROWN_JEWEL": []
+  },
+  "sensitive_labels": ["SECRET", "CROWN_JEWEL"],
+  "required_redaction_before_egress": ["SECRET", "CROWN_JEWEL"],
+  "network_accessed": false,
+  "runtime_execution_performed": false,
+  "secret_value_read": false,
+  "secret_value_persisted": false
+}
