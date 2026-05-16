@@ -25,6 +25,13 @@ It does not:
 - checkpoint SQLite
 - truncate WAL
 
+Explicit test-bound boundary markers:
+
+- no runtime execution
+- no network access
+- no secret read
+- no automatic repair
+
 ## Change
 
 `Makefile` now declares:
