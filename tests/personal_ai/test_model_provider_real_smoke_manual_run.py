@@ -103,10 +103,21 @@ class ModelProviderManualSmokeRunTests(unittest.TestCase):
             "prompt_length_chars": 16,
             "manual_flags": {},
             "secret_presence": {},
+            "secret_value_read": False,
+            "secret_value_persisted": False,
+            "secret_value_serialized": False,
             "raw_prompt_persisted": True,
+            "raw_provider_response_persisted": False,
+            "runtime_execution_performed": False,
+            "model_api_called": False,
+            "external_network_accessed": False,
+            "file_or_tool_action_performed": False,
+            "output_triggered_tool_or_file_authority": False,
+            "automatic_runtime_authority_granted": False,
+            "required_human_approval": True,
         }
 
-        with self.assertRaisesRegex(ValueError, "model provider smoke sealed evidence contract failed"):
+        with self.assertRaisesRegex(ValueError, "raw_prompt_persisted must be false"):
             build_model_provider_smoke_sealed_evidence_payload(report)
 
     def test_missing_manual_flags_and_secret_block_readiness(self):
