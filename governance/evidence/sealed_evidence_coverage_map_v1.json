@@ -90,6 +90,26 @@
       ]
     },
     {
+      "surface_id": "evidence_proof_contract_foundation",
+      "path": "kernel/evidence/evidence_proof_contract.py",
+      "artifact": "proof_record_contract_only",
+      "coverage_status": "covered_contract_surface",
+      "evidence_contract": "evidence_proof_contract_v1",
+      "coverage_mechanism": "deterministic_proof_record_validation_contract",
+      "classification": "public_restricted_secret",
+      "representation": "sha256_digest_redacted_digest_hmac_placeholder_merkle_placeholder",
+      "real_hmac_key_allowed": false,
+      "real_merkle_tree_allowed": false,
+      "encrypted_vault_allowed": false,
+      "zero_knowledge_proof_allowed": false,
+      "runtime_execution_allowed": false,
+      "network_access_allowed": false,
+      "secret_value_allowed": false,
+      "tests": [
+        "tests.tracer_bullet.test_evidence_proof_contract"
+      ]
+    },
+    {
       "surface_id": "encrypted_evidence_vault",
       "path": null,
       "artifact": null,
@@ -99,13 +119,13 @@
       "future_required_work": "encrypted vault storage, access policy, key management, recovery policy"
     },
     {
-      "surface_id": "merkle_or_hmac_evidence_proofs",
+      "surface_id": "real_merkle_or_hmac_evidence_proofs",
       "path": null,
       "artifact": null,
       "coverage_status": "not_implemented",
       "evidence_contract": null,
       "coverage_mechanism": "not_implemented",
-      "future_required_work": "Merkle/HMAC proof layer with key rotation and proof verification"
+      "future_required_work": "real Merkle/HMAC proof layer with key rotation and proof verification"
     },
     {
       "surface_id": "zero_knowledge_like_evidence_proofs",
@@ -137,5 +157,5 @@
     "not_implemented",
     "forbidden"
   ],
-  "next_recommended_slice": "sealed-evidence-coverage-health-gate-v1"
+  "next_recommended_slice": "evidence-proof-contract-health-gate-v1"
 }
