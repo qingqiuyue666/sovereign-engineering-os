@@ -1,0 +1,51 @@
+{
+  "contract_type": "seos_proof_authority_policy_contracts_v1",
+  "version": "v1",
+  "status": "policy_contract_only_no_real_crypto",
+  "runtime_execution_performed": false,
+  "network_accessed": false,
+  "sensitive_value_read": false,
+  "sensitive_value_persisted": false,
+  "sqlite_schema_changed": false,
+  "audit_append_performed": false,
+  "real_hmac_implemented": false,
+  "real_merkle_implemented": false,
+  "zero_knowledge_proof_implemented": false,
+  "contracts": [
+    {
+      "contract_id": "digest_authority_policy",
+      "status": "contract_only",
+      "allowed_record_kinds": ["sha256_digest", "redacted_digest"],
+      "requires_subject_evidence_id": true,
+      "requires_algorithm": true,
+      "requires_digest": true
+    },
+    {
+      "contract_id": "hmac_authority_policy_placeholder",
+      "status": "placeholder_contract_only",
+      "allowed_record_kinds": ["hmac_placeholder"],
+      "real_signing_allowed": false,
+      "real_key_material_allowed": false,
+      "requires_future_policy_id": true,
+      "requires_rotation_policy_before_realization": true
+    },
+    {
+      "contract_id": "merkle_authority_policy_placeholder",
+      "status": "placeholder_contract_only",
+      "allowed_record_kinds": ["merkle_placeholder"],
+      "real_tree_build_allowed": false,
+      "real_root_claim_allowed": false,
+      "requires_future_leaf_canonicalization_policy": true,
+      "requires_future_inclusion_proof_policy": true,
+      "requires_future_consistency_proof_policy": true
+    }
+  ],
+  "forbidden_claims_in_this_slice": [
+    "real_hmac_signature_created",
+    "real_merkle_tree_created",
+    "real_merkle_root_verified",
+    "zero_knowledge_proof_created",
+    "protected_storage_implemented",
+    "runtime_transport_enabled"
+  ]
+}

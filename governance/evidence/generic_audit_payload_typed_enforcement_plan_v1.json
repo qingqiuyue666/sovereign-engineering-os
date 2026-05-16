@@ -1,0 +1,46 @@
+{
+  "plan_type": "seos_generic_audit_payload_typed_enforcement_plan_v1",
+  "version": "v1",
+  "status": "contract_plan_only_not_enforced",
+  "runtime_execution_performed": false,
+  "network_accessed": false,
+  "sensitive_value_read": false,
+  "sensitive_value_persisted": false,
+  "sqlite_schema_changed": false,
+  "audit_append_performed": false,
+  "full_generic_enforcement_enabled": false,
+  "current_state": "selected_high_risk_only",
+  "target_state": "full_typed_payload_enforcement_after_compatibility_plan",
+  "allowed_phases": [
+    "phase_0_inventory",
+    "phase_1_type_registry",
+    "phase_2_shadow_validation",
+    "phase_3_selected_reject",
+    "phase_4_full_enforcement"
+  ],
+  "non_goals": [
+    "do_not_mutate_existing_audit_records",
+    "do_not_rewrite_historical_payloads",
+    "do_not_enable_full_enforcement_in_this_slice",
+    "do_not_change_sqlite_schema",
+    "do_not_append_runtime_audit_records"
+  ],
+  "required_contract_fields_for_future_payloads": [
+    "payload_type",
+    "schema_version",
+    "classification",
+    "representation",
+    "digest_or_redacted_digest",
+    "authority_boundary",
+    "sensitive_boundary",
+    "raw_material_boundary"
+  ],
+  "promotion_blockers_before_full_enforcement": [
+    "historical_payload_inventory_missing",
+    "payload_type_registry_missing",
+    "shadow_validation_missing",
+    "migration_compatibility_receipt_missing",
+    "root_integrity_health_missing",
+    "sealed_evidence_coverage_health_missing"
+  ]
+}

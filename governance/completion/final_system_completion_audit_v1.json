@@ -12,8 +12,8 @@
   "audit_append_performed": false,
   "raw_evidence_store_allowed": false,
   "verdict": "FINAL_COMPLETION_AUDIT_READY_NOT_100_PERCENT",
-  "readiness_band": "final_completion_audit_ready",
-  "estimated_completion_percent": 57,
+  "readiness_band": "hardening_bundle_ready",
+  "estimated_completion_percent": 60,
   "canonical_health_gate": {
     "make_target": "health",
     "ci_target": "ci",
@@ -21,6 +21,7 @@
       "test-root-integrity",
       "test-sealed-evidence-coverage",
       "test-evidence-proof-contract",
+      "test-evidence-proof-fixtures",
       "test-schemas",
       "test-tracer-bullet",
       "test-acceptance",
@@ -82,24 +83,39 @@
     },
     {
       "surface_id": "evidence_proof_fixtures",
-      "status": "implemented_but_not_dedicated_health_gated",
-      "evidence": "tests.tracer_bullet.test_evidence_proof_fixtures"
+      "status": "implemented_and_health_gated",
+      "evidence": "test-evidence-proof-fixtures"
+    },
+    {
+      "surface_id": "generic_audit_payload_typed_enforcement_plan",
+      "status": "implemented_contract_plan_only",
+      "evidence": "tests.tracer_bullet.test_evidence_proof_hardening_bundle"
+    },
+    {
+      "surface_id": "protected_evidence_storage_policy_plan",
+      "status": "implemented_policy_plan_only",
+      "evidence": "tests.tracer_bullet.test_evidence_proof_hardening_bundle"
+    },
+    {
+      "surface_id": "proof_authority_policy_contracts",
+      "status": "implemented_policy_contract_only",
+      "evidence": "tests.tracer_bullet.test_evidence_proof_hardening_bundle"
     }
   ],
   "not_implemented_surfaces": [
     {
-      "surface_id": "encrypted_evidence_vault",
-      "status": "not_implemented",
+      "surface_id": "protected_evidence_storage_implementation",
+      "status": "not_implemented_policy_plan_only_currently",
       "required_before_100_percent": true
     },
     {
       "surface_id": "real_hmac_key_management_and_signing",
-      "status": "not_implemented",
+      "status": "not_implemented_policy_contract_only_currently",
       "required_before_100_percent": true
     },
     {
       "surface_id": "real_merkle_tree_and_proof_verification",
-      "status": "not_implemented",
+      "status": "not_implemented_policy_contract_only_currently",
       "required_before_100_percent": true
     },
     {
@@ -109,7 +125,7 @@
     },
     {
       "surface_id": "full_generic_audit_payload_typed_enforcement",
-      "status": "not_implemented_selected_high_risk_only_currently",
+      "status": "not_implemented_plan_only_currently",
       "required_before_100_percent": true
     },
     {
@@ -138,14 +154,13 @@
     "allow_final_runtime_completion_track": true,
     "allow_production_autonomy_claim": false,
     "allow_manual_default_disabled_runtime_track": true,
-    "required_next_branch": "evidence-proof-fixtures-health-gate-v1"
+    "required_next_branch": "final-runtime-completion-track-v1"
   },
   "next_required_slices_before_100_percent": [
-    "evidence-proof-fixtures-health-gate-v1",
-    "generic-audit-payload-typed-enforcement-plan-v1",
-    "encrypted-evidence-vault-contract-plan-v1",
-    "real-hmac-key-policy-contract-v1",
-    "real-merkle-proof-policy-contract-v1",
+    "full-generic-audit-payload-typed-enforcement-v1",
+    "protected-evidence-storage-implementation-v1",
+    "real-hmac-policy-realization-v1",
+    "real-merkle-proof-realization-v1",
     "final-runtime-completion-track-v1"
   ]
 }

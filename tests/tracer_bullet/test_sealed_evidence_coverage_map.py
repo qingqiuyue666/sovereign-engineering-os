@@ -31,7 +31,7 @@ class SealedEvidenceCoverageMapTests(unittest.TestCase):
         self.assertFalse(payload["zero_knowledge_proof_implemented"])
         self.assertFalse(payload["raw_evidence_store_allowed"])
         self.assertIsInstance(payload["surfaces"], list)
-        self.assertGreaterEqual(len(payload["surfaces"]), 10)
+        self.assertGreaterEqual(len(payload["surfaces"]), 13)
 
     def test_required_surfaces_are_declared(self):
         surfaces = self.surfaces_by_id()
@@ -43,6 +43,9 @@ class SealedEvidenceCoverageMapTests(unittest.TestCase):
             "sealed_redacted_evidence_contract",
             "evidence_proof_contract_foundation",
             "evidence_proof_fixtures",
+            "generic_audit_payload_typed_enforcement_plan",
+            "protected_evidence_storage_policy_plan",
+            "proof_authority_policy_contracts",
             "encrypted_evidence_vault",
             "real_merkle_or_hmac_evidence_proofs",
             "zero_knowledge_like_evidence_proofs",
@@ -95,6 +98,20 @@ class SealedEvidenceCoverageMapTests(unittest.TestCase):
         self.assertFalse(surface["network_access_allowed"])
         self.assertFalse(surface["secret_value_allowed"])
         self.assertIn("tests.tracer_bullet.test_evidence_proof_fixtures", surface["tests"])
+
+    def test_hardening_bundle_plan_surfaces_are_contract_only(self):
+        surfaces = self.surfaces_by_id()
+        for surface_id in (
+            "generic_audit_payload_typed_enforcement_plan",
+            "protected_evidence_storage_policy_plan",
+            "proof_authority_policy_contracts",
+        ):
+            surface = surfaces[surface_id]
+            self.assertEqual(surface["coverage_status"], "covered_contract_surface")
+            self.assertFalse(surface["runtime_execution_allowed"])
+            self.assertFalse(surface["network_access_allowed"])
+            self.assertFalse(surface["secret_value_allowed"])
+            self.assertIn("tests.tracer_bullet.test_evidence_proof_hardening_bundle", surface["tests"])
 
     def test_append_only_ledger_is_selected_high_risk_only(self):
         surface = self.surfaces_by_id()["append_only_ledger_high_risk_payload_ingress"]
