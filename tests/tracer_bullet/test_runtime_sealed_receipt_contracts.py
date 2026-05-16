@@ -14,7 +14,7 @@ from kernel.runtime.runtime_sealed_receipt_contracts import (
 
 POLICY_PATH = Path("governance/runtime/runtime_sealed_receipt_v1.json")
 FIXTURE_PATH = Path("governance/runtime/fixtures/runtime_sealed_receipt_fixtures_v1.json")
-EXPECTED_HEALTH = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-runtime-sealed-receipt test-generic-payload-shadow test-protected-evidence-storage test-real-hmac-policy-realization test-real-merkle-proof-realization test-schemas test-tracer-bullet test-acceptance diff-check"
+EXPECTED_HEALTH = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-runtime-sealed-receipt test-generic-payload-shadow test-protected-evidence-storage test-real-hmac-policy-realization test-real-merkle-proof-realization test-generic-payload-full-enforcement test-schemas test-tracer-bullet test-acceptance diff-check"
 VALIDATORS = {"validate_runtime_sealed_receipt_policy": validate_runtime_sealed_receipt_policy, "validate_transport_attempt_receipt": validate_transport_attempt_receipt, "validate_blocked_attempt_receipt": validate_blocked_attempt_receipt, "validate_postcheck_receipt": validate_postcheck_receipt, "validate_receipt_chain": validate_receipt_chain}
 FORBIDDEN_FLAGS = ("provider_live_call_performed", "transport_attempted", "network_accessed", "secret_value_read", "secret_value_persisted", "env_read_performed", "raw_prompt_persisted", "raw_response_persisted", "sqlite_schema_changed", "audit_append_performed", "protected_storage_implemented", "real_hmac_performed", "real_merkle_tree_built", "zero_knowledge_proof_built", "production_autonomy_enabled", "raw_evidence_store_allowed")
 
@@ -47,7 +47,7 @@ class RuntimeSealedReceiptContractsTests(unittest.TestCase):
     def test_non_mapping_payload_raises(self):
         with self.assertRaises(RuntimeSealedReceiptContractViolation): validate_runtime_sealed_receipt_policy(["not", "mapping"])
     def test_makefile_declares_runtime_sealed_receipt_gate(self):
-        text = Path("Makefile").read_text(encoding="utf-8"); self.assertIn("test-runtime-sealed-receipt", text); self.assertIn(EXPECTED_HEALTH, text); self.assertLess(EXPECTED_HEALTH.index("test-real-hmac-policy-realization"), EXPECTED_HEALTH.index("test-real-merkle-proof-realization")); self.assertLess(EXPECTED_HEALTH.index("test-real-merkle-proof-realization"), EXPECTED_HEALTH.index("test-schemas"))
+        text = Path("Makefile").read_text(encoding="utf-8"); self.assertIn("test-runtime-sealed-receipt", text); self.assertIn(EXPECTED_HEALTH, text); self.assertLess(EXPECTED_HEALTH.index("test-real-merkle-proof-realization"), EXPECTED_HEALTH.index("test-generic-payload-full-enforcement")); self.assertLess(EXPECTED_HEALTH.index("test-generic-payload-full-enforcement"), EXPECTED_HEALTH.index("test-schemas"))
     def test_source_does_not_introduce_live_transport_surface(self):
         source = Path("kernel/runtime/runtime_sealed_receipt_contracts.py").read_text(encoding="utf-8")
         for marker in ("requests", "httpx", "urllib", "socket.", "subprocess", "os.system", "sqlite3", "openai.", "anthropic.", "google.generativeai", "getenv", "os.environ", ".environ", "write_text("):

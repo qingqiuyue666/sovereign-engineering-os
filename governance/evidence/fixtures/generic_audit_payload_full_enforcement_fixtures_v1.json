@@ -1,0 +1,156 @@
+{
+  "fixture_type": "seos_generic_audit_payload_full_enforcement_fixtures_v1",
+  "version": "v1",
+  "status": "fixture_only_contract_validation",
+  "valid_records": [
+    {
+      "fixture_id": "valid_full_enforcement_policy",
+      "validator": "validate_full_enforcement_policy",
+      "expected_accepted": true,
+      "expected_section": "policy",
+      "record": {
+        "policy_type": "seos_generic_audit_payload_full_enforcement_v1",
+        "status": "contract_only_enforcement_gate_not_runtime_mutation",
+        "full_enforcement_enabled": false,
+        "shadow_validation_retained": true,
+        "ordinary_payload_behavior_changed": false,
+        "audit_append_behavior_changed": false,
+        "sqlite_schema_changed": false,
+        "runtime_execution_performed": false,
+        "network_accessed": false,
+        "secret_value_read": false,
+        "secret_value_persisted": false,
+        "raw_material_persistence_allowed": false,
+        "compatibility_inventory_required": true,
+        "migration_receipt_required": true,
+        "rollback_plan_required": true,
+        "unknown_payload_fail_closed": true,
+        "high_risk_guard_retained": true,
+        "allowed_categories": ["classification", "lifecycle_transition", "validation_receipt", "approval", "sealed_evidence", "provider_transport_receipt", "runtime_sealed_receipt", "generic_enforcement_report"]
+      }
+    },
+    {
+      "fixture_id": "valid_compatibility_inventory",
+      "validator": "validate_compatibility_inventory",
+      "expected_accepted": true,
+      "expected_section": "compatibility_inventory",
+      "record": {
+        "inventory_type": "generic_payload_compatibility_inventory_v1",
+        "inventory_id": "inventory-001",
+        "task_id": "task-generic-enforcement-001",
+        "covered_categories": ["classification", "lifecycle_transition", "validation_receipt", "approval", "sealed_evidence", "provider_transport_receipt", "runtime_sealed_receipt"],
+        "unknown_payload_policy": "fail_closed_after_migration_receipt",
+        "shadow_gap_inventory_complete": true,
+        "ordinary_payload_behavior_changed": false,
+        "audit_append_behavior_changed": false,
+        "sqlite_schema_changed": false,
+        "runtime_execution_performed": false,
+        "network_accessed": false,
+        "secret_value_read": false,
+        "secret_value_persisted": false,
+        "raw_material_persistence_allowed": false
+      }
+    },
+    {
+      "fixture_id": "valid_migration_receipt",
+      "validator": "validate_migration_receipt",
+      "expected_accepted": true,
+      "expected_section": "migration_receipt",
+      "record": {
+        "receipt_type": "generic_payload_enforcement_migration_receipt_v1",
+        "receipt_id": "migration-001",
+        "task_id": "task-generic-enforcement-001",
+        "inventory_id": "inventory-001",
+        "rollback_plan_id": "rollback-001",
+        "compatibility_inventory_verified": true,
+        "rollback_plan_verified": true,
+        "shadow_validation_retained": true,
+        "high_risk_guard_retained": true,
+        "append_behavior_mutation_authorized": false,
+        "ordinary_payload_behavior_changed": false,
+        "audit_append_behavior_changed": false,
+        "sqlite_schema_changed": false,
+        "runtime_execution_performed": false,
+        "network_accessed": false,
+        "secret_value_read": false,
+        "secret_value_persisted": false,
+        "raw_material_persistence_allowed": false
+      }
+    },
+    {
+      "fixture_id": "valid_rollback_plan",
+      "validator": "validate_rollback_plan",
+      "expected_accepted": true,
+      "expected_section": "rollback_plan",
+      "record": {
+        "plan_type": "generic_payload_enforcement_rollback_plan_v1",
+        "rollback_plan_id": "rollback-001",
+        "task_id": "task-generic-enforcement-001",
+        "rollback_mode": "restore_shadow_validation_without_payload_loss",
+        "rollback_test_required": true,
+        "destructive_rollback_allowed": false,
+        "ordinary_payload_behavior_changed": false,
+        "audit_append_behavior_changed": false,
+        "sqlite_schema_changed": false,
+        "runtime_execution_performed": false,
+        "network_accessed": false,
+        "secret_value_read": false,
+        "secret_value_persisted": false,
+        "raw_material_persistence_allowed": false
+      }
+    },
+    {
+      "fixture_id": "valid_typed_enforcement_record",
+      "validator": "validate_typed_enforcement_record",
+      "expected_accepted": true,
+      "expected_section": "typed_enforcement_record",
+      "record": {
+        "record_type": "generic_payload_typed_enforcement_record_v1",
+        "record_id": "typed-record-001",
+        "task_id": "task-generic-enforcement-001",
+        "category": "classification",
+        "schema_ref": "schema::classification-v1",
+        "migration_receipt_id": "migration-001",
+        "typed_schema_validated": true,
+        "high_risk_guard_applied": true,
+        "unknown_payload": false,
+        "ordinary_payload_behavior_changed": false,
+        "audit_append_behavior_changed": false,
+        "sqlite_schema_changed": false,
+        "runtime_execution_performed": false,
+        "network_accessed": false,
+        "secret_value_read": false,
+        "secret_value_persisted": false,
+        "raw_material_persistence_allowed": false
+      }
+    },
+    {
+      "fixture_id": "valid_enforcement_report",
+      "validator": "validate_enforcement_report",
+      "expected_accepted": true,
+      "expected_section": "report",
+      "record": {
+        "report_type": "generic_payload_full_enforcement_report_v1",
+        "contract_only": true,
+        "validated_sections": ["policy", "compatibility_inventory", "migration_receipt", "rollback_plan", "typed_enforcement_record"],
+        "full_runtime_enforcement_ready": false,
+        "ordinary_payload_behavior_changed": false,
+        "audit_append_behavior_changed": false,
+        "sqlite_schema_changed": false,
+        "runtime_execution_performed": false,
+        "network_accessed": false,
+        "secret_value_read": false,
+        "secret_value_persisted": false,
+        "raw_material_persistence_allowed": false
+      }
+    }
+  ],
+  "invalid_records": [
+    {"fixture_id": "runtime_enforcement_claimed", "validator": "validate_full_enforcement_policy", "expected_failures": ["full_enforcement_enabled_must_be_false_in_contract_slice"], "record_patch": {"full_enforcement_enabled": true}},
+    {"fixture_id": "unknown_record", "validator": "validate_typed_enforcement_record", "expected_failures": ["unknown_payload_fail_closed"], "record_patch": {"unknown_payload": true}},
+    {"fixture_id": "compatibility_gap_record", "validator": "validate_typed_enforcement_record", "expected_failures": ["category_invalid"], "record_patch": {"category": "compatibility_gap"}},
+    {"fixture_id": "append_mutation_claimed", "validator": "validate_migration_receipt", "expected_failures": ["append_behavior_mutation_authorized_must_be_false"], "record_patch": {"append_behavior_mutation_authorized": true}},
+    {"fixture_id": "raw_prompt_present", "validator": "validate_typed_enforcement_record", "expected_failures": ["high_risk_key_forbidden"], "record_patch": {"raw_prompt": "forbidden"}},
+    {"fixture_id": "missing_rollback", "validator": "validate_migration_receipt", "expected_failures": ["rollback_plan_verified_missing"], "record_patch": {"rollback_plan_verified": false}}
+  ]
+}

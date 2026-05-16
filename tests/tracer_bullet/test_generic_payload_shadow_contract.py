@@ -14,7 +14,7 @@ from kernel.evidence.generic_payload_shadow_contract import (
 
 POLICY_PATH = Path("governance/evidence/generic_payload_shadow_v1.json")
 FIXTURE_PATH = Path("governance/evidence/fixtures/generic_payload_shadow_fixtures_v1.json")
-EXPECTED_HEALTH = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-runtime-sealed-receipt test-generic-payload-shadow test-protected-evidence-storage test-real-hmac-policy-realization test-real-merkle-proof-realization test-schemas test-tracer-bullet test-acceptance diff-check"
+EXPECTED_HEALTH = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-runtime-sealed-receipt test-generic-payload-shadow test-protected-evidence-storage test-real-hmac-policy-realization test-real-merkle-proof-realization test-generic-payload-full-enforcement test-schemas test-tracer-bullet test-acceptance diff-check"
 VALIDATORS = {"validate_generic_payload_shadow_policy": validate_generic_payload_shadow_policy, "validate_generic_payload_shadow_record": validate_generic_payload_shadow_record, "validate_generic_payload_compatibility_gap": validate_generic_payload_compatibility_gap, "validate_generic_payload_shadow_report": validate_generic_payload_shadow_report}
 FORBIDDEN_FLAGS = ("enforcement_enabled", "ordinary_payload_behavior_changed", "audit_append_behavior_changed", "sqlite_schema_changed", "runtime_execution_performed", "network_accessed", "secret_value_read", "secret_value_persisted", "raw_material_persistence_allowed")
 
@@ -46,7 +46,7 @@ class GenericPayloadShadowContractTests(unittest.TestCase):
     def test_non_mapping_payload_raises(self):
         with self.assertRaises(GenericPayloadShadowContractViolation): validate_generic_payload_shadow_record(["not", "mapping"])
     def test_makefile_declares_generic_payload_shadow_gate(self):
-        text = Path("Makefile").read_text(encoding="utf-8"); self.assertIn("test-generic-payload-shadow", text); self.assertIn(EXPECTED_HEALTH, text); self.assertLess(EXPECTED_HEALTH.index("test-real-hmac-policy-realization"), EXPECTED_HEALTH.index("test-real-merkle-proof-realization")); self.assertLess(EXPECTED_HEALTH.index("test-real-merkle-proof-realization"), EXPECTED_HEALTH.index("test-schemas"))
+        text = Path("Makefile").read_text(encoding="utf-8"); self.assertIn("test-generic-payload-shadow", text); self.assertIn(EXPECTED_HEALTH, text); self.assertLess(EXPECTED_HEALTH.index("test-real-merkle-proof-realization"), EXPECTED_HEALTH.index("test-generic-payload-full-enforcement")); self.assertLess(EXPECTED_HEALTH.index("test-generic-payload-full-enforcement"), EXPECTED_HEALTH.index("test-schemas"))
     def test_source_does_not_introduce_execution_or_persistence_surface(self):
         source = Path("kernel/evidence/generic_payload_shadow_contract.py").read_text(encoding="utf-8")
         for marker in ("requests", "httpx", "urllib", "socket.", "subprocess", "os.system", "sqlite3", "openai.", "anthropic.", "google.generativeai", "getenv", "os.environ", ".environ", "write_text("):
