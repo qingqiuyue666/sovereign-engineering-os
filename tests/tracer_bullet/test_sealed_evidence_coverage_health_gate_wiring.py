@@ -2,7 +2,7 @@ import unittest
 from pathlib import Path
 
 
-EXPECTED_HEALTH = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-schemas test-tracer-bullet test-acceptance diff-check"
+EXPECTED_HEALTH = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-schemas test-tracer-bullet test-acceptance diff-check"
 
 
 class SealedEvidenceCoverageHealthGateWiringTests(unittest.TestCase):
@@ -23,14 +23,18 @@ class SealedEvidenceCoverageHealthGateWiringTests(unittest.TestCase):
         text = self.read_makefile()
         health_line = next(line for line in text.splitlines() if line.startswith("health:"))
         self.assertEqual(health_line, EXPECTED_HEALTH)
-        self.assertLess(health_line.index("test-root-integrity"), health_line.index("test-sealed-evidence-coverage"))
-        self.assertLess(health_line.index("test-sealed-evidence-coverage"), health_line.index("test-evidence-proof-contract"))
-        self.assertLess(health_line.index("test-evidence-proof-contract"), health_line.index("test-evidence-proof-fixtures"))
-        self.assertLess(health_line.index("test-evidence-proof-fixtures"), health_line.index("test-final-runtime-contracts"))
-        self.assertLess(health_line.index("test-final-runtime-contracts"), health_line.index("test-schemas"))
-        self.assertLess(health_line.index("test-schemas"), health_line.index("test-tracer-bullet"))
-        self.assertLess(health_line.index("test-tracer-bullet"), health_line.index("test-acceptance"))
-        self.assertLess(health_line.index("test-acceptance"), health_line.index("diff-check"))
+        for earlier, later in (
+            ("test-root-integrity", "test-sealed-evidence-coverage"),
+            ("test-sealed-evidence-coverage", "test-evidence-proof-contract"),
+            ("test-evidence-proof-contract", "test-evidence-proof-fixtures"),
+            ("test-evidence-proof-fixtures", "test-final-runtime-contracts"),
+            ("test-final-runtime-contracts", "test-gated-provider-transport"),
+            ("test-gated-provider-transport", "test-schemas"),
+            ("test-schemas", "test-tracer-bullet"),
+            ("test-tracer-bullet", "test-acceptance"),
+            ("test-acceptance", "diff-check"),
+        ):
+            self.assertLess(health_line.index(earlier), health_line.index(later))
 
     def test_ci_still_depends_on_health_only(self):
         text = self.read_makefile()
