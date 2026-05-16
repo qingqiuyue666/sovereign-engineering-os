@@ -15,7 +15,7 @@ from kernel.runtime.runtime_sealed_receipt_contracts import (
 
 POLICY_PATH = Path("governance/runtime/runtime_sealed_receipt_v1.json")
 FIXTURE_PATH = Path("governance/runtime/fixtures/runtime_sealed_receipt_fixtures_v1.json")
-EXPECTED_HEALTH = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-runtime-sealed-receipt test-generic-payload-shadow test-schemas test-tracer-bullet test-acceptance diff-check"
+EXPECTED_HEALTH = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-runtime-sealed-receipt test-generic-payload-shadow test-protected-evidence-storage test-schemas test-tracer-bullet test-acceptance diff-check"
 
 VALIDATORS = {
     "validate_runtime_sealed_receipt_policy": validate_runtime_sealed_receipt_policy,
@@ -55,10 +55,7 @@ class RuntimeSealedReceiptContractsTests(unittest.TestCase):
         return json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
 
     def valid_by_validator(self):
-        return {
-            item["validator"]: item["record"]
-            for item in self.load_fixtures()["valid_records"]
-        }
+        return {item["validator"]: item["record"] for item in self.load_fixtures()["valid_records"]}
 
     def test_policy_map_is_accepted_contract_only(self):
         result = validate_runtime_sealed_receipt_policy(self.load_policy())
@@ -68,8 +65,7 @@ class RuntimeSealedReceiptContractsTests(unittest.TestCase):
     def test_valid_fixtures_are_accepted(self):
         for item in self.load_fixtures()["valid_records"]:
             with self.subTest(fixture_id=item["fixture_id"]):
-                validator = VALIDATORS[item["validator"]]
-                result = validator(item["record"])
+                result = VALIDATORS[item["validator"]](item["record"])
                 self.assertTrue(result.accepted, result.failures)
                 self.assertTrue(item["expected_accepted"])
 
@@ -79,8 +75,7 @@ class RuntimeSealedReceiptContractsTests(unittest.TestCase):
             with self.subTest(fixture_id=item["fixture_id"]):
                 base = copy.deepcopy(valid_records[item["validator"]])
                 base.update(item["record_patch"])
-                validator = VALIDATORS[item["validator"]]
-                result = validator(base)
+                result = VALIDATORS[item["validator"]](base)
                 self.assertFalse(result.accepted)
                 self.assertFalse(item["expected_accepted"])
                 for failure in item["expected_failures"]:
@@ -126,50 +121,23 @@ class RuntimeSealedReceiptContractsTests(unittest.TestCase):
     def test_makefile_declares_runtime_sealed_receipt_gate(self):
         text = Path("Makefile").read_text(encoding="utf-8")
         self.assertIn("test-runtime-sealed-receipt", text)
-        self.assertIn(
-            "PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_runtime_sealed_receipt_contracts -v",
-            text,
-        )
+        self.assertIn("PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_runtime_sealed_receipt_contracts -v", text)
         self.assertIn(EXPECTED_HEALTH, text)
         self.assertLess(EXPECTED_HEALTH.index("test-gated-provider-transport"), EXPECTED_HEALTH.index("test-runtime-sealed-receipt"))
         self.assertLess(EXPECTED_HEALTH.index("test-runtime-sealed-receipt"), EXPECTED_HEALTH.index("test-generic-payload-shadow"))
-        self.assertLess(EXPECTED_HEALTH.index("test-generic-payload-shadow"), EXPECTED_HEALTH.index("test-schemas"))
+        self.assertLess(EXPECTED_HEALTH.index("test-generic-payload-shadow"), EXPECTED_HEALTH.index("test-protected-evidence-storage"))
+        self.assertLess(EXPECTED_HEALTH.index("test-protected-evidence-storage"), EXPECTED_HEALTH.index("test-schemas"))
 
     def test_source_does_not_introduce_live_transport_surface(self):
         source = Path("kernel/runtime/runtime_sealed_receipt_contracts.py").read_text(encoding="utf-8")
-        forbidden_markers = (
-            "requests",
-            "httpx",
-            "urllib",
-            "socket.",
-            "subprocess",
-            "os.system",
-            "sqlite3",
-            "openai.",
-            "anthropic.",
-            "google.generativeai",
-            "getenv",
-            "os.environ",
-            ".environ",
-            "write_text(",
-        )
-        for marker in forbidden_markers:
+        for marker in ("requests", "httpx", "urllib", "socket.", "subprocess", "os.system", "sqlite3", "openai.", "anthropic.", "google.generativeai", "getenv", "os.environ", ".environ", "write_text("):
             self.assertNotIn(marker, source)
 
     def test_runbook_exists_and_records_receipt_boundary(self):
         path = Path("docs/runbooks/runtime_sealed_receipt_v1.md")
         self.assertTrue(path.is_file(), str(path))
         text = path.read_text(encoding="utf-8")
-        for marker in (
-            "RUNTIME_SEALED_RECEIPT_CONTRACT_READY",
-            "transport attempt receipt",
-            "blocked attempt receipt",
-            "postcheck receipt",
-            "receipt chain",
-            "no provider live call",
-            "no network access",
-            "no secret read",
-        ):
+        for marker in ("RUNTIME_SEALED_RECEIPT_CONTRACT_READY", "transport attempt receipt", "blocked attempt receipt", "postcheck receipt", "receipt chain", "no provider live call", "no network access", "no secret read"):
             self.assertIn(marker, text)
 
 
