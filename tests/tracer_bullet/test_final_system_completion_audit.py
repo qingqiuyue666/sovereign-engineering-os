@@ -19,11 +19,11 @@ class FinalSystemCompletionAuditTests(unittest.TestCase):
         self.assertEqual(audit["audit_type"], "seos_final_system_completion_audit_v1")
         self.assertEqual(audit["status"], "final_completion_audit_only_no_runtime")
         self.assertEqual(audit["verdict"], "FINAL_COMPLETION_AUDIT_READY_NOT_100_PERCENT")
-        self.assertEqual(audit["readiness_band"], "gated_provider_transport_contract_ready")
+        self.assertEqual(audit["readiness_band"], "runtime_sealed_receipt_contract_ready")
         self.assertFalse(audit["claim_100_percent_complete"])
         self.assertFalse(audit["final_system_fully_finished"])
         self.assertLess(audit["estimated_completion_percent"], 100)
-        self.assertGreaterEqual(audit["estimated_completion_percent"], 76)
+        self.assertGreaterEqual(audit["estimated_completion_percent"], 82)
 
     def test_audit_has_no_runtime_or_secret_posture(self):
         audit = self.load_audit()
@@ -51,6 +51,7 @@ class FinalSystemCompletionAuditTests(unittest.TestCase):
                 "test-evidence-proof-fixtures",
                 "test-final-runtime-contracts",
                 "test-gated-provider-transport",
+                "test-runtime-sealed-receipt",
                 "test-schemas",
                 "test-tracer-bullet",
                 "test-acceptance",
@@ -73,14 +74,16 @@ class FinalSystemCompletionAuditTests(unittest.TestCase):
             "gated_provider_transport_map",
             "gated_provider_transport_contracts",
             "gated_provider_transport_fixtures",
-            "gated_provider_transport_runbook",
+            "runtime_sealed_receipt_map",
+            "runtime_sealed_receipt_contracts",
+            "runtime_sealed_receipt_fixtures",
+            "runtime_sealed_receipt_runbook",
         ):
             self.assertIn(surface_id, implemented)
 
     def test_not_implemented_surfaces_block_100_percent_claim(self):
         not_implemented = self.ids("not_implemented_surfaces")
         for surface_id in (
-            "runtime_sealed_receipt_implementation",
             "protected_evidence_storage_implementation",
             "real_hmac_key_management_and_signing",
             "real_merkle_tree_and_proof_verification",
@@ -114,24 +117,24 @@ class FinalSystemCompletionAuditTests(unittest.TestCase):
         self.assertTrue(decision["allow_final_runtime_completion_track"])
         self.assertFalse(decision["allow_production_autonomy_claim"])
         self.assertTrue(decision["allow_manual_default_disabled_runtime_track"])
-        self.assertEqual(decision["required_next_branch"], "runtime-sealed-receipt-bundle-v1")
+        self.assertEqual(decision["required_next_branch"], "generic-audit-payload-full-typed-shadow-bundle-v1")
 
     def test_next_required_slices_are_not_empty(self):
         slices = self.load_audit()["next_required_slices_before_100_percent"]
         self.assertGreaterEqual(len(slices), 5)
-        self.assertIn("runtime-sealed-receipt-bundle-v1", slices)
+        self.assertIn("generic-audit-payload-full-typed-shadow-bundle-v1", slices)
         self.assertIn("real-merkle-proof-realization-v1", slices)
 
     def test_decision_doc_exists_and_records_non_100_percent_posture(self):
-        path = Path("docs/decisions/gated_provider_transport_bundle_v1.md")
+        path = Path("docs/decisions/runtime_sealed_receipt_bundle_v1.md")
         self.assertTrue(path.is_file(), str(path))
         text = path.read_text(encoding="utf-8")
         for marker in (
-            "GATED_PROVIDER_TRANSPORT_BUNDLE_READY_FOR_LOCAL_TESTS",
-            "gated_provider_transport_contract_ready",
+            "RUNTIME_SEALED_RECEIPT_BUNDLE_READY_FOR_LOCAL_TESTS",
+            "runtime_sealed_receipt_contract_ready",
             "not 100%",
-            "test-gated-provider-transport",
-            "runtime-sealed-receipt-bundle-v1",
+            "test-runtime-sealed-receipt",
+            "generic-audit-payload-full-typed-shadow-bundle-v1",
         ):
             self.assertIn(marker, text)
 
