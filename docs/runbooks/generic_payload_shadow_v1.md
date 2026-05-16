@@ -8,9 +8,9 @@ This runbook defines full typed shadow validation for generic payloads.
 
 It is shadow validation only.
 
-Enforcement remains disabled.
+enforcement remains disabled.
 
-Ordinary payload behavior is unchanged.
+ordinary payload behavior is unchanged.
 
 ## Boundary
 
