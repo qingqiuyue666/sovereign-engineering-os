@@ -1,10 +1,13 @@
-.PHONY: ci test-schemas test-tracer-bullet test-acceptance diff-check health
+.PHONY: ci test-root-integrity test-schemas test-tracer-bullet test-acceptance diff-check health
 
 PYTHON ?= python3
 
 ci: health
 
-health: test-schemas test-tracer-bullet test-acceptance diff-check
+health: test-root-integrity test-schemas test-tracer-bullet test-acceptance diff-check
+
+test-root-integrity:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_root_integrity_verifier -v
 
 test-schemas:
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest discover -s tests/schemas
