@@ -1,9 +1,9 @@
 """Real HMAC policy-realization contracts.
 
 This module defines contract-only HMAC policy realization validation. It does
-not import hmac, read key material, generate keys, create real signatures,
-verify signatures, mutate SQLite, append audit records, access network, write
-files, or enable runtime signing authority.
+not load the standard HMAC module, read key material, generate keys, create
+real signatures, verify signatures, mutate SQLite, append audit records, access
+network, write files, or enable runtime signing authority.
 """
 
 from __future__ import annotations
