@@ -25,7 +25,7 @@ class SealedEvidenceCoverageMapTests(unittest.TestCase):
         self.assertFalse(payload["sqlite_schema_changed"])
         self.assertFalse(payload["raw_evidence_store_allowed"])
         self.assertIsInstance(payload["surfaces"], list)
-        self.assertGreaterEqual(len(payload["surfaces"]), 20)
+        self.assertGreaterEqual(len(payload["surfaces"]), 24)
 
     def test_required_surfaces_are_declared(self):
         surfaces = self.surfaces_by_id()
@@ -38,6 +38,10 @@ class SealedEvidenceCoverageMapTests(unittest.TestCase):
             "evidence_proof_contract_foundation",
             "evidence_proof_fixtures",
             "generic_audit_payload_typed_enforcement_plan",
+            "generic_payload_shadow_policy",
+            "generic_payload_shadow_contract",
+            "generic_payload_shadow_fixtures",
+            "generic_payload_shadow_runbook",
             "protected_evidence_storage_policy_plan",
             "proof_authority_policy_contracts",
             "final_runtime_completion_track_map",
@@ -47,6 +51,10 @@ class SealedEvidenceCoverageMapTests(unittest.TestCase):
             "gated_provider_transport_contracts",
             "gated_provider_transport_fixtures",
             "gated_provider_transport_runbook",
+            "runtime_sealed_receipt_map",
+            "runtime_sealed_receipt_contracts",
+            "runtime_sealed_receipt_fixtures",
+            "runtime_sealed_receipt_runbook",
             "encrypted_evidence_vault",
             "real_merkle_or_hmac_evidence_proofs",
             "zero_knowledge_like_evidence_proofs",
@@ -60,6 +68,10 @@ class SealedEvidenceCoverageMapTests(unittest.TestCase):
             "evidence_proof_contract_foundation",
             "evidence_proof_fixtures",
             "generic_audit_payload_typed_enforcement_plan",
+            "generic_payload_shadow_policy",
+            "generic_payload_shadow_contract",
+            "generic_payload_shadow_fixtures",
+            "generic_payload_shadow_runbook",
             "protected_evidence_storage_policy_plan",
             "proof_authority_policy_contracts",
             "final_runtime_completion_track_map",
@@ -69,20 +81,32 @@ class SealedEvidenceCoverageMapTests(unittest.TestCase):
             "gated_provider_transport_contracts",
             "gated_provider_transport_fixtures",
             "gated_provider_transport_runbook",
+            "runtime_sealed_receipt_map",
+            "runtime_sealed_receipt_contracts",
+            "runtime_sealed_receipt_fixtures",
+            "runtime_sealed_receipt_runbook",
         ):
             surface = surfaces[surface_id]
             self.assertEqual(surface["coverage_status"], "covered_contract_surface")
             self.assertFalse(surface["runtime_execution_allowed"])
             self.assertFalse(surface["network_access_allowed"])
 
-    def test_runtime_contract_surfaces_have_runtime_tests(self):
+    def test_runtime_and_shadow_surfaces_have_tests(self):
         surfaces = self.surfaces_by_id()
         for surface_id in (
-            "final_runtime_completion_track_map",
-            "final_runtime_contract_validators",
-            "final_runtime_runbook",
+            "generic_payload_shadow_policy",
+            "generic_payload_shadow_contract",
+            "generic_payload_shadow_fixtures",
+            "generic_payload_shadow_runbook",
         ):
-            self.assertIn("tests.tracer_bullet.test_final_runtime_contracts", surfaces[surface_id]["tests"])
+            self.assertIn("tests.tracer_bullet.test_generic_payload_shadow_contract", surfaces[surface_id]["tests"])
+        for surface_id in (
+            "runtime_sealed_receipt_map",
+            "runtime_sealed_receipt_contracts",
+            "runtime_sealed_receipt_fixtures",
+            "runtime_sealed_receipt_runbook",
+        ):
+            self.assertIn("tests.tracer_bullet.test_runtime_sealed_receipt_contracts", surfaces[surface_id]["tests"])
         for surface_id in (
             "gated_provider_transport_map",
             "gated_provider_transport_contracts",
@@ -91,10 +115,12 @@ class SealedEvidenceCoverageMapTests(unittest.TestCase):
         ):
             self.assertIn("tests.tracer_bullet.test_gated_provider_transport_contracts", surfaces[surface_id]["tests"])
 
-    def test_selected_high_risk_and_future_layers_are_not_overclaimed(self):
+    def test_selected_high_risk_future_layers_and_shadow_state_are_not_overclaimed(self):
         surfaces = self.surfaces_by_id()
         self.assertEqual(surfaces["append_only_ledger_high_risk_payload_ingress"]["coverage_status"], "selected_high_risk_only")
-        self.assertEqual(surfaces["generic_audit_payloads"]["coverage_status"], "selected_high_risk_only")
+        self.assertEqual(surfaces["generic_audit_payloads"]["coverage_status"], "full_typed_shadow_validation_ready")
+        self.assertFalse(surfaces["generic_audit_payloads"]["ordinary_payload_behavior_changed"])
+        self.assertFalse(surfaces["generic_audit_payloads"]["full_enforcement_enabled"])
         for surface_id in (
             "encrypted_evidence_vault",
             "real_merkle_or_hmac_evidence_proofs",
