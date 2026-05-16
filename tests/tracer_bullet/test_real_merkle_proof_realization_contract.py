@@ -17,7 +17,7 @@ from kernel.evidence.real_merkle_proof_realization_contract import (
 
 POLICY_PATH = Path("governance/evidence/real_merkle_proof_realization_contract_v1.json")
 FIXTURE_PATH = Path("governance/evidence/fixtures/real_merkle_proof_realization_fixtures_v1.json")
-EXPECTED_HEALTH = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-runtime-sealed-receipt test-generic-payload-shadow test-protected-evidence-storage test-real-hmac-policy-realization test-real-merkle-proof-realization test-generic-payload-full-enforcement test-schemas test-tracer-bullet test-acceptance diff-check"
+EXPECTED_HEALTH = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-runtime-sealed-receipt test-generic-payload-shadow test-protected-evidence-storage test-protected-evidence-storage-implementation test-real-hmac-policy-realization test-real-merkle-proof-realization test-generic-payload-full-enforcement test-schemas test-tracer-bullet test-acceptance diff-check"
 VALIDATORS = {
     "validate_real_merkle_policy": validate_real_merkle_policy,
     "validate_merkle_tree_manifest": validate_merkle_tree_manifest,
@@ -70,7 +70,7 @@ class RealMerkleProofRealizationContractTests(unittest.TestCase):
     def test_non_mapping_payload_raises(self):
         with self.assertRaises(RealMerkleProofContractViolation): validate_real_merkle_policy(["not", "mapping"])
     def test_makefile_declares_real_merkle_proof_realization_gate(self):
-        text = Path("Makefile").read_text(encoding="utf-8"); self.assertIn("test-real-merkle-proof-realization", text); self.assertIn("PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_real_merkle_proof_realization_contract -v", text); self.assertIn(EXPECTED_HEALTH, text); self.assertLess(EXPECTED_HEALTH.index("test-real-merkle-proof-realization"), EXPECTED_HEALTH.index("test-generic-payload-full-enforcement")); self.assertLess(EXPECTED_HEALTH.index("test-generic-payload-full-enforcement"), EXPECTED_HEALTH.index("test-schemas"))
+        text = Path("Makefile").read_text(encoding="utf-8"); self.assertIn("test-real-merkle-proof-realization", text); self.assertIn("PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_real_merkle_proof_realization_contract -v", text); self.assertIn(EXPECTED_HEALTH, text); self.assertLess(EXPECTED_HEALTH.index("test-protected-evidence-storage"), EXPECTED_HEALTH.index("test-protected-evidence-storage-implementation")); self.assertLess(EXPECTED_HEALTH.index("test-protected-evidence-storage-implementation"), EXPECTED_HEALTH.index("test-real-hmac-policy-realization")); self.assertLess(EXPECTED_HEALTH.index("test-real-merkle-proof-realization"), EXPECTED_HEALTH.index("test-generic-payload-full-enforcement")); self.assertLess(EXPECTED_HEALTH.index("test-generic-payload-full-enforcement"), EXPECTED_HEALTH.index("test-schemas"))
     def test_source_does_not_introduce_tree_storage_or_runtime_surface(self):
         source = Path("kernel/evidence/real_merkle_proof_realization_contract.py").read_text(encoding="utf-8")
         for marker in ("hashlib", "sqlite3", "requests", "httpx", "urllib", "socket.", "subprocess", "os.system", "openai.", "anthropic.", "google.generativeai", "getenv", "os.environ", ".environ", "write_text("):
