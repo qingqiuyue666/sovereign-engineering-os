@@ -110,6 +110,26 @@
       ]
     },
     {
+      "surface_id": "evidence_proof_fixtures",
+      "path": "governance/evidence/fixtures/evidence_proof_records_v1.json",
+      "artifact": "proof_record_fixture_corpus_only",
+      "coverage_status": "covered_contract_surface",
+      "evidence_contract": "evidence_proof_contract_v1",
+      "coverage_mechanism": "typed_valid_and_invalid_fixture_corpus",
+      "classification": "fixture_only_no_runtime",
+      "representation": "sha256_digest_redacted_digest_hmac_placeholder_merkle_placeholder",
+      "real_hmac_key_allowed": false,
+      "real_merkle_tree_allowed": false,
+      "encrypted_vault_allowed": false,
+      "zero_knowledge_proof_allowed": false,
+      "runtime_execution_allowed": false,
+      "network_access_allowed": false,
+      "secret_value_allowed": false,
+      "tests": [
+        "tests.tracer_bullet.test_evidence_proof_fixtures"
+      ]
+    },
+    {
       "surface_id": "encrypted_evidence_vault",
       "path": null,
       "artifact": null,
@@ -157,5 +177,5 @@
     "not_implemented",
     "forbidden"
   ],
-  "next_recommended_slice": "evidence-proof-contract-health-gate-v1"
+  "next_recommended_slice": "evidence-proof-fixtures-health-gate-v1"
 }

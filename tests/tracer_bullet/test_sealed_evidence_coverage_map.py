@@ -31,7 +31,7 @@ class SealedEvidenceCoverageMapTests(unittest.TestCase):
         self.assertFalse(payload["zero_knowledge_proof_implemented"])
         self.assertFalse(payload["raw_evidence_store_allowed"])
         self.assertIsInstance(payload["surfaces"], list)
-        self.assertGreaterEqual(len(payload["surfaces"]), 9)
+        self.assertGreaterEqual(len(payload["surfaces"]), 10)
 
     def test_required_surfaces_are_declared(self):
         surfaces = self.surfaces_by_id()
@@ -42,6 +42,7 @@ class SealedEvidenceCoverageMapTests(unittest.TestCase):
             "generic_audit_payloads",
             "sealed_redacted_evidence_contract",
             "evidence_proof_contract_foundation",
+            "evidence_proof_fixtures",
             "encrypted_evidence_vault",
             "real_merkle_or_hmac_evidence_proofs",
             "zero_knowledge_like_evidence_proofs",
@@ -79,6 +80,21 @@ class SealedEvidenceCoverageMapTests(unittest.TestCase):
         self.assertFalse(surface["network_access_allowed"])
         self.assertFalse(surface["secret_value_allowed"])
         self.assertIn("tests.tracer_bullet.test_evidence_proof_contract", surface["tests"])
+
+    def test_evidence_proof_fixtures_are_fixture_surface_only(self):
+        surface = self.surfaces_by_id()["evidence_proof_fixtures"]
+        self.assertEqual(surface["coverage_status"], "covered_contract_surface")
+        self.assertEqual(surface["evidence_contract"], "evidence_proof_contract_v1")
+        self.assertEqual(surface["coverage_mechanism"], "typed_valid_and_invalid_fixture_corpus")
+        self.assertEqual(surface["classification"], "fixture_only_no_runtime")
+        self.assertFalse(surface["real_hmac_key_allowed"])
+        self.assertFalse(surface["real_merkle_tree_allowed"])
+        self.assertFalse(surface["encrypted_vault_allowed"])
+        self.assertFalse(surface["zero_knowledge_proof_allowed"])
+        self.assertFalse(surface["runtime_execution_allowed"])
+        self.assertFalse(surface["network_access_allowed"])
+        self.assertFalse(surface["secret_value_allowed"])
+        self.assertIn("tests.tracer_bullet.test_evidence_proof_fixtures", surface["tests"])
 
     def test_append_only_ledger_is_selected_high_risk_only(self):
         surface = self.surfaces_by_id()["append_only_ledger_high_risk_payload_ingress"]

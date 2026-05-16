@@ -1,0 +1,304 @@
+{
+  "fixture_type": "seos_evidence_proof_records_v1",
+  "version": "v1",
+  "status": "fixture_only_no_runtime",
+  "runtime_execution_performed": false,
+  "network_accessed": false,
+  "secret_value_read": false,
+  "secret_value_persisted": false,
+  "sqlite_schema_changed": false,
+  "encrypted_vault_implemented": false,
+  "real_hmac_implemented": false,
+  "real_merkle_implemented": false,
+  "zero_knowledge_proof_implemented": false,
+  "raw_evidence_store_allowed": false,
+  "valid_records": [
+    {
+      "fixture_id": "valid_sha256_digest_public",
+      "expected_accepted": true,
+      "record": {
+        "proof_id": "proof-valid-sha256-001",
+        "proof_kind": "sha256_digest",
+        "classification": "public",
+        "subject_evidence_id": "ev-public-001",
+        "digest": "sha256:8d5afc2b35fbde8f7ad792c67ab44e1742d1bd76b75e5ab11c40e4fd4fdbf385",
+        "algorithm": "sha256",
+        "payload": {
+          "shape": "hash_only",
+          "raw_prompt_persisted": false
+        },
+        "encrypted_vault_implemented": false,
+        "real_hmac_key_read": false,
+        "real_merkle_tree_built": false,
+        "zero_knowledge_proof_built": false,
+        "secret_value_read": false,
+        "runtime_execution_performed": false,
+        "network_accessed": false
+      }
+    },
+    {
+      "fixture_id": "valid_redacted_digest_restricted",
+      "expected_accepted": true,
+      "record": {
+        "proof_id": "proof-valid-redacted-001",
+        "proof_kind": "redacted_digest",
+        "classification": "restricted",
+        "subject_evidence_id": "ev-restricted-001",
+        "digest": "sha256:6d2c5dc2c3e1c94ef87f6cfe49b8fb3a19eea1e68f05cdfdff8fbb8fd44712af",
+        "algorithm": "redacted_sha256",
+        "payload": {
+          "shape": "redacted_hash_only",
+          "raw_provider_response_persisted": false
+        },
+        "encrypted_vault_implemented": false,
+        "real_hmac_key_read": false,
+        "real_merkle_tree_built": false,
+        "zero_knowledge_proof_built": false,
+        "secret_value_read": false,
+        "runtime_execution_performed": false,
+        "network_accessed": false
+      }
+    },
+    {
+      "fixture_id": "valid_hmac_placeholder_secret",
+      "expected_accepted": true,
+      "record": {
+        "proof_id": "proof-valid-hmac-placeholder-001",
+        "proof_kind": "hmac_placeholder",
+        "classification": "secret",
+        "subject_evidence_id": "ev-secret-001",
+        "digest": "hmac_placeholder",
+        "algorithm": "hmac_sha256_placeholder",
+        "key_id": "placeholder",
+        "payload": {
+          "shape": "placeholder_only",
+          "raw_exception_dump_persisted": false
+        },
+        "encrypted_vault_implemented": false,
+        "real_hmac_key_read": false,
+        "real_merkle_tree_built": false,
+        "zero_knowledge_proof_built": false,
+        "secret_value_read": false,
+        "runtime_execution_performed": false,
+        "network_accessed": false
+      }
+    },
+    {
+      "fixture_id": "valid_merkle_placeholder_secret",
+      "expected_accepted": true,
+      "record": {
+        "proof_id": "proof-valid-merkle-placeholder-001",
+        "proof_kind": "merkle_placeholder",
+        "classification": "secret",
+        "subject_evidence_id": "ev-secret-002",
+        "digest": "merkle_placeholder",
+        "algorithm": "merkle_sha256_placeholder",
+        "merkle_root": "placeholder",
+        "payload": {
+          "shape": "placeholder_only",
+          "raw_traceback_persisted": false
+        },
+        "encrypted_vault_implemented": false,
+        "real_hmac_key_read": false,
+        "real_merkle_tree_built": false,
+        "zero_knowledge_proof_built": false,
+        "secret_value_read": false,
+        "runtime_execution_performed": false,
+        "network_accessed": false
+      }
+    }
+  ],
+  "invalid_records": [
+    {
+      "fixture_id": "invalid_real_hmac_key_present",
+      "expected_accepted": false,
+      "expected_failures": ["real_hmac_key_forbidden"],
+      "record": {
+        "proof_id": "proof-invalid-hmac-key-001",
+        "proof_kind": "hmac_placeholder",
+        "classification": "secret",
+        "subject_evidence_id": "ev-secret-003",
+        "digest": "hmac_placeholder",
+        "algorithm": "hmac_sha256_placeholder",
+        "key_id": "real-key-001",
+        "payload": {},
+        "encrypted_vault_implemented": false,
+        "real_hmac_key_read": false,
+        "real_merkle_tree_built": false,
+        "zero_knowledge_proof_built": false,
+        "secret_value_read": false,
+        "runtime_execution_performed": false,
+        "network_accessed": false
+      }
+    },
+    {
+      "fixture_id": "invalid_real_merkle_root_present",
+      "expected_accepted": false,
+      "expected_failures": ["real_merkle_root_forbidden"],
+      "record": {
+        "proof_id": "proof-invalid-merkle-root-001",
+        "proof_kind": "merkle_placeholder",
+        "classification": "secret",
+        "subject_evidence_id": "ev-secret-004",
+        "digest": "merkle_placeholder",
+        "algorithm": "merkle_sha256_placeholder",
+        "merkle_root": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "payload": {},
+        "encrypted_vault_implemented": false,
+        "real_hmac_key_read": false,
+        "real_merkle_tree_built": false,
+        "zero_knowledge_proof_built": false,
+        "secret_value_read": false,
+        "runtime_execution_performed": false,
+        "network_accessed": false
+      }
+    },
+    {
+      "fixture_id": "invalid_encrypted_vault_claimed",
+      "expected_accepted": false,
+      "expected_failures": ["encrypted_vault_implementation_forbidden"],
+      "record": {
+        "proof_id": "proof-invalid-vault-001",
+        "proof_kind": "sha256_digest",
+        "classification": "restricted",
+        "subject_evidence_id": "ev-restricted-002",
+        "digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "algorithm": "sha256",
+        "payload": {},
+        "encrypted_vault_implemented": true,
+        "real_hmac_key_read": false,
+        "real_merkle_tree_built": false,
+        "zero_knowledge_proof_built": false,
+        "secret_value_read": false,
+        "runtime_execution_performed": false,
+        "network_accessed": false
+      }
+    },
+    {
+      "fixture_id": "invalid_zero_knowledge_proof_claimed",
+      "expected_accepted": false,
+      "expected_failures": ["zero_knowledge_proof_build_forbidden"],
+      "record": {
+        "proof_id": "proof-invalid-zk-001",
+        "proof_kind": "redacted_digest",
+        "classification": "secret",
+        "subject_evidence_id": "ev-secret-005",
+        "digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "algorithm": "redacted_sha256",
+        "payload": {},
+        "encrypted_vault_implemented": false,
+        "real_hmac_key_read": false,
+        "real_merkle_tree_built": false,
+        "zero_knowledge_proof_built": true,
+        "secret_value_read": false,
+        "runtime_execution_performed": false,
+        "network_accessed": false
+      }
+    },
+    {
+      "fixture_id": "invalid_secret_value_read_claimed",
+      "expected_accepted": false,
+      "expected_failures": ["secret_value_read_forbidden"],
+      "record": {
+        "proof_id": "proof-invalid-secret-read-001",
+        "proof_kind": "sha256_digest",
+        "classification": "secret",
+        "subject_evidence_id": "ev-secret-006",
+        "digest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "algorithm": "sha256",
+        "payload": {},
+        "encrypted_vault_implemented": false,
+        "real_hmac_key_read": false,
+        "real_merkle_tree_built": false,
+        "zero_knowledge_proof_built": false,
+        "secret_value_read": true,
+        "runtime_execution_performed": false,
+        "network_accessed": false
+      }
+    },
+    {
+      "fixture_id": "invalid_runtime_execution_claimed",
+      "expected_accepted": false,
+      "expected_failures": ["runtime_execution_forbidden"],
+      "record": {
+        "proof_id": "proof-invalid-runtime-001",
+        "proof_kind": "sha256_digest",
+        "classification": "public",
+        "subject_evidence_id": "ev-public-002",
+        "digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "algorithm": "sha256",
+        "payload": {},
+        "encrypted_vault_implemented": false,
+        "real_hmac_key_read": false,
+        "real_merkle_tree_built": false,
+        "zero_knowledge_proof_built": false,
+        "secret_value_read": false,
+        "runtime_execution_performed": true,
+        "network_accessed": false
+      }
+    },
+    {
+      "fixture_id": "invalid_network_access_claimed",
+      "expected_accepted": false,
+      "expected_failures": ["network_access_forbidden"],
+      "record": {
+        "proof_id": "proof-invalid-network-001",
+        "proof_kind": "sha256_digest",
+        "classification": "public",
+        "subject_evidence_id": "ev-public-003",
+        "digest": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "algorithm": "sha256",
+        "payload": {},
+        "encrypted_vault_implemented": false,
+        "real_hmac_key_read": false,
+        "real_merkle_tree_built": false,
+        "zero_knowledge_proof_built": false,
+        "secret_value_read": false,
+        "runtime_execution_performed": false,
+        "network_accessed": true
+      }
+    },
+    {
+      "fixture_id": "invalid_raw_prompt_present",
+      "expected_accepted": false,
+      "expected_failures": ["forbidden_raw_field_present"],
+      "record": {
+        "proof_id": "proof-invalid-raw-prompt-001",
+        "proof_kind": "redacted_digest",
+        "classification": "restricted",
+        "subject_evidence_id": "ev-restricted-003",
+        "digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        "algorithm": "redacted_sha256",
+        "payload": {"raw_prompt": "do not persist raw prompt"},
+        "encrypted_vault_implemented": false,
+        "real_hmac_key_read": false,
+        "real_merkle_tree_built": false,
+        "zero_knowledge_proof_built": false,
+        "secret_value_read": false,
+        "runtime_execution_performed": false,
+        "network_accessed": false
+      }
+    },
+    {
+      "fixture_id": "invalid_plaintext_secret_marker_present",
+      "expected_accepted": false,
+      "expected_failures": ["plaintext_secret_marker_present"],
+      "record": {
+        "proof_id": "proof-invalid-secret-marker-001",
+        "proof_kind": "redacted_digest",
+        "classification": "secret",
+        "subject_evidence_id": "ev-secret-007",
+        "digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+        "algorithm": "redacted_sha256",
+        "payload": {"note": "api_key=sk-test-secret-value"},
+        "encrypted_vault_implemented": false,
+        "real_hmac_key_read": false,
+        "real_merkle_tree_built": false,
+        "zero_knowledge_proof_built": false,
+        "secret_value_read": false,
+        "runtime_execution_performed": false,
+        "network_accessed": false
+      }
+    }
+  ]
+}
