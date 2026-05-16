@@ -15,7 +15,7 @@ from kernel.evidence.protected_evidence_storage_contract import (
 
 POLICY_PATH = Path("governance/evidence/protected_evidence_storage_contract_v1.json")
 FIXTURE_PATH = Path("governance/evidence/fixtures/protected_evidence_storage_fixtures_v1.json")
-EXPECTED_HEALTH = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-runtime-sealed-receipt test-generic-payload-shadow test-protected-evidence-storage test-real-hmac-policy-realization test-schemas test-tracer-bullet test-acceptance diff-check"
+EXPECTED_HEALTH = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-runtime-sealed-receipt test-generic-payload-shadow test-protected-evidence-storage test-real-hmac-policy-realization test-real-merkle-proof-realization test-schemas test-tracer-bullet test-acceptance diff-check"
 VALIDATORS = {"validate_protected_storage_policy": validate_protected_storage_policy, "validate_storage_manifest": validate_storage_manifest, "validate_access_policy": validate_access_policy, "validate_recovery_policy": validate_recovery_policy, "validate_deletion_policy": validate_deletion_policy, "validate_storage_contract_report": validate_storage_contract_report}
 FORBIDDEN_FLAGS = ("implementation_enabled", "encrypted_vault_implemented", "protected_storage_implemented", "key_material_read", "key_material_persisted", "plaintext_secret_allowed", "raw_prompt_allowed", "raw_provider_response_allowed", "runtime_execution_performed", "network_accessed", "sqlite_schema_changed", "audit_append_performed")
 
@@ -24,8 +24,7 @@ class ProtectedEvidenceStorageContractTests(unittest.TestCase):
         self.assertTrue(POLICY_PATH.is_file(), str(POLICY_PATH)); return json.loads(POLICY_PATH.read_text(encoding="utf-8"))
     def load_fixtures(self):
         self.assertTrue(FIXTURE_PATH.is_file(), str(FIXTURE_PATH)); return json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
-    def valid_by_validator(self):
-        return {item["validator"]: item["record"] for item in self.load_fixtures()["valid_records"]}
+    def valid_by_validator(self): return {item["validator"]: item["record"] for item in self.load_fixtures()["valid_records"]}
     def test_policy_map_is_accepted_contract_only(self):
         result = validate_protected_storage_policy(self.load_policy()); self.assertTrue(result.accepted, result.failures); self.assertEqual(result.contract_section, "policy")
     def test_valid_fixtures_are_accepted(self):
@@ -55,7 +54,7 @@ class ProtectedEvidenceStorageContractTests(unittest.TestCase):
     def test_non_mapping_payload_raises(self):
         with self.assertRaises(ProtectedEvidenceStorageContractViolation): validate_protected_storage_policy(["not", "mapping"])
     def test_makefile_declares_protected_storage_gate(self):
-        text = Path("Makefile").read_text(encoding="utf-8"); self.assertIn("test-protected-evidence-storage", text); self.assertIn(EXPECTED_HEALTH, text); self.assertLess(EXPECTED_HEALTH.index("test-protected-evidence-storage"), EXPECTED_HEALTH.index("test-real-hmac-policy-realization")); self.assertLess(EXPECTED_HEALTH.index("test-real-hmac-policy-realization"), EXPECTED_HEALTH.index("test-schemas"))
+        text = Path("Makefile").read_text(encoding="utf-8"); self.assertIn("test-protected-evidence-storage", text); self.assertIn(EXPECTED_HEALTH, text); self.assertLess(EXPECTED_HEALTH.index("test-real-hmac-policy-realization"), EXPECTED_HEALTH.index("test-real-merkle-proof-realization")); self.assertLess(EXPECTED_HEALTH.index("test-real-merkle-proof-realization"), EXPECTED_HEALTH.index("test-schemas"))
     def test_source_does_not_introduce_crypto_storage_or_runtime_surface(self):
         source = Path("kernel/evidence/protected_evidence_storage_contract.py").read_text(encoding="utf-8")
         for marker in ("cryptography", "sqlite3", "requests", "httpx", "urllib", "socket.", "subprocess", "os.system", "openai.", "anthropic.", "google.generativeai", "getenv", "os.environ", ".environ", "write_text("):

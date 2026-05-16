@@ -17,7 +17,7 @@ from kernel.evidence.real_hmac_policy_realization_contract import (
 
 POLICY_PATH = Path("governance/evidence/real_hmac_policy_realization_contract_v1.json")
 FIXTURE_PATH = Path("governance/evidence/fixtures/real_hmac_policy_realization_fixtures_v1.json")
-EXPECTED_HEALTH = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-runtime-sealed-receipt test-generic-payload-shadow test-protected-evidence-storage test-real-hmac-policy-realization test-schemas test-tracer-bullet test-acceptance diff-check"
+EXPECTED_HEALTH = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-runtime-sealed-receipt test-generic-payload-shadow test-protected-evidence-storage test-real-hmac-policy-realization test-real-merkle-proof-realization test-schemas test-tracer-bullet test-acceptance diff-check"
 
 VALIDATORS = {
     "validate_real_hmac_policy": validate_real_hmac_policy,
@@ -57,10 +57,7 @@ class RealHmacPolicyRealizationContractTests(unittest.TestCase):
         return json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
 
     def valid_by_validator(self):
-        return {
-            item["validator"]: item["record"]
-            for item in self.load_fixtures()["valid_records"]
-        }
+        return {item["validator"]: item["record"] for item in self.load_fixtures()["valid_records"]}
 
     def test_policy_map_is_accepted_contract_only(self):
         result = validate_real_hmac_policy(self.load_policy())
@@ -134,51 +131,20 @@ class RealHmacPolicyRealizationContractTests(unittest.TestCase):
     def test_makefile_declares_real_hmac_policy_realization_gate(self):
         text = Path("Makefile").read_text(encoding="utf-8")
         self.assertIn("test-real-hmac-policy-realization", text)
-        self.assertIn(
-            "PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_real_hmac_policy_realization_contract -v",
-            text,
-        )
+        self.assertIn("PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_real_hmac_policy_realization_contract -v", text)
         self.assertIn(EXPECTED_HEALTH, text)
         self.assertLess(EXPECTED_HEALTH.index("test-protected-evidence-storage"), EXPECTED_HEALTH.index("test-real-hmac-policy-realization"))
-        self.assertLess(EXPECTED_HEALTH.index("test-real-hmac-policy-realization"), EXPECTED_HEALTH.index("test-schemas"))
+        self.assertLess(EXPECTED_HEALTH.index("test-real-hmac-policy-realization"), EXPECTED_HEALTH.index("test-real-merkle-proof-realization"))
+        self.assertLess(EXPECTED_HEALTH.index("test-real-merkle-proof-realization"), EXPECTED_HEALTH.index("test-schemas"))
 
     def test_source_does_not_introduce_hmac_key_or_runtime_surface(self):
         source = Path("kernel/evidence/real_hmac_policy_realization_contract.py").read_text(encoding="utf-8")
-        for marker in (
-            "import hmac",
-            "hmac.",
-            "compare_digest",
-            "cryptography",
-            "sqlite3",
-            "requests",
-            "httpx",
-            "urllib",
-            "socket.",
-            "subprocess",
-            "os.system",
-            "openai.",
-            "anthropic.",
-            "google.generativeai",
-            "getenv",
-            "os.environ",
-            ".environ",
-            "write_text(",
-        ):
+        for marker in ("import hmac", "hmac.", "compare_digest", "cryptography", "sqlite3", "requests", "httpx", "urllib", "socket.", "subprocess", "os.system", "openai.", "anthropic.", "google.generativeai", "getenv", "os.environ", ".environ", "write_text("):
             self.assertNotIn(marker, source)
 
     def test_runbook_exists_and_records_hmac_boundary(self):
-        path = Path("docs/runbooks/real_hmac_policy_realization_contract_v1.md")
-        self.assertTrue(path.is_file(), str(path))
-        text = path.read_text(encoding="utf-8")
-        for marker in (
-            "REAL_HMAC_POLICY_REALIZATION_CONTRACT_READY",
-            "contract-only HMAC policy realization",
-            "no real HMAC signature",
-            "no key material read",
-            "no key material persistence",
-            "constant-time compare required before real verification",
-            "protected storage contract required",
-        ):
+        text = Path("docs/runbooks/real_hmac_policy_realization_contract_v1.md").read_text(encoding="utf-8")
+        for marker in ("REAL_HMAC_POLICY_REALIZATION_CONTRACT_READY", "contract-only HMAC policy realization", "no real HMAC signature", "no key material read", "no key material persistence", "constant-time compare required before real verification", "protected storage contract required"):
             self.assertIn(marker, text)
 
 
