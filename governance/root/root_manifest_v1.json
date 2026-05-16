@@ -3,7 +3,7 @@
   "created_for_branch": "root-integrity-verifier-foundation-v1",
   "critical_files": [
     {
-      "git_blob_sha1": "99d9cbaf6d9781df21cd83d6903be3431e30f5d4",
+      "git_blob_sha1": "afb068d9709aae31d51fac774ae43a26995bd726",
       "path": "kernel/bootstrap/root_integrity_verifier.py",
       "role": "bootstrap_verifier"
     },
