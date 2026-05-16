@@ -1,6 +1,6 @@
 {
   "automatic_repair_allowed": false,
-  "created_for_branch": "runtime-sealed-receipt-bundle-v1",
+  "created_for_branch": "generic-audit-payload-full-typed-shadow-bundle-v1",
   "critical_files": [
     {
       "git_blob_sha1": "afb068d9709aae31d51fac774ae43a26995bd726",
@@ -38,7 +38,7 @@
       "role": "model_provider_manual_smoke_planner"
     },
     {
-      "git_blob_sha1": "a51c1c97cf29d6e002ef73f3f228b8f2e14e1ea3",
+      "git_blob_sha1": "d1a0b8578bc052d9cebb713adcc64abf6f44c19c",
       "path": "Makefile",
       "role": "canonical_ci_gate"
     },
@@ -60,7 +60,7 @@
   "runtime_execution_performed": false,
   "secret_value_persisted": false,
   "secret_value_read": false,
-  "status": "runtime_sealed_receipt_health_gate_wiring",
+  "status": "generic_payload_shadow_health_gate_wiring",
   "version": "v1",
   "next_allowed_action_on_failure": "read_only_seed_recovery_required"
 }
