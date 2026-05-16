@@ -1,0 +1,141 @@
+{
+  "map_type": "seos_sealed_evidence_coverage_map_v1",
+  "version": "v1",
+  "status": "coverage_map_only_no_runtime",
+  "runtime_execution_performed": false,
+  "network_accessed": false,
+  "secret_value_read": false,
+  "secret_value_persisted": false,
+  "sqlite_schema_changed": false,
+  "encrypted_vault_implemented": false,
+  "merkle_proof_implemented": false,
+  "hmac_proof_implemented": false,
+  "zero_knowledge_proof_implemented": false,
+  "raw_evidence_store_allowed": false,
+  "surfaces": [
+    {
+      "surface_id": "model_provider_manual_smoke_report",
+      "path": "kernel/personal_ai/model_provider_real_smoke_manual_run.py",
+      "artifact": "model_provider_real_smoke_manual_run_report.json",
+      "coverage_status": "covered",
+      "evidence_contract": "sealed_redaction_v1",
+      "coverage_mechanism": "embedded_sealed_evidence_payload",
+      "classification": "secret",
+      "representation": "redacted_digest",
+      "raw_prompt_allowed": false,
+      "raw_provider_response_allowed": false,
+      "secret_value_allowed": false,
+      "runtime_authority_allowed": false,
+      "tests": [
+        "tests.personal_ai.test_model_provider_real_smoke_manual_run"
+      ]
+    },
+    {
+      "surface_id": "failure_quarantine_manifest",
+      "path": "kernel/personal_ai/failure_quarantine.py",
+      "artifact": "failure_manifest.json",
+      "coverage_status": "covered",
+      "evidence_contract": "sealed_redaction_v1",
+      "coverage_mechanism": "embedded_sealed_evidence_payload",
+      "classification": "secret",
+      "representation": "redacted_digest",
+      "raw_traceback_allowed": false,
+      "raw_exception_dump_allowed": false,
+      "secret_value_allowed": false,
+      "runtime_authority_allowed": false,
+      "tests": [
+        "tests.personal_ai.test_failure_quarantine"
+      ]
+    },
+    {
+      "surface_id": "append_only_ledger_high_risk_payload_ingress",
+      "path": "kernel/evidence/append_only_ledger.py",
+      "artifact": "audit_records.payload_json",
+      "coverage_status": "selected_high_risk_only",
+      "evidence_contract": "sealed_redaction_v1",
+      "coverage_mechanism": "selected_high_risk_payload_ingress_guard",
+      "classification": "varies_by_payload",
+      "representation": "contract_constrained",
+      "ordinary_payload_behavior_changed": false,
+      "generic_classification_key_triggers_contract": false,
+      "raw_prompt_allowed": false,
+      "raw_provider_response_allowed": false,
+      "secret_value_allowed": false,
+      "tests": [
+        "tests.tracer_bullet.test_sealed_evidence_ledger_ingress"
+      ]
+    },
+    {
+      "surface_id": "generic_audit_payloads",
+      "path": "kernel/evidence/append_only_ledger.py",
+      "artifact": "audit_records.payload_json",
+      "coverage_status": "selected_high_risk_only",
+      "evidence_contract": "sealed_redaction_v1",
+      "coverage_mechanism": "not_all_payloads_forced_through_contract",
+      "ordinary_payload_behavior_changed": false,
+      "rationale": "avoid breaking historical and classification audit records while high-risk keys are guarded",
+      "future_required_work": "expand typed evidence payload schemas before full enforcement"
+    },
+    {
+      "surface_id": "sealed_redacted_evidence_contract",
+      "path": "kernel/evidence/sealed_redaction_contract.py",
+      "artifact": "contract_only",
+      "coverage_status": "covered_contract_surface",
+      "evidence_contract": "sealed_redaction_v1",
+      "coverage_mechanism": "deterministic_validation_contract",
+      "classification": "public_restricted_secret",
+      "representation": "sha256_salted_hash_hmac_placeholder_sealed_blob_ref_redacted_digest",
+      "tests": [
+        "tests.tracer_bullet.test_sealed_evidence_redaction_contract"
+      ]
+    },
+    {
+      "surface_id": "encrypted_evidence_vault",
+      "path": null,
+      "artifact": null,
+      "coverage_status": "not_implemented",
+      "evidence_contract": null,
+      "coverage_mechanism": "not_implemented",
+      "future_required_work": "encrypted vault storage, access policy, key management, recovery policy"
+    },
+    {
+      "surface_id": "merkle_or_hmac_evidence_proofs",
+      "path": null,
+      "artifact": null,
+      "coverage_status": "not_implemented",
+      "evidence_contract": null,
+      "coverage_mechanism": "not_implemented",
+      "future_required_work": "Merkle/HMAC proof layer with key rotation and proof verification"
+    },
+    {
+      "surface_id": "zero_knowledge_like_evidence_proofs",
+      "path": null,
+      "artifact": null,
+      "coverage_status": "not_implemented",
+      "evidence_contract": null,
+      "coverage_mechanism": "not_implemented",
+      "future_required_work": "zero-knowledge-like digest verification without plaintext disclosure"
+    },
+    {
+      "surface_id": "raw_evidence_store",
+      "path": null,
+      "artifact": null,
+      "coverage_status": "forbidden",
+      "evidence_contract": null,
+      "coverage_mechanism": "explicitly_disallowed",
+      "raw_prompt_allowed": false,
+      "raw_provider_response_allowed": false,
+      "secret_value_allowed": false,
+      "raw_traceback_allowed": false,
+      "raw_exception_dump_allowed": false
+    }
+  ],
+  "required_status_values": [
+    "covered",
+    "selected_high_risk_only",
+    "covered_contract_surface",
+    "not_implemented",
+    "forbidden"
+  ],
+  "next_recommended_slice": "sealed-evidence-coverage-health-gate-v1"
+}
