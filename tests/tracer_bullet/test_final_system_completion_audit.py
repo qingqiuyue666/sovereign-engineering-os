@@ -19,11 +19,11 @@ class FinalSystemCompletionAuditTests(unittest.TestCase):
         self.assertEqual(audit["audit_type"], "seos_final_system_completion_audit_v1")
         self.assertEqual(audit["status"], "final_completion_audit_only_no_runtime")
         self.assertEqual(audit["verdict"], "FINAL_COMPLETION_AUDIT_READY_NOT_100_PERCENT")
-        self.assertEqual(audit["readiness_band"], "generic_payload_full_typed_shadow_ready")
+        self.assertEqual(audit["readiness_band"], "protected_evidence_storage_contract_ready")
         self.assertFalse(audit["claim_100_percent_complete"])
         self.assertFalse(audit["final_system_fully_finished"])
         self.assertLess(audit["estimated_completion_percent"], 100)
-        self.assertGreaterEqual(audit["estimated_completion_percent"], 86)
+        self.assertGreaterEqual(audit["estimated_completion_percent"], 90)
 
     def test_audit_has_no_runtime_or_secret_posture(self):
         audit = self.load_audit()
@@ -53,6 +53,7 @@ class FinalSystemCompletionAuditTests(unittest.TestCase):
                 "test-gated-provider-transport",
                 "test-runtime-sealed-receipt",
                 "test-generic-payload-shadow",
+                "test-protected-evidence-storage",
                 "test-schemas",
                 "test-tracer-bullet",
                 "test-acceptance",
@@ -82,6 +83,10 @@ class FinalSystemCompletionAuditTests(unittest.TestCase):
             "generic_payload_shadow_contract",
             "generic_payload_shadow_fixtures",
             "generic_payload_shadow_runbook",
+            "protected_evidence_storage_contract_map",
+            "protected_evidence_storage_contract",
+            "protected_evidence_storage_fixtures",
+            "protected_evidence_storage_runbook",
         ):
             self.assertIn(surface_id, implemented)
 
@@ -89,6 +94,7 @@ class FinalSystemCompletionAuditTests(unittest.TestCase):
         not_implemented = self.ids("not_implemented_surfaces")
         for surface_id in (
             "protected_evidence_storage_implementation",
+            "encrypted_evidence_vault",
             "real_hmac_key_management_and_signing",
             "real_merkle_tree_and_proof_verification",
             "full_generic_audit_payload_typed_enforcement",
@@ -108,6 +114,9 @@ class FinalSystemCompletionAuditTests(unittest.TestCase):
             "raw_traceback_persistence",
             "raw_exception_dump_persistence",
             "secret_value_persistence",
+            "key_material_read",
+            "key_material_persistence",
+            "plaintext_secret_storage",
             "ungated_runtime_authority",
             "network_access_without_explicit_transport_gate",
             "provider_live_call_without_transport_gate",
@@ -123,25 +132,28 @@ class FinalSystemCompletionAuditTests(unittest.TestCase):
         self.assertFalse(decision["allow_production_autonomy_claim"])
         self.assertTrue(decision["allow_manual_default_disabled_runtime_track"])
         self.assertFalse(decision["allow_generic_payload_full_enforcement"])
-        self.assertEqual(decision["required_next_branch"], "protected-evidence-storage-contract-bundle-v1")
+        self.assertFalse(decision["allow_protected_storage_implementation"])
+        self.assertFalse(decision["allow_encrypted_vault_claim"])
+        self.assertFalse(decision["allow_key_material_access"])
+        self.assertEqual(decision["required_next_branch"], "real-hmac-policy-realization-contract-bundle-v1")
 
     def test_next_required_slices_are_not_empty(self):
         slices = self.load_audit()["next_required_slices_before_100_percent"]
         self.assertGreaterEqual(len(slices), 5)
-        self.assertIn("protected-evidence-storage-contract-bundle-v1", slices)
-        self.assertIn("generic-audit-payload-full-enforcement-bundle-v1", slices)
+        self.assertIn("real-hmac-policy-realization-contract-bundle-v1", slices)
+        self.assertIn("protected-evidence-storage-implementation-v1", slices)
         self.assertIn("real-merkle-proof-realization-v1", slices)
 
     def test_decision_doc_exists_and_records_non_100_percent_posture(self):
-        path = Path("docs/decisions/generic_payload_shadow_bundle_v1.md")
+        path = Path("docs/decisions/protected_evidence_storage_contract_bundle_v1.md")
         self.assertTrue(path.is_file(), str(path))
         text = path.read_text(encoding="utf-8")
         for marker in (
-            "GENERIC_PAYLOAD_SHADOW_BUNDLE_READY_FOR_LOCAL_TESTS",
-            "generic_payload_full_typed_shadow_ready",
+            "PROTECTED_EVIDENCE_STORAGE_CONTRACT_BUNDLE_READY_FOR_LOCAL_TESTS",
+            "protected_evidence_storage_contract_ready",
             "not 100%",
-            "test-generic-payload-shadow",
-            "protected-evidence-storage-contract-bundle-v1",
+            "test-protected-evidence-storage",
+            "real-hmac-policy-realization-contract-bundle-v1",
         ):
             self.assertIn(marker, text)
 
