@@ -2,7 +2,7 @@ import unittest
 from pathlib import Path
 
 
-EXPECTED_HEALTH = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-schemas test-tracer-bullet test-acceptance diff-check"
+EXPECTED_HEALTH = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-runtime-sealed-receipt test-schemas test-tracer-bullet test-acceptance diff-check"
 
 
 class SealedEvidenceCoverageHealthGateWiringTests(unittest.TestCase):
@@ -29,7 +29,8 @@ class SealedEvidenceCoverageHealthGateWiringTests(unittest.TestCase):
             ("test-evidence-proof-contract", "test-evidence-proof-fixtures"),
             ("test-evidence-proof-fixtures", "test-final-runtime-contracts"),
             ("test-final-runtime-contracts", "test-gated-provider-transport"),
-            ("test-gated-provider-transport", "test-schemas"),
+            ("test-gated-provider-transport", "test-runtime-sealed-receipt"),
+            ("test-runtime-sealed-receipt", "test-schemas"),
             ("test-schemas", "test-tracer-bullet"),
             ("test-tracer-bullet", "test-acceptance"),
             ("test-acceptance", "diff-check"),

@@ -12,8 +12,8 @@
   "audit_append_performed": false,
   "raw_evidence_store_allowed": false,
   "verdict": "FINAL_COMPLETION_AUDIT_READY_NOT_100_PERCENT",
-  "readiness_band": "gated_provider_transport_contract_ready",
-  "estimated_completion_percent": 76,
+  "readiness_band": "runtime_sealed_receipt_contract_ready",
+  "estimated_completion_percent": 82,
   "canonical_health_gate": {
     "make_target": "health",
     "ci_target": "ci",
@@ -24,6 +24,7 @@
       "test-evidence-proof-fixtures",
       "test-final-runtime-contracts",
       "test-gated-provider-transport",
+      "test-runtime-sealed-receipt",
       "test-schemas",
       "test-tracer-bullet",
       "test-acceptance",
@@ -45,10 +46,12 @@
     {"surface_id": "gated_provider_transport_map", "status": "implemented_and_health_gated_contract_only", "evidence": "test-gated-provider-transport"},
     {"surface_id": "gated_provider_transport_contracts", "status": "implemented_and_health_gated_contract_only", "evidence": "test-gated-provider-transport"},
     {"surface_id": "gated_provider_transport_fixtures", "status": "implemented_and_health_gated_fixture_only", "evidence": "test-gated-provider-transport"},
-    {"surface_id": "gated_provider_transport_runbook", "status": "implemented_runbook_only", "evidence": "docs/runbooks/gated_provider_transport_v1.md"}
+    {"surface_id": "runtime_sealed_receipt_map", "status": "implemented_and_health_gated_contract_only", "evidence": "test-runtime-sealed-receipt"},
+    {"surface_id": "runtime_sealed_receipt_contracts", "status": "implemented_and_health_gated_contract_only", "evidence": "test-runtime-sealed-receipt"},
+    {"surface_id": "runtime_sealed_receipt_fixtures", "status": "implemented_and_health_gated_fixture_only", "evidence": "test-runtime-sealed-receipt"},
+    {"surface_id": "runtime_sealed_receipt_runbook", "status": "implemented_runbook_only", "evidence": "docs/runbooks/runtime_sealed_receipt_v1.md"}
   ],
   "not_implemented_surfaces": [
-    {"surface_id": "runtime_sealed_receipt_implementation", "status": "not_implemented", "required_before_100_percent": true},
     {"surface_id": "real_runtime_provider_transport_execution", "status": "not_implemented_disabled_by_default_contract_only_currently", "required_before_100_percent": true},
     {"surface_id": "protected_evidence_storage_implementation", "status": "not_implemented_policy_plan_only_currently", "required_before_100_percent": true},
     {"surface_id": "real_hmac_key_management_and_signing", "status": "not_implemented_policy_contract_only_currently", "required_before_100_percent": true},
@@ -73,13 +76,13 @@
     "allow_final_runtime_completion_track": true,
     "allow_production_autonomy_claim": false,
     "allow_manual_default_disabled_runtime_track": true,
-    "required_next_branch": "runtime-sealed-receipt-bundle-v1"
+    "required_next_branch": "generic-audit-payload-full-typed-shadow-bundle-v1"
   },
   "next_required_slices_before_100_percent": [
-    "runtime-sealed-receipt-bundle-v1",
-    "full-generic-audit-payload-typed-enforcement-v1",
+    "generic-audit-payload-full-typed-shadow-bundle-v1",
     "protected-evidence-storage-implementation-v1",
     "real-hmac-policy-realization-v1",
-    "real-merkle-proof-realization-v1"
+    "real-merkle-proof-realization-v1",
+    "real-runtime-provider-transport-execution-v1"
   ]
 }
