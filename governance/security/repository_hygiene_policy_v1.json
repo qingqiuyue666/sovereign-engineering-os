@@ -1,0 +1,16 @@
+{
+  "policy_type": "seos_repository_hygiene_policy_v1",
+  "version": "v1",
+  "status": "active_contract",
+  "read_only_gate": true,
+  "fail_closed": true,
+  "blocked_paths": [".env", ".env.local", "secrets/", "credentials/"],
+  "blocked_suffixes": [".pem", ".key", ".p12", ".pfx", ".mobileprovision", ".sqlite", ".db", ".log"],
+  "allowed_fixture_suffixes": [".json", ".md", ".py", ".txt"],
+  "blocked_directories": ["node_modules/", ".venv/", "__pycache__/"],
+  "scanner_engine": "CoreSecretScanner",
+  "network_accessed": false,
+  "runtime_execution_performed": false,
+  "secret_value_read": false,
+  "secret_value_persisted": false
+}
