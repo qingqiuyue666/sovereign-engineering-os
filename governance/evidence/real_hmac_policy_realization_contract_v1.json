@@ -1,0 +1,37 @@
+{
+  "contract_type": "seos_real_hmac_policy_realization_contract_v1",
+  "version": "v1",
+  "status": "contract_only_no_real_signature",
+  "real_hmac_signature_created": false,
+  "hmac_verification_performed": false,
+  "key_material_read": false,
+  "key_material_persisted": false,
+  "key_generation_performed": false,
+  "signing_runtime_enabled": false,
+  "verification_runtime_enabled": false,
+  "secret_value_read": false,
+  "secret_value_persisted": false,
+  "plaintext_secret_allowed": false,
+  "runtime_execution_performed": false,
+  "network_accessed": false,
+  "sqlite_schema_changed": false,
+  "audit_append_performed": false,
+  "required_contracts": [
+    "hmac_key_policy",
+    "hmac_signing_authority_policy",
+    "hmac_verifier_policy",
+    "hmac_signature_receipt_contract",
+    "hmac_rotation_policy",
+    "hmac_policy_realization_report"
+  ],
+  "allowed_digest_algorithms": [
+    "sha256",
+    "sha384",
+    "sha512"
+  ],
+  "verification_compare_rule": "constant_time_compare_required_before_real_verification",
+  "migration_receipt_required_before_real_signature": true,
+  "protected_storage_contract_required": true,
+  "human_authorization_required_before_key_access": true,
+  "next_allowed_track": "real-merkle-proof-realization-v1"
+}
