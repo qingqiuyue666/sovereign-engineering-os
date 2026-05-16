@@ -6,7 +6,7 @@ from pathlib import Path
 GENERIC_PLAN = Path("governance/evidence/generic_audit_payload_typed_enforcement_plan_v1.json")
 STORAGE_PLAN = Path("governance/evidence/protected_evidence_storage_policy_plan_v1.json")
 PROOF_POLICY = Path("governance/evidence/proof_authority_policy_contracts_v1.json")
-EXPECTED_HEALTH = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-runtime-sealed-receipt test-generic-payload-shadow test-protected-evidence-storage test-real-hmac-policy-realization test-real-merkle-proof-realization test-schemas test-tracer-bullet test-acceptance diff-check"
+EXPECTED_HEALTH = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-runtime-sealed-receipt test-generic-payload-shadow test-protected-evidence-storage test-real-hmac-policy-realization test-real-merkle-proof-realization test-generic-payload-full-enforcement test-schemas test-tracer-bullet test-acceptance diff-check"
 
 
 class EvidenceProofHardeningBundleTests(unittest.TestCase):
@@ -47,7 +47,7 @@ class EvidenceProofHardeningBundleTests(unittest.TestCase):
     def test_makefile_health_runs_fixtures_then_runtime_gates_before_schemas(self):
         health_line = next(line for line in Path("Makefile").read_text(encoding="utf-8").splitlines() if line.startswith("health:"))
         self.assertEqual(health_line, EXPECTED_HEALTH)
-        for earlier, later in (("test-evidence-proof-contract", "test-evidence-proof-fixtures"), ("test-evidence-proof-fixtures", "test-final-runtime-contracts"), ("test-final-runtime-contracts", "test-gated-provider-transport"), ("test-gated-provider-transport", "test-runtime-sealed-receipt"), ("test-runtime-sealed-receipt", "test-generic-payload-shadow"), ("test-generic-payload-shadow", "test-protected-evidence-storage"), ("test-protected-evidence-storage", "test-real-hmac-policy-realization"), ("test-real-hmac-policy-realization", "test-real-merkle-proof-realization"), ("test-real-merkle-proof-realization", "test-schemas")):
+        for earlier, later in (("test-evidence-proof-contract", "test-evidence-proof-fixtures"), ("test-real-merkle-proof-realization", "test-generic-payload-full-enforcement"), ("test-generic-payload-full-enforcement", "test-schemas")):
             self.assertLess(health_line.index(earlier), health_line.index(later))
 
     def test_decision_doc_exists_and_records_bundle_boundary(self):
