@@ -2,9 +2,8 @@
 
 This module defines disabled-by-default final runtime track contracts. It does
 not execute provider calls, access network, read secrets, mutate SQLite, append
-audit records, implement protected storage, generate real HMAC signatures,
-build Merkle trees, mutate generic payload append behavior, or provide
-production autonomy.
+audit records, generate real HMAC signatures, build Merkle trees, mutate generic
+payload append behavior, or provide production autonomy.
 """
 
 from __future__ import annotations
@@ -15,7 +14,7 @@ from typing import Any, Mapping
 __all__ = ["FinalRuntimeContractViolation", "FinalRuntimeValidationResult", "validate_final_runtime_track_map", "validate_runtime_preflight", "validate_runtime_receipt", "validate_post_run_health", "validate_failure_quarantine_link"]
 _ALLOWED_TRACK_STATUS = {"disabled_by_default", "manual_preflight_required"}
 _ALLOWED_RUNTIME_MODES = {"disabled", "manual_dry_run"}
-_REQUIRED_HEALTH_GATES = ("test-root-integrity", "test-sealed-evidence-coverage", "test-evidence-proof-contract", "test-evidence-proof-fixtures", "test-final-runtime-contracts", "test-gated-provider-transport", "test-runtime-sealed-receipt", "test-generic-payload-shadow", "test-protected-evidence-storage", "test-real-hmac-policy-realization", "test-real-merkle-proof-realization", "test-generic-payload-full-enforcement", "test-schemas", "test-tracer-bullet", "test-acceptance", "diff-check")
+_REQUIRED_HEALTH_GATES = ("test-root-integrity", "test-sealed-evidence-coverage", "test-evidence-proof-contract", "test-evidence-proof-fixtures", "test-final-runtime-contracts", "test-gated-provider-transport", "test-runtime-sealed-receipt", "test-generic-payload-shadow", "test-protected-evidence-storage", "test-protected-evidence-storage-implementation", "test-real-hmac-policy-realization", "test-real-merkle-proof-realization", "test-generic-payload-full-enforcement", "test-schemas", "test-tracer-bullet", "test-acceptance", "diff-check")
 _FORBIDDEN_TRUE_FLAGS = ("provider_call_performed", "network_accessed", "secret_value_read", "secret_value_persisted", "sqlite_schema_changed", "audit_append_performed", "protected_storage_implemented", "real_hmac_performed", "real_merkle_tree_built", "zero_knowledge_proof_built", "production_autonomy_enabled", "raw_evidence_store_allowed")
 
 @dataclass(frozen=True)

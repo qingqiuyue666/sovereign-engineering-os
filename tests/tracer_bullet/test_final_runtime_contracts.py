@@ -12,9 +12,9 @@ from kernel.runtime.final_runtime_contracts import (
 )
 
 TRACK_MAP_PATH = Path("governance/runtime/final_runtime_completion_track_v1.json")
-REQUIRED_GATES = ["test-root-integrity", "test-sealed-evidence-coverage", "test-evidence-proof-contract", "test-evidence-proof-fixtures", "test-final-runtime-contracts", "test-gated-provider-transport", "test-runtime-sealed-receipt", "test-generic-payload-shadow", "test-protected-evidence-storage", "test-real-hmac-policy-realization", "test-real-merkle-proof-realization", "test-generic-payload-full-enforcement", "test-schemas", "test-tracer-bullet", "test-acceptance", "diff-check"]
+REQUIRED_GATES = ["test-root-integrity", "test-sealed-evidence-coverage", "test-evidence-proof-contract", "test-evidence-proof-fixtures", "test-final-runtime-contracts", "test-gated-provider-transport", "test-runtime-sealed-receipt", "test-generic-payload-shadow", "test-protected-evidence-storage", "test-protected-evidence-storage-implementation", "test-real-hmac-policy-realization", "test-real-merkle-proof-realization", "test-generic-payload-full-enforcement", "test-schemas", "test-tracer-bullet", "test-acceptance", "diff-check"]
 FORBIDDEN_FLAGS = ("provider_call_performed", "network_accessed", "secret_value_read", "secret_value_persisted", "sqlite_schema_changed", "audit_append_performed", "protected_storage_implemented", "real_hmac_performed", "real_merkle_tree_built", "zero_knowledge_proof_built", "production_autonomy_enabled", "raw_evidence_store_allowed")
-EXPECTED_HEALTH = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-runtime-sealed-receipt test-generic-payload-shadow test-protected-evidence-storage test-real-hmac-policy-realization test-real-merkle-proof-realization test-generic-payload-full-enforcement test-schemas test-tracer-bullet test-acceptance diff-check"
+EXPECTED_HEALTH = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-runtime-sealed-receipt test-generic-payload-shadow test-protected-evidence-storage test-protected-evidence-storage-implementation test-real-hmac-policy-realization test-real-merkle-proof-realization test-generic-payload-full-enforcement test-schemas test-tracer-bullet test-acceptance diff-check"
 
 class FinalRuntimeContractsTests(unittest.TestCase):
     def load_track_map(self):
@@ -41,7 +41,7 @@ class FinalRuntimeContractsTests(unittest.TestCase):
     def test_receipt_rejects_execution_attempt(self):
         data = self.valid_receipt(); data["execution_attempted"] = True; self.assertIn("execution_attempted_must_be_false", validate_runtime_receipt(data).failures)
     def test_post_run_health_rejects_missing_gate_result(self):
-        data = self.valid_post_run_health(); data["gate_results"]["test-generic-payload-full-enforcement"] = "missing"; result = validate_post_run_health(data); self.assertFalse(result.accepted); self.assertIn("test-generic-payload-full-enforcement_not_passed", result.failures)
+        data = self.valid_post_run_health(); data["gate_results"]["test-protected-evidence-storage-implementation"] = "missing"; result = validate_post_run_health(data); self.assertFalse(result.accepted); self.assertIn("test-protected-evidence-storage-implementation_not_passed", result.failures)
     def test_failure_link_rejects_wrong_policy_status(self):
         data = self.valid_failure_link(); data["failure_quarantine_policy_status"] = "unlinked"; self.assertIn("failure_quarantine_policy_status_invalid", validate_failure_quarantine_link(data).failures)
     def test_all_forbidden_true_flags_fail_closed_across_contracts(self):

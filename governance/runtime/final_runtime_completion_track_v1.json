@@ -28,6 +28,7 @@
     "test-runtime-sealed-receipt",
     "test-generic-payload-shadow",
     "test-protected-evidence-storage",
+    "test-protected-evidence-storage-implementation",
     "test-real-hmac-policy-realization",
     "test-real-merkle-proof-realization",
     "test-generic-payload-full-enforcement",
@@ -38,5 +39,5 @@
   ],
   "promotion_blockers": ["operator_preflight_missing", "health_gate_missing", "sealed_evidence_policy_missing", "proof_policy_missing", "failure_quarantine_policy_missing", "worktree_dirty", "provider_transport_enabled", "network_access_requested", "secret_access_requested", "production_autonomy_requested"],
   "required_contracts": ["final_runtime_preflight_contract", "final_runtime_receipt_contract", "final_runtime_post_run_health_contract", "final_runtime_failure_quarantine_link_contract"],
-  "next_allowed_track": "protected-evidence-storage-implementation-v1"
+  "next_allowed_track": "real-runtime-provider-transport-execution-v1"
 }
