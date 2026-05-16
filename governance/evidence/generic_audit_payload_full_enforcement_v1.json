@@ -1,0 +1,45 @@
+{
+  "policy_type": "seos_generic_audit_payload_full_enforcement_v1",
+  "version": "v1",
+  "status": "contract_only_enforcement_gate_not_runtime_mutation",
+  "full_enforcement_enabled": false,
+  "shadow_validation_retained": true,
+  "ordinary_payload_behavior_changed": false,
+  "audit_append_behavior_changed": false,
+  "sqlite_schema_changed": false,
+  "runtime_execution_performed": false,
+  "network_accessed": false,
+  "secret_value_read": false,
+  "secret_value_persisted": false,
+  "raw_material_persistence_allowed": false,
+  "compatibility_inventory_required": true,
+  "migration_receipt_required": true,
+  "rollback_plan_required": true,
+  "unknown_payload_fail_closed": true,
+  "high_risk_guard_retained": true,
+  "allowed_categories": [
+    "classification",
+    "lifecycle_transition",
+    "validation_receipt",
+    "approval",
+    "sealed_evidence",
+    "provider_transport_receipt",
+    "runtime_sealed_receipt",
+    "generic_enforcement_report"
+  ],
+  "forbidden_keys": [
+    "raw_prompt",
+    "raw_provider_response",
+    "secret_value",
+    "raw_traceback",
+    "raw_exception_dump"
+  ],
+  "required_contracts": [
+    "compatibility_inventory",
+    "migration_receipt",
+    "rollback_plan",
+    "typed_payload_enforcement_record",
+    "enforcement_report"
+  ],
+  "next_allowed_track": "protected-evidence-storage-implementation-v1"
+}
