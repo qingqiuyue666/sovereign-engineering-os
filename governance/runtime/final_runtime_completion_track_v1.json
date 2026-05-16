@@ -30,6 +30,7 @@
     "test-evidence-proof-fixtures",
     "test-final-runtime-contracts",
     "test-gated-provider-transport",
+    "test-runtime-sealed-receipt",
     "test-schemas",
     "test-tracer-bullet",
     "test-acceptance",
@@ -53,5 +54,5 @@
     "final_runtime_post_run_health_contract",
     "final_runtime_failure_quarantine_link_contract"
   ],
-  "next_allowed_track": "runtime-sealed-receipt-bundle-v1"
+  "next_allowed_track": "generic-audit-payload-full-typed-shadow-bundle-v1"
 }
