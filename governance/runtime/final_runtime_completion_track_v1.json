@@ -25,6 +25,7 @@
     "test-evidence-proof-fixtures",
     "test-final-runtime-contracts",
     "test-gated-provider-transport",
+    "test-real-runtime-provider-transport-execution",
     "test-runtime-sealed-receipt",
     "test-generic-payload-shadow",
     "test-protected-evidence-storage",
@@ -37,7 +38,7 @@
     "test-acceptance",
     "diff-check"
   ],
-  "promotion_blockers": ["operator_preflight_missing", "health_gate_missing", "sealed_evidence_policy_missing", "proof_policy_missing", "failure_quarantine_policy_missing", "worktree_dirty", "provider_transport_enabled", "network_access_requested", "secret_access_requested", "production_autonomy_requested"],
-  "required_contracts": ["final_runtime_preflight_contract", "final_runtime_receipt_contract", "final_runtime_post_run_health_contract", "final_runtime_failure_quarantine_link_contract"],
-  "next_allowed_track": "real-runtime-provider-transport-execution-v1"
+  "promotion_blockers": ["operator_preflight_missing", "health_gate_missing", "sealed_evidence_policy_missing", "proof_policy_missing", "failure_quarantine_policy_missing", "worktree_dirty", "provider_transport_not_explicitly_authorized", "network_access_requested_without_authorization", "secret_access_requested", "production_autonomy_requested", "unbounded_provider_execution_requested"],
+  "required_contracts": ["final_runtime_preflight_contract", "final_runtime_receipt_contract", "final_runtime_post_run_health_contract", "final_runtime_failure_quarantine_link_contract", "real_runtime_provider_transport_execution_boundary"],
+  "next_allowed_track": "production-autonomy-final-gate-v1"
 }
