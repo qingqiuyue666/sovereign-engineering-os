@@ -1,6 +1,6 @@
 {
   "automatic_repair_allowed": false,
-  "created_for_branch": "root-integrity-verifier-foundation-v1",
+  "created_for_branch": "root-integrity-health-gate-wiring-v1",
   "critical_files": [
     {
       "git_blob_sha1": "afb068d9709aae31d51fac774ae43a26995bd726",
@@ -38,7 +38,7 @@
       "role": "model_provider_manual_smoke_planner"
     },
     {
-      "git_blob_sha1": "0fc70914ef84a4f95a9a8afae6c0f4999d10dc60",
+      "git_blob_sha1": "8e5b96c4adf45d87919f011c9c5403893fafc2e4",
       "path": "Makefile",
       "role": "canonical_ci_gate"
     },
@@ -60,7 +60,7 @@
   "runtime_execution_performed": false,
   "secret_value_persisted": false,
   "secret_value_read": false,
-  "status": "root_integrity_verifier_foundation",
+  "status": "root_integrity_health_gate_wiring",
   "version": "v1",
   "next_allowed_action_on_failure": "read_only_seed_recovery_required"
 }
