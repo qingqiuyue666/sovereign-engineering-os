@@ -12,8 +12,8 @@
   "audit_append_performed": false,
   "raw_evidence_store_allowed": false,
   "verdict": "FINAL_COMPLETION_AUDIT_READY_NOT_100_PERCENT",
-  "readiness_band": "generic_payload_full_typed_shadow_ready",
-  "estimated_completion_percent": 86,
+  "readiness_band": "protected_evidence_storage_contract_ready",
+  "estimated_completion_percent": 90,
   "canonical_health_gate": {
     "make_target": "health",
     "ci_target": "ci",
@@ -26,6 +26,7 @@
       "test-gated-provider-transport",
       "test-runtime-sealed-receipt",
       "test-generic-payload-shadow",
+      "test-protected-evidence-storage",
       "test-schemas",
       "test-tracer-bullet",
       "test-acceptance",
@@ -53,10 +54,15 @@
     {"surface_id": "generic_payload_shadow_policy", "status": "implemented_and_health_gated_shadow_only", "evidence": "test-generic-payload-shadow"},
     {"surface_id": "generic_payload_shadow_contract", "status": "implemented_and_health_gated_shadow_only", "evidence": "test-generic-payload-shadow"},
     {"surface_id": "generic_payload_shadow_fixtures", "status": "implemented_and_health_gated_fixture_only", "evidence": "test-generic-payload-shadow"},
-    {"surface_id": "generic_payload_shadow_runbook", "status": "implemented_runbook_only", "evidence": "docs/runbooks/generic_payload_shadow_v1.md"}
+    {"surface_id": "generic_payload_shadow_runbook", "status": "implemented_runbook_only", "evidence": "docs/runbooks/generic_payload_shadow_v1.md"},
+    {"surface_id": "protected_evidence_storage_contract_map", "status": "implemented_and_health_gated_contract_only", "evidence": "test-protected-evidence-storage"},
+    {"surface_id": "protected_evidence_storage_contract", "status": "implemented_and_health_gated_contract_only", "evidence": "test-protected-evidence-storage"},
+    {"surface_id": "protected_evidence_storage_fixtures", "status": "implemented_and_health_gated_fixture_only", "evidence": "test-protected-evidence-storage"},
+    {"surface_id": "protected_evidence_storage_runbook", "status": "implemented_runbook_only", "evidence": "docs/runbooks/protected_evidence_storage_contract_v1.md"}
   ],
   "not_implemented_surfaces": [
-    {"surface_id": "protected_evidence_storage_implementation", "status": "not_implemented_policy_plan_only_currently", "required_before_100_percent": true},
+    {"surface_id": "protected_evidence_storage_implementation", "status": "not_implemented_contract_only_currently", "required_before_100_percent": true},
+    {"surface_id": "encrypted_evidence_vault", "status": "not_implemented_contract_only_currently", "required_before_100_percent": true},
     {"surface_id": "real_hmac_key_management_and_signing", "status": "not_implemented_policy_contract_only_currently", "required_before_100_percent": true},
     {"surface_id": "real_merkle_tree_and_proof_verification", "status": "not_implemented_policy_contract_only_currently", "required_before_100_percent": true},
     {"surface_id": "full_generic_audit_payload_typed_enforcement", "status": "not_implemented_shadow_only_currently", "required_before_100_percent": true},
@@ -70,6 +76,9 @@
     "raw_traceback_persistence",
     "raw_exception_dump_persistence",
     "secret_value_persistence",
+    "key_material_read",
+    "key_material_persistence",
+    "plaintext_secret_storage",
     "ungated_runtime_authority",
     "network_access_without_explicit_transport_gate",
     "provider_live_call_without_transport_gate",
@@ -82,13 +91,16 @@
     "allow_production_autonomy_claim": false,
     "allow_manual_default_disabled_runtime_track": true,
     "allow_generic_payload_full_enforcement": false,
-    "required_next_branch": "protected-evidence-storage-contract-bundle-v1"
+    "allow_protected_storage_implementation": false,
+    "allow_encrypted_vault_claim": false,
+    "allow_key_material_access": false,
+    "required_next_branch": "real-hmac-policy-realization-contract-bundle-v1"
   },
   "next_required_slices_before_100_percent": [
-    "protected-evidence-storage-contract-bundle-v1",
-    "generic-audit-payload-full-enforcement-bundle-v1",
-    "real-hmac-policy-realization-v1",
+    "real-hmac-policy-realization-contract-bundle-v1",
     "real-merkle-proof-realization-v1",
+    "generic-audit-payload-full-enforcement-bundle-v1",
+    "protected-evidence-storage-implementation-v1",
     "real-runtime-provider-transport-execution-v1"
   ]
 }
