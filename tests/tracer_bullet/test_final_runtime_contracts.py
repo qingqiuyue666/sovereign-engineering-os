@@ -21,6 +21,7 @@ REQUIRED_GATES = [
     "test-final-runtime-contracts",
     "test-gated-provider-transport",
     "test-runtime-sealed-receipt",
+    "test-generic-payload-shadow",
     "test-schemas",
     "test-tracer-bullet",
     "test-acceptance",
@@ -40,7 +41,7 @@ FORBIDDEN_FLAGS = (
     "production_autonomy_enabled",
     "raw_evidence_store_allowed",
 )
-EXPECTED_HEALTH = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-runtime-sealed-receipt test-schemas test-tracer-bullet test-acceptance diff-check"
+EXPECTED_HEALTH = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-runtime-sealed-receipt test-generic-payload-shadow test-schemas test-tracer-bullet test-acceptance diff-check"
 
 
 class FinalRuntimeContractsTests(unittest.TestCase):
@@ -161,10 +162,10 @@ class FinalRuntimeContractsTests(unittest.TestCase):
 
     def test_post_run_health_rejects_missing_gate_result(self):
         data = self.valid_post_run_health()
-        data["gate_results"]["test-runtime-sealed-receipt"] = "missing"
+        data["gate_results"]["test-generic-payload-shadow"] = "missing"
         result = validate_post_run_health(data)
         self.assertFalse(result.accepted)
-        self.assertIn("test-runtime-sealed-receipt_not_passed", result.failures)
+        self.assertIn("test-generic-payload-shadow_not_passed", result.failures)
 
     def test_failure_link_rejects_wrong_policy_status(self):
         data = self.valid_failure_link()

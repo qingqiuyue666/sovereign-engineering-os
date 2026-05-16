@@ -1,0 +1,36 @@
+{
+  "policy_type": "seos_generic_payload_shadow_v1",
+  "version": "v1",
+  "status": "shadow_validation_only",
+  "shadow_validation_enabled": true,
+  "enforcement_enabled": false,
+  "ordinary_payload_behavior_changed": false,
+  "selected_high_risk_guard_retained": true,
+  "schema_compatibility_inventory_required": true,
+  "migration_receipt_required_before_enforcement": true,
+  "audit_append_behavior_changed": false,
+  "sqlite_schema_changed": false,
+  "runtime_execution_performed": false,
+  "network_accessed": false,
+  "secret_value_read": false,
+  "secret_value_persisted": false,
+  "raw_material_persistence_allowed": false,
+  "allowed_shadow_categories": [
+    "classification",
+    "lifecycle_transition",
+    "validation_receipt",
+    "approval",
+    "sealed_evidence",
+    "provider_transport_receipt",
+    "runtime_sealed_receipt",
+    "compatibility_gap"
+  ],
+  "high_risk_keys": [
+    "raw_prompt",
+    "raw_provider_response",
+    "secret_value",
+    "raw_traceback",
+    "raw_exception_dump"
+  ],
+  "next_allowed_track": "protected-evidence-storage-contract-bundle-v1"
+}
