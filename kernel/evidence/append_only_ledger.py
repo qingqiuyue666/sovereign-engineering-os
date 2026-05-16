@@ -43,18 +43,20 @@ _AUDIT_RECORD_SCHEMA = load_schema("audit_record")
 _SEALED_EVIDENCE_CONTRACT = "sealed_redaction_v1"
 _HIGH_RISK_PAYLOAD_KEYS = frozenset(
     {
-        "classification",
+        "api_key",
+        "authorization",
         "contains_sensitive_material",
+        "cookie",
+        "credential",
         "evidence_id",
+        "password",
+        "private_key",
         "raw_prompt",
         "raw_provider_response",
         "raw_value",
         "secret",
+        "session_token",
         "token",
-        "password",
-        "api_key",
-        "credential",
-        "cookie",
     }
 )
 
