@@ -31,6 +31,7 @@ _REQUIRED_HEALTH_GATES = (
     "test-final-runtime-contracts",
     "test-gated-provider-transport",
     "test-runtime-sealed-receipt",
+    "test-generic-payload-shadow",
     "test-schemas",
     "test-tracer-bullet",
     "test-acceptance",
