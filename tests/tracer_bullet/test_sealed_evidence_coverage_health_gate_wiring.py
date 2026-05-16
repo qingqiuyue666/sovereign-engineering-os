@@ -2,7 +2,7 @@ import unittest
 from pathlib import Path
 
 
-EXPECTED_HEALTH = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-runtime-sealed-receipt test-generic-payload-shadow test-protected-evidence-storage test-protected-evidence-storage-implementation test-real-hmac-policy-realization test-real-merkle-proof-realization test-generic-payload-full-enforcement test-schemas test-tracer-bullet test-acceptance diff-check"
+EXPECTED_HEALTH = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-real-runtime-provider-transport-execution test-runtime-sealed-receipt test-generic-payload-shadow test-protected-evidence-storage test-protected-evidence-storage-implementation test-real-hmac-policy-realization test-real-merkle-proof-realization test-generic-payload-full-enforcement test-schemas test-tracer-bullet test-acceptance diff-check"
 
 
 class SealedEvidenceCoverageHealthGateWiringTests(unittest.TestCase):
@@ -19,7 +19,7 @@ class SealedEvidenceCoverageHealthGateWiringTests(unittest.TestCase):
     def test_health_runs_root_integrity_then_sealed_coverage_before_other_gates(self):
         health_line = next(line for line in self.read_makefile().splitlines() if line.startswith("health:"))
         self.assertEqual(health_line, EXPECTED_HEALTH)
-        for earlier, later in (("test-root-integrity", "test-sealed-evidence-coverage"), ("test-protected-evidence-storage", "test-protected-evidence-storage-implementation"), ("test-protected-evidence-storage-implementation", "test-real-hmac-policy-realization"), ("test-real-merkle-proof-realization", "test-generic-payload-full-enforcement"), ("test-generic-payload-full-enforcement", "test-schemas"), ("test-acceptance", "diff-check")):
+        for earlier, later in (("test-root-integrity", "test-sealed-evidence-coverage"), ("test-gated-provider-transport", "test-real-runtime-provider-transport-execution"), ("test-real-runtime-provider-transport-execution", "test-runtime-sealed-receipt"), ("test-protected-evidence-storage", "test-protected-evidence-storage-implementation"), ("test-protected-evidence-storage-implementation", "test-real-hmac-policy-realization"), ("test-real-merkle-proof-realization", "test-generic-payload-full-enforcement"), ("test-generic-payload-full-enforcement", "test-schemas"), ("test-acceptance", "diff-check")):
             self.assertLess(health_line.index(earlier), health_line.index(later))
 
     def test_ci_still_depends_on_health_only(self):
