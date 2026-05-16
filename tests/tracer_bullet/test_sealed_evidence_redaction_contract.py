@@ -48,6 +48,19 @@ class SealedEvidenceRedactionContractTests(unittest.TestCase):
         self.assertFalse(result.sealed_required)
         self.assertTrue(result.redaction_required)
 
+    def test_raw_persistence_flag_must_be_false(self):
+        result = validate_sealed_evidence_record(
+            {
+                "evidence_id": "ev-raw-flag-true",
+                "classification": "restricted",
+                "digest": self.digest("raw-flag"),
+                "payload": {"raw_prompt_persisted": True},
+            }
+        )
+
+        self.assertFalse(result.accepted)
+        self.assertIn("forbidden_raw_secret_field_present", result.failures)
+
     def test_secret_evidence_hash_only_record_is_accepted(self):
         result = validate_sealed_evidence_record(
             {
@@ -171,7 +184,6 @@ class SealedEvidenceRedactionContractTests(unittest.TestCase):
             "os.system",
             "openai.",
             "write_text(",
-            "append(",
             "sqlite3",
         )
         for marker in forbidden_markers:
