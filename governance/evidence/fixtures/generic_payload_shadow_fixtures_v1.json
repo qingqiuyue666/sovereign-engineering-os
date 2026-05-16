@@ -1,0 +1,102 @@
+{
+  "fixture_type": "seos_generic_payload_shadow_fixtures_v1",
+  "version": "v1",
+  "status": "fixture_only_shadow_validation",
+  "valid_records": [
+    {
+      "fixture_id": "valid_policy_contract",
+      "validator": "validate_generic_payload_shadow_policy",
+      "expected_accepted": true,
+      "record": {
+        "policy_type": "seos_generic_payload_shadow_v1",
+        "status": "shadow_validation_only",
+        "shadow_validation_enabled": true,
+        "enforcement_enabled": false,
+        "ordinary_payload_behavior_changed": false,
+        "selected_high_risk_guard_retained": true,
+        "schema_compatibility_inventory_required": true,
+        "migration_receipt_required_before_enforcement": true,
+        "audit_append_behavior_changed": false,
+        "sqlite_schema_changed": false,
+        "runtime_execution_performed": false,
+        "network_accessed": false,
+        "secret_value_read": false,
+        "secret_value_persisted": false,
+        "raw_material_persistence_allowed": false
+      }
+    },
+    {
+      "fixture_id": "ordinary_classification_payload",
+      "validator": "validate_generic_payload_shadow_record",
+      "expected_accepted": true,
+      "expected_category": "classification",
+      "record": {"shadow_mode": true, "shadow_category": "classification", "record_type": "classification", "classifier": "fixture", "enforcement_enabled": false, "ordinary_payload_behavior_changed": false}
+    },
+    {
+      "fixture_id": "lifecycle_transition_payload",
+      "validator": "validate_generic_payload_shadow_record",
+      "expected_accepted": true,
+      "expected_category": "lifecycle_transition",
+      "record": {"shadow_mode": true, "shadow_category": "lifecycle_transition", "stage_transition": "draft_to_review", "enforcement_enabled": false, "ordinary_payload_behavior_changed": false}
+    },
+    {
+      "fixture_id": "validation_receipt_payload",
+      "validator": "validate_generic_payload_shadow_record",
+      "expected_accepted": true,
+      "expected_category": "validation_receipt",
+      "record": {"shadow_mode": true, "shadow_category": "validation_receipt", "validation_receipt": "receipt-001", "validation_result": "passed", "enforcement_enabled": false, "ordinary_payload_behavior_changed": false}
+    },
+    {
+      "fixture_id": "approval_payload",
+      "validator": "validate_generic_payload_shadow_record",
+      "expected_accepted": true,
+      "expected_category": "approval",
+      "record": {"shadow_mode": true, "shadow_category": "approval", "approval_id": "approval-001", "approved_by": "human", "enforcement_enabled": false, "ordinary_payload_behavior_changed": false}
+    },
+    {
+      "fixture_id": "sealed_evidence_payload",
+      "validator": "validate_generic_payload_shadow_record",
+      "expected_accepted": true,
+      "expected_category": "sealed_evidence",
+      "record": {"shadow_mode": true, "shadow_category": "sealed_evidence", "sealed_evidence": "sealed::001", "redacted_digest": "sha256:fixture", "enforcement_enabled": false, "ordinary_payload_behavior_changed": false}
+    },
+    {
+      "fixture_id": "provider_transport_receipt_payload",
+      "validator": "validate_generic_payload_shadow_record",
+      "expected_accepted": true,
+      "expected_category": "provider_transport_receipt",
+      "record": {"shadow_mode": true, "shadow_category": "provider_transport_receipt", "transport_gate_id": "provider-gate-v1", "provider_transport": "disabled", "enforcement_enabled": false, "ordinary_payload_behavior_changed": false}
+    },
+    {
+      "fixture_id": "runtime_sealed_receipt_payload",
+      "validator": "validate_generic_payload_shadow_record",
+      "expected_accepted": true,
+      "expected_category": "runtime_sealed_receipt",
+      "record": {"shadow_mode": true, "shadow_category": "runtime_sealed_receipt", "receipt_chain": "receipt-chain-001", "runtime_sealed_receipt": "contract", "enforcement_enabled": false, "ordinary_payload_behavior_changed": false}
+    },
+    {
+      "fixture_id": "compatibility_gap_unknown_payload",
+      "validator": "validate_generic_payload_compatibility_gap",
+      "expected_accepted": true,
+      "expected_category": "compatibility_gap",
+      "record": {"shadow_mode": true, "gap_recorded": true, "enforcement_blocked": true, "unknown_future_shape": "fixture", "enforcement_enabled": false, "ordinary_payload_behavior_changed": false}
+    },
+    {
+      "fixture_id": "valid_shadow_report",
+      "validator": "validate_generic_payload_shadow_report",
+      "expected_accepted": true,
+      "expected_category": "report",
+      "record": {"report_type": "generic_payload_shadow_report_v1", "shadow_validation_enabled": true, "enforcement_enabled": false, "category_counts": {"classification": 1, "compatibility_gap": 1}}
+    }
+  ],
+  "invalid_records": [
+    {"fixture_id": "raw_prompt_payload", "validator": "validate_generic_payload_shadow_record", "expected_accepted": false, "expected_failures": ["high_risk_payload_forbidden"], "record": {"shadow_mode": true, "raw_prompt": "forbidden"}},
+    {"fixture_id": "raw_provider_response_payload", "validator": "validate_generic_payload_shadow_record", "expected_accepted": false, "expected_failures": ["high_risk_payload_forbidden"], "record": {"shadow_mode": true, "raw_provider_response": "forbidden"}},
+    {"fixture_id": "secret_value_payload", "validator": "validate_generic_payload_shadow_record", "expected_accepted": false, "expected_failures": ["high_risk_payload_forbidden"], "record": {"shadow_mode": true, "secret_value": "forbidden"}},
+    {"fixture_id": "raw_traceback_payload", "validator": "validate_generic_payload_shadow_record", "expected_accepted": false, "expected_failures": ["high_risk_payload_forbidden"], "record": {"shadow_mode": true, "raw_traceback": "forbidden"}},
+    {"fixture_id": "raw_exception_dump_payload", "validator": "validate_generic_payload_shadow_record", "expected_accepted": false, "expected_failures": ["high_risk_payload_forbidden"], "record": {"shadow_mode": true, "raw_exception_dump": "forbidden"}},
+    {"fixture_id": "malformed_shadow_record", "validator": "validate_generic_payload_shadow_record", "expected_accepted": false, "expected_failures": ["shadow_mode_required"], "record": {"record_type": "classification"}},
+    {"fixture_id": "enforcement_claimed_true", "validator": "validate_generic_payload_shadow_record", "expected_accepted": false, "expected_failures": ["enforcement_enabled_forbidden"], "record": {"shadow_mode": true, "record_type": "classification", "enforcement_enabled": true}},
+    {"fixture_id": "ordinary_behavior_changed_true", "validator": "validate_generic_payload_shadow_record", "expected_accepted": false, "expected_failures": ["ordinary_payload_behavior_changed_forbidden"], "record": {"shadow_mode": true, "record_type": "classification", "ordinary_payload_behavior_changed": true}}
+  ]
+}
