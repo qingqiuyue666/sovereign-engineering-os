@@ -29,6 +29,7 @@ _REQUIRED_HEALTH_GATES = (
     "test-evidence-proof-contract",
     "test-evidence-proof-fixtures",
     "test-final-runtime-contracts",
+    "test-gated-provider-transport",
     "test-schemas",
     "test-tracer-bullet",
     "test-acceptance",
