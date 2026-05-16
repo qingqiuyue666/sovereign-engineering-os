@@ -22,7 +22,13 @@ __all__ = [
 ]
 
 _ALLOWED_CLASSIFICATIONS = ("public", "restricted", "secret")
-_ALLOWED_SECRET_FORMS = ("sha256", "salted_hash", "hmac_placeholder", "sealed_blob_ref", "redacted_digest")
+_ALLOWED_SECRET_FORMS = (
+    "sha256",
+    "salted_hash",
+    "hmac_placeholder",
+    "sealed_blob_ref",
+    "redacted_digest",
+)
 _SECRET_MARKERS = (
     "api_key",
     "apikey",
@@ -46,6 +52,7 @@ _FORBIDDEN_RAW_FIELD_NAMES = (
     "private_key",
     "raw_prompt",
     "raw_provider_response",
+    "raw_value",
     "secret",
     "session_token",
     "token",
@@ -183,13 +190,19 @@ def _contains_forbidden_raw_field(value: object) -> bool:
     if isinstance(value, Mapping):
         for key, item in value.items():
             lowered = str(key).lower()
-            if lowered in _FORBIDDEN_RAW_FIELD_NAMES or lowered.startswith("raw_"):
+            if lowered in _FORBIDDEN_RAW_FIELD_NAMES:
+                return True
+            if lowered.startswith("raw_") and not _is_false_persistence_flag(lowered, item):
                 return True
             if _contains_forbidden_raw_field(item):
                 return True
     elif isinstance(value, (list, tuple)):
         return any(_contains_forbidden_raw_field(item) for item in value)
     return False
+
+
+def _is_false_persistence_flag(key: str, value: object) -> bool:
+    return key.endswith("_persisted") and value is False
 
 
 def _contains_plaintext_secret_value(value: object) -> bool:
@@ -215,7 +228,10 @@ def _redact_payload(value: object) -> object:
         redacted: dict[str, object] = {}
         for key, item in sorted(value.items(), key=lambda entry: str(entry[0])):
             key_text = str(key)
-            if _text_has_secret_marker(key_text) or key_text.lower().startswith("raw_"):
+            if _text_has_secret_marker(key_text) or (
+                key_text.lower().startswith("raw_")
+                and not _is_false_persistence_flag(key_text.lower(), item)
+            ):
                 redacted[key_text] = "[redacted]"
             else:
                 redacted[key_text] = _redact_payload(item)
