@@ -25,7 +25,7 @@ class SealedEvidenceCoverageMapTests(unittest.TestCase):
         self.assertFalse(payload["sqlite_schema_changed"])
         self.assertFalse(payload["raw_evidence_store_allowed"])
         self.assertIsInstance(payload["surfaces"], list)
-        self.assertGreaterEqual(len(payload["surfaces"]), 16)
+        self.assertGreaterEqual(len(payload["surfaces"]), 20)
 
     def test_required_surfaces_are_declared(self):
         surfaces = self.surfaces_by_id()
@@ -43,6 +43,10 @@ class SealedEvidenceCoverageMapTests(unittest.TestCase):
             "final_runtime_completion_track_map",
             "final_runtime_contract_validators",
             "final_runtime_runbook",
+            "gated_provider_transport_map",
+            "gated_provider_transport_contracts",
+            "gated_provider_transport_fixtures",
+            "gated_provider_transport_runbook",
             "encrypted_evidence_vault",
             "real_merkle_or_hmac_evidence_proofs",
             "zero_knowledge_like_evidence_proofs",
@@ -61,6 +65,10 @@ class SealedEvidenceCoverageMapTests(unittest.TestCase):
             "final_runtime_completion_track_map",
             "final_runtime_contract_validators",
             "final_runtime_runbook",
+            "gated_provider_transport_map",
+            "gated_provider_transport_contracts",
+            "gated_provider_transport_fixtures",
+            "gated_provider_transport_runbook",
         ):
             surface = surfaces[surface_id]
             self.assertEqual(surface["coverage_status"], "covered_contract_surface")
@@ -75,6 +83,13 @@ class SealedEvidenceCoverageMapTests(unittest.TestCase):
             "final_runtime_runbook",
         ):
             self.assertIn("tests.tracer_bullet.test_final_runtime_contracts", surfaces[surface_id]["tests"])
+        for surface_id in (
+            "gated_provider_transport_map",
+            "gated_provider_transport_contracts",
+            "gated_provider_transport_fixtures",
+            "gated_provider_transport_runbook",
+        ):
+            self.assertIn("tests.tracer_bullet.test_gated_provider_transport_contracts", surfaces[surface_id]["tests"])
 
     def test_selected_high_risk_and_future_layers_are_not_overclaimed(self):
         surfaces = self.surfaces_by_id()

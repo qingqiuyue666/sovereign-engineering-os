@@ -1,0 +1,220 @@
+{
+  "fixture_type": "seos_gated_provider_transport_fixtures_v1",
+  "version": "v1",
+  "status": "fixture_only_no_live_transport",
+  "valid_records": [
+    {
+      "fixture_id": "valid_disabled_transport_gate",
+      "validator": "validate_provider_transport_gate",
+      "expected_accepted": true,
+      "record": {
+        "gate_type": "seos_gated_provider_transport_v1",
+        "status": "disabled",
+        "transport_mode": "manual_dry_run",
+        "default_disabled": true,
+        "manual_approval_required": true,
+        "sealed_receipt_required": true,
+        "failure_quarantine_link_required": true,
+        "post_run_health_required": true,
+        "provider_enabled": false,
+        "provider_live_call_performed": false,
+        "network_accessed": false,
+        "secret_value_read": false,
+        "secret_value_persisted": false,
+        "env_read_performed": false,
+        "raw_prompt_persisted": false,
+        "raw_response_persisted": false,
+        "sqlite_schema_changed": false,
+        "audit_append_performed": false,
+        "protected_storage_implemented": false,
+        "real_hmac_performed": false,
+        "real_merkle_tree_built": false,
+        "zero_knowledge_proof_built": false,
+        "production_autonomy_enabled": false,
+        "raw_evidence_store_allowed": false
+      }
+    },
+    {
+      "fixture_id": "valid_manual_dry_run_preflight",
+      "validator": "validate_provider_transport_preflight",
+      "expected_accepted": true,
+      "record": {
+        "preflight_id": "provider-preflight-001",
+        "task_id": "task-provider-001",
+        "transport_gate_id": "provider-gate-v1",
+        "manual_approval_required": true,
+        "manual_approval_present": true,
+        "transport_status": "disabled",
+        "transport_mode": "manual_dry_run",
+        "sealed_receipt_policy": "required",
+        "failure_quarantine_policy": "required",
+        "postcheck_policy": "required",
+        "provider_enabled": false,
+        "provider_live_call_performed": false,
+        "network_accessed": false,
+        "secret_value_read": false,
+        "secret_value_persisted": false,
+        "env_read_performed": false,
+        "raw_prompt_persisted": false,
+        "raw_response_persisted": false,
+        "sqlite_schema_changed": false,
+        "audit_append_performed": false,
+        "protected_storage_implemented": false,
+        "real_hmac_performed": false,
+        "real_merkle_tree_built": false,
+        "zero_knowledge_proof_built": false,
+        "production_autonomy_enabled": false,
+        "raw_evidence_store_allowed": false
+      }
+    },
+    {
+      "fixture_id": "valid_sealed_receipt_shape",
+      "validator": "validate_provider_transport_receipt",
+      "expected_accepted": true,
+      "record": {
+        "receipt_id": "provider-receipt-001",
+        "task_id": "task-provider-001",
+        "transport_gate_id": "provider-gate-v1",
+        "preflight_id": "provider-preflight-001",
+        "preflight_result": "passed",
+        "transport_attempted": false,
+        "transport_mode": "manual_dry_run",
+        "sealed_receipt_refs": ["sealed-receipt::task-provider-001"],
+        "failure_quarantine_refs": [],
+        "postcheck_refs": ["postcheck::task-provider-001"],
+        "provider_enabled": false,
+        "provider_live_call_performed": false,
+        "network_accessed": false,
+        "secret_value_read": false,
+        "secret_value_persisted": false,
+        "env_read_performed": false,
+        "raw_prompt_persisted": false,
+        "raw_response_persisted": false,
+        "sqlite_schema_changed": false,
+        "audit_append_performed": false,
+        "protected_storage_implemented": false,
+        "real_hmac_performed": false,
+        "real_merkle_tree_built": false,
+        "zero_knowledge_proof_built": false,
+        "production_autonomy_enabled": false,
+        "raw_evidence_store_allowed": false
+      }
+    },
+    {
+      "fixture_id": "valid_blocked_live_call_attempt",
+      "validator": "validate_provider_transport_blocked_attempt",
+      "expected_accepted": true,
+      "record": {
+        "blocked_attempt_id": "provider-blocked-001",
+        "task_id": "task-provider-001",
+        "transport_gate_id": "provider-gate-v1",
+        "blocked": true,
+        "block_reason": "provider_disabled",
+        "provider_enabled": false,
+        "provider_live_call_performed": false,
+        "network_accessed": false,
+        "secret_value_read": false,
+        "secret_value_persisted": false,
+        "env_read_performed": false,
+        "raw_prompt_persisted": false,
+        "raw_response_persisted": false,
+        "sqlite_schema_changed": false,
+        "audit_append_performed": false,
+        "protected_storage_implemented": false,
+        "real_hmac_performed": false,
+        "real_merkle_tree_built": false,
+        "zero_knowledge_proof_built": false,
+        "production_autonomy_enabled": false,
+        "raw_evidence_store_allowed": false
+      }
+    },
+    {
+      "fixture_id": "valid_postcheck_passed",
+      "validator": "validate_provider_transport_postcheck",
+      "expected_accepted": true,
+      "record": {
+        "postcheck_id": "provider-postcheck-001",
+        "task_id": "task-provider-001",
+        "transport_gate_id": "provider-gate-v1",
+        "sealed_receipt_present": true,
+        "failure_quarantine_link_present": true,
+        "post_run_health_present": true,
+        "postcheck_result": "passed",
+        "provider_enabled": false,
+        "provider_live_call_performed": false,
+        "network_accessed": false,
+        "secret_value_read": false,
+        "secret_value_persisted": false,
+        "env_read_performed": false,
+        "raw_prompt_persisted": false,
+        "raw_response_persisted": false,
+        "sqlite_schema_changed": false,
+        "audit_append_performed": false,
+        "protected_storage_implemented": false,
+        "real_hmac_performed": false,
+        "real_merkle_tree_built": false,
+        "zero_knowledge_proof_built": false,
+        "production_autonomy_enabled": false,
+        "raw_evidence_store_allowed": false
+      }
+    }
+  ],
+  "invalid_records": [
+    {
+      "fixture_id": "invalid_provider_enabled_without_approval",
+      "validator": "validate_provider_transport_preflight",
+      "expected_accepted": false,
+      "expected_failures": ["manual_approval_missing", "provider_enabled_forbidden"],
+      "record_patch": {"manual_approval_present": false, "provider_enabled": true}
+    },
+    {
+      "fixture_id": "invalid_network_access_claimed",
+      "validator": "validate_provider_transport_gate",
+      "expected_accepted": false,
+      "expected_failures": ["network_accessed_forbidden"],
+      "record_patch": {"network_accessed": true}
+    },
+    {
+      "fixture_id": "invalid_secret_read_claimed",
+      "validator": "validate_provider_transport_gate",
+      "expected_accepted": false,
+      "expected_failures": ["secret_value_read_forbidden"],
+      "record_patch": {"secret_value_read": true}
+    },
+    {
+      "fixture_id": "invalid_raw_prompt_persisted",
+      "validator": "validate_provider_transport_gate",
+      "expected_accepted": false,
+      "expected_failures": ["raw_prompt_persisted_forbidden"],
+      "record_patch": {"raw_prompt_persisted": true}
+    },
+    {
+      "fixture_id": "invalid_raw_response_persisted",
+      "validator": "validate_provider_transport_gate",
+      "expected_accepted": false,
+      "expected_failures": ["raw_response_persisted_forbidden"],
+      "record_patch": {"raw_response_persisted": true}
+    },
+    {
+      "fixture_id": "invalid_live_call_performed",
+      "validator": "validate_provider_transport_receipt",
+      "expected_accepted": false,
+      "expected_failures": ["provider_live_call_performed_forbidden"],
+      "record_patch": {"provider_live_call_performed": true}
+    },
+    {
+      "fixture_id": "invalid_missing_sealed_receipt",
+      "validator": "validate_provider_transport_postcheck",
+      "expected_accepted": false,
+      "expected_failures": ["sealed_receipt_present_required"],
+      "record_patch": {"sealed_receipt_present": false}
+    },
+    {
+      "fixture_id": "invalid_missing_failure_quarantine_link",
+      "validator": "validate_provider_transport_postcheck",
+      "expected_accepted": false,
+      "expected_failures": ["failure_quarantine_link_present_required"],
+      "record_patch": {"failure_quarantine_link_present": false}
+    }
+  ]
+}
