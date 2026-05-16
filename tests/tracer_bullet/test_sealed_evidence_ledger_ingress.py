@@ -73,6 +73,22 @@ class SealedEvidenceLedgerIngressTests(unittest.TestCase):
         self.assertEqual(row["audit_record_id"], audit_id)
         self.assertIn("ordinary", row["payload_json"])
 
+    def test_plain_classification_payload_does_not_trigger_sealed_contract(self):
+        conn, ledger = self.make_ledger()
+
+        audit_id = ledger.append(
+            record_type="classification_audit_note",
+            task_id="task-classification",
+            payload={"classification": "runtime_observation", "status": "ok"},
+        )
+
+        row = conn.execute(
+            "SELECT audit_record_id, payload_json FROM audit_records WHERE audit_record_id = ?",
+            (audit_id,),
+        ).fetchone()
+        self.assertEqual(row["audit_record_id"], audit_id)
+        self.assertIn("runtime_observation", row["payload_json"])
+
     def test_sealed_contract_payload_appends_when_valid(self):
         conn, ledger = self.make_ledger()
 
@@ -109,9 +125,9 @@ class SealedEvidenceLedgerIngressTests(unittest.TestCase):
                 record_type="unsafe_raw_prompt",
                 task_id="task-unsafe",
                 payload={
-                    "classification": "restricted",
                     "digest": self.digest("unsafe"),
                     "payload": {"raw_prompt": "do not persist this"},
+                    "raw_prompt": "do not persist this",
                 },
             )
 
