@@ -15,7 +15,7 @@ from kernel.runtime.gated_provider_transport_contracts import (
 
 GATE_PATH = Path("governance/runtime/gated_provider_transport_v1.json")
 FIXTURE_PATH = Path("governance/runtime/fixtures/gated_provider_transport_fixtures_v1.json")
-EXPECTED_HEALTH = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-schemas test-tracer-bullet test-acceptance diff-check"
+EXPECTED_HEALTH = "health: test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-runtime-sealed-receipt test-schemas test-tracer-bullet test-acceptance diff-check"
 
 VALIDATORS = {
     "validate_provider_transport_gate": validate_provider_transport_gate,
@@ -133,7 +133,8 @@ class GatedProviderTransportContractsTests(unittest.TestCase):
         )
         self.assertIn(EXPECTED_HEALTH, text)
         self.assertLess(EXPECTED_HEALTH.index("test-final-runtime-contracts"), EXPECTED_HEALTH.index("test-gated-provider-transport"))
-        self.assertLess(EXPECTED_HEALTH.index("test-gated-provider-transport"), EXPECTED_HEALTH.index("test-schemas"))
+        self.assertLess(EXPECTED_HEALTH.index("test-gated-provider-transport"), EXPECTED_HEALTH.index("test-runtime-sealed-receipt"))
+        self.assertLess(EXPECTED_HEALTH.index("test-runtime-sealed-receipt"), EXPECTED_HEALTH.index("test-schemas"))
 
     def test_source_does_not_introduce_live_transport_surface(self):
         source = Path("kernel/runtime/gated_provider_transport_contracts.py").read_text(encoding="utf-8")
