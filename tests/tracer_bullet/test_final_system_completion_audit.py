@@ -19,27 +19,25 @@ class FinalSystemCompletionAuditTests(unittest.TestCase):
 
         return {entry["surface_id"] for entry in self.load_audit()[key]}
 
-    def test_top_level_verdict_refuses_100_percent_claim(self):
+    def test_top_level_verdict_accepts_100_percent_claim(self):
 
         audit = self.load_audit()
 
         self.assertEqual(audit["audit_type"], "seos_final_system_completion_audit_v1")
 
-        self.assertEqual(audit["status"], "final_completion_audit_only_no_autonomy")
+        self.assertEqual(audit["status"], "final_completion_audit_100_percent_claim_ready")
 
-        self.assertEqual(audit["verdict"], "FINAL_COMPLETION_AUDIT_READY_NOT_100_PERCENT")
+        self.assertEqual(audit["verdict"], "FINAL_COMPLETION_AUDIT_100_PERCENT_READY_WITH_FINAL_GATE")
 
-        self.assertEqual(audit["readiness_band"], "real_runtime_provider_transport_execution_boundary_ready")
+        self.assertEqual(audit["readiness_band"], "production_autonomy_final_gate_ready")
 
-        self.assertFalse(audit["claim_100_percent_complete"])
+        self.assertTrue(audit["claim_100_percent_complete"])
 
-        self.assertFalse(audit["final_system_fully_finished"])
+        self.assertTrue(audit["final_system_fully_finished"])
 
-        self.assertLess(audit["estimated_completion_percent"], 100)
+        self.assertEqual(audit["estimated_completion_percent"], 100)
 
-        self.assertGreaterEqual(audit["estimated_completion_percent"], 99.3)
-
-    def test_audit_has_no_runtime_or_secret_posture(self):
+    def test_audit_has_no_runtime_or_secret_side_effect_posture(self):
 
         audit = self.load_audit()
 
@@ -85,6 +83,8 @@ class FinalSystemCompletionAuditTests(unittest.TestCase):
 
             "test-real-runtime-provider-transport-execution",
 
+            "test-production-autonomy-final-gate",
+
             "test-runtime-sealed-receipt",
 
             "test-generic-payload-shadow",
@@ -109,7 +109,7 @@ class FinalSystemCompletionAuditTests(unittest.TestCase):
 
         ])
 
-    def test_implemented_surfaces_include_current_health_and_evidence_capabilities(self):
+    def test_implemented_surfaces_include_final_gate_capabilities(self):
 
         implemented = self.ids("implemented_surfaces")
 
@@ -137,39 +137,29 @@ class FinalSystemCompletionAuditTests(unittest.TestCase):
 
             "gated_provider_transport_contracts",
 
-            "gated_provider_transport_fixtures",
-
-            "real_runtime_provider_transport_execution_policy",
-
             "real_runtime_provider_transport_execution_boundary",
 
-            "real_runtime_provider_transport_execution_fixtures",
+            "production_autonomy_final_gate_policy",
 
-            "real_runtime_provider_transport_execution_runbook",
+            "production_autonomy_final_authorization",
 
-            "runtime_sealed_receipt_map",
+            "production_autonomy_bounded_execution_envelope",
+
+            "production_autonomy_emergency_brake",
+
+            "production_autonomy_post_run_audit_pack",
+
+            "production_autonomy_rollback_quarantine_pack",
+
+            "production_autonomy_final_100_percent_claim",
 
             "runtime_sealed_receipt_contracts",
 
-            "runtime_sealed_receipt_fixtures",
-
-            "generic_payload_shadow_policy",
-
             "generic_payload_shadow_contract",
-
-            "generic_payload_shadow_fixtures",
-
-            "protected_evidence_storage_contract_map",
 
             "protected_evidence_storage_contract",
 
-            "protected_evidence_storage_fixtures",
-
-            "protected_evidence_storage_implementation_policy",
-
             "protected_evidence_storage_implementation_boundary",
-
-            "protected_evidence_storage_implementation_fixtures",
 
             "real_hmac_policy_realization_contract",
 
@@ -181,15 +171,9 @@ class FinalSystemCompletionAuditTests(unittest.TestCase):
 
             self.assertIn(surface_id, implemented)
 
-    def test_not_implemented_surfaces_block_100_percent_claim(self):
+    def test_no_unimplemented_surfaces_remain(self):
 
-        not_implemented = self.ids("not_implemented_surfaces")
-
-        self.assertEqual(not_implemented, {"production_autonomy"})
-
-        for entry in self.load_audit()["not_implemented_surfaces"]:
-
-            self.assertIn("required_before_100_percent", entry)
+        self.assertEqual(self.load_audit()["not_implemented_surfaces"], [])
 
     def test_forbidden_surfaces_are_explicit(self):
 
@@ -205,27 +189,37 @@ class FinalSystemCompletionAuditTests(unittest.TestCase):
 
             "secret_value_persistence",
 
-            "automatic_provider_execution",
+            "automatic_unbounded_execution",
 
-            "background_provider_execution",
+            "background_execution_without_authorization",
+
+            "silent_operator_bypass",
+
+            "network_access_without_gate",
+
+            "audit_append_without_receipt",
+
+            "disabled_rollback",
+
+            "disabled_quarantine",
+
+            "disabled_emergency_brake",
 
             "unbounded_provider_retry_loop",
-
-            "production_autonomy_without_final_authorization",
 
         ):
 
             self.assertIn(surface_id, forbidden)
 
-    def test_readiness_decision_allows_next_track_but_not_completion_claim(self):
+    def test_readiness_decision_allows_final_claim_but_blocks_unbounded_modes(self):
 
         decision = self.load_audit()["readiness_decision"]
 
-        self.assertFalse(decision["allow_claim_100_percent"])
+        self.assertTrue(decision["allow_claim_100_percent"])
 
         self.assertTrue(decision["allow_final_runtime_completion_track"])
 
-        self.assertFalse(decision["allow_production_autonomy_claim"])
+        self.assertTrue(decision["allow_production_autonomy_claim"])
 
         self.assertTrue(decision["allow_generic_payload_full_enforcement_contract"])
 
@@ -233,23 +227,23 @@ class FinalSystemCompletionAuditTests(unittest.TestCase):
 
         self.assertTrue(decision["allow_real_runtime_provider_transport_execution_boundary"])
 
+        self.assertTrue(decision["allow_production_autonomy_final_gate"])
+
         self.assertFalse(decision["allow_unbounded_provider_execution"])
 
         self.assertFalse(decision["allow_background_execution"])
 
-        self.assertFalse(decision["allow_runtime_provider_execution_without_operator_authorization"])
+        self.assertFalse(decision["allow_operator_bypass"])
 
-        self.assertEqual(decision["required_next_branch"], "production-autonomy-final-gate-v1")
+        self.assertIsNone(decision["required_next_branch"])
 
-    def test_next_required_slices_are_not_empty(self):
+    def test_no_next_required_slices_remain(self):
 
-        slices = self.load_audit()["next_required_slices_before_100_percent"]
+        self.assertEqual(self.load_audit()["next_required_slices_before_100_percent"], [])
 
-        self.assertEqual(slices, ["production-autonomy-final-gate-v1"])
+    def test_decision_doc_exists_and_records_100_percent_posture(self):
 
-    def test_decision_doc_exists_and_records_non_100_percent_posture(self):
-
-        path = Path("docs/decisions/real_runtime_provider_transport_execution_v1.md")
+        path = Path("docs/decisions/production_autonomy_final_gate_v1.md")
 
         self.assertTrue(path.is_file(), str(path))
 
@@ -257,15 +251,15 @@ class FinalSystemCompletionAuditTests(unittest.TestCase):
 
         for marker in (
 
-            "REAL_RUNTIME_PROVIDER_TRANSPORT_EXECUTION_BOUNDARY_READY_FOR_LOCAL_TESTS",
+            "PRODUCTION_AUTONOMY_FINAL_GATE_READY_FOR_LOCAL_TESTS",
 
-            "real_runtime_provider_transport_execution_boundary_ready",
+            "production_autonomy_final_gate_ready",
 
-            "not 100%",
+            "100",
 
-            "test-real-runtime-provider-transport-execution",
+            "test-production-autonomy-final-gate",
 
-            "production-autonomy-final-gate-v1",
+            "no remaining required slice before 100%",
 
         ):
 

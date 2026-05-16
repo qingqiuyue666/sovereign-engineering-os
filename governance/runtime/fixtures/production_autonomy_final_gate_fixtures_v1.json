@@ -1,0 +1,147 @@
+{
+  "fixture_type": "seos_production_autonomy_final_gate_fixtures_v1",
+  "version": "v1",
+  "status": "fixture_only_final_gate_validation",
+  "valid_records": [
+    {
+      "fixture_id": "valid_final_gate_policy",
+      "validator": "validate_final_gate_policy",
+      "expected_section": "final_gate_policy",
+      "record": {
+        "policy_type": "production_autonomy_final_gate_policy_v1",
+        "gate_mode": "default_deny",
+        "default_deny": true,
+        "explicit_authorization_required": true,
+        "bounded_execution_required": true,
+        "emergency_brake_required": true,
+        "post_run_audit_required": true,
+        "rollback_required": true,
+        "quarantine_required": true,
+        "human_operator_accountability_required": true,
+        "automatic_unbounded_execution_enabled": false,
+        "background_execution_enabled": false,
+        "silent_operator_bypass_enabled": false,
+        "network_access_without_gate": false,
+        "secret_value_read": false,
+        "secret_value_persisted": false,
+        "env_read_performed": false,
+        "raw_prompt_persisted": false,
+        "raw_response_persisted": false,
+        "sqlite_schema_changed": false,
+        "audit_append_without_receipt": false,
+        "rollback_disabled": false,
+        "quarantine_disabled": false,
+        "emergency_brake_disabled": false,
+        "unbounded_provider_retry_loop_enabled": false,
+        "required_health_gates": ["test-root-integrity", "test-sealed-evidence-coverage", "test-evidence-proof-contract", "test-evidence-proof-fixtures", "test-final-runtime-contracts", "test-gated-provider-transport", "test-real-runtime-provider-transport-execution", "test-production-autonomy-final-gate", "test-runtime-sealed-receipt", "test-generic-payload-shadow", "test-protected-evidence-storage", "test-protected-evidence-storage-implementation", "test-real-hmac-policy-realization", "test-real-merkle-proof-realization", "test-generic-payload-full-enforcement", "test-schemas", "test-tracer-bullet", "test-acceptance", "diff-check"]
+      }
+    },
+    {
+      "fixture_id": "valid_final_authorization",
+      "validator": "validate_final_authorization",
+      "expected_section": "final_authorization",
+      "record": {
+        "authorization_type": "production_autonomy_final_authorization_v1",
+        "authorization_id": "final-auth-001",
+        "task_id": "task-final-001",
+        "operator_id": "operator-001",
+        "policy_id": "final-policy-001",
+        "operator_explicitly_approved": true,
+        "scope": "bounded_production_autonomy",
+        "expires_after_single_run": true
+      }
+    },
+    {
+      "fixture_id": "valid_bounded_execution_envelope",
+      "validator": "validate_bounded_execution_envelope",
+      "expected_section": "bounded_execution_envelope",
+      "record": {
+        "envelope_type": "production_autonomy_bounded_execution_envelope_v1",
+        "envelope_id": "final-envelope-001",
+        "task_id": "task-final-001",
+        "authorization_id": "final-auth-001",
+        "max_provider_calls": 1,
+        "max_mutating_actions": 0,
+        "manual_final_confirm_required": true,
+        "digest_only_payload": true
+      }
+    },
+    {
+      "fixture_id": "valid_emergency_brake",
+      "validator": "validate_emergency_brake",
+      "expected_section": "emergency_brake",
+      "record": {
+        "brake_type": "production_autonomy_emergency_brake_v1",
+        "brake_id": "brake-001",
+        "task_id": "task-final-001",
+        "kill_switch_available": true,
+        "fail_closed_on_brake": true,
+        "operator_can_abort": true,
+        "rollback_on_abort": true
+      }
+    },
+    {
+      "fixture_id": "valid_post_run_audit_pack",
+      "validator": "validate_post_run_audit_pack",
+      "expected_section": "post_run_audit_pack",
+      "record": {
+        "audit_pack_type": "production_autonomy_post_run_audit_pack_v1",
+        "audit_pack_id": "audit-pack-001",
+        "task_id": "task-final-001",
+        "receipt_id": "receipt-001",
+        "sealed_receipt_refs": ["sealed::receipt-001"],
+        "quarantine_refs": ["quarantine::task-final-001"],
+        "rollback_refs": ["rollback::task-final-001"],
+        "health_gate_refs": ["health::ci"]
+      }
+    },
+    {
+      "fixture_id": "valid_rollback_quarantine_pack",
+      "validator": "validate_rollback_quarantine_pack",
+      "expected_section": "rollback_quarantine_pack",
+      "record": {
+        "pack_type": "production_autonomy_rollback_quarantine_pack_v1",
+        "pack_id": "rollback-quarantine-001",
+        "task_id": "task-final-001",
+        "rollback_plan_ready": true,
+        "quarantine_plan_ready": true,
+        "destructive_rollback_allowed": false
+      }
+    },
+    {
+      "fixture_id": "valid_final_100_percent_claim",
+      "validator": "validate_final_100_percent_claim",
+      "expected_section": "final_100_percent_claim",
+      "record": {
+        "claim_type": "seos_final_100_percent_completion_claim_v1",
+        "claim_status": "claim_ready",
+        "claim_100_percent_complete": true,
+        "all_required_health_gates_passed": true,
+        "all_runtime_boundaries_authorized": true,
+        "production_autonomy_final_gate_passed": true,
+        "required_health_gates": ["test-root-integrity", "test-sealed-evidence-coverage", "test-evidence-proof-contract", "test-evidence-proof-fixtures", "test-final-runtime-contracts", "test-gated-provider-transport", "test-real-runtime-provider-transport-execution", "test-production-autonomy-final-gate", "test-runtime-sealed-receipt", "test-generic-payload-shadow", "test-protected-evidence-storage", "test-protected-evidence-storage-implementation", "test-real-hmac-policy-realization", "test-real-merkle-proof-realization", "test-generic-payload-full-enforcement", "test-schemas", "test-tracer-bullet", "test-acceptance", "diff-check"]
+      }
+    },
+    {
+      "fixture_id": "valid_final_gate_report",
+      "validator": "validate_final_gate_report",
+      "expected_section": "final_gate_report",
+      "record": {
+        "report_type": "production_autonomy_final_gate_report_v1",
+        "final_gate_ready": true,
+        "final_system_fully_finished": true,
+        "validated_sections": ["final_gate_policy", "final_authorization", "bounded_execution_envelope", "emergency_brake", "post_run_audit_pack", "rollback_quarantine_pack", "final_100_percent_claim"]
+      }
+    }
+  ],
+  "invalid_records": [
+    {"fixture_id": "missing_authorization", "validator": "validate_final_authorization", "expected_failures": ["operator_explicitly_approved_required"], "record_patch": {"operator_explicitly_approved": false}},
+    {"fixture_id": "unbounded_calls", "validator": "validate_bounded_execution_envelope", "expected_failures": ["max_provider_calls_must_be_one"], "record_patch": {"max_provider_calls": 2}},
+    {"fixture_id": "mutating_actions", "validator": "validate_bounded_execution_envelope", "expected_failures": ["max_mutating_actions_must_be_zero"], "record_patch": {"max_mutating_actions": 1}},
+    {"fixture_id": "brake_disabled", "validator": "validate_emergency_brake", "expected_failures": ["kill_switch_available_missing"], "record_patch": {"kill_switch_available": false}},
+    {"fixture_id": "rollback_not_ready", "validator": "validate_rollback_quarantine_pack", "expected_failures": ["rollback_plan_ready_required"], "record_patch": {"rollback_plan_ready": false}},
+    {"fixture_id": "claim_not_ready", "validator": "validate_final_100_percent_claim", "expected_failures": ["all_required_health_gates_passed_required"], "record_patch": {"all_required_health_gates_passed": false}},
+    {"fixture_id": "raw_prompt_present", "validator": "validate_final_gate_policy", "expected_failures": ["high_risk_key_forbidden"], "record_patch": {"raw_prompt": "blocked"}},
+    {"fixture_id": "background_execution", "validator": "validate_final_gate_policy", "expected_failures": ["background_execution_enabled_forbidden"], "record_patch": {"background_execution_enabled": true}}
+  ]
+}

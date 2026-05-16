@@ -17,7 +17,7 @@
   "zero_knowledge_proof_built": false,
   "production_autonomy_enabled": false,
   "raw_evidence_store_allowed": false,
-  "allowed_stages": ["preflight", "receipt", "post_run_health", "failure_quarantine_linkage"],
+  "allowed_stages": ["preflight", "receipt", "post_run_health", "failure_quarantine_linkage", "production_autonomy_final_gate"],
   "required_health_gates": [
     "test-root-integrity",
     "test-sealed-evidence-coverage",
@@ -26,6 +26,7 @@
     "test-final-runtime-contracts",
     "test-gated-provider-transport",
     "test-real-runtime-provider-transport-execution",
+    "test-production-autonomy-final-gate",
     "test-runtime-sealed-receipt",
     "test-generic-payload-shadow",
     "test-protected-evidence-storage",
@@ -38,7 +39,7 @@
     "test-acceptance",
     "diff-check"
   ],
-  "promotion_blockers": ["operator_preflight_missing", "health_gate_missing", "sealed_evidence_policy_missing", "proof_policy_missing", "failure_quarantine_policy_missing", "worktree_dirty", "provider_transport_not_explicitly_authorized", "network_access_requested_without_authorization", "secret_access_requested", "production_autonomy_requested", "unbounded_provider_execution_requested"],
-  "required_contracts": ["final_runtime_preflight_contract", "final_runtime_receipt_contract", "final_runtime_post_run_health_contract", "final_runtime_failure_quarantine_link_contract", "real_runtime_provider_transport_execution_boundary"],
-  "next_allowed_track": "production-autonomy-final-gate-v1"
+  "promotion_blockers": ["operator_preflight_missing", "health_gate_missing", "sealed_evidence_policy_missing", "proof_policy_missing", "failure_quarantine_policy_missing", "worktree_dirty", "provider_transport_not_explicitly_authorized", "network_access_requested_without_authorization", "secret_access_requested", "unbounded_provider_execution_requested", "production_autonomy_final_gate_missing", "emergency_brake_missing", "rollback_quarantine_pack_missing"],
+  "required_contracts": ["final_runtime_preflight_contract", "final_runtime_receipt_contract", "final_runtime_post_run_health_contract", "final_runtime_failure_quarantine_link_contract", "real_runtime_provider_transport_execution_boundary", "production_autonomy_final_gate"],
+  "next_allowed_track": null
 }
