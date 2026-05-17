@@ -1,0 +1,57 @@
+
+{
+
+  "max_runtime_seconds": 28800,
+
+  "queue_mode": "overnight",
+
+  "queue_name": "overnight_task_queue_v1",
+
+  "queue_version": "v1",
+
+  "status": "active",
+
+  "stop_on_first_failure": true,
+
+  "tasks": [
+
+    {
+
+      "allow_commit": false,
+
+      "allow_push_feature_branch": false,
+
+      "commit_message": "overnight local-core verification",
+
+      "mode": "verify",
+
+      "stage_id": "stage-001-local-core-verify",
+
+      "suite": "local-core",
+
+      "task_id": "overnight-local-core-verify"
+
+    },
+
+    {
+
+      "allow_commit": false,
+
+      "allow_push_feature_branch": false,
+
+      "commit_message": "overnight full verification",
+
+      "mode": "verify",
+
+      "stage_id": "stage-002-full-verify",
+
+      "suite": "full",
+
+      "task_id": "overnight-full-verify"
+
+    }
+
+  ]
+
+}
+

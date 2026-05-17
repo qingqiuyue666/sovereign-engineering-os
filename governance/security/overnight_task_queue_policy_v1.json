@@ -1,0 +1,107 @@
+
+{
+
+  "allowed_queue_modes": [
+
+    "verify",
+
+    "overnight"
+
+  ],
+
+  "allowed_side_effects": [
+
+    "write_outputs_logs",
+
+    "write_outputs_reports",
+
+    "write_resume_marker",
+
+    "write_heartbeat",
+
+    "git_commit_current_feature_branch_when_explicitly_allowed",
+
+    "git_push_current_feature_branch_when_explicitly_allowed"
+
+  ],
+
+  "forbidden_actions": [
+
+    "git_merge",
+
+    "git_push_main",
+
+    "git_branch_delete",
+
+    "main_branch_modification",
+
+    "secret_read",
+
+    "env_read",
+
+    "cloud_ai_api_call",
+
+    "provider_live_execution",
+
+    "vault_live_write",
+
+    "production_autonomy",
+
+    "deployment",
+
+    "unbounded_runtime"
+
+  ],
+
+  "max_runtime_seconds_default": 28800,
+
+  "policy_name": "overnight_task_queue_policy_v1",
+
+  "policy_version": "v1",
+
+  "purpose": "Define the local-only overnight queue extension for Local Train Runner. The queue may execute predefined local verification stages for long-running unattended work, but it may not merge, delete branches, push main, call cloud AI, read secrets, or perform production execution.",
+
+  "required_guards": [
+
+    "stop_on_first_failure",
+
+    "max_runtime_enforced",
+
+    "heartbeat_written",
+
+    "resume_marker_written",
+
+    "stage_reports_written",
+
+    "main_branch_mutation_rejected",
+
+    "cloud_ai_calls_forbidden",
+
+    "secrets_forbidden",
+
+    "merge_forbidden",
+
+    "branch_delete_forbidden"
+
+  ],
+
+  "required_outputs": [
+
+    "outputs/logs/overnight_task_queue.log",
+
+    "outputs/reports/overnight_task_queue_report.md",
+
+    "outputs/reports/overnight_task_queue_summary.json",
+
+    "outputs/reports/overnight_task_queue_index.json",
+
+    "outputs/state/overnight_task_queue_resume.json",
+
+    "outputs/state/overnight_task_queue_heartbeat.json"
+
+  ],
+
+  "status": "active"
+
+}
+

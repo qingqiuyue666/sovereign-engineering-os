@@ -36,6 +36,12 @@ LOG_PATH = ROOT / "outputs/logs/local_train_runner.log"
 REPORT_PATH = ROOT / "outputs/reports/local_train_runner_report.md"
 
 SUMMARY_PATH = ROOT / "outputs/reports/local_train_runner_summary.json"
+OVERNIGHT_LOG_PATH = ROOT / "outputs/logs/overnight_task_queue.log"
+OVERNIGHT_REPORT_PATH = ROOT / "outputs/reports/overnight_task_queue_report.md"
+OVERNIGHT_SUMMARY_PATH = ROOT / "outputs/reports/overnight_task_queue_summary.json"
+OVERNIGHT_INDEX_PATH = ROOT / "outputs/reports/overnight_task_queue_index.json"
+OVERNIGHT_RESUME_PATH = ROOT / "outputs/state/overnight_task_queue_resume.json"
+OVERNIGHT_HEARTBEAT_PATH = ROOT / "outputs/state/overnight_task_queue_heartbeat.json"
 
 ALLOWED_SUITES = ("local-core", "full")
 
@@ -86,6 +92,12 @@ def ensure_output_dirs() -> None:
     REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
 
     SUMMARY_PATH.parent.mkdir(parents=True, exist_ok=True)
+    OVERNIGHT_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+    OVERNIGHT_REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    OVERNIGHT_SUMMARY_PATH.parent.mkdir(parents=True, exist_ok=True)
+    OVERNIGHT_INDEX_PATH.parent.mkdir(parents=True, exist_ok=True)
+    OVERNIGHT_RESUME_PATH.parent.mkdir(parents=True, exist_ok=True)
+    OVERNIGHT_HEARTBEAT_PATH.parent.mkdir(parents=True, exist_ok=True)
 
 def run_command(command: Sequence[str]) -> CommandResult:
 
@@ -453,6 +465,181 @@ def run_suite(
 
     return 0 if first_failure is None else 1
 
+
+def write_overnight_state(
+
+    *,
+
+    queue_path: str,
+
+    stage_index: int,
+
+    stage_count: int,
+
+    stage_id: str,
+
+    task_id: str,
+
+    status: str,
+
+    started_at: str,
+
+    finished_at: str | None = None,
+
+    first_failure: str | None = None,
+
+) -> None:
+
+    ensure_output_dirs()
+
+    heartbeat = {
+
+        "generated_at": now_utc(),
+
+        "queue_path": queue_path,
+
+        "stage_index": stage_index,
+
+        "stage_count": stage_count,
+
+        "stage_id": stage_id,
+
+        "task_id": task_id,
+
+        "status": status,
+
+    }
+
+    resume = {
+
+        "queue_path": queue_path,
+
+        "stage_index": stage_index,
+
+        "stage_count": stage_count,
+
+        "stage_id": stage_id,
+
+        "task_id": task_id,
+
+        "status": status,
+
+        "started_at": started_at,
+
+        "finished_at": finished_at,
+
+        "first_failure": first_failure,
+
+    }
+
+    OVERNIGHT_HEARTBEAT_PATH.write_text(json.dumps(heartbeat, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+    OVERNIGHT_RESUME_PATH.write_text(json.dumps(resume, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+def write_overnight_reports(queue_summary: dict[str, object]) -> None:
+
+    ensure_output_dirs()
+
+    OVERNIGHT_SUMMARY_PATH.write_text(json.dumps(queue_summary, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+    index_payload = {
+
+        "generated_at": queue_summary.get("generated_at"),
+
+        "queue_path": queue_summary.get("queue_path"),
+
+        "overall_ok": queue_summary.get("overall_ok"),
+
+        "stage_count": queue_summary.get("stage_count"),
+
+        "completed_stage_count": queue_summary.get("completed_stage_count"),
+
+        "first_failure": queue_summary.get("first_failure"),
+
+        "stages": queue_summary.get("stages", []),
+
+    }
+
+    OVERNIGHT_INDEX_PATH.write_text(json.dumps(index_payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+    lines = [
+
+        "# Overnight Task Queue Report",
+
+        "",
+
+        f"- generated_at: `{queue_summary.get('generated_at')}`",
+
+        f"- queue_path: `{queue_summary.get('queue_path')}`",
+
+        f"- overall_ok: `{queue_summary.get('overall_ok')}`",
+
+        f"- first_failure: `{queue_summary.get('first_failure') or ''}`",
+
+        f"- stage_count: `{queue_summary.get('stage_count')}`",
+
+        f"- completed_stage_count: `{queue_summary.get('completed_stage_count')}`",
+
+        "",
+
+        "## Stages",
+
+        "",
+
+    ]
+
+    for stage in queue_summary.get("stages", []):
+
+        if isinstance(stage, dict):
+
+            lines.append(
+
+                f"- `{stage.get('status')}` `{stage.get('stage_id')}` "
+
+                f"task=`{stage.get('task_id')}` suite=`{stage.get('suite')}` mode=`{stage.get('mode')}`"
+
+            )
+
+    lines.extend([
+
+        "",
+
+        "## Safety",
+
+        "",
+
+        "- no cloud AI calls",
+
+        "- no merge",
+
+        "- no branch deletion",
+
+        "- no push to main",
+
+        "- no secret read",
+
+        "- no provider live execution",
+
+        "- no vault live write",
+
+        "- no production autonomy",
+
+        "",
+
+    ])
+
+    OVERNIGHT_REPORT_PATH.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    with OVERNIGHT_LOG_PATH.open("a", encoding="utf-8") as fh:
+
+        fh.write("\n" + "=" * 80 + "\n")
+
+        fh.write(f"overnight queue report at {now_utc()}\n")
+
+        fh.write(json.dumps(queue_summary, indent=2, sort_keys=True) + "\n")
+
+
+
 def load_queue(path: Path) -> dict[str, object]:
 
     return json.loads(path.read_text(encoding="utf-8"))
@@ -467,19 +654,53 @@ def run_queue(path: Path, fallback_mode: str, allow_commit: bool, allow_push_fea
 
         raise SystemExit("queue_tasks_must_be_list")
 
+    queue_path = str(path.relative_to(ROOT)) if path.is_absolute() else str(path)
+
+    started_at = now_utc()
+
+    stages: list[dict[str, object]] = []
+
+    first_failure = None
+
     exit_code = 0
 
-    for task in tasks:
+    for index, task in enumerate(tasks, start=1):
 
         if not isinstance(task, dict):
 
             raise SystemExit("queue_task_must_be_object")
 
+        stage_id = str(task.get("stage_id", f"stage-{index:03d}"))
+
+        task_id = str(task.get("task_id", stage_id))
+
+        suite = str(task.get("suite", "full"))
+
+        mode = str(task.get("mode", fallback_mode))
+
+        write_overnight_state(
+
+            queue_path=queue_path,
+
+            stage_index=index,
+
+            stage_count=len(tasks),
+
+            stage_id=stage_id,
+
+            task_id=task_id,
+
+            status="running",
+
+            started_at=started_at,
+
+        )
+
         exit_code = run_suite(
 
-            suite=str(task.get("suite", "full")),
+            suite=suite,
 
-            mode=str(task.get("mode", fallback_mode)),
+            mode=mode,
 
             commit_message=str(task.get("commit_message", "local train runner commit")),
 
@@ -489,9 +710,105 @@ def run_queue(path: Path, fallback_mode: str, allow_commit: bool, allow_push_fea
 
         )
 
+        stage_status = "ok" if exit_code == 0 else "failed"
+
+        stages.append({
+
+            "stage_index": index,
+
+            "stage_id": stage_id,
+
+            "task_id": task_id,
+
+            "suite": suite,
+
+            "mode": mode,
+
+            "status": stage_status,
+
+            "exit_code": exit_code,
+
+        })
+
         if exit_code != 0:
 
-            return exit_code
+            first_failure = stage_id
+
+            write_overnight_state(
+
+                queue_path=queue_path,
+
+                stage_index=index,
+
+                stage_count=len(tasks),
+
+                stage_id=stage_id,
+
+                task_id=task_id,
+
+                status="failed",
+
+                started_at=started_at,
+
+                finished_at=now_utc(),
+
+                first_failure=first_failure,
+
+            )
+
+            break
+
+        write_overnight_state(
+
+            queue_path=queue_path,
+
+            stage_index=index,
+
+            stage_count=len(tasks),
+
+            stage_id=stage_id,
+
+            task_id=task_id,
+
+            status="ok",
+
+            started_at=started_at,
+
+            finished_at=now_utc(),
+
+        )
+
+    queue_summary = {
+
+        "generated_at": now_utc(),
+
+        "queue_path": queue_path,
+
+        "overall_ok": first_failure is None,
+
+        "first_failure": first_failure,
+
+        "stage_count": len(tasks),
+
+        "completed_stage_count": len(stages),
+
+        "stages": stages,
+
+        "report_path": str(OVERNIGHT_REPORT_PATH),
+
+        "summary_path": str(OVERNIGHT_SUMMARY_PATH),
+
+        "index_path": str(OVERNIGHT_INDEX_PATH),
+
+        "resume_path": str(OVERNIGHT_RESUME_PATH),
+
+        "heartbeat_path": str(OVERNIGHT_HEARTBEAT_PATH),
+
+        "log_path": str(OVERNIGHT_LOG_PATH),
+
+    }
+
+    write_overnight_reports(queue_summary)
 
     return exit_code
 
