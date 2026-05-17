@@ -1,0 +1,31 @@
+
+{
+
+  "queue_name": "local_train_task_queue_v1",
+
+  "queue_version": "v1",
+
+  "status": "active",
+
+  "tasks": [
+
+    {
+
+      "allow_commit": false,
+
+      "allow_push_feature_branch": false,
+
+      "commit_message": "v12 local train runner",
+
+      "mode": "verify",
+
+      "suite": "full",
+
+      "task_id": "local-train-runner-full-verification"
+
+    }
+
+  ]
+
+}
+

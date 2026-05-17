@@ -1,0 +1,119 @@
+
+{
+
+  "allowed_modes": [
+
+    "verify",
+
+    "commit",
+
+    "commit-push",
+
+    "overnight"
+
+  ],
+
+  "allowed_side_effects": [
+
+    "write_outputs_logs",
+
+    "write_outputs_reports",
+
+    "git_commit_current_feature_branch_when_explicitly_allowed",
+
+    "git_push_current_feature_branch_when_explicitly_allowed"
+
+  ],
+
+  "allowed_suites": [
+
+    "local-core",
+
+    "full"
+
+  ],
+
+  "authority_model": {
+
+    "cloud_ai_role": "none",
+
+    "human_review_required_for_merge": true,
+
+    "local_terminal_remains_authority": true,
+
+    "runner_role": "local_execution_reporter_and_limited_branch_worker"
+
+  },
+
+  "default_mode": "verify",
+
+  "forbidden_actions": [
+
+    "git_merge",
+
+    "git_push_main",
+
+    "git_checkout_main_and_modify",
+
+    "git_branch_delete",
+
+    "rm_rf",
+
+    "secret_read",
+
+    "env_read",
+
+    "cloud_ai_api_call",
+
+    "provider_live_execution",
+
+    "vault_live_write",
+
+    "production_autonomy",
+
+    "deployment"
+
+  ],
+
+  "policy_name": "local_train_runner_policy_v1",
+
+  "policy_version": "v1",
+
+  "purpose": "Define a local-only automation runner for verification, reporting, controlled commit, and controlled feature-branch push without delegating authority to cloud AI.",
+
+  "required_guards": [
+
+    "reject_main_branch_commit",
+
+    "reject_main_branch_push",
+
+    "reject_merge",
+
+    "reject_branch_delete",
+
+    "reject_env_file_reads",
+
+    "reject_cloud_ai_calls",
+
+    "command_allowlist_only",
+
+    "record_every_command",
+
+    "stop_on_first_failure"
+
+  ],
+
+  "required_report_outputs": [
+
+    "outputs/logs/local_train_runner.log",
+
+    "outputs/reports/local_train_runner_report.md",
+
+    "outputs/reports/local_train_runner_summary.json"
+
+  ],
+
+  "status": "active"
+
+}
+
