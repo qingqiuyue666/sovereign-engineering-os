@@ -17,7 +17,7 @@ from kernel.runtime.real_runtime_provider_transport_execution import (
 
 POLICY_PATH = Path("governance/runtime/real_runtime_provider_transport_execution_v1.json")
 FIXTURE_PATH = Path("governance/runtime/fixtures/real_runtime_provider_transport_execution_fixtures_v1.json")
-EXPECTED_HEALTH = "health: test-root-integrity test-leak-prevention-foundation test-v12-foundation test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-real-runtime-provider-transport-execution test-production-autonomy-final-gate test-runtime-sealed-receipt test-generic-payload-shadow test-protected-evidence-storage test-protected-evidence-storage-implementation test-real-hmac-policy-realization test-real-merkle-proof-realization test-generic-payload-full-enforcement test-schemas test-tracer-bullet test-acceptance diff-check"
+EXPECTED_HEALTH = "health: test-root-integrity test-leak-prevention-foundation test-security-truth-substrate test-v12-foundation test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-real-runtime-provider-transport-execution test-production-autonomy-final-gate test-runtime-sealed-receipt test-generic-payload-shadow test-protected-evidence-storage test-protected-evidence-storage-implementation test-real-hmac-policy-realization test-real-merkle-proof-realization test-generic-payload-full-enforcement test-schemas test-tracer-bullet test-acceptance diff-check"
 VALIDATORS = {
     "validate_transport_execution_policy": validate_transport_execution_policy,
     "validate_operator_authorization": validate_operator_authorization,
