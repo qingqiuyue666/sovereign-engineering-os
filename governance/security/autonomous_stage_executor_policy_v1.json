@@ -1,0 +1,105 @@
+
+{
+
+  "allowed_stage_types": [
+
+    "verification",
+
+    "local_script"
+
+  ],
+
+  "allowed_side_effects": [
+
+    "write_stage_logs",
+
+    "write_stage_reports",
+
+    "write_stage_summary",
+
+    "run_allowlisted_local_script",
+
+    "run_verification_suite"
+
+  ],
+
+  "forbidden_actions": [
+
+    "cloud_ai_api_call",
+
+    "freeform_shell_execution",
+
+    "unbounded_code_generation",
+
+    "unbounded_runtime",
+
+    "git_merge",
+
+    "git_push_main",
+
+    "git_branch_delete",
+
+    "main_branch_modification",
+
+    "secret_read",
+
+    "env_read",
+
+    "provider_live_execution",
+
+    "vault_live_write",
+
+    "production_autonomy",
+
+    "deployment"
+
+  ],
+
+  "policy_name": "autonomous_stage_executor_policy_v1",
+
+  "policy_version": "v1",
+
+  "purpose": "Define a bounded local-only stage executor for predefined verification and allowlisted local script stages. The executor may not run freeform shell commands, call cloud AI, read secrets, merge, push main, delete branches, or execute production surfaces.",
+
+  "required_guards": [
+
+    "stage_registry_required",
+
+    "stage_id_must_be_registered",
+
+    "script_path_must_be_allowlisted",
+
+    "freeform_shell_forbidden",
+
+    "stop_on_first_failure",
+
+    "stage_report_written",
+
+    "stage_summary_written",
+
+    "main_branch_mutation_rejected",
+
+    "cloud_ai_calls_forbidden",
+
+    "secrets_forbidden",
+
+    "merge_forbidden",
+
+    "branch_delete_forbidden"
+
+  ],
+
+  "required_outputs": [
+
+    "outputs/logs/autonomous_stage_executor.log",
+
+    "outputs/reports/autonomous_stage_executor_report.md",
+
+    "outputs/reports/autonomous_stage_executor_summary.json"
+
+  ],
+
+  "status": "active"
+
+}
+

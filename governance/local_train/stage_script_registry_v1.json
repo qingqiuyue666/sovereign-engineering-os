@@ -1,0 +1,73 @@
+
+{
+
+  "registry_name": "stage_script_registry_v1",
+
+  "registry_version": "v1",
+
+  "status": "active",
+
+  "default_rule": "allowlisted_local_scripts_only",
+
+  "allowed_stage_types": [
+
+    "verification",
+
+    "local_script"
+
+  ],
+
+  "forbidden_stage_types": [
+
+    "cloud_ai",
+
+    "freeform_shell",
+
+    "production_execution",
+
+    "provider_live_execution",
+
+    "vault_live_write",
+
+    "deployment"
+
+  ],
+
+  "scripts": [
+
+    {
+
+      "script_id": "verify-local-core",
+
+      "stage_type": "verification",
+
+      "script_path": "tools/local_stage_scripts/verify_local_core.py",
+
+      "description": "Run local-core verification through the local train runner.",
+
+      "allow_commit": false,
+
+      "allow_push_feature_branch": false
+
+    },
+
+    {
+
+      "script_id": "verify-full",
+
+      "stage_type": "verification",
+
+      "script_path": "tools/local_stage_scripts/verify_full.py",
+
+      "description": "Run full verification through the local train runner.",
+
+      "allow_commit": false,
+
+      "allow_push_feature_branch": false
+
+    }
+
+  ]
+
+}
+
