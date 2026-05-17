@@ -1,0 +1,7 @@
+{
+  "policy_type": "keyring_contract_v1",
+  "version": "v1",
+  "metadata_only": true,
+  "keyring_access_allowed": false,
+  "encryption_runtime_allowed": false
+}

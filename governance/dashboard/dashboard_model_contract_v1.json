@@ -1,0 +1,8 @@
+{
+  "policy_type": "dashboard_model_contract_v1",
+  "version": "v1",
+  "data_model_only": true,
+  "web_server_allowed": false,
+  "frontend_build_allowed": false,
+  "network_allowed": false
+}

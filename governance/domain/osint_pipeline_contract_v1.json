@@ -1,0 +1,8 @@
+{
+  "policy_type": "osint_pipeline_contract_v1",
+  "version": "v1",
+  "skeleton_only": true,
+  "network_allowed": false,
+  "live_data_fetch_allowed": false,
+  "telegram_push_allowed": false
+}

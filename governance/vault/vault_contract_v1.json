@@ -1,0 +1,8 @@
+{
+  "policy_type": "vault_contract_v1",
+  "version": "v1",
+  "metadata_only": true,
+  "secret_value_read_allowed": false,
+  "plaintext_secret_value_allowed": false,
+  "kms_runtime_allowed": false
+}

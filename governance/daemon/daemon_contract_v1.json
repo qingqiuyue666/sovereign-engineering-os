@@ -1,0 +1,8 @@
+{
+  "policy_type": "daemon_contract_v1",
+  "version": "v1",
+  "metadata_only": true,
+  "process_spawn_allowed": false,
+  "background_loop_allowed": false,
+  "kill_switch_required": true
+}

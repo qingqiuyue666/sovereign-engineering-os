@@ -1,0 +1,7 @@
+{
+  "policy_type": "macro_asset_mapping_contract_v1",
+  "version": "v1",
+  "contract_only": true,
+  "trading_execution_allowed": false,
+  "live_market_data_allowed": false
+}

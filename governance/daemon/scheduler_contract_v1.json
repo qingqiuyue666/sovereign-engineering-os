@@ -1,0 +1,7 @@
+{
+  "policy_type": "scheduler_contract_v1",
+  "version": "v1",
+  "metadata_only": true,
+  "scheduler_runtime_allowed": false,
+  "single_run_mode_required": true
+}
