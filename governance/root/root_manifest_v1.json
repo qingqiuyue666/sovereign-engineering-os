@@ -9,7 +9,7 @@
     {"git_blob_sha1": "e5e1d710aaa949de98ccd9b2ba12047f675c6e13", "path": "kernel/services/validation_service.py", "role": "validation_service"},
     {"git_blob_sha1": "53b43ef030c45dc6e2b6fb45ab7fb0957ba9b673", "path": "kernel/personal_ai/adapters/openai_explicit_transport.py", "role": "openai_explicit_transport"},
     {"git_blob_sha1": "9fd4f4f1b9b09675950a0765e48d4c7221ad1f0c", "path": "kernel/personal_ai/model_provider_real_smoke_manual_run.py", "role": "model_provider_manual_smoke_planner"},
-    {"git_blob_sha1": "a38b15bef25faaa394b761528ab72f6fb7c06d7f", "path": "Makefile", "role": "canonical_ci_gate"},
+    {"git_blob_sha1": "f0e7e18dc9f6456bf2f2e3a917d372684be3a499", "path": "Makefile", "role": "canonical_ci_gate"},
     {"git_blob_sha1": "3151e7b28d4958f29745f6efd9d98ecd0b5a6e13", "path": "governance/constitution/sovereign_engineering_operating_system_master_plan_v11.txt", "role": "constitution_baseline"},
     {"git_blob_sha1": "65f01e7005f2b5a6efc730875eaaf026def59e8c", "path": "governance/implementation/v11_narrow_path_implementation_foundation.md", "role": "implementation_foundation"}
   ],
