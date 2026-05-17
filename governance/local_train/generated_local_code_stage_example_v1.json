@@ -1,0 +1,15 @@
+{
+  "allowed_outputs": [
+    "docs/runbooks/generated_local_code_stage_example_v1.md",
+    "governance/local_train/generated_local_code_stage_example_v1.json",
+    "tests/tracer_bullet/test_generated_local_code_stage_example.py"
+  ],
+  "artifact_name": "generated_local_code_stage_example_v1",
+  "artifact_version": "v1",
+  "cloud_ai_used": false,
+  "freeform_shell_used": false,
+  "generated_by": "tools/local_code_stages/generate_local_code_stage_example.py",
+  "purpose": "Prove bounded local-only code generation through an allowlisted stage script.",
+  "secret_read": false,
+  "status": "active"
+}

@@ -1,0 +1,125 @@
+
+{
+
+  "registry_name": "code_stage_registry_v1",
+
+  "registry_version": "v1",
+
+  "status": "active",
+
+  "default_rule": "predefined_local_code_stages_only",
+
+  "allowed_stage_types": [
+
+    "local_code_generation",
+
+    "local_code_patch",
+
+    "verification"
+
+  ],
+
+  "forbidden_stage_types": [
+
+    "cloud_ai",
+
+    "freeform_shell",
+
+    "production_execution",
+
+    "provider_live_execution",
+
+    "vault_live_write",
+
+    "deployment",
+
+    "unbounded_generation"
+
+  ],
+
+  "path_policy": {
+
+    "allowlisted_roots": [
+
+      "tools/local_code_stages/",
+
+      "governance/local_train/",
+
+      "governance/security/",
+
+      "docs/runbooks/",
+
+      "tests/tracer_bullet/"
+
+    ],
+
+    "forbidden_roots": [
+
+      ".env",
+
+      ".git/",
+
+      "outputs/",
+
+      "kernel/runtime/",
+
+      "kernel/security/",
+
+      "validation/",
+
+      "governance/root/"
+
+    ]
+
+  },
+
+  "line_budget": {
+
+    "max_lines_added_per_stage": 2000,
+
+    "max_files_changed_per_stage": 12,
+
+    "reject_if_unbounded": true
+
+  },
+
+  "stages": [
+
+    {
+
+      "stage_id": "generate-local-code-stage-example",
+
+      "stage_type": "local_code_generation",
+
+      "script_path": "tools/local_code_stages/generate_local_code_stage_example.py",
+
+      "description": "Generate a bounded local-only example artifact under allowlisted roots.",
+
+      "allowed_write_paths": [
+
+        "docs/runbooks/generated_local_code_stage_example_v1.md",
+
+        "tests/tracer_bullet/test_generated_local_code_stage_example.py",
+
+        "governance/local_train/generated_local_code_stage_example_v1.json"
+
+      ],
+
+      "verification_commands": [
+
+        "python3 -m unittest tests.tracer_bullet.test_generated_local_code_stage_example -v",
+
+        "git diff --check"
+
+      ],
+
+      "allow_commit": false,
+
+      "allow_push_feature_branch": false
+
+    }
+
+  ]
+
+}
+

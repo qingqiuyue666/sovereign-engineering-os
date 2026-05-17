@@ -1,0 +1,153 @@
+
+{
+
+  "allowed_stage_types": [
+
+    "local_code_generation",
+
+    "local_code_patch",
+
+    "verification"
+
+  ],
+
+  "allowed_side_effects": [
+
+    "write_allowlisted_files",
+
+    "write_diff_report",
+
+    "write_stage_summary",
+
+    "run_verification_suite"
+
+  ],
+
+  "forbidden_actions": [
+
+    "cloud_ai_api_call",
+
+    "freeform_shell_execution",
+
+    "unbounded_code_generation",
+
+    "unbounded_runtime",
+
+    "git_merge",
+
+    "git_push_main",
+
+    "git_branch_delete",
+
+    "main_branch_modification",
+
+    "secret_read",
+
+    "env_read",
+
+    "provider_live_execution",
+
+    "vault_live_write",
+
+    "production_autonomy",
+
+    "deployment"
+
+  ],
+
+  "line_budget": {
+
+    "max_lines_added_per_stage": 2000,
+
+    "max_files_changed_per_stage": 12,
+
+    "reject_if_unbounded": true
+
+  },
+
+  "path_policy": {
+
+    "allowlisted_roots": [
+
+      "tools/local_code_stages/",
+
+      "governance/local_train/",
+
+      "governance/security/",
+
+      "docs/runbooks/",
+
+      "tests/tracer_bullet/"
+
+    ],
+
+    "forbidden_roots": [
+
+      ".env",
+
+      ".git/",
+
+      "outputs/",
+
+      "kernel/runtime/",
+
+      "kernel/security/",
+
+      "validation/",
+
+      "governance/root/"
+
+    ]
+
+  },
+
+  "policy_name": "autonomous_code_stage_policy_v1",
+
+  "policy_version": "v1",
+
+  "purpose": "Define a bounded local-only code stage that may write only allowlisted files through predefined local scripts. It forbids cloud AI, freeform shell, secrets, main mutation, production execution, and unbounded generation.",
+
+  "required_guards": [
+
+    "code_stage_registry_required",
+
+    "stage_id_must_be_registered",
+
+    "write_paths_must_be_allowlisted",
+
+    "line_budget_enforced",
+
+    "freeform_shell_forbidden",
+
+    "cloud_ai_calls_forbidden",
+
+    "secrets_forbidden",
+
+    "main_branch_mutation_rejected",
+
+    "merge_forbidden",
+
+    "branch_delete_forbidden",
+
+    "diff_report_written",
+
+    "verification_required_after_write"
+
+  ],
+
+  "required_outputs": [
+
+    "outputs/logs/autonomous_code_stage.log",
+
+    "outputs/reports/autonomous_code_stage_report.md",
+
+    "outputs/reports/autonomous_code_stage_summary.json",
+
+    "outputs/reports/autonomous_code_stage_diff.json"
+
+  ],
+
+  "status": "active"
+
+}
+
