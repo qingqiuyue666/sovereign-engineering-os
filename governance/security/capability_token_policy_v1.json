@@ -1,0 +1,9 @@
+{
+  "policy_type": "capability_token_policy_v1",
+  "version": "v1",
+  "metadata_only": true,
+  "wildcard_scope_allowed": false,
+  "expired_token_allowed": false,
+  "secret_material_allowed": false,
+  "unauthorized_action_allowed": false
+}

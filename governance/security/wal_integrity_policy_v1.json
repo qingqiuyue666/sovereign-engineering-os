@@ -1,0 +1,9 @@
+{
+  "policy_type": "wal_integrity_policy_v1",
+  "version": "v1",
+  "metadata_only": true,
+  "required_fields": ["segment_id", "logical_sequence", "expected_hash", "observed_hash"],
+  "duplicate_segment_id_allowed": false,
+  "sequence_regression_allowed": false,
+  "real_wal_reader_allowed": false
+}

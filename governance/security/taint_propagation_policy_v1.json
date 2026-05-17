@@ -1,0 +1,8 @@
+{
+  "policy_type": "taint_propagation_policy_v1",
+  "version": "v1",
+  "labels": ["PUBLIC", "INTERNAL", "CONFIDENTIAL", "SECRET", "CROWN_JEWEL"],
+  "monotonic_escalation_required": true,
+  "downgrade_requires_declassification_receipt": true,
+  "derived_artifact_inherits_highest_input_taint": true
+}

@@ -1,0 +1,7 @@
+{
+  "policy_type": "artifact_provenance_policy_v1",
+  "version": "v1",
+  "required_fields": ["artifact_id", "artifact_type", "content_hash", "source_refs", "classification", "created_by_stage"],
+  "raw_content_required": false,
+  "unknown_classification_fails_closed": true
+}

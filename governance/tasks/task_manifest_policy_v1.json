@@ -1,0 +1,7 @@
+{
+  "policy_type": "task_manifest_policy_v1",
+  "version": "v1",
+  "required_fields": ["objective", "requested_capabilities", "classification", "policy_version", "code_version", "input_digest"],
+  "deterministic_task_id_if_missing": true,
+  "provider_bound_secret_or_crown_jewel_allowed": false
+}

@@ -1,0 +1,8 @@
+{
+  "policy_type": "run_ledger_policy_v1",
+  "version": "v1",
+  "append_only": true,
+  "duplicate_event_id_allowed": false,
+  "sequence_regression_allowed": false,
+  "required_event_fields": ["run_id", "task_id", "stage", "event_type", "logical_time", "payload_digest"]
+}
