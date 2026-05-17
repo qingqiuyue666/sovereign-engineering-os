@@ -1,0 +1,111 @@
+
+{
+
+  "allowed_modes": [
+
+    "plan",
+
+    "verify",
+
+    "overnight"
+
+  ],
+
+  "allowed_side_effects": [
+
+    "write_train_plan",
+
+    "write_stage_reports",
+
+    "write_train_summary",
+
+    "write_resume_marker",
+
+    "write_heartbeat",
+
+    "run_local_allowlisted_commands"
+
+  ],
+
+  "forbidden_actions": [
+
+    "cloud_ai_api_call",
+
+    "unbounded_code_generation",
+
+    "unbounded_runtime",
+
+    "git_merge",
+
+    "git_push_main",
+
+    "git_branch_delete",
+
+    "main_branch_modification",
+
+    "secret_read",
+
+    "env_read",
+
+    "provider_live_execution",
+
+    "vault_live_write",
+
+    "production_autonomy",
+
+    "deployment"
+
+  ],
+
+  "max_runtime_seconds_default": 28800,
+
+  "policy_name": "autonomous_build_train_policy_v1",
+
+  "policy_version": "v1",
+
+  "purpose": "Define a bounded local-only autonomous build train that executes predefined local stages through the Local Train Runner without delegating architecture authority, merge authority, or production authority.",
+
+  "required_guards": [
+
+    "predefined_stage_queue_required",
+
+    "stop_on_first_failure",
+
+    "max_runtime_enforced",
+
+    "heartbeat_written",
+
+    "resume_marker_written",
+
+    "stage_reports_written",
+
+    "main_branch_mutation_rejected",
+
+    "cloud_ai_calls_forbidden",
+
+    "secrets_forbidden",
+
+    "merge_forbidden",
+
+    "branch_delete_forbidden",
+
+    "unbounded_generation_forbidden"
+
+  ],
+
+  "required_outputs": [
+
+    "outputs/reports/autonomous_build_train_plan.md",
+
+    "outputs/reports/autonomous_build_train_summary.json",
+
+    "outputs/state/autonomous_build_train_resume.json",
+
+    "outputs/state/autonomous_build_train_heartbeat.json"
+
+  ],
+
+  "status": "active"
+
+}
+

@@ -1,0 +1,61 @@
+
+{
+
+  "max_runtime_seconds": 28800,
+
+  "plan_name": "autonomous_build_train_plan_v1",
+
+  "plan_version": "v1",
+
+  "status": "active",
+
+  "stop_on_first_failure": true,
+
+  "train_mode": "overnight",
+
+  "stages": [
+
+    {
+
+      "allow_commit": false,
+
+      "allow_push_feature_branch": false,
+
+      "commit_message": "autonomous build train local-core verification",
+
+      "mode": "verify",
+
+      "stage_id": "stage-001-local-core-verify",
+
+      "stage_type": "verification",
+
+      "suite": "local-core",
+
+      "task_id": "autonomous-local-core-verify"
+
+    },
+
+    {
+
+      "allow_commit": false,
+
+      "allow_push_feature_branch": false,
+
+      "commit_message": "autonomous build train full verification",
+
+      "mode": "verify",
+
+      "stage_id": "stage-002-full-verify",
+
+      "stage_type": "verification",
+
+      "suite": "full",
+
+      "task_id": "autonomous-full-verify"
+
+    }
+
+  ]
+
+}
+
