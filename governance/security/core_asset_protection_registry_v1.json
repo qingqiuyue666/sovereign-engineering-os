@@ -1,0 +1,114 @@
+{
+  "default_rule": "local_only_no_cloud_ai",
+  "forbidden_delegations": [
+    "cloud_ai_git_authority",
+    "cloud_ai_merge_authority",
+    "cloud_ai_push_authority",
+    "cloud_ai_branch_delete_authority",
+    "cloud_ai_final_ci_authority",
+    "cloud_ai_production_execution_authority"
+  ],
+  "protected_assets": [
+    {
+      "asset_class": "C",
+      "asset_id": "system_architecture_core",
+      "cloud_ai_allowed": false,
+      "exposure_mode": "local_only",
+      "local_only_required": true
+    },
+    {
+      "asset_class": "C",
+      "asset_id": "runtime_spine_design",
+      "cloud_ai_allowed": false,
+      "exposure_mode": "local_only",
+      "local_only_required": true
+    },
+    {
+      "asset_class": "C",
+      "asset_id": "provider_architecture",
+      "cloud_ai_allowed": false,
+      "exposure_mode": "local_only",
+      "local_only_required": true
+    },
+    {
+      "asset_class": "C",
+      "asset_id": "replay_architecture",
+      "cloud_ai_allowed": false,
+      "exposure_mode": "local_only",
+      "local_only_required": true
+    },
+    {
+      "asset_class": "C",
+      "asset_id": "evidence_vault_architecture",
+      "cloud_ai_allowed": false,
+      "exposure_mode": "local_only",
+      "local_only_required": true
+    },
+    {
+      "asset_class": "C",
+      "asset_id": "osint_asset_mapping_architecture",
+      "cloud_ai_allowed": false,
+      "exposure_mode": "local_only",
+      "local_only_required": true
+    },
+    {
+      "asset_class": "C",
+      "asset_id": "decision_engine",
+      "cloud_ai_allowed": false,
+      "exposure_mode": "local_only",
+      "local_only_required": true
+    },
+    {
+      "asset_class": "C",
+      "asset_id": "real_provider_implementation",
+      "cloud_ai_allowed": false,
+      "exposure_mode": "local_only",
+      "local_only_required": true
+    },
+    {
+      "asset_class": "C",
+      "asset_id": "real_strategy_parameters",
+      "cloud_ai_allowed": false,
+      "exposure_mode": "local_only",
+      "local_only_required": true
+    },
+    {
+      "asset_class": "C",
+      "asset_id": "real_execution_logic",
+      "cloud_ai_allowed": false,
+      "exposure_mode": "local_only",
+      "local_only_required": true
+    },
+    {
+      "asset_class": "C",
+      "asset_id": "real_deployment_scripts",
+      "cloud_ai_allowed": false,
+      "exposure_mode": "local_only",
+      "local_only_required": true
+    },
+    {
+      "asset_class": "C",
+      "asset_id": "real_run_history",
+      "cloud_ai_allowed": false,
+      "exposure_mode": "local_only",
+      "local_only_required": true
+    },
+    {
+      "asset_class": "C",
+      "asset_id": "real_evidence_vault",
+      "cloud_ai_allowed": false,
+      "exposure_mode": "local_only",
+      "local_only_required": true
+    },
+    {
+      "asset_class": "C",
+      "asset_id": "real_kms_or_keyring",
+      "cloud_ai_allowed": false,
+      "exposure_mode": "local_only",
+      "local_only_required": true
+    }
+  ],
+  "registry_name": "core_asset_protection_registry_v1",
+  "registry_version": "v1",
+  "status": "active"
+}
