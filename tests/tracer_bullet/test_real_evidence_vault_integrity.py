@@ -141,10 +141,12 @@ class RealEvidenceVaultIntegrityTests(unittest.TestCase):
     # --- verify_storage_envelope ---
 
     def test_verify_storage_envelope_valid(self):
-        envelope = {
+        # Build an envelope with a correctly computed envelope_hash so
+        # the new hash-recomputation check (DEFECT-4) passes.
+        payload = {
             "artifact_id": "ART-001",
+            "artifact_type": "run_log",
             "content_hash": "a" * 64,
-            "envelope_hash": "b" * 64,
             "hash_algorithm": "sha256",
             "created_at": "2025-01-01T00:00:00Z",
             "producer": "test",
@@ -152,6 +154,9 @@ class RealEvidenceVaultIntegrityTests(unittest.TestCase):
             "immutable": True,
             "append_only": True,
         }
+        canonical = json.dumps(payload, sort_keys=True, ensure_ascii=False).encode("utf-8")
+        correct_hash = hashlib.sha256(canonical).hexdigest()
+        envelope = {**payload, "envelope_hash": correct_hash}
         result = EvidenceIntegrity.verify_storage_envelope(envelope)
         self.assertTrue(result["valid"])
 
@@ -284,6 +289,54 @@ class RealEvidenceVaultIntegrityTests(unittest.TestCase):
             "a" * 64,
         )
         self.assertFalse(result["valid"])
+
+    # ==================================================================
+    # AUDIT-HARDENING TESTS
+    # ==================================================================
+
+    # --- DEFECT-4: verify_storage_envelope detects hash mismatch ---
+
+    def test_verify_storage_envelope_hash_mismatch_returns_invalid(self):
+        """DEFECT-4: verify_storage_envelope detects when envelope_hash is wrong."""
+        envelope = {
+            "artifact_id": "ART-001",
+            "artifact_type": "run_log",
+            "content_hash": "a" * 64,
+            "hash_algorithm": "sha256",
+            "created_at": "2025-01-01T00:00:00Z",
+            "producer": "test",
+            "lineage": ["l1"],
+            "immutable": True,
+            "append_only": True,
+            "envelope_hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        }
+        result = EvidenceIntegrity.verify_storage_envelope(envelope)
+        self.assertFalse(result["valid"],
+                         "verify_storage_envelope must detect hash mismatch")
+        self.assertFalse(result["checks"]["envelope_hash_match"],
+                         "envelope_hash_match must be False on mismatch")
+
+    def test_verify_storage_envelope_valid_with_correct_hash(self):
+        """DEFECT-4: verify_storage_envelope passes when hash matches."""
+        # Build a known-good envelope with a correct envelope_hash
+        payload = {
+            "artifact_id": "ART-OK",
+            "artifact_type": "run_log",
+            "content_hash": "a" * 64,
+            "hash_algorithm": "sha256",
+            "created_at": "2025-06-01T00:00:00Z",
+            "producer": "test",
+            "lineage": ["l1"],
+            "immutable": True,
+            "append_only": True,
+        }
+        canonical = json.dumps(payload, sort_keys=True, ensure_ascii=False).encode("utf-8")
+        correct_hash = hashlib.sha256(canonical).hexdigest()
+        envelope = {**payload, "envelope_hash": correct_hash}
+        result = EvidenceIntegrity.verify_storage_envelope(envelope)
+        self.assertTrue(result["valid"],
+                        f"verify_storage_envelope must pass with correct hash: {result}")
+        self.assertTrue(result["checks"]["envelope_hash_match"])
 
 
 if __name__ == "__main__":

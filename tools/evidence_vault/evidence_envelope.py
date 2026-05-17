@@ -7,8 +7,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 
 ALLOWED_HASH_ALGORITHMS = frozenset({"sha256", "sha512", "blake2b"})
 FORBIDDEN_ARTIFACT_TYPES = frozenset({
@@ -134,7 +133,7 @@ class EvidenceEnvelope:
             "immutable": True,
             "append_only": True,
             "envelope_hash": envelope_hash,
-            "envelope_created_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "envelope_created_at": created_at,
             "module_version": "v1",
         }
 

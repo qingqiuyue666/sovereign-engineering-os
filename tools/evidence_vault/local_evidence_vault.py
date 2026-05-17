@@ -22,18 +22,28 @@ from __future__ import annotations
 import hashlib
 import json
 import os
-import shutil
-from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 
 from .evidence_envelope import EvidenceEnvelope, EvidenceEnvelopeError
 from .evidence_index import EvidenceIndex, EvidenceIndexError
-from .evidence_integrity import EvidenceIntegrity, EvidenceIntegrityError
-from .evidence_recovery import EvidenceRecovery
+from .evidence_integrity import EvidenceIntegrity
 
 
 class LocalEvidenceVaultError(Exception):
     """Raised when evidence vault runtime operations fail."""
+
+
+STABLE_ENVELOPE_FIELDS = (
+    "artifact_id", "artifact_type", "content_hash", "hash_algorithm",
+    "created_at", "producer", "lineage", "immutable", "append_only",
+)
+
+
+def _recompute_envelope_hash(envelope: Dict[str, Any]) -> str:
+    """Recompute envelope hash from stable fields only — shared by read and verify paths."""
+    rebuild = {k: envelope[k] for k in STABLE_ENVELOPE_FIELDS if k in envelope}
+    canonical = json.dumps(rebuild, sort_keys=True, ensure_ascii=False).encode("utf-8")
+    return hashlib.sha256(canonical).hexdigest()
 
 
 class LocalEvidenceVault:
@@ -52,19 +62,20 @@ class LocalEvidenceVault:
     def index_path(self) -> str:
         return self._index_path
 
-    def _artifact_path(self, artifact_id: str) -> str:
-        safe_id = "".join(c for c in artifact_id if c.isalnum() or c in "-_.")
-        return os.path.join(self._storage_dir, f"{safe_id}.json")
-
     def _storage_envelope_path(self, artifact_id: str) -> str:
         safe_id = "".join(c for c in artifact_id if c.isalnum() or c in "-_.")
         return os.path.join(self._storage_dir, f"{safe_id}.envelope.json")
+
+    # ------------------------------------------------------------------
+    # DEFECT-1: write exactly one envelope file per artifact.
+    # No duplicate <artifact_id>.json payload file.
+    # ------------------------------------------------------------------
 
     def write_artifact(self, payload: Dict[str, Any]) -> Dict[str, Any]:
         """Write an evidence artifact to the vault.
 
         Validates the payload, creates an envelope, appends to the index,
-        and writes the artifact payload to disk. Rejects duplicate artifact_id.
+        and writes exactly one envelope file to disk. Rejects duplicate artifact_id.
         """
         if not isinstance(payload, dict):
             raise TypeError("payload must be a mapping")
@@ -79,8 +90,7 @@ class LocalEvidenceVault:
 
         # Reject overwrite on disk
         envelope_path = self._storage_envelope_path(artifact_id)
-        payload_path = self._artifact_path(artifact_id)
-        if os.path.exists(envelope_path) or os.path.exists(payload_path):
+        if os.path.exists(envelope_path):
             raise LocalEvidenceVaultError(
                 f"duplicate_artifact_id_rejected: {artifact_id} — artifact already exists on disk"
             )
@@ -88,7 +98,7 @@ class LocalEvidenceVault:
         # Create and validate envelope (raises if invalid)
         envelope = EvidenceEnvelope.create_envelope(payload)
 
-        # Write the envelope
+        # Write exactly one envelope file — the single source of truth.
         with open(envelope_path, "w", encoding="utf-8") as f:
             json.dump(envelope, f, sort_keys=True, ensure_ascii=False, indent=2)
 
@@ -99,10 +109,6 @@ class LocalEvidenceVault:
         # Append to index (reject duplicates)
         EvidenceIndex.append_entry(self._index_path, index_entry, conflict_policy="REJECT_DUPLICATE")
 
-        # Write artifact payload to disk
-        with open(payload_path, "w", encoding="utf-8") as f:
-            json.dump(envelope, f, sort_keys=True, ensure_ascii=False, indent=2)
-
         return {
             "status": "sealed",
             "artifact_id": artifact_id,
@@ -111,63 +117,74 @@ class LocalEvidenceVault:
             "index_path": self._index_path,
         }
 
+    # ------------------------------------------------------------------
+    # DEFECT-1 + DEFECT-4: read from indexed storage_path, enforce full
+    # hash integrity via verify_storage_envelope.
+    # ------------------------------------------------------------------
+
     def read_artifact(self, artifact_id: str) -> Dict[str, Any]:
-        """Read an artifact from the vault by artifact_id."""
+        """Read an artifact from the vault by artifact_id.
+
+        Resolves storage_path from the index entry, reads the single
+        envelope file, and enforces full envelope integrity including
+        hash recomputation.
+        """
         entry = EvidenceIndex.lookup(self._index_path, artifact_id)
         if entry is None:
             raise LocalEvidenceVaultError(f"artifact_not_found: {artifact_id}")
 
-        payload_path = self._artifact_path(artifact_id)
-        if not os.path.isfile(payload_path):
+        # DEFECT-1: read from indexed storage_path, not a hard-coded path.
+        storage_path = entry.get("storage_path", "")
+        if not storage_path or not os.path.isfile(storage_path):
             raise LocalEvidenceVaultError(f"payload_file_missing: {artifact_id}")
 
         try:
-            with open(payload_path, "r", encoding="utf-8") as f:
+            with open(storage_path, "r", encoding="utf-8") as f:
                 envelope = json.load(f)
         except (json.JSONDecodeError, OSError) as e:
             raise LocalEvidenceVaultError(f"payload_read_error: {artifact_id} — {e}")
 
-        # Verify integrity
+        # DEFECT-4: verify_storage_envelope now recomputes envelope_hash.
         integrity = EvidenceIntegrity.verify_storage_envelope(envelope)
         if not integrity["valid"]:
             raise LocalEvidenceVaultError(f"envelope_integrity_failed: {artifact_id}")
 
         return envelope
 
+    # ------------------------------------------------------------------
+    # DEFECT-1 + DEFECT-4: read from indexed storage_path; use shared
+    # canonical hash recomputation.
+    # ------------------------------------------------------------------
+
     def verify_artifact_integrity(self, artifact_id: str) -> Dict[str, Any]:
         """Verify that a stored artifact has not been corrupted.
 
-        Verifies envelope structure and recomputes envelope_hash from the
-        canonical payload to detect any tampering.
+        Reads from the indexed storage_path, verifies envelope structure
+        via EvidenceIntegrity.verify_storage_envelope (which now includes
+        hash recomputation), and also independently recomputes the
+        envelope hash for defense-in-depth.
         """
         entry = EvidenceIndex.lookup(self._index_path, artifact_id)
         if entry is None:
             return {"valid": False, "reason": "artifact_not_in_index", "artifact_id": artifact_id}
 
-        payload_path = self._artifact_path(artifact_id)
-        if not os.path.isfile(payload_path):
+        # DEFECT-1: read from indexed storage_path.
+        storage_path = entry.get("storage_path", "")
+        if not storage_path or not os.path.isfile(storage_path):
             return {"valid": False, "reason": "payload_file_missing", "artifact_id": artifact_id}
 
         try:
-            with open(payload_path, "r", encoding="utf-8") as f:
+            with open(storage_path, "r", encoding="utf-8") as f:
                 envelope = json.load(f)
         except (json.JSONDecodeError, OSError) as e:
             return {"valid": False, "reason": f"payload_read_error: {e}", "artifact_id": artifact_id}
 
-        # Verify envelope structure
+        # verify_storage_envelope now includes hash recomputation (DEFECT-4).
         structure = EvidenceIntegrity.verify_storage_envelope(envelope)
 
-        # Recompute envelope hash: rebuild canonical payload (excluding runtime fields)
-        # and verify against stored envelope_hash
+        # Defense-in-depth: recompute envelope hash independently.
         stored_hash = envelope.get("envelope_hash", "")
-        rebuild = {
-            k: envelope[k]
-            for k in ("artifact_id", "artifact_type", "content_hash", "hash_algorithm",
-                      "created_at", "producer", "lineage", "immutable", "append_only")
-            if k in envelope
-        }
-        canonical = json.dumps(rebuild, sort_keys=True, ensure_ascii=False).encode("utf-8")
-        computed_hash = hashlib.sha256(canonical).hexdigest()
+        computed_hash = _recompute_envelope_hash(envelope)
         hash_match = computed_hash == stored_hash
 
         valid = structure["valid"] and hash_match
@@ -199,5 +216,11 @@ class LocalEvidenceVault:
     def get_rollback_plan(self, artifact_id: str) -> Dict[str, Any]:
         """Get a rollback plan for a specific artifact."""
         entry = EvidenceIndex.lookup(self._index_path, artifact_id)
-        storage_path = self._artifact_path(artifact_id)
+        if entry is None:
+            return EvidenceRecovery.create_rollback_plan(artifact_id, "")
+        storage_path = entry.get("storage_path", self._storage_envelope_path(artifact_id))
         return EvidenceRecovery.create_rollback_plan(artifact_id, storage_path)
+
+
+# Late import — EvidenceRecovery is a peer module.
+from .evidence_recovery import EvidenceRecovery  # noqa: E402

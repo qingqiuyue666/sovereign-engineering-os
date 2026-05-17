@@ -8,7 +8,12 @@ from __future__ import annotations
 import hashlib
 import json
 import os
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
+
+STABLE_ENVELOPE_FIELDS = (
+    "artifact_id", "artifact_type", "content_hash", "hash_algorithm",
+    "created_at", "producer", "lineage", "immutable", "append_only",
+)
 
 
 class EvidenceIntegrityError(ValueError):
@@ -125,7 +130,11 @@ class EvidenceIntegrity:
 
     @classmethod
     def verify_storage_envelope(cls, envelope: Dict[str, Any]) -> Dict[str, Any]:
-        """Verify that a storage envelope is correct: hashes and field integrity."""
+        """Verify that a storage envelope is correct: structure and envelope hash.
+
+        DEFECT-4: recomputes envelope_hash from stable fields and compares
+        against the stored value. Returns valid=False on any mismatch.
+        """
         cls._reject_non_mapping(envelope)
         checks = {
             "has_artifact_id": bool(envelope.get("artifact_id")),
@@ -138,7 +147,17 @@ class EvidenceIntegrity:
             "immutable_is_true": envelope.get("immutable") is True,
             "append_only_is_true": envelope.get("append_only") is True,
         }
-        valid = all(checks.values())
+        structure_valid = all(checks.values())
+
+        # DEFECT-4: recompute envelope hash from stable fields and compare.
+        stored_hash = envelope.get("envelope_hash", "")
+        rebuild = {k: envelope[k] for k in STABLE_ENVELOPE_FIELDS if k in envelope}
+        canonical = json.dumps(rebuild, sort_keys=True, ensure_ascii=False).encode("utf-8")
+        computed_hash = hashlib.sha256(canonical).hexdigest()
+        hash_match = computed_hash == stored_hash
+        checks["envelope_hash_match"] = hash_match
+
+        valid = structure_valid and hash_match
         return {
             "valid": valid,
             "checks": checks,

@@ -8,7 +8,6 @@ from __future__ import annotations
 import hashlib
 import json
 import os
-from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 
@@ -33,46 +32,56 @@ class EvidenceIndex:
 
     @classmethod
     def create_index_entry(cls, envelope: Dict[str, Any]) -> Dict[str, Any]:
-        """Create an index entry from an evidence envelope."""
+        """Create a deterministic index entry from an evidence envelope."""
         cls._reject_non_mapping(envelope)
         artifact_id = envelope.get("artifact_id")
         if not artifact_id or not isinstance(artifact_id, str):
             raise EvidenceIndexError("artifact_id is required and must be a non-empty string")
 
-        index_key = f"idx-{artifact_id}-{envelope.get('envelope_hash', 'unknown')}"
-        created_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        # DEFECT-3: no wall-clock time. Use envelope created_at.
+        indexed_at = envelope.get("created_at")
+        if not isinstance(indexed_at, str) or not indexed_at.strip():
+            indexed_at = "1970-01-01T00:00:00Z"
+
+        envelope_hash = envelope.get("envelope_hash", "")
 
         entry = {
             "artifact_id": artifact_id,
-            "index_key": index_key,
+            "index_key": f"idx-{artifact_id}-{envelope_hash}",
             "content_hash": envelope.get("content_hash", ""),
-            "envelope_hash": envelope.get("envelope_hash", ""),
+            "envelope_hash": envelope_hash,
             "hash_algorithm": envelope.get("hash_algorithm", ""),
-            "indexed_at": created_at,
+            "indexed_at": indexed_at,
             "artifact_type": envelope.get("artifact_type", ""),
             "producer": envelope.get("producer", ""),
             "lineage": list(envelope.get("lineage", [])),
             "immutable": envelope.get("immutable", True),
             "append_only": envelope.get("append_only", True),
-            "index_record_hash": cls._hash_key(artifact_id, envelope.get("envelope_hash", ""), created_at),
+            # DEFECT-3: deterministic hash based on stable fields only.
+            "index_record_hash": cls._hash_key(artifact_id, envelope_hash, indexed_at),
         }
         return entry
 
     @classmethod
     def lookup(cls, index_path: str, artifact_id: str) -> Optional[Dict[str, Any]]:
-        """Look up an artifact in the index by artifact_id. Returns None if not found."""
+        """Look up an artifact in the index by artifact_id. Returns None if not found.
+
+        Raises EvidenceIndexError on corrupt JSON lines (DEFECT-2).
+        """
         if not os.path.isfile(index_path):
             return None
         try:
             with open(index_path, "r", encoding="utf-8") as f:
-                for line in f:
+                for line_num, line in enumerate(f, 1):
                     line = line.strip()
                     if not line:
                         continue
                     try:
                         entry = json.loads(line)
                     except json.JSONDecodeError:
-                        continue
+                        raise EvidenceIndexError(
+                            f"corrupt_index_line: {line_num} — cannot parse JSON"
+                        ) from None
                     if entry.get("artifact_id") == artifact_id:
                         return entry
         except OSError:
@@ -107,20 +116,25 @@ class EvidenceIndex:
 
     @classmethod
     def list_all(cls, index_path: str) -> List[Dict[str, Any]]:
-        """Return all entries from the index."""
+        """Return all entries from the index.
+
+        Raises EvidenceIndexError on corrupt JSON lines (DEFECT-2).
+        """
         if not os.path.isfile(index_path):
             return []
         results: List[Dict[str, Any]] = []
         try:
             with open(index_path, "r", encoding="utf-8") as f:
-                for line in f:
+                for line_num, line in enumerate(f, 1):
                     line = line.strip()
                     if not line:
                         continue
                     try:
                         results.append(json.loads(line))
                     except json.JSONDecodeError:
-                        continue
+                        raise EvidenceIndexError(
+                            f"corrupt_index_line: {line_num} — cannot parse JSON"
+                        ) from None
         except OSError:
             raise EvidenceIndexError(f"cannot read index file: {index_path}")
         return results
