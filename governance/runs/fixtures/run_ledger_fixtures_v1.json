@@ -1,0 +1,13 @@
+{
+  "fixture_type": "run_ledger_fixtures_v1",
+  "version": "v1",
+  "valid_event": {
+    "event_id": "evt-1",
+    "run_id": "run-1",
+    "task_id": "task-1",
+    "stage": "intake",
+    "event_type": "accepted",
+    "logical_time": 1,
+    "payload_digest": "sha256:example"
+  }
+}

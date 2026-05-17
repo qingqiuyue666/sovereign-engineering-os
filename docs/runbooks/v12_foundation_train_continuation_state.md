@@ -2,26 +2,27 @@
 
 ## Current State
 
-- current branch: v12-security-truth-substrate-v1
-- current HEAD: 1f66f04 plus validated branch 2 security truth substrate edits
-- current phase: branch 2 commit before clean-tree CI rerun
+- current branch: v12-operator-task-intake-ledger-v1
+- current HEAD: 603c3bc plus validated branch 3 operator task intake ledger edits
+- current phase: branch 3 commit before clean-tree CI rerun
 - no-reset instruction: do not reset, discard, or restart from main; continue
   from the current branch state.
 
 ## Completed Files
 
 - Branch 1 committed as `1f66f04` with leak-prevention health alignment.
-- Added descriptor-only WAL integrity guard.
-- Added security truth substrate threat model, runbook, decision doc, and focused
-  test.
-- Updated Makefile health order to place `test-security-truth-substrate` after
-  `test-leak-prevention-foundation`.
+- Branch 2 committed as `603c3bc` with descriptor-only WAL guard and security
+  truth substrate health alignment.
+- Added operator task contract wrapper, `kernel/runs` ledger/report wrappers,
+  task/run fixtures, branch docs, and focused operator intake tests.
+- Updated Makefile health order to place `test-operator-task-ledger` after
+  `test-security-truth-substrate`.
 - Refreshed `governance/root/root_manifest_v1.json` for the Makefile hash.
 
 ## Incomplete Files
 
-- None for branch 2.
-- Later branch-train wrappers and contracts remain for branches 3 through 8.
+- None for branch 3.
+- Later branch-train wrappers and contracts remain for branches 4 through 8.
 
 ## Tests Already Passed
 
@@ -43,10 +44,19 @@
   156 tests.
 - Pre-commit branch 2 `make ci` passed all test phases and failed only at the
   final clean-tree guard because branch 2 edits were intentionally uncommitted.
+- Post-commit branch 2 `make ci` passed on clean tree.
+- Branch 3 focused tests passed: 7 tests.
+- `python3 -m unittest discover -s tests/tracer_bullet -v` passed: 3622
+  tests, 4 skipped.
+- `python3 -m unittest discover -s tests/schemas -v` passed: 70 tests.
+- `python3 -m unittest discover -s validation/tests/acceptance -v` passed:
+  156 tests.
+- Pre-commit branch 3 `make ci` passed all test phases and failed only at the
+  final clean-tree guard because branch 3 edits were intentionally uncommitted.
 
 ## Current Failing Tests
 
-- Pre-commit `make ci` final clean-tree guard failed while branch 2 files were
+- Pre-commit `make ci` final clean-tree guard failed while branch 3 files were
   dirty.
 
 ## Exact Failing Command
@@ -59,7 +69,7 @@
 
 ## Exact Next File To Edit
 
-- stage and commit branch 2 changes
+- stage and commit branch 3 changes
 
 ## Remaining Branch Train
 
@@ -72,6 +82,7 @@
 
 ## Recovery Instructions
 
-If interrupted, inspect `git status --short`. Branch 2 tests passed before the
-dirty-tree `make ci` guard; commit with `v12-02 security truth substrate`,
-rerun `make ci`, then create `v12-operator-task-intake-ledger-v1`.
+If interrupted, inspect `git status --short`. Branch 3 tests passed before the
+dirty-tree `make ci` guard; commit with
+`v12-03 operator task intake and run ledger`, rerun `make ci`, then create
+`v12-operator-cli-foundation-v1`.

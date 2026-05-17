@@ -1,0 +1,13 @@
+{
+  "policy_type": "run_ledger_policy_v1",
+  "version": "v1",
+  "append_only": true,
+  "duplicate_event_id_allowed": false,
+  "sequence_regression_allowed": false,
+  "raw_input_persistence_allowed": false,
+  "network_access_allowed": false,
+  "secret_read_allowed": false,
+  "ai_provider_call_allowed": false,
+  "sqlite_mutation_allowed": false,
+  "production_autonomy_allowed": false
+}

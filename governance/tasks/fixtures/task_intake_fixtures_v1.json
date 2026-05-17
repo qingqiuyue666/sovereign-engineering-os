@@ -1,0 +1,12 @@
+{
+  "fixture_type": "task_intake_fixtures_v1",
+  "version": "v1",
+  "valid_text_descriptor": {
+    "descriptor_type": "text",
+    "content_digest": "sha256:example"
+  },
+  "invalid_raw_prompt_descriptor": {
+    "descriptor_type": "text",
+    "raw_prompt": "forbidden"
+  }
+}
