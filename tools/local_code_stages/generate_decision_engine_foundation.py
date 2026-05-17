@@ -84,8 +84,10 @@ def _hash_id(*parts: str) -> str:
     return hashlib.sha256("|".join(parts).encode()).hexdigest()[:16]
 
 
-def _utcnow() -> str:
-    return datetime.now(timezone.utc).isoformat()
+def _created_at(payload: Dict[str, Any]) -> str:
+    value = payload.get("created_at")
+    return value if isinstance(value, str) and value.strip() else "1970-01-01T00:00:00Z"
+
 
 
 def _reject_non_mapping(payload: Any) -> None:
@@ -158,7 +160,7 @@ def produce_decision_engine_receipt(payload: Any) -> Dict[str, Any]:
     hr = payload.get("human_review", {})
     has_review = isinstance(hr, dict) and hr.get("reviewed", False) and bool(hr.get("reviewer_id"))
     receipt = DecisionEngineReceipt(
-        receipt_id=_hash_id(payload.get("decision_id", "unknown"), _utcnow()),
+        receipt_id=_hash_id(payload.get("decision_id", "unknown"), "v1"),
         decision_id=payload.get("decision_id", "unknown"),
         action=action_check["action"],
         confidence=conf_check["confidence"],
@@ -167,7 +169,7 @@ def produce_decision_engine_receipt(payload: Any) -> Dict[str, Any]:
         single_action_enforced=action_check["single_action"],
         human_review_present=has_review,
         status="approved" if (conf_check["gate_passed"] and friction_check["friction_gate_passed"] and has_review) else "rejected",
-        created_at=_utcnow(),
+        created_at=_created_at(payload),
     )
     return asdict(receipt)
 

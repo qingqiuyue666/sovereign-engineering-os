@@ -80,8 +80,10 @@ def _hash_id(*parts: str) -> str:
     return hashlib.sha256("|".join(parts).encode()).hexdigest()[:16]
 
 
-def _utcnow() -> str:
-    return datetime.now(timezone.utc).isoformat()
+def _created_at(payload: Dict[str, Any]) -> str:
+    value = payload.get("created_at")
+    return value if isinstance(value, str) and value.strip() else "1970-01-01T00:00:00Z"
+
 
 
 def _reject_non_mapping(payload: Any) -> None:
@@ -135,7 +137,7 @@ def produce_evidence_index_receipt(payload: Any) -> Dict[str, Any]:
     lookup = validate_evidence_lookup_contract(payload)
     consistency = validate_index_consistency_contract(payload)
     receipt = EvidenceIndexReceipt(
-        receipt_id=_hash_id(payload.get("artifact_id", "unknown"), _utcnow()),
+        receipt_id=_hash_id(payload.get("artifact_id", "unknown"), "v1"),
         artifact_id=payload.get("artifact_id", "unknown"),
         content_hash=payload.get("content_hash", ""),
         index_key=payload.get("index_key", ""),
@@ -144,7 +146,7 @@ def produce_evidence_index_receipt(payload: Any) -> Dict[str, Any]:
         consistency_valid=consistency["consistent"],
         is_duplicate=consistency["is_duplicate"],
         status="indexed" if (lookup["lookup_valid"] and consistency["consistent"]) else "rejected",
-        created_at=_utcnow(),
+        created_at=_created_at(payload),
     )
     return asdict(receipt)
 

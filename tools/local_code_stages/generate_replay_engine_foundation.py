@@ -91,8 +91,10 @@ def _hash_id(*parts: str) -> str:
     return hashlib.sha256("|".join(parts).encode()).hexdigest()[:16]
 
 
-def _utcnow() -> str:
-    return datetime.now(timezone.utc).isoformat()
+def _created_at(payload: Dict[str, Any]) -> str:
+    value = payload.get("created_at")
+    return value if isinstance(value, str) and value.strip() else "1970-01-01T00:00:00Z"
+
 
 
 def _reject_non_mapping(payload: Any) -> None:
@@ -146,7 +148,7 @@ def produce_replay_engine_receipt(payload: Any) -> Dict[str, Any]:
     snapshot = validate_replay_input_snapshot_contract(payload)
     version = validate_replay_version_tuple(payload)
     receipt = ReplayEngineReceipt(
-        receipt_id=_hash_id(payload.get("replay_anchor_id", "unknown"), _utcnow()),
+        receipt_id=_hash_id(payload.get("replay_anchor_id", "unknown"), "v1"),
         replay_anchor_id=payload.get("replay_anchor_id", "unknown"),
         input_snapshot_hash=payload.get("input_snapshot_hash", ""),
         policy_version=payload.get("policy_version", ""),
@@ -158,7 +160,7 @@ def produce_replay_engine_receipt(payload: Any) -> Dict[str, Any]:
         snapshot_valid=snapshot["snapshot_valid"],
         version_tuple_valid=version["version_tuple_valid"],
         status="ready" if (anchor["anchor_valid"] and snapshot["snapshot_valid"] and version["version_tuple_valid"]) else "rejected",
-        created_at=_utcnow(),
+        created_at=_created_at(payload),
     )
     return asdict(receipt)
 

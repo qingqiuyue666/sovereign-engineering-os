@@ -119,8 +119,10 @@ def _hash_id(*parts: str) -> str:
     return hashlib.sha256("|".join(parts).encode()).hexdigest()[:16]
 
 
-def _utcnow() -> str:
-    return datetime.now(timezone.utc).isoformat()
+def _created_at(payload: Dict[str, Any]) -> str:
+    value = payload.get("created_at")
+    return value if isinstance(value, str) and value.strip() else "1970-01-01T00:00:00Z"
+
 
 
 def _reject_non_mapping(payload: Any) -> None:
@@ -178,14 +180,14 @@ def produce_stage_pack_manifest_receipt(payload: Any) -> Dict[str, Any]:
     coverage = validate_stage_pack_test_coverage(payload)
     stage_ids = [s.get("stage_id", "unknown") for s in payload.get("stages", [])]
     receipt = StagePackManifestReceipt(
-        receipt_id=_hash_id(payload.get("pack_version", "v1"), _utcnow()),
+        receipt_id=_hash_id(payload.get("pack_version", "v1"), "v1"),
         pack_version=payload.get("pack_version", "v1"),
         total_stages=len(stage_ids),
         stages_indexed=stage_ids,
         test_coverage_valid=coverage["test_coverage_valid"],
         all_entries_valid=True,
         status="complete" if coverage["test_coverage_valid"] else "incomplete",
-        created_at=_utcnow(),
+        created_at=_created_at(payload),
     )
     return asdict(receipt)
 

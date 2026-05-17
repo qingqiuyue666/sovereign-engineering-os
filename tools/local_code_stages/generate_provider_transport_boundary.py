@@ -82,8 +82,10 @@ def _hash_id(*parts: str) -> str:
     return hashlib.sha256("|".join(parts).encode()).hexdigest()[:16]
 
 
-def _utcnow() -> str:
-    return datetime.now(timezone.utc).isoformat()
+def _created_at(payload: Dict[str, Any]) -> str:
+    value = payload.get("created_at")
+    return value if isinstance(value, str) and value.strip() else "1970-01-01T00:00:00Z"
+
 
 
 def _reject_non_mapping(payload: Any) -> None:
@@ -134,14 +136,14 @@ def produce_provider_transport_receipt(payload: Any) -> Dict[str, Any]:
     cap = validate_provider_capability_boundary(payload)
     preflight = validate_provider_transport_preflight(payload)
     receipt = ProviderTransportReceipt(
-        receipt_id=_hash_id(payload.get("provider_id", "unknown"), _utcnow()),
+        receipt_id=_hash_id(payload.get("provider_id", "unknown"), "v1"),
         provider_id=payload.get("provider_id", "unknown"),
         capability_token=payload.get("capability_token", ""),
         evidence_binding_present=bool(payload.get("evidence_binding")),
         status="gated" if (preflight["preflight_passed"] and cap["capability_valid"]) else "rejected",
         boundary_valid=preflight["preflight_passed"],
         preflight_passed=preflight["preflight_passed"],
-        created_at=_utcnow(),
+        created_at=_created_at(payload),
     )
     return asdict(receipt)
 

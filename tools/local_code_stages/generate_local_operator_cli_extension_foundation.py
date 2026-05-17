@@ -100,8 +100,10 @@ def _hash_id(*parts: str) -> str:
     return hashlib.sha256("|".join(parts).encode()).hexdigest()[:16]
 
 
-def _utcnow() -> str:
-    return datetime.now(timezone.utc).isoformat()
+def _created_at(payload: Dict[str, Any]) -> str:
+    value = payload.get("created_at")
+    return value if isinstance(value, str) and value.strip() else "1970-01-01T00:00:00Z"
+
 
 
 def _reject_non_mapping(payload: Any) -> None:
@@ -171,14 +173,14 @@ def produce_operator_cli_extension_receipt(payload: Any) -> Dict[str, Any]:
     contract = validate_cli_command_contract(payload)
     safety = validate_cli_safety_boundary(payload)
     receipt = OperatorCliExtensionReceipt(
-        receipt_id=_hash_id(payload.get("command", "unknown"), payload.get("subcommand", ""), _utcnow()),
+        receipt_id=_hash_id(payload.get("command", "unknown"), payload.get("subcommand", ""), "v1"),
         command=payload.get("command", ""),
         subcommand=payload.get("subcommand", ""),
         command_registered=contract["checks"]["command_registered"],
         safety_boundary_valid=safety["safety_boundary_valid"],
         command_contract_valid=contract["command_contract_valid"],
         status="ready" if (contract["command_contract_valid"] and safety["safety_boundary_valid"]) else "rejected",
-        created_at=_utcnow(),
+        created_at=_created_at(payload),
     )
     return asdict(receipt)
 
