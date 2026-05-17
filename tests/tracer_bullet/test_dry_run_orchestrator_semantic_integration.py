@@ -69,5 +69,33 @@ class DryRunOrchestratorSemanticIntegrationTests(unittest.TestCase):
         self.assertEqual(receipt.replay_plan_digest, EMPTY_DIGEST)
 
 
+    def test_repaired_module_removed(self):
+
+        from pathlib import Path
+
+        self.assertFalse(Path("kernel/runtime/_dry_run_orchestrator_repaired.py").exists())
+
+    def test_orchestrator_is_not_shim(self):
+
+        from pathlib import Path
+
+        content = Path("kernel/runtime/dry_run_orchestrator.py").read_text(encoding="utf-8")
+
+        self.assertNotIn("_dry_run_orchestrator_repaired", content)
+
+        self.assertIn("build_failure_bundle", content)
+
+        self.assertIn("validate_failure_bundle", content)
+
+        self.assertIn("validate_replay_plan", content)
+
+        self.assertIn("validate_provider_execution_plane", content)
+
+        self.assertIn("validate_evidence_vault_boundary", content)
+
+        self.assertIn("validate_protected_storage_request", content)
+
+
+
 if __name__ == "__main__":
     unittest.main()
