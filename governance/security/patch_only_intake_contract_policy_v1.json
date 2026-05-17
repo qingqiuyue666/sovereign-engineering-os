@@ -1,0 +1,35 @@
+{
+  "forbidden_patch_content": [
+    "secrets",
+    "env_reads",
+    "git_push",
+    "git_merge",
+    "provider_live_execution",
+    "vault_live_write",
+    "production_autonomy"
+  ],
+  "policy_name": "patch_only_intake_contract_policy_v1",
+  "policy_version": "v1",
+  "purpose": "Define patch-only intake rules for B-layer work where cloud AI may see minimal snippets but cannot access the full repository.",
+  "required_fields": [
+    "patch_id",
+    "task_id",
+    "source_snippet_digest",
+    "patch_digest",
+    "output_mode",
+    "repository_access_mode",
+    "cloud_ai_role",
+    "human_review_required",
+    "local_apply_required",
+    "local_ci_required"
+  ],
+  "required_values": {
+    "cloud_ai_role": "draft_worker_only",
+    "human_review_required": true,
+    "local_apply_required": true,
+    "local_ci_required": true,
+    "output_mode": "unified_diff_patch",
+    "repository_access_mode": "minimal_snippets"
+  },
+  "status": "active"
+}

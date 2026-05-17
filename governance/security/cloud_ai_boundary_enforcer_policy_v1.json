@@ -1,0 +1,45 @@
+{
+  "cloud_ai_role": "draft_worker_only",
+  "forbidden_actions": [
+    "git_push",
+    "git_merge",
+    "branch_delete",
+    "main_branch_modification",
+    "secret_read",
+    "env_read",
+    "provider_live_execution",
+    "vault_live_write",
+    "production_autonomy",
+    "deployment",
+    "full_core_architecture_ingestion"
+  ],
+  "forbidden_inputs": [
+    "secrets",
+    "env_files",
+    "api_keys",
+    "tokens",
+    "ssh_private_keys",
+    "cookies",
+    "sessions",
+    "real_account_data",
+    "real_strategy_parameters",
+    "real_provider_credentials",
+    "real_execution_context",
+    "full_core_architecture_context"
+  ],
+  "local_terminal_role": "authority",
+  "policy_name": "cloud_ai_boundary_enforcer_policy_v1",
+  "policy_version": "v1",
+  "purpose": "Fail closed when a cloud AI task attempts authority, secrets, full core context, live execution, or repository control.",
+  "required_receipt_fields": [
+    "accepted",
+    "failures",
+    "task_id",
+    "asset_class",
+    "cloud_ai_allowed",
+    "repository_access_mode",
+    "output_mode",
+    "policy_version"
+  ],
+  "status": "active"
+}

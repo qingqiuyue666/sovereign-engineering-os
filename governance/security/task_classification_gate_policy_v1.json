@@ -1,0 +1,57 @@
+{
+  "accepted_output_modes": [
+    "draft_text",
+    "unified_diff_patch",
+    "localized_code_suggestion",
+    "local_commit_only"
+  ],
+  "accepted_repository_access_modes": [
+    "none",
+    "minimal_snippets",
+    "patch_only",
+    "temporary_low_sensitivity_clone",
+    "local_only"
+  ],
+  "asset_classes": {
+    "A": "cloud_assist_allowed_with_sanitized_context",
+    "B": "patch_only_minimal_snippets",
+    "C": "local_only_no_cloud_ai"
+  },
+  "forbidden_combinations": [
+    {
+      "asset_class": "C",
+      "cloud_ai_allowed": true,
+      "reason": "c_layer_must_be_local_only"
+    },
+    {
+      "asset_class": "B",
+      "reason": "b_layer_requires_patch_only",
+      "repository_access_mode": "full_repo_mount"
+    },
+    {
+      "cloud_ai_allowed": true,
+      "reason": "secrets_forbid_cloud_ai",
+      "secret_exposure_check": "present"
+    },
+    {
+      "cloud_ai_allowed": true,
+      "core_architecture_exposure": "full_context",
+      "reason": "core_architecture_full_context_forbids_cloud_ai"
+    }
+  ],
+  "policy_name": "task_classification_gate_policy_v1",
+  "policy_version": "v1",
+  "purpose": "Require every development task to be classified as A, B, or C before execution.",
+  "required_fields": [
+    "task_id",
+    "task_name",
+    "asset_class",
+    "cloud_ai_allowed",
+    "repository_access_mode",
+    "secret_exposure_check",
+    "core_architecture_exposure",
+    "expected_output_mode",
+    "human_review_required"
+  ],
+  "status": "active"
+}
