@@ -27,6 +27,11 @@ REQUIRED_FIELDS = frozenset({
     "hash_algorithm", "created_at", "producer",
     "lineage", "immutable", "append_only",
 })
+STABLE_ENVELOPE_FIELDS = (
+    "artifact_id", "artifact_type", "content_hash", "hash_algorithm",
+    "created_at", "producer", "lineage", "immutable", "append_only",
+)
+DEFAULT_CREATED_AT = "1970-01-01T00:00:00Z"
 
 
 class EvidenceEnvelopeError(ValueError):
@@ -92,6 +97,37 @@ class EvidenceEnvelope:
             return hashlib.blake2b(content, digest_size=64).hexdigest()
         raise EvidenceEnvelopeError(f"unsupported_hash_algorithm: {algo}")
 
+    @staticmethod
+    def _normalize_created_at(payload: Dict[str, Any]) -> str:
+        created_at = payload.get("created_at")
+        if not isinstance(created_at, str) or not created_at.strip():
+            return DEFAULT_CREATED_AT
+        return created_at
+
+    @classmethod
+    def _stable_envelope_payload(cls, payload: Dict[str, Any]) -> Dict[str, Any]:
+        """Build the exact stable payload used for envelope hash computation.
+
+        Unknown input keys are intentionally excluded. created_at is normalized before
+        hashing so the hash matches the persisted envelope and integrity verifier.
+        """
+        return {
+            "artifact_id": payload["artifact_id"],
+            "artifact_type": payload["artifact_type"],
+            "content_hash": payload["content_hash"],
+            "hash_algorithm": payload["hash_algorithm"],
+            "created_at": cls._normalize_created_at(payload),
+            "producer": payload["producer"],
+            "lineage": list(payload["lineage"]),
+            "immutable": True,
+            "append_only": True,
+        }
+
+    @staticmethod
+    def compute_envelope_hash(stable_payload: Dict[str, Any]) -> str:
+        canonical = json.dumps(stable_payload, sort_keys=True, ensure_ascii=False).encode("utf-8")
+        return hashlib.sha256(canonical).hexdigest()
+
     @classmethod
     def create_envelope(cls, payload: Dict[str, Any]) -> Dict[str, Any]:
         """Create a deterministic evidence envelope from the given payload."""
@@ -115,25 +151,13 @@ class EvidenceEnvelope:
         if not cls._check_hash_format(content_hash, algo):
             raise EvidenceEnvelopeError("content_hash_mismatch — hash format invalid for algorithm")
 
-        created_at = payload.get("created_at")
-        if not isinstance(created_at, str) or not created_at.strip():
-            created_at = "1970-01-01T00:00:00Z"
-
-        canonical = json.dumps(payload, sort_keys=True, ensure_ascii=False).encode("utf-8")
-        envelope_hash = hashlib.sha256(canonical).hexdigest()
+        stable_payload = cls._stable_envelope_payload(payload)
+        envelope_hash = cls.compute_envelope_hash(stable_payload)
 
         return {
-            "artifact_id": payload["artifact_id"],
-            "artifact_type": payload["artifact_type"],
-            "content_hash": content_hash,
-            "hash_algorithm": algo,
-            "created_at": created_at,
-            "producer": payload["producer"],
-            "lineage": list(payload["lineage"]),
-            "immutable": True,
-            "append_only": True,
+            **stable_payload,
             "envelope_hash": envelope_hash,
-            "envelope_created_at": created_at,
+            "envelope_created_at": stable_payload["created_at"],
             "module_version": "v1",
         }
 
