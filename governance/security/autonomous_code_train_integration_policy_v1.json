@@ -1,0 +1,111 @@
+
+{
+
+  "allowed_stage_kinds": [
+
+    "verification",
+
+    "code_stage"
+
+  ],
+
+  "allowed_side_effects": [
+
+    "execute_registered_code_stage",
+
+    "execute_verification_stage",
+
+    "write_train_reports",
+
+    "write_stage_reports",
+
+    "write_resume_marker",
+
+    "write_heartbeat",
+
+    "write_diff_report"
+
+  ],
+
+  "forbidden_actions": [
+
+    "cloud_ai_api_call",
+
+    "freeform_shell_execution",
+
+    "unbounded_code_generation",
+
+    "unbounded_runtime",
+
+    "git_merge",
+
+    "git_push_main",
+
+    "git_branch_delete",
+
+    "main_branch_modification",
+
+    "secret_read",
+
+    "env_read",
+
+    "provider_live_execution",
+
+    "vault_live_write",
+
+    "production_autonomy",
+
+    "deployment"
+
+  ],
+
+  "policy_name": "autonomous_code_train_integration_policy_v1",
+
+  "policy_version": "v1",
+
+  "purpose": "Allow Autonomous Build Train to schedule registered local code stages through the local code stage executor while preserving local-only execution, bounded writes, verification-after-write, and main-branch protection.",
+
+  "required_guards": [
+
+    "code_stage_must_be_registered",
+
+    "verification_after_code_stage_required",
+
+    "stop_on_first_failure",
+
+    "stage_report_written",
+
+    "diff_report_written",
+
+    "main_branch_mutation_rejected",
+
+    "cloud_ai_calls_forbidden",
+
+    "secrets_forbidden",
+
+    "merge_forbidden",
+
+    "branch_delete_forbidden",
+
+    "unbounded_generation_forbidden"
+
+  ],
+
+  "required_outputs": [
+
+    "outputs/reports/autonomous_code_train_integration_report.md",
+
+    "outputs/reports/autonomous_code_train_integration_summary.json",
+
+    "outputs/reports/autonomous_code_train_integration_index.json",
+
+    "outputs/state/autonomous_code_train_integration_resume.json",
+
+    "outputs/state/autonomous_code_train_integration_heartbeat.json"
+
+  ],
+
+  "status": "active"
+
+}
+

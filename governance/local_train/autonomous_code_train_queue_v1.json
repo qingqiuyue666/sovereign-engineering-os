@@ -1,0 +1,61 @@
+
+{
+
+  "max_runtime_seconds": 28800,
+
+  "queue_name": "autonomous_code_train_queue_v1",
+
+  "queue_version": "v1",
+
+  "status": "active",
+
+  "stop_on_first_failure": true,
+
+  "train_mode": "overnight",
+
+  "stages": [
+
+    {
+
+      "allow_commit": false,
+
+      "allow_push_feature_branch": false,
+
+      "commit_message": "autonomous code train code stage",
+
+      "mode": "code_stage",
+
+      "stage_id": "stage-001-generate-local-code-stage-example",
+
+      "stage_kind": "code_stage",
+
+      "task_id": "autonomous-code-stage-example",
+
+      "code_stage_id": "generate-local-code-stage-example"
+
+    },
+
+    {
+
+      "allow_commit": false,
+
+      "allow_push_feature_branch": false,
+
+      "commit_message": "autonomous code train full verification",
+
+      "mode": "verify",
+
+      "stage_id": "stage-002-full-verify",
+
+      "stage_kind": "verification",
+
+      "suite": "full",
+
+      "task_id": "autonomous-code-train-full-verify"
+
+    }
+
+  ]
+
+}
+
