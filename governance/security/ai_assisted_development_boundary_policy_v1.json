@@ -1,0 +1,115 @@
+{
+  "acceptance_requirements": [
+    "policy_exists",
+    "runbook_exists",
+    "tests_assert_layering",
+    "tests_assert_cloud_ai_not_authority",
+    "tests_assert_c_layer_local_only",
+    "tests_assert_push_merge_forbidden_for_cloud_ai",
+    "tests_assert_secrets_forbidden_for_cloud_ai",
+    "tests_assert_patch_only_mode_for_b_layer"
+  ],
+  "allowed_cloud_ai_outputs": [
+    "draft_text",
+    "draft_runbook",
+    "draft_policy",
+    "draft_test_cases",
+    "unified_diff_patch_draft",
+    "localized_code_suggestion",
+    "review_comment"
+  ],
+  "asset_classes": {
+    "A_cloud_assist_allowed": [
+      "ordinary_docs",
+      "non_core_test_drafts",
+      "policy_json_format_drafts",
+      "runbook_drafts",
+      "non_core_makefile_suggestions",
+      "mock_boundary_text",
+      "schema_examples_without_real_data"
+    ],
+    "B_patch_only": [
+      "single_file_localized_refactor",
+      "limited_validator_patch",
+      "limited_test_patch",
+      "localized_contract_shape",
+      "sanitized_error_log_analysis",
+      "small_unified_diff_draft"
+    ],
+    "C_local_only": [
+      "system_architecture_core",
+      "runtime_spine_design",
+      "provider_architecture",
+      "replay_architecture",
+      "evidence_vault_architecture",
+      "osint_asset_mapping_architecture",
+      "decision_engine",
+      "real_provider_implementation",
+      "real_strategy_parameters",
+      "real_execution_logic",
+      "real_deployment_scripts",
+      "real_run_history",
+      "real_evidence_vault",
+      "real_kms_or_keyring",
+      "secrets_env_tokens_cookies_sessions"
+    ]
+  },
+  "authority_model": {
+    "cloud_ai_may_not_be_authority": true,
+    "cloud_ai_role": "draft_worker_only",
+    "human_review_required": true,
+    "local_terminal_role": "authority_for_git_ci_merge_push",
+    "repository_truth_source": "git_file_content_and_local_ci"
+  },
+  "default_mode": "local_first",
+  "forbidden_cloud_ai_actions": [
+    "git_push",
+    "git_merge",
+    "git_branch_delete",
+    "main_branch_modification",
+    "secret_read",
+    "env_read",
+    "production_execution",
+    "network_enablement_for_core_modules",
+    "provider_live_execution",
+    "vault_live_write",
+    "autonomous_deployment"
+  ],
+  "forbidden_cloud_ai_inputs": [
+    "full_authority_repository_mount_for_core_work",
+    "secrets",
+    "env_files",
+    "api_keys",
+    "github_tokens",
+    "ssh_private_keys",
+    "cookies",
+    "sessions",
+    "real_account_data",
+    "real_portfolio_state",
+    "real_strategy_parameters",
+    "real_provider_credentials",
+    "real_evidence_vault_material",
+    "core_architecture_full_context",
+    "production_execution_context"
+  ],
+  "policy_name": "ai_assisted_development_boundary_policy_v1",
+  "policy_version": "v1",
+  "purpose": "Define enforceable boundaries for AI-assisted development so cloud AI tools remain draft workers and never become authority over protected architecture assets, repository control, secrets, production execution, or core local-only design.",
+  "required_work_modes": {
+    "A_layer": "cloud_ai_allowed_with_sanitized_context",
+    "B_layer": "patch_only_minimal_snippets",
+    "C_layer": "local_only_no_cloud_ai",
+    "cloud_ai_repository_access": "not_allowed_for_core_work",
+    "main_repository": "terminal_authority_only"
+  },
+  "status": "active",
+  "task_intake_required_fields": [
+    "task_name",
+    "asset_class",
+    "cloud_ai_allowed",
+    "repository_access_mode",
+    "secret_exposure_check",
+    "expected_outputs",
+    "human_review_required"
+  ]
+}
