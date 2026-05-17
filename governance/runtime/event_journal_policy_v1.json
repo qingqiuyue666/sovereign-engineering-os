@@ -3,6 +3,38 @@
   "version": "v1",
   "in_memory_only": true,
   "append_only": true,
-  "duplicate_event_id_allowed": false,
-  "sequence_regression_allowed": false
+  "deterministic_required": true,
+  "no_sqlite": true,
+  "no_provider_calls": true,
+  "no_network_access": true,
+  "duplicate_logical_sequence_allowed": false,
+  "sequence_regression_allowed": false,
+  "stage_regression_allowed": false,
+  "forbidden_fields": [
+    "raw_prompt",
+    "raw_provider_response",
+    "secret_value",
+    "env_value"
+  ],
+  "required_event_fields": [
+    "event_id",
+    "run_id",
+    "task_id",
+    "stage",
+    "event_type",
+    "logical_sequence",
+    "payload_digest"
+  ],
+  "digest_refs_only": true,
+  "legal_stages": [
+    "dry_run",
+    "context",
+    "inference",
+    "patch_proposal",
+    "validation",
+    "review",
+    "approval",
+    "revision_seal",
+    "evidence"
+  ]
 }

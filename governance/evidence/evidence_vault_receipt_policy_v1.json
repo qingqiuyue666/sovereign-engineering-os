@@ -1,0 +1,24 @@
+{
+  "policy_type": "evidence_vault_receipt_policy_v1",
+  "version": "v1",
+  "descriptor_only": true,
+  "approved_default_false": true,
+  "no_secret_values": true,
+  "deterministic_required": true,
+  "no_provider_calls": true,
+  "no_network_access": true,
+  "forbidden_fields": [
+    "raw_prompt",
+    "raw_provider_response",
+    "secret_value",
+    "env_value"
+  ],
+  "required_fields": [
+    "receipt_id",
+    "artifact_digest",
+    "storage_classification",
+    "policy_version",
+    "code_version"
+  ],
+  "digest_format_required": "sha256:"
+}

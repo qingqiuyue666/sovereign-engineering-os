@@ -2,16 +2,56 @@
   "automatic_repair_allowed": false,
   "created_for_branch": "production-autonomy-final-gate-v1",
   "critical_files": [
-    {"git_blob_sha1": "afb068d9709aae31d51fac774ae43a26995bd726", "path": "kernel/bootstrap/root_integrity_verifier.py", "role": "bootstrap_verifier"},
-    {"git_blob_sha1": "1d1855d1c8cf5ee2190921e6b6cf65f7592b81db", "path": "kernel/schemas/__init__.py", "role": "schema_freeze_loader"},
-    {"git_blob_sha1": "89daff8a76f28d2052126503743fd907e2ded53c", "path": "kernel/lifecycle/signoff_gate.py", "role": "signoff_gate"},
-    {"git_blob_sha1": "db71e0b683c495a26d32eb38165a1c289f260eb2", "path": "kernel/services/capability_service.py", "role": "capability_service"},
-    {"git_blob_sha1": "e5e1d710aaa949de98ccd9b2ba12047f675c6e13", "path": "kernel/services/validation_service.py", "role": "validation_service"},
-    {"git_blob_sha1": "53b43ef030c45dc6e2b6fb45ab7fb0957ba9b673", "path": "kernel/personal_ai/adapters/openai_explicit_transport.py", "role": "openai_explicit_transport"},
-    {"git_blob_sha1": "9fd4f4f1b9b09675950a0765e48d4c7221ad1f0c", "path": "kernel/personal_ai/model_provider_real_smoke_manual_run.py", "role": "model_provider_manual_smoke_planner"},
-    {"git_blob_sha1": "f0e7e18dc9f6456bf2f2e3a917d372684be3a499", "path": "Makefile", "role": "canonical_ci_gate"},
-    {"git_blob_sha1": "3151e7b28d4958f29745f6efd9d98ecd0b5a6e13", "path": "governance/constitution/sovereign_engineering_operating_system_master_plan_v11.txt", "role": "constitution_baseline"},
-    {"git_blob_sha1": "65f01e7005f2b5a6efc730875eaaf026def59e8c", "path": "governance/implementation/v11_narrow_path_implementation_foundation.md", "role": "implementation_foundation"}
+    {
+      "git_blob_sha1": "afb068d9709aae31d51fac774ae43a26995bd726",
+      "path": "kernel/bootstrap/root_integrity_verifier.py",
+      "role": "bootstrap_verifier"
+    },
+    {
+      "git_blob_sha1": "1d1855d1c8cf5ee2190921e6b6cf65f7592b81db",
+      "path": "kernel/schemas/__init__.py",
+      "role": "schema_freeze_loader"
+    },
+    {
+      "git_blob_sha1": "89daff8a76f28d2052126503743fd907e2ded53c",
+      "path": "kernel/lifecycle/signoff_gate.py",
+      "role": "signoff_gate"
+    },
+    {
+      "git_blob_sha1": "db71e0b683c495a26d32eb38165a1c289f260eb2",
+      "path": "kernel/services/capability_service.py",
+      "role": "capability_service"
+    },
+    {
+      "git_blob_sha1": "e5e1d710aaa949de98ccd9b2ba12047f675c6e13",
+      "path": "kernel/services/validation_service.py",
+      "role": "validation_service"
+    },
+    {
+      "git_blob_sha1": "53b43ef030c45dc6e2b6fb45ab7fb0957ba9b673",
+      "path": "kernel/personal_ai/adapters/openai_explicit_transport.py",
+      "role": "openai_explicit_transport"
+    },
+    {
+      "git_blob_sha1": "9fd4f4f1b9b09675950a0765e48d4c7221ad1f0c",
+      "path": "kernel/personal_ai/model_provider_real_smoke_manual_run.py",
+      "role": "model_provider_manual_smoke_planner"
+    },
+    {
+      "git_blob_sha1": "30856760153b57127f67e91f2455b234275d9fd4",
+      "path": "Makefile",
+      "role": "canonical_ci_gate"
+    },
+    {
+      "git_blob_sha1": "3151e7b28d4958f29745f6efd9d98ecd0b5a6e13",
+      "path": "governance/constitution/sovereign_engineering_operating_system_master_plan_v11.txt",
+      "role": "constitution_baseline"
+    },
+    {
+      "git_blob_sha1": "65f01e7005f2b5a6efc730875eaaf026def59e8c",
+      "path": "governance/implementation/v11_narrow_path_implementation_foundation.md",
+      "role": "implementation_foundation"
+    }
   ],
   "hash_algorithm": "git_blob_sha1",
   "manifest_type": "seos_root_integrity_manifest_v1",

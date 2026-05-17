@@ -3,11 +3,13 @@
 .PHONY: test-wal-integrity-guard test-taint-propagation test-artifact-provenance test-wal-integrity-contract test-capability-token-policy test-security-truth-substrate
 .PHONY: test-task-manifest test-task-intake test-run-id test-run-ledger test-task-foundation test-operator-task-intake test-operator-task-ledger
 .PHONY: test-cli-foundation test-cli-status test-cli-security-scan test-operator-cli
-.PHONY: test-dry-run-runner test-event-journal test-failure-bundle test-dry-run-runtime-foundation
-.PHONY: test-replay-manifest test-replay-verifier test-replay-diff test-replay-foundation
+.PHONY: test-dry-run-runner test-runtime-runner test-event-journal test-runtime-state-machine test-idempotency test-runtime-runner-event-journal test-failure-bundle test-dry-run-runtime-foundation
+.PHONY: test-failurebundle-replay-foundation test-replay-plan test-replay-manifest test-replay-verifier test-replay-diff test-replay-foundation
+.PHONY: test-evidence-vault-boundary test-evidence-vault-receipt test-protected-storage-interface test-evidence-vault-boundary-foundation
 .PHONY: test-audit-bundle test-audit-exporter test-audit-redaction test-audit-export-foundation
 .PHONY: test-status-reporter-v12 test-health-plan test-module-registry test-local-status-foundation
 .PHONY: test-provider-contract test-mock-provider test-provider-request-envelope test-provider-response-receipt test-provider-mock-foundation
+.PHONY: test-provider-execution-plane test-provider-adapter-registry test-provider-execution-receipt test-provider-execution-plane-boundary
 .PHONY: test-notification-contract test-telegram-mock test-notification-redaction test-notification-mock-foundation
 .PHONY: test-vault-contract test-keyring-contract test-secret-ref test-vault-contract-foundation
 .PHONY: test-daemon-contract test-scheduler-contract test-daemon-contract-foundation
@@ -19,7 +21,7 @@ PYTHON ?= python3
 
 ci: health
 
-health: test-root-integrity test-leak-prevention-foundation test-security-truth-substrate test-operator-task-ledger test-operator-cli test-v12-foundation test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-real-runtime-provider-transport-execution test-production-autonomy-final-gate test-runtime-sealed-receipt test-generic-payload-shadow test-protected-evidence-storage test-protected-evidence-storage-implementation test-real-hmac-policy-realization test-real-merkle-proof-realization test-generic-payload-full-enforcement test-schemas test-tracer-bullet test-acceptance diff-check
+health: test-root-integrity test-leak-prevention-foundation test-security-truth-substrate test-operator-task-ledger test-operator-cli test-runtime-runner-event-journal test-failurebundle-replay-foundation test-evidence-vault-boundary-foundation test-provider-execution-plane-boundary test-v12-foundation test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-real-runtime-provider-transport-execution test-production-autonomy-final-gate test-runtime-sealed-receipt test-generic-payload-shadow test-protected-evidence-storage test-protected-evidence-storage-implementation test-real-hmac-policy-realization test-real-merkle-proof-realization test-generic-payload-full-enforcement test-schemas test-tracer-bullet test-acceptance diff-check
 
 test-root-integrity:
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_root_integrity_verifier -v
@@ -137,13 +139,27 @@ test-operator-cli:
 test-dry-run-runner:
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_dry_run_runner -v
 
+test-runtime-runner:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_runtime_runner -v
+
 test-event-journal:
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_event_journal -v
+
+test-runtime-state-machine:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_runtime_state_machine -v
+
+test-idempotency:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_idempotency -v
+
+test-runtime-runner-event-journal: test-runtime-runner test-event-journal test-runtime-state-machine test-idempotency
 
 test-failure-bundle:
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_failure_bundle -v
 
 test-dry-run-runtime-foundation: test-dry-run-runner test-event-journal test-failure-bundle
+
+test-replay-plan:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_replay_plan -v
 
 test-replay-manifest:
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_replay_manifest -v
@@ -155,6 +171,8 @@ test-replay-diff:
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_replay_diff -v
 
 test-replay-foundation: test-replay-manifest test-replay-verifier test-replay-diff
+
+test-failurebundle-replay-foundation: test-failure-bundle test-replay-plan test-replay-diff
 
 test-audit-bundle:
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_audit_bundle -v
@@ -192,6 +210,17 @@ test-provider-response-receipt:
 
 test-provider-mock-foundation: test-provider-contract test-mock-provider test-provider-request-envelope test-provider-response-receipt
 
+test-provider-execution-plane:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_provider_execution_plane -v
+
+test-provider-adapter-registry:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_provider_adapter_registry -v
+
+test-provider-execution-receipt:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_provider_execution_receipt -v
+
+test-provider-execution-plane-boundary: test-provider-execution-plane test-provider-adapter-registry test-provider-execution-receipt
+
 test-notification-contract:
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_notification_contract -v
 
@@ -205,6 +234,17 @@ test-notification-mock-foundation: test-notification-contract test-telegram-mock
 
 test-vault-contract:
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_vault_contract -v
+
+test-evidence-vault-boundary:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_evidence_vault_boundary -v
+
+test-evidence-vault-receipt:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_evidence_vault_receipt -v
+
+test-protected-storage-interface:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_protected_storage_interface -v
+
+test-evidence-vault-boundary-foundation: test-evidence-vault-boundary test-evidence-vault-receipt test-protected-storage-interface
 
 test-keyring-contract:
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_keyring_contract -v
@@ -250,7 +290,7 @@ test-dashboard-contracts: test-dashboard-model test-run-summary-model test-secur
 test-v12-foundation-progress-audit:
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_v12_foundation_progress_audit -v
 
-test-v12-foundation: test-leak-prevention-foundation test-security-truth-substrate test-task-foundation test-cli-foundation test-cli-status test-cli-security-scan test-dry-run-runtime-foundation test-replay-foundation test-audit-export-foundation test-local-status-foundation test-provider-mock-foundation test-notification-mock-foundation test-vault-contract-foundation test-daemon-contract-foundation test-domain-pipeline-contracts test-dashboard-contracts test-v12-foundation-progress-audit
+test-v12-foundation: test-leak-prevention-foundation test-security-truth-substrate test-task-foundation test-cli-foundation test-cli-status test-cli-security-scan test-dry-run-runtime-foundation test-runtime-runner-event-journal test-replay-foundation test-audit-export-foundation test-local-status-foundation test-provider-mock-foundation test-notification-mock-foundation test-vault-contract-foundation test-daemon-contract-foundation test-domain-pipeline-contracts test-dashboard-contracts test-v12-foundation-progress-audit
 
 test-schemas:
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest discover -s tests/schemas

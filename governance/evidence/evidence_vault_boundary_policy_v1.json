@@ -1,0 +1,28 @@
+{
+  "policy_type": "evidence_vault_boundary_policy_v1",
+  "version": "v1",
+  "default_disabled": true,
+  "vault_enabled_requires_explicit_authorization": true,
+  "human_approval_required": true,
+  "no_real_encryption": true,
+  "no_real_kms": true,
+  "no_secret_material": true,
+  "digest_only_envelope": true,
+  "receipt_only_boundary": true,
+  "no_provider_calls": true,
+  "no_network_access": true,
+  "no_sqlite_mutation": true,
+  "forbidden_fields": [
+    "raw_prompt",
+    "raw_provider_response",
+    "secret_value",
+    "env_value",
+    "real_secret_material"
+  ],
+  "required_fields": [
+    "artifact_digest",
+    "policy_version",
+    "code_version"
+  ],
+  "deterministic_required": true
+}

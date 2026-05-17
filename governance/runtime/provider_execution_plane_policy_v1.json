@@ -1,0 +1,34 @@
+{
+  "policy_type": "provider_execution_plane_policy_v1",
+  "version": "v1",
+  "default_disabled": true,
+  "operator_authorization_required": true,
+  "one_call_boundary_only": true,
+  "no_retries": true,
+  "no_streaming": true,
+  "no_raw_prompt_persistence": true,
+  "no_raw_response_persistence": true,
+  "no_secret_value_persistence": true,
+  "no_tool_calls": true,
+  "no_file_edits": true,
+  "no_autonomous_execution": true,
+  "sealed_receipt_required": true,
+  "post_run_health_required": true,
+  "quarantine_link_required": true,
+  "no_provider_calls": true,
+  "no_network_access": true,
+  "deterministic_required": true,
+  "forbidden_fields": [
+    "raw_prompt",
+    "raw_provider_response",
+    "secret_value",
+    "env_value"
+  ],
+  "required_fields": [
+    "provider_id",
+    "request_digest",
+    "authorization_digest",
+    "policy_version",
+    "code_version"
+  ]
+}

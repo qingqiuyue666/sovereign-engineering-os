@@ -1,0 +1,37 @@
+{
+  "policy_type": "runtime_runner_policy_v1",
+  "version": "v1",
+  "dry_run_only": true,
+  "dry_run_required": true,
+  "provider_execution_allowed": false,
+  "network_execution_allowed": false,
+  "production_autonomy_allowed": false,
+  "forbidden_fields": [
+    "raw_prompt",
+    "raw_provider_response",
+    "secret_value"
+  ],
+  "required_fields": [
+    "task_id",
+    "run_id",
+    "stage",
+    "policy_version",
+    "code_version",
+    "input_digest"
+  ],
+  "receipt_required_fields": [
+    "task_id",
+    "run_id",
+    "stage",
+    "status",
+    "policy_version",
+    "code_version",
+    "input_digest",
+    "output_digest"
+  ],
+  "deterministic_required": true,
+  "provider_calls_allowed": false,
+  "network_access_allowed": false,
+  "sqlite_mutation_allowed": false,
+  "file_mutation_allowed": false
+}

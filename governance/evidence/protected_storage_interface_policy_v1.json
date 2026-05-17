@@ -1,0 +1,27 @@
+{
+  "policy_type": "protected_storage_interface_policy_v1",
+  "version": "v1",
+  "interface_contract_only": true,
+  "no_real_storage_backend": true,
+  "no_encryption_implementation": true,
+  "no_key_material": true,
+  "default_disabled": true,
+  "live_write_rejected": true,
+  "human_approval_required": true,
+  "deterministic_required": true,
+  "no_provider_calls": true,
+  "no_network_access": true,
+  "no_sqlite_mutation": true,
+  "forbidden_fields": [
+    "raw_prompt",
+    "raw_provider_response",
+    "secret_value",
+    "env_value"
+  ],
+  "required_fields": [
+    "storage_request_id",
+    "artifact_digest",
+    "policy_version",
+    "code_version"
+  ]
+}

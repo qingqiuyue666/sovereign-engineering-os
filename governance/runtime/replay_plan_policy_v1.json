@@ -1,34 +1,31 @@
 {
-  "policy_type": "failure_bundle_policy_v1",
+  "policy_type": "replay_plan_policy_v1",
   "version": "v1",
-  "sanitized_only": true,
+  "descriptor_only": true,
+  "exact_replay_required": true,
+  "no_cloud_requery": true,
   "deterministic_required": true,
   "no_provider_calls": true,
   "no_network_access": true,
-  "no_sqlite": true,
   "no_file_mutation": true,
-  "no_production_autonomy": true,
-  "raw_exception_persistence_allowed": false,
+  "no_sqlite": true,
   "forbidden_fields": [
     "raw_prompt",
     "raw_provider_response",
     "secret_value",
-    "env_value"
+    "env_value",
+    "provider_live_requery"
   ],
   "required_fields": [
-    "failure_id",
     "task_id",
     "run_id",
-    "stage",
-    "error_class",
-    "sanitized_message",
-    "state_snapshot_digest",
+    "replay_id",
     "input_snapshot_digest",
+    "state_snapshot_digest",
     "policy_version",
     "code_version",
-    "retry_decision",
-    "quarantine_ref",
-    "rollback_ref"
+    "environment_descriptor_digest",
+    "expected_output_digest"
   ],
   "digest_format_required": "sha256:"
 }

@@ -1,0 +1,29 @@
+{
+  "policy_type": "idempotency_policy_v1",
+  "version": "v1",
+  "deterministic_required": true,
+  "no_provider_calls": true,
+  "no_network_access": true,
+  "no_sqlite": true,
+  "no_file_mutation": true,
+  "idempotency_key_required": true,
+  "operation_digest_required": true,
+  "duplicate_safe_on_match": true,
+  "reject_different_digest_same_key": true,
+  "digest_format_required": "sha256:",
+  "forbidden_fields": [
+    "raw_prompt",
+    "raw_provider_response",
+    "secret_value",
+    "env_value"
+  ],
+  "receipt_required_fields": [
+    "idempotency_key",
+    "operation_digest",
+    "accepted",
+    "duplicate_safe",
+    "reasons",
+    "policy_version",
+    "code_version"
+  ]
+}

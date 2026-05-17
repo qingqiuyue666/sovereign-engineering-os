@@ -1,0 +1,47 @@
+{
+  "policy_type": "runtime_state_transition_policy_v1",
+  "version": "v1",
+  "deterministic_required": true,
+  "no_provider_calls": true,
+  "no_network_access": true,
+  "no_sqlite": true,
+  "no_file_mutation": true,
+  "no_production_autonomy": true,
+  "allowed_states": [
+    "planned",
+    "validated",
+    "dry_run",
+    "executed",
+    "failed",
+    "quarantined",
+    "completed"
+  ],
+  "terminal_states": [
+    "completed"
+  ],
+  "quarantined_is_terminal_unless_recovery": true,
+  "allowed_transitions": [
+    {"from_state": "planned", "to_state": "validated"},
+    {"from_state": "validated", "to_state": "dry_run"},
+    {"from_state": "dry_run", "to_state": "executed"},
+    {"from_state": "dry_run", "to_state": "failed"},
+    {"from_state": "executed", "to_state": "completed"},
+    {"from_state": "executed", "to_state": "failed"},
+    {"from_state": "failed", "to_state": "quarantined"},
+    {"from_state": "quarantined", "to_state": "planned", "requires_recovery_allowed": true}
+  ],
+  "forbidden_fields": [
+    "raw_prompt",
+    "raw_provider_response",
+    "secret_value",
+    "env_value"
+  ],
+  "receipt_required_fields": [
+    "from_state",
+    "to_state",
+    "accepted",
+    "reasons",
+    "policy_version",
+    "code_version"
+  ]
+}
