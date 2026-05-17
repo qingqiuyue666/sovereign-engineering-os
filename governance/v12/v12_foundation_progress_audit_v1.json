@@ -1,0 +1,61 @@
+{
+  "audit_type": "v12_foundation_progress_audit_v1",
+  "version": "v1",
+  "implemented_surfaces": [
+    "security_classification",
+    "core_secret_scanner",
+    "environment_sanitizer",
+    "ai_context_firewall",
+    "anti_exfiltration_gate",
+    "repository_hygiene",
+    "taint_propagation",
+    "artifact_provenance",
+    "wal_integrity_contract",
+    "capability_token_policy",
+    "task_manifest",
+    "task_intake",
+    "run_id",
+    "run_ledger",
+    "cli_foundation",
+    "dry_run_runner",
+    "event_journal",
+    "failure_bundle",
+    "replay_verifier",
+    "audit_bundle_export",
+    "local_status_reporter",
+    "provider_mock_contract",
+    "telegram_mock_contract",
+    "vault_keyring_contracts",
+    "daemon_scheduler_contracts",
+    "domain_pipeline_contracts",
+    "dashboard_data_model"
+  ],
+  "incomplete_surfaces": [
+    "production hardening beyond tracer-bullet draft",
+    "real provider activation",
+    "real notification delivery",
+    "real vault or keyring integration",
+    "daemon runtime",
+    "OSINT live ingestion",
+    "dashboard runtime"
+  ],
+  "forbidden_surfaces_not_implemented": {
+    "live_provider_runtime": true,
+    "network_accessed": true,
+    "secret_value_read": true,
+    "secret_value_persisted": true,
+    "live_telegram": true,
+    "real_vault": true,
+    "kms_keyring_runtime": true,
+    "daemon_runtime": true,
+    "osint_live_ingestion": true,
+    "dashboard_runtime": true,
+    "real_wal_reader": true,
+    "real_sqlite_migration": true
+  },
+  "next_allowed_branches": [
+    "v12-foundation-hardening-v1",
+    "v12-dry-run-runtime-hardening-v1",
+    "v12-audit-replay-hardening-v1"
+  ]
+}
