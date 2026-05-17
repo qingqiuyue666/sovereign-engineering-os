@@ -12,7 +12,6 @@ import hashlib
 import json
 
 from kernel.runtime._strict_validation import (
-    strict_bool,
     validate_required_digest_fields,
     validate_required_string_fields,
 )
@@ -28,6 +27,9 @@ _FORBIDDEN_FIELDS = (
     "raw_provider_response",
     "secret_value",
     "env_value",
+)
+
+_GATED_BOOL_FIELDS = (
     "provider_live_requery",
 )
 
@@ -84,14 +86,15 @@ def validate_replay_plan(payload: Mapping[str, object]) -> ReplayPlanReceipt:
     failures: list[str] = []
 
     # provider_live_requery — must be actual bool
-    prq = payload_dict.get("provider_live_requery")
-    if prq is not None:
-        if not isinstance(prq, bool):
-            failures.append("provider_live_requery_must_be_bool")
-        elif prq is True:
-            failures.append("provider_live_requery_rejected_exact_replay_only")
+    for field in _GATED_BOOL_FIELDS:
+        value = payload_dict.get(field)
+        if value is not None:
+            if not isinstance(value, bool):
+                failures.append(f"{field}_must_be_bool")
+            elif value is True:
+                failures.append(f"{field}_rejected_exact_replay_only")
 
-    for field in ("raw_prompt", "raw_provider_response", "secret_value", "env_value"):
+    for field in _FORBIDDEN_FIELDS:
         if field in payload_dict:
             failures.append(f"{field}_forbidden")
 
