@@ -1,0 +1,117 @@
+
+{
+
+  "allowed_stage_kinds": [
+
+    "verification",
+
+    "code_stage"
+
+  ],
+
+  "allowed_side_effects": [
+
+    "dispatch_registered_code_stage",
+
+    "dispatch_verification_stage",
+
+    "write_overnight_reports",
+
+    "write_overnight_summary",
+
+    "write_overnight_index",
+
+    "write_resume_marker",
+
+    "write_heartbeat"
+
+  ],
+
+  "forbidden_actions": [
+
+    "cloud_ai_api_call",
+
+    "freeform_shell_execution",
+
+    "unbounded_code_generation",
+
+    "unbounded_runtime",
+
+    "git_merge",
+
+    "git_push_main",
+
+    "git_branch_delete",
+
+    "main_branch_modification",
+
+    "secret_read",
+
+    "env_read",
+
+    "provider_live_execution",
+
+    "vault_live_write",
+
+    "production_autonomy",
+
+    "deployment"
+
+  ],
+
+  "policy_name": "code_train_runner_dispatch_policy_v1",
+
+  "policy_version": "v1",
+
+  "purpose": "Allow Local Train Runner to dispatch registered code_stage entries from autonomous_code_train_queue_v1 through the local code stage executor, then continue verification stages, while preserving local-only and main-protection boundaries.",
+
+  "required_guards": [
+
+    "stage_kind_must_be_known",
+
+    "code_stage_id_required_for_code_stage",
+
+    "suite_required_for_verification",
+
+    "code_stage_dispatched_through_local_executor",
+
+    "verification_dispatched_through_local_runner",
+
+    "stop_on_first_failure",
+
+    "heartbeat_written",
+
+    "resume_marker_written",
+
+    "main_branch_mutation_rejected",
+
+    "cloud_ai_calls_forbidden",
+
+    "secrets_forbidden",
+
+    "merge_forbidden",
+
+    "branch_delete_forbidden",
+
+    "unbounded_generation_forbidden"
+
+  ],
+
+  "required_outputs": [
+
+    "outputs/reports/overnight_task_queue_summary.json",
+
+    "outputs/reports/overnight_task_queue_report.md",
+
+    "outputs/reports/overnight_task_queue_index.json",
+
+    "outputs/state/overnight_task_queue_resume.json",
+
+    "outputs/state/overnight_task_queue_heartbeat.json"
+
+  ],
+
+  "status": "active"
+
+}
+

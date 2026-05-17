@@ -648,11 +648,11 @@ def run_queue(path: Path, fallback_mode: str, allow_commit: bool, allow_push_fea
 
     queue = load_queue(path)
 
-    tasks = queue.get("tasks", [])
+    tasks = queue.get("tasks", queue.get("stages", []))
 
     if not isinstance(tasks, list):
 
-        raise SystemExit("queue_tasks_must_be_list")
+        raise SystemExit("queue_tasks_or_stages_must_be_list")
 
     queue_path = str(path.relative_to(ROOT)) if path.is_absolute() else str(path)
 
@@ -673,6 +673,8 @@ def run_queue(path: Path, fallback_mode: str, allow_commit: bool, allow_push_fea
         stage_id = str(task.get("stage_id", f"stage-{index:03d}"))
 
         task_id = str(task.get("task_id", stage_id))
+
+        stage_kind = str(task.get("stage_kind", "verification"))
 
         suite = str(task.get("suite", "full"))
 
@@ -696,19 +698,97 @@ def run_queue(path: Path, fallback_mode: str, allow_commit: bool, allow_push_fea
 
         )
 
-        exit_code = run_suite(
+        if stage_kind == "verification":
 
-            suite=suite,
+            exit_code = run_suite(
 
-            mode=mode,
+                suite=suite,
 
-            commit_message=str(task.get("commit_message", "local train runner commit")),
+                mode=mode,
 
-            allow_commit=bool(task.get("allow_commit", allow_commit)),
+                commit_message=str(task.get("commit_message", "local train runner commit")),
 
-            allow_push_feature_branch=bool(task.get("allow_push_feature_branch", allow_push_feature_branch)),
+                allow_commit=bool(task.get("allow_commit", allow_commit)),
 
-        )
+                allow_push_feature_branch=bool(task.get("allow_push_feature_branch", allow_push_feature_branch)),
+
+            )
+
+        elif stage_kind == "code_stage":
+
+            code_stage_id = task.get("code_stage_id")
+
+            if not isinstance(code_stage_id, str) or not code_stage_id.strip():
+
+                code_stage_id_required = "code_stage_id_required"
+
+                exit_code = 98
+
+            else:
+
+                result = run_command((
+
+                    "python3",
+
+                    "tools/local_code_stage_executor.py",
+
+                    "--stage-id",
+
+                    code_stage_id,
+
+                ))
+
+                results_for_code_stage = [result]
+
+                append_log(
+
+                    results_for_code_stage,
+
+                    {
+
+                        "generated_at": now_utc(),
+
+                        "branch": current_branch(),
+
+                        "head": current_head(),
+
+                        "suite": "code_stage",
+
+                        "mode": "code_stage",
+
+                        "stage_kind": stage_kind,
+
+                        "stage_id": stage_id,
+
+                        "task_id": task_id,
+
+                        "code_stage_id": code_stage_id,
+
+                        "overall_ok": result.ok,
+
+                        "first_failure": None if result.ok else "code_stage",
+
+                        "dirty_worktree": bool(git_status_short()),
+
+                        "git_status_short": git_status_short(),
+
+                        "committed": False,
+
+                        "pushed": False,
+
+                        "safety_failures": [],
+
+                        "commands": [result.as_dict()],
+
+                    },
+
+                )
+
+                exit_code = result.returncode
+
+        else:
+
+            exit_code = 97
 
         stage_status = "ok" if exit_code == 0 else "failed"
 
