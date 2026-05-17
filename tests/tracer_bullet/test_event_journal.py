@@ -201,6 +201,43 @@ class EventJournalDuplicateSequenceTests(unittest.TestCase):
         self.assertFalse(result.accepted)
         self.assertIn("duplicate_logical_sequence", result.failures)
 
+    # Blocker 2 — sequence regression tests
+    def test_sequence_5_then_4_same_run_rejected(self):
+        journal = EventJournal()
+        journal.append(_valid_event({"event_id": "e1", "logical_sequence": 5}))
+        result = journal.append(_valid_event({"event_id": "e2", "logical_sequence": 4}))
+        self.assertFalse(result.accepted)
+        self.assertIn("sequence_regression", result.failures)
+
+    def test_sequence_5_then_5_same_run_rejected_as_duplicate(self):
+        journal = EventJournal()
+        journal.append(_valid_event({"event_id": "e1", "logical_sequence": 5}))
+        result = journal.append(_valid_event({"event_id": "e2", "logical_sequence": 5}))
+        self.assertFalse(result.accepted)
+        self.assertIn("duplicate_logical_sequence", result.failures)
+
+    def test_sequence_5_then_6_same_run_accepted(self):
+        journal = EventJournal()
+        journal.append(_valid_event({"event_id": "e1", "logical_sequence": 5}))
+        result = journal.append(_valid_event({"event_id": "e2", "logical_sequence": 6}))
+        self.assertTrue(result.accepted)
+
+    def test_sequence_5_run_a_then_4_run_b_accepted(self):
+        journal = EventJournal()
+        journal.append(_valid_event({"event_id": "e1", "run_id": "run-a", "logical_sequence": 5}))
+        result = journal.append(_valid_event({"event_id": "e2", "run_id": "run-b", "logical_sequence": 4}))
+        self.assertTrue(result.accepted)
+
+    def test_rejected_sequence_regression_does_not_mutate_journal(self):
+        journal = EventJournal()
+        journal.append(_valid_event({"event_id": "e1", "logical_sequence": 5}))
+        count_before = journal.event_count()
+        events_before = journal.events
+        result = journal.append(_valid_event({"event_id": "e2", "logical_sequence": 4}))
+        self.assertFalse(result.accepted)
+        self.assertEqual(journal.event_count(), count_before)
+        self.assertEqual(journal.events, events_before)
+
 
 class EventJournalStageRegressionTests(unittest.TestCase):
     """Stage regression detection tests."""

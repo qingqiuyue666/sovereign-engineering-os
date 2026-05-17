@@ -3,6 +3,7 @@
 Produces sanitized failure descriptors that contain only digest references.
 Never stores raw prompts, raw provider responses, secret values, or env values.
 All functions are deterministic and side-effect free.
+Strict field typing enforced for all validations.
 """
 
 from __future__ import annotations
@@ -11,6 +12,13 @@ from dataclasses import dataclass
 from typing import Any, Mapping
 import hashlib
 import json
+
+from kernel.runtime._strict_validation import (
+    strict_digest,
+    strict_nonempty_string,
+    validate_required_digest_fields,
+    validate_required_string_fields,
+)
 
 __all__ = [
     "FailureBundleRejection",
@@ -26,15 +34,13 @@ _FORBIDDEN_FIELDS = (
     "env_value",
 )
 
-_REQUIRED_FIELDS = (
+_REQUIRED_STRING_FIELDS = (
     "failure_id",
     "task_id",
     "run_id",
     "stage",
     "error_class",
     "sanitized_message",
-    "state_snapshot_digest",
-    "input_snapshot_digest",
     "policy_version",
     "code_version",
     "retry_decision",
@@ -42,7 +48,7 @@ _REQUIRED_FIELDS = (
     "rollback_ref",
 )
 
-_DIGEST_FIELDS = (
+_REQUIRED_DIGEST_FIELDS = (
     "state_snapshot_digest",
     "input_snapshot_digest",
 )
@@ -68,31 +74,26 @@ def _digest_payload(payload: Any) -> str:
 
 
 def validate_failure_bundle(bundle: Mapping[str, object]) -> FailureBundleValidationResult:
-    """Validate a failure bundle against policy boundaries.
+    """Validate a failure bundle against policy boundaries with strict typing.
 
-    Returns a FailureBundleValidationResult with accepted=True if the bundle
-    passes all checks, or accepted=False with failures listed.
+    All string fields must be non-empty, non-None strings.
+    All digest fields must match sha256:<64 lowercase hex>.
+    No forbidden fields allowed.
     """
+    payload_dict = dict(bundle)
     failures: list[str] = []
 
     for field in _FORBIDDEN_FIELDS:
-        if field in bundle:
+        if field in payload_dict:
             failures.append(f"{field}_forbidden")
 
-    for field in _REQUIRED_FIELDS:
-        if field not in bundle:
-            failures.append(f"{field}_required")
-
-    for field in _DIGEST_FIELDS:
-        if field in bundle:
-            val = bundle[field]
-            if isinstance(val, str) and val and not val.startswith("sha256:"):
-                failures.append(f"{field}_must_be_sha256_prefixed")
+    validate_required_string_fields(payload_dict, _REQUIRED_STRING_FIELDS, failures)
+    validate_required_digest_fields(payload_dict, _REQUIRED_DIGEST_FIELDS, failures)
 
     if failures:
         return FailureBundleValidationResult(False, tuple(failures), "")
 
-    digest = _digest_payload(dict(bundle))
+    digest = _digest_payload(payload_dict)
     return FailureBundleValidationResult(True, (), digest)
 
 
@@ -111,11 +112,7 @@ def build_failure_bundle(
     quarantine_ref: str,
     rollback_ref: str,
 ) -> dict[str, object]:
-    """Build a sanitized failure bundle descriptor.
-
-    The message is sanitized (never contains raw prompts or secrets).
-    All snapshot data is stored as sha256 digests only.
-    """
+    """Build a sanitized failure bundle descriptor."""
     state_digest = _digest_payload(dict(state_snapshot))
     input_digest = _digest_payload(dict(input_snapshot))
 

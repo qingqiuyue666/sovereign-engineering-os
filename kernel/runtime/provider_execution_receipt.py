@@ -1,15 +1,18 @@
 """Provider execution receipt — sealed descriptor only.
 
-No raw prompts or responses. Deterministic digest-only receipt for
-provider execution operations.
+No raw prompts or responses. Deterministic digest-only receipt with strict
+field typing for provider execution operations.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Any, Mapping
-import hashlib
-import json
+
+from kernel.runtime._strict_validation import (
+    validate_required_digest_fields,
+    validate_required_string_fields,
+)
 
 __all__ = [
     "ProviderExecutionReceipt",
@@ -23,18 +26,14 @@ _FORBIDDEN_FIELDS = (
     "env_value",
 )
 
-_REQUIRED_FIELDS = (
+_REQUIRED_STRING_FIELDS = (
     "provider_id",
-    "request_digest",
-    "response_digest",
-    "authorization_digest",
     "policy_version",
     "code_version",
-    "post_run_health_digest",
     "quarantine_ref",
 )
 
-_DIGEST_FIELDS = (
+_REQUIRED_DIGEST_FIELDS = (
     "request_digest",
     "response_digest",
     "authorization_digest",
@@ -52,25 +51,21 @@ class ProviderExecutionReceipt:
 
 
 def validate_provider_execution_receipt(payload: Mapping[str, object]) -> ProviderExecutionReceipt:
-    """Validate a provider execution receipt descriptor.
+    """Validate a provider execution receipt descriptor with strict typing.
 
-    All digest fields must have sha256: prefix. No forbidden fields allowed.
+    All digest fields must match sha256:<64 lowercase hex>.
+    All string fields must be non-empty, non-None strings.
+    No forbidden fields allowed.
     """
+    payload_dict = dict(payload)
     failures: list[str] = []
 
     for field in _FORBIDDEN_FIELDS:
-        if field in payload:
+        if field in payload_dict:
             failures.append(f"{field}_forbidden")
 
-    for field in _REQUIRED_FIELDS:
-        if field not in payload:
-            failures.append(f"{field}_required")
-
-    for field in _DIGEST_FIELDS:
-        if field in payload:
-            val = payload[field]
-            if isinstance(val, str) and val and not val.startswith("sha256:"):
-                failures.append(f"{field}_must_be_sha256_prefixed")
+    validate_required_string_fields(payload_dict, _REQUIRED_STRING_FIELDS, failures)
+    validate_required_digest_fields(payload_dict, _REQUIRED_DIGEST_FIELDS, failures)
 
     if failures:
         return ProviderExecutionReceipt(False, tuple(failures))

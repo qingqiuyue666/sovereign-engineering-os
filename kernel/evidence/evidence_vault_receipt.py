@@ -1,15 +1,18 @@
 """Evidence vault receipt — descriptor only, no secret values.
 
 Produces a deterministic receipt descriptor for vault operations.
-Approved is false by default (requires explicit human approval).
+Approved is false by default. Strict field typing enforced.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Any, Mapping
-import hashlib
-import json
+
+from kernel.runtime._strict_validation import (
+    validate_required_digest_fields,
+    validate_required_string_fields,
+)
 
 __all__ = [
     "EvidenceVaultReceipt",
@@ -23,12 +26,15 @@ _FORBIDDEN_FIELDS = (
     "env_value",
 )
 
-_REQUIRED_FIELDS = (
+_REQUIRED_STRING_FIELDS = (
     "receipt_id",
-    "artifact_digest",
     "storage_classification",
     "policy_version",
     "code_version",
+)
+
+_REQUIRED_DIGEST_FIELDS = (
+    "artifact_digest",
 )
 
 
@@ -47,27 +53,22 @@ class EvidenceVaultReceipt:
 
 
 def validate_evidence_vault_receipt(payload: Mapping[str, object]) -> EvidenceVaultReceipt:
-    """Validate an evidence vault receipt descriptor.
+    """Validate an evidence vault receipt descriptor with strict typing.
 
-    Receipt is always approved=false by default. Only validates structural
-    integrity and forbidden fields.
+    Receipt is always approved=false by default.
+    All string fields must be non-empty, non-None strings.
+    All digest fields must match sha256:<64 lowercase hex>.
     """
+    payload_dict = dict(payload)
     failures: list[str] = []
 
     for field in _FORBIDDEN_FIELDS:
-        if field in payload:
+        if field in payload_dict:
             failures.append(f"{field}_forbidden")
 
-    for field in _REQUIRED_FIELDS:
-        if field not in payload:
-            failures.append(f"{field}_required")
-
-    if "artifact_digest" in payload:
-        val = payload["artifact_digest"]
-        if isinstance(val, str) and val and not val.startswith("sha256:"):
-            failures.append("artifact_digest_must_be_sha256_prefixed")
+    validate_required_string_fields(payload_dict, _REQUIRED_STRING_FIELDS, failures)
+    validate_required_digest_fields(payload_dict, _REQUIRED_DIGEST_FIELDS, failures)
 
     if failures:
         return EvidenceVaultReceipt(False, False, tuple(failures))
-
     return EvidenceVaultReceipt(True, False, ())

@@ -2,14 +2,19 @@
 
 Compares expected and actual output digests to detect replay mismatches.
 Reports version mismatches and output digest mismatches as failures.
+Strict field typing enforced.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Any, Mapping
-import hashlib
-import json
+
+from kernel.runtime._strict_validation import (
+    strict_nonempty_string,
+    validate_required_digest_fields,
+    validate_required_string_fields,
+)
 
 __all__ = [
     "ReplayDiffReceipt",
@@ -24,12 +29,14 @@ _FORBIDDEN_FIELDS = (
     "env_value",
 )
 
-_REQUIRED_FIELDS = (
-    "expected_output_digest",
-    "actual_output_digest",
+_REQUIRED_STRING_FIELDS = (
     "policy_version",
     "code_version",
-    "bound_version_tuple",
+)
+
+_REQUIRED_DIGEST_FIELDS = (
+    "expected_output_digest",
+    "actual_output_digest",
 )
 
 
@@ -51,52 +58,45 @@ class ReplayDiffReceipt:
         }
 
 
-def _canonical_json(payload: Any) -> str:
-    return json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
-
-
-def _digest_payload(payload: Any) -> str:
-    return "sha256:" + hashlib.sha256(_canonical_json(payload).encode("utf-8")).hexdigest()
-
-
 def validate_replay_diff(payload: Mapping[str, object]) -> ReplayDiffReceipt:
-    """Validate and compare a replay diff descriptor.
+    """Validate and compare a replay diff descriptor with strict typing.
 
-    Checks:
-    - No forbidden fields
-    - All required fields present
-    - Digest fields have sha256: prefix
-    - expected_output_digest == actual_output_digest (replay_match)
-    - bound_version_tuple must be present (version mismatch otherwise)
+    All string fields must be non-empty, non-None strings.
+    All digest fields must match sha256:<64 lowercase hex>.
+    bound_version_tuple must be non-empty list of non-empty strings.
     """
+    payload_dict = dict(payload)
     failures: list[str] = []
 
     for field in _FORBIDDEN_FIELDS:
-        if field in payload:
+        if field in payload_dict:
             failures.append(f"{field}_forbidden")
 
-    for field in _REQUIRED_FIELDS:
-        if field not in payload:
-            failures.append(f"{field}_required")
+    validate_required_string_fields(payload_dict, _REQUIRED_STRING_FIELDS, failures)
+    validate_required_digest_fields(payload_dict, _REQUIRED_DIGEST_FIELDS, failures)
 
-    # Digest format checks
-    for field in ("expected_output_digest", "actual_output_digest"):
-        if field in payload:
-            val = payload[field]
-            if isinstance(val, str) and val and not val.startswith("sha256:"):
-                failures.append(f"{field}_must_be_sha256_prefixed")
-
-    # Bound version tuple must be present and non-empty
-    bvt = payload.get("bound_version_tuple")
-    if bvt is not None and (not isinstance(bvt, (list, tuple)) or len(bvt) == 0):
+    # bound_version_tuple strict validation
+    bvt = payload_dict.get("bound_version_tuple")
+    if bvt is None:
+        failures.append("bound_version_tuple_must_not_be_none")
+    elif not isinstance(bvt, (list, tuple)):
+        failures.append("bound_version_tuple_must_be_list")
+    elif len(bvt) == 0:
         failures.append("bound_version_tuple_must_be_nonempty")
+    else:
+        for i, entry in enumerate(bvt):
+            if entry is None:
+                failures.append(f"bound_version_tuple[{i}]_must_not_be_none")
+            elif not isinstance(entry, str):
+                failures.append(f"bound_version_tuple[{i}]_must_be_string")
+            elif not entry or not entry.strip():
+                failures.append(f"bound_version_tuple[{i}]_must_be_nonempty_string")
 
     if failures:
         return ReplayDiffReceipt(False, False, tuple(failures))
 
-    expected = str(payload["expected_output_digest"])
-    actual = str(payload["actual_output_digest"])
-
+    expected = payload_dict["expected_output_digest"]
+    actual = payload_dict["actual_output_digest"]
     replay_match = (expected == actual)
 
     if not replay_match:

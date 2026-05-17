@@ -184,6 +184,7 @@ class EventJournal:
 
     _events: list[JournalEvent] = field(default_factory=list)
     _seen_sequences_by_run: dict[str, set[int]] = field(default_factory=dict)
+    _max_sequence_by_run: dict[str, int] = field(default_factory=dict)
     _last_stage_by_run: dict[str, str] = field(default_factory=dict)
 
     @property
@@ -222,8 +223,14 @@ class EventJournal:
         # Duplicate logical_sequence check (per run).
         if run_id not in self._seen_sequences_by_run:
             self._seen_sequences_by_run[run_id] = set()
+            self._max_sequence_by_run[run_id] = -1
         if logical_sequence in self._seen_sequences_by_run[run_id]:
             failures.append("duplicate_logical_sequence")
+
+        # Sequence regression check (per run) — reject lower than max seen.
+        if run_id in self._max_sequence_by_run:
+            if logical_sequence < self._max_sequence_by_run[run_id]:
+                failures.append("sequence_regression")
 
         # Stage regression check (per run).
         current_index = _stage_index(stage)
@@ -248,6 +255,8 @@ class EventJournal:
         )
         self._events.append(event)
         self._seen_sequences_by_run[run_id].add(logical_sequence)
+        if logical_sequence > self._max_sequence_by_run.get(run_id, -1):
+            self._max_sequence_by_run[run_id] = logical_sequence
         self._last_stage_by_run[run_id] = stage
 
         return JournalAppendResult(True, (), event)

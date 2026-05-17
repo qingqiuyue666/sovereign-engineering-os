@@ -14,5 +14,6 @@ def cli_status_report() -> dict[str, object]:
         "status": "V12 foundation status",
         "implemented_count": report["implemented_count"],
         "missing_count": report["missing_count"],
-        "forbidden_surfaces_absent": report["forbidden_surfaces_absent"],
+        "forbidden_surfaces_absent": bool(report.get("forbidden_surfaces_absent", False)),
+        "forbidden_surfaces_status": report.get("forbidden_surfaces_status", "unknown_without_gate_evidence"),
     }
