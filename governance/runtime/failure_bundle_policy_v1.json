@@ -1,0 +1,7 @@
+{
+  "policy_type": "failure_bundle_policy_v1",
+  "version": "v1",
+  "sanitized_only": true,
+  "raw_exception_persistence_allowed": false,
+  "required_fields": ["failure_id", "task_id", "run_id", "stage", "error_class", "sanitized_message", "state_snapshot_digest", "input_snapshot_digest", "policy_version", "code_version", "quarantine_ref", "rollback_ref"]
+}

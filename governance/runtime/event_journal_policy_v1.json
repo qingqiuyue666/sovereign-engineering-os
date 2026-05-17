@@ -1,0 +1,8 @@
+{
+  "policy_type": "event_journal_policy_v1",
+  "version": "v1",
+  "in_memory_only": true,
+  "append_only": true,
+  "duplicate_event_id_allowed": false,
+  "sequence_regression_allowed": false
+}

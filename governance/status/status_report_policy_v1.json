@@ -1,0 +1,7 @@
+{
+  "policy_type": "status_report_policy_v1",
+  "version": "v1",
+  "machine_readable_required": true,
+  "deterministic_output": true,
+  "reports_forbidden_surfaces_absent": true
+}
