@@ -1,10 +1,19 @@
-"""Security primitives for V12 leak prevention."""
+"""V12 security foundation gates."""
+
+from .security_classification import (
+    CLASSIFICATION_ORDER,
+    highest_classification,
+    normalize_classification,
+    validate_classification,
+)
+from .secret_scanner import CoreSecretScanner, SecretFinding, SecretScanResult
 
 __all__ = [
-    "security_classification",
-    "secret_scanner",
-    "environment_sanitizer",
-    "anti_exfiltration_gate",
-    "ai_context_firewall",
-    "repository_hygiene",
+    "CLASSIFICATION_ORDER",
+    "CoreSecretScanner",
+    "SecretFinding",
+    "SecretScanResult",
+    "highest_classification",
+    "normalize_classification",
+    "validate_classification",
 ]

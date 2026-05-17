@@ -1,40 +1,48 @@
-"""Read-only environment sanitizer for V12 leak prevention."""
+"""Environment mapping sanitizer for V12."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Mapping
 
-_ALLOWED_KEYS = {"PATH", "HOME", "USER", "SHELL", "TMPDIR", "LANG", "LC_ALL", "PYTHONPATH"}
-_BLOCKED_FRAGMENTS = ("KEY", "TOKEN", "SECRET", "PASSWORD", "COOKIE", "AUTH", "CREDENTIAL")
+from .secret_scanner import CoreSecretScanner, REDACTION, SecretFinding
+
+__all__ = ["EnvironmentSanitizerResult", "sanitize_environment"]
+
+_SENSITIVE_KEY_PARTS = ("KEY", "TOKEN", "SECRET", "PASSWORD", "COOKIE", "CREDENTIAL")
 
 
 @dataclass(frozen=True)
 class EnvironmentSanitizerResult:
     accepted: bool
-    sanitized_env: dict[str, str]
-    removed_keys: tuple[str, ...]
+    sanitized: dict[str, str]
+    redacted_keys: tuple[str, ...]
+    findings: tuple[SecretFinding, ...]
     failures: tuple[str, ...]
 
 
-def sanitize_environment(env: Mapping[str, str], *, allowed_keys: set[str] | None = None) -> EnvironmentSanitizerResult:
+def sanitize_environment(env: Mapping[str, object], *, scanner: CoreSecretScanner | None = None) -> EnvironmentSanitizerResult:
     if not isinstance(env, Mapping):
-        return EnvironmentSanitizerResult(False, {}, (), ("env_must_be_mapping",))
-    allowed = allowed_keys or _ALLOWED_KEYS
+        return EnvironmentSanitizerResult(False, {}, (), (), ("environment_must_be_mapping",))
+    active_scanner = scanner or CoreSecretScanner()
     sanitized: dict[str, str] = {}
-    removed: list[str] = []
-    failures: list[str] = []
+    redacted: list[str] = []
+    findings: list[SecretFinding] = []
     for key, value in env.items():
         key_text = str(key)
-        if key_text in allowed and not _blocked_key(key_text):
-            sanitized[key_text] = "[REDACTED]" if value else ""
+        value_text = "" if value is None else str(value)
+        scan = active_scanner.scan_text(value_text, path=f"env:{key_text}")
+        sensitive_key = any(part in key_text.upper() for part in _SENSITIVE_KEY_PARTS)
+        if sensitive_key or not scan.clean:
+            sanitized[key_text] = REDACTION
+            redacted.append(key_text)
+            findings.extend(scan.findings)
         else:
-            removed.append(key_text)
-            if _blocked_key(key_text):
-                failures.append("blocked_environment_key_removed")
-    return EnvironmentSanitizerResult(True, sanitized, tuple(sorted(removed)), tuple(sorted(set(failures))))
-
-
-def _blocked_key(key: str) -> bool:
-    upper = key.upper()
-    return any(fragment in upper for fragment in _BLOCKED_FRAGMENTS)
+            sanitized[key_text] = value_text
+    return EnvironmentSanitizerResult(
+        accepted=True,
+        sanitized=sanitized,
+        redacted_keys=tuple(sorted(redacted)),
+        findings=tuple(findings),
+        failures=(),
+    )

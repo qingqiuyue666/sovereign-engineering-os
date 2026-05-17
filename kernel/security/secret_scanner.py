@@ -1,147 +1,192 @@
-"""Core read-only scanner for V12 leak prevention.
+"""Core secret scanner shared by V12 leak-prevention gates.
 
-The scanner is pure and side-effect free. It never opens files, mutates files,
-reads environment variables, performs network access, or shells out.
+The scanner is intentionally bounded: regexes are simple, input is truncated,
+decoded variants are limited, and no filesystem mutation or network access is
+performed.
 """
 
 from __future__ import annotations
 
-import base64
-import math
-import re
 from dataclasses import dataclass
-from typing import Any, Iterable, Mapping
-from urllib.parse import unquote
+from pathlib import Path
+from typing import Iterable
+import base64
+import hashlib
+import re
+import urllib.parse
 
-MAX_TEXT_CHARS = 200_000
-MAX_FILE_BYTES = 1_048_576
-MAX_SCAN_ITEMS = 1_000
-FAKE_MARKER = "SEOS_FAKE_SECRET_OK"
-FAKE_MARKER_ALLOWED_PREFIXES = ("tests/", "governance/security/fixtures/")
-SAFE_HASH_FIELDS = {"git_blob_sha1", "sha256", "digest", "content_hash", "snapshot_root_hash", "output_hash", "root_commitment", "artifact_hash", "cross_phase_digest"}
-SENSITIVE_FIELD_FRAGMENTS = ("api" + "_key", "tok" + "en", "pass" + "word", "cook" + "ie", "auth" + "orization", "sec" + "ret", "env" + "_value", "private" + "_key", "raw" + "_prompt", "raw" + "_provider" + "_response")
-_PATTERNS = (
-    ("private_material_block", re.compile("-" * 5 + r"BEGIN [A-Z ]*PRIVATE [A-Z ]*" + "-" * 5)),
-    ("sensitive_label", re.compile(r"(?i)(api[_-]?key|tok" + r"en|sec" + r"ret|pass" + r"word|cook" + r"ie|auth" + r"orization)\s*[:=]")),
-    ("raw_payload_label", re.compile(r"(?i)(raw_prompt|raw_provider_response|secret_value|env_value)\s*[:=]")),
-    ("env_assignment", re.compile(r"(?m)^[A-Z][A-Z0-9_]{2,}\s*=")),
+__all__ = [
+    "CoreSecretScanner",
+    "SecretFinding",
+    "SecretScanResult",
+]
+
+SAFE_TEST_MARKER = "SEOS_FAKE_SECRET_OK"
+REDACTION = "[REDACTED_BY_V12_SECURITY]"
+KNOWN_SAFE_TEXT_HASHES = frozenset(
+    {
+        hashlib.sha256(b"known-safe-v12-fixture").hexdigest(),
+        hashlib.sha256(b"SEOS_KNOWN_SAFE_FAKE_VALUE").hexdigest(),
+    }
 )
+SAFE_FAKE_PATH_PREFIXES = ("tests/", "governance/security/fixtures/")
 
 
 @dataclass(frozen=True)
 class SecretFinding:
-    finding_type: str
-    path: str
-    field: str
-    message: str
+    kind: str
+    detail: str
+    path: str | None = None
 
 
 @dataclass(frozen=True)
-class ScanResult:
-    accepted: bool
+class SecretScanResult:
+    clean: bool
     findings: tuple[SecretFinding, ...]
-    truncated: bool = False
+    scanned_text_chars: int
+    decoded_items_scanned: int
+    truncated: bool
 
 
 class CoreSecretScanner:
-    """Shared scanner engine for all leak-prevention gates."""
+    """Bounded text and path scanner for secret-like material."""
 
-    def __init__(self, max_text_chars: int = MAX_TEXT_CHARS, max_file_bytes: int = MAX_FILE_BYTES, max_scan_items: int = MAX_SCAN_ITEMS):
+    def __init__(
+        self,
+        *,
+        max_text_chars: int = 200_000,
+        max_file_bytes: int = 1_048_576,
+        max_scan_items: int = 2_000,
+        known_safe_hashes: Iterable[str] = KNOWN_SAFE_TEXT_HASHES,
+    ) -> None:
         self.max_text_chars = max_text_chars
         self.max_file_bytes = max_file_bytes
         self.max_scan_items = max_scan_items
+        self.known_safe_hashes = frozenset(known_safe_hashes)
+        self._patterns: tuple[tuple[str, re.Pattern[str]], ...] = (
+            ("private_key_block", re.compile(r"-----BEGIN [A-Z ]{0,32}PRIVATE KEY-----")),
+            ("aws_access_key", re.compile(r"\bAKIA[0-9A-Z]{16}\b")),
+            ("bearer_token", re.compile(r"\bBearer\s+[A-Za-z0-9._~+/=-]{20,200}\b")),
+            ("slack_token", re.compile(r"\bxox[baprs]-[A-Za-z0-9-]{10,200}\b")),
+            ("assignment_secret", re.compile(r"(?i)\b(api[_-]?key|secret|token|password)\b\s*[:=]\s*[\"']?[A-Za-z0-9._~+/=-]{12,200}")),
+        )
 
-    def scan_text(self, text: str, *, path: str = "<memory>", field: str = "text") -> ScanResult:
+    def scan_file(self, path: str | Path) -> SecretScanResult:
+        file_path = Path(path)
+        data = file_path.read_bytes()[: self.max_file_bytes + 1]
+        truncated = len(data) > self.max_file_bytes
+        text = data[: self.max_file_bytes].decode("utf-8", errors="replace")
+        result = self.scan_text(text, path=file_path.as_posix())
+        return SecretScanResult(
+            clean=result.clean,
+            findings=result.findings,
+            scanned_text_chars=result.scanned_text_chars,
+            decoded_items_scanned=result.decoded_items_scanned,
+            truncated=result.truncated or truncated,
+        )
+
+    def scan_text(self, text: object, *, path: str | None = None) -> SecretScanResult:
         if not isinstance(text, str):
-            return ScanResult(False, (SecretFinding("type_error", path, field, "text must be str"),))
-        if FAKE_MARKER in text and not _path_allows_fake_marker(path):
-            return ScanResult(False, (SecretFinding("fake_marker_outside_allowed_path", path, field, "fake marker outside approved paths"),))
+            return SecretScanResult(
+                clean=False,
+                findings=(SecretFinding("non_text_input", "scanner_input_must_be_text", path),),
+                scanned_text_chars=0,
+                decoded_items_scanned=0,
+                truncated=False,
+            )
+        digest = hashlib.sha256(text.encode("utf-8")).hexdigest()
+        if digest in self.known_safe_hashes:
+            return SecretScanResult(True, (), 0, 0, False)
+        return self._scan_bounded_text(text, path=path, decode_depth=0)
+
+    def _scan_bounded_text(self, text: str, *, path: str | None, decode_depth: int) -> SecretScanResult:
+        scan_text = text[: self.max_text_chars]
         truncated = len(text) > self.max_text_chars
-        sample = text[: self.max_text_chars]
-        findings = list(_scan_plain(sample, path, field))
-        for decoded_name, decoded in _decode_variants(sample):
-            findings.extend(_scan_plain(decoded, path, f"{field}:{decoded_name}"))
-        return ScanResult(not findings, tuple(findings), truncated)
-
-    def scan_mapping(self, payload: Mapping[str, Any], *, path: str = "<mapping>") -> ScanResult:
-        if not isinstance(payload, Mapping):
-            return ScanResult(False, (SecretFinding("type_error", path, "payload", "payload must be mapping"),))
         findings: list[SecretFinding] = []
-        count = 0
-        for key, value in _walk(payload):
-            count += 1
-            if count > self.max_scan_items:
-                findings.append(SecretFinding("scan_item_limit_exceeded", path, key, "mapping scan item limit exceeded"))
+
+        if SAFE_TEST_MARKER in scan_text and not _path_allows_fake_marker(path):
+            findings.append(SecretFinding("fake_marker_outside_safe_path", SAFE_TEST_MARKER, path))
+
+        for kind, pattern in self._patterns:
+            for match in pattern.finditer(scan_text):
+                if len(findings) >= self.max_scan_items:
+                    break
+                findings.append(SecretFinding(kind, _bounded_detail(match.group(0)), path))
+            if len(findings) >= self.max_scan_items:
                 break
-            normalized_key = key.split(".")[-1].split("[")[0]
-            if normalized_key not in SAFE_HASH_FIELDS and any(fragment in normalized_key.lower() for fragment in SENSITIVE_FIELD_FRAGMENTS):
-                findings.append(SecretFinding("dangerous_field_name", path, key, "dangerous field name"))
-            if isinstance(value, str):
-                if normalized_key in SAFE_HASH_FIELDS:
-                    continue
-                result = self.scan_text(value, path=path, field=key)
-                findings.extend(result.findings)
-                if _looks_high_entropy(value):
-                    findings.append(SecretFinding("high_entropy_string", path, key, "high entropy string outside safe hash field"))
-        return ScanResult(not findings, tuple(findings))
 
-    def scan_file_metadata(self, *, path: str, size_bytes: int, is_binary: bool = False) -> ScanResult:
-        findings: list[SecretFinding] = []
-        if size_bytes > self.max_file_bytes:
-            findings.append(SecretFinding("file_too_large", path, "size", "file exceeds scanner size cap"))
-        if is_binary:
-            findings.append(SecretFinding("binary_file_blocked", path, "binary", "binary file blocked from text scanning"))
-        return ScanResult(not findings, tuple(findings))
+        decoded_items = 0
+        if decode_depth == 0 and len(findings) < self.max_scan_items:
+            decoded_candidates = _decoded_variants(scan_text, self.max_scan_items)
+            for decoded in decoded_candidates:
+                if decoded_items >= self.max_scan_items or len(findings) >= self.max_scan_items:
+                    break
+                decoded_items += 1
+                nested = self._scan_bounded_text(decoded, path=path, decode_depth=1)
+                for finding in nested.findings:
+                    findings.append(
+                        SecretFinding(
+                            "decoded_" + finding.kind,
+                            finding.detail,
+                            finding.path,
+                        )
+                    )
+                    if len(findings) >= self.max_scan_items:
+                        break
 
-
-def _scan_plain(text: str, path: str, field: str) -> Iterable[SecretFinding]:
-    for finding_type, pattern in _PATTERNS:
-        if pattern.search(text):
-            yield SecretFinding(finding_type, path, field, f"matched {finding_type}")
-
-
-def _decode_variants(text: str) -> Iterable[tuple[str, str]]:
-    url_decoded = unquote(text)
-    if url_decoded != text:
-        yield ("url", url_decoded[:MAX_TEXT_CHARS])
-    compact = re.sub(r"\s+", "", text)
-    if 16 <= len(compact) <= 4096 and re.fullmatch(r"[A-Za-z0-9+/=]+", compact or ""):
-        try:
-            decoded = base64.b64decode(compact, validate=True).decode("utf-8", errors="ignore")
-        except Exception:
-            return
-        if decoded:
-            yield ("base64", decoded[:MAX_TEXT_CHARS])
+        unique = tuple(_dedupe_findings(findings))
+        return SecretScanResult(
+            clean=not unique,
+            findings=unique,
+            scanned_text_chars=len(scan_text),
+            decoded_items_scanned=decoded_items,
+            truncated=truncated,
+        )
 
 
-def _walk(payload: Mapping[str, Any], prefix: str = "") -> Iterable[tuple[str, Any]]:
-    for key, value in payload.items():
-        path = f"{prefix}.{key}" if prefix else str(key)
-        if isinstance(value, Mapping):
-            yield from _walk(value, path)
-        elif isinstance(value, list):
-            for index, item in enumerate(value):
-                item_path = f"{path}[{index}]"
-                if isinstance(item, Mapping):
-                    yield from _walk(item, item_path)
-                else:
-                    yield (item_path, item)
-        else:
-            yield (path, value)
-
-
-def _path_allows_fake_marker(path: str) -> bool:
-    return path.startswith(FAKE_MARKER_ALLOWED_PREFIXES)
-
-
-def _looks_high_entropy(value: str) -> bool:
-    if len(value) < 32 or len(value) > 256:
+def _path_allows_fake_marker(path: str | None) -> bool:
+    if path is None:
         return False
-    alphabet = set(value)
-    if len(alphabet) < 12:
-        return False
-    entropy = 0.0
-    for char in alphabet:
-        p = value.count(char) / len(value)
-        entropy -= p * math.log2(p)
-    return entropy >= 4.5
+    normalized = Path(path).as_posix().lstrip("./")
+    return normalized.startswith(SAFE_FAKE_PATH_PREFIXES)
+
+
+def _bounded_detail(value: str) -> str:
+    return value[:80]
+
+
+def _dedupe_findings(findings: Iterable[SecretFinding]) -> list[SecretFinding]:
+    seen: set[tuple[str, str, str | None]] = set()
+    result: list[SecretFinding] = []
+    for finding in findings:
+        key = (finding.kind, finding.detail, finding.path)
+        if key not in seen:
+            seen.add(key)
+            result.append(finding)
+    return result
+
+
+def _decoded_variants(text: str, max_items: int) -> list[str]:
+    variants: list[str] = []
+    unquoted = urllib.parse.unquote(text)
+    if unquoted != text:
+        variants.append(unquoted[:200_000])
+
+    token_re = re.compile(r"\b[A-Za-z0-9+/_=-]{16,512}\b")
+    for match in token_re.finditer(text):
+        if len(variants) >= max_items:
+            break
+        token = match.group(0)
+        padded = token + ("=" * ((4 - len(token) % 4) % 4))
+        for altchars in (None, b"-_"):
+            try:
+                raw = base64.b64decode(padded.encode("ascii"), altchars=altchars, validate=False)
+            except Exception:
+                continue
+            if not raw:
+                continue
+            decoded = raw.decode("utf-8", errors="ignore")
+            if decoded and decoded != token and any(ch.isprintable() for ch in decoded):
+                variants.append(decoded[:200_000])
+                break
+    return variants

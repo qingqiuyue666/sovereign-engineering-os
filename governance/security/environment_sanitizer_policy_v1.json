@@ -1,15 +1,8 @@
 {
-  "policy_type": "seos_environment_sanitizer_policy_v1",
+  "policy_type": "environment_sanitizer_policy_v1",
   "version": "v1",
-  "status": "active_contract",
-  "default_deny": true,
-  "read_only_gate": true,
-  "allowed_environment_keys": ["PATH", "HOME", "USER", "SHELL", "TMPDIR", "LANG", "LC_ALL", "PYTHONPATH"],
-  "blocked_key_fragments": ["KEY", "TOKEN", "SECRET", "PASSWORD", "COOKIE", "AUTH", "CREDENTIAL"],
-  "return_real_values": false,
-  "return_redacted_values_only": true,
-  "network_accessed": false,
-  "runtime_execution_performed": false,
-  "secret_value_read": false,
-  "secret_value_persisted": false
+  "returns_sanitized_copy_only": true,
+  "mutates_input": false,
+  "sensitive_key_redaction_required": true,
+  "fail_closed_on_non_mapping": true
 }

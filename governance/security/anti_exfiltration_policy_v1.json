@@ -1,15 +1,8 @@
 {
-  "policy_type": "seos_anti_exfiltration_policy_v1",
+  "policy_type": "anti_exfiltration_policy_v1",
   "version": "v1",
-  "status": "active_contract",
-  "scanner_engine": "CoreSecretScanner",
-  "read_only_gate": true,
-  "fail_closed": true,
-  "blocked_sinks": ["provider_request", "run_report", "exported_artifact", "ledger_record", "failure_bundle", "telegram_message", "stdout"],
-  "blocked_classifications": ["SECRET", "CROWN_JEWEL"],
-  "blocked_content_labels": ["raw_prompt", "raw_provider_response", "secret_value", "env_value", "cookie", "private_key"],
-  "network_accessed": false,
-  "runtime_execution_performed": false,
-  "secret_value_read": false,
-  "secret_value_persisted": false
+  "contaminated_outbound_payload_allowed": false,
+  "provider_payload_scanning_required": true,
+  "telegram_payload_scanning_required": true,
+  "fail_closed": true
 }

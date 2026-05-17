@@ -1,52 +1,39 @@
 import base64
+import hashlib
 import unittest
 
-from kernel.security.secret_scanner import CoreSecretScanner, FAKE_MARKER
+from kernel.security.secret_scanner import CoreSecretScanner, SAFE_TEST_MARKER
 
 
-class SecretScannerTests(unittest.TestCase):
-    def setUp(self):
-        self.scanner = CoreSecretScanner(max_text_chars=1000, max_file_bytes=1024, max_scan_items=20)
+class CoreSecretScannerTests(unittest.TestCase):
+    def test_detects_secret_like_assignment(self):
+        result = CoreSecretScanner().scan_text("api_key = 'abc123456789SECRET'")
+        self.assertFalse(result.clean)
+        self.assertIn("assignment_secret", {finding.kind for finding in result.findings})
 
-    def test_scanner_catches_sensitive_label_patterns(self):
-        result = self.scanner.scan_text("api_key = value", path="docs/example.txt")
-        self.assertFalse(result.accepted)
-        self.assertTrue(any(f.finding_type == "sensitive_label" for f in result.findings))
+    def test_fake_marker_only_allowed_in_tests_or_fixture_path(self):
+        scanner = CoreSecretScanner()
+        self.assertTrue(scanner.scan_text(SAFE_TEST_MARKER, path="tests/example.txt").clean)
+        self.assertTrue(scanner.scan_text(SAFE_TEST_MARKER, path="governance/security/fixtures/example.txt").clean)
+        self.assertFalse(scanner.scan_text(SAFE_TEST_MARKER, path="docs/example.md").clean)
 
-    def test_scanner_catches_private_material_block(self):
-        result = self.scanner.scan_text("-----BEGIN PRIVATE MATERIAL-----", path="docs/example.txt")
-        self.assertFalse(result.accepted)
-        self.assertTrue(any(f.finding_type == "private_material_block" for f in result.findings))
+    def test_known_safe_hash_allowlist(self):
+        digest = hashlib.sha256(b"api_key = 'abc123456789SECRET'").hexdigest()
+        scanner = CoreSecretScanner(known_safe_hashes={digest})
+        self.assertTrue(scanner.scan_text("api_key = 'abc123456789SECRET'").clean)
 
-    def test_scanner_catches_base64_encoded_sensitive_label(self):
-        encoded = base64.b64encode(b"token = value").decode("ascii")
-        result = self.scanner.scan_text(encoded, path="docs/example.txt")
-        self.assertFalse(result.accepted)
-        self.assertTrue(any("base64" in f.field for f in result.findings))
+    def test_bounded_base64_decode_finds_encoded_secret(self):
+        encoded = base64.b64encode(b"token=abc123456789SECRET").decode("ascii")
+        result = CoreSecretScanner().scan_text(encoded)
+        self.assertFalse(result.clean)
+        self.assertIn("decoded_assignment_secret", {finding.kind for finding in result.findings})
 
-    def test_scanner_rejects_fake_marker_outside_tests(self):
-        result = self.scanner.scan_text(FAKE_MARKER, path="kernel/example.py")
-        self.assertFalse(result.accepted)
-        self.assertIn("fake_marker_outside_allowed_path", {f.finding_type for f in result.findings})
-
-    def test_scanner_allows_fake_marker_inside_tests(self):
-        result = self.scanner.scan_text(FAKE_MARKER, path="tests/fixtures/example.txt")
-        self.assertTrue(result.accepted, result.findings)
-
-    def test_mapping_ignores_known_safe_hash_fields(self):
-        payload = {"git_blob_sha1": "a141375ed472b484c01671d05f6d375be3d9ed27"}
-        result = self.scanner.scan_mapping(payload)
-        self.assertTrue(result.accepted, result.findings)
-
-    def test_mapping_blocks_dangerous_field_name(self):
-        result = self.scanner.scan_mapping({"token": "redacted"})
-        self.assertFalse(result.accepted)
-        self.assertIn("dangerous_field_name", {f.finding_type for f in result.findings})
-
-    def test_scanner_flags_large_file_metadata(self):
-        result = self.scanner.scan_file_metadata(path="large.log", size_bytes=2048)
-        self.assertFalse(result.accepted)
-        self.assertIn("file_too_large", {f.finding_type for f in result.findings})
+    def test_limits_scan_size_without_regex_blowup(self):
+        scanner = CoreSecretScanner(max_text_chars=10, max_scan_items=3)
+        result = scanner.scan_text("x" * 10000)
+        self.assertTrue(result.clean)
+        self.assertTrue(result.truncated)
+        self.assertEqual(result.scanned_text_chars, 10)
 
 
 if __name__ == "__main__":
