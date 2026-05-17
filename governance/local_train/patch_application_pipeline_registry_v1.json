@@ -1,0 +1,15 @@
+{
+  "boundary": "local-only, no real patch application in v1",
+  "functions": [
+    "validate_patch_application_request",
+    "classify_patch_risk",
+    "validate_patch_allowlist",
+    "validate_patch_preflight",
+    "produce_patch_application_receipt"
+  ],
+  "module_path": "tools/local_code_stages/generated_patch_application_pipeline.py",
+  "receipt_type": "PatchApplicationReceipt",
+  "registry_name": "patch_application_pipeline_registry_v1",
+  "registry_version": "v1",
+  "status": "active"
+}

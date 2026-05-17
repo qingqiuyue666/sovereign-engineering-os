@@ -1,0 +1,28 @@
+{
+  "boundary": "local-only, no actual CLI execution in v1",
+  "functions": [
+    "validate_cli_extension_request",
+    "validate_cli_command_contract",
+    "validate_cli_safety_boundary",
+    "produce_operator_cli_extension_receipt"
+  ],
+  "module_path": "tools/local_code_stages/generated_local_operator_cli_extension_foundation.py",
+  "receipt_type": "OperatorCliExtensionReceipt",
+  "registered_commands": [
+    "approve",
+    "checkpoint",
+    "evidence",
+    "health",
+    "index",
+    "list",
+    "reject",
+    "report",
+    "review",
+    "rollback",
+    "run",
+    "status"
+  ],
+  "registry_name": "local_operator_cli_extension_foundation_registry_v1",
+  "registry_version": "v1",
+  "status": "active"
+}

@@ -1,0 +1,15 @@
+{
+  "boundary": "local-only, no actual replay execution in v1",
+  "functions": [
+    "validate_replay_request",
+    "validate_replay_anchor_contract",
+    "validate_replay_input_snapshot_contract",
+    "validate_replay_version_tuple",
+    "produce_replay_engine_receipt"
+  ],
+  "module_path": "tools/local_code_stages/generated_replay_engine_foundation.py",
+  "receipt_type": "ReplayEngineReceipt",
+  "registry_name": "replay_engine_foundation_registry_v1",
+  "registry_version": "v1",
+  "status": "active"
+}

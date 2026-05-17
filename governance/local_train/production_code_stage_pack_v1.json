@@ -1,0 +1,336 @@
+{
+  "pack_name": "production_code_stage_pack_v1",
+  "pack_version": "v1",
+  "status": "active",
+  "purpose": "Register the full bounded local-only production code stages for all 20 foundation modules.",
+  "line_budget": {
+    "max_lines_added_per_stage": 4000,
+    "max_files_changed_per_stage": 12,
+    "reject_if_unbounded": true
+  },
+  "stages": [
+    {
+      "stage_id": "generate-patch-application-pipeline",
+      "stage_type": "local_code_generation",
+      "script_path": "tools/local_code_stages/generate_patch_application_pipeline.py",
+      "description": "Generate bounded local-only patch application pipeline artifacts.",
+      "allowed_write_paths": [
+        "tools/local_code_stages/generated_patch_application_pipeline.py",
+        "governance/local_train/patch_application_pipeline_registry_v1.json",
+        "governance/security/patch_application_pipeline_policy_v1.json",
+        "docs/runbooks/patch_application_pipeline_v1.md",
+        "tests/tracer_bullet/test_patch_application_pipeline.py"
+      ],
+      "verification_commands": [
+        "python3 -m unittest tests.tracer_bullet.test_patch_application_pipeline -v",
+        "git diff --check"
+      ],
+      "allow_commit": false,
+      "allow_push_feature_branch": false
+    },
+    {
+      "stage_id": "generate-local-execution-kernel",
+      "stage_type": "local_code_generation",
+      "script_path": "tools/local_code_stages/generate_local_execution_kernel.py",
+      "description": "Generate bounded local-only execution kernel foundation artifacts.",
+      "allowed_write_paths": [
+        "tools/local_code_stages/generated_local_execution_kernel.py",
+        "governance/local_train/local_execution_kernel_registry_v1.json",
+        "governance/security/local_execution_kernel_policy_v1.json",
+        "docs/runbooks/local_execution_kernel_v1.md",
+        "tests/tracer_bullet/test_local_execution_kernel.py"
+      ],
+      "verification_commands": [
+        "python3 -m unittest tests.tracer_bullet.test_local_execution_kernel -v",
+        "git diff --check"
+      ],
+      "allow_commit": false,
+      "allow_push_feature_branch": false
+    },
+    {
+      "stage_id": "generate-evidence-vault-foundation",
+      "stage_type": "local_code_generation",
+      "script_path": "tools/local_code_stages/generate_evidence_vault_foundation.py",
+      "description": "Generate bounded local-only evidence vault foundation artifacts.",
+      "allowed_write_paths": [
+        "tools/local_code_stages/generated_evidence_vault_foundation.py",
+        "governance/local_train/evidence_vault_foundation_registry_v1.json",
+        "governance/security/evidence_vault_foundation_policy_v1.json",
+        "docs/runbooks/evidence_vault_foundation_v1.md",
+        "tests/tracer_bullet/test_evidence_vault_foundation.py"
+      ],
+      "verification_commands": [
+        "python3 -m unittest tests.tracer_bullet.test_evidence_vault_foundation -v",
+        "git diff --check"
+      ],
+      "allow_commit": false,
+      "allow_push_feature_branch": false
+    },
+    {
+      "stage_id": "generate-replay-engine-foundation",
+      "stage_type": "local_code_generation",
+      "script_path": "tools/local_code_stages/generate_replay_engine_foundation.py",
+      "description": "Generate bounded local-only replay engine foundation artifacts.",
+      "allowed_write_paths": [
+        "tools/local_code_stages/generated_replay_engine_foundation.py",
+        "governance/local_train/replay_engine_foundation_registry_v1.json",
+        "governance/security/replay_engine_foundation_policy_v1.json",
+        "docs/runbooks/replay_engine_foundation_v1.md",
+        "tests/tracer_bullet/test_replay_engine_foundation.py"
+      ],
+      "verification_commands": [
+        "python3 -m unittest tests.tracer_bullet.test_replay_engine_foundation -v",
+        "git diff --check"
+      ],
+      "allow_commit": false,
+      "allow_push_feature_branch": false
+    },
+    {
+      "stage_id": "generate-provider-transport-boundary",
+      "stage_type": "local_code_generation",
+      "script_path": "tools/local_code_stages/generate_provider_transport_boundary.py",
+      "description": "Generate bounded local-only provider transport boundary artifacts.",
+      "allowed_write_paths": [
+        "tools/local_code_stages/generated_provider_transport_boundary.py",
+        "governance/local_train/provider_transport_boundary_registry_v1.json",
+        "governance/security/provider_transport_boundary_policy_v1.json",
+        "docs/runbooks/provider_transport_boundary_v1.md",
+        "tests/tracer_bullet/test_provider_transport_boundary.py"
+      ],
+      "verification_commands": [
+        "python3 -m unittest tests.tracer_bullet.test_provider_transport_boundary -v",
+        "git diff --check"
+      ],
+      "allow_commit": false,
+      "allow_push_feature_branch": false
+    },
+    {
+      "stage_id": "generate-operator-daily-run-foundation",
+      "stage_type": "local_code_generation",
+      "script_path": "tools/local_code_stages/generate_operator_daily_run_foundation.py",
+      "description": "Generate bounded local-only operator daily run foundation artifacts.",
+      "allowed_write_paths": [
+        "tools/local_code_stages/generated_operator_daily_run_foundation.py",
+        "governance/local_train/operator_daily_run_foundation_registry_v1.json",
+        "governance/security/operator_daily_run_foundation_policy_v1.json",
+        "docs/runbooks/operator_daily_run_foundation_v1.md",
+        "tests/tracer_bullet/test_operator_daily_run_foundation.py"
+      ],
+      "verification_commands": [
+        "python3 -m unittest tests.tracer_bullet.test_operator_daily_run_foundation -v",
+        "git diff --check"
+      ],
+      "allow_commit": false,
+      "allow_push_feature_branch": false
+    },
+    {
+      "stage_id": "generate-alert-delivery-foundation",
+      "stage_type": "local_code_generation",
+      "script_path": "tools/local_code_stages/generate_alert_delivery_foundation.py",
+      "description": "Generate bounded local-only alert delivery foundation artifacts.",
+      "allowed_write_paths": [
+        "tools/local_code_stages/generated_alert_delivery_foundation.py",
+        "governance/local_train/alert_delivery_foundation_registry_v1.json",
+        "governance/security/alert_delivery_foundation_policy_v1.json",
+        "docs/runbooks/alert_delivery_foundation_v1.md",
+        "tests/tracer_bullet/test_alert_delivery_foundation.py"
+      ],
+      "verification_commands": [
+        "python3 -m unittest tests.tracer_bullet.test_alert_delivery_foundation -v",
+        "git diff --check"
+      ],
+      "allow_commit": false,
+      "allow_push_feature_branch": false
+    },
+    {
+      "stage_id": "generate-osint-ingestion-foundation",
+      "stage_type": "local_code_generation",
+      "script_path": "tools/local_code_stages/generate_osint_ingestion_foundation.py",
+      "description": "Generate bounded local-only OSINT ingestion foundation artifacts.",
+      "allowed_write_paths": [
+        "tools/local_code_stages/generated_osint_ingestion_foundation.py",
+        "governance/local_train/osint_ingestion_foundation_registry_v1.json",
+        "governance/security/osint_ingestion_foundation_policy_v1.json",
+        "docs/runbooks/osint_ingestion_foundation_v1.md",
+        "tests/tracer_bullet/test_osint_ingestion_foundation.py"
+      ],
+      "verification_commands": [
+        "python3 -m unittest tests.tracer_bullet.test_osint_ingestion_foundation -v",
+        "git diff --check"
+      ],
+      "allow_commit": false,
+      "allow_push_feature_branch": false
+    },
+    {
+      "stage_id": "generate-asset-mapping-foundation",
+      "stage_type": "local_code_generation",
+      "script_path": "tools/local_code_stages/generate_asset_mapping_foundation.py",
+      "description": "Generate bounded local-only asset mapping foundation artifacts.",
+      "allowed_write_paths": [
+        "tools/local_code_stages/generated_asset_mapping_foundation.py",
+        "governance/local_train/asset_mapping_foundation_registry_v1.json",
+        "governance/security/asset_mapping_foundation_policy_v1.json",
+        "docs/runbooks/asset_mapping_foundation_v1.md",
+        "tests/tracer_bullet/test_asset_mapping_foundation.py"
+      ],
+      "verification_commands": [
+        "python3 -m unittest tests.tracer_bullet.test_asset_mapping_foundation -v",
+        "git diff --check"
+      ],
+      "allow_commit": false,
+      "allow_push_feature_branch": false
+    },
+    {
+      "stage_id": "generate-decision-engine-foundation",
+      "stage_type": "local_code_generation",
+      "script_path": "tools/local_code_stages/generate_decision_engine_foundation.py",
+      "description": "Generate bounded local-only decision engine foundation artifacts.",
+      "allowed_write_paths": [
+        "tools/local_code_stages/generated_decision_engine_foundation.py",
+        "governance/local_train/decision_engine_foundation_registry_v1.json",
+        "governance/security/decision_engine_foundation_policy_v1.json",
+        "docs/runbooks/decision_engine_foundation_v1.md",
+        "tests/tracer_bullet/test_decision_engine_foundation.py"
+      ],
+      "verification_commands": [
+        "python3 -m unittest tests.tracer_bullet.test_decision_engine_foundation -v",
+        "git diff --check"
+      ],
+      "allow_commit": false,
+      "allow_push_feature_branch": false
+    },
+    {
+      "stage_id": "generate-recovery-rollback-foundation",
+      "stage_type": "local_code_generation",
+      "script_path": "tools/local_code_stages/generate_recovery_rollback_foundation.py",
+      "description": "Generate bounded local-only recovery rollback foundation artifacts.",
+      "allowed_write_paths": [
+        "tools/local_code_stages/generated_recovery_rollback_foundation.py",
+        "governance/local_train/recovery_rollback_foundation_registry_v1.json",
+        "governance/security/recovery_rollback_foundation_policy_v1.json",
+        "docs/runbooks/recovery_rollback_foundation_v1.md",
+        "tests/tracer_bullet/test_recovery_rollback_foundation.py"
+      ],
+      "verification_commands": [
+        "python3 -m unittest tests.tracer_bullet.test_recovery_rollback_foundation -v",
+        "git diff --check"
+      ],
+      "allow_commit": false,
+      "allow_push_feature_branch": false
+    },
+    {
+      "stage_id": "generate-checkpoint-runtime-foundation",
+      "stage_type": "local_code_generation",
+      "script_path": "tools/local_code_stages/generate_checkpoint_runtime_foundation.py",
+      "description": "Generate bounded local-only checkpoint runtime foundation artifacts.",
+      "allowed_write_paths": [
+        "tools/local_code_stages/generated_checkpoint_runtime_foundation.py",
+        "governance/local_train/checkpoint_runtime_foundation_registry_v1.json",
+        "governance/security/checkpoint_runtime_foundation_policy_v1.json",
+        "docs/runbooks/checkpoint_runtime_foundation_v1.md",
+        "tests/tracer_bullet/test_checkpoint_runtime_foundation.py"
+      ],
+      "verification_commands": [
+        "python3 -m unittest tests.tracer_bullet.test_checkpoint_runtime_foundation -v",
+        "git diff --check"
+      ],
+      "allow_commit": false,
+      "allow_push_feature_branch": false
+    },
+    {
+      "stage_id": "generate-run-ledger-hardening-foundation",
+      "stage_type": "local_code_generation",
+      "script_path": "tools/local_code_stages/generate_run_ledger_hardening_foundation.py",
+      "description": "Generate bounded local-only run ledger hardening foundation artifacts.",
+      "allowed_write_paths": [
+        "tools/local_code_stages/generated_run_ledger_hardening_foundation.py",
+        "governance/local_train/run_ledger_hardening_foundation_registry_v1.json",
+        "governance/security/run_ledger_hardening_foundation_policy_v1.json",
+        "docs/runbooks/run_ledger_hardening_foundation_v1.md",
+        "tests/tracer_bullet/test_run_ledger_hardening_foundation.py"
+      ],
+      "verification_commands": [
+        "python3 -m unittest tests.tracer_bullet.test_run_ledger_hardening_foundation -v",
+        "git diff --check"
+      ],
+      "allow_commit": false,
+      "allow_push_feature_branch": false
+    },
+    {
+      "stage_id": "generate-evidence-index-foundation",
+      "stage_type": "local_code_generation",
+      "script_path": "tools/local_code_stages/generate_evidence_index_foundation.py",
+      "description": "Generate bounded local-only evidence index foundation artifacts.",
+      "allowed_write_paths": [
+        "tools/local_code_stages/generated_evidence_index_foundation.py",
+        "governance/local_train/evidence_index_foundation_registry_v1.json",
+        "governance/security/evidence_index_foundation_policy_v1.json",
+        "docs/runbooks/evidence_index_foundation_v1.md",
+        "tests/tracer_bullet/test_evidence_index_foundation.py"
+      ],
+      "verification_commands": [
+        "python3 -m unittest tests.tracer_bullet.test_evidence_index_foundation -v",
+        "git diff --check"
+      ],
+      "allow_commit": false,
+      "allow_push_feature_branch": false
+    },
+    {
+      "stage_id": "generate-decision-report-foundation",
+      "stage_type": "local_code_generation",
+      "script_path": "tools/local_code_stages/generate_decision_report_foundation.py",
+      "description": "Generate bounded local-only decision report foundation artifacts.",
+      "allowed_write_paths": [
+        "tools/local_code_stages/generated_decision_report_foundation.py",
+        "governance/local_train/decision_report_foundation_registry_v1.json",
+        "governance/security/decision_report_foundation_policy_v1.json",
+        "docs/runbooks/decision_report_foundation_v1.md",
+        "tests/tracer_bullet/test_decision_report_foundation.py"
+      ],
+      "verification_commands": [
+        "python3 -m unittest tests.tracer_bullet.test_decision_report_foundation -v",
+        "git diff --check"
+      ],
+      "allow_commit": false,
+      "allow_push_feature_branch": false
+    },
+    {
+      "stage_id": "generate-local-operator-cli-extension-foundation",
+      "stage_type": "local_code_generation",
+      "script_path": "tools/local_code_stages/generate_local_operator_cli_extension_foundation.py",
+      "description": "Generate bounded local-only operator CLI extension foundation artifacts.",
+      "allowed_write_paths": [
+        "tools/local_code_stages/generated_local_operator_cli_extension_foundation.py",
+        "governance/local_train/local_operator_cli_extension_foundation_registry_v1.json",
+        "governance/security/local_operator_cli_extension_foundation_policy_v1.json",
+        "docs/runbooks/local_operator_cli_extension_foundation_v1.md",
+        "tests/tracer_bullet/test_local_operator_cli_extension_foundation.py"
+      ],
+      "verification_commands": [
+        "python3 -m unittest tests.tracer_bullet.test_local_operator_cli_extension_foundation -v",
+        "git diff --check"
+      ],
+      "allow_commit": false,
+      "allow_push_feature_branch": false
+    },
+    {
+      "stage_id": "generate-stage-pack-manifest-index",
+      "stage_type": "local_code_generation",
+      "script_path": "tools/local_code_stages/generate_stage_pack_manifest_index.py",
+      "description": "Generate the stage pack manifest index that catalogs all stages.",
+      "allowed_write_paths": [
+        "tools/local_code_stages/generated_stage_pack_manifest_index.py",
+        "governance/local_train/stage_pack_manifest_index_registry_v1.json",
+        "governance/security/stage_pack_manifest_index_policy_v1.json",
+        "docs/runbooks/stage_pack_manifest_index_v1.md",
+        "tests/tracer_bullet/test_stage_pack_manifest_index.py"
+      ],
+      "verification_commands": [
+        "python3 -m unittest tests.tracer_bullet.test_stage_pack_manifest_index -v",
+        "git diff --check"
+      ],
+      "allow_commit": false,
+      "allow_push_feature_branch": false
+    }
+  ]
+}

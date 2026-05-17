@@ -1,0 +1,26 @@
+{
+  "allowed_actions": [
+    "ESCALATE",
+    "FLAG",
+    "HOLD",
+    "REVIEW"
+  ],
+  "forbidden_actions": [
+    "BUY",
+    "COVER",
+    "EXECUTE",
+    "ORDER",
+    "SELL",
+    "SHORT",
+    "TRADE"
+  ],
+  "friction_data_required": true,
+  "human_review_required": true,
+  "max_confidence": 0.95,
+  "min_confidence_threshold": 0.7,
+  "no_real_trade_execution_in_v1": true,
+  "policy_name": "decision_engine_foundation_policy_v1",
+  "policy_version": "v1",
+  "single_action_only": true,
+  "status": "active"
+}

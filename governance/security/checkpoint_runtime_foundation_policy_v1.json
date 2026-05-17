@@ -1,0 +1,11 @@
+{
+  "approval_required": true,
+  "content_hash_required": true,
+  "dirty_state_checkpoint_forbidden": true,
+  "no_checkpoint_mutation_in_v1": true,
+  "policy_name": "checkpoint_runtime_foundation_policy_v1",
+  "policy_version": "v1",
+  "rollback_reference_required": true,
+  "source_revision_required": true,
+  "status": "active"
+}

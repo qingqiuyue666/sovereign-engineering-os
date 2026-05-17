@@ -1,0 +1,11 @@
+{
+  "approval_required": true,
+  "autonomous_production_action_forbidden": true,
+  "evidence_summary_required": true,
+  "human_review_required": true,
+  "no_real_execution_in_v1": true,
+  "policy_name": "operator_daily_run_foundation_policy_v1",
+  "policy_version": "v1",
+  "runbook_reference_required": true,
+  "status": "active"
+}

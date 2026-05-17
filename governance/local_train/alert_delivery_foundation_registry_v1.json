@@ -1,0 +1,20 @@
+{
+  "allowed_channels": [
+    "console",
+    "dashboard",
+    "log",
+    "queue"
+  ],
+  "boundary": "local-only, no real message sending in v1",
+  "functions": [
+    "validate_alert_delivery_request",
+    "validate_alert_channel_policy",
+    "validate_alert_payload_contract",
+    "produce_alert_delivery_receipt"
+  ],
+  "module_path": "tools/local_code_stages/generated_alert_delivery_foundation.py",
+  "receipt_type": "AlertDeliveryReceipt",
+  "registry_name": "alert_delivery_foundation_registry_v1",
+  "registry_version": "v1",
+  "status": "active"
+}

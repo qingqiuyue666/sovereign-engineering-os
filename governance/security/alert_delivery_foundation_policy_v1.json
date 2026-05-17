@@ -1,0 +1,25 @@
+{
+  "allowed_channels": [
+    "console",
+    "dashboard",
+    "log",
+    "queue"
+  ],
+  "evidence_reference_required": true,
+  "forbidden_channels": [
+    "email",
+    "http",
+    "push",
+    "slack",
+    "sms",
+    "telegram",
+    "webhook"
+  ],
+  "no_network_delivery_in_v1": true,
+  "no_real_message_sending_in_v1": true,
+  "operator_acknowledgement_required": true,
+  "policy_name": "alert_delivery_foundation_policy_v1",
+  "policy_version": "v1",
+  "secret_material_in_alerts_forbidden": true,
+  "status": "active"
+}

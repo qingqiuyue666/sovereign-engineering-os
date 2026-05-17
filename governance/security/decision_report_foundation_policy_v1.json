@@ -1,0 +1,25 @@
+{
+  "confidence_rationale_required": true,
+  "evidence_links_required": true,
+  "forbidden_actions": [
+    "BUY",
+    "EXECUTE",
+    "ORDER",
+    "SELL",
+    "TRADE"
+  ],
+  "friction_summary_required": true,
+  "human_review_required": true,
+  "max_confidence": 0.95,
+  "no_report_publication_in_v1": true,
+  "overclaim_forbidden": true,
+  "policy_name": "decision_report_foundation_policy_v1",
+  "policy_version": "v1",
+  "status": "active",
+  "supported_actions": [
+    "ESCALATE",
+    "FLAG",
+    "HOLD",
+    "REVIEW"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "boundary": "local-only, no actual vault storage write in v1",
+  "functions": [
+    "validate_evidence_vault_record",
+    "validate_evidence_hash_contract",
+    "validate_evidence_append_only_contract",
+    "validate_evidence_metadata_contract",
+    "produce_evidence_vault_receipt"
+  ],
+  "module_path": "tools/local_code_stages/generated_evidence_vault_foundation.py",
+  "receipt_type": "EvidenceVaultReceipt",
+  "registry_name": "evidence_vault_foundation_registry_v1",
+  "registry_version": "v1",
+  "status": "active"
+}

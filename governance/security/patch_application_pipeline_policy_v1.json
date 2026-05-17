@@ -1,0 +1,39 @@
+{
+  "allowed_patch_modes": [
+    "dry-run",
+    "staged-review",
+    "approved-only"
+  ],
+  "forbidden_actions": [
+    "deployment",
+    "git_branch_delete",
+    "git_merge",
+    "git_push_main",
+    "main_branch_modification",
+    "production_execution"
+  ],
+  "forbidden_path_patterns": [
+    "..",
+    "~",
+    "$",
+    "`",
+    "|",
+    ";",
+    "&",
+    "\n",
+    "\r"
+  ],
+  "forbidden_roots": [
+    "/",
+    "/dev",
+    "/etc",
+    "/proc",
+    "/sys",
+    "/tmp",
+    "/var"
+  ],
+  "no_real_patch_application_in_v1": true,
+  "policy_name": "patch_application_pipeline_policy_v1",
+  "policy_version": "v1",
+  "status": "active"
+}

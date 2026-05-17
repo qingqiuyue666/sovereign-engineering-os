@@ -1,0 +1,32 @@
+{
+  "allowed_hash_algorithms": [
+    "blake2b",
+    "sha256",
+    "sha512"
+  ],
+  "append_only_required": true,
+  "forbidden_artifact_types": [
+    "api_key",
+    "credential",
+    "password",
+    "private_key",
+    "raw_secret",
+    "token"
+  ],
+  "immutable_records_required": true,
+  "no_vault_write_in_v1": true,
+  "policy_name": "evidence_vault_foundation_policy_v1",
+  "policy_version": "v1",
+  "required_fields": [
+    "append_only",
+    "artifact_id",
+    "artifact_type",
+    "content_hash",
+    "created_at",
+    "hash_algorithm",
+    "immutable",
+    "lineage",
+    "producer"
+  ],
+  "status": "active"
+}

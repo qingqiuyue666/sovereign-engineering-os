@@ -1,0 +1,18 @@
+{
+  "approval_required": true,
+  "failure_evidence_required": true,
+  "irreversible_operations": [
+    "DELETE_WAL",
+    "DROP_TABLE",
+    "HARD_DELETE",
+    "PURGE_VAULT",
+    "TRUNCATE"
+  ],
+  "no_production_mutation_in_v1": true,
+  "policy_name": "recovery_rollback_foundation_policy_v1",
+  "policy_version": "v1",
+  "reversible_only_allowed": true,
+  "rollback_plan_required": true,
+  "rollback_target_required": true,
+  "status": "active"
+}

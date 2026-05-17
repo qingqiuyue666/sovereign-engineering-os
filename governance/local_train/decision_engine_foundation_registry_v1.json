@@ -1,0 +1,15 @@
+{
+  "boundary": "local-only, no real trade execution in v1",
+  "functions": [
+    "validate_decision_request",
+    "validate_single_action_contract",
+    "validate_confidence_gate",
+    "validate_friction_gate",
+    "produce_decision_engine_receipt"
+  ],
+  "module_path": "tools/local_code_stages/generated_decision_engine_foundation.py",
+  "receipt_type": "DecisionEngineReceipt",
+  "registry_name": "decision_engine_foundation_registry_v1",
+  "registry_version": "v1",
+  "status": "active"
+}

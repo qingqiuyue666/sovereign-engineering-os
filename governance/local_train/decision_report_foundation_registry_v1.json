@@ -1,0 +1,14 @@
+{
+  "boundary": "local-only, no production report publication in v1",
+  "functions": [
+    "validate_decision_report",
+    "validate_report_evidence_links",
+    "validate_report_non_overclaim",
+    "produce_decision_report_receipt"
+  ],
+  "module_path": "tools/local_code_stages/generated_decision_report_foundation.py",
+  "receipt_type": "DecisionReportReceipt",
+  "registry_name": "decision_report_foundation_registry_v1",
+  "registry_version": "v1",
+  "status": "active"
+}

@@ -1,0 +1,14 @@
+{
+  "boundary": "local-only, no ledger write in v1",
+  "functions": [
+    "validate_run_ledger_entry",
+    "validate_run_sequence_contract",
+    "validate_run_status_contract",
+    "produce_run_ledger_receipt"
+  ],
+  "module_path": "tools/local_code_stages/generated_run_ledger_hardening_foundation.py",
+  "receipt_type": "RunLedgerReceipt",
+  "registry_name": "run_ledger_hardening_foundation_registry_v1",
+  "registry_version": "v1",
+  "status": "active"
+}

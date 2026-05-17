@@ -1,0 +1,49 @@
+{
+  "forbidden_actions": [
+    "branch_delete",
+    "freeform_shell",
+    "main_mutation",
+    "merge",
+    "network",
+    "production_execution",
+    "push_main",
+    "secret_read"
+  ],
+  "forbidden_commands": [
+    "bash",
+    "curl",
+    "eval",
+    "exec",
+    "nc",
+    "scp",
+    "sh",
+    "shell",
+    "ssh",
+    "sudo",
+    "system",
+    "telnet",
+    "wget"
+  ],
+  "freeform_shell_forbidden": true,
+  "main_mutation_forbidden": true,
+  "network_forbidden": true,
+  "no_cli_execution_in_v1": true,
+  "policy_name": "local_operator_cli_extension_foundation_policy_v1",
+  "policy_version": "v1",
+  "registered_commands": [
+    "approve",
+    "checkpoint",
+    "evidence",
+    "health",
+    "index",
+    "list",
+    "reject",
+    "report",
+    "review",
+    "rollback",
+    "run",
+    "status"
+  ],
+  "secret_read_forbidden": true,
+  "status": "active"
+}

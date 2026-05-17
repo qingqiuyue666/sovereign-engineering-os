@@ -1,0 +1,49 @@
+{
+  "allowed_command_categories": [
+    "build-check",
+    "ci-check",
+    "format-check",
+    "lint",
+    "test",
+    "typecheck"
+  ],
+  "forbidden_actions": [
+    "branch_delete",
+    "env_read",
+    "freeform_shell",
+    "main_mutation",
+    "merge",
+    "network",
+    "production_execution",
+    "push_main",
+    "secrets"
+  ],
+  "forbidden_command_patterns": [
+    "curl",
+    "wget",
+    "nc ",
+    "telnet",
+    "ssh ",
+    "scp ",
+    "rsync ",
+    "git merge",
+    "git push",
+    "git branch -d",
+    "git branch -D",
+    "rm -rf /",
+    "> /dev/",
+    "mkfs",
+    "dd if=",
+    "| sh",
+    "$(",
+    ".env",
+    "API_KEY",
+    "SECRET",
+    "TOKEN",
+    "password"
+  ],
+  "no_command_execution_in_v1": true,
+  "policy_name": "local_execution_kernel_policy_v1",
+  "policy_version": "v1",
+  "status": "active"
+}

@@ -1,0 +1,17 @@
+{
+  "cloud_requery_forbidden": true,
+  "deterministic_mode_required": true,
+  "no_replay_execution_in_v1": true,
+  "policy_name": "replay_engine_foundation_policy_v1",
+  "policy_version": "v1",
+  "required_fields": [
+    "code_version",
+    "deterministic_mode",
+    "environment_fingerprint",
+    "input_snapshot_hash",
+    "no_cloud_requery",
+    "policy_version",
+    "replay_anchor_id"
+  ],
+  "status": "active"
+}

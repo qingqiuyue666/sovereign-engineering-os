@@ -1,0 +1,26 @@
+{
+  "forbidden_providers": [
+    "live-bank",
+    "live-broker",
+    "live-exchange",
+    "live-payment"
+  ],
+  "known_providers": [
+    "mock-finance",
+    "mock-market-data",
+    "mock-news",
+    "mock-weather"
+  ],
+  "live_provider_calls_forbidden_in_v1": true,
+  "network_execution_forbidden_in_v1": true,
+  "policy_name": "provider_transport_boundary_policy_v1",
+  "policy_version": "v1",
+  "production_autonomy_forbidden_in_v1": true,
+  "required_fields": [
+    "capability_token",
+    "evidence_binding",
+    "provider_id",
+    "request_payload"
+  ],
+  "status": "active"
+}

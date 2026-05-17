@@ -1,0 +1,20 @@
+{
+  "boundary": "local-only, no real provider calls in v1",
+  "functions": [
+    "validate_provider_transport_request",
+    "validate_provider_capability_boundary",
+    "validate_provider_transport_preflight",
+    "produce_provider_transport_receipt"
+  ],
+  "known_providers": [
+    "mock-finance",
+    "mock-market-data",
+    "mock-news",
+    "mock-weather"
+  ],
+  "module_path": "tools/local_code_stages/generated_provider_transport_boundary.py",
+  "receipt_type": "ProviderTransportReceipt",
+  "registry_name": "provider_transport_boundary_registry_v1",
+  "registry_version": "v1",
+  "status": "active"
+}

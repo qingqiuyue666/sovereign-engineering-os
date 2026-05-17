@@ -1,0 +1,19 @@
+{
+  "boundary": "local-only, no real ingestion in v1",
+  "functions": [
+    "validate_osint_ingestion_request",
+    "validate_source_tier_contract",
+    "validate_freshness_contract",
+    "produce_osint_ingestion_receipt"
+  ],
+  "module_path": "tools/local_code_stages/generated_osint_ingestion_foundation.py",
+  "receipt_type": "OsintIngestionReceipt",
+  "registry_name": "osint_ingestion_foundation_registry_v1",
+  "registry_version": "v1",
+  "source_tiers": [
+    "TIER_1_PRIMARY",
+    "TIER_2_SECONDARY",
+    "TIER_3_TERTIARY"
+  ],
+  "status": "active"
+}

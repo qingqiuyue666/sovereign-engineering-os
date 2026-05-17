@@ -1,0 +1,14 @@
+{
+  "boundary": "local-only, no production mutation in v1",
+  "functions": [
+    "validate_recovery_request",
+    "validate_rollback_plan",
+    "validate_failure_bundle_contract",
+    "produce_recovery_rollback_receipt"
+  ],
+  "module_path": "tools/local_code_stages/generated_recovery_rollback_foundation.py",
+  "receipt_type": "RecoveryRollbackReceipt",
+  "registry_name": "recovery_rollback_foundation_registry_v1",
+  "registry_version": "v1",
+  "status": "active"
+}

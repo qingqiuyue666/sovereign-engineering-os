@@ -1,0 +1,15 @@
+{
+  "boundary": "local-only, no command execution in v1",
+  "functions": [
+    "validate_local_execution_request",
+    "classify_execution_request",
+    "validate_command_allowlist",
+    "validate_execution_preflight",
+    "produce_local_execution_receipt"
+  ],
+  "module_path": "tools/local_code_stages/generated_local_execution_kernel.py",
+  "receipt_type": "LocalExecutionReceipt",
+  "registry_name": "local_execution_kernel_registry_v1",
+  "registry_version": "v1",
+  "status": "active"
+}

@@ -1,0 +1,14 @@
+{
+  "boundary": "local-only, no vault write in v1",
+  "functions": [
+    "validate_evidence_index_entry",
+    "validate_evidence_lookup_contract",
+    "validate_index_consistency_contract",
+    "produce_evidence_index_receipt"
+  ],
+  "module_path": "tools/local_code_stages/generated_evidence_index_foundation.py",
+  "receipt_type": "EvidenceIndexReceipt",
+  "registry_name": "evidence_index_foundation_registry_v1",
+  "registry_version": "v1",
+  "status": "active"
+}

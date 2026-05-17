@@ -1,0 +1,24 @@
+{
+  "downgrade_actions": [
+    "FLAG_ONLY",
+    "NO_TRADE",
+    "WAIT"
+  ],
+  "evidence_hash_required": true,
+  "forbidden_sources": [
+    "live_api",
+    "live_network",
+    "live_scraper"
+  ],
+  "live_network_ingestion_forbidden_in_v1": true,
+  "no_real_ingestion_in_v1": true,
+  "policy_name": "osint_ingestion_foundation_policy_v1",
+  "policy_version": "v1",
+  "source_tiers": [
+    "TIER_1_PRIMARY",
+    "TIER_2_SECONDARY",
+    "TIER_3_TERTIARY"
+  ],
+  "status": "active",
+  "timestamp_required": true
+}

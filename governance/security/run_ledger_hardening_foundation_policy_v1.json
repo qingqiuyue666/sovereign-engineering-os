@@ -1,0 +1,19 @@
+{
+  "allowed_statuses": [
+    "cancelled",
+    "completed",
+    "failed",
+    "pending",
+    "rolled_back",
+    "running"
+  ],
+  "evidence_link_required": true,
+  "mutable_ledger_forbidden": true,
+  "no_ledger_write_in_v1": true,
+  "operator_id_required": true,
+  "policy_name": "run_ledger_hardening_foundation_policy_v1",
+  "policy_version": "v1",
+  "run_id_required": true,
+  "status": "active",
+  "valid_transition_required": true
+}

@@ -1,0 +1,16 @@
+{
+  "artifact_id_required": true,
+  "conflict_policies": [
+    "KEEP_NEWEST",
+    "MANUAL_RESOLVE",
+    "OVERWRITE_OLDEST",
+    "REJECT_DUPLICATE"
+  ],
+  "content_hash_required": true,
+  "duplicate_without_policy_forbidden": true,
+  "index_key_required": true,
+  "no_vault_write_in_v1": true,
+  "policy_name": "evidence_index_foundation_policy_v1",
+  "policy_version": "v1",
+  "status": "active"
+}

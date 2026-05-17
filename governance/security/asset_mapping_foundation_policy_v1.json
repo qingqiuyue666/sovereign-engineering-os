@@ -1,0 +1,21 @@
+{
+  "allowed_asset_classes": [
+    "commodity",
+    "crypto",
+    "equity",
+    "forex",
+    "future",
+    "index",
+    "option"
+  ],
+  "confidence_overclaim_forbidden": true,
+  "evidence_required": true,
+  "friction_data_required": true,
+  "max_confidence": 0.95,
+  "no_real_trading_decision_in_v1": true,
+  "policy_name": "asset_mapping_foundation_policy_v1",
+  "policy_version": "v1",
+  "product_id_required": true,
+  "status": "active",
+  "venue_required": true
+}
