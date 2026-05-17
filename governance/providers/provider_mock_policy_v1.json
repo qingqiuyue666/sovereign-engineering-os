@@ -1,0 +1,7 @@
+{
+  "policy_type": "provider_mock_policy_v1",
+  "version": "v1",
+  "mock_only": true,
+  "deterministic_response_required": true,
+  "network_allowed": false
+}

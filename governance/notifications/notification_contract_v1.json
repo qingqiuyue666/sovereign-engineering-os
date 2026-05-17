@@ -1,0 +1,7 @@
+{
+  "policy_type": "notification_contract_v1",
+  "version": "v1",
+  "redaction_before_send_required": true,
+  "live_send_allowed": false,
+  "sensitive_payload_allowed": false
+}

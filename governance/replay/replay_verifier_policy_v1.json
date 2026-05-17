@@ -1,0 +1,9 @@
+{
+  "policy_type": "replay_verifier_policy_v1",
+  "version": "v1",
+  "digest_only": true,
+  "provider_requery_allowed": false,
+  "raw_content_comparison_allowed": false,
+  "policy_version_required": true,
+  "code_version_required": true
+}

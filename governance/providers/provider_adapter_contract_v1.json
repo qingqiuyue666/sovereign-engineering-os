@@ -1,0 +1,8 @@
+{
+  "policy_type": "provider_adapter_contract_v1",
+  "version": "v1",
+  "digest_only_request_envelope": true,
+  "live_provider_calls_allowed": false,
+  "raw_response_persistence_allowed": false,
+  "secret_or_crown_jewel_payload_allowed": false
+}

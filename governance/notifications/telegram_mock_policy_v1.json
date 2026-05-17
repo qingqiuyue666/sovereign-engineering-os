@@ -1,0 +1,7 @@
+{
+  "policy_type": "telegram_mock_policy_v1",
+  "version": "v1",
+  "mock_only": true,
+  "network_allowed": false,
+  "live_telegram_send_allowed": false
+}

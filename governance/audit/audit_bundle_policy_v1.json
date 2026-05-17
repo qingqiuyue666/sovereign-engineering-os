@@ -1,0 +1,8 @@
+{
+  "policy_type": "audit_bundle_policy_v1",
+  "version": "v1",
+  "deterministic_json_export_required": true,
+  "sensitive_export_allowed": false,
+  "redaction_required": true,
+  "unknown_classification_fails_closed": true
+}
