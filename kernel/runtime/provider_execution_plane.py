@@ -10,8 +10,6 @@ from dataclasses import dataclass
 from typing import Any, Mapping
 
 from kernel.runtime._strict_validation import (
-    strict_bool,
-    validate_required_bool_fields,
     validate_required_digest_fields,
     validate_required_string_fields,
 )
