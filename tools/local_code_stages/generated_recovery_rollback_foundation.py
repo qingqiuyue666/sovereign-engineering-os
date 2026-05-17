@@ -33,8 +33,10 @@ def _hash_id(*parts: str) -> str:
     return hashlib.sha256("|".join(parts).encode()).hexdigest()[:16]
 
 
-def _utcnow() -> str:
-    return datetime.now(timezone.utc).isoformat()
+def _created_at(payload: Dict[str, Any]) -> str:
+    value = payload.get("created_at")
+    return value if isinstance(value, str) and value.strip() else "1970-01-01T00:00:00Z"
+
 
 
 def _reject_non_mapping(payload: Any) -> None:
@@ -92,7 +94,7 @@ def produce_recovery_rollback_receipt(payload: Any) -> Dict[str, Any]:
     approval = payload.get("approval", {})
     approved = isinstance(approval, dict) and approval.get("approved", False) and bool(approval.get("approver_id"))
     receipt = RecoveryRollbackReceipt(
-        receipt_id=_hash_id(payload.get("recovery_id", "unknown"), _utcnow()),
+        receipt_id=_hash_id(payload.get("recovery_id", "unknown"), "v1"),
         recovery_id=payload.get("recovery_id", "unknown"),
         rollback_target=payload.get("rollback_target", ""),
         failure_evidence_present=failure["failure_bundle_valid"],
@@ -100,7 +102,7 @@ def produce_recovery_rollback_receipt(payload: Any) -> Dict[str, Any]:
         is_reversible=plan["is_reversible"],
         approval_gate_passed=approved,
         status="ready" if (plan["rollback_plan_valid"] and failure["failure_bundle_valid"] and approved) else "rejected",
-        created_at=_utcnow(),
+        created_at=_created_at(payload),
     )
     return asdict(receipt)
 

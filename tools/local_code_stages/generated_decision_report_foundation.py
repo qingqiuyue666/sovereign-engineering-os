@@ -35,8 +35,10 @@ def _hash_id(*parts: str) -> str:
     return hashlib.sha256("|".join(parts).encode()).hexdigest()[:16]
 
 
-def _utcnow() -> str:
-    return datetime.now(timezone.utc).isoformat()
+def _created_at(payload: Dict[str, Any]) -> str:
+    value = payload.get("created_at")
+    return value if isinstance(value, str) and value.strip() else "1970-01-01T00:00:00Z"
+
 
 
 def _reject_non_mapping(payload: Any) -> None:
@@ -96,7 +98,7 @@ def produce_decision_report_receipt(payload: Any) -> Dict[str, Any]:
     friction = payload.get("friction_summary", {})
     has_friction = isinstance(friction, dict) and bool(friction.get("summary"))
     receipt = DecisionReportReceipt(
-        receipt_id=_hash_id(payload.get("decision_id", "unknown"), _utcnow()),
+        receipt_id=_hash_id(payload.get("decision_id", "unknown"), "v1"),
         decision_id=payload.get("decision_id", "unknown"),
         action=payload.get("action", ""),
         evidence_links_present=evidence["evidence_links_present"],
@@ -105,7 +107,7 @@ def produce_decision_report_receipt(payload: Any) -> Dict[str, Any]:
         human_review_present=has_review,
         overclaim_detected=non_overclaim["overclaim"],
         status="published" if (evidence["evidence_links_present"] and has_review and has_friction and not non_overclaim["overclaim"]) else "rejected",
-        created_at=_utcnow(),
+        created_at=_created_at(payload),
     )
     return asdict(receipt)
 

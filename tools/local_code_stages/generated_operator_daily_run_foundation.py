@@ -32,8 +32,10 @@ def _hash_id(*parts: str) -> str:
     return hashlib.sha256("|".join(parts).encode()).hexdigest()[:16]
 
 
-def _utcnow() -> str:
-    return datetime.now(timezone.utc).isoformat()
+def _created_at(payload: Dict[str, Any]) -> str:
+    value = payload.get("created_at")
+    return value if isinstance(value, str) and value.strip() else "1970-01-01T00:00:00Z"
+
 
 
 def _reject_non_mapping(payload: Any) -> None:
@@ -88,7 +90,7 @@ def produce_operator_daily_run_receipt(payload: Any) -> Dict[str, Any]:
     window = validate_operator_run_window(payload)
     review = validate_operator_review_gate(payload)
     receipt = OperatorDailyRunReceipt(
-        receipt_id=_hash_id(payload.get("run_id", "unknown"), _utcnow()),
+        receipt_id=_hash_id(payload.get("run_id", "unknown"), "v1"),
         run_id=payload.get("run_id", "unknown"),
         operator_id=payload.get("operator_id", "unknown"),
         runbook_reference=payload.get("runbook_reference", ""),
@@ -97,7 +99,7 @@ def produce_operator_daily_run_receipt(payload: Any) -> Dict[str, Any]:
         approval_gate_passed=review["approval_gate_passed"],
         run_window_valid=window["run_window_valid"],
         status="approved" if (review["approval_gate_passed"] and window["run_window_valid"]) else "rejected",
-        created_at=_utcnow(),
+        created_at=_created_at(payload),
     )
     return asdict(receipt)
 

@@ -32,8 +32,10 @@ def _hash_id(*parts: str) -> str:
     return hashlib.sha256("|".join(parts).encode()).hexdigest()[:16]
 
 
-def _utcnow() -> str:
-    return datetime.now(timezone.utc).isoformat()
+def _created_at(payload: Dict[str, Any]) -> str:
+    value = payload.get("created_at")
+    return value if isinstance(value, str) and value.strip() else "1970-01-01T00:00:00Z"
+
 
 
 def _reject_non_mapping(payload: Any) -> None:
@@ -95,7 +97,7 @@ def produce_checkpoint_runtime_receipt(payload: Any) -> Dict[str, Any]:
     approval = payload.get("approval", {})
     approved = isinstance(approval, dict) and approval.get("approved", False)
     receipt = CheckpointRuntimeReceipt(
-        receipt_id=_hash_id(payload.get("checkpoint_id", "unknown"), _utcnow()),
+        receipt_id=_hash_id(payload.get("checkpoint_id", "unknown"), "v1"),
         checkpoint_id=payload.get("checkpoint_id", "unknown"),
         source_revision=payload.get("source_revision", ""),
         content_hash=payload.get("content_hash", ""),
@@ -104,7 +106,7 @@ def produce_checkpoint_runtime_receipt(payload: Any) -> Dict[str, Any]:
         integrity_valid=integrity["integrity_valid"],
         state_clean=not dirty,
         status="created" if (scope["scope_valid"] and integrity["integrity_valid"] and approved and not dirty) else "rejected",
-        created_at=_utcnow(),
+        created_at=_created_at(payload),
     )
     return asdict(receipt)
 

@@ -42,8 +42,10 @@ def _hash_id(*parts: str) -> str:
     return hashlib.sha256("|".join(parts).encode()).hexdigest()[:16]
 
 
-def _utcnow() -> str:
-    return datetime.now(timezone.utc).isoformat()
+def _created_at(payload: Dict[str, Any]) -> str:
+    value = payload.get("created_at")
+    return value if isinstance(value, str) and value.strip() else "1970-01-01T00:00:00Z"
+
 
 
 def _reject_non_mapping(payload: Any) -> None:
@@ -132,7 +134,7 @@ def produce_patch_application_receipt(payload: Any) -> Dict[str, Any]:
     allowlist = validate_patch_allowlist(payload)
     preflight = validate_patch_preflight(payload)
     receipt = PatchApplicationReceipt(
-        receipt_id=_hash_id(payload.get("patch_id", "unknown"), _utcnow()),
+        receipt_id=_hash_id(payload.get("patch_id", "unknown"), "v1"),
         patch_id=payload.get("patch_id", "unknown"),
         status="approved" if (preflight["preflight_passed"] and allowlist["valid"] and risk["risk"] != "rejected") else "rejected",
         risk_classification=risk["risk"],
@@ -141,7 +143,7 @@ def produce_patch_application_receipt(payload: Any) -> Dict[str, Any]:
         diff_summary=payload.get("diff_summary", ""),
         rollback_plan_present=bool(payload.get("rollback_plan")),
         tests_present=bool(payload.get("tests")),
-        created_at=_utcnow(),
+        created_at=_created_at(payload),
     )
     return asdict(receipt)
 

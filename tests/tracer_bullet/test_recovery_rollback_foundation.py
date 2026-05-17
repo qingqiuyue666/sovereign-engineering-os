@@ -102,5 +102,18 @@ class RecoveryRollbackFoundationTests(unittest.TestCase):
         self.assertNotIn("import requests", src)
 
 
+
+    def test_produce_receipt_is_deterministic_same_receipt_id(self):
+        result1 = produce_recovery_rollback_receipt(VALID_PAYLOAD)
+        result2 = produce_recovery_rollback_receipt(VALID_PAYLOAD)
+        self.assertEqual(result1["receipt_id"], result2["receipt_id"],
+                         "receipt_id must be deterministic — same payload = same receipt_id")
+
+    def test_produce_receipt_is_deterministic_same_created_at(self):
+        result1 = produce_recovery_rollback_receipt(VALID_PAYLOAD)
+        result2 = produce_recovery_rollback_receipt(VALID_PAYLOAD)
+        self.assertEqual(result1["created_at"], result2["created_at"],
+                         "created_at must be deterministic — same payload = same created_at")
+
 if __name__ == "__main__":
     unittest.main()

@@ -44,8 +44,10 @@ def _hash_id(*parts: str) -> str:
     return hashlib.sha256("|".join(parts).encode()).hexdigest()[:16]
 
 
-def _utcnow() -> str:
-    return datetime.now(timezone.utc).isoformat()
+def _created_at(payload: Dict[str, Any]) -> str:
+    value = payload.get("created_at")
+    return value if isinstance(value, str) and value.strip() else "1970-01-01T00:00:00Z"
+
 
 
 def _reject_non_mapping(payload: Any) -> None:
@@ -116,7 +118,7 @@ def produce_evidence_vault_receipt(payload: Any) -> Dict[str, Any]:
     append_check = validate_evidence_append_only_contract(payload)
     meta_check = validate_evidence_metadata_contract(payload)
     receipt = EvidenceVaultReceipt(
-        receipt_id=_hash_id(payload.get("artifact_id", "unknown"), _utcnow()),
+        receipt_id=_hash_id(payload.get("artifact_id", "unknown"), "v1"),
         artifact_id=payload.get("artifact_id", "unknown"),
         artifact_type=payload.get("artifact_type", "unknown"),
         content_hash=payload.get("content_hash", ""),
@@ -126,7 +128,7 @@ def produce_evidence_vault_receipt(payload: Any) -> Dict[str, Any]:
         append_only_enforced=append_check["append_only"],
         immutable_enforced=payload.get("immutable", False),
         metadata_valid=meta_check["metadata_valid"],
-        created_at=payload.get("created_at", _utcnow()),
+        created_at=_created_at(payload),
         producer=payload.get("producer", "unknown"),
         lineage=payload.get("lineage", []),
     )

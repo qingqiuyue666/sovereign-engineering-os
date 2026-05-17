@@ -67,18 +67,57 @@ class LocalExecutionKernelTests(unittest.TestCase):
         self.assertEqual(result["category"], "test")
         self.assertEqual(result["risk"], "low")
 
-    def test_validate_allowlist_passes(self):
+    def test_validate_allowlist_accepts_exact_match(self):
+        """allowlist ['python3'] accepts 'python3 -m pytest tests/'"""
         result = validate_command_allowlist(VALID_PAYLOAD)
         self.assertTrue(result["valid"])
 
-    def test_validate_allowlist_rejects_unknown(self):
+    def test_validate_allowlist_rejects_unknown_command(self):
         p = {**VALID_PAYLOAD, "allowlist": ["npm"]}
+        result = validate_command_allowlist(p)
+        self.assertFalse(result["valid"])
+
+    def test_validate_allowlist_rejects_prefix_match(self):
+        """allowlist ['python'] must reject 'pythonmalicious -m unittest'"""
+        p = {**VALID_PAYLOAD, "command_text": "pythonmalicious -m unittest", "allowlist": ["python"]}
+        result = validate_command_allowlist(p)
+        self.assertFalse(result["valid"])
+
+    def test_validate_allowlist_accepts_python3_with_args(self):
+        """allowlist ['python3'] accepts 'python3 -m unittest tests'"""
+        p = {**VALID_PAYLOAD, "command_text": "python3 -m unittest tests", "allowlist": ["python3"]}
+        result = validate_command_allowlist(p)
+        self.assertTrue(result["valid"])
+
+    def test_validate_allowlist_rejects_empty_command_text(self):
+        p = {**VALID_PAYLOAD, "command_text": "", "allowlist": ["python3"]}
         result = validate_command_allowlist(p)
         self.assertFalse(result["valid"])
 
     def test_validate_preflight_passes(self):
         result = validate_execution_preflight(VALID_PAYLOAD)
         self.assertTrue(result["preflight_passed"])
+
+    def test_preflight_main_in_filename_does_not_fail(self):
+        """'python3 tests/test_main.py' must not fail only because it contains 'main'."""
+        p = {**VALID_PAYLOAD, "command_text": "python3 tests/test_main.py"}
+        result = validate_execution_preflight(p)
+        self.assertTrue(result["preflight_passed"])
+
+    def test_preflight_git_push_origin_main_fails(self):
+        p = {**VALID_PAYLOAD, "command_text": "git push origin main"}
+        result = validate_execution_preflight(p)
+        self.assertFalse(result["preflight_passed"])
+
+    def test_preflight_git_checkout_main_fails(self):
+        p = {**VALID_PAYLOAD, "command_text": "git checkout main"}
+        result = validate_execution_preflight(p)
+        self.assertFalse(result["preflight_passed"])
+
+    def test_preflight_git_merge_main_fails(self):
+        p = {**VALID_PAYLOAD, "command_text": "git merge main"}
+        result = validate_execution_preflight(p)
+        self.assertFalse(result["preflight_passed"])
 
     def test_produce_receipt_valid(self):
         receipt = produce_local_execution_receipt(VALID_PAYLOAD)
@@ -102,6 +141,19 @@ class LocalExecutionKernelTests(unittest.TestCase):
         self.assertNotIn("import socket", src)
         self.assertNotIn("import requests", src)
 
+
+
+    def test_produce_receipt_is_deterministic_same_receipt_id(self):
+        result1 = produce_local_execution_receipt(VALID_PAYLOAD)
+        result2 = produce_local_execution_receipt(VALID_PAYLOAD)
+        self.assertEqual(result1["receipt_id"], result2["receipt_id"],
+                         "receipt_id must be deterministic — same payload = same receipt_id")
+
+    def test_produce_receipt_is_deterministic_same_created_at(self):
+        result1 = produce_local_execution_receipt(VALID_PAYLOAD)
+        result2 = produce_local_execution_receipt(VALID_PAYLOAD)
+        self.assertEqual(result1["created_at"], result2["created_at"],
+                         "created_at must be deterministic — same payload = same created_at")
 
 if __name__ == "__main__":
     unittest.main()

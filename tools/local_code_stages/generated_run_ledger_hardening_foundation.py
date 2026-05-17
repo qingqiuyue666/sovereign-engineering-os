@@ -43,8 +43,10 @@ def _hash_id(*parts: str) -> str:
     return hashlib.sha256("|".join(parts).encode()).hexdigest()[:16]
 
 
-def _utcnow() -> str:
-    return datetime.now(timezone.utc).isoformat()
+def _created_at(payload: Dict[str, Any]) -> str:
+    value = payload.get("created_at")
+    return value if isinstance(value, str) and value.strip() else "1970-01-01T00:00:00Z"
+
 
 
 def _reject_non_mapping(payload: Any) -> None:
@@ -100,7 +102,7 @@ def produce_run_ledger_receipt(payload: Any) -> Dict[str, Any]:
     if mutable:
         raise ValueError("mutable_ledger_claim_rejected")
     receipt = RunLedgerReceipt(
-        receipt_id=_hash_id(payload.get("run_id", "unknown"), _utcnow()),
+        receipt_id=_hash_id(payload.get("run_id", "unknown"), "v1"),
         run_id=payload.get("run_id", "unknown"),
         operator_id=payload.get("operator_id", "unknown"),
         status=payload.get("status", ""),
@@ -109,7 +111,7 @@ def produce_run_ledger_receipt(payload: Any) -> Dict[str, Any]:
         sequence_valid=seq_check["sequence_valid"],
         evidence_link_present=bool(payload.get("evidence_link")),
         mutable_claim=mutable,
-        created_at=_utcnow(),
+        created_at=_created_at(payload),
     )
     return asdict(receipt)
 

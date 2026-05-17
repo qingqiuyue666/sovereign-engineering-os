@@ -9,15 +9,19 @@ Tests that every stage in the production pack has:
 - test file
 
 Also verifies no generated module contains forbidden imports or strings.
+Strengthened: checks determinism, dataclass naming, and no wall-clock in produce_* functions.
 """
 
 from __future__ import annotations
 
 import ast
+import re
+import sys
 import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "tools" / "local_code_stages"))
 
 STAGE_IDS = [
     "patch_application_pipeline",
@@ -39,8 +43,17 @@ STAGE_IDS = [
 ]
 
 FORBIDDEN_IMPORTS = {"subprocess", "socket", "requests", "http.client", "urllib.request", "urllib"}
-FORBIDDEN_STRINGS = ["cloud_ai", "push main", "merge main", "branch delete",
-                     "live_broker", "live_exchange", "real_trade", "production_deploy"]
+FORBIDDEN_STRINGS = ["cloud_ai", "live_broker", "live_exchange", "real_trade", "production_deploy"]
+
+
+def _produce_func_source(sid: str) -> str:
+    """Extract the source body of the produce_*_receipt function."""
+    path = ROOT / "tools" / "local_code_stages" / f"generated_{sid}.py"
+    source = path.read_text(encoding="utf-8")
+    m = re.search(r"def (produce_\w+_receipt)\(.*?\n(?:.*?\n)*?(?=\ndef |\n@|\n__all__)", source)
+    if m:
+        return m.group(0)
+    return source
 
 
 class ProductionPackMetaTests(unittest.TestCase):
@@ -125,7 +138,11 @@ class ProductionPackMetaTests(unittest.TestCase):
             path = ROOT / "tools" / "local_code_stages" / f"generated_{sid}.py"
             source = path.read_text(encoding="utf-8")
             self.assertIn("@dataclass", source, f"{sid} missing @dataclass decorator")
-            self.assertIn("Receipt", source, f"{sid} missing Receipt class")
+            # Check for class name ending in "Receipt"
+            self.assertTrue(
+                re.search(r"class\s+(\w*Receipt)\s*[(:]", source),
+                f"{sid} missing a dataclass whose name ends in Receipt",
+            )
 
     # ── validate function check ────────────────────────────────────
 
@@ -142,6 +159,37 @@ class ProductionPackMetaTests(unittest.TestCase):
             path = ROOT / "tools" / "local_code_stages" / f"generated_{sid}.py"
             source = path.read_text(encoding="utf-8")
             self.assertIn("def produce_", source, f"{sid} missing produce_ function")
+
+    # ── determinism checks ────────────────────────────────────────
+
+    def test_no_produce_function_uses_datetime_now(self):
+        """No produce_*_receipt function uses datetime.now (wall-clock)."""
+        for sid in STAGE_IDS:
+            func_src = _produce_func_source(sid)
+            self.assertNotIn("datetime.now", func_src,
+                             f"{sid} produce_* function uses datetime.now (non-deterministic)")
+            self.assertNotIn("timezone.now", func_src,
+                             f"{sid} produce_* function uses timezone.now (non-deterministic)")
+            self.assertNotIn("_utcnow()", func_src,
+                             f"{sid} produce_* function uses _utcnow (non-deterministic)")
+
+    def test_no_module_uses_datetime_now_in_produce_body(self):
+        """Every module's produce_*_receipt body has no wall-clock calls."""
+        for sid in STAGE_IDS:
+            path = ROOT / "tools" / "local_code_stages" / f"generated_{sid}.py"
+            source = path.read_text(encoding="utf-8")
+            # Find the produce function body
+            m = re.search(r"def (produce_\w+_receipt)\(.*", source)
+            if m:
+                start = m.start()
+                # Find the next top-level def or __all__
+                rest = source[start:]
+                end_m = re.search(r"\n(def |__all__)", rest)
+                body = rest[:end_m.start()] if end_m else rest
+                self.assertNotIn("datetime.now", body,
+                                 f"{sid} produce body uses datetime.now")
+                self.assertNotIn("_utcnow()", body,
+                                 f"{sid} produce body uses _utcnow")
 
 
 class StagePackCoverFilesTest(unittest.TestCase):

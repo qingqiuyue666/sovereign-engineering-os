@@ -7,6 +7,7 @@ v1 — contract-only. No command execution.
 from __future__ import annotations
 
 import hashlib
+import shlex
 from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
 from typing import Any, Dict, List
@@ -22,6 +23,12 @@ FORBIDDEN_ACTIONS = frozenset({
     "network", "secrets", "env_read", "main_mutation", "merge",
     "push_main", "branch_delete", "production_execution", "freeform_shell",
 })
+
+GIT_MAIN_MUTATION_PATTERNS = (
+    "git checkout main", "git switch main", "git push origin main",
+    "git push main", "git merge main", "git branch -d main",
+    "git branch -D main",
+)
 
 
 @dataclass(frozen=True)
@@ -42,8 +49,10 @@ def _hash_id(*parts: str) -> str:
     return hashlib.sha256("|".join(parts).encode()).hexdigest()[:16]
 
 
-def _utcnow() -> str:
-    return datetime.now(timezone.utc).isoformat()
+def _created_at(payload: Dict[str, Any]) -> str:
+    value = payload.get("created_at")
+    return value if isinstance(value, str) and value.strip() else "1970-01-01T00:00:00Z"
+
 
 
 def _reject_non_mapping(payload: Any) -> None:
@@ -100,9 +109,17 @@ def validate_command_allowlist(payload: Any) -> Dict[str, Any]:
         if not isinstance(item, str):
             raise TypeError("allowlist entries must be strings")
     cmd = payload.get("command_text", "")
-    base = cmd.split()[0] if cmd else ""
-    valid = any(base == a or cmd.startswith(a) for a in allowlist)
-    return {"valid": valid, "command_base": base, "allowlist": allowlist}
+    if not isinstance(cmd, str) or not cmd.strip():
+        return {"valid": False, "command_base": "", "allowlist": allowlist, "reason": "empty_command_text"}
+    try:
+        tokens = shlex.split(cmd)
+    except ValueError:
+        return {"valid": False, "command_base": "", "allowlist": allowlist, "reason": "invalid_shell_syntax"}
+    if not tokens:
+        return {"valid": False, "command_base": "", "allowlist": allowlist, "reason": "no_tokens"}
+    first_token = tokens[0]
+    valid = first_token in allowlist
+    return {"valid": valid, "command_base": first_token, "allowlist": allowlist}
 
 
 def validate_execution_preflight(payload: Any) -> Dict[str, Any]:
@@ -116,7 +133,10 @@ def validate_execution_preflight(payload: Any) -> Dict[str, Any]:
         p in (payload.get("command_text") or "").lower()
         for p in (".env", "api_key", "secret", "token", "password")
     )
-    checks["no_main_mutation"] = "main" not in (payload.get("command_text") or "").lower() or "main" in ("main.py", "main_test")
+    checks["no_main_mutation"] = not any(
+        pattern in (payload.get("command_text") or "").lower()
+        for pattern in GIT_MAIN_MUTATION_PATTERNS
+    )
     all_pass = all(checks.values())
     return {"preflight_passed": all_pass, "checks": checks}
 
@@ -128,14 +148,14 @@ def produce_local_execution_receipt(payload: Any) -> Dict[str, Any]:
     allowlist = validate_command_allowlist(payload)
     preflight = validate_execution_preflight(payload)
     receipt = LocalExecutionReceipt(
-        receipt_id=_hash_id(payload.get("execution_id", "unknown"), _utcnow()),
+        receipt_id=_hash_id(payload.get("execution_id", "unknown"), "v1"),
         execution_id=payload.get("execution_id", "unknown"),
         status="approved" if (preflight["preflight_passed"] and allowlist["valid"]) else "rejected",
         category=classification["category"],
         command_valid=preflight["preflight_passed"],
         preflight_passed=preflight["preflight_passed"],
         allowlist_validated=allowlist["valid"],
-        created_at=_utcnow(),
+        created_at=_created_at(payload),
     )
     return asdict(receipt)
 

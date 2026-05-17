@@ -34,8 +34,10 @@ def _hash_id(*parts: str) -> str:
     return hashlib.sha256("|".join(parts).encode()).hexdigest()[:16]
 
 
-def _utcnow() -> str:
-    return datetime.now(timezone.utc).isoformat()
+def _created_at(payload: Dict[str, Any]) -> str:
+    value = payload.get("created_at")
+    return value if isinstance(value, str) and value.strip() else "1970-01-01T00:00:00Z"
+
 
 
 def _reject_non_mapping(payload: Any) -> None:
@@ -87,14 +89,14 @@ def produce_osint_ingestion_receipt(payload: Any) -> Dict[str, Any]:
     if not freshness["fresh"]:
         status = "stale_rejected"
     receipt = OsintIngestionReceipt(
-        receipt_id=_hash_id(payload.get("source_id", "unknown"), _utcnow()),
+        receipt_id=_hash_id(payload.get("source_id", "unknown"), "v1"),
         source_id=payload.get("source_id", "unknown"),
         source_tier=payload.get("source_tier", ""),
         freshness_timestamp=payload.get("timestamp", ""),
         evidence_hash_present=bool(payload.get("evidence_hash")),
         conflict_resolution=payload.get("conflict_resolution", "NONE"),
         status=status,
-        created_at=_utcnow(),
+        created_at=_created_at(payload),
     )
     return asdict(receipt)
 

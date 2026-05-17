@@ -36,8 +36,10 @@ def _hash_id(*parts: str) -> str:
     return hashlib.sha256("|".join(parts).encode()).hexdigest()[:16]
 
 
-def _utcnow() -> str:
-    return datetime.now(timezone.utc).isoformat()
+def _created_at(payload: Dict[str, Any]) -> str:
+    value = payload.get("created_at")
+    return value if isinstance(value, str) and value.strip() else "1970-01-01T00:00:00Z"
+
 
 
 def _reject_non_mapping(payload: Any) -> None:
@@ -90,7 +92,7 @@ def produce_asset_mapping_receipt(payload: Any) -> Dict[str, Any]:
     candidate = validate_asset_candidate_contract(payload)
     conf_check = validate_mapping_confidence_contract(payload)
     receipt = AssetMappingReceipt(
-        receipt_id=_hash_id(payload.get("candidate_id", "unknown"), _utcnow()),
+        receipt_id=_hash_id(payload.get("candidate_id", "unknown"), "v1"),
         candidate_id=payload.get("candidate_id", "unknown"),
         asset_class=payload.get("asset_class", ""),
         venue=payload.get("venue", ""),
@@ -100,7 +102,7 @@ def produce_asset_mapping_receipt(payload: Any) -> Dict[str, Any]:
         confidence_overclaim=conf_check["overclaim"],
         friction_data_present=bool(payload.get("friction_data")),
         status="mapped" if (candidate["candidate_valid"] and conf_check["within_bounds"]) else "rejected",
-        created_at=_utcnow(),
+        created_at=_created_at(payload),
     )
     return asdict(receipt)
 
