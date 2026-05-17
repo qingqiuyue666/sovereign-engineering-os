@@ -1,0 +1,42 @@
+{
+  "policy_type": "runtime_integration_trace_policy_v1",
+  "version": "v1",
+  "dry_run_only": true,
+  "deterministic_required": true,
+  "no_provider_calls": true,
+  "no_network_access": true,
+  "no_sqlite": true,
+  "no_file_mutation": true,
+  "digest_refs_only": true,
+  "required_digest_fields": [
+    "execution_descriptor_digest",
+    "runner_receipt_digest",
+    "state_transition_digest",
+    "idempotency_digest",
+    "event_journal_digest",
+    "provider_boundary_digest",
+    "evidence_boundary_digest"
+  ],
+  "optional_digest_fields": [
+    "failure_bundle_digest",
+    "replay_plan_digest",
+    "replay_diff_digest"
+  ],
+  "forbidden_fields": [
+    "raw_prompt",
+    "raw_provider_response",
+    "secret_value",
+    "env_value",
+    "inline_payload",
+    "live_provider_response",
+    "network_result"
+  ],
+  "digest_format_required": "sha256:",
+  "receipt_required_fields": [
+    "accepted",
+    "failures",
+    "trace_digest",
+    "policy_version",
+    "code_version"
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "policy_type": "dry_run_orchestrator_policy_v1",
+  "version": "v1",
+  "dry_run_only": true,
+  "provider_execution_allowed": false,
+  "network_access_allowed": false,
+  "production_autonomy_allowed": false,
+  "deterministic_required": true,
+  "no_provider_calls": true,
+  "no_network_access": true,
+  "no_sqlite": true,
+  "no_file_mutation": true,
+  "no_real_vault_write": true,
+  "orchestration_flow": [
+    "validate_execution_descriptor",
+    "validate_state_transition_planned_to_validated",
+    "validate_idempotency",
+    "produce_dry_run_runner_receipt",
+    "append_event_journal_descriptor_validated",
+    "refuse_provider_execution",
+    "refuse_evidence_vault_live_write",
+    "append_event_journal_dry_run_completed",
+    "produce_final_receipt"
+  ],
+  "wired_modules": [
+    "execution_descriptor",
+    "runner",
+    "state_machine",
+    "idempotency",
+    "event_journal",
+    "provider_execution_plane",
+    "evidence_vault_boundary",
+    "protected_storage_interface",
+    "failure_bundle",
+    "replay_plan"
+  ],
+  "forbidden_fields": [
+    "raw_prompt",
+    "raw_provider_response",
+    "secret_value",
+    "env_value",
+    "provider_api_key",
+    "live_network_target",
+    "autonomy_directive"
+  ],
+  "receipt_required_fields": [
+    "accepted",
+    "failures",
+    "task_id",
+    "run_id",
+    "execution_id",
+    "dry_run",
+    "state_transition_receipt_digest",
+    "idempotency_receipt_digest",
+    "runner_receipt_digest",
+    "provider_boundary_receipt_digest",
+    "evidence_boundary_receipt_digest",
+    "event_journal_digest",
+    "final_status",
+    "policy_version",
+    "code_version"
+  ]
+}

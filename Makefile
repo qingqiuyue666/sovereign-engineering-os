@@ -1,4 +1,5 @@
 .PHONY: ci test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-real-runtime-provider-transport-execution test-production-autonomy-final-gate test-runtime-sealed-receipt test-generic-payload-shadow test-protected-evidence-storage test-protected-evidence-storage-implementation test-real-hmac-policy-realization test-real-merkle-proof-realization test-generic-payload-full-enforcement test-schemas test-tracer-bullet test-acceptance diff-check health
+.PHONY: test-runtime-execution-descriptor test-dry-run-orchestrator test-runtime-integration-trace test-completion-audit test-runtime-integration-hardening
 .PHONY: test-security-classification test-secret-scanner test-environment-sanitizer test-anti-exfiltration-gate test-ai-context-firewall test-repository-hygiene test-leak-prevention-foundation
 .PHONY: test-wal-integrity-guard test-taint-propagation test-artifact-provenance test-wal-integrity-contract test-capability-token-policy test-security-truth-substrate
 .PHONY: test-task-manifest test-task-intake test-run-id test-run-ledger test-task-foundation test-operator-task-intake test-operator-task-ledger
@@ -21,7 +22,7 @@ PYTHON ?= python3
 
 ci: health
 
-health: test-root-integrity test-leak-prevention-foundation test-security-truth-substrate test-operator-task-ledger test-operator-cli test-runtime-runner-event-journal test-failurebundle-replay-foundation test-evidence-vault-boundary-foundation test-provider-execution-plane-boundary test-v12-foundation test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-real-runtime-provider-transport-execution test-production-autonomy-final-gate test-runtime-sealed-receipt test-generic-payload-shadow test-protected-evidence-storage test-protected-evidence-storage-implementation test-real-hmac-policy-realization test-real-merkle-proof-realization test-generic-payload-full-enforcement test-schemas test-tracer-bullet test-acceptance diff-check
+health: test-root-integrity test-leak-prevention-foundation test-security-truth-substrate test-operator-task-ledger test-operator-cli test-runtime-runner-event-journal test-failurebundle-replay-foundation test-evidence-vault-boundary-foundation test-provider-execution-plane-boundary test-runtime-integration-hardening test-v12-foundation test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-real-runtime-provider-transport-execution test-production-autonomy-final-gate test-runtime-sealed-receipt test-generic-payload-shadow test-protected-evidence-storage test-protected-evidence-storage-implementation test-real-hmac-policy-realization test-real-merkle-proof-realization test-generic-payload-full-enforcement test-schemas test-tracer-bullet test-acceptance diff-check
 
 test-root-integrity:
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_root_integrity_verifier -v
@@ -220,6 +221,20 @@ test-provider-execution-receipt:
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_provider_execution_receipt -v
 
 test-provider-execution-plane-boundary: test-provider-execution-plane test-provider-adapter-registry test-provider-execution-receipt
+
+test-runtime-execution-descriptor:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_runtime_execution_descriptor -v
+
+test-dry-run-orchestrator:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_dry_run_orchestrator -v
+
+test-runtime-integration-trace:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_runtime_integration_trace -v
+
+test-completion-audit:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_completion_audit -v
+
+test-runtime-integration-hardening: test-runtime-execution-descriptor test-dry-run-orchestrator test-runtime-integration-trace test-completion-audit
 
 test-notification-contract:
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_notification_contract -v

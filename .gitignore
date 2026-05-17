@@ -27,3 +27,4 @@ venv/
 .vscode/
 *.swp
 .aider*
+.claude/
