@@ -1,0 +1,72 @@
+{
+  "policy_name": "real_evidence_vault_runtime_policy_v1",
+  "policy_version": "v1",
+  "status": "active",
+  "runtime_type": "local-only",
+  "storage_backend": "local_filesystem",
+  "allowed_hash_algorithms": [
+    "sha256",
+    "sha512",
+    "blake2b"
+  ],
+  "append_only_required": true,
+  "immutable_records_required": true,
+  "forbidden_artifact_types": [
+    "raw_secret",
+    "api_key",
+    "private_key",
+    "token",
+    "password",
+    "credential"
+  ],
+  "forbidden_content_markers": [
+    "-----BEGIN",
+    "API_KEY=",
+    "SECRET=",
+    "TOKEN=",
+    "password=",
+    "sk-",
+    "Bearer "
+  ],
+  "required_fields": [
+    "artifact_id",
+    "artifact_type",
+    "content_hash",
+    "hash_algorithm",
+    "created_at",
+    "producer",
+    "lineage",
+    "immutable",
+    "append_only"
+  ],
+  "runtime_constraints": {
+    "no_network": true,
+    "no_encryption": true,
+    "no_key_management": true,
+    "no_cloud_api_calls": true,
+    "no_subprocess": true,
+    "no_live_provider_surface": true,
+    "no_production_autonomy": true,
+    "no_secret_storage": true,
+    "no_plaintext_secret_material": true,
+    "no_destructive_delete": true,
+    "no_overwrite_existing_artifact": true,
+    "append_only_enforced": true
+  },
+  "capabilities": [
+    "evidence_envelope_creation",
+    "content_hash_verification",
+    "append_only_storage",
+    "evidence_index_creation",
+    "evidence_index_lookup",
+    "digest_only_protected_envelope",
+    "raw_secret_material_rejection",
+    "mutable_evidence_rejection",
+    "corruption_detection",
+    "read_by_artifact_id",
+    "recovery_receipt",
+    "migration_receipt",
+    "rollback_plan"
+  ],
+  "module_version": "v1"
+}

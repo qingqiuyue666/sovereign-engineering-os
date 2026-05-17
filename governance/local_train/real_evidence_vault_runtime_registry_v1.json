@@ -1,0 +1,45 @@
+{
+  "registry_name": "real_evidence_vault_runtime_registry_v1",
+  "registry_version": "v1",
+  "status": "active",
+  "boundary": "local-only, real runtime v1 — append-only local filesystem evidence storage",
+  "module_path": "tools/evidence_vault/",
+  "modules": [
+    {
+      "name": "local_evidence_vault",
+      "path": "tools/evidence_vault/local_evidence_vault.py",
+      "class": "LocalEvidenceVault",
+      "description": "Real local evidence vault runtime — append-only filesystem storage"
+    },
+    {
+      "name": "evidence_envelope",
+      "path": "tools/evidence_vault/evidence_envelope.py",
+      "class": "EvidenceEnvelope",
+      "description": "Deterministic evidence artifact envelope creation and hash verification"
+    },
+    {
+      "name": "evidence_index",
+      "path": "tools/evidence_vault/evidence_index.py",
+      "class": "EvidenceIndex",
+      "description": "Append-only evidence index with deterministic hashing"
+    },
+    {
+      "name": "evidence_integrity",
+      "path": "tools/evidence_vault/evidence_integrity.py",
+      "class": "EvidenceIntegrity",
+      "description": "Corruption detection and payload digest validation"
+    },
+    {
+      "name": "evidence_recovery",
+      "path": "tools/evidence_vault/evidence_recovery.py",
+      "class": "EvidenceRecovery",
+      "description": "Recovery receipt, migration receipt, and rollback plan generation"
+    }
+  ],
+  "runtime_type": "local_vault",
+  "no_network": true,
+  "no_encryption": true,
+  "no_key_management": true,
+  "storage_backend": "local_filesystem",
+  "append_only": true
+}
