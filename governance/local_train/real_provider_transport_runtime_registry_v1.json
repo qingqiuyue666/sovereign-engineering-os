@@ -1,0 +1,75 @@
+{
+  "registry_name": "real_provider_transport_runtime_registry_v1",
+  "registry_version": "v1",
+  "status": "active",
+  "boundary": "local-only, deterministic, dry-run only, no network, no live provider, no secrets, no trading, no production action",
+  "module_path": "tools/provider_transport",
+  "functions": [
+    "validate_provider_request",
+    "validate_adapter_descriptor",
+    "register_provider_adapter",
+    "get_provider_adapter",
+    "list_registered_providers",
+    "run_provider_transport_preflight",
+    "produce_dry_run_receipt",
+    "produce_failure_receipt",
+    "validate_capability_boundary",
+    "validate_evidence_binding",
+    "validate_rate_limit_budget",
+    "enforce_no_network",
+    "execute_provider_transport"
+  ],
+  "classes": [
+    "ProviderAdapterRegistry",
+    "ProviderAdapterDescriptor",
+    "ProviderRequestContract",
+    "PreflightResult",
+    "ProviderDryRunReceipt",
+    "ProviderFailureReceipt",
+    "CapabilityBoundaryResult",
+    "EvidenceBindingResult",
+    "RateLimitBudgetResult",
+    "NetworkEnforcementResult",
+    "ProviderTransportRuntime",
+    "TransportExecutionResult"
+  ],
+  "known_providers": [
+    "mock-finance",
+    "mock-market-data",
+    "mock-news",
+    "mock-weather"
+  ],
+  "forbidden_providers": [
+    "live-broker",
+    "live-exchange",
+    "live-payment",
+    "live-bank"
+  ],
+  "known_capabilities": [
+    "fetch_price",
+    "fetch_news",
+    "fetch_weather",
+    "calculate_risk",
+    "validate_asset",
+    "mock_execute"
+  ],
+  "forbidden_capabilities": [
+    "live_trade",
+    "live_transfer",
+    "live_withdrawal",
+    "live_deposit",
+    "live_order"
+  ],
+  "hash_algorithms": [
+    "sha256"
+  ],
+  "governance_bindings": [
+    "governance/security/real_provider_transport_runtime_policy_v1.json"
+  ],
+  "spine_integration": {
+    "receipt_type": "ProviderDryRunReceipt",
+    "canonical_hash_field": "canonical_hash",
+    "linkable_to_runtime_spine": true,
+    "linkable_in_future_branch": true
+  }
+}

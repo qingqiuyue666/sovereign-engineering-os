@@ -1,0 +1,103 @@
+{
+  "policy_name": "real_provider_transport_runtime_policy_v1",
+  "policy_version": "v1",
+  "status": "active",
+  "module_path": "tools/provider_transport",
+  "boundary": "local-only, deterministic, dry-run only, no network, no live provider, no secrets, no trading, no production action",
+  "required_behaviors": [
+    "validate_provider_request",
+    "register_provider_adapter",
+    "declare_provider_capability",
+    "enforce_provider_allowlist",
+    "dry_run_only_execution",
+    "deterministic_receipt",
+    "deterministic_failure_receipt",
+    "reject_unsupported_provider",
+    "reject_unsupported_capability",
+    "reject_missing_evidence_binding",
+    "validate_budget_limit_contract",
+    "validate_rate_limit_contract",
+    "store_hashes_and_metadata_only",
+    "reject_raw_payload",
+    "reject_secret_markers",
+    "reject_env_markers",
+    "reject_live_mode",
+    "reject_network_mode",
+    "no_wall_clock_in_receipt_hash"
+  ],
+  "forbidden": [
+    "network_execution",
+    "live_provider_calls",
+    "subprocess_spawn",
+    "socket_connections",
+    "http_requests",
+    "cloud_ai_api_calls",
+    "trading_actions",
+    "production_actions",
+    "secrets_read",
+    "env_file_read",
+    "raw_payload_persistence",
+    "raw_response_storage",
+    "secret_value_transmission",
+    "wall_clock_in_hash",
+    "non_deterministic_receipt",
+    "fake_provider_execution_claim",
+    "unsupported_provider_bypass",
+    "unsupported_capability_bypass",
+    "dry_run_bypass",
+    "budget_contract_bypass",
+    "rate_limit_contract_bypass",
+    "overclaim_in_runbook"
+  ],
+  "security_gates": {
+    "no_network": true,
+    "no_subprocess": true,
+    "no_live_provider": true,
+    "no_trading": true,
+    "no_raw_payload": true,
+    "no_secrets": true,
+    "no_env_read": true,
+    "dry_run_only": true,
+    "deterministic_hash": true,
+    "provider_allowlist_enforced": true,
+    "capability_boundary_enforced": true,
+    "evidence_binding_required": true,
+    "budget_limit_enforced": true,
+    "rate_limit_enforced": true
+  },
+  "known_providers": [
+    "mock-finance",
+    "mock-market-data",
+    "mock-news",
+    "mock-weather"
+  ],
+  "forbidden_providers": [
+    "live-broker",
+    "live-exchange",
+    "live-payment",
+    "live-bank"
+  ],
+  "known_capabilities": [
+    "fetch_price",
+    "fetch_news",
+    "fetch_weather",
+    "calculate_risk",
+    "validate_asset",
+    "mock_execute"
+  ],
+  "forbidden_capabilities": [
+    "live_trade",
+    "live_transfer",
+    "live_withdrawal",
+    "live_deposit",
+    "live_order"
+  ],
+  "runtime_constraints": {
+    "execution_mode": "dry_run_only",
+    "network_mode": "disabled",
+    "live_mode": "disabled",
+    "receipt_mode": "deterministic_hash_only",
+    "wall_clock_in_hash": "forbidden",
+    "created_at_sentinel": "1970-01-01T00:00:00Z"
+  }
+}
