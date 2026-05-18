@@ -51,19 +51,21 @@ class LocalRuntimePromotionResult:
     observed_at: str = ""
 
     def deterministic_material(self) -> dict[str, object]:
-        return {
-            "accepted": self.accepted,
-            "code_version": self.code_version,
-            "decision": self.decision,
-            "policy_version": self.policy_version,
-            "promotion_receipt_hash": self.promotion_receipt_hash,
-            "reasons": list(self.reasons),
-            "review_packet_hash": self.review_packet_hash,
-            "rollback_plan_hash": self.rollback_plan_hash,
-        }
+        """Return promotion material excluding observation metadata and self-hash."""
+
+        return _promotion_material(
+            accepted=self.accepted,
+            code_version=self.code_version,
+            decision=self.decision,
+            policy_version=self.policy_version,
+            reasons=self.reasons,
+            review_packet_hash=self.review_packet_hash,
+            rollback_plan_hash=self.rollback_plan_hash,
+        )
 
     def as_dict(self) -> dict[str, object]:
         payload = self.deterministic_material()
+        payload["promotion_receipt_hash"] = self.promotion_receipt_hash
         payload["observed_at"] = self.observed_at
         return payload
 
@@ -86,6 +88,9 @@ def evaluate_promotion_gate(
     """Evaluate whether a local runtime result is eligible for human review.
 
     Returns a fail-closed verdict: accepted=True only when all conditions are met.
+    Rejections always carry a deterministic rollback-plan reference. When the
+    caller has not supplied one, the gate emits a deterministic symbolic
+    required-rollback reference without executing rollback.
     """
 
     for field, value in (
@@ -98,6 +103,8 @@ def evaluate_promotion_gate(
         raise ValueError("runtime_receipt_hash_must_be_valid_digest")
     if not strict_digest(review_packet_hash):
         raise ValueError("review_packet_hash_must_be_valid_digest")
+    if rollback_plan_hash is not None and not strict_digest(rollback_plan_hash):
+        raise ValueError("rollback_plan_hash_must_be_valid_digest")
     if not strict_bool(runtime_accepted):
         raise ValueError("runtime_accepted_must_be_bool")
     if not strict_bool(guard_accepted):
@@ -123,38 +130,35 @@ def evaluate_promotion_gate(
         if flag_value is not True:
             reasons.append(f"boundary_flag_not_proven:{flag_name}")
 
-    flag_keys_lower = {str(k).lower().replace("_", "").replace("-", "") for k in boundary_flags}
-    if "dryrunonly" not in flag_keys_lower:
-        reasons.append("boundary_flag_not_proven:dry_run_only")
-
     if provider_transport_attempted and not provider_dry_run_receipt_exists:
         reasons.append("provider_transport_attempted_but_receipt_missing")
 
     if not audit_chain_head_exists:
         reasons.append("audit_chain_head_missing")
 
-    if not strict_digest(runtime_receipt_hash):
-        reasons.append("runtime_receipt_hash_invalid")
-    if not strict_digest(review_packet_hash):
-        reasons.append("review_packet_hash_invalid")
-
     accepted = not reasons
     decision = "eligible_for_human_review" if accepted else "rejected"
-
+    normalized_reasons = tuple(sorted(set(reasons)))
     rollback_ref: str | None = rollback_plan_hash
     if not accepted and rollback_ref is None:
-        rollback_ref = None
+        rollback_ref = _required_rollback_ref(
+            code_version=code_version,
+            policy_version=policy_version,
+            reasons=normalized_reasons,
+            review_packet_hash=review_packet_hash,
+            runtime_receipt_hash=runtime_receipt_hash,
+        )
 
     observed = _observed_at(observed_at)
-    normalized_reasons = tuple(sorted(set(reasons)))
-    promotion_material = {
-        "accepted": accepted,
-        "code_version": code_version,
-        "decision": decision,
-        "policy_version": policy_version,
-        "reasons": list(normalized_reasons),
-        "review_packet_hash": review_packet_hash,
-    }
+    promotion_material = _promotion_material(
+        accepted=accepted,
+        code_version=code_version,
+        decision=decision,
+        policy_version=policy_version,
+        reasons=normalized_reasons,
+        review_packet_hash=review_packet_hash,
+        rollback_plan_hash=rollback_ref,
+    )
     return LocalRuntimePromotionResult(
         accepted=accepted,
         decision=decision,
@@ -191,16 +195,53 @@ def validate_promotion_result(result: LocalRuntimePromotionResult) -> bool:
         return False
     if result.rollback_plan_hash is not None and not strict_digest(result.rollback_plan_hash):
         return False
+    if result.accepted and result.rollback_plan_hash is not None:
+        return False
+    if not result.accepted and result.rollback_plan_hash is None:
+        return False
 
-    promotion_material = {
-        "accepted": result.accepted,
-        "code_version": result.code_version,
-        "decision": result.decision,
-        "policy_version": result.policy_version,
-        "reasons": list(result.reasons),
-        "review_packet_hash": result.review_packet_hash,
+    return result.promotion_receipt_hash == digest_payload(result.deterministic_material())
+
+
+def _promotion_material(
+    *,
+    accepted: bool,
+    code_version: str,
+    decision: str,
+    policy_version: str,
+    reasons: tuple[str, ...],
+    review_packet_hash: str,
+    rollback_plan_hash: str | None,
+) -> dict[str, object]:
+    return {
+        "accepted": accepted,
+        "code_version": code_version,
+        "decision": decision,
+        "policy_version": policy_version,
+        "reasons": list(reasons),
+        "review_packet_hash": review_packet_hash,
+        "rollback_plan_hash": rollback_plan_hash,
     }
-    return result.promotion_receipt_hash == digest_payload(promotion_material)
+
+
+def _required_rollback_ref(
+    *,
+    code_version: str,
+    policy_version: str,
+    reasons: tuple[str, ...],
+    review_packet_hash: str,
+    runtime_receipt_hash: str,
+) -> str:
+    return digest_payload(
+        {
+            "code_version": code_version,
+            "policy_version": policy_version,
+            "reasons": list(reasons),
+            "review_packet_hash": review_packet_hash,
+            "rollback_requirement": "symbolic_rollback_plan_required",
+            "runtime_receipt_hash": runtime_receipt_hash,
+        }
+    )
 
 
 def _observed_at(value: str | None) -> str:
