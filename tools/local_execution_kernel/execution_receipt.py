@@ -22,6 +22,7 @@ class ExecutionReceipt:
     command_valid: bool
     preflight_passed: bool
     allowlist_validated: bool
+    patch_receipt_hash: str
     canonical_hash: str
     created_at: str
     module_version: str = "v1"
@@ -52,20 +53,28 @@ def _hash_id(*parts: str) -> str:
     return hashlib.blake2b("|".join(parts).encode(), digest_size=16).hexdigest()
 
 
+def _hash64(value: str) -> bool:
+    return isinstance(value, str) and len(value) == 64 and all(c in "0123456789abcdef" for c in value.lower())
+
+
 def produce_execution_receipt(
     execution_id: str,
     status: str,
     category: str,
     preflight_result: Dict[str, Any],
+    patch_receipt_hash: str = "",
     created_at: str = "",
 ) -> ExecutionReceipt:
     if status not in ("approved", "rejected"):
         raise ValueError(f"invalid status: {status}")
+    if patch_receipt_hash and not _hash64(patch_receipt_hash):
+        raise ValueError("patch_receipt_hash must be sha256 hex when provided")
 
     raw = "|".join([
         execution_id, status, category,
         str(preflight_result.get("preflight_passed", False)),
         str(preflight_result.get("allowlist_valid", False)),
+        patch_receipt_hash,
     ])
     canonical = hashlib.sha256(raw.encode()).hexdigest()
     receipt_id = _hash_id(execution_id, canonical)
@@ -78,6 +87,7 @@ def produce_execution_receipt(
         command_valid=preflight_result.get("preflight_passed", False),
         preflight_passed=preflight_result.get("preflight_passed", False),
         allowlist_validated=preflight_result.get("allowlist_valid", False),
+        patch_receipt_hash=patch_receipt_hash,
         canonical_hash=canonical,
         created_at=created_at or "1970-01-01T00:00:00Z",
     )
