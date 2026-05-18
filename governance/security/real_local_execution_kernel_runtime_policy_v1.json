@@ -1,0 +1,54 @@
+{
+  "policy_name": "real_local_execution_kernel_runtime_policy_v1",
+  "policy_version": "v1",
+  "status": "active",
+  "bounded_runtime": "local_execution_kernel",
+  "runtime_version": "v1",
+  "contract_only": true,
+  "no_execution_performed": true,
+  "required_behaviors": [
+    "command_request_model",
+    "command_category_validation",
+    "exact_first_token_allowlist",
+    "shlex_parsing_only",
+    "no_execution_by_default",
+    "dry_run_receipt",
+    "execution_preflight",
+    "main_mutation_rejection",
+    "branch_delete_rejection",
+    "network_command_rejection",
+    "secret_or_env_rejection",
+    "production_execution_rejection",
+    "deterministic_execution_receipt"
+  ],
+  "forbidden": [
+    "network_commands",
+    "main_mutation",
+    "branch_delete",
+    "git_push",
+    "git_merge",
+    "secret_material",
+    "env_read",
+    "production_execution",
+    "freeform_shell",
+    "actual_execution"
+  ],
+  "allowed_hash_algorithms": ["blake2b", "sha256", "sha512"],
+  "allowed_categories": ["test", "lint", "typecheck", "format-check", "build-check", "ci-check"],
+  "receipt_types": ["ExecutionReceipt", "ExecutionFailureReceipt"],
+  "security_gates": {
+    "no_network": true,
+    "no_main_mutation": true,
+    "no_branch_delete": true,
+    "no_secret_material": true,
+    "no_env_read": true,
+    "no_production_execution": true,
+    "no_execution_by_default": true,
+    "deterministic_receipts": true
+  },
+  "module_path": "tools/local_execution_kernel",
+  "governance_bindings": [
+    "governance/local_train/real_local_execution_kernel_runtime_registry_v1.json",
+    "docs/runbooks/real_local_execution_kernel_runtime_v1.md"
+  ]
+}

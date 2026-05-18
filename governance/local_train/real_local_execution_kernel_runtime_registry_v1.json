@@ -1,0 +1,31 @@
+{
+  "registry_name": "real_local_execution_kernel_runtime_registry_v1",
+  "registry_version": "v1",
+  "status": "active",
+  "boundary": "local-only, contract-only, no command execution in v1",
+  "module_path": "tools/local_execution_kernel",
+  "functions": [
+    "create_request",
+    "validate_request",
+    "run_preflight",
+    "approve",
+    "produce_failure_receipt",
+    "configure_allowlist",
+    "canonical_hash"
+  ],
+  "classes": [
+    "LocalExecutionKernel",
+    "ExecutionRequest",
+    "CommandAllowlist",
+    "ExecutionPreflight",
+    "ExecutionReceipt",
+    "ExecutionFailureReceipt",
+    "ExecutionCanonicalHash",
+    "ExecutionSecurity"
+  ],
+  "receipt_types": ["ExecutionReceipt", "ExecutionFailureReceipt"],
+  "hash_algorithms": ["blake2b", "sha256", "sha512"],
+  "governance_bindings": [
+    "governance/security/real_local_execution_kernel_runtime_policy_v1.json"
+  ]
+}
