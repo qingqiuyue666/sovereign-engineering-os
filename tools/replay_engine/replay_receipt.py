@@ -85,9 +85,6 @@ def produce_replay_receipt(
     if mode not in ("strict", "dry_run"):
         raise ValueError(f"invalid mode: {mode}")
     ids = sorted(evidence_artifact_ids or [])
-    if evidence_binding_valid and (not evidence_binding_hash.strip() or not ids):
-        raise ValueError("evidence binding hash and ids required")
-
     raw = "|".join([
         anchor_id, snapshot_id, version_tuple_id, status, mode,
         str(evidence_binding_valid), evidence_binding_hash, "|".join(ids),
