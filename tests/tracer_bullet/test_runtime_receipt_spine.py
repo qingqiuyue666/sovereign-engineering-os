@@ -65,12 +65,11 @@ class TestRuntimeReceiptChain(unittest.TestCase):
 
     def test_chain_hash_deterministic(self):
         chain1 = RuntimeReceiptChain()
-        for h in [VALID_SHA256, VALID_SHA256_B, VALID_SHA256_C, VALID_SHA256_D, VALID_SHA256_E]:
-            chain1.set_evidence_vault_receipt(VALID_SHA256)
-            chain1.set_replay_receipt(VALID_SHA256_B)
-            chain1.set_patch_receipt(VALID_SHA256_C)
-            chain1.set_execution_receipt(VALID_SHA256_D)
-            chain1.set_operator_run_receipt(VALID_SHA256_E)
+        chain1.set_evidence_vault_receipt(VALID_SHA256)
+        chain1.set_replay_receipt(VALID_SHA256_B)
+        chain1.set_patch_receipt(VALID_SHA256_C)
+        chain1.set_execution_receipt(VALID_SHA256_D)
+        chain1.set_operator_run_receipt(VALID_SHA256_E)
 
         chain2 = RuntimeReceiptChain()
         chain2.set_evidence_vault_receipt(VALID_SHA256)
@@ -89,12 +88,11 @@ class TestRuntimeReceiptChain(unittest.TestCase):
 
     def test_enforce_passes_on_complete(self):
         chain = RuntimeReceiptChain()
-        for h in [VALID_SHA256, VALID_SHA256_B, VALID_SHA256_C, VALID_SHA256_D, VALID_SHA256_E]:
-            chain.set_evidence_vault_receipt(VALID_SHA256)
-            chain.set_replay_receipt(VALID_SHA256_B)
-            chain.set_patch_receipt(VALID_SHA256_C)
-            chain.set_execution_receipt(VALID_SHA256_D)
-            chain.set_operator_run_receipt(VALID_SHA256_E)
+        chain.set_evidence_vault_receipt(VALID_SHA256)
+        chain.set_replay_receipt(VALID_SHA256_B)
+        chain.set_patch_receipt(VALID_SHA256_C)
+        chain.set_execution_receipt(VALID_SHA256_D)
+        chain.set_operator_run_receipt(VALID_SHA256_E)
         chain.enforce()  # should not raise
 
     def test_reject_invalid_hash_length(self):
@@ -106,7 +104,6 @@ class TestRuntimeReceiptChain(unittest.TestCase):
         chain = RuntimeReceiptChain()
         chain.set_evidence_vault_receipt(VALID_SHA256)
         chain.set_replay_receipt(VALID_SHA256_B)
-        # Missing patch, execution, operator
         result = chain.validate()
         self.assertFalse(result["chain_valid"])
         self.assertEqual(len(result["missing_links"]), 3)
@@ -127,16 +124,38 @@ class TestRuntimeReceiptValidator(unittest.TestCase):
         return {"artifact_id": "ev-1", "content_hash": VALID_SHA256, "hash_algorithm": "sha256"}
 
     def _rp_receipt(self):
-        return {"receipt_id": "rp-1", "anchor_id": "a-1", "canonical_hash": VALID_SHA256_B}
+        return {
+            "receipt_id": "rp-1",
+            "anchor_id": "a-1",
+            "canonical_hash": VALID_SHA256_B,
+            "evidence_binding_valid": True,
+            "evidence_binding_hash": VALID_SHA256,
+            "evidence_artifact_ids": ["ev-1"],
+        }
 
     def _pt_receipt(self):
-        return {"receipt_id": "pt-1", "request_id": "req-1", "canonical_hash": VALID_SHA256_C}
+        return {
+            "receipt_id": "pt-1",
+            "request_id": "req-1",
+            "canonical_hash": VALID_SHA256_C,
+            "replay_receipt_hash": VALID_SHA256_B,
+        }
 
     def _ex_receipt(self):
-        return {"receipt_id": "ex-1", "execution_id": "exec-1", "canonical_hash": VALID_SHA256_D}
+        return {
+            "receipt_id": "ex-1",
+            "execution_id": "exec-1",
+            "canonical_hash": VALID_SHA256_D,
+            "patch_receipt_hash": VALID_SHA256_C,
+        }
 
     def _op_receipt(self):
-        return {"receipt_id": "op-1", "run_id": "run-1", "canonical_hash": VALID_SHA256_E}
+        return {
+            "receipt_id": "op-1",
+            "run_id": "run-1",
+            "canonical_hash": VALID_SHA256_E,
+            "execution_receipt_hashes": [VALID_SHA256_D],
+        }
 
     def test_evidence_to_replay_compatible(self):
         result = RuntimeReceiptValidator.validate_evidence_to_replay(
@@ -150,11 +169,28 @@ class TestRuntimeReceiptValidator(unittest.TestCase):
         )
         self.assertFalse(result["compatible"])
 
+    def test_evidence_to_replay_rejects_unlinked_artifact(self):
+        bad_replay = {**self._rp_receipt(), "evidence_artifact_ids": ["different"]}
+        result = RuntimeReceiptValidator.validate_evidence_to_replay(
+            self._ev_receipt(), bad_replay,
+        )
+        self.assertFalse(result["compatible"])
+        self.assertIn("evidence_artifact_id_not_linked_to_replay", result["issues"])
+
     def test_replay_to_patch_compatible(self):
         result = RuntimeReceiptValidator.validate_replay_to_patch(
             self._rp_receipt(), self._pt_receipt(),
         )
         self.assertTrue(result["compatible"])
+
+    def test_replay_to_patch_rejects_missing_link(self):
+        patch = dict(self._pt_receipt())
+        del patch["replay_receipt_hash"]
+        result = RuntimeReceiptValidator.validate_replay_to_patch(
+            self._rp_receipt(), patch,
+        )
+        self.assertFalse(result["compatible"])
+        self.assertIn("patch_missing_replay_receipt_hash", result["issues"])
 
     def test_patch_to_execution_compatible(self):
         result = RuntimeReceiptValidator.validate_patch_to_execution(
@@ -162,11 +198,27 @@ class TestRuntimeReceiptValidator(unittest.TestCase):
         )
         self.assertTrue(result["compatible"])
 
+    def test_patch_to_execution_rejects_mismatch(self):
+        bad_exec = {**self._ex_receipt(), "patch_receipt_hash": "f" * 64}
+        result = RuntimeReceiptValidator.validate_patch_to_execution(
+            self._pt_receipt(), bad_exec,
+        )
+        self.assertFalse(result["compatible"])
+        self.assertIn("execution_patch_receipt_hash_mismatch", result["issues"])
+
     def test_execution_to_operator_compatible(self):
         result = RuntimeReceiptValidator.validate_execution_to_operator(
             self._ex_receipt(), self._op_receipt(),
         )
         self.assertTrue(result["compatible"])
+
+    def test_execution_to_operator_rejects_missing_link(self):
+        op = {**self._op_receipt(), "execution_receipt_hashes": []}
+        result = RuntimeReceiptValidator.validate_execution_to_operator(
+            self._ex_receipt(), op,
+        )
+        self.assertFalse(result["compatible"])
+        self.assertIn("operator_missing_execution_receipt_link", result["issues"])
 
     def test_raw_payload_rejected(self):
         bad_ev = {**self._ev_receipt(), "raw_payload": "secret data"}
@@ -174,7 +226,7 @@ class TestRuntimeReceiptValidator(unittest.TestCase):
             bad_ev, self._rp_receipt(),
         )
         self.assertFalse(result["compatible"])
-        self.assertIn("raw_payload_detected", result["issues"])
+        self.assertTrue(any("raw_payload_detected" in i for i in result["issues"]))
 
     def test_raw_data_rejected(self):
         bad_rp = {**self._rp_receipt(), "raw_data": "sensitive"}
@@ -182,7 +234,7 @@ class TestRuntimeReceiptValidator(unittest.TestCase):
             self._ev_receipt(), bad_rp,
         )
         self.assertFalse(result["compatible"])
-        self.assertIn("raw_payload_detected", result["issues"])
+        self.assertTrue(any("raw_payload_detected" in i for i in result["issues"]))
 
     def test_full_spine_valid(self):
         result = RuntimeReceiptValidator.validate_full_spine(
