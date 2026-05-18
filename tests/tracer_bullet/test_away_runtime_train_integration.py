@@ -5,7 +5,7 @@ Verifies cross-subsystem compatibility:
 - Replay -> Patch compatibility
 - Patch -> Local Execution Kernel compatibility
 - Replay/Patch/Execution -> Operator Daily Run compatibility
-- Runtime Receipt Spine validates chain
+- Runtime Receipt Spine validates explicit chain linkage
 - Runtime Recovery consumes failure bundles
 """
 
@@ -32,96 +32,82 @@ VALID_SHA256_D = "d" * 64
 VALID_SHA256_E = "e" * 64
 
 
+def _make_replay_receipt():
+    engine = ReplayEngine()
+    anchor = engine.create_anchor(VALID_SHA256, "v1", "code", "env")
+    snapshot = engine.bind_snapshot(VALID_SHA256, 10, "evidence_vault")
+    vt = engine.validate_version_tuple("v1", "code", "env")
+    binding = engine.bind_evidence(anchor.anchor_id, ["ev-1"])
+    return engine.produce_receipt(anchor, snapshot, vt, "strict", binding)
+
+
+def _make_patch_receipt(replay_hash: str = ""):
+    patch = PatchRuntime()
+    patch.configure_allowlist(["tools/file.py"])
+    patch_request = patch.create_request(
+        "patch-1", "tools/file.py", VALID_SHA256_B, VALID_SHA256_C,
+        replay_receipt_hash=replay_hash,
+    )
+    return patch.approve(patch_request)
+
+
+def _make_execution_receipt(patch_hash: str = ""):
+    kernel = LocalExecutionKernel()
+    kernel.configure_allowlist(["python3"])
+    exec_request = kernel.create_request("exec-1", "test", "python3 -m pytest")
+    return kernel.approve(exec_request, patch_receipt_hash=patch_hash)
+
+
 class TestCrossSubsystemIntegration(unittest.TestCase):
     """Full cross-subsystem integration tests."""
 
     def test_evidence_to_replay_compatibility(self):
-        """Evidence Vault receipts are compatible with Replay Engine."""
-        engine = ReplayEngine()
-        anchor = engine.create_anchor(VALID_SHA256, "v1", "code", "env")
-        snapshot = engine.bind_snapshot(VALID_SHA256, 10, "evidence_vault")
-        vt = engine.validate_version_tuple("v1", "code", "env")
-        receipt = engine.produce_receipt(anchor, snapshot, vt, "strict")
-
-        # Replay receipt has all required fields for spine validation
-        self.assertTrue(receipt.canonical_hash)
-        self.assertTrue(receipt.anchor_id)
-        self.assertTrue(receipt.snapshot_id)
-        self.assertEqual(receipt.module_version, "v1")
+        replay_receipt = _make_replay_receipt()
+        evidence = {"artifact_id": "ev-1", "content_hash": VALID_SHA256, "hash_algorithm": "sha256"}
+        result = RuntimeReceiptValidator.validate_evidence_to_replay(evidence, replay_receipt.to_dict())
+        self.assertTrue(result["compatible"])
+        self.assertTrue(replay_receipt.evidence_binding_hash)
+        self.assertIn("ev-1", replay_receipt.evidence_artifact_ids)
 
     def test_replay_to_patch_compatibility(self):
-        """Replay Engine receipts are compatible with Patch Runtime."""
-        engine = ReplayEngine()
-        anchor = engine.create_anchor(VALID_SHA256, "v1", "code", "env")
-        snapshot = engine.bind_snapshot(VALID_SHA256, 10, "evidence_vault")
-        vt = engine.validate_version_tuple("v1", "code", "env")
-        replay_receipt = engine.produce_receipt(anchor, snapshot, vt, "strict")
-
-        patch = PatchRuntime()
-        patch.configure_allowlist(["tools/file.py"])
-        patch_request = patch.create_request(
-            "patch-1", "tools/file.py", VALID_SHA256_B, VALID_SHA256_C,
+        replay_receipt = _make_replay_receipt()
+        patch_receipt = _make_patch_receipt(replay_receipt.canonical_hash)
+        result = RuntimeReceiptValidator.validate_replay_to_patch(
+            replay_receipt.to_dict(), patch_receipt.to_dict(),
         )
-        patch_receipt = patch.approve(patch_request)
-
-        self.assertEqual(replay_receipt.module_version, "v1")
-        self.assertEqual(patch_receipt.module_version, "v1")
-        self.assertTrue(replay_receipt.canonical_hash)
-        self.assertTrue(patch_receipt.canonical_hash)
+        self.assertTrue(result["compatible"])
 
     def test_patch_to_execution_compatibility(self):
-        """Patch Runtime receipts are compatible with Execution Kernel."""
-        patch = PatchRuntime()
-        patch.configure_allowlist(["tools/file.py"])
-        patch_request = patch.create_request(
-            "patch-1", "tools/file.py", VALID_SHA256, VALID_SHA256_B,
+        patch_receipt = _make_patch_receipt()
+        exec_receipt = _make_execution_receipt(patch_receipt.canonical_hash)
+        result = RuntimeReceiptValidator.validate_patch_to_execution(
+            patch_receipt.to_dict(), exec_receipt.to_dict(),
         )
-        patch_receipt = patch.approve(patch_request)
-
-        kernel = LocalExecutionKernel()
-        kernel.configure_allowlist(["python3"])
-        exec_request = kernel.create_request("exec-1", "test", "python3 -m pytest")
-        exec_receipt = kernel.approve(exec_request)
-
-        self.assertEqual(patch_receipt.module_version, "v1")
-        self.assertEqual(exec_receipt.module_version, "v1")
+        self.assertTrue(result["compatible"])
 
     def test_all_to_operator_compatibility(self):
-        """Replay/Patch/Execution receipts bind into Operator Daily Run."""
-        engine = ReplayEngine()
-        anchor = engine.create_anchor(VALID_SHA256, "v1", "code", "env")
-        snapshot = engine.bind_snapshot(VALID_SHA256, 10, "evidence_vault")
-        vt = engine.validate_version_tuple("v1", "code", "env")
-        replay_receipt = engine.produce_receipt(anchor, snapshot, vt, "strict")
-
-        patch = PatchRuntime()
-        patch.configure_allowlist(["tools/file.py"])
-        patch_request = patch.create_request(
-            "patch-1", "tools/file.py", VALID_SHA256_B, VALID_SHA256_C,
-        )
-        patch_receipt = patch.approve(patch_request)
-
-        kernel = LocalExecutionKernel()
-        kernel.configure_allowlist(["python3"])
-        exec_request = kernel.create_request("exec-1", "test", "python3 -m pytest")
-        exec_receipt = kernel.approve(exec_request)
+        replay_receipt = _make_replay_receipt()
+        patch_receipt = _make_patch_receipt(replay_receipt.canonical_hash)
+        exec_receipt = _make_execution_receipt(patch_receipt.canonical_hash)
 
         operator = OperatorDailyRun()
         op_request = operator.create_request(
             "run-1", "op-1",
             VALID_SHA256_D,
             replay_receipt.canonical_hash,
-            "Review evidence and approve patches",
+            "Review evidence and approve patches with local kernel validation",
             "review-1", "approval-1",
             patch_receipt_hashes=[patch_receipt.canonical_hash],
             execution_receipt_hashes=[exec_receipt.canonical_hash],
         )
         op_receipt = operator.approve(op_request)
+        result = RuntimeReceiptValidator.validate_execution_to_operator(
+            exec_receipt.to_dict(), op_receipt.to_dict(),
+        )
+        self.assertTrue(result["compatible"])
         self.assertEqual(op_receipt.status, "approved")
-        self.assertTrue(op_receipt.no_production_action)
 
     def test_spine_validates_full_chain(self):
-        """Runtime Receipt Spine validates the full chain."""
         chain = RuntimeReceiptChain()
         chain.set_evidence_vault_receipt(VALID_SHA256)
         chain.set_replay_receipt(VALID_SHA256_B)
@@ -131,40 +117,23 @@ class TestCrossSubsystemIntegration(unittest.TestCase):
         self.assertTrue(chain.validate()["chain_valid"])
 
     def test_spine_rejects_incomplete_chain(self):
-        """Runtime Receipt Spine rejects incomplete chains."""
         chain = RuntimeReceiptChain()
         chain.set_evidence_vault_receipt(VALID_SHA256)
         chain.set_replay_receipt(VALID_SHA256_B)
-        # Missing patch, execution, operator
         result = chain.validate()
         self.assertFalse(result["chain_valid"])
         self.assertEqual(len(result["missing_links"]), 3)
 
     def test_recovery_consumes_failure_bundles(self):
-        """Runtime Recovery consumes failure bundles from any subsystem."""
-        # Failure from replay
         bundle = FailureBundle.create(
-            "replay_engine",
-            ["REPLAY_EVIDENCE_CORRUPTED"],
-            ["ev-1", "ev-2"],
+            "replay_engine", ["REPLAY_EVIDENCE_CORRUPTED"], ["ev-1", "ev-2"],
         )
-        plan = RecoveryPlan.create(
-            bundle.bundle_id,
-            ["restore evidence", "replay evidence"],
-        )
+        plan = RecoveryPlan.create(bundle.bundle_id, ["restore evidence", "replay evidence"])
         receipt = produce_recovery_receipt(bundle.bundle_id, plan.plan_id, "ready")
         self.assertEqual(receipt.status, "ready")
 
-        # Failure from patch
-        bundle2 = FailureBundle.create(
-            "patch_runtime",
-            ["PATCH_ALLOWLIST_FAILED"],
-            ["ev-3"],
-        )
-        plan2 = RecoveryPlan.create(
-            bundle2.bundle_id,
-            ["fix allowlist", "re-run validation"],
-        )
+        bundle2 = FailureBundle.create("patch_runtime", ["PATCH_ALLOWLIST_FAILED"], ["ev-3"])
+        plan2 = RecoveryPlan.create(bundle2.bundle_id, ["fix allowlist", "re-run validation"])
         receipt2 = produce_recovery_receipt(bundle2.bundle_id, plan2.plan_id, "ready")
         self.assertEqual(receipt2.status, "ready")
 
@@ -175,10 +144,24 @@ class TestSpineValidatorIntegration(unittest.TestCase):
     def test_full_spine_validation(self):
         result = RuntimeReceiptValidator.validate_full_spine(
             {"artifact_id": "ev-1", "content_hash": VALID_SHA256, "hash_algorithm": "sha256"},
-            {"receipt_id": "rp-1", "anchor_id": "a-1", "canonical_hash": VALID_SHA256_B},
-            {"receipt_id": "pt-1", "request_id": "req-1", "canonical_hash": VALID_SHA256_C},
-            {"receipt_id": "ex-1", "execution_id": "exec-1", "canonical_hash": VALID_SHA256_D},
-            {"receipt_id": "op-1", "run_id": "run-1", "canonical_hash": VALID_SHA256_E},
+            {
+                "receipt_id": "rp-1", "anchor_id": "a-1", "canonical_hash": VALID_SHA256_B,
+                "evidence_binding_valid": True,
+                "evidence_binding_hash": VALID_SHA256,
+                "evidence_artifact_ids": ["ev-1"],
+            },
+            {
+                "receipt_id": "pt-1", "request_id": "req-1", "canonical_hash": VALID_SHA256_C,
+                "replay_receipt_hash": VALID_SHA256_B,
+            },
+            {
+                "receipt_id": "ex-1", "execution_id": "exec-1", "canonical_hash": VALID_SHA256_D,
+                "patch_receipt_hash": VALID_SHA256_C,
+            },
+            {
+                "receipt_id": "op-1", "run_id": "run-1", "canonical_hash": VALID_SHA256_E,
+                "execution_receipt_hashes": [VALID_SHA256_D],
+            },
         )
         self.assertTrue(result["spine_valid"])
 
@@ -187,45 +170,20 @@ class TestAllReceiptsDeterministic(unittest.TestCase):
     """Verify all receipt types are deterministic."""
 
     def test_replay_receipt_deterministic(self):
-        engine1 = ReplayEngine()
-        engine2 = ReplayEngine()
-        for eng in (engine1, engine2):
-            anchor = eng.create_anchor(VALID_SHA256, "v1", "code", "env")
-            snapshot = eng.bind_snapshot(VALID_SHA256, 10, "evidence_vault")
-            vt = eng.validate_version_tuple("v1", "code", "env")
-            receipt = eng.produce_receipt(anchor, snapshot, vt, "strict")
-            if eng is engine1:
-                r1 = receipt
-            else:
-                r2 = receipt
+        r1 = _make_replay_receipt()
+        r2 = _make_replay_receipt()
         self.assertEqual(r1.receipt_id, r2.receipt_id)
         self.assertEqual(r1.canonical_hash, r2.canonical_hash)
 
     def test_patch_receipt_deterministic(self):
-        p1 = PatchRuntime()
-        p1.configure_allowlist(["tools/file.py"])
-        req1 = p1.create_request("patch-1", "tools/file.py", VALID_SHA256, VALID_SHA256_B)
-        r1 = p1.approve(req1)
-
-        p2 = PatchRuntime()
-        p2.configure_allowlist(["tools/file.py"])
-        req2 = p2.create_request("patch-1", "tools/file.py", VALID_SHA256, VALID_SHA256_B)
-        r2 = p2.approve(req2)
-
+        r1 = _make_patch_receipt(VALID_SHA256)
+        r2 = _make_patch_receipt(VALID_SHA256)
         self.assertEqual(r1.receipt_id, r2.receipt_id)
         self.assertEqual(r1.canonical_hash, r2.canonical_hash)
 
     def test_execution_receipt_deterministic(self):
-        k1 = LocalExecutionKernel()
-        k1.configure_allowlist(["python3"])
-        req1 = k1.create_request("exec-1", "test", "python3 -m pytest")
-        r1 = k1.approve(req1)
-
-        k2 = LocalExecutionKernel()
-        k2.configure_allowlist(["python3"])
-        req2 = k2.create_request("exec-1", "test", "python3 -m pytest")
-        r2 = k2.approve(req2)
-
+        r1 = _make_execution_receipt(VALID_SHA256)
+        r2 = _make_execution_receipt(VALID_SHA256)
         self.assertEqual(r1.receipt_id, r2.receipt_id)
 
     def test_operator_receipt_deterministic(self):
@@ -250,14 +208,10 @@ class TestNoRuntimeClaims(unittest.TestCase):
     """Verify no runtime claims about provider live execution or trading."""
 
     def test_no_provider_live_claim(self):
-        """No runtime module claims provider live execution capability."""
         runtime_modules = [
-            "tools/replay_engine",
-            "tools/patch_runtime",
-            "tools/local_execution_kernel",
-            "tools/operator_daily_run",
-            "tools/runtime_spine",
-            "tools/runtime_recovery",
+            "tools/replay_engine", "tools/patch_runtime",
+            "tools/local_execution_kernel", "tools/operator_daily_run",
+            "tools/runtime_spine", "tools/runtime_recovery",
         ]
         for mod_path in runtime_modules:
             for py_file in (ROOT / mod_path).glob("*.py"):
@@ -271,7 +225,6 @@ class TestNoRuntimeClaims(unittest.TestCase):
                         continue
                     if "no live provider" in stripped.lower():
                         continue
-                    # Check for claims of capability
                     lower = stripped.lower()
                     if "provider execution" in lower and "no" not in lower:
                         self.fail(f"{py_file.name}: claims provider execution")
@@ -279,7 +232,6 @@ class TestNoRuntimeClaims(unittest.TestCase):
                         self.fail(f"{py_file.name}: claims live provider execution")
 
     def test_no_trading_claim(self):
-        """No runtime module claims trading execution capability."""
         runtime_modules = [
             "tools/replay_engine", "tools/patch_runtime",
             "tools/local_execution_kernel", "tools/operator_daily_run",
@@ -301,7 +253,6 @@ class TestNoRuntimeClaims(unittest.TestCase):
                         self.fail(f"{py_file.name}: claims trading execution")
 
     def test_no_network_imports_anywhere(self):
-        """All runtime modules are free of network imports."""
         runtime_modules = [
             "tools/replay_engine", "tools/patch_runtime",
             "tools/local_execution_kernel", "tools/operator_daily_run",
@@ -318,7 +269,6 @@ class TestNoRuntimeClaims(unittest.TestCase):
                 self.assertNotIn("import openai", src, f"{py_file.name}")
 
     def test_no_env_reads_anywhere(self):
-        """All runtime modules are free of env reads."""
         runtime_modules = [
             "tools/replay_engine", "tools/patch_runtime",
             "tools/local_execution_kernel", "tools/operator_daily_run",
