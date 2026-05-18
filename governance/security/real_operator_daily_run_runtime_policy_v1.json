@@ -1,0 +1,59 @@
+{
+  "policy_name": "real_operator_daily_run_runtime_policy_v1",
+  "policy_version": "v1",
+  "status": "active",
+  "bounded_runtime": "operator_daily_run",
+  "runtime_version": "v1",
+  "contract_only": true,
+  "no_production_action": true,
+  "required_behaviors": [
+    "daily_run_request_model",
+    "run_window_validation",
+    "evidence_summary_binding",
+    "replay_receipt_binding",
+    "patch_receipt_binding",
+    "execution_receipt_binding",
+    "human_review_gate",
+    "approval_gate",
+    "single_operator_action_plan",
+    "no_autonomous_production_action",
+    "no_trading",
+    "no_network",
+    "deterministic_run_receipt",
+    "missing_run_id_rejected",
+    "missing_operator_id_rejected",
+    "missing_evidence_summary_rejected",
+    "missing_replay_receipt_rejected",
+    "missing_human_review_rejected",
+    "missing_approval_rejected",
+    "production_action_rejected"
+  ],
+  "forbidden": [
+    "autonomous_production_action",
+    "trading",
+    "network_calls",
+    "production_deployment",
+    "secret_material",
+    "env_file_read",
+    "missing_required_fields",
+    "bypassing_human_review",
+    "bypassing_approval"
+  ],
+  "allowed_hash_algorithms": ["blake2b", "sha256", "sha512"],
+  "allowed_windows": ["daily_review", "incident_response", "scheduled_maintenance"],
+  "receipt_types": ["OperatorRunReceipt", "OperatorRunFailureReceipt"],
+  "security_gates": {
+    "no_autonomous_production_action": true,
+    "no_trading": true,
+    "no_network": true,
+    "human_review_required": true,
+    "approval_required": true,
+    "single_operator_action_plan": true,
+    "deterministic_receipts": true
+  },
+  "module_path": "tools/operator_daily_run",
+  "governance_bindings": [
+    "governance/local_train/real_operator_daily_run_runtime_registry_v1.json",
+    "docs/runbooks/real_operator_daily_run_runtime_v1.md"
+  ]
+}
