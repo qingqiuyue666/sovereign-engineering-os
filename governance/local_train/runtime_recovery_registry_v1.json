@@ -1,0 +1,24 @@
+{
+  "registry_name": "runtime_recovery_registry_v1",
+  "registry_version": "v1",
+  "status": "active",
+  "boundary": "local-only, contract-only, no destructive recovery in v1",
+  "module_path": "tools/runtime_recovery",
+  "functions": [
+    "create_failure_bundle",
+    "create_recovery_plan",
+    "produce_recovery_receipt",
+    "canonical_hash"
+  ],
+  "classes": [
+    "FailureBundle",
+    "RecoveryPlan",
+    "RecoveryReceipt",
+    "RuntimeRecoveryCanonicalHash"
+  ],
+  "receipt_types": ["RecoveryReceipt"],
+  "hash_algorithms": ["blake2b", "sha256", "sha512"],
+  "governance_bindings": [
+    "governance/security/runtime_recovery_policy_v1.json"
+  ]
+}

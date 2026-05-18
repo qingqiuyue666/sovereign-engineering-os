@@ -1,0 +1,34 @@
+{
+  "policy_name": "runtime_receipt_spine_policy_v1",
+  "policy_version": "v1",
+  "status": "active",
+  "required_behaviors": [
+    "evidence_vault_to_replay_compatibility",
+    "replay_to_patch_compatibility",
+    "patch_to_execution_compatibility",
+    "execution_to_operator_compatibility",
+    "deterministic_receipt_chain_hash",
+    "missing_chain_link_rejected",
+    "mismatched_artifact_ids_rejected",
+    "raw_payload_rejected",
+    "no_network_subprocess_live_provider_trading"
+  ],
+  "forbidden": [
+    "network", "subprocess", "live_provider", "trading",
+    "raw_payload_in_receipts", "missing_chain_links",
+    "mismatched_artifact_ids"
+  ],
+  "allowed_hash_algorithms": ["blake2b", "sha256", "sha512"],
+  "chain_order": ["evidence_vault", "replay", "patch", "execution", "operator_run"],
+  "security_gates": {
+    "no_network": true,
+    "no_subprocess": true,
+    "no_live_provider": true,
+    "no_trading": true,
+    "no_raw_payload": true,
+    "deterministic_chain_hash": true,
+    "missing_link_rejected": true,
+    "mismatched_artifact_id_rejected": true
+  },
+  "module_path": "tools/runtime_spine"
+}

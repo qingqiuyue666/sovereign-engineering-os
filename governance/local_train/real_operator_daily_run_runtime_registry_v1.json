@@ -1,0 +1,30 @@
+{
+  "registry_name": "real_operator_daily_run_runtime_registry_v1",
+  "registry_version": "v1",
+  "status": "active",
+  "boundary": "local-only, contract-only, no autonomous production action in v1",
+  "module_path": "tools/operator_daily_run",
+  "functions": [
+    "create_request",
+    "validate_window",
+    "validate_review",
+    "approve",
+    "produce_failure_receipt",
+    "canonical_hash"
+  ],
+  "classes": [
+    "OperatorDailyRun",
+    "DailyRunRequest",
+    "RunWindow",
+    "ReviewGate",
+    "OperatorRunReceipt",
+    "OperatorRunFailureReceipt",
+    "OperatorRunCanonicalHash",
+    "OperatorRunSecurity"
+  ],
+  "receipt_types": ["OperatorRunReceipt", "OperatorRunFailureReceipt"],
+  "hash_algorithms": ["blake2b", "sha256", "sha512"],
+  "governance_bindings": [
+    "governance/security/real_operator_daily_run_runtime_policy_v1.json"
+  ]
+}

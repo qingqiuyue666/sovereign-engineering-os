@@ -1,0 +1,60 @@
+{
+  "policy_name": "real_patch_application_runtime_policy_v1",
+  "policy_version": "v1",
+  "status": "active",
+  "bounded_runtime": "patch_application",
+  "runtime_version": "v1",
+  "dry_run_only": true,
+  "no_patch_application": true,
+  "required_behaviors": [
+    "dry_run_patch_validation",
+    "patch_request_contract",
+    "patch_allowlist_enforcement",
+    "target_path_safety",
+    "absolute_path_rejection",
+    "path_traversal_rejection",
+    "forbidden_root_rejection",
+    "main_mutation_rejection",
+    "git_push_merge_branch_delete_rejection",
+    "no_freeform_shell",
+    "no_network",
+    "rollback_bundle_required",
+    "tests_required_before_approval",
+    "deterministic_patch_receipt",
+    "patch_failure_receipt",
+    "no_destructive_mutation_in_v1",
+    "no_overclaim_about_actual_patch_application"
+  ],
+  "forbidden": [
+    "absolute_paths",
+    "path_traversal",
+    "forbidden_roots",
+    "main_mutation",
+    "git_push",
+    "git_merge",
+    "branch_delete",
+    "freeform_shell",
+    "network_calls",
+    "secret_material",
+    "env_file_read",
+    "destructive_mutation",
+    "actual_patch_application"
+  ],
+  "allowed_hash_algorithms": ["blake2b", "sha256", "sha512"],
+  "receipt_types": ["PatchReceipt", "PatchFailureReceipt"],
+  "security_gates": {
+    "no_network": true,
+    "no_git_push_merge_branch_delete": true,
+    "no_freeform_shell": true,
+    "no_destructive_mutation_in_v1": true,
+    "no_overclaim_actual_application": true,
+    "rollback_bundle_required": true,
+    "tests_required_before_approval": true,
+    "deterministic_receipts": true
+  },
+  "module_path": "tools/patch_runtime",
+  "governance_bindings": [
+    "governance/local_train/real_patch_application_runtime_registry_v1.json",
+    "docs/runbooks/real_patch_application_runtime_v1.md"
+  ]
+}

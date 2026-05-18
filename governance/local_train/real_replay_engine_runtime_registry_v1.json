@@ -1,0 +1,49 @@
+{
+  "registry_name": "real_replay_engine_runtime_registry_v1",
+  "registry_version": "v1",
+  "status": "active",
+  "boundary": "local-only, contract-only, no actual replay execution in v1",
+  "module_path": "tools/replay_engine",
+  "functions": [
+    "create_anchor",
+    "bind_snapshot",
+    "validate_version_tuple",
+    "bind_evidence",
+    "check_readiness",
+    "produce_receipt",
+    "produce_failure_receipt",
+    "record_failure",
+    "add_mismatch",
+    "validate_payload",
+    "validate_mode",
+    "canonical_hash",
+    "engine_hash"
+  ],
+  "classes": [
+    "ReplayEngine",
+    "ReplayAnchor",
+    "ReplaySnapshot",
+    "ReplayVersionTuple",
+    "ReplayMismatch",
+    "ReplayReceipt",
+    "ReplayReadinessReceipt",
+    "ReplayFailureReceipt",
+    "ReplayEvidenceBinding",
+    "ReplayFailure",
+    "ReplayFailures",
+    "ReplayModes",
+    "ReplaySecurity",
+    "ReplayCanonicalHash",
+    "MismatchReport"
+  ],
+  "receipt_types": [
+    "ReplayReceipt",
+    "ReplayReadinessReceipt",
+    "ReplayFailureReceipt"
+  ],
+  "hash_algorithms": ["blake2b", "sha256", "sha512"],
+  "modes": ["strict", "dry_run"],
+  "governance_bindings": [
+    "governance/security/real_replay_engine_runtime_policy_v1.json"
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "policy_name": "runtime_recovery_policy_v1",
+  "policy_version": "v1",
+  "status": "active",
+  "required_behaviors": [
+    "failure_bundle_creation",
+    "failure_evidence_binding",
+    "recovery_plan_creation",
+    "rollback_compatible_receipt",
+    "deterministic_recovery_receipt",
+    "missing_evidence_rejected",
+    "missing_failed_module_rejected",
+    "destructive_recovery_rejected",
+    "no_production_mutation",
+    "no_network",
+    "no_secret_material"
+  ],
+  "forbidden": [
+    "destructive_recovery",
+    "production_mutation",
+    "network_calls",
+    "secret_material",
+    "env_file_read",
+    "branch_delete",
+    "main_mutation",
+    "force_push"
+  ],
+  "allowed_hash_algorithms": ["blake2b", "sha256", "sha512"],
+  "receipt_types": ["RecoveryReceipt"],
+  "security_gates": {
+    "no_destructive_recovery": true,
+    "no_production_mutation": true,
+    "no_network": true,
+    "no_secret_material": true,
+    "rollback_compatible": true,
+    "deterministic_receipts": true
+  },
+  "module_path": "tools/runtime_recovery"
+}

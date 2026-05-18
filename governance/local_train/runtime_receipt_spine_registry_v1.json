@@ -1,0 +1,27 @@
+{
+  "registry_name": "runtime_receipt_spine_registry_v1",
+  "registry_version": "v1",
+  "status": "active",
+  "boundary": "local-only, receipt chain validation, no network/subprocess/live provider/trading",
+  "module_path": "tools/runtime_spine",
+  "functions": [
+    "validate_evidence_to_replay",
+    "validate_replay_to_patch",
+    "validate_patch_to_execution",
+    "validate_execution_to_operator",
+    "validate_full_spine",
+    "validate_chain",
+    "canonical_hash",
+    "validate_no_raw_payload"
+  ],
+  "classes": [
+    "RuntimeReceiptChain",
+    "RuntimeReceiptValidator",
+    "RuntimeSpineCanonicalHash",
+    "RuntimeSpineSecurity"
+  ],
+  "hash_algorithms": ["blake2b", "sha256", "sha512"],
+  "governance_bindings": [
+    "governance/security/runtime_receipt_spine_policy_v1.json"
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "policy_name": "real_replay_engine_runtime_policy_v1",
+  "policy_version": "v1",
+  "status": "active",
+  "bounded_runtime": "replay_engine",
+  "runtime_version": "v1",
+  "contract_only": true,
+  "no_replay_execution": true,
+  "required_behaviors": [
+    "replay_anchor_creation",
+    "input_snapshot_binding",
+    "version_tuple_validation",
+    "environment_fingerprint_validation",
+    "replay_request_validation",
+    "replay_mode_validation",
+    "deterministic_replay_receipt",
+    "replay_readiness_receipt",
+    "replay_failure_receipt",
+    "mismatch_report",
+    "mismatch_report_hash",
+    "evidence_vault_binding",
+    "exact_replay_gate",
+    "cloud_requery_rejection",
+    "nondeterministic_replay_rejection",
+    "corrupted_evidence_fail_closed",
+    "no_evidence_mutation",
+    "no_raw_payload_in_receipts",
+    "no_wall_clock_in_hash_or_receipt"
+  ],
+  "forbidden": [
+    "cloud_requery",
+    "nondeterministic_replay",
+    "network_call",
+    "subprocess_execution",
+    "cloud_ai_api",
+    "live_provider_execution",
+    "trading_execution",
+    "production_deployment",
+    "evidence_mutation",
+    "raw_payload_in_receipts",
+    "wall_clock_in_hash",
+    "secret_material",
+    "env_file_read"
+  ],
+  "allowed_hash_algorithms": ["blake2b", "sha256", "sha512"],
+  "allowed_modes": ["strict", "dry_run"],
+  "receipt_types": [
+    "ReplayReceipt",
+    "ReplayReadinessReceipt",
+    "ReplayFailureReceipt"
+  ],
+  "security_gates": {
+    "no_network": true,
+    "no_cloud_ai": true,
+    "no_live_provider": true,
+    "no_secret_material": true,
+    "no_evidence_mutation": true,
+    "no_raw_payload_in_receipts": true,
+    "deterministic_only": true,
+    "fail_closed": true
+  },
+  "module_path": "tools/replay_engine",
+  "governance_bindings": [
+    "governance/local_train/real_replay_engine_runtime_registry_v1.json",
+    "docs/runbooks/real_replay_engine_runtime_v1.md"
+  ]
+}
