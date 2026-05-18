@@ -13,7 +13,7 @@ if str(ROOT) not in sys.path:
 from kernel.runtime.code_audit_workbench import build_code_audit_report, render_code_audit_markdown
 
 REPORT_PATH = ROOT / "docs" / "reports" / "sovereign_engineering_os_mainline_audit_report.md"
-MAIN_COMMIT = "3d219bc9efa961d315db48afbaec9f3d8c6bf458"
+MAIN_COMMIT = "1f4f77b8141e04343ace0d6ee62205d73805381e"
 OBSERVED_AT = "2026-05-19T00:00:00+08:00"
 VALID_DIGEST = "sha256:" + "1" * 64
 
@@ -55,7 +55,7 @@ def build_mainline_audit_material() -> dict[str, object]:
             "watchdog and daemon surface",
         ],
         "test_matrix": {
-            "tracer_bullet": "5521 tests, 4 skipped, OK",
+            "tracer_bullet": "5543 tests, 4 skipped, OK",
             "schemas": "70 tests, OK",
             "acceptance": "156 tests, OK",
             "make_ci": "passed",

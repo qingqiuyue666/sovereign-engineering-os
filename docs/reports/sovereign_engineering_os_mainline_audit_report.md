@@ -4,10 +4,10 @@
 | --- | --- |
 | report_id | sovereign-engineering-os-mainline-audit-report-v1 |
 | repository_url | https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os |
-| main_commit | 3d219bc9efa961d315db48afbaec9f3d8c6bf458 |
+| main_commit | 1f4f77b8141e04343ace0d6ee62205d73805381e |
 | policy_version | code-audit-workbench-v1 |
 | code_version | 0.1.0 |
-| content_hash | sha256:3bea1dc25da5ba946fdad0d26994df470e47285e1bbbfc1bfe4496dd5cfde11e |
+| content_hash | sha256:164332199a70fe91c11c82c4b1b3eda2368957cfa32ad0b85149276ca2bff1f0 |
 | observed_at | 2026-05-19T00:00:00+08:00 |
 
 ## Executive Summary
@@ -15,7 +15,7 @@ Sovereign Engineering OS mainline has reached local durable operator-control-pla
 
 ## Repository State
 - branch: main
-- main_commit: 3d219bc9efa961d315db48afbaec9f3d8c6bf458
+- main_commit: 1f4f77b8141e04343ace0d6ee62205d73805381e
 - source: latest mainline snapshot
 - tree_state: clean at verified merge result
 
@@ -48,7 +48,7 @@ Sovereign Engineering OS mainline has reached local durable operator-control-pla
 - git_diff_check: passed
 - make_ci: passed
 - schemas: 70 tests, OK
-- tracer_bullet: 5521 tests, 4 skipped, OK
+- tracer_bullet: 5543 tests, 4 skipped, OK
 
 ## Root Integrity / Governance Status
 - governance_posture: fail-closed root integrity gate remains authoritative
