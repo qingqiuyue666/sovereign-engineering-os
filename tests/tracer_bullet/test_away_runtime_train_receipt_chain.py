@@ -126,14 +126,35 @@ class TestFullReceiptChain(unittest.TestCase):
     def test_spine_validator_full_chain(self):
         result = RuntimeReceiptValidator.validate_full_spine(
             {"artifact_id": "ev-1", "content_hash": VALID_SHA256, "hash_algorithm": "sha256"},
-            {"receipt_id": "rp-1", "anchor_id": "a-1", "canonical_hash": VALID_SHA256_B},
-            {"receipt_id": "pt-1", "request_id": "req-1", "canonical_hash": VALID_SHA256_C},
-            {"receipt_id": "ex-1", "execution_id": "exec-1", "canonical_hash": VALID_SHA256_D},
-            {"receipt_id": "op-1", "run_id": "run-1", "canonical_hash": VALID_SHA256_E},
+            {
+                "receipt_id": "rp-1",
+                "anchor_id": "a-1",
+                "canonical_hash": VALID_SHA256_B,
+                "evidence_binding_valid": True,
+                "evidence_binding_hash": VALID_SHA256,
+                "evidence_artifact_ids": ["ev-1"],
+            },
+            {
+                "receipt_id": "pt-1",
+                "request_id": "req-1",
+                "canonical_hash": VALID_SHA256_C,
+                "replay_receipt_hash": VALID_SHA256_B,
+            },
+            {
+                "receipt_id": "ex-1",
+                "execution_id": "exec-1",
+                "canonical_hash": VALID_SHA256_D,
+                "patch_receipt_hash": VALID_SHA256_C,
+            },
+            {
+                "receipt_id": "op-1",
+                "run_id": "run-1",
+                "canonical_hash": VALID_SHA256_E,
+                "execution_receipt_hashes": [VALID_SHA256_D],
+            },
         )
         self.assertTrue(result["spine_valid"])
         self.assertEqual(len(result["pairs"]), 4)
-        # Check all pair names
         pair_names = list(result["pairs"].keys())
         self.assertIn("evidence->replay", pair_names)
         self.assertIn("replay->patch", pair_names)
