@@ -1,11 +1,3 @@
-"""Replay receipt — deterministic replay receipts.
-
-Generates readiness receipts, failure receipts, and standard replay
-receipts. All receipts are deterministic given the same inputs.
-No wall-clock time in hash/receipt generation.
-No raw payload data in receipts.
-"""
-
 from __future__ import annotations
 
 import hashlib
@@ -15,8 +7,6 @@ from typing import Any, Dict, List, Optional
 
 @dataclass(frozen=True)
 class ReplayReceipt:
-    """Standard replay receipt — no raw payload, deterministic fields only."""
-
     receipt_id: str
     anchor_id: str
     snapshot_id: str
@@ -24,6 +14,8 @@ class ReplayReceipt:
     status: str
     mode: str
     evidence_binding_valid: bool
+    evidence_binding_hash: str
+    evidence_artifact_ids: List[str]
     canonical_hash: str
     created_at: str
     module_version: str = "v1"
@@ -35,8 +27,6 @@ class ReplayReceipt:
 
 @dataclass(frozen=True)
 class ReplayReadinessReceipt:
-    """Readiness receipt produced before any replay attempt."""
-
     receipt_id: str
     anchor_id: str
     snapshot_id: str
@@ -54,8 +44,6 @@ class ReplayReadinessReceipt:
 
 @dataclass(frozen=True)
 class ReplayFailureReceipt:
-    """Failure receipt produced when replay cannot proceed."""
-
     receipt_id: str
     anchor_id: str
     failure_reason: str
@@ -74,14 +62,6 @@ def _hash_id(*parts: str) -> str:
     return hashlib.blake2b("|".join(parts).encode(), digest_size=16).hexdigest()
 
 
-def _created_at(payload: Optional[Dict[str, Any]] = None, default: str = "1970-01-01T00:00:00Z") -> str:
-    if payload:
-        value = payload.get("created_at")
-        if isinstance(value, str) and value.strip():
-            return value
-    return default
-
-
 def _reject_non_mapping(payload: Any) -> None:
     if not isinstance(payload, dict):
         raise TypeError("payload must be a mapping")
@@ -94,6 +74,8 @@ def produce_replay_receipt(
     status: str,
     mode: str,
     evidence_binding_valid: bool,
+    evidence_binding_hash: str = "",
+    evidence_artifact_ids: Optional[List[str]] = None,
     created_at: str = "",
 ) -> ReplayReceipt:
     if not anchor_id.strip():
@@ -102,14 +84,16 @@ def produce_replay_receipt(
         raise ValueError(f"invalid status: {status}")
     if mode not in ("strict", "dry_run"):
         raise ValueError(f"invalid mode: {mode}")
+    ids = sorted(evidence_artifact_ids or [])
+    if evidence_binding_valid and (not evidence_binding_hash.strip() or not ids):
+        raise ValueError("evidence binding hash and ids required")
 
     raw = "|".join([
         anchor_id, snapshot_id, version_tuple_id, status, mode,
-        str(evidence_binding_valid),
+        str(evidence_binding_valid), evidence_binding_hash, "|".join(ids),
     ])
     canonical = hashlib.sha256(raw.encode()).hexdigest()
     receipt_id = _hash_id(anchor_id, snapshot_id, canonical)
-
     return ReplayReceipt(
         receipt_id=receipt_id,
         anchor_id=anchor_id,
@@ -118,6 +102,8 @@ def produce_replay_receipt(
         status=status,
         mode=mode,
         evidence_binding_valid=evidence_binding_valid,
+        evidence_binding_hash=evidence_binding_hash,
+        evidence_artifact_ids=ids,
         canonical_hash=canonical,
         created_at=created_at or "1970-01-01T00:00:00Z",
     )
@@ -137,7 +123,6 @@ def produce_readiness_receipt(
     ])
     canonical = hashlib.sha256(raw.encode()).hexdigest()
     receipt_id = _hash_id(anchor_id, "readiness", canonical)
-
     return ReplayReadinessReceipt(
         receipt_id=receipt_id,
         anchor_id=anchor_id,
@@ -161,11 +146,9 @@ def produce_failure_receipt(
         raise ValueError("failure_reason required")
     if not failure_code.strip():
         raise ValueError("failure_code required")
-
     raw = "|".join([anchor_id, failure_reason, failure_code, str(evidence_corrupted)])
     canonical = hashlib.sha256(raw.encode()).hexdigest()
     receipt_id = _hash_id(anchor_id, "failure", canonical)
-
     return ReplayFailureReceipt(
         receipt_id=receipt_id,
         anchor_id=anchor_id,
