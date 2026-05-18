@@ -303,19 +303,32 @@ class OperatorDecisionLedger:
             if entry.previous_entry_hash is not None:
                 raise ValueError("first_entry_must_have_none_previous_entry_hash")
 
-        # Enforce session state transitions
+        # Enforce session state transitions. A session may be observed as
+
+        # pending once and may then transition once to a final approved/rejected
+
+        # decision. Repeating the same session/action or changing a final
+
+        # decision is rejected fail-closed.
+
         session_id = entry.session_id
+
         action = entry.operator_action
+
         current_state = self._session_states.get(session_id)
 
-        if current_state == "approved":
-            raise ValueError(f"session_{session_id}_already_approved")
-        if current_state == "rejected" and action == "approved":
-            raise ValueError(f"session_{session_id}_already_rejected_cannot_approve")
-        if current_state == "approved" and action == "rejected":
-            raise ValueError(f"session_{session_id}_already_approved_cannot_reject")
+        if current_state is not None:
+
+            if current_state == action:
+
+                raise ValueError(f"duplicate_session_action_{session_id}_{action}")
+
+            if current_state in {"approved", "rejected"}:
+
+                raise ValueError(f"session_{session_id}_already_finalized_as_{current_state}")
 
         self._session_states[session_id] = action
+
         self._entry_ids.add(entry.entry_id)
         self._entries.append(entry)
         return entry
