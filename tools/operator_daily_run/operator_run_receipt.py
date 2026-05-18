@@ -23,6 +23,10 @@ class OperatorRunReceipt:
     replay_bound: bool
     review_passed: bool
     approval_passed: bool
+    replay_receipt_hash: str
+    patch_receipt_hashes: List[str]
+    execution_receipt_hashes: List[str]
+    chain_hash: str
     canonical_hash: str
     created_at: str
     module_version: str = "v1"
@@ -53,6 +57,18 @@ def _hash_id(*parts: str) -> str:
     return hashlib.blake2b("|".join(parts).encode(), digest_size=16).hexdigest()
 
 
+def _hash64(value: str) -> bool:
+    return isinstance(value, str) and len(value) == 64 and all(c in "0123456789abcdef" for c in value.lower())
+
+
+def _normalize_hashes(values: List[str] | None) -> List[str]:
+    normalized = sorted(values or [])
+    for value in normalized:
+        if not _hash64(value):
+            raise ValueError("receipt hash must be sha256 hex")
+    return normalized
+
+
 def produce_operator_run_receipt(
     run_id: str,
     operator_id: str,
@@ -61,15 +77,26 @@ def produce_operator_run_receipt(
     replay_bound: bool,
     review_passed: bool,
     approval_passed: bool,
+    replay_receipt_hash: str = "",
+    patch_receipt_hashes: List[str] | None = None,
+    execution_receipt_hashes: List[str] | None = None,
+    chain_hash: str = "",
     created_at: str = "",
 ) -> OperatorRunReceipt:
     if status not in ("approved", "rejected"):
         raise ValueError(f"invalid status: {status}")
+    if replay_receipt_hash and not _hash64(replay_receipt_hash):
+        raise ValueError("replay_receipt_hash must be sha256 hex when provided")
+    patches = _normalize_hashes(patch_receipt_hashes)
+    executions = _normalize_hashes(execution_receipt_hashes)
+    if chain_hash and not _hash64(chain_hash):
+        raise ValueError("chain_hash must be sha256 hex when provided")
 
     raw = "|".join([
         run_id, operator_id, status,
         str(evidence_bound), str(replay_bound),
-        str(review_passed), str(approval_passed),
+        str(review_passed), str(approval_passed), replay_receipt_hash,
+        "|".join(patches), "|".join(executions), chain_hash,
     ])
     canonical = hashlib.sha256(raw.encode()).hexdigest()
     receipt_id = _hash_id(run_id, operator_id, canonical)
@@ -83,6 +110,10 @@ def produce_operator_run_receipt(
         replay_bound=replay_bound,
         review_passed=review_passed,
         approval_passed=approval_passed,
+        replay_receipt_hash=replay_receipt_hash,
+        patch_receipt_hashes=patches,
+        execution_receipt_hashes=executions,
+        chain_hash=chain_hash,
         canonical_hash=canonical,
         created_at=created_at or "1970-01-01T00:00:00Z",
     )
