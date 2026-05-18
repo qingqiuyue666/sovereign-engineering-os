@@ -1,9 +1,9 @@
-"""Operator daily run — main operator daily run runtime orchestrator.
+"""Operator daily run — local-only validation runtime.
 
-Coordinates daily run request validation, evidence/replay/patch/execution
-binding, human review gate, approval gate, receipt generation.
+Coordinates daily run request validation, evidence/replay/patch/local-kernel
+binding, human review gate, approval gate, and receipt generation.
 
-v1 — contract-only. No autonomous production action. No trading. No network.
+v1 — local validation / receipt runtime only. No autonomous production action. No trading. No network.
 """
 
 from __future__ import annotations
@@ -23,11 +23,7 @@ from .operator_run_security import OperatorRunSecurity
 
 
 class OperatorDailyRun:
-    """Real operator daily run runtime — v1 contract-only.
-
-    Validates daily run requests, enforces review/approval gates,
-    and produces deterministic receipts. No autonomous production action.
-    """
+    """Real operator daily run validation runtime — local-only v1."""
 
     def __init__(self) -> None:
         self._receipts: List[OperatorRunReceipt] = []
@@ -47,11 +43,9 @@ class OperatorDailyRun:
         patch_receipt_hashes: List[str] | None = None,
         execution_receipt_hashes: List[str] | None = None,
     ) -> DailyRunRequest:
-        # Security: validate action plan
         sec = OperatorRunSecurity.validate_action_plan(action_plan)
         if not sec["valid"]:
             raise ValueError(f"action_plan_rejected: {sec['violations']}")
-
         request = DailyRunRequest.create(
             run_id=run_id,
             operator_id=operator_id,
@@ -72,8 +66,30 @@ class OperatorDailyRun:
     def validate_review(self, human_review_id: str, approval_id: str) -> Dict[str, Any]:
         return ReviewGate.validate(human_review_id, approval_id)
 
-    def approve(self, request: DailyRunRequest) -> OperatorRunReceipt:
-        # Validate review gate
+    @staticmethod
+    def _requires_patch(action_plan: str) -> bool:
+        return "patch" in action_plan.lower()
+
+    @staticmethod
+    def _requires_local_kernel(action_plan: str) -> bool:
+        text = action_plan.lower()
+        return any(marker in text for marker in ("local kernel", "kernel validation", "dry-run receipt"))
+
+    def validate_chain_context(self, request: DailyRunRequest, chain_hash: str = "") -> Dict[str, Any]:
+        issues: List[str] = []
+        if not request.evidence_summary_hash:
+            issues.append("evidence_summary_hash_missing")
+        if not request.replay_receipt_hash:
+            issues.append("replay_receipt_hash_missing")
+        if self._requires_patch(request.action_plan) and not request.patch_receipt_hashes:
+            issues.append("patch_receipt_hash_required_by_action_plan")
+        if self._requires_local_kernel(request.action_plan) and not request.execution_receipt_hashes:
+            issues.append("local_kernel_receipt_hash_required_by_action_plan")
+        if chain_hash and len(chain_hash) != 64:
+            issues.append("chain_hash_invalid")
+        return {"valid": len(issues) == 0, "issues": issues}
+
+    def approve(self, request: DailyRunRequest, *, chain_hash: str = "") -> OperatorRunReceipt:
         review = self.validate_review(request.human_review_id, request.approval_id)
         if not review["review_passed"]:
             failure = produce_operator_run_failure_receipt(
@@ -84,7 +100,6 @@ class OperatorDailyRun:
             self._failure_receipts.append(failure)
             raise ValueError("review_gate_failed")
 
-        # Security re-check
         sec = OperatorRunSecurity.validate_action_plan(request.action_plan)
         if not sec["valid"]:
             failure = produce_operator_run_failure_receipt(
@@ -95,17 +110,28 @@ class OperatorDailyRun:
             self._failure_receipts.append(failure)
             raise ValueError("security_violation")
 
-        evidence_bound = bool(request.evidence_summary_hash)
-        replay_bound = bool(request.replay_receipt_hash)
+        chain = self.validate_chain_context(request, chain_hash=chain_hash)
+        if not chain["valid"]:
+            failure = produce_operator_run_failure_receipt(
+                request.run_id,
+                "chain_context_failed: " + ", ".join(chain["issues"]),
+                "OP_RUN_CHAIN_CONTEXT_FAILED",
+            )
+            self._failure_receipts.append(failure)
+            raise ValueError("chain_context_failed")
 
         receipt = produce_operator_run_receipt(
             run_id=request.run_id,
             operator_id=request.operator_id,
             status="approved",
-            evidence_bound=evidence_bound,
-            replay_bound=replay_bound,
+            evidence_bound=bool(request.evidence_summary_hash),
+            replay_bound=bool(request.replay_receipt_hash),
             review_passed=review["review_passed"],
             approval_passed=review["gates"].get("approval_present", False),
+            replay_receipt_hash=request.replay_receipt_hash,
+            patch_receipt_hashes=request.patch_receipt_hashes,
+            execution_receipt_hashes=request.execution_receipt_hashes,
+            chain_hash=chain_hash,
         )
         self._receipts.append(receipt)
         return receipt
