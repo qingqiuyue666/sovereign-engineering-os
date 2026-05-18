@@ -1,6 +1,6 @@
-"""Patch receipt — deterministic patch receipts.
+"""Patch receipt — deterministic dry-run patch receipts.
 
-Generates approval receipts and failure receipts for patch operations.
+Generates approval receipts and failure receipts for patch validation.
 All receipts are deterministic. No raw payload in receipts.
 No actual patch application in v1.
 """
@@ -24,6 +24,7 @@ class PatchReceipt:
     preflight_passed: bool
     allowlist_valid: bool
     rollback_bundle_present: bool
+    replay_receipt_hash: str
     canonical_hash: str
     created_at: str
     module_version: str = "v1"
@@ -54,15 +55,22 @@ def _hash_id(*parts: str) -> str:
     return hashlib.blake2b("|".join(parts).encode(), digest_size=16).hexdigest()
 
 
+def _hash64(value: str) -> bool:
+    return isinstance(value, str) and len(value) == 64 and all(c in "0123456789abcdef" for c in value.lower())
+
+
 def produce_patch_receipt(
-    request: Any,  # PatchRequest
+    request: Any,
     preflight_result: Dict[str, bool],
     created_at: str = "",
 ) -> PatchReceipt:
+    replay_receipt_hash = getattr(request, "replay_receipt_hash", "")
+    if replay_receipt_hash and not _hash64(replay_receipt_hash):
+        raise ValueError("replay_receipt_hash must be sha256 hex when provided")
     raw = "|".join([
         request.request_id, request.patch_id, request.target_path,
         str(preflight_result.get("preflight_passed", False)),
-        str(request.rollback_bundle_hash),
+        str(request.rollback_bundle_hash), replay_receipt_hash,
     ])
     canonical = hashlib.sha256(raw.encode()).hexdigest()
     receipt_id = _hash_id(request.request_id, canonical)
@@ -76,6 +84,7 @@ def produce_patch_receipt(
         preflight_passed=preflight_result.get("preflight_passed", False),
         allowlist_valid=preflight_result.get("target_in_allowlist", False),
         rollback_bundle_present=bool(request.rollback_bundle_hash),
+        replay_receipt_hash=replay_receipt_hash,
         canonical_hash=canonical,
         created_at=created_at or "1970-01-01T00:00:00Z",
     )
