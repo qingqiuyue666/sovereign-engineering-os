@@ -47,6 +47,7 @@ from operator_daily_run import (  # type: ignore[import-not-found]
 
 VALID_SHA256 = "a" * 64
 VALID_SHA256_B = "b" * 64
+VALID_SHA256_C = "c" * 64
 
 
 class TestDailyRunRequest(unittest.TestCase):
@@ -62,105 +63,60 @@ class TestDailyRunRequest(unittest.TestCase):
 
     def test_reject_missing_run_id(self):
         with self.assertRaises(ValueError):
-            DailyRunRequest.create(
-                "", "op-1", VALID_SHA256, VALID_SHA256_B,
-                "Review", "review-1", "approval-1",
-            )
+            DailyRunRequest.create("", "op-1", VALID_SHA256, VALID_SHA256_B, "Review", "review-1", "approval-1")
 
     def test_reject_missing_operator_id(self):
         with self.assertRaises(ValueError):
-            DailyRunRequest.create(
-                "run-1", "", VALID_SHA256, VALID_SHA256_B,
-                "Review", "review-1", "approval-1",
-            )
+            DailyRunRequest.create("run-1", "", VALID_SHA256, VALID_SHA256_B, "Review", "review-1", "approval-1")
 
     def test_reject_missing_evidence_summary(self):
         with self.assertRaises(ValueError):
-            DailyRunRequest.create(
-                "run-1", "op-1", "", VALID_SHA256_B,
-                "Review", "review-1", "approval-1",
-            )
+            DailyRunRequest.create("run-1", "op-1", "", VALID_SHA256_B, "Review", "review-1", "approval-1")
 
     def test_reject_invalid_evidence_hash(self):
         with self.assertRaises(ValueError):
-            DailyRunRequest.create(
-                "run-1", "op-1", "short", VALID_SHA256_B,
-                "Review", "review-1", "approval-1",
-            )
+            DailyRunRequest.create("run-1", "op-1", "short", VALID_SHA256_B, "Review", "review-1", "approval-1")
 
     def test_reject_missing_replay_receipt(self):
         with self.assertRaises(ValueError):
-            DailyRunRequest.create(
-                "run-1", "op-1", VALID_SHA256, "",
-                "Review", "review-1", "approval-1",
-            )
+            DailyRunRequest.create("run-1", "op-1", VALID_SHA256, "", "Review", "review-1", "approval-1")
 
     def test_reject_invalid_replay_hash(self):
         with self.assertRaises(ValueError):
-            DailyRunRequest.create(
-                "run-1", "op-1", VALID_SHA256, "short",
-                "Review", "review-1", "approval-1",
-            )
+            DailyRunRequest.create("run-1", "op-1", VALID_SHA256, "short", "Review", "review-1", "approval-1")
 
     def test_reject_missing_human_review(self):
         with self.assertRaises(ValueError):
-            DailyRunRequest.create(
-                "run-1", "op-1", VALID_SHA256, VALID_SHA256_B,
-                "Review", "", "approval-1",
-            )
+            DailyRunRequest.create("run-1", "op-1", VALID_SHA256, VALID_SHA256_B, "Review", "", "approval-1")
 
     def test_reject_missing_approval(self):
         with self.assertRaises(ValueError):
-            DailyRunRequest.create(
-                "run-1", "op-1", VALID_SHA256, VALID_SHA256_B,
-                "Review", "review-1", "",
-            )
+            DailyRunRequest.create("run-1", "op-1", VALID_SHA256, VALID_SHA256_B, "Review", "review-1", "")
 
     def test_reject_missing_action_plan(self):
         with self.assertRaises(ValueError):
-            DailyRunRequest.create(
-                "run-1", "op-1", VALID_SHA256, VALID_SHA256_B,
-                "", "review-1", "approval-1",
-            )
+            DailyRunRequest.create("run-1", "op-1", VALID_SHA256, VALID_SHA256_B, "", "review-1", "approval-1")
 
     def test_reject_production_action(self):
         with self.assertRaises(ValueError):
-            DailyRunRequest.create(
-                "run-1", "op-1", VALID_SHA256, VALID_SHA256_B,
-                "deploy to production", "review-1", "approval-1",
-            )
+            DailyRunRequest.create("run-1", "op-1", VALID_SHA256, VALID_SHA256_B, "deploy to production", "review-1", "approval-1")
 
     def test_reject_trading_action(self):
         with self.assertRaises(ValueError):
-            DailyRunRequest.create(
-                "run-1", "op-1", VALID_SHA256, VALID_SHA256_B,
-                "execute trading order", "review-1", "approval-1",
-            )
+            DailyRunRequest.create("run-1", "op-1", VALID_SHA256, VALID_SHA256_B, "execute trading order", "review-1", "approval-1")
 
     def test_reject_network_action(self):
         with self.assertRaises(ValueError):
-            DailyRunRequest.create(
-                "run-1", "op-1", VALID_SHA256, VALID_SHA256_B,
-                "curl http://api.example.com", "review-1", "approval-1",
-            )
+            DailyRunRequest.create("run-1", "op-1", VALID_SHA256, VALID_SHA256_B, "curl http://api.example.com", "review-1", "approval-1")
 
     def test_request_deterministic(self):
-        r1 = DailyRunRequest.create(
-            "run-1", "op-1", VALID_SHA256, VALID_SHA256_B,
-            "Review evidence", "review-1", "approval-1",
-        )
-        r2 = DailyRunRequest.create(
-            "run-1", "op-1", VALID_SHA256, VALID_SHA256_B,
-            "Review evidence", "review-1", "approval-1",
-        )
+        r1 = DailyRunRequest.create("run-1", "op-1", VALID_SHA256, VALID_SHA256_B, "Review evidence", "review-1", "approval-1")
+        r2 = DailyRunRequest.create("run-1", "op-1", VALID_SHA256, VALID_SHA256_B, "Review evidence", "review-1", "approval-1")
         self.assertEqual(r1.request_id, r2.request_id)
         self.assertEqual(r1.canonical_hash, r2.canonical_hash)
 
     def test_request_no_raw_payload(self):
-        req = DailyRunRequest.create(
-            "run-1", "op-1", VALID_SHA256, VALID_SHA256_B,
-            "Review evidence", "review-1", "approval-1",
-        )
+        req = DailyRunRequest.create("run-1", "op-1", VALID_SHA256, VALID_SHA256_B, "Review evidence", "review-1", "approval-1")
         d = req.to_dict()
         self.assertNotIn("raw_payload", d)
         self.assertNotIn("raw_data", d)
@@ -170,24 +126,19 @@ class TestRunWindow(unittest.TestCase):
     """Run window validation tests."""
 
     def test_valid_window_daily_review(self):
-        result = RunWindow.validate("daily_review")
-        self.assertTrue(result["valid"])
+        self.assertTrue(RunWindow.validate("daily_review")["valid"])
 
     def test_valid_window_incident_response(self):
-        result = RunWindow.validate("incident_response")
-        self.assertTrue(result["valid"])
+        self.assertTrue(RunWindow.validate("incident_response")["valid"])
 
     def test_valid_window_scheduled_maintenance(self):
-        result = RunWindow.validate("scheduled_maintenance")
-        self.assertTrue(result["valid"])
+        self.assertTrue(RunWindow.validate("scheduled_maintenance")["valid"])
 
     def test_reject_unknown_window(self):
-        result = RunWindow.validate("middle_of_night")
-        self.assertFalse(result["valid"])
+        self.assertFalse(RunWindow.validate("middle_of_night")["valid"])
 
     def test_reject_empty_window(self):
-        result = RunWindow.validate("")
-        self.assertFalse(result["valid"])
+        self.assertFalse(RunWindow.validate("")["valid"])
 
     def test_create_window(self):
         w = RunWindow.create("daily_review")
@@ -199,8 +150,7 @@ class TestReviewGate(unittest.TestCase):
     """Human review and approval gate tests."""
 
     def test_both_present(self):
-        result = ReviewGate.validate("review-1", "approval-1")
-        self.assertTrue(result["review_passed"])
+        self.assertTrue(ReviewGate.validate("review-1", "approval-1")["review_passed"])
 
     def test_missing_review(self):
         result = ReviewGate.validate("", "approval-1")
@@ -213,42 +163,34 @@ class TestReviewGate(unittest.TestCase):
         self.assertIn("approval_present", result["failure_reasons"])
 
     def test_both_missing(self):
-        result = ReviewGate.validate("", "")
-        self.assertFalse(result["review_passed"])
+        self.assertFalse(ReviewGate.validate("", "")["review_passed"])
 
     def test_enforce_passes(self):
-        ReviewGate.enforce("review-1", "approval-1")  # should not raise
+        ReviewGate.enforce("review-1", "approval-1")
 
     def test_enforce_raises(self):
         with self.assertRaises(ValueError):
             ReviewGate.enforce("", "")
 
     def test_gate_hash(self):
-        h = ReviewGate.gate_hash("review-1", "approval-1")
-        self.assertEqual(len(h), 64)
+        self.assertEqual(len(ReviewGate.gate_hash("review-1", "approval-1")), 64)
 
 
 class TestOperatorRunReceipts(unittest.TestCase):
     """Operator run receipt tests."""
 
     def test_produce_approved_receipt(self):
-        receipt = produce_operator_run_receipt(
-            "run-1", "op-1", "approved", True, True, True, True,
-        )
+        receipt = produce_operator_run_receipt("run-1", "op-1", "approved", True, True, True, True)
         self.assertEqual(receipt.status, "approved")
         self.assertTrue(receipt.no_production_action)
         self.assertTrue(receipt.canonical_hash)
 
     def test_produce_rejected_receipt(self):
-        receipt = produce_operator_run_receipt(
-            "run-1", "op-1", "rejected", False, False, False, False,
-        )
+        receipt = produce_operator_run_receipt("run-1", "op-1", "rejected", False, False, False, False)
         self.assertEqual(receipt.status, "rejected")
 
     def test_produce_failure_receipt(self):
-        receipt = produce_operator_run_failure_receipt(
-            "run-1", "missing review", "OP_RUN_MISSING_REVIEW",
-        )
+        receipt = produce_operator_run_failure_receipt("run-1", "missing review", "OP_RUN_MISSING_REVIEW")
         self.assertEqual(receipt.failure_code, "OP_RUN_MISSING_REVIEW")
         self.assertTrue(receipt.no_production_action)
 
@@ -276,28 +218,22 @@ class TestOperatorRunSecurity(unittest.TestCase):
     """Operator run security boundary tests."""
 
     def test_validate_clean_action_plan(self):
-        result = OperatorRunSecurity.validate_action_plan("Review daily evidence and approve")
-        self.assertTrue(result["valid"])
+        self.assertTrue(OperatorRunSecurity.validate_action_plan("Review daily evidence and approve")["valid"])
 
     def test_reject_production(self):
-        result = OperatorRunSecurity.validate_action_plan("deploy to production")
-        self.assertFalse(result["valid"])
+        self.assertFalse(OperatorRunSecurity.validate_action_plan("deploy to production")["valid"])
 
     def test_reject_trading(self):
-        result = OperatorRunSecurity.validate_action_plan("execute trading orders")
-        self.assertFalse(result["valid"])
+        self.assertFalse(OperatorRunSecurity.validate_action_plan("execute trading orders")["valid"])
 
     def test_reject_network(self):
-        result = OperatorRunSecurity.validate_action_plan("curl http://api.example.com")
-        self.assertFalse(result["valid"])
+        self.assertFalse(OperatorRunSecurity.validate_action_plan("curl http://api.example.com")["valid"])
 
     def test_reject_autonomous(self):
-        result = OperatorRunSecurity.validate_action_plan("autonomous decision execution")
-        self.assertFalse(result["valid"])
+        self.assertFalse(OperatorRunSecurity.validate_action_plan("autonomous decision execution")["valid"])
 
     def test_reject_empty_action_plan(self):
-        result = OperatorRunSecurity.validate_action_plan("")
-        self.assertFalse(result["valid"])
+        self.assertFalse(OperatorRunSecurity.validate_action_plan("")["valid"])
 
     def test_no_network_detection(self):
         self.assertTrue(OperatorRunSecurity.validate_no_network("review evidence"))
@@ -322,8 +258,7 @@ class TestOperatorRunCanonicalHash(unittest.TestCase):
     """Operator run canonical hash tests."""
 
     def test_canonical_hash(self):
-        h = OperatorRunCanonicalHash.canonical_hash("a", "b")
-        self.assertEqual(len(h), 64)
+        self.assertEqual(len(OperatorRunCanonicalHash.canonical_hash("a", "b")), 64)
 
     def test_deterministic(self):
         h1 = OperatorRunCanonicalHash.canonical_hash("a", "b")
@@ -331,8 +266,7 @@ class TestOperatorRunCanonicalHash(unittest.TestCase):
         self.assertEqual(h1, h2)
 
     def test_run_hash(self):
-        h = OperatorRunCanonicalHash.run_hash("r1", "o1", VALID_SHA256, VALID_SHA256_B)
-        self.assertEqual(len(h), 64)
+        self.assertEqual(len(OperatorRunCanonicalHash.run_hash("r1", "o1", VALID_SHA256, VALID_SHA256_B)), 64)
 
 
 class TestOperatorDailyRun(unittest.TestCase):
@@ -346,63 +280,43 @@ class TestOperatorDailyRun(unittest.TestCase):
             "run-1", "op-1", VALID_SHA256, VALID_SHA256_B,
             "Review daily evidence and approve patches",
             "review-1", "approval-1",
+            patch_receipt_hashes=[VALID_SHA256_C],
         )
         receipt = self.runtime.approve(request)
         self.assertEqual(receipt.status, "approved")
         self.assertTrue(receipt.no_production_action)
+        self.assertEqual(receipt.patch_receipt_hashes, [VALID_SHA256_C])
 
     def test_missing_review_rejected(self):
         with self.assertRaises(ValueError):
-            self.runtime.create_request(
-                "run-1", "op-1", VALID_SHA256, VALID_SHA256_B,
-                "Review daily evidence",
-                "", "approval-1",
-            )
+            self.runtime.create_request("run-1", "op-1", VALID_SHA256, VALID_SHA256_B, "Review daily evidence", "", "approval-1")
 
     def test_missing_approval_rejected(self):
         with self.assertRaises(ValueError):
-            self.runtime.create_request(
-                "run-1", "op-1", VALID_SHA256, VALID_SHA256_B,
-                "Review daily evidence",
-                "review-1", "",
-            )
+            self.runtime.create_request("run-1", "op-1", VALID_SHA256, VALID_SHA256_B, "Review daily evidence", "review-1", "")
 
     def test_production_action_rejected(self):
         with self.assertRaises(ValueError):
-            self.runtime.create_request(
-                "run-1", "op-1", VALID_SHA256, VALID_SHA256_B,
-                "deploy to production",
-                "review-1", "approval-1",
-            )
+            self.runtime.create_request("run-1", "op-1", VALID_SHA256, VALID_SHA256_B, "deploy to production", "review-1", "approval-1")
 
     def test_trading_rejected(self):
         with self.assertRaises(ValueError):
-            self.runtime.create_request(
-                "run-1", "op-1", VALID_SHA256, VALID_SHA256_B,
-                "execute trading",
-                "review-1", "approval-1",
-            )
+            self.runtime.create_request("run-1", "op-1", VALID_SHA256, VALID_SHA256_B, "execute trading", "review-1", "approval-1")
 
     def test_network_rejected(self):
         with self.assertRaises(ValueError):
-            self.runtime.create_request(
-                "run-1", "op-1", VALID_SHA256, VALID_SHA256_B,
-                "curl http://api.example.com",
-                "review-1", "approval-1",
-            )
+            self.runtime.create_request("run-1", "op-1", VALID_SHA256, VALID_SHA256_B, "curl http://api.example.com", "review-1", "approval-1")
 
     def test_window_validation(self):
-        result = self.runtime.validate_window("daily_review")
-        self.assertTrue(result["valid"])
+        self.assertTrue(self.runtime.validate_window("daily_review")["valid"])
 
     def test_window_rejection(self):
-        result = self.runtime.validate_window("invalid")
-        self.assertFalse(result["valid"])
+        self.assertFalse(self.runtime.validate_window("invalid")["valid"])
 
     def test_patch_and_execution_bindings(self):
         request = self.runtime.create_request(
             "run-1", "op-1", VALID_SHA256, VALID_SHA256_B,
-            "Review evidence and patch bindings",
+            "Review evidence and patch bindings with local kernel validation",
             "review-1", "approval-1",
             patch_receipt_hashes=[VALID_SHA256],
             execution_receipt_hashes=[VALID_SHA256_B],
@@ -412,17 +326,30 @@ class TestOperatorDailyRun(unittest.TestCase):
         receipt = self.runtime.approve(request)
         self.assertEqual(receipt.status, "approved")
 
-    def test_failure_receipt_tracks(self):
-        receipt = self.runtime.produce_failure_receipt(
-            "run-1", "missing review", "OP_RUN_MISSING_REVIEW",
+    def test_missing_patch_binding_rejected_when_action_mentions_patch(self):
+        request = self.runtime.create_request(
+            "run-1", "op-1", VALID_SHA256, VALID_SHA256_B,
+            "Review evidence and approve patches",
+            "review-1", "approval-1",
         )
+        with self.assertRaises(ValueError):
+            self.runtime.approve(request)
+
+    def test_missing_local_kernel_binding_rejected_when_action_mentions_kernel(self):
+        request = self.runtime.create_request(
+            "run-1", "op-1", VALID_SHA256, VALID_SHA256_B,
+            "Review evidence with local kernel validation",
+            "review-1", "approval-1",
+        )
+        with self.assertRaises(ValueError):
+            self.runtime.approve(request)
+
+    def test_failure_receipt_tracks(self):
+        self.runtime.produce_failure_receipt("run-1", "missing review", "OP_RUN_MISSING_REVIEW")
         self.assertEqual(self.runtime.failure_count(), 1)
 
     def test_receipt_count_tracks(self):
-        request = self.runtime.create_request(
-            "run-1", "op-1", VALID_SHA256, VALID_SHA256_B,
-            "Review evidence", "review-1", "approval-1",
-        )
+        request = self.runtime.create_request("run-1", "op-1", VALID_SHA256, VALID_SHA256_B, "Review evidence", "review-1", "approval-1")
         self.assertEqual(self.runtime.receipt_count(), 0)
         self.runtime.approve(request)
         self.assertEqual(self.runtime.receipt_count(), 1)
@@ -434,30 +361,20 @@ class TestOperatorDailyRun(unittest.TestCase):
         self.assertNotEqual(h1, h2)
 
     def test_reset(self):
-        request = self.runtime.create_request(
-            "run-1", "op-1", VALID_SHA256, VALID_SHA256_B,
-            "Review evidence", "review-1", "approval-1",
-        )
+        request = self.runtime.create_request("run-1", "op-1", VALID_SHA256, VALID_SHA256_B, "Review evidence", "review-1", "approval-1")
         self.runtime.approve(request)
         self.runtime.reset()
         self.assertEqual(self.runtime.receipt_count(), 0)
         self.assertEqual(self.runtime.failure_count(), 0)
 
     def test_no_production_action_in_receipt(self):
-        request = self.runtime.create_request(
-            "run-1", "op-1", VALID_SHA256, VALID_SHA256_B,
-            "Review evidence", "review-1", "approval-1",
-        )
+        request = self.runtime.create_request("run-1", "op-1", VALID_SHA256, VALID_SHA256_B, "Review evidence", "review-1", "approval-1")
         receipt = self.runtime.approve(request)
         self.assertTrue(receipt.no_production_action)
 
     def test_autonomous_rejected(self):
         with self.assertRaises(ValueError):
-            self.runtime.create_request(
-                "run-1", "op-1", VALID_SHA256, VALID_SHA256_B,
-                "autonomous action execution",
-                "review-1", "approval-1",
-            )
+            self.runtime.create_request("run-1", "op-1", VALID_SHA256, VALID_SHA256_B, "autonomous action execution", "review-1", "approval-1")
 
 
 class TestNoNetworkOrSubprocess(unittest.TestCase):
