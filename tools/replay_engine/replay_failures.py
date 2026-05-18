@@ -1,7 +1,7 @@
 """Replay failures — structured failure capture for replay operations.
 
 Produces immutable failure records. Never includes raw payload data.
-Evidence corruption triggers fail-closed behavior.
+Evidence corruption and missing evidence binding trigger fail-closed behavior.
 """
 
 from __future__ import annotations
@@ -30,7 +30,7 @@ class ReplayFailure:
         failure_reason: str,
         *,
         evidence_corrupted: bool = False,
-    ) -> ReplayFailure:
+    ) -> "ReplayFailure":
         if not isinstance(anchor_id, str):
             raise ValueError("anchor_id must be a string")
         if not failure_code.strip():
@@ -44,12 +44,17 @@ class ReplayFailure:
             "REPLAY_EVIDENCE_CORRUPTED", "REPLAY_NONDETERMINISTIC",
             "REPLAY_CLOUD_REQUERY", "REPLAY_GATE_FAILED",
             "REPLAY_BINDING_INVALID", "REPLAY_INPUT_CORRUPTED",
+            "REPLAY_EVIDENCE_BINDING_MISSING",
+            "REPLAY_EVIDENCE_VAULT_BINDING_FAILED",
         }
         if failure_code not in valid_codes:
             raise ValueError(f"invalid failure_code: {failure_code}")
 
         fail_closed = evidence_corrupted or failure_code in (
-            "REPLAY_EVIDENCE_CORRUPTED", "REPLAY_INPUT_CORRUPTED",
+            "REPLAY_EVIDENCE_CORRUPTED",
+            "REPLAY_INPUT_CORRUPTED",
+            "REPLAY_EVIDENCE_BINDING_MISSING",
+            "REPLAY_EVIDENCE_VAULT_BINDING_FAILED",
         )
         raw = "|".join([anchor_id, failure_code, failure_reason, str(evidence_corrupted)])
         canonical = hashlib.sha256(raw.encode()).hexdigest()
