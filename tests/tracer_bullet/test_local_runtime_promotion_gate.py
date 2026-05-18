@@ -4,7 +4,6 @@ import unittest
 from pathlib import Path
 
 from kernel.runtime.local_runtime_promotion_gate import (
-    LocalRuntimePromotionResult,
     evaluate_promotion_gate,
     validate_promotion_result,
 )
@@ -49,6 +48,7 @@ class PromotionGateAcceptTests(unittest.TestCase):
         result = evaluate_promotion_gate(**_valid_base_args())
         self.assertTrue(result.accepted, result.reasons)
         self.assertEqual(result.decision, "eligible_for_human_review")
+        self.assertIsNone(result.rollback_plan_hash)
         self.assertTrue(validate_promotion_result(result))
 
     def test_promotion_receipt_hash_is_deterministic(self):
@@ -71,6 +71,7 @@ class PromotionGateAcceptTests(unittest.TestCase):
         result = evaluate_promotion_gate(**_valid_base_args(boundary_flags=flags))
         self.assertFalse(result.accepted)
         self.assertIn("boundary_flag_not_proven:dry_run_only", result.reasons)
+        self.assertIsNotNone(result.rollback_plan_hash)
 
 
 class PromotionGateRejectTests(unittest.TestCase):
@@ -81,11 +82,15 @@ class PromotionGateRejectTests(unittest.TestCase):
         self.assertFalse(result.accepted)
         self.assertEqual(result.decision, "rejected")
         self.assertIn("runtime_result_not_accepted", result.reasons)
+        self.assertIsNotNone(result.rollback_plan_hash)
+        self.assertTrue(validate_promotion_result(result))
 
     def test_rejected_guard_result_fail_closed(self):
         result = evaluate_promotion_gate(**_valid_base_args(guard_accepted=False))
         self.assertFalse(result.accepted)
         self.assertIn("guard_result_not_accepted", result.reasons)
+        self.assertIsNotNone(result.rollback_plan_hash)
+        self.assertTrue(validate_promotion_result(result))
 
     def test_missing_provider_receipt_when_transport_attempted_fail_closed(self):
         result = evaluate_promotion_gate(**_valid_base_args(
@@ -94,11 +99,13 @@ class PromotionGateRejectTests(unittest.TestCase):
         ))
         self.assertFalse(result.accepted)
         self.assertIn("provider_transport_attempted_but_receipt_missing", result.reasons)
+        self.assertIsNotNone(result.rollback_plan_hash)
 
     def test_missing_audit_chain_head_fail_closed(self):
         result = evaluate_promotion_gate(**_valid_base_args(audit_chain_head_exists=False))
         self.assertFalse(result.accepted)
         self.assertIn("audit_chain_head_missing", result.reasons)
+        self.assertIsNotNone(result.rollback_plan_hash)
 
     def test_unsafe_boundary_flag_fail_closed(self):
         unsafe_flags = {
@@ -111,10 +118,24 @@ class PromotionGateRejectTests(unittest.TestCase):
         result = evaluate_promotion_gate(**_valid_base_args(boundary_flags=unsafe_flags))
         self.assertFalse(result.accepted)
         self.assertTrue(any(r.startswith("boundary_flag_not_proven:") for r in result.reasons))
+        self.assertIsNotNone(result.rollback_plan_hash)
+
+    def test_explicit_rollback_plan_hash_is_preserved_on_rejection(self):
+        result = evaluate_promotion_gate(**_valid_base_args(
+            runtime_accepted=False,
+            rollback_plan_hash=VALID_DIGEST_3,
+        ))
+        self.assertFalse(result.accepted)
+        self.assertEqual(result.rollback_plan_hash, VALID_DIGEST_3)
+        self.assertTrue(validate_promotion_result(result))
 
     def test_invalid_runtime_receipt_hash_raises_value_error(self):
         with self.assertRaises(ValueError):
             evaluate_promotion_gate(**_valid_base_args(runtime_receipt_hash="bad-hash"))
+
+    def test_invalid_rollback_plan_hash_raises_value_error(self):
+        with self.assertRaises(ValueError):
+            evaluate_promotion_gate(**_valid_base_args(runtime_accepted=False, rollback_plan_hash="bad-hash"))
 
     def test_observed_at_excluded_from_promotion_hash(self):
         first = evaluate_promotion_gate(
@@ -131,6 +152,7 @@ class PromotionGateRejectTests(unittest.TestCase):
         )
         self.assertNotEqual(first.observed_at, second.observed_at)
         self.assertEqual(first.promotion_receipt_hash, second.promotion_receipt_hash)
+        self.assertEqual(first.rollback_plan_hash, second.rollback_plan_hash)
 
 
 class PromotionGateResultValidationTests(unittest.TestCase):
