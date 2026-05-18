@@ -1,9 +1,9 @@
-"""Replay engine — main replay engine orchestrator.
+"""Replay engine — main replay validation runtime orchestrator.
 
 Coordinates replay anchor creation, snapshot binding, version tuple
-validation, evidence binding, receipt generation, and failure handling.
+validation, Evidence Vault binding, receipt generation, and failure handling.
 
-v1 — contract-only. No actual replay execution. No network.
+v1 — local validation / receipt runtime only. No actual replay execution. No network.
 """
 
 from __future__ import annotations
@@ -27,10 +27,10 @@ from .replay_security import ReplaySecurity
 
 
 class ReplayEngine:
-    """Real replay engine runtime — v1 contract-only.
+    """Real replay validation runtime — local-only v1.
 
-    Validates replay requests, binds evidence, produces deterministic
-    receipts, and captures failures. No actual replay execution.
+    Validates replay requests, binds Evidence Vault records, produces
+    deterministic receipts, and captures failures. No actual replay execution.
     """
 
     def __init__(self) -> None:
@@ -90,6 +90,10 @@ class ReplayEngine:
         return vt
 
     def bind_evidence(self, anchor_id: str, evidence_ids: List[str]) -> ReplayEvidenceBinding:
+        """Create an ID-only evidence binding for compatibility.
+
+        Exact replay readiness should use bind_evidence_from_vault().
+        """
         try:
             return ReplayEvidenceBinding.create(anchor_id=anchor_id, evidence_ids=evidence_ids)
         except ValueError as exc:
@@ -97,6 +101,29 @@ class ReplayEngine:
                 anchor_id=anchor_id,
                 failure_code="REPLAY_BINDING_INVALID",
                 failure_reason=str(exc),
+            ))
+            raise
+
+    def bind_evidence_from_vault(
+        self, anchor_id: str, evidence_ids: List[str], vault: Any,
+    ) -> ReplayEvidenceBinding:
+        """Bind replay to real Evidence Vault artifacts.
+
+        Missing or corrupted vault artifacts fail closed. The binding stores
+        only artifact IDs and deterministic hashes, never raw payload data.
+        """
+        try:
+            return ReplayEvidenceBinding.from_vault(
+                anchor_id=anchor_id,
+                evidence_ids=evidence_ids,
+                vault=vault,
+            )
+        except Exception as exc:
+            self._failures.record(ReplayFailure.create(
+                anchor_id=anchor_id,
+                failure_code="REPLAY_EVIDENCE_VAULT_BINDING_FAILED",
+                failure_reason=str(exc),
+                evidence_corrupted="integrity" in str(exc).lower() or "corrupt" in str(exc).lower(),
             ))
             raise
 
@@ -118,6 +145,11 @@ class ReplayEngine:
         }
         if evidence_binding:
             gates["evidence_binding_valid"] = evidence_binding.is_valid
+            gates["evidence_vault_hashes_present"] = bool(
+                evidence_binding.evidence_content_hashes and evidence_binding.evidence_envelope_hashes
+            )
+        else:
+            gates["evidence_binding_valid"] = False
 
         return produce_readiness_receipt(
             anchor_id=anchor.anchor_id,
@@ -144,7 +176,13 @@ class ReplayEngine:
             ))
             raise ValueError("version_tuple_invalid")
 
-        evidence_valid = evidence_binding.is_valid if evidence_binding else True
+        if evidence_binding is None or not evidence_binding.is_valid:
+            self._failures.record(ReplayFailure.create(
+                anchor_id=anchor.anchor_id,
+                failure_code="REPLAY_EVIDENCE_BINDING_REQUIRED",
+                failure_reason="valid evidence binding required for replay receipt",
+            ))
+            raise ValueError("valid_evidence_binding_required")
 
         receipt = produce_replay_receipt(
             anchor_id=anchor.anchor_id,
@@ -152,13 +190,14 @@ class ReplayEngine:
             version_tuple_id=version_tuple.tuple_id,
             status="ready",
             mode=mode,
-            evidence_binding_valid=evidence_valid,
+            evidence_binding_valid=evidence_binding.is_valid,
+            evidence_binding_hash=evidence_binding.canonical_hash,
+            evidence_artifact_ids=evidence_binding.evidence_ids,
         )
         self._receipts.append(receipt)
         return receipt
 
-    def record_failure(
-        self, anchor_id: str, failure_code: str, failure_reason: str,
+    def record_failure(self, anchor_id: str, failure_code: str, failure_reason: str,
         *, evidence_corrupted: bool = False,
     ) -> ReplayFailure:
         failure = ReplayFailure.create(
@@ -170,8 +209,7 @@ class ReplayEngine:
         self._failures.record(failure)
         return failure
 
-    def produce_failure_receipt(
-        self, anchor_id: str, failure_reason: str, failure_code: str,
+    def produce_failure_receipt(self, anchor_id: str, failure_reason: str, failure_code: str,
         *, evidence_corrupted: bool = False,
     ) -> ReplayFailureReceipt:
         self.record_failure(
@@ -187,8 +225,7 @@ class ReplayEngine:
             evidence_corrupted=evidence_corrupted,
         )
 
-    def add_mismatch(
-        self, anchor_id: str, field: str, expected_hash: str, actual_hash: str,
+    def add_mismatch(self, anchor_id: str, field: str, expected_hash: str, actual_hash: str,
     ) -> ReplayMismatch:
         mismatch = ReplayMismatch.create(
             anchor_id=anchor_id,
@@ -217,10 +254,7 @@ class ReplayEngine:
         return len(self._receipts)
 
     def engine_hash(self) -> str:
-        parts = [
-            self._failures.aggregate_hash(),
-            str(len(self._receipts)),
-        ]
+        parts = [self._failures.aggregate_hash(), str(len(self._receipts))]
         for r in self._mismatch_reports:
             parts.append(r.aggregate_hash())
         for r in self._receipts:
