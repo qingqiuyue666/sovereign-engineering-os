@@ -1,9 +1,9 @@
-"""Local execution kernel — main execution kernel runtime orchestrator.
+"""Local execution kernel — main execution validation runtime orchestrator.
 
 Coordinates execution request validation, allowlist enforcement, preflight
 checks, receipt generation, and failure handling.
 
-v1 — contract-only. No command execution. No network.
+v1 — local validation / dry-run receipt runtime only. No command execution. No network.
 """
 
 from __future__ import annotations
@@ -23,10 +23,10 @@ from .execution_security import ExecutionSecurity
 
 
 class LocalExecutionKernel:
-    """Real local execution kernel runtime — v1 contract-only.
+    """Real local execution validation runtime — v1 dry-run only.
 
-    Validates execution requests, enforces allowlists, runs preflight
-    checks, and produces deterministic receipts. No actual execution.
+    Validates execution requests, enforces allowlists, runs preflight checks,
+    and produces deterministic receipts. No actual command execution.
     """
 
     def __init__(self) -> None:
@@ -65,7 +65,7 @@ class LocalExecutionKernel:
     def run_preflight(self, request: ExecutionRequest) -> Dict[str, Any]:
         return self._preflight.check(request)
 
-    def approve(self, request: ExecutionRequest) -> ExecutionReceipt:
+    def approve(self, request: ExecutionRequest, *, patch_receipt_hash: str = "") -> ExecutionReceipt:
         validation = self.validate_request(request)
         if not validation["valid"]:
             failure = produce_execution_failure_receipt(
@@ -91,6 +91,7 @@ class LocalExecutionKernel:
             "approved",
             request.command_category,
             preflight,
+            patch_receipt_hash=patch_receipt_hash,
         )
         self._receipts.append(receipt)
         return receipt
