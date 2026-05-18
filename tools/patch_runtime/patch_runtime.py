@@ -1,9 +1,9 @@
 """Patch runtime — main patch application runtime orchestrator.
 
-Coordinates patch request validation, allowlist enforcement, preflight
+Coordinates dry-run patch request validation, allowlist enforcement, preflight
 checks, receipt generation, and failure handling.
 
-v1 — dry-run only. No actual patch application. No network.
+v1 — dry-run validation only. No actual patch application. No network.
 """
 
 from __future__ import annotations
@@ -24,7 +24,7 @@ from .patch_security import PatchSecurity
 
 
 class PatchRuntime:
-    """Real patch application runtime — v1 dry-run only.
+    """Real patch validation runtime — v1 dry-run only.
 
     Validates patch requests, enforces allowlists, runs preflight checks,
     and produces deterministic receipts. No actual patch application.
@@ -50,6 +50,8 @@ class PatchRuntime:
         *,
         allowlist_ids: List[str] | None = None,
         test_results_hash: str = "",
+        operation: str = "validate_only",
+        replay_receipt_hash: str = "",
     ) -> PatchRequest:
         request = PatchRequest.create(
             patch_id=patch_id,
@@ -59,6 +61,8 @@ class PatchRuntime:
             allowlist_ids=allowlist_ids,
             test_results_hash=test_results_hash,
             is_dry_run=True,
+            operation=operation,
+            replay_receipt_hash=replay_receipt_hash,
         )
         self._requests.append(request)
         return request
@@ -71,15 +75,16 @@ class PatchRuntime:
         )
 
     def validate_request(self, request: PatchRequest) -> Dict[str, Any]:
-        # Security check
         sec = PatchSecurity.validate_payload(request.to_dict())
         if not sec["valid"]:
             return {"valid": False, "reason": "security_violation", "details": sec["violations"]}
 
-        # Allowlist check
         allowlist_result = self._allowlist.validate(request.target_path)
         if not allowlist_result["valid"]:
             return {"valid": False, "reason": allowlist_result["reason"]}
+
+        if request.is_dry_run is not True:
+            return {"valid": False, "reason": "patch_runtime_v1_requires_dry_run"}
 
         return {"valid": True, "reason": None}
 
@@ -87,7 +92,6 @@ class PatchRuntime:
         return self._preflight.check(request)
 
     def approve(self, request: PatchRequest) -> PatchReceipt:
-        # Validate
         validation = self.validate_request(request)
         if not validation["valid"]:
             failure = produce_patch_failure_receipt(
@@ -98,7 +102,6 @@ class PatchRuntime:
             self._failure_receipts.append(failure)
             raise ValueError(validation["reason"])
 
-        # Preflight
         preflight = self.run_preflight(request)
         if not preflight["preflight_passed"]:
             failure = produce_patch_failure_receipt(
@@ -109,10 +112,11 @@ class PatchRuntime:
             self._failure_receipts.append(failure)
             raise ValueError("preflight_failed")
 
-        # Security gates
         sec_payload = {
             "patch_id": request.patch_id,
             "target_path": request.target_path,
+            "operation": request.operation,
+            "replay_receipt_hash": request.replay_receipt_hash,
             "flags": [],
         }
         sec_result = PatchSecurity.validate_payload(sec_payload)
