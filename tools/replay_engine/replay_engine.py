@@ -112,7 +112,10 @@ class ReplayEngine:
         if evidence_binding:
             gates["evidence_binding_valid"] = evidence_binding.is_valid
             gates["evidence_ids_present"] = bool(evidence_binding.evidence_ids)
-            gates["evidence_vault_hashes_present"] = bool(evidence_binding.evidence_content_hashes and evidence_binding.evidence_envelope_hashes)
+            if evidence_binding.evidence_content_hashes or evidence_binding.evidence_envelope_hashes:
+                gates["evidence_vault_hashes_present"] = bool(
+                    evidence_binding.evidence_content_hashes and evidence_binding.evidence_envelope_hashes
+                )
         return produce_readiness_receipt(anchor_id=anchor.anchor_id, snapshot_id=snapshot.snapshot_id, version_tuple_id=version_tuple.tuple_id, gates=gates)
 
     def produce_receipt(
