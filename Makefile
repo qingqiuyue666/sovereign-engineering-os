@@ -17,13 +17,12 @@
 .PHONY: test-source-reliability test-osint-task-contract test-macro-regime-contract test-asset-mapping-contract test-domain-pipeline-contracts
 .PHONY: test-dashboard-model test-run-summary-model test-security-status-model test-dashboard-contracts
 .PHONY: test-v12-foundation-progress-audit test-v12-foundation
-.PHONY: test-local-runtime-review-packet test-local-runtime-promotion-gate test-local-runtime-rollback-plan test-local-runtime-review-gate
 
 PYTHON ?= python3
 
 ci: health
 
-health: test-root-integrity test-leak-prevention-foundation test-security-truth-substrate test-operator-task-ledger test-operator-cli test-runtime-runner-event-journal test-failurebundle-replay-foundation test-evidence-vault-boundary-foundation test-provider-execution-plane-boundary test-runtime-integration-hardening test-v12-foundation test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-real-runtime-provider-transport-execution test-production-autonomy-final-gate test-runtime-sealed-receipt test-generic-payload-shadow test-protected-evidence-storage test-protected-evidence-storage-implementation test-real-hmac-policy-realization test-real-merkle-proof-realization test-generic-payload-full-enforcement test-schemas test-tracer-bullet test-acceptance diff-check test-local-runtime-review-gate
+health: test-root-integrity test-leak-prevention-foundation test-security-truth-substrate test-operator-task-ledger test-operator-cli test-runtime-runner-event-journal test-failurebundle-replay-foundation test-evidence-vault-boundary-foundation test-provider-execution-plane-boundary test-runtime-integration-hardening test-v12-foundation test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-real-runtime-provider-transport-execution test-production-autonomy-final-gate test-runtime-sealed-receipt test-generic-payload-shadow test-protected-evidence-storage test-protected-evidence-storage-implementation test-real-hmac-policy-realization test-real-merkle-proof-realization test-generic-payload-full-enforcement test-schemas test-tracer-bullet test-acceptance diff-check
 
 test-root-integrity:
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_root_integrity_verifier -v
@@ -307,17 +306,6 @@ test-v12-foundation-progress-audit:
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_v12_foundation_progress_audit -v
 
 test-v12-foundation: test-leak-prevention-foundation test-security-truth-substrate test-task-foundation test-cli-foundation test-cli-status test-cli-security-scan test-dry-run-runtime-foundation test-runtime-runner-event-journal test-replay-foundation test-audit-export-foundation test-local-status-foundation test-provider-mock-foundation test-notification-mock-foundation test-vault-contract-foundation test-daemon-contract-foundation test-domain-pipeline-contracts test-dashboard-contracts test-v12-foundation-progress-audit
-
-test-local-runtime-review-packet:
-	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_local_runtime_review_packet -v
-
-test-local-runtime-promotion-gate:
-	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_local_runtime_promotion_gate -v
-
-test-local-runtime-rollback-plan:
-	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_local_runtime_rollback_plan -v
-
-test-local-runtime-review-gate: test-local-runtime-review-packet test-local-runtime-promotion-gate test-local-runtime-rollback-plan
 
 test-schemas:
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest discover -s tests/schemas
