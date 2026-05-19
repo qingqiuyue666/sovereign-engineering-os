@@ -1,0 +1,20 @@
+{
+  "status": "HFX_021_SHOT_BOUND_TEMPLATE_V030_READY",
+  "asset_id": "HFX_021",
+  "asset_name": "Advanced Pyro Explosion",
+  "required_binding_fields": [
+    "shot_id",
+    "take_id",
+    "frame_start",
+    "frame_end",
+    "camera_mode",
+    "plate_mode",
+    "blast_radius",
+    "fire_amount",
+    "smoke_amount",
+    "debris_amount",
+    "ground_plane_source"
+  ],
+  "derive_per_shot": true,
+  "direct_mutation_forbidden": true
+}

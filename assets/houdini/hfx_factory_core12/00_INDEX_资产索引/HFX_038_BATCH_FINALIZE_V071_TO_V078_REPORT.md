@@ -1,0 +1,33 @@
+# HFX_038 Batch Finalize V071 to V078 Report
+
+Generated: 2026-05-19T21:27:10
+
+Status: HFX_038_BATCH_FINALIZE_RUNNING
+
+## Preflight
+
+- PASS: HFX_037 batch report
+- PASS: HFX_037 final seal
+- PASS: Factory state
+- PASS: Factory matrix
+
+## Batch Stage Results
+
+- PASS: V071_SOURCE_RESOLUTION
+- PASS: V072_PREVIEW_BUILD
+- PASS: V073_PREVIEW_VALIDATION
+- PASS: V074_MID_BUILD
+- PASS: V075_MID_VALIDATION
+- PASS: V076_FINAL_BUILD
+- PASS: V077_FINAL_VALIDATION
+- PASS: V078_FINAL_ASSET_SEAL
+
+## Final Summary
+
+- HFX_038 long-term asset: READY
+- Release package: 300_PRODUCTION_UPGRADE/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION/10_release/release_package
+- Release HIP: 300_PRODUCTION_UPGRADE/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION/10_release/release_package/hip/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION_FINAL_CANDIDATE_v078.hip
+- Next asset: HFX_027 Summoning Portal Gate
+- All Houdini FX top-tier complete: false
+
+Final Status: HFX_038_BATCH_FINALIZE_V071_TO_V078_PASS

@@ -1,0 +1,57 @@
+{
+  "status": "HFX_FACTORY_CORE_12_PRIORITY_PLAN_V002_READY",
+  "groups": [
+    {
+      "group": "REFERENCE",
+      "assets": [
+        "HFX_008"
+      ],
+      "reason": "completed factory reference asset"
+    },
+    {
+      "group": "PRIMARY_REUSABLE_HERO_ASSETS",
+      "assets": [
+        "HFX_015",
+        "HFX_016",
+        "HFX_021",
+        "HFX_025",
+        "HFX_028"
+      ],
+      "reason": "highest reuse value for future cinematic/anime FX shots"
+    },
+    {
+      "group": "COMP_SUPPORT_ASSETS",
+      "assets": [
+        "HFX_033",
+        "HFX_036",
+        "HFX_037",
+        "HFX_038"
+      ],
+      "reason": "required for polish, integration, holdout, lightwrap, and grounding"
+    },
+    {
+      "group": "COMPLEX_ADVANCED_ASSETS",
+      "assets": [
+        "HFX_027",
+        "HFX_029"
+      ],
+      "reason": "should be built after portal/emission/distortion/support dependencies"
+    }
+  ],
+  "execution_order": [
+    "HFX_008",
+    "HFX_015",
+    "HFX_016",
+    "HFX_021",
+    "HFX_025",
+    "HFX_028",
+    "HFX_033",
+    "HFX_036",
+    "HFX_037",
+    "HFX_038",
+    "HFX_027",
+    "HFX_029"
+  ],
+  "next_asset_to_build": "HFX_015",
+  "next_stage": "HFX_FACTORY_V003_HFX015_PORTAL_RING_SOURCE_RESOLUTION"
+}

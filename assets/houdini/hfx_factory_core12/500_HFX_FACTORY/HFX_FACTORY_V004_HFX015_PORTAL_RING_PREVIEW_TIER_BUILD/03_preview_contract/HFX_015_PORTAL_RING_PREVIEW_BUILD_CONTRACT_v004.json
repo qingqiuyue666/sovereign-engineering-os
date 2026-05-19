@@ -1,0 +1,25 @@
+{
+  "status": "HFX_015_PORTAL_RING_PREVIEW_BUILD_CONTRACT_V004_READY",
+  "asset_id": "HFX_015",
+  "quality_tier": "PREVIEW",
+  "hip_path": "300_PRODUCTION_UPGRADE/HFX_015_PORTAL_RING/01_preview/hip/HFX_015_PORTAL_RING_PREVIEW_TIER_v004.hip",
+  "mirror_hip_path": "500_HFX_FACTORY/HFX_FACTORY_V004_HFX015_PORTAL_RING_PREVIEW_TIER_BUILD/02_preview_hip/HFX_015_PORTAL_RING_PREVIEW_TIER_v004.hip",
+  "required_outputs": [
+    "OUT_PREVIEW_PORTAL_CORE",
+    "OUT_PREVIEW_RIM_EMISSION",
+    "OUT_PREVIEW_INNER_SURFACE_PROXY",
+    "OUT_PREVIEW_DISTORTION_PROXY",
+    "OUT_PREVIEW_METADATA"
+  ],
+  "cook_test_required": true,
+  "frames": [
+    1,
+    12,
+    24,
+    48,
+    72,
+    120
+  ],
+  "render_export_allowed": false,
+  "delivery_allowed": false
+}

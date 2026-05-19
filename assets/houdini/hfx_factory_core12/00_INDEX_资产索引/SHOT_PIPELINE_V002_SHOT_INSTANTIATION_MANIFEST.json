@@ -1,0 +1,114 @@
+{
+  "status": "SHOT_PIPELINE_V002_SHOT_INSTANTIATION_PASS",
+  "generated": "2026-05-18T00:02:18",
+  "shot_id": "SHOT_001_TEST_REAL_FX_BINDING",
+  "take_id": "TAKE_A",
+  "template_root": "200_SHOTS/SHOT_TEMPLATE_V001_REAL_SHOT_BINDING",
+  "shot_root": "200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING",
+  "files": [
+    {
+      "path": "200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING/shot_manifest_v002.json",
+      "sha256": "109b5e14ca60e8ff33474e883db074734e28c876df03e76d38820b6365c32fb2",
+      "size_bytes": 3595
+    },
+    {
+      "path": "200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING/00_plate/PLATE_BINDING_v002.json",
+      "sha256": "23be856ff456a83a4a206d9f195dc26409466627eeb5c397f724f1f4878b3970",
+      "size_bytes": 392
+    },
+    {
+      "path": "200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING/01_camera/CAMERA_BINDING_v002.json",
+      "sha256": "8444f30ca8c3b3945b853837e5ff0192423f5a7d1e8d2287dcafab71103cf538",
+      "size_bytes": 402
+    },
+    {
+      "path": "200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING/02_unreal/UNREAL_BINDING_v002.json",
+      "sha256": "e97e43da276aaeb82e3834cc6db68ae5cc54ab39199688fc9f2fcf937ac97055",
+      "size_bytes": 305
+    },
+    {
+      "path": "200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING/03_houdini/HFX_ASSET_SELECTION_v002.json",
+      "sha256": "4b919d006f347cf48a214e55bfad616defa3a60391b01e21bf26a1c0d935424f",
+      "size_bytes": 2251
+    },
+    {
+      "path": "200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING/05_comp/COMP_PASS_MAP_v002.json",
+      "sha256": "9522a17b4acb58fb0f11ba2f9a76482e00a6a9244018b8959e351bea5b9c55df",
+      "size_bytes": 600
+    },
+    {
+      "path": "200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING/06_delivery/SHOT_HANDOFF_MANIFEST_v002.json",
+      "sha256": "fd13f6951243f617c409e557c0b89a14568d12bbcc2b57037af96cab577706ad",
+      "size_bytes": 582
+    },
+    {
+      "path": "200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING/07_validation/SHOT_VALIDATION_CHECKLIST_v002.md",
+      "sha256": "898ccbd9d7cb130c93f3c3ce013123ba1a389f20bc875af3c84df7540ee6f95c",
+      "size_bytes": 983
+    },
+    {
+      "path": "200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING/README_SHOT_001_TEST_REAL_FX_BINDING.md",
+      "sha256": "9258097d278dc040434b93ba706c023f8c0a962ab949dab2de893bde7c5bebf1",
+      "size_bytes": 572
+    }
+  ],
+  "selected_hfx_assets": [
+    {
+      "id": "HFX_008",
+      "name": "Energy Shockwave",
+      "batch": "B01",
+      "role": "primary_test_fx",
+      "reason": "safe baseline radial FX for shot-pipeline binding test",
+      "enabled": true
+    },
+    {
+      "id": "HFX_033",
+      "name": "Glow Emission Pass",
+      "batch": "B05",
+      "role": "emission_support_pass",
+      "reason": "standard glow/emission support for comp pipeline",
+      "enabled": true
+    },
+    {
+      "id": "HFX_034",
+      "name": "ZDepth Fog Pass",
+      "batch": "B05",
+      "role": "depth_support_pass",
+      "reason": "standard depth/fog support for comp pipeline",
+      "enabled": true
+    },
+    {
+      "id": "HFX_036",
+      "name": "Alpha Holdout Matte",
+      "batch": "B05",
+      "role": "matte_support_pass",
+      "reason": "standard alpha/holdout support for real plate integration",
+      "enabled": true
+    },
+    {
+      "id": "HFX_037",
+      "name": "LightWrap Rim Interaction",
+      "batch": "B05",
+      "role": "edge_integration_pass",
+      "reason": "standard lightwrap/rim support for CG/live-action fusion",
+      "enabled": true
+    },
+    {
+      "id": "HFX_038",
+      "name": "ContactShadow Ground Integration",
+      "batch": "B05",
+      "role": "grounding_support_pass",
+      "reason": "standard contact shadow support for floor/ground integration",
+      "enabled": true
+    },
+    {
+      "id": "HFX_040",
+      "name": "Unreal DaVinci AE Handoff Template",
+      "batch": "B05",
+      "role": "handoff_contract",
+      "reason": "required handoff manifest for shot delivery structure",
+      "enabled": true
+    }
+  ],
+  "pollution": []
+}

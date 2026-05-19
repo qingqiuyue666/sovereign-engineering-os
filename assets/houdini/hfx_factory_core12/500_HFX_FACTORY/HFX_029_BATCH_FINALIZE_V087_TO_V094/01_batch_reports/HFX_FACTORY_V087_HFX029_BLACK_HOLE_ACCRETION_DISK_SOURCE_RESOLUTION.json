@@ -1,0 +1,26 @@
+{
+  "status": "HFX_FACTORY_V087_HFX029_BLACK_HOLE_ACCRETION_DISK_SOURCE_RESOLUTION_PASS",
+  "asset_id": "HFX_029",
+  "asset_name": "Black Hole Accretion Disk",
+  "source_type": "procedural_factory_build",
+  "required_parameters": [
+    "event_horizon_radius",
+    "accretion_disk_radius",
+    "lensing_strength",
+    "particle_orbit_density",
+    "gravity_distortion_strength",
+    "glow_emission_link"
+  ],
+  "required_passes": [
+    "OUT_FINAL_EVENT_HORIZON",
+    "OUT_FINAL_ACCRETION_DISK",
+    "OUT_FINAL_LENSING_RING",
+    "OUT_FINAL_PARTICLE_ORBIT",
+    "OUT_FINAL_GRAVITY_DISTORTION",
+    "OUT_FINAL_GLOW_EMISSION_LINK",
+    "OUT_FINAL_ZDEPTH",
+    "OUT_FINAL_ALPHA",
+    "OUT_FINAL_METADATA"
+  ],
+  "next_stage": "HFX_FACTORY_V088_HFX029_BLACK_HOLE_ACCRETION_DISK_PREVIEW_BUILD"
+}

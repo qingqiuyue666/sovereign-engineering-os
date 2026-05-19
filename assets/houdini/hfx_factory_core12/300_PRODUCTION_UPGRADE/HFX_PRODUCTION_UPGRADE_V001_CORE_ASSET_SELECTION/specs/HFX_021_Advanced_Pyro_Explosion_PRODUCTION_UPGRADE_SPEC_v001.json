@@ -1,0 +1,115 @@
+{
+  "status": "HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTED",
+  "asset": {
+    "asset_id": "HFX_021",
+    "name": "Advanced Pyro Explosion",
+    "batch": "B03",
+    "priority": "P0",
+    "upgrade_class": "hero_pyro_explosion",
+    "current_level": "PREVIEW_PROXY",
+    "target_level": "PRODUCTION_FINAL",
+    "why_core": "Highest cinematic value but also highest simulation/render cost; must be upgraded through strict quality tiers.",
+    "required_disciplines": [
+      "Pyro",
+      "Sparse volumes",
+      "VDB",
+      "shader",
+      "lighting",
+      "cache",
+      "EXR_passes",
+      "comp"
+    ],
+    "preview_goal": "cheap timing/shape explosion proxy",
+    "mid_goal": "medium-resolution pyro with temperature/density/fire mask passes",
+    "final_goal": "high-resolution cached pyro with separate fire/smoke/heat/distortion/emission/z-depth passes and shot-specific lighting",
+    "required_outputs": [
+      "fire",
+      "smoke",
+      "density",
+      "temperature",
+      "emission",
+      "zdepth",
+      "holdout",
+      "metadata_manifest"
+    ],
+    "blocked_until": [
+      "sim_scale_locked",
+      "cache_budget_declared",
+      "render_engine_declared",
+      "shot_camera_locked"
+    ]
+  },
+  "quality_tiers": {
+    "PREVIEW": {
+      "purpose": "composition, timing, blocking, fast iteration",
+      "allowed": [
+        "low density",
+        "proxy geometry",
+        "fast cook",
+        "viewport preview",
+        "no final render claim"
+      ],
+      "blocked": [
+        "final delivery",
+        "client-grade render",
+        "claiming film quality"
+      ]
+    },
+    "MID": {
+      "purpose": "short-form usable quality and look development",
+      "allowed": [
+        "medium density",
+        "shot-local cache",
+        "basic shader",
+        "separated core passes",
+        "preview comp"
+      ],
+      "blocked": [
+        "final-pixel claim without FINAL tier validation"
+      ]
+    },
+    "FINAL": {
+      "purpose": "production-grade hero shot output",
+      "allowed": [
+        "high-density simulation",
+        "versioned cache",
+        "shot camera",
+        "ACES colorspace",
+        "EXR pass separation",
+        "final comp validation"
+      ],
+      "blocked": [
+        "unversioned export",
+        "flattened comp before review",
+        "missing pass manifest",
+        "missing camera/plate context"
+      ]
+    }
+  },
+  "upgrade_contract": {
+    "do_not_modify_existing_final_seals": true,
+    "all_upgrade_work_goes_under_300_PRODUCTION_UPGRADE": true,
+    "shot_local_derivation_required_for_real_use": true,
+    "preview_mid_final_tiers_required": true,
+    "render_export_blocked_until_tier_specific_validation": true,
+    "final_quality_requires_real_or_approved_synthetic_shot_context": true
+  },
+  "v002_entry_conditions": [
+    "source HDA/HIP resolved",
+    "quality tier selected",
+    "shot context declared",
+    "camera/scale/colorspace declared",
+    "cache budget declared if simulation-based",
+    "pass manifest declared"
+  ],
+  "blocked_conditions": [
+    "modifying sealed release directly",
+    "claiming final quality from preview proxy",
+    "missing camera or scale context",
+    "missing colorspace",
+    "missing pass manifest",
+    "unversioned cache/export",
+    "flattened comp before review"
+  ],
+  "next_stage": "HFX_PRODUCTION_UPGRADE_V002_SINGLE_ASSET_SOURCE_RESOLUTION"
+}

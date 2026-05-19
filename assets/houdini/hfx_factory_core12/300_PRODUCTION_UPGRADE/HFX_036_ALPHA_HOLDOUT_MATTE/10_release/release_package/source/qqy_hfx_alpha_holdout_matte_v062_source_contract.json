@@ -1,0 +1,8 @@
+{
+  "status": "HFX_036_SOURCE_CONTRACT_V062_READY",
+  "asset_id": "HFX_036",
+  "asset_name": "Alpha Holdout Matte",
+  "source_of_truth": "300_PRODUCTION_UPGRADE/HFX_036_ALPHA_HOLDOUT_MATTE/10_release/release_package/hip/HFX_036_ALPHA_HOLDOUT_MATTE_FINAL_CANDIDATE_v062.hip",
+  "direct_mutation_forbidden": true,
+  "derive_per_shot": true
+}

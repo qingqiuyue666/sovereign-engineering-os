@@ -1,0 +1,15 @@
+{
+  "status": "HFX_FACTORY_V078_HFX038_CONTACTSHADOW_GROUND_INTEGRATION_FINAL_ASSET_SYSTEM_SEAL_PASS",
+  "asset_id": "HFX_038",
+  "asset_name": "ContactShadow Ground Integration",
+  "asset_class": "contact_shadow",
+  "quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+  "registry_role": "FX_FACTORY_CORE_ASSET",
+  "hfx038_ready_as_long_term_asset": true,
+  "hfx038_ready_as_reusable_contactshadow_template": true,
+  "release_package": "300_PRODUCTION_UPGRADE/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION/10_release/release_package",
+  "release_hip": "300_PRODUCTION_UPGRADE/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION/10_release/release_package/hip/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION_FINAL_CANDIDATE_v078.hip",
+  "all_houdini_fx_top_tier_complete": false,
+  "next_asset_to_build": "HFX_027",
+  "next_stage": "HFX_FACTORY_V079_HFX027_SUMMONING_PORTAL_GATE_SOURCE_RESOLUTION"
+}

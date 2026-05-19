@@ -1,0 +1,18 @@
+{
+  "status": "HFX_FACTORY_V053_HFX033_GLOW_EMISSION_PASS_FINAL_CANDIDATE_VALIDATION_PASS",
+  "asset_id": "HFX_033",
+  "asset_name": "Glow Emission Pass",
+  "final_candidate_validated": true,
+  "final_candidate_hip": "300_PRODUCTION_UPGRADE/HFX_033_GLOW_EMISSION_PASS/03_final/hip/HFX_033_GLOW_EMISSION_PASS_FINAL_CANDIDATE_v054.hip",
+  "required_outputs": [
+    "OUT_FINAL_EMISSION_SOURCE",
+    "OUT_FINAL_THRESHOLD_MASK",
+    "OUT_FINAL_BLOOM_RADIUS",
+    "OUT_FINAL_GLOW_FALLOFF",
+    "OUT_FINAL_COLOR_TEMPERATURE",
+    "OUT_FINAL_ALPHA_MASK",
+    "OUT_FINAL_METADATA"
+  ],
+  "render_export_allowed": false,
+  "delivery_allowed": false
+}

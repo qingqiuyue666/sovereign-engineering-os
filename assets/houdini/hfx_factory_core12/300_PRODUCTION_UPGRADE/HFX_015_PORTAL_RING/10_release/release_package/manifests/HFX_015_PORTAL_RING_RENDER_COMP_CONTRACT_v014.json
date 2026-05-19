@@ -1,0 +1,27 @@
+{
+  "status": "HFX_FACTORY_V012_HFX015_PORTAL_RING_RENDER_COMP_CONTRACT_PASS",
+  "asset_id": "HFX_015",
+  "asset_name": "Portal Ring",
+  "required_passes": [
+    "OUT_FINAL_PORTAL_CORE",
+    "OUT_FINAL_RIM_EMISSION",
+    "OUT_FINAL_INNER_SURFACE",
+    "OUT_FINAL_SPARK_FIELD",
+    "OUT_FINAL_DISTORTION_VECTOR",
+    "OUT_FINAL_ALPHA",
+    "OUT_FINAL_ZDEPTH",
+    "OUT_FINAL_LIGHTWRAP",
+    "OUT_FINAL_CONTACT_SHADOW",
+    "OUT_FINAL_METADATA"
+  ],
+  "comp_targets": [
+    "AE",
+    "DaVinci",
+    "ComfyUI_post_repair_only"
+  ],
+  "comfyui_source_of_truth_forbidden": true,
+  "single_flat_beauty_only_forbidden": true,
+  "final_delivery_allowed": false,
+  "hollywood_final_pixel_claim_allowed": false,
+  "next_stage": "HFX_FACTORY_V013_HFX015_PORTAL_RING_DELIVERY_CANDIDATE"
+}

@@ -1,0 +1,52 @@
+{
+  "status": "HFX_015_PORTAL_RING_PASS_CONTRACT_V003_READY",
+  "asset_id": "HFX_015",
+  "required_common_passes": [
+    "beauty",
+    "emission",
+    "alpha",
+    "zdepth",
+    "distortion_vector",
+    "contact_shadow",
+    "lightwrap",
+    "holdout",
+    "matte",
+    "metadata"
+  ],
+  "required_portal_specific_passes": [
+    "portal_core",
+    "portal_rim",
+    "portal_inner_surface",
+    "portal_sparks",
+    "portal_distortion",
+    "portal_depth_mask"
+  ],
+  "final_candidate_required_outputs": [
+    "alpha",
+    "beauty",
+    "contact_shadow",
+    "distortion_vector",
+    "emission",
+    "holdout",
+    "lightwrap",
+    "matte",
+    "metadata",
+    "portal_core",
+    "portal_depth_mask",
+    "portal_distortion",
+    "portal_inner_surface",
+    "portal_rim",
+    "portal_sparks",
+    "zdepth"
+  ],
+  "pass_policy": {
+    "single_flat_beauty_only_forbidden": true,
+    "emission_required": true,
+    "alpha_required": true,
+    "zdepth_required": true,
+    "distortion_vector_required": true,
+    "metadata_required": true,
+    "lightwrap_required_for_character_integration": true,
+    "contact_shadow_required_if_grounded_portal": true
+  }
+}

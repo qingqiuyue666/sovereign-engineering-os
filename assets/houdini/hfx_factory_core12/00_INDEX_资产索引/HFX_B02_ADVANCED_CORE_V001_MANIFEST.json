@@ -1,0 +1,257 @@
+{
+  "status": "HFX_B02_ADVANCED_CORE_V001_VALIDATION_PASS",
+  "generated": "2026-05-17T18:06:00",
+  "assets": [
+    {
+      "asset": "06_体积雾气_环境烟雾/HFX_009_Volumetric_Fog_Bank",
+      "result": "PASS",
+      "checks": [
+        {
+          "check": "asset_folder",
+          "result": "PASS"
+        },
+        {
+          "check": "00_preview",
+          "result": "PASS"
+        },
+        {
+          "check": "01_hip",
+          "result": "PASS"
+        },
+        {
+          "check": "02_cache",
+          "result": "PASS"
+        },
+        {
+          "check": "04_export",
+          "result": "PASS"
+        },
+        {
+          "check": "05_notes",
+          "result": "PASS"
+        }
+      ]
+    },
+    {
+      "asset": "06_体积雾气_环境烟雾/HFX_010_Smoke_Plume_Column",
+      "result": "PASS",
+      "checks": [
+        {
+          "check": "asset_folder",
+          "result": "PASS"
+        },
+        {
+          "check": "00_preview",
+          "result": "PASS"
+        },
+        {
+          "check": "01_hip",
+          "result": "PASS"
+        },
+        {
+          "check": "02_cache",
+          "result": "PASS"
+        },
+        {
+          "check": "04_export",
+          "result": "PASS"
+        },
+        {
+          "check": "05_notes",
+          "result": "PASS"
+        }
+      ]
+    },
+    {
+      "asset": "07_粒子火星_灰烬火花/HFX_011_Ember_Ash_Field",
+      "result": "PASS",
+      "checks": [
+        {
+          "check": "asset_folder",
+          "result": "PASS"
+        },
+        {
+          "check": "00_preview",
+          "result": "PASS"
+        },
+        {
+          "check": "01_hip",
+          "result": "PASS"
+        },
+        {
+          "check": "02_cache",
+          "result": "PASS"
+        },
+        {
+          "check": "04_export",
+          "result": "PASS"
+        },
+        {
+          "check": "05_notes",
+          "result": "PASS"
+        }
+      ]
+    },
+    {
+      "asset": "07_粒子火星_灰烬火花/HFX_012_Sparks_Impact_Spray",
+      "result": "PASS",
+      "checks": [
+        {
+          "check": "asset_folder",
+          "result": "PASS"
+        },
+        {
+          "check": "00_preview",
+          "result": "PASS"
+        },
+        {
+          "check": "01_hip",
+          "result": "PASS"
+        },
+        {
+          "check": "02_cache",
+          "result": "PASS"
+        },
+        {
+          "check": "04_export",
+          "result": "PASS"
+        },
+        {
+          "check": "05_notes",
+          "result": "PASS"
+        }
+      ]
+    },
+    {
+      "asset": "08_碎片爆发_二级破坏/HFX_013_Debris_Burst_Radial",
+      "result": "PASS",
+      "checks": [
+        {
+          "check": "asset_folder",
+          "result": "PASS"
+        },
+        {
+          "check": "00_preview",
+          "result": "PASS"
+        },
+        {
+          "check": "01_hip",
+          "result": "PASS"
+        },
+        {
+          "check": "02_cache",
+          "result": "PASS"
+        },
+        {
+          "check": "04_export",
+          "result": "PASS"
+        },
+        {
+          "check": "05_notes",
+          "result": "PASS"
+        }
+      ]
+    },
+    {
+      "asset": "09_魔法能量_空间场/HFX_014_Magic_Particle_Aura",
+      "result": "PASS",
+      "checks": [
+        {
+          "check": "asset_folder",
+          "result": "PASS"
+        },
+        {
+          "check": "00_preview",
+          "result": "PASS"
+        },
+        {
+          "check": "01_hip",
+          "result": "PASS"
+        },
+        {
+          "check": "02_cache",
+          "result": "PASS"
+        },
+        {
+          "check": "04_export",
+          "result": "PASS"
+        },
+        {
+          "check": "05_notes",
+          "result": "PASS"
+        }
+      ]
+    },
+    {
+      "asset": "09_魔法能量_空间场/HFX_015_Portal_Ring_Field",
+      "result": "PASS",
+      "checks": [
+        {
+          "check": "asset_folder",
+          "result": "PASS"
+        },
+        {
+          "check": "00_preview",
+          "result": "PASS"
+        },
+        {
+          "check": "01_hip",
+          "result": "PASS"
+        },
+        {
+          "check": "02_cache",
+          "result": "PASS"
+        },
+        {
+          "check": "04_export",
+          "result": "PASS"
+        },
+        {
+          "check": "05_notes",
+          "result": "PASS"
+        }
+      ]
+    },
+    {
+      "asset": "10_热浪扭曲_空气扰动/HFX_016_Heat_Distortion_Field",
+      "result": "PASS",
+      "checks": [
+        {
+          "check": "asset_folder",
+          "result": "PASS"
+        },
+        {
+          "check": "00_preview",
+          "result": "PASS"
+        },
+        {
+          "check": "01_hip",
+          "result": "PASS"
+        },
+        {
+          "check": "02_cache",
+          "result": "PASS"
+        },
+        {
+          "check": "04_export",
+          "result": "PASS"
+        },
+        {
+          "check": "05_notes",
+          "result": "PASS"
+        }
+      ]
+    }
+  ],
+  "global_files": [
+    {
+      "path": "00_INDEX_资产索引/HFX_B02_ADVANCED_CORE_V001_RULEBOOK.md",
+      "result": "PASS"
+    },
+    {
+      "path": "00_INDEX_资产索引/HFX_B02_ADVANCED_CORE_V001_REGISTRY.md",
+      "result": "PASS"
+    }
+  ],
+  "pollution": []
+}

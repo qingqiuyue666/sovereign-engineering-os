@@ -1,0 +1,28 @@
+{
+  "status": "HFX_038_RENDER_COMP_CONTRACT_V078_READY",
+  "asset_id": "HFX_038",
+  "asset_name": "ContactShadow Ground Integration",
+  "required_passes": [
+    "OUT_FINAL_CONTACT_CORE",
+    "OUT_FINAL_SOFT_FALLOFF",
+    "OUT_FINAL_GROUND_OCCLUSION",
+    "OUT_FINAL_DIRECTIONAL_SHADOW",
+    "OUT_FINAL_ALPHA_MASK",
+    "OUT_FINAL_ZDEPTH_GROUND",
+    "OUT_FINAL_METADATA"
+  ],
+  "target_uses": [
+    "contact shadow",
+    "grounding",
+    "ground occlusion",
+    "FX-to-floor integration",
+    "subject-to-floor integration"
+  ],
+  "dependencies": [
+    "HFX_036",
+    "HFX_037"
+  ],
+  "comfyui_source_of_truth_forbidden": true,
+  "single_flat_beauty_only_forbidden": true,
+  "delivery_allowed": false
+}

@@ -1,0 +1,13 @@
+{
+  "status": "HFX_FACTORY_V002_CORE_12_ASSET_UPGRADE_MATRIX_VALIDATION_PASS",
+  "validated": true,
+  "factory_root": "500_HFX_FACTORY/HFX_FACTORY_V002_CORE_12_ASSET_UPGRADE_MATRIX",
+  "reference_asset": "HFX_008",
+  "reference_asset_ready": true,
+  "core_asset_count": 12,
+  "completed_core_asset_count": 1,
+  "pending_core_asset_count": 11,
+  "next_asset_to_build": "HFX_015",
+  "all_houdini_fx_top_tier_complete": false,
+  "next_stage": "HFX_FACTORY_V003_HFX015_PORTAL_RING_SOURCE_RESOLUTION"
+}

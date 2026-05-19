@@ -1,0 +1,126 @@
+{
+  "status": "HFX_B02_ADVANCED_CORE_V003_TRIGGER_ANIMATION_PASS",
+  "generated": "2026-05-17T18:12:24",
+  "assets": [
+    {
+      "asset": "HFX_009_Volumetric_Fog_Bank",
+      "rel": "06_体积雾气_环境烟雾/HFX_009_Volumetric_Fog_Bank",
+      "result": "PASS",
+      "trigger_frame": 1,
+      "duration": 180,
+      "main_out": "OUT_FOG_BANK_MAIN",
+      "layers": [
+        "OUT_DENSITY_ONLY",
+        "OUT_LIGHT_BEAM_MASK",
+        "OUT_DEPTH_FADE_MASK"
+      ],
+      "hip": "06_体积雾气_环境烟雾/HFX_009_Volumetric_Fog_Bank/01_hip/HFX_009_Volumetric_Fog_Bank_v003.hip",
+      "readme_v003": "06_体积雾气_环境烟雾/HFX_009_Volumetric_Fog_Bank/05_notes/README_v003.md"
+    },
+    {
+      "asset": "HFX_010_Smoke_Plume_Column",
+      "rel": "06_体积雾气_环境烟雾/HFX_010_Smoke_Plume_Column",
+      "result": "PASS",
+      "trigger_frame": 12,
+      "duration": 160,
+      "main_out": "OUT_SMOKE_PLUME_MAIN",
+      "layers": [
+        "OUT_DENSITY_ONLY",
+        "OUT_TOP_ROLL",
+        "OUT_BASE_SPREAD"
+      ],
+      "hip": "06_体积雾气_环境烟雾/HFX_010_Smoke_Plume_Column/01_hip/HFX_010_Smoke_Plume_Column_v003.hip",
+      "readme_v003": "06_体积雾气_环境烟雾/HFX_010_Smoke_Plume_Column/05_notes/README_v003.md"
+    },
+    {
+      "asset": "HFX_011_Ember_Ash_Field",
+      "rel": "07_粒子火星_灰烬火花/HFX_011_Ember_Ash_Field",
+      "result": "PASS",
+      "trigger_frame": 1,
+      "duration": 180,
+      "main_out": "OUT_EMBER_ASH_MAIN",
+      "layers": [
+        "OUT_EMBERS_ONLY",
+        "OUT_ASH_ONLY",
+        "OUT_FOREGROUND_LAYER"
+      ],
+      "hip": "07_粒子火星_灰烬火花/HFX_011_Ember_Ash_Field/01_hip/HFX_011_Ember_Ash_Field_v003.hip",
+      "readme_v003": "07_粒子火星_灰烬火花/HFX_011_Ember_Ash_Field/05_notes/README_v003.md"
+    },
+    {
+      "asset": "HFX_012_Sparks_Impact_Spray",
+      "rel": "07_粒子火星_灰烬火花/HFX_012_Sparks_Impact_Spray",
+      "result": "PASS",
+      "trigger_frame": 12,
+      "duration": 72,
+      "main_out": "OUT_SPARKS_MAIN",
+      "layers": [
+        "OUT_HOT_SPARKS",
+        "OUT_TRAILS_ONLY",
+        "OUT_CONTACT_FLASH"
+      ],
+      "hip": "07_粒子火星_灰烬火花/HFX_012_Sparks_Impact_Spray/01_hip/HFX_012_Sparks_Impact_Spray_v003.hip",
+      "readme_v003": "07_粒子火星_灰烬火花/HFX_012_Sparks_Impact_Spray/05_notes/README_v003.md"
+    },
+    {
+      "asset": "HFX_013_Debris_Burst_Radial",
+      "rel": "08_碎片爆发_二级破坏/HFX_013_Debris_Burst_Radial",
+      "result": "PASS",
+      "trigger_frame": 14,
+      "duration": 96,
+      "main_out": "OUT_DEBRIS_BURST_MAIN",
+      "layers": [
+        "OUT_LARGE_DEBRIS",
+        "OUT_SMALL_DEBRIS",
+        "OUT_DUST_PROXY"
+      ],
+      "hip": "08_碎片爆发_二级破坏/HFX_013_Debris_Burst_Radial/01_hip/HFX_013_Debris_Burst_Radial_v003.hip",
+      "readme_v003": "08_碎片爆发_二级破坏/HFX_013_Debris_Burst_Radial/05_notes/README_v003.md"
+    },
+    {
+      "asset": "HFX_014_Magic_Particle_Aura",
+      "rel": "09_魔法能量_空间场/HFX_014_Magic_Particle_Aura",
+      "result": "PASS",
+      "trigger_frame": 1,
+      "duration": 180,
+      "main_out": "OUT_MAGIC_AURA_MAIN",
+      "layers": [
+        "OUT_CORE_PARTICLES",
+        "OUT_ORBITING_PARTICLES",
+        "OUT_GLOW_FIELD"
+      ],
+      "hip": "09_魔法能量_空间场/HFX_014_Magic_Particle_Aura/01_hip/HFX_014_Magic_Particle_Aura_v003.hip",
+      "readme_v003": "09_魔法能量_空间场/HFX_014_Magic_Particle_Aura/05_notes/README_v003.md"
+    },
+    {
+      "asset": "HFX_015_Portal_Ring_Field",
+      "rel": "09_魔法能量_空间场/HFX_015_Portal_Ring_Field",
+      "result": "PASS",
+      "trigger_frame": 18,
+      "duration": 132,
+      "main_out": "OUT_PORTAL_RING_MAIN",
+      "layers": [
+        "OUT_RING_CORE",
+        "OUT_EDGE_SPARKS",
+        "OUT_DISTORTION_MASK"
+      ],
+      "hip": "09_魔法能量_空间场/HFX_015_Portal_Ring_Field/01_hip/HFX_015_Portal_Ring_Field_v003.hip",
+      "readme_v003": "09_魔法能量_空间场/HFX_015_Portal_Ring_Field/05_notes/README_v003.md"
+    },
+    {
+      "asset": "HFX_016_Heat_Distortion_Field",
+      "rel": "10_热浪扭曲_空气扰动/HFX_016_Heat_Distortion_Field",
+      "result": "PASS",
+      "trigger_frame": 1,
+      "duration": 180,
+      "main_out": "OUT_HEAT_DISTORTION_MAIN",
+      "layers": [
+        "OUT_VECTOR_FIELD",
+        "OUT_MASK_ONLY",
+        "OUT_NOISE_FIELD"
+      ],
+      "hip": "10_热浪扭曲_空气扰动/HFX_016_Heat_Distortion_Field/01_hip/HFX_016_Heat_Distortion_Field_v003.hip",
+      "readme_v003": "10_热浪扭曲_空气扰动/HFX_016_Heat_Distortion_Field/05_notes/README_v003.md"
+    }
+  ]
+}

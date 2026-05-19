@@ -1,0 +1,21 @@
+{
+  "status": "HFX_FACTORY_V085_HFX027_SUMMONING_PORTAL_GATE_FINAL_CANDIDATE_VALIDATION_PASS",
+  "asset_id": "HFX_027",
+  "asset_name": "Summoning Portal Gate",
+  "final_candidate_validated": true,
+  "final_candidate_hip": "300_PRODUCTION_UPGRADE/HFX_027_SUMMONING_PORTAL_GATE/03_final/hip/HFX_027_SUMMONING_PORTAL_GATE_FINAL_CANDIDATE_v086.hip",
+  "required_outputs": [
+    "OUT_FINAL_SUMMON_RING",
+    "OUT_FINAL_GLYPH_FIELD",
+    "OUT_FINAL_INNER_GATE",
+    "OUT_FINAL_PARTICLE_ASCENT",
+    "OUT_FINAL_PORTAL_CORE_LINK",
+    "OUT_FINAL_GLOW_PASS_LINK",
+    "OUT_FINAL_CONTACTSHADOW_LINK",
+    "OUT_FINAL_ZDEPTH",
+    "OUT_FINAL_ALPHA",
+    "OUT_FINAL_METADATA"
+  ],
+  "render_export_allowed": false,
+  "delivery_allowed": false
+}

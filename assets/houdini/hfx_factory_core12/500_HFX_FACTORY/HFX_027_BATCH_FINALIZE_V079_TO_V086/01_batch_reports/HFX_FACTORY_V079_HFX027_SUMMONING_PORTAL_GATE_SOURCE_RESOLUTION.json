@@ -1,0 +1,28 @@
+{
+  "status": "HFX_FACTORY_V079_HFX027_SUMMONING_PORTAL_GATE_SOURCE_RESOLUTION_PASS",
+  "asset_id": "HFX_027",
+  "asset_name": "Summoning Portal Gate",
+  "source_type": "procedural_factory_build",
+  "required_parameters": [
+    "summon_radius",
+    "glyph_density",
+    "inner_gate_depth",
+    "particle_ascent",
+    "portal_core_link",
+    "glow_link",
+    "contactshadow_link"
+  ],
+  "required_passes": [
+    "OUT_FINAL_SUMMON_RING",
+    "OUT_FINAL_GLYPH_FIELD",
+    "OUT_FINAL_INNER_GATE",
+    "OUT_FINAL_PARTICLE_ASCENT",
+    "OUT_FINAL_PORTAL_CORE_LINK",
+    "OUT_FINAL_GLOW_PASS_LINK",
+    "OUT_FINAL_CONTACTSHADOW_LINK",
+    "OUT_FINAL_ZDEPTH",
+    "OUT_FINAL_ALPHA",
+    "OUT_FINAL_METADATA"
+  ],
+  "next_stage": "HFX_FACTORY_V080_HFX027_SUMMONING_PORTAL_GATE_PREVIEW_BUILD"
+}

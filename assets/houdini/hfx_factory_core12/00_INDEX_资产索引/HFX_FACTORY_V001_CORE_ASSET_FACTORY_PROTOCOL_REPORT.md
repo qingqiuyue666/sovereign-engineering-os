@@ -1,0 +1,78 @@
+# HFX Factory v001 Core Asset Factory Protocol Report
+
+Generated: 2026-05-19T18:21:07
+
+Status: HFX_FACTORY_CORE_ASSET_FACTORY_PROTOCOL_RUNNING
+
+## Previous Stage Checks
+
+- PASS: HFX_008 Final Asset System Seal v011
+
+## Reference Input Checks / Copy
+
+- PASS: copied HFX_008 factory reference template -> `500_HFX_FACTORY/HFX_FACTORY_V001_CORE_ASSET_FACTORY_PROTOCOL/00_inputs/HFX_FACTORY_REFERENCE_ASSET_HFX008_v011.json`
+- PASS: copied HFX long-term asset registry -> `500_HFX_FACTORY/HFX_FACTORY_V001_CORE_ASSET_FACTORY_PROTOCOL/00_inputs/HFX_LONG_TERM_ASSET_REGISTRY.json`
+- PASS: copied HFX_008 V011 seal report -> `500_HFX_FACTORY/HFX_FACTORY_V001_CORE_ASSET_FACTORY_PROTOCOL/00_inputs/SHOT_BOUND_HFX008_FINAL_PIXEL_RENDER_V011_FINAL_ASSET_SYSTEM_SEAL_REPORT.md`
+
+## Protocol Checks
+
+- PASS: hfx008_registry_verified
+- PASS: core_asset_count_12
+- PASS: completed_core_asset_count_1
+- PASS: pending_core_asset_count_11
+- PASS: factory_stage_count_19
+- PASS: required_parameter_count_gt_30
+- PASS: required_pass_count_14
+- PASS: sealed_source_mutation_forbidden
+- PASS: node_rebuild_for_variation_forbidden
+- PASS: single_flat_beauty_forbidden
+- PASS: shot_binding_required
+- PASS: next_stage_v002_matrix
+
+## Core Asset Matrix
+
+- PASS: HFX_008 Energy Shockwave -> REFERENCE_COMPLETE
+- PASS: HFX_015 Portal Ring -> PENDING_FACTORY_UPGRADE
+- PASS: HFX_016 Heat Distortion -> PENDING_FACTORY_UPGRADE
+- PASS: HFX_021 Advanced Pyro Explosion -> PENDING_FACTORY_UPGRADE
+- PASS: HFX_025 Character Energy Field -> PENDING_FACTORY_UPGRADE
+- PASS: HFX_028 Space Rift Tear -> PENDING_FACTORY_UPGRADE
+- PASS: HFX_033 Glow Emission Pass -> PENDING_FACTORY_UPGRADE
+- PASS: HFX_036 Alpha Holdout Matte -> PENDING_FACTORY_UPGRADE
+- PASS: HFX_037 LightWrap Rim Interaction -> PENDING_FACTORY_UPGRADE
+- PASS: HFX_038 ContactShadow Ground Integration -> PENDING_FACTORY_UPGRADE
+- PASS: HFX_027 Summoning Portal Gate -> PENDING_FACTORY_UPGRADE
+- PASS: HFX_029 Black Hole Accretion Disk -> PENDING_FACTORY_UPGRADE
+
+## Generated File Checks
+
+- PASS: `500_HFX_FACTORY/HFX_FACTORY_V001_CORE_ASSET_FACTORY_PROTOCOL/01_protocol/HFX_FACTORY_CORE_ASSET_FACTORY_PROTOCOL_v001.json`
+- PASS: `500_HFX_FACTORY/HFX_FACTORY_V001_CORE_ASSET_FACTORY_PROTOCOL/02_asset_standards/HFX_FACTORY_ASSET_STANDARD_v001.json`
+- PASS: `500_HFX_FACTORY/HFX_FACTORY_V001_CORE_ASSET_FACTORY_PROTOCOL/03_parameter_interface/HFX_FACTORY_PARAMETER_INTERFACE_STANDARD_v001.json`
+- PASS: `500_HFX_FACTORY/HFX_FACTORY_V001_CORE_ASSET_FACTORY_PROTOCOL/04_pass_contract/HFX_FACTORY_PASS_OUTPUT_CONTRACT_v001.json`
+- PASS: `500_HFX_FACTORY/HFX_FACTORY_V001_CORE_ASSET_FACTORY_PROTOCOL/05_shot_binding_contract/HFX_FACTORY_SHOT_BINDING_CONTRACT_v001.json`
+- PASS: `500_HFX_FACTORY/HFX_FACTORY_V001_CORE_ASSET_FACTORY_PROTOCOL/06_validation/HFX_FACTORY_V001_CORE_ASSET_FACTORY_PROTOCOL_VALIDATION.json`
+- PASS: `500_HFX_FACTORY/HFX_FACTORY_V001_CORE_ASSET_FACTORY_PROTOCOL/06_validation/HFX_FACTORY_V001_CORE_ASSET_FACTORY_PROTOCOL_VALIDATION.md`
+- PASS: `500_HFX_FACTORY/HFX_FACTORY_V001_CORE_ASSET_FACTORY_PROTOCOL/08_docs/README_HFX_FACTORY_V001_CORE_ASSET_FACTORY_PROTOCOL.md`
+- PASS: `00_INDEX_资产索引/HFX_FACTORY_CORE_ASSET_FACTORY_PROTOCOL_v001.json`
+- PASS: `00_INDEX_资产索引/HFX_FACTORY_STATE.json`
+
+## Pollution Check
+
+Result: PASS
+No video/archive/macOS metadata pollution found in HFX Factory v001 package.
+
+## Summary
+
+- Factory: Houdini Production FX Factory
+- Protocol: HFX_FACTORY_V001_CORE_ASSET_FACTORY_PROTOCOL
+- Reference asset: HFX_008 Energy Shockwave
+- Core assets: 12
+- Completed reference assets: 1
+- Pending core assets: 11
+- All Houdini FX top-tier complete: false
+- Next: HFX_FACTORY_V002_CORE_12_ASSET_UPGRADE_MATRIX
+
+---
+
+Final Status: HFX_FACTORY_V001_CORE_ASSET_FACTORY_PROTOCOL_PASS

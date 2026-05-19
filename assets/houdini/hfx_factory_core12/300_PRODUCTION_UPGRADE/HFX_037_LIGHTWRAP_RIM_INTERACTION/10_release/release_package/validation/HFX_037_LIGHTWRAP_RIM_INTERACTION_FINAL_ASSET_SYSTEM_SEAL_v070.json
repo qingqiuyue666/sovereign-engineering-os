@@ -1,0 +1,15 @@
+{
+  "status": "HFX_FACTORY_V070_HFX037_LIGHTWRAP_RIM_INTERACTION_FINAL_ASSET_SYSTEM_SEAL_PASS",
+  "asset_id": "HFX_037",
+  "asset_name": "LightWrap Rim Interaction",
+  "asset_class": "lightwrap_rim",
+  "quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+  "registry_role": "FX_FACTORY_CORE_ASSET",
+  "hfx037_ready_as_long_term_asset": true,
+  "hfx037_ready_as_reusable_lightwrap_template": true,
+  "release_package": "300_PRODUCTION_UPGRADE/HFX_037_LIGHTWRAP_RIM_INTERACTION/10_release/release_package",
+  "release_hip": "300_PRODUCTION_UPGRADE/HFX_037_LIGHTWRAP_RIM_INTERACTION/10_release/release_package/hip/HFX_037_LIGHTWRAP_RIM_INTERACTION_FINAL_CANDIDATE_v070.hip",
+  "all_houdini_fx_top_tier_complete": false,
+  "next_asset_to_build": "HFX_038",
+  "next_stage": "HFX_FACTORY_V071_HFX038_CONTACTSHADOW_GROUND_INTEGRATION_SOURCE_RESOLUTION"
+}

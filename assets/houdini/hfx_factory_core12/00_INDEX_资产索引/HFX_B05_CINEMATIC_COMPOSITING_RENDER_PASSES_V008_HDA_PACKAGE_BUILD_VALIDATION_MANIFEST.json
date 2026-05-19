@@ -1,0 +1,55 @@
+{
+  "status": "HFX_B05_CINEMATIC_COMPOSITING_RENDER_PASSES_V008_HDA_PACKAGE_BUILD_VALIDATION_PASS",
+  "generated": "2026-05-17T23:16:36",
+  "assets": [
+    {
+      "asset": "HFX_033_Glow_Emission_Pass",
+      "result": "PASS",
+      "hda": "26_发光通道_能量Emission/HFX_033_Glow_Emission_Pass/03_hda/qqy_hfx_glow_emission_pass_b05_v008.hda",
+      "hda_type": "qqy::hfx_glow_emission_pass::5.0"
+    },
+    {
+      "asset": "HFX_034_ZDepth_Fog_Pass",
+      "result": "PASS",
+      "hda": "27_深度雾_ZDepth/HFX_034_ZDepth_Fog_Pass/03_hda/qqy_hfx_zdepth_fog_pass_b05_v008.hda",
+      "hda_type": "qqy::hfx_zdepth_fog_pass::5.0"
+    },
+    {
+      "asset": "HFX_035_Distortion_Heat_Shockwave_Mask",
+      "result": "PASS",
+      "hda": "28_热浪扭曲_冲击波Mask/HFX_035_Distortion_Heat_Shockwave_Mask/03_hda/qqy_hfx_distortion_heat_shockwave_mask_b05_v008.hda",
+      "hda_type": "qqy::hfx_distortion_heat_shockwave_mask::5.0"
+    },
+    {
+      "asset": "HFX_036_Alpha_Holdout_Matte",
+      "result": "PASS",
+      "hda": "29_Alpha遮挡_HoldoutMatte/HFX_036_Alpha_Holdout_Matte/03_hda/qqy_hfx_alpha_holdout_matte_b05_v008.hda",
+      "hda_type": "qqy::hfx_alpha_holdout_matte::5.0"
+    },
+    {
+      "asset": "HFX_037_LightWrap_Rim_Interaction",
+      "result": "PASS",
+      "hda": "30_边缘光_LightWrap融合/HFX_037_LightWrap_Rim_Interaction/03_hda/qqy_hfx_lightwrap_rim_interaction_b05_v008.hda",
+      "hda_type": "qqy::hfx_lightwrap_rim_interaction::5.0"
+    },
+    {
+      "asset": "HFX_038_ContactShadow_Ground_Integration",
+      "result": "PASS",
+      "hda": "31_接触阴影_地面融合/HFX_038_ContactShadow_Ground_Integration/03_hda/qqy_hfx_contact_shadow_ground_integration_b05_v008.hda",
+      "hda_type": "qqy::hfx_contact_shadow_ground_integration::5.0"
+    },
+    {
+      "asset": "HFX_039_LensDirt_BloomStreak_Proxy",
+      "result": "PASS",
+      "hda": "32_镜头脏污_BloomStreak/HFX_039_LensDirt_BloomStreak_Proxy/03_hda/qqy_hfx_lens_dirt_bloom_streak_proxy_b05_v008.hda",
+      "hda_type": "qqy::hfx_lens_dirt_bloom_streak_proxy::5.0"
+    },
+    {
+      "asset": "HFX_040_Unreal_DaVinci_AE_Handoff_Template",
+      "result": "PASS",
+      "hda": "33_交付模板_Unreal_DaVinci_AE/HFX_040_Unreal_DaVinci_AE_Handoff_Template/03_hda/qqy_hfx_unreal_davinci_ae_handoff_template_b05_v008.hda",
+      "hda_type": "qqy::hfx_unreal_davinci_ae_handoff_template::5.0"
+    }
+  ],
+  "pollution": []
+}

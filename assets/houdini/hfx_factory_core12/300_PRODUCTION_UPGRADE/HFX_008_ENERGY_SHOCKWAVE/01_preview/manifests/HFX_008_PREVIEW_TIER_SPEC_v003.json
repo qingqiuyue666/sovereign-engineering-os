@@ -1,0 +1,79 @@
+{
+  "status": "HFX_008_PREVIEW_TIER_SPEC_V003_READY",
+  "asset_id": "HFX_008",
+  "asset_name": "Energy Shockwave",
+  "tier": "PREVIEW",
+  "preview_hip": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/01_preview/hip/HFX_008_ENERGY_SHOCKWAVE_PREVIEW_TIER_v003.hip",
+  "source_hda": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/00_source/qqy_hfx_energy_shockwave_v009C.hda",
+  "purpose": "fast readable radial shockwave timing and scale proxy",
+  "quality_claim": "PREVIEW_ONLY",
+  "not_allowed_claims": [
+    "Hollywood final quality",
+    "final-pixel render",
+    "delivery-ready FX",
+    "shot-final output"
+  ],
+  "allowed_use": [
+    "blocking",
+    "timing",
+    "scale check",
+    "shot layout",
+    "pipeline validation"
+  ],
+  "blocked": [
+    "final delivery",
+    "production render claim",
+    "unversioned export overwrite",
+    "flattened comp before review"
+  ],
+  "render_export_allowed": false,
+  "delivery_allowed": false,
+  "sealed_source_mutation_forbidden": true,
+  "test_frames": [
+    1,
+    12,
+    24,
+    48,
+    72,
+    120
+  ],
+  "cook_results": [
+    {
+      "frame": 1,
+      "result": "PASS",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "frame": 12,
+      "result": "PASS",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "frame": 24,
+      "result": "PASS",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "frame": 48,
+      "result": "PASS",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "frame": 72,
+      "result": "PASS",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "frame": 120,
+      "result": "PASS",
+      "errors": [],
+      "warnings": []
+    }
+  ],
+  "next_stage": "HFX_PRODUCTION_UPGRADE_V004_HFX008_PREVIEW_TIER_VALIDATION"
+}

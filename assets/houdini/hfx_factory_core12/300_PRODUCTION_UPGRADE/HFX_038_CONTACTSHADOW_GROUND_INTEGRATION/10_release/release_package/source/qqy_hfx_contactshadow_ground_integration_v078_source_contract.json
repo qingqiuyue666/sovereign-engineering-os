@@ -1,0 +1,8 @@
+{
+  "status": "HFX_038_SOURCE_CONTRACT_V078_READY",
+  "asset_id": "HFX_038",
+  "asset_name": "ContactShadow Ground Integration",
+  "source_of_truth": "300_PRODUCTION_UPGRADE/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION/10_release/release_package/hip/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION_FINAL_CANDIDATE_v078.hip",
+  "direct_mutation_forbidden": true,
+  "derive_per_shot": true
+}

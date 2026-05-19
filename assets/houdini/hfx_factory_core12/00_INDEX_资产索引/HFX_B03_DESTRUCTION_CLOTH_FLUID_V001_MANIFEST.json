@@ -1,0 +1,269 @@
+{
+  "status": "HFX_B03_DESTRUCTION_CLOTH_FLUID_V001_VALIDATION_PASS",
+  "generated": "2026-05-17T18:34:14",
+  "assets": [
+    {
+      "asset": "11_大规模破坏_建筑碎裂/HFX_017_Building_Fracture_Collapse",
+      "result": "PASS",
+      "checks": [
+        {
+          "check": "asset_folder",
+          "result": "PASS"
+        },
+        {
+          "check": "00_preview",
+          "result": "PASS"
+        },
+        {
+          "check": "01_hip",
+          "result": "PASS"
+        },
+        {
+          "check": "02_cache",
+          "result": "PASS"
+        },
+        {
+          "check": "04_export",
+          "result": "PASS"
+        },
+        {
+          "check": "05_notes",
+          "result": "PASS"
+        }
+      ]
+    },
+    {
+      "asset": "11_大规模破坏_建筑碎裂/HFX_018_Glass_Shatter_Burst",
+      "result": "PASS",
+      "checks": [
+        {
+          "check": "asset_folder",
+          "result": "PASS"
+        },
+        {
+          "check": "00_preview",
+          "result": "PASS"
+        },
+        {
+          "check": "01_hip",
+          "result": "PASS"
+        },
+        {
+          "check": "02_cache",
+          "result": "PASS"
+        },
+        {
+          "check": "04_export",
+          "result": "PASS"
+        },
+        {
+          "check": "05_notes",
+          "result": "PASS"
+        }
+      ]
+    },
+    {
+      "asset": "12_布料披风_角色动力学/HFX_019_Vellum_Cape_Cloth_Sim",
+      "result": "PASS",
+      "checks": [
+        {
+          "check": "asset_folder",
+          "result": "PASS"
+        },
+        {
+          "check": "00_preview",
+          "result": "PASS"
+        },
+        {
+          "check": "01_hip",
+          "result": "PASS"
+        },
+        {
+          "check": "02_cache",
+          "result": "PASS"
+        },
+        {
+          "check": "04_export",
+          "result": "PASS"
+        },
+        {
+          "check": "05_notes",
+          "result": "PASS"
+        }
+      ]
+    },
+    {
+      "asset": "13_水体液体_FLIP/HFX_020_FLIP_Water_Splash",
+      "result": "PASS",
+      "checks": [
+        {
+          "check": "asset_folder",
+          "result": "PASS"
+        },
+        {
+          "check": "00_preview",
+          "result": "PASS"
+        },
+        {
+          "check": "01_hip",
+          "result": "PASS"
+        },
+        {
+          "check": "02_cache",
+          "result": "PASS"
+        },
+        {
+          "check": "04_export",
+          "result": "PASS"
+        },
+        {
+          "check": "05_notes",
+          "result": "PASS"
+        }
+      ]
+    },
+    {
+      "asset": "14_高级爆炸_Pyro/HFX_021_Advanced_Pyro_Explosion",
+      "result": "PASS",
+      "checks": [
+        {
+          "check": "asset_folder",
+          "result": "PASS"
+        },
+        {
+          "check": "00_preview",
+          "result": "PASS"
+        },
+        {
+          "check": "01_hip",
+          "result": "PASS"
+        },
+        {
+          "check": "02_cache",
+          "result": "PASS"
+        },
+        {
+          "check": "04_export",
+          "result": "PASS"
+        },
+        {
+          "check": "05_notes",
+          "result": "PASS"
+        }
+      ]
+    },
+    {
+      "asset": "15_风暴云_环境体积/HFX_022_Storm_Cloud_Volume",
+      "result": "PASS",
+      "checks": [
+        {
+          "check": "asset_folder",
+          "result": "PASS"
+        },
+        {
+          "check": "00_preview",
+          "result": "PASS"
+        },
+        {
+          "check": "01_hip",
+          "result": "PASS"
+        },
+        {
+          "check": "02_cache",
+          "result": "PASS"
+        },
+        {
+          "check": "04_export",
+          "result": "PASS"
+        },
+        {
+          "check": "05_notes",
+          "result": "PASS"
+        }
+      ]
+    },
+    {
+      "asset": "16_地面塌陷_岩层崩解/HFX_023_Ground_Collapse_Sinkhole",
+      "result": "PASS",
+      "checks": [
+        {
+          "check": "asset_folder",
+          "result": "PASS"
+        },
+        {
+          "check": "00_preview",
+          "result": "PASS"
+        },
+        {
+          "check": "01_hip",
+          "result": "PASS"
+        },
+        {
+          "check": "02_cache",
+          "result": "PASS"
+        },
+        {
+          "check": "04_export",
+          "result": "PASS"
+        },
+        {
+          "check": "05_notes",
+          "result": "PASS"
+        }
+      ]
+    },
+    {
+      "asset": "17_能量护盾_屏障破碎/HFX_024_Energy_Shield_Shatter",
+      "result": "PASS",
+      "checks": [
+        {
+          "check": "asset_folder",
+          "result": "PASS"
+        },
+        {
+          "check": "00_preview",
+          "result": "PASS"
+        },
+        {
+          "check": "01_hip",
+          "result": "PASS"
+        },
+        {
+          "check": "02_cache",
+          "result": "PASS"
+        },
+        {
+          "check": "04_export",
+          "result": "PASS"
+        },
+        {
+          "check": "05_notes",
+          "result": "PASS"
+        }
+      ]
+    }
+  ],
+  "global_files": [
+    {
+      "path": "00_INDEX_资产索引/HFX_B03_DESTRUCTION_CLOTH_FLUID_V001_RULEBOOK.md",
+      "result": "PASS"
+    },
+    {
+      "path": "00_INDEX_资产索引/HFX_B03_DESTRUCTION_CLOTH_FLUID_V001_REGISTRY.md",
+      "result": "PASS"
+    }
+  ],
+  "upstream": [
+    {
+      "file": "HFX_V013_FINAL_SEAL_REPORT.md",
+      "marker": "Final Status: HFX_V013_FINAL_SEAL_PASS",
+      "result": "PASS"
+    },
+    {
+      "file": "HFX_B02_ADVANCED_CORE_V013_FINAL_SEAL_REPORT.md",
+      "marker": "Final Status: HFX_B02_ADVANCED_CORE_V013_FINAL_SEAL_PASS",
+      "result": "PASS"
+    }
+  ],
+  "pollution": []
+}

@@ -1,0 +1,387 @@
+{
+  "status": "HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION_PASS",
+  "generated": "2026-05-18T18:16:08",
+  "upgrade_root": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION",
+  "core_asset_count": 12,
+  "quality_tiers": {
+    "PREVIEW": {
+      "purpose": "composition, timing, blocking, fast iteration",
+      "allowed": [
+        "low density",
+        "proxy geometry",
+        "fast cook",
+        "viewport preview",
+        "no final render claim"
+      ],
+      "blocked": [
+        "final delivery",
+        "client-grade render",
+        "claiming film quality"
+      ]
+    },
+    "MID": {
+      "purpose": "short-form usable quality and look development",
+      "allowed": [
+        "medium density",
+        "shot-local cache",
+        "basic shader",
+        "separated core passes",
+        "preview comp"
+      ],
+      "blocked": [
+        "final-pixel claim without FINAL tier validation"
+      ]
+    },
+    "FINAL": {
+      "purpose": "production-grade hero shot output",
+      "allowed": [
+        "high-density simulation",
+        "versioned cache",
+        "shot camera",
+        "ACES colorspace",
+        "EXR pass separation",
+        "final comp validation"
+      ],
+      "blocked": [
+        "unversioned export",
+        "flattened comp before review",
+        "missing pass manifest",
+        "missing camera/plate context"
+      ]
+    }
+  },
+  "assets": [
+    {
+      "asset_id": "HFX_008",
+      "name": "Energy Shockwave",
+      "batch": "B01",
+      "priority": "P0",
+      "current_level": "PREVIEW_PROXY",
+      "target_level": "PRODUCTION_FINAL",
+      "spec_json": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_008_Energy_Shockwave_PRODUCTION_UPGRADE_SPEC_v001.json",
+      "spec_md": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_008_Energy_Shockwave_PRODUCTION_UPGRADE_SPEC_v001.md",
+      "result": "PASS"
+    },
+    {
+      "asset_id": "HFX_015",
+      "name": "Portal Ring",
+      "batch": "B02",
+      "priority": "P0",
+      "current_level": "PREVIEW_PROXY",
+      "target_level": "PRODUCTION_FINAL",
+      "spec_json": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_015_Portal_Ring_PRODUCTION_UPGRADE_SPEC_v001.json",
+      "spec_md": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_015_Portal_Ring_PRODUCTION_UPGRADE_SPEC_v001.md",
+      "result": "PASS"
+    },
+    {
+      "asset_id": "HFX_016",
+      "name": "Heat Distortion",
+      "batch": "B02",
+      "priority": "P0",
+      "current_level": "PREVIEW_PROXY",
+      "target_level": "PRODUCTION_FINAL",
+      "spec_json": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_016_Heat_Distortion_PRODUCTION_UPGRADE_SPEC_v001.json",
+      "spec_md": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_016_Heat_Distortion_PRODUCTION_UPGRADE_SPEC_v001.md",
+      "result": "PASS"
+    },
+    {
+      "asset_id": "HFX_021",
+      "name": "Advanced Pyro Explosion",
+      "batch": "B03",
+      "priority": "P0",
+      "current_level": "PREVIEW_PROXY",
+      "target_level": "PRODUCTION_FINAL",
+      "spec_json": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_021_Advanced_Pyro_Explosion_PRODUCTION_UPGRADE_SPEC_v001.json",
+      "spec_md": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_021_Advanced_Pyro_Explosion_PRODUCTION_UPGRADE_SPEC_v001.md",
+      "result": "PASS"
+    },
+    {
+      "asset_id": "HFX_025",
+      "name": "Character Energy Field",
+      "batch": "B04",
+      "priority": "P0",
+      "current_level": "PREVIEW_PROXY",
+      "target_level": "PRODUCTION_FINAL",
+      "spec_json": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_025_Character_Energy_Field_PRODUCTION_UPGRADE_SPEC_v001.json",
+      "spec_md": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_025_Character_Energy_Field_PRODUCTION_UPGRADE_SPEC_v001.md",
+      "result": "PASS"
+    },
+    {
+      "asset_id": "HFX_027",
+      "name": "Summoning Portal Gate",
+      "batch": "B04",
+      "priority": "P0",
+      "current_level": "PREVIEW_PROXY",
+      "target_level": "PRODUCTION_FINAL",
+      "spec_json": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_027_Summoning_Portal_Gate_PRODUCTION_UPGRADE_SPEC_v001.json",
+      "spec_md": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_027_Summoning_Portal_Gate_PRODUCTION_UPGRADE_SPEC_v001.md",
+      "result": "PASS"
+    },
+    {
+      "asset_id": "HFX_028",
+      "name": "Space Rift Tear",
+      "batch": "B04",
+      "priority": "P0",
+      "current_level": "PREVIEW_PROXY",
+      "target_level": "PRODUCTION_FINAL",
+      "spec_json": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_028_Space_Rift_Tear_PRODUCTION_UPGRADE_SPEC_v001.json",
+      "spec_md": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_028_Space_Rift_Tear_PRODUCTION_UPGRADE_SPEC_v001.md",
+      "result": "PASS"
+    },
+    {
+      "asset_id": "HFX_029",
+      "name": "Black Hole Accretion Disk",
+      "batch": "B04",
+      "priority": "P0",
+      "current_level": "PREVIEW_PROXY",
+      "target_level": "PRODUCTION_FINAL",
+      "spec_json": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_029_Black_Hole_Accretion_Disk_PRODUCTION_UPGRADE_SPEC_v001.json",
+      "spec_md": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_029_Black_Hole_Accretion_Disk_PRODUCTION_UPGRADE_SPEC_v001.md",
+      "result": "PASS"
+    },
+    {
+      "asset_id": "HFX_033",
+      "name": "Glow Emission Pass",
+      "batch": "B05",
+      "priority": "P0",
+      "current_level": "SUPPORT_PROXY",
+      "target_level": "PRODUCTION_SUPPORT_FINAL",
+      "spec_json": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_033_Glow_Emission_Pass_PRODUCTION_UPGRADE_SPEC_v001.json",
+      "spec_md": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_033_Glow_Emission_Pass_PRODUCTION_UPGRADE_SPEC_v001.md",
+      "result": "PASS"
+    },
+    {
+      "asset_id": "HFX_036",
+      "name": "Alpha Holdout Matte",
+      "batch": "B05",
+      "priority": "P0",
+      "current_level": "SUPPORT_PROXY",
+      "target_level": "PRODUCTION_SUPPORT_FINAL",
+      "spec_json": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_036_Alpha_Holdout_Matte_PRODUCTION_UPGRADE_SPEC_v001.json",
+      "spec_md": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_036_Alpha_Holdout_Matte_PRODUCTION_UPGRADE_SPEC_v001.md",
+      "result": "PASS"
+    },
+    {
+      "asset_id": "HFX_037",
+      "name": "LightWrap Rim Interaction",
+      "batch": "B05",
+      "priority": "P0",
+      "current_level": "SUPPORT_PROXY",
+      "target_level": "PRODUCTION_SUPPORT_FINAL",
+      "spec_json": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_037_LightWrap_Rim_Interaction_PRODUCTION_UPGRADE_SPEC_v001.json",
+      "spec_md": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_037_LightWrap_Rim_Interaction_PRODUCTION_UPGRADE_SPEC_v001.md",
+      "result": "PASS"
+    },
+    {
+      "asset_id": "HFX_038",
+      "name": "ContactShadow Ground Integration",
+      "batch": "B05",
+      "priority": "P0",
+      "current_level": "SUPPORT_PROXY",
+      "target_level": "PRODUCTION_SUPPORT_FINAL",
+      "spec_json": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_038_ContactShadow_Ground_Integration_PRODUCTION_UPGRADE_SPEC_v001.json",
+      "spec_md": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_038_ContactShadow_Ground_Integration_PRODUCTION_UPGRADE_SPEC_v001.md",
+      "result": "PASS"
+    }
+  ],
+  "foundation_checks": [
+    {
+      "label": "Batch 01 Final Seal",
+      "file": "HFX_V013_FINAL_SEAL_REPORT.md",
+      "marker": "Final Status: HFX_V013_FINAL_SEAL_PASS",
+      "result": "PASS"
+    },
+    {
+      "label": "Batch 02 Final Seal",
+      "file": "HFX_B02_ADVANCED_CORE_V013_FINAL_SEAL_REPORT.md",
+      "marker": "Final Status: HFX_B02_ADVANCED_CORE_V013_FINAL_SEAL_PASS",
+      "result": "PASS"
+    },
+    {
+      "label": "Batch 03 Final Seal",
+      "file": "HFX_B03_DESTRUCTION_CLOTH_FLUID_V013_FINAL_SEAL_REPORT.md",
+      "marker": "Final Status: HFX_B03_DESTRUCTION_CLOTH_FLUID_V013_FINAL_SEAL_PASS",
+      "result": "PASS"
+    },
+    {
+      "label": "Batch 04 Final Seal",
+      "file": "HFX_B04_CHARACTER_MAGIC_ENVIRONMENT_V013_FINAL_SEAL_REPORT.md",
+      "marker": "Final Status: HFX_B04_CHARACTER_MAGIC_ENVIRONMENT_V013_FINAL_SEAL_PASS",
+      "result": "PASS"
+    },
+    {
+      "label": "Batch 05 Final Seal",
+      "file": "HFX_B05_CINEMATIC_COMPOSITING_RENDER_PASSES_V012_FINAL_SEAL_REPORT.md",
+      "marker": "Final Status: HFX_B05_CINEMATIC_COMPOSITING_RENDER_PASSES_V012_FINAL_SEAL_PASS",
+      "result": "PASS"
+    },
+    {
+      "label": "Shot Pipeline v001",
+      "file": "SHOT_PIPELINE_V001_REAL_SHOT_BINDING_REPORT.md",
+      "marker": "Final Status: SHOT_PIPELINE_V001_REAL_SHOT_BINDING_PASS",
+      "result": "PASS"
+    },
+    {
+      "label": "Shot Pipeline v002",
+      "file": "SHOT_PIPELINE_V002_SHOT_INSTANTIATION_REPORT.md",
+      "marker": "Final Status: SHOT_PIPELINE_V002_SHOT_INSTANTIATION_PASS",
+      "result": "PASS"
+    },
+    {
+      "label": "Shot Pipeline v003",
+      "file": "SHOT_PIPELINE_V003_SYNTHETIC_PLATE_CAMERA_BINDING_REPORT.md",
+      "marker": "Final Status: SHOT_PIPELINE_V003_SYNTHETIC_PLATE_CAMERA_BINDING_PASS",
+      "result": "PASS"
+    },
+    {
+      "label": "Shot Pipeline v004",
+      "file": "SHOT_PIPELINE_V004_HERO_HIP_DERIVATION_PREFLIGHT_REPORT.md",
+      "marker": "Final Status: SHOT_PIPELINE_V004_HERO_HIP_DERIVATION_PREFLIGHT_PASS",
+      "result": "PASS"
+    },
+    {
+      "label": "Shot Pipeline v005",
+      "file": "SHOT_PIPELINE_V005_HERO_HIP_DERIVATION_BUILD_REPORT.md",
+      "marker": "Final Status: SHOT_PIPELINE_V005_HERO_HIP_DERIVATION_BUILD_PASS",
+      "result": "PASS"
+    }
+  ],
+  "files": [
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_008_Energy_Shockwave_PRODUCTION_UPGRADE_SPEC_v001.json",
+      "sha256": "226202756eb6b80ea9cf025cb80dfadfc2d03b5511e74dd625d08b35d586eb1e",
+      "size_bytes": 3305
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_008_Energy_Shockwave_PRODUCTION_UPGRADE_SPEC_v001.md",
+      "sha256": "31f9cb009ff0632335bc136b1adb52220bbac5b90c1c219e0310b3e7e8e35f19",
+      "size_bytes": 1304
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_015_Portal_Ring_PRODUCTION_UPGRADE_SPEC_v001.json",
+      "sha256": "e3ae474142bde05bb2fd520ab9d22d324e52d030f6c43af1f7c0420d5d3d5a84",
+      "size_bytes": 3316
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_015_Portal_Ring_PRODUCTION_UPGRADE_SPEC_v001.md",
+      "sha256": "81045efa8f64334eff2936dab72d6adc7e9a49226da8d6b19ef6e983d50c152d",
+      "size_bytes": 1308
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_016_Heat_Distortion_PRODUCTION_UPGRADE_SPEC_v001.json",
+      "sha256": "e1943adb499c94361e5c822a3913c19a8a3e148d3b5727e0f555738322898b23",
+      "size_bytes": 3237
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_016_Heat_Distortion_PRODUCTION_UPGRADE_SPEC_v001.md",
+      "sha256": "04b462a93668cbdd9841a3b03de694531921cd4936da770df270cff272ec900a",
+      "size_bytes": 1257
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_021_Advanced_Pyro_Explosion_PRODUCTION_UPGRADE_SPEC_v001.json",
+      "sha256": "f495f27141f6d0dc798cfa385b76d4cea16c9403109f66c8d4eb76f67db728dc",
+      "size_bytes": 3376
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_021_Advanced_Pyro_Explosion_PRODUCTION_UPGRADE_SPEC_v001.md",
+      "sha256": "8946828ce25dfc4dfc097ab98bac04279aaf9e194b971918291d3bd4261457b6",
+      "size_bytes": 1347
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_025_Character_Energy_Field_PRODUCTION_UPGRADE_SPEC_v001.json",
+      "sha256": "94c6cd092f0610b47bc4a4dd60c94fa1f3718f1063f560fea4f43086c85feba0",
+      "size_bytes": 3290
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_025_Character_Energy_Field_PRODUCTION_UPGRADE_SPEC_v001.md",
+      "sha256": "06121848f726cfacacc7fd582f4abfe6b0256106ab4215d3f053c00e30813086",
+      "size_bytes": 1289
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_027_Summoning_Portal_Gate_PRODUCTION_UPGRADE_SPEC_v001.json",
+      "sha256": "299abba8aead87ba09b332e9be2ae7345e9f406f2de259fff954ab9d800ad81f",
+      "size_bytes": 3265
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_027_Summoning_Portal_Gate_PRODUCTION_UPGRADE_SPEC_v001.md",
+      "sha256": "ffadfb79ae00a1ff10d8d69ccbabf81f18a6aaa836163282450eae30e8e7cf95",
+      "size_bytes": 1264
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_028_Space_Rift_Tear_PRODUCTION_UPGRADE_SPEC_v001.json",
+      "sha256": "4a085bd8443ef04e9325ed5b80d1caac1af3f79eee6c15e88c40daeb05f84092",
+      "size_bytes": 3255
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_028_Space_Rift_Tear_PRODUCTION_UPGRADE_SPEC_v001.md",
+      "sha256": "93d72c7c6397c7f9c9cea76812fd41c5789ccc3f9e574eb4a936104cfc5b1a6f",
+      "size_bytes": 1268
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_029_Black_Hole_Accretion_Disk_PRODUCTION_UPGRADE_SPEC_v001.json",
+      "sha256": "fc546760da48b223ce3938325e3a4e8af58e6b93b475ee12cf437c8fbfc527e3",
+      "size_bytes": 3308
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_029_Black_Hole_Accretion_Disk_PRODUCTION_UPGRADE_SPEC_v001.md",
+      "sha256": "882f1afa732506d16640f54f4abf1fc56e070b5fa1566a0d0be48d52c78f5ff7",
+      "size_bytes": 1307
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_033_Glow_Emission_Pass_PRODUCTION_UPGRADE_SPEC_v001.json",
+      "sha256": "96330c87ecd83f1acc64c1eaa413e84cda47ade3c9696461c3a29e07e902ae00",
+      "size_bytes": 3144
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_033_Glow_Emission_Pass_PRODUCTION_UPGRADE_SPEC_v001.md",
+      "sha256": "dcf21f021d13a5029a44ed81f81a54104359dd7d2bed89adb7f5428ae8bcb8a0",
+      "size_bytes": 1185
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_036_Alpha_Holdout_Matte_PRODUCTION_UPGRADE_SPEC_v001.json",
+      "sha256": "a85464bc083aecc2c7566385a0b790aa7b1b9f1f9540c6989ad3134deddd4877",
+      "size_bytes": 3188
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_036_Alpha_Holdout_Matte_PRODUCTION_UPGRADE_SPEC_v001.md",
+      "sha256": "f05e7ec5a8eda86b17bcf35c328b23ced9f6083fdac82f41e0b5b0c8d97e2ae9",
+      "size_bytes": 1222
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_037_LightWrap_Rim_Interaction_PRODUCTION_UPGRADE_SPEC_v001.json",
+      "sha256": "f7924c42a6d61ff16d2ac62afc546b5a9404f50705103b30698eb6dba83f50d8",
+      "size_bytes": 3221
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_037_LightWrap_Rim_Interaction_PRODUCTION_UPGRADE_SPEC_v001.md",
+      "sha256": "248d076cc36fe5a4306a226fcd6e01afe60e2383bf64611ddb0020e5cfa4f5e9",
+      "size_bytes": 1241
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_038_ContactShadow_Ground_Integration_PRODUCTION_UPGRADE_SPEC_v001.json",
+      "sha256": "e3a1cf38f2fa72bfcc495c7114e2daadedc2cd400d33910948168aa19679d052",
+      "size_bytes": 3248
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/specs/HFX_038_ContactShadow_Ground_Integration_PRODUCTION_UPGRADE_SPEC_v001.md",
+      "sha256": "f9db2c9673ddfebf0701cbfef0f5c0d88933ff87643680764c0d236cea34d46a",
+      "size_bytes": 1261
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/HFX_PRODUCTION_UPGRADE_V001_RULEBOOK.md",
+      "sha256": "58b64948c6ccd0aac5d0d686d90cbc5c44f37fd31f34c3c7d119c7a1165c4d68",
+      "size_bytes": 1491
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/README_HFX_PRODUCTION_UPGRADE_V001.md",
+      "sha256": "4e5db0965c9a5a331012dd30c05bed084529caab1d81ab646ef56d42a12a5c31",
+      "size_bytes": 880
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION/validation/HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION_VALIDATION.md",
+      "sha256": "0131fcb76cc91726cbb4088ef8565ccb8b9503fa99652a9d43c38c67ab371f9c",
+      "size_bytes": 568
+    }
+  ],
+  "pollution": []
+}

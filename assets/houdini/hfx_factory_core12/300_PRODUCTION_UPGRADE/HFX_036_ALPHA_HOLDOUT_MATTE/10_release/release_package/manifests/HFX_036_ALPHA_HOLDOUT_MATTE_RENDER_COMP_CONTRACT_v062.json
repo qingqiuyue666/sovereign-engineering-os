@@ -1,0 +1,26 @@
+{
+  "status": "HFX_036_RENDER_COMP_CONTRACT_V062_READY",
+  "asset_id": "HFX_036",
+  "asset_name": "Alpha Holdout Matte",
+  "required_passes": [
+    "OUT_FINAL_ALPHA_CORE",
+    "OUT_FINAL_EDGE_EXPAND",
+    "OUT_FINAL_EDGE_FEATHER",
+    "OUT_FINAL_HOLDOUT_STRENGTH",
+    "OUT_FINAL_TEMPORAL_SMOOTH_PROXY",
+    "OUT_FINAL_MATTE_OUTPUT",
+    "OUT_FINAL_METADATA"
+  ],
+  "target_uses": [
+    "alpha matte",
+    "holdout",
+    "subject occlusion",
+    "edge expand",
+    "edge feather",
+    "green-screen integration"
+  ],
+  "dependencies": [],
+  "comfyui_source_of_truth_forbidden": true,
+  "single_flat_beauty_only_forbidden": true,
+  "delivery_allowed": false
+}

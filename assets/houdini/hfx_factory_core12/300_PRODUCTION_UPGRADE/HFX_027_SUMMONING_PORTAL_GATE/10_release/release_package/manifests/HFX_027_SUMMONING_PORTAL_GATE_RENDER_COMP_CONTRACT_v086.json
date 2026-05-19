@@ -1,0 +1,32 @@
+{
+  "status": "HFX_027_RENDER_COMP_CONTRACT_V086_READY",
+  "asset_id": "HFX_027",
+  "asset_name": "Summoning Portal Gate",
+  "required_passes": [
+    "OUT_FINAL_SUMMON_RING",
+    "OUT_FINAL_GLYPH_FIELD",
+    "OUT_FINAL_INNER_GATE",
+    "OUT_FINAL_PARTICLE_ASCENT",
+    "OUT_FINAL_PORTAL_CORE_LINK",
+    "OUT_FINAL_GLOW_PASS_LINK",
+    "OUT_FINAL_CONTACTSHADOW_LINK",
+    "OUT_FINAL_ZDEPTH",
+    "OUT_FINAL_ALPHA",
+    "OUT_FINAL_METADATA"
+  ],
+  "target_uses": [
+    "summoning gate",
+    "anime magic circle",
+    "character arrival",
+    "portal summon",
+    "ritual gate"
+  ],
+  "dependencies": [
+    "HFX_015",
+    "HFX_033",
+    "HFX_038"
+  ],
+  "comfyui_source_of_truth_forbidden": true,
+  "single_flat_beauty_only_forbidden": true,
+  "delivery_allowed": false
+}

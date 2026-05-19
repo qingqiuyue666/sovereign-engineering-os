@@ -1,0 +1,56 @@
+{
+  "status": "SHOT_PIPELINE_V003_SYNTHETIC_PLATE_CAMERA_BINDING_PASS",
+  "generated": "2026-05-18T00:07:02",
+  "shot_id": "SHOT_001_TEST_REAL_FX_BINDING",
+  "take_id": "TAKE_A",
+  "shot_root": "200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING",
+  "mode": "synthetic_test_binding",
+  "files": [
+    {
+      "path": "200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING/shot_manifest_v003.json",
+      "sha256": "8e4c1bf21f85850ec394fbf3ee8142740480559e6790a78509b0c4c253864c1e",
+      "size_bytes": 3710
+    },
+    {
+      "path": "200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING/00_plate/PLATE_BINDING_v003_SYNTHETIC.json",
+      "sha256": "2db4ec17198586f5335162954606c36d71618364bd98c117e6031999e8a63690",
+      "size_bytes": 1136
+    },
+    {
+      "path": "200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING/01_camera/CAMERA_BINDING_v003_SYNTHETIC.json",
+      "sha256": "dbdf6c0d3f9ad24c6747f9cebb8f2307a9d2d60093ada2605516a65e67731f3a",
+      "size_bytes": 1081
+    },
+    {
+      "path": "200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING/02_unreal/UNREAL_BINDING_v003.json",
+      "sha256": "8b57519aed617874b58cc2d892eba3503af2541d6c9b8692f9cfae77eda448ac",
+      "size_bytes": 547
+    },
+    {
+      "path": "200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING/03_houdini/HFX_ASSET_SELECTION_v003.json",
+      "sha256": "f9ff64d7cd26c158f068d7a5003869313a54946a7d82cd30e49f233327dba22d",
+      "size_bytes": 2287
+    },
+    {
+      "path": "200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING/05_comp/COMP_PASS_MAP_v003.json",
+      "sha256": "560886591544bdd944215e5d938c3b476919b6149a2b86d9f002d0247454c5ec",
+      "size_bytes": 932
+    },
+    {
+      "path": "200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING/06_delivery/SHOT_HANDOFF_MANIFEST_v003.json",
+      "sha256": "70609889fbf8370a25a570a7cefba7284bbd1d54e353c21bce6140aa9df546ad",
+      "size_bytes": 579
+    },
+    {
+      "path": "200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING/07_validation/SHOT_VALIDATION_SYNTHETIC_BINDING_v003.md",
+      "sha256": "8e8b89222daddaa2897f608f6f9a6fb181ac7a5db3d687a64f6db6450a2ca9e6",
+      "size_bytes": 1070
+    },
+    {
+      "path": "200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING/08_notes/README_V003_SYNTHETIC_BINDING.md",
+      "sha256": "d1d2f85ac17df095691cfa782b8e2f0916ef8957321823ae99e0456aaa6a3f04",
+      "size_bytes": 733
+    }
+  ],
+  "pollution": []
+}

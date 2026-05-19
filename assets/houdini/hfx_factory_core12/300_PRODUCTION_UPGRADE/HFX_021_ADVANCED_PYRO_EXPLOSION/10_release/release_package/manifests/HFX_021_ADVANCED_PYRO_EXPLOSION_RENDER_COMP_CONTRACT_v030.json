@@ -1,0 +1,32 @@
+{
+  "status": "HFX_021_RENDER_COMP_CONTRACT_V030_READY",
+  "asset_id": "HFX_021",
+  "asset_name": "Advanced Pyro Explosion",
+  "required_passes": [
+    "OUT_FINAL_BLAST_CORE",
+    "OUT_FINAL_FIRE_EMISSION",
+    "OUT_FINAL_SMOKE_VOLUME_PROXY",
+    "OUT_FINAL_DEBRIS_FIELD",
+    "OUT_FINAL_SHOCKWAVE_RING",
+    "OUT_FINAL_HEAT_DISTORTION_LINK",
+    "OUT_FINAL_CONTACT_SHADOW",
+    "OUT_FINAL_ZDEPTH",
+    "OUT_FINAL_ALPHA_HOLDOUT",
+    "OUT_FINAL_METADATA"
+  ],
+  "target_uses": [
+    "explosion",
+    "fireball",
+    "impact blast",
+    "debris burst",
+    "shockwave",
+    "pyro hero shot"
+  ],
+  "dependencies": [
+    "HFX_008",
+    "HFX_016"
+  ],
+  "comfyui_source_of_truth_forbidden": true,
+  "single_flat_beauty_only_forbidden": true,
+  "delivery_allowed": false
+}

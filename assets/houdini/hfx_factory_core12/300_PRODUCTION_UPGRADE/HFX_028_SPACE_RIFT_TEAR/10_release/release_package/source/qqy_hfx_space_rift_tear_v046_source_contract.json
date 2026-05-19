@@ -1,0 +1,8 @@
+{
+  "status": "HFX_028_SOURCE_CONTRACT_V046_READY",
+  "asset_id": "HFX_028",
+  "asset_name": "Space Rift Tear",
+  "source_of_truth": "300_PRODUCTION_UPGRADE/HFX_028_SPACE_RIFT_TEAR/10_release/release_package/hip/HFX_028_SPACE_RIFT_TEAR_FINAL_CANDIDATE_v046.hip",
+  "direct_mutation_forbidden": true,
+  "derive_per_shot": true
+}

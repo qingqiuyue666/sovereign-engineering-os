@@ -1,0 +1,18 @@
+{
+  "status": "HFX_FACTORY_V077_HFX038_CONTACTSHADOW_GROUND_INTEGRATION_FINAL_CANDIDATE_VALIDATION_PASS",
+  "asset_id": "HFX_038",
+  "asset_name": "ContactShadow Ground Integration",
+  "final_candidate_validated": true,
+  "final_candidate_hip": "300_PRODUCTION_UPGRADE/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION/03_final/hip/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION_FINAL_CANDIDATE_v078.hip",
+  "required_outputs": [
+    "OUT_FINAL_CONTACT_CORE",
+    "OUT_FINAL_SOFT_FALLOFF",
+    "OUT_FINAL_GROUND_OCCLUSION",
+    "OUT_FINAL_DIRECTIONAL_SHADOW",
+    "OUT_FINAL_ALPHA_MASK",
+    "OUT_FINAL_ZDEPTH_GROUND",
+    "OUT_FINAL_METADATA"
+  ],
+  "render_export_allowed": false,
+  "delivery_allowed": false
+}

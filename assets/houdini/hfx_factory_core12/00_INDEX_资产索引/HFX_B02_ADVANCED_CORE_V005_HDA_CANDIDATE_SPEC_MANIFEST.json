@@ -1,0 +1,87 @@
+{
+  "status": "HFX_B02_ADVANCED_CORE_V005_HDA_CANDIDATE_SPEC_PASS",
+  "generated": "2026-05-17T18:14:41",
+  "assets": [
+    {
+      "asset": "HFX_009_Volumetric_Fog_Bank",
+      "rel": "06_体积雾气_环境烟雾/HFX_009_Volumetric_Fog_Bank",
+      "result": "PASS",
+      "hda_type": "qqy::hfx_volumetric_fog_bank::2.0",
+      "hda_file": "qqy_hfx_volumetric_fog_bank_b02_v005.hda",
+      "spec": "06_体积雾气_环境烟雾/HFX_009_Volumetric_Fog_Bank/05_notes/HDA_CANDIDATE_SPEC_v005.md",
+      "json": "06_体积雾气_环境烟雾/HFX_009_Volumetric_Fog_Bank/05_notes/HDA_CANDIDATE_SPEC_v005.json",
+      "readme_v005": "06_体积雾气_环境烟雾/HFX_009_Volumetric_Fog_Bank/05_notes/README_v005.md"
+    },
+    {
+      "asset": "HFX_010_Smoke_Plume_Column",
+      "rel": "06_体积雾气_环境烟雾/HFX_010_Smoke_Plume_Column",
+      "result": "PASS",
+      "hda_type": "qqy::hfx_smoke_plume_column::2.0",
+      "hda_file": "qqy_hfx_smoke_plume_column_b02_v005.hda",
+      "spec": "06_体积雾气_环境烟雾/HFX_010_Smoke_Plume_Column/05_notes/HDA_CANDIDATE_SPEC_v005.md",
+      "json": "06_体积雾气_环境烟雾/HFX_010_Smoke_Plume_Column/05_notes/HDA_CANDIDATE_SPEC_v005.json",
+      "readme_v005": "06_体积雾气_环境烟雾/HFX_010_Smoke_Plume_Column/05_notes/README_v005.md"
+    },
+    {
+      "asset": "HFX_011_Ember_Ash_Field",
+      "rel": "07_粒子火星_灰烬火花/HFX_011_Ember_Ash_Field",
+      "result": "PASS",
+      "hda_type": "qqy::hfx_ember_ash_field::2.0",
+      "hda_file": "qqy_hfx_ember_ash_field_b02_v005.hda",
+      "spec": "07_粒子火星_灰烬火花/HFX_011_Ember_Ash_Field/05_notes/HDA_CANDIDATE_SPEC_v005.md",
+      "json": "07_粒子火星_灰烬火花/HFX_011_Ember_Ash_Field/05_notes/HDA_CANDIDATE_SPEC_v005.json",
+      "readme_v005": "07_粒子火星_灰烬火花/HFX_011_Ember_Ash_Field/05_notes/README_v005.md"
+    },
+    {
+      "asset": "HFX_012_Sparks_Impact_Spray",
+      "rel": "07_粒子火星_灰烬火花/HFX_012_Sparks_Impact_Spray",
+      "result": "PASS",
+      "hda_type": "qqy::hfx_sparks_impact_spray::2.0",
+      "hda_file": "qqy_hfx_sparks_impact_spray_b02_v005.hda",
+      "spec": "07_粒子火星_灰烬火花/HFX_012_Sparks_Impact_Spray/05_notes/HDA_CANDIDATE_SPEC_v005.md",
+      "json": "07_粒子火星_灰烬火花/HFX_012_Sparks_Impact_Spray/05_notes/HDA_CANDIDATE_SPEC_v005.json",
+      "readme_v005": "07_粒子火星_灰烬火花/HFX_012_Sparks_Impact_Spray/05_notes/README_v005.md"
+    },
+    {
+      "asset": "HFX_013_Debris_Burst_Radial",
+      "rel": "08_碎片爆发_二级破坏/HFX_013_Debris_Burst_Radial",
+      "result": "PASS",
+      "hda_type": "qqy::hfx_debris_burst_radial::2.0",
+      "hda_file": "qqy_hfx_debris_burst_radial_b02_v005.hda",
+      "spec": "08_碎片爆发_二级破坏/HFX_013_Debris_Burst_Radial/05_notes/HDA_CANDIDATE_SPEC_v005.md",
+      "json": "08_碎片爆发_二级破坏/HFX_013_Debris_Burst_Radial/05_notes/HDA_CANDIDATE_SPEC_v005.json",
+      "readme_v005": "08_碎片爆发_二级破坏/HFX_013_Debris_Burst_Radial/05_notes/README_v005.md"
+    },
+    {
+      "asset": "HFX_014_Magic_Particle_Aura",
+      "rel": "09_魔法能量_空间场/HFX_014_Magic_Particle_Aura",
+      "result": "PASS",
+      "hda_type": "qqy::hfx_magic_particle_aura::2.0",
+      "hda_file": "qqy_hfx_magic_particle_aura_b02_v005.hda",
+      "spec": "09_魔法能量_空间场/HFX_014_Magic_Particle_Aura/05_notes/HDA_CANDIDATE_SPEC_v005.md",
+      "json": "09_魔法能量_空间场/HFX_014_Magic_Particle_Aura/05_notes/HDA_CANDIDATE_SPEC_v005.json",
+      "readme_v005": "09_魔法能量_空间场/HFX_014_Magic_Particle_Aura/05_notes/README_v005.md"
+    },
+    {
+      "asset": "HFX_015_Portal_Ring_Field",
+      "rel": "09_魔法能量_空间场/HFX_015_Portal_Ring_Field",
+      "result": "PASS",
+      "hda_type": "qqy::hfx_portal_ring_field::2.0",
+      "hda_file": "qqy_hfx_portal_ring_field_b02_v005.hda",
+      "spec": "09_魔法能量_空间场/HFX_015_Portal_Ring_Field/05_notes/HDA_CANDIDATE_SPEC_v005.md",
+      "json": "09_魔法能量_空间场/HFX_015_Portal_Ring_Field/05_notes/HDA_CANDIDATE_SPEC_v005.json",
+      "readme_v005": "09_魔法能量_空间场/HFX_015_Portal_Ring_Field/05_notes/README_v005.md"
+    },
+    {
+      "asset": "HFX_016_Heat_Distortion_Field",
+      "rel": "10_热浪扭曲_空气扰动/HFX_016_Heat_Distortion_Field",
+      "result": "PASS",
+      "hda_type": "qqy::hfx_heat_distortion_field::2.0",
+      "hda_file": "qqy_hfx_heat_distortion_field_b02_v005.hda",
+      "spec": "10_热浪扭曲_空气扰动/HFX_016_Heat_Distortion_Field/05_notes/HDA_CANDIDATE_SPEC_v005.md",
+      "json": "10_热浪扭曲_空气扰动/HFX_016_Heat_Distortion_Field/05_notes/HDA_CANDIDATE_SPEC_v005.json",
+      "readme_v005": "10_热浪扭曲_空气扰动/HFX_016_Heat_Distortion_Field/05_notes/README_v005.md"
+    }
+  ],
+  "pollution": []
+}

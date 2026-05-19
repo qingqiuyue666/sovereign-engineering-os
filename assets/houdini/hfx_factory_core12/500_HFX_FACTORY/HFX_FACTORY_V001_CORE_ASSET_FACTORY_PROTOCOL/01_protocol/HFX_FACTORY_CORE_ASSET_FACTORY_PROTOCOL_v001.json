@@ -1,0 +1,156 @@
+{
+  "status": "HFX_FACTORY_CORE_ASSET_FACTORY_PROTOCOL_V001_READY",
+  "generated": "2026-05-19T18:21:07",
+  "factory_name": "Houdini Production FX Factory",
+  "reference_asset": {
+    "asset_id": "HFX_008",
+    "asset_name": "Energy Shockwave",
+    "status": "REFERENCE_COMPLETE",
+    "registry_verified": true
+  },
+  "core_assets": [
+    {
+      "asset_id": "HFX_008",
+      "asset_name": "Energy Shockwave",
+      "asset_class": "energy_shockwave",
+      "priority": 1,
+      "status": "REFERENCE_COMPLETE",
+      "upgrade_order": 1,
+      "role": "factory_reference_asset"
+    },
+    {
+      "asset_id": "HFX_015",
+      "asset_name": "Portal Ring",
+      "asset_class": "portal_ring",
+      "priority": 2,
+      "status": "PENDING_FACTORY_UPGRADE",
+      "upgrade_order": 2,
+      "role": "primary_spatial_transition_fx"
+    },
+    {
+      "asset_id": "HFX_016",
+      "asset_name": "Heat Distortion",
+      "asset_class": "heat_distortion",
+      "priority": 3,
+      "status": "PENDING_FACTORY_UPGRADE",
+      "upgrade_order": 3,
+      "role": "integration_distortion_layer"
+    },
+    {
+      "asset_id": "HFX_021",
+      "asset_name": "Advanced Pyro Explosion",
+      "asset_class": "pyro_explosion",
+      "priority": 4,
+      "status": "PENDING_FACTORY_UPGRADE",
+      "upgrade_order": 4,
+      "role": "high_energy_pyro_fx"
+    },
+    {
+      "asset_id": "HFX_025",
+      "asset_name": "Character Energy Field",
+      "asset_class": "character_energy_field",
+      "priority": 5,
+      "status": "PENDING_FACTORY_UPGRADE",
+      "upgrade_order": 5,
+      "role": "character_bound_energy_fx"
+    },
+    {
+      "asset_id": "HFX_028",
+      "asset_name": "Space Rift Tear",
+      "asset_class": "space_rift",
+      "priority": 6,
+      "status": "PENDING_FACTORY_UPGRADE",
+      "upgrade_order": 6,
+      "role": "space_distortion_tear_fx"
+    },
+    {
+      "asset_id": "HFX_033",
+      "asset_name": "Glow Emission Pass",
+      "asset_class": "glow_emission",
+      "priority": 7,
+      "status": "PENDING_FACTORY_UPGRADE",
+      "upgrade_order": 7,
+      "role": "comp_support_emission_layer"
+    },
+    {
+      "asset_id": "HFX_036",
+      "asset_name": "Alpha Holdout Matte",
+      "asset_class": "alpha_holdout",
+      "priority": 8,
+      "status": "PENDING_FACTORY_UPGRADE",
+      "upgrade_order": 8,
+      "role": "comp_support_holdout_layer"
+    },
+    {
+      "asset_id": "HFX_037",
+      "asset_name": "LightWrap Rim Interaction",
+      "asset_class": "lightwrap_rim",
+      "priority": 9,
+      "status": "PENDING_FACTORY_UPGRADE",
+      "upgrade_order": 9,
+      "role": "comp_support_lightwrap_layer"
+    },
+    {
+      "asset_id": "HFX_038",
+      "asset_name": "ContactShadow Ground Integration",
+      "asset_class": "contact_shadow",
+      "priority": 10,
+      "status": "PENDING_FACTORY_UPGRADE",
+      "upgrade_order": 10,
+      "role": "grounding_contact_layer"
+    },
+    {
+      "asset_id": "HFX_027",
+      "asset_name": "Summoning Portal Gate",
+      "asset_class": "summoning_portal_gate",
+      "priority": 11,
+      "status": "PENDING_FACTORY_UPGRADE",
+      "upgrade_order": 11,
+      "role": "complex_magic_portal_fx"
+    },
+    {
+      "asset_id": "HFX_029",
+      "asset_name": "Black Hole Accretion Disk",
+      "asset_class": "black_hole_accretion",
+      "priority": 12,
+      "status": "PENDING_FACTORY_UPGRADE",
+      "upgrade_order": 12,
+      "role": "advanced_gravity_lens_fx"
+    }
+  ],
+  "factory_stages": [
+    "source_resolution",
+    "preview_tier_build",
+    "preview_tier_validation",
+    "mid_tier_build",
+    "mid_tier_validation",
+    "final_candidate_tier_build",
+    "final_candidate_tier_validation",
+    "final_candidate_release_seal",
+    "shot_bound_render_package",
+    "render_execution_preflight",
+    "controlled_preview_render",
+    "preview_validation",
+    "synthetic_or_real_context_decision",
+    "structured_render_package",
+    "render_package_validation",
+    "comp_package",
+    "final_look_validation",
+    "delivery_candidate",
+    "final_asset_system_seal"
+  ],
+  "asset_standard": "500_HFX_FACTORY/HFX_FACTORY_V001_CORE_ASSET_FACTORY_PROTOCOL/02_asset_standards/HFX_FACTORY_ASSET_STANDARD_v001.json",
+  "parameter_interface_standard": "500_HFX_FACTORY/HFX_FACTORY_V001_CORE_ASSET_FACTORY_PROTOCOL/03_parameter_interface/HFX_FACTORY_PARAMETER_INTERFACE_STANDARD_v001.json",
+  "pass_output_contract": "500_HFX_FACTORY/HFX_FACTORY_V001_CORE_ASSET_FACTORY_PROTOCOL/04_pass_contract/HFX_FACTORY_PASS_OUTPUT_CONTRACT_v001.json",
+  "shot_binding_contract": "500_HFX_FACTORY/HFX_FACTORY_V001_CORE_ASSET_FACTORY_PROTOCOL/05_shot_binding_contract/HFX_FACTORY_SHOT_BINDING_CONTRACT_v001.json",
+  "operating_principles": {
+    "asset_factory_not_one_off_hip_files": true,
+    "reuse_by_parameters_not_node_rebuild": true,
+    "preview_mid_final_required": true,
+    "shot_binding_required": true,
+    "pass_based_comp_required": true,
+    "validation_and_release_required": true,
+    "hfx008_is_reference_not_entire_factory_completion": true
+  },
+  "next_stage": "HFX_FACTORY_V002_CORE_12_ASSET_UPGRADE_MATRIX"
+}

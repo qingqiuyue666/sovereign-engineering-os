@@ -1,0 +1,18 @@
+{
+  "status": "HFX_FACTORY_V013_HFX015_PORTAL_RING_DELIVERY_CANDIDATE_PASS",
+  "asset_id": "HFX_015",
+  "asset_name": "Portal Ring",
+  "candidate_ready": true,
+  "allowed_claims": [
+    "HFX_015_PRODUCTION_FINAL_CANDIDATE_ASSET",
+    "HFX_015_PORTAL_RING_LONG_TERM_ASSET_CANDIDATE",
+    "HFX_015_SHOT_BOUND_TEMPLATE_READY"
+  ],
+  "blocked_claims": [
+    "Hollywood_final_pixel_portal_complete",
+    "actual_OpenEXR_pixels_rendered",
+    "actual_final_comp_rendered",
+    "client_or_public_final_delivery_ready"
+  ],
+  "next_stage": "HFX_FACTORY_V014_HFX015_PORTAL_RING_FINAL_ASSET_SYSTEM_SEAL"
+}

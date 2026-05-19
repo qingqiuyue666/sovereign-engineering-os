@@ -1,0 +1,24 @@
+{
+  "status": "HFX_FACTORY_V071_HFX038_CONTACTSHADOW_GROUND_INTEGRATION_SOURCE_RESOLUTION_PASS",
+  "asset_id": "HFX_038",
+  "asset_name": "ContactShadow Ground Integration",
+  "source_type": "procedural_factory_build",
+  "required_parameters": [
+    "contact_radius",
+    "falloff_softness",
+    "ground_occlusion",
+    "directional_bias",
+    "alpha_strength",
+    "zdepth_ground"
+  ],
+  "required_passes": [
+    "OUT_FINAL_CONTACT_CORE",
+    "OUT_FINAL_SOFT_FALLOFF",
+    "OUT_FINAL_GROUND_OCCLUSION",
+    "OUT_FINAL_DIRECTIONAL_SHADOW",
+    "OUT_FINAL_ALPHA_MASK",
+    "OUT_FINAL_ZDEPTH_GROUND",
+    "OUT_FINAL_METADATA"
+  ],
+  "next_stage": "HFX_FACTORY_V072_HFX038_CONTACTSHADOW_GROUND_INTEGRATION_PREVIEW_BUILD"
+}

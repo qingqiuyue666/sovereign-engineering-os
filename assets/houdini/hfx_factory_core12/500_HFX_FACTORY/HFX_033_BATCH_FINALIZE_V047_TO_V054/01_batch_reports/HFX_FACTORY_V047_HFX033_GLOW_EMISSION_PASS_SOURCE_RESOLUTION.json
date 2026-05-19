@@ -1,0 +1,24 @@
+{
+  "status": "HFX_FACTORY_V047_HFX033_GLOW_EMISSION_PASS_SOURCE_RESOLUTION_PASS",
+  "asset_id": "HFX_033",
+  "asset_name": "Glow Emission Pass",
+  "source_type": "procedural_factory_build",
+  "required_parameters": [
+    "emission_threshold",
+    "bloom_radius",
+    "glow_falloff",
+    "color_temperature",
+    "mask_softness",
+    "alpha_strength"
+  ],
+  "required_passes": [
+    "OUT_FINAL_EMISSION_SOURCE",
+    "OUT_FINAL_THRESHOLD_MASK",
+    "OUT_FINAL_BLOOM_RADIUS",
+    "OUT_FINAL_GLOW_FALLOFF",
+    "OUT_FINAL_COLOR_TEMPERATURE",
+    "OUT_FINAL_ALPHA_MASK",
+    "OUT_FINAL_METADATA"
+  ],
+  "next_stage": "HFX_FACTORY_V048_HFX033_GLOW_EMISSION_PASS_PREVIEW_BUILD"
+}

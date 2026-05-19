@@ -1,0 +1,1122 @@
+{
+  "status": "HFX_037_BATCH_FINALIZE_V063_TO_V070_PASS",
+  "generated": "2026-05-19T21:13:00",
+  "asset_id": "HFX_037",
+  "asset_name": "LightWrap Rim Interaction",
+  "asset_class": "lightwrap_rim",
+  "batch_root": "500_HFX_FACTORY/HFX_037_BATCH_FINALIZE_V063_TO_V070",
+  "files": [
+    {
+      "path": "500_HFX_FACTORY/HFX_037_BATCH_FINALIZE_V063_TO_V070/00_inputs/HFX_036_BATCH_FINALIZE_V055_TO_V062_REPORT.md",
+      "sha256": "18e37c344ae326effb95392189e6bbeb42947137201adb9187b513c75ee677d5",
+      "size_bytes": 929
+    },
+    {
+      "path": "500_HFX_FACTORY/HFX_037_BATCH_FINALIZE_V063_TO_V070/00_inputs/HFX_036_ALPHA_HOLDOUT_MATTE_FINAL_ASSET_SYSTEM_SEAL_v062.json",
+      "sha256": "deceba4186128390185e221b17594425c1043bb1490e7a6c3f71ec5692e57540",
+      "size_bytes": 814
+    },
+    {
+      "path": "500_HFX_FACTORY/HFX_037_BATCH_FINALIZE_V063_TO_V070/00_inputs/HFX_FACTORY_STATE.json",
+      "sha256": "7fb3f8e058081e25f4433e3539c2b19b9a3eaf5e2ebb7cac088703f819b30213",
+      "size_bytes": 1734
+    },
+    {
+      "path": "500_HFX_FACTORY/HFX_037_BATCH_FINALIZE_V063_TO_V070/00_inputs/HFX_FACTORY_CORE_12_ASSET_UPGRADE_MATRIX_v002.json",
+      "sha256": "9c8cc0702ea248061fed60a4ec585ee7903722ca64cc911996a1318312ee0da1",
+      "size_bytes": 11081
+    },
+    {
+      "path": "500_HFX_FACTORY/HFX_037_BATCH_FINALIZE_V063_TO_V070/01_batch_reports/HFX_FACTORY_V063_HFX037_LIGHTWRAP_RIM_INTERACTION_SOURCE_RESOLUTION.json",
+      "sha256": "cc29d6e938a41766e024d14c76958395e5db6074a79d1d5e23cf6203a5787c0a",
+      "size_bytes": 683
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_037_LIGHTWRAP_RIM_INTERACTION/01_preview/hip/HFX_037_LIGHTWRAP_RIM_INTERACTION_PREVIEW_TIER_v063.hip",
+      "sha256": "179e29f0dbdadab46c8745d8e6f7d05cd269edf014adb4324e32f241d4514484",
+      "size_bytes": 112581
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_037_LIGHTWRAP_RIM_INTERACTION/01_preview/validation/HFX_037_LIGHTWRAP_RIM_INTERACTION_PREVIEW_BUILD_v064.json",
+      "sha256": "68c15ab16f11107a7f7e3a1045248ac1e3f02f78fa34b6b8764e495a594c53c3",
+      "size_bytes": 234
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_037_LIGHTWRAP_RIM_INTERACTION/01_preview/validation/HFX_037_LIGHTWRAP_RIM_INTERACTION_PREVIEW_VALIDATION_v065.json",
+      "sha256": "f51a5387b33b8ea2fc146ddb5ae6d393036e4c0fa046287cf737256a5ddd26bb",
+      "size_bytes": 120
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_037_LIGHTWRAP_RIM_INTERACTION/02_mid/hip/HFX_037_LIGHTWRAP_RIM_INTERACTION_MID_TIER_v065.hip",
+      "sha256": "eb862a238e1fd3a3900022daa0610d8a187e60c367dbff4924a9bfcfdd77c898",
+      "size_bytes": 270130
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_037_LIGHTWRAP_RIM_INTERACTION/02_mid/validation/HFX_037_LIGHTWRAP_RIM_INTERACTION_MID_BUILD_v066.json",
+      "sha256": "fa447a825b2b65096d9c9b822d0dc81ff83df4db08e9ecf306ee5356ac499ebe",
+      "size_bytes": 218
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_037_LIGHTWRAP_RIM_INTERACTION/02_mid/validation/HFX_037_LIGHTWRAP_RIM_INTERACTION_MID_VALIDATION_v067.json",
+      "sha256": "691dc39171152d6d8690de002211ab453329e6f1ad8c43e19bc8f1125444cf74",
+      "size_bytes": 112
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_037_LIGHTWRAP_RIM_INTERACTION/03_final/hip/HFX_037_LIGHTWRAP_RIM_INTERACTION_FINAL_CANDIDATE_v070.hip",
+      "sha256": "588b6b0ecbde6cd43f4d388126e641349b29cf4f003e9224ed873dcc2600deaf",
+      "size_bytes": 497254
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_037_LIGHTWRAP_RIM_INTERACTION/10_release/release_package/hip/HFX_037_LIGHTWRAP_RIM_INTERACTION_FINAL_CANDIDATE_v070.hip",
+      "sha256": "588b6b0ecbde6cd43f4d388126e641349b29cf4f003e9224ed873dcc2600deaf",
+      "size_bytes": 497254
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_037_LIGHTWRAP_RIM_INTERACTION/03_final/validation/HFX_037_LIGHTWRAP_RIM_INTERACTION_FINAL_CANDIDATE_BUILD_v068.json",
+      "sha256": "e62b17a9ddc013e533014f66acc73429000aa95a0d5fe7a088aebdf9a3546924",
+      "size_bytes": 659
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_037_LIGHTWRAP_RIM_INTERACTION/03_final/validation/HFX_037_LIGHTWRAP_RIM_INTERACTION_FINAL_CANDIDATE_VALIDATION_v069.json",
+      "sha256": "eed04583eadb750fe1f883ac0a902f7b8edcd923ddcb18c1cb2fc6e83a5671db",
+      "size_bytes": 667
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_037_LIGHTWRAP_RIM_INTERACTION/10_release/release_package/source/qqy_hfx_lightwrap_rim_interaction_v070_source_contract.json",
+      "sha256": "8534e84e7a0bf7b8aaee7f903f7ac590425f9c118da85cf7f9e522d4d3f5f3e3",
+      "size_bytes": 357
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_037_LIGHTWRAP_RIM_INTERACTION/10_release/release_package/manifests/HFX_037_LIGHTWRAP_RIM_INTERACTION_RENDER_COMP_CONTRACT_v070.json",
+      "sha256": "a49406143fae1113183abbd8bcc1b69e5f674e07aefc17c845d9ecbf5b66b7db",
+      "size_bytes": 698
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_037_LIGHTWRAP_RIM_INTERACTION/10_release/release_package/manifests/HFX_037_LIGHTWRAP_RIM_INTERACTION_SHOT_BOUND_TEMPLATE_v070.json",
+      "sha256": "8a7a29970b640dee93c9a1263fc99d6ed5b2f26a44e7a87e28831872ba188552",
+      "size_bytes": 415
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_037_LIGHTWRAP_RIM_INTERACTION/10_release/release_package/validation/HFX_037_LIGHTWRAP_RIM_INTERACTION_FINAL_ASSET_SYSTEM_SEAL_v070.json",
+      "sha256": "6c4279092fc8776466756a60f087277e0cc5eb19637181fcf9b517be99daed0c",
+      "size_bytes": 847
+    },
+    {
+      "path": "00_INDEX_资产索引/HFX_LONG_TERM_ASSET_REGISTRY.json",
+      "sha256": "492142a085ab579860520a9269cbc92209b81388c63ec7628f91e97b251ba939",
+      "size_bytes": 12260
+    },
+    {
+      "path": "00_INDEX_资产索引/HFX_FACTORY_STATE.json",
+      "sha256": "615342654ff58912e9d48bbf0ca39f6de20f6a417b728aad0d2463d6b8e1963f",
+      "size_bytes": 1839
+    },
+    {
+      "path": "00_INDEX_资产索引/HFX_FACTORY_CORE_12_ASSET_UPGRADE_MATRIX_v002.json",
+      "sha256": "e7dba2e5cb1705183f0217a47d81d9cf9d953c3d3b9e8eef3d5bf6fd0a58a5a7",
+      "size_bytes": 11126
+    },
+    {
+      "path": "500_HFX_FACTORY/HFX_037_BATCH_FINALIZE_V063_TO_V070/02_validation/HFX_037_BATCH_FINALIZE_V063_TO_V070_VALIDATION.json",
+      "sha256": "e6acf66ea8d52fe8f65cdf68010ae371027b76b1e4d6473c8444c2dd06b9deb0",
+      "size_bytes": 1023
+    },
+    {
+      "path": "500_HFX_FACTORY/HFX_037_BATCH_FINALIZE_V063_TO_V070/02_validation/HFX_037_BATCH_FINALIZE_V063_TO_V070_VALIDATION.md",
+      "sha256": "b0f77cbd2e6d6b60867079df48be984f67c423839df81adeda4c70de48ae0066",
+      "size_bytes": 935
+    },
+    {
+      "path": "500_HFX_FACTORY/HFX_037_BATCH_FINALIZE_V063_TO_V070/04_docs/README_HFX_037_BATCH_FINALIZE_V063_TO_V070.md",
+      "sha256": "d86afa494956babfd2f44998dc59f00a2d4f3fc0fa423fc30cdb1282b6e3c694",
+      "size_bytes": 202
+    },
+    {
+      "path": "500_HFX_FACTORY/HFX_037_BATCH_FINALIZE_V063_TO_V070/03_manifests/HFX_037_BATCH_FINALIZE_V063_TO_V070_MANIFEST.json",
+      "sha256": "1f59963ff497570251e994afd6f105b9510bc539c7e3276e455a41ab8369ad1e",
+      "size_bytes": 25676
+    }
+  ],
+  "preflight_checks": [
+    {
+      "label": "HFX_036 batch report",
+      "path": "00_INDEX_资产索引/HFX_036_BATCH_FINALIZE_V055_TO_V062_REPORT.md",
+      "result": "PASS"
+    },
+    {
+      "label": "HFX_036 final seal",
+      "path": "300_PRODUCTION_UPGRADE/HFX_036_ALPHA_HOLDOUT_MATTE/10_release/release_package/validation/HFX_036_ALPHA_HOLDOUT_MATTE_FINAL_ASSET_SYSTEM_SEAL_v062.json",
+      "result": "PASS"
+    },
+    {
+      "label": "Factory state",
+      "path": "00_INDEX_资产索引/HFX_FACTORY_STATE.json",
+      "result": "PASS"
+    },
+    {
+      "label": "Factory matrix",
+      "path": "00_INDEX_资产索引/HFX_FACTORY_CORE_12_ASSET_UPGRADE_MATRIX_v002.json",
+      "result": "PASS"
+    }
+  ],
+  "stage_checks": [],
+  "node_checks": [
+    {
+      "stage": "V064_PREVIEW_BUILD",
+      "node": "HFX_037_PREVIEW_EDGE_WRAP_v064",
+      "result": "PASS"
+    },
+    {
+      "stage": "V064_PREVIEW_BUILD",
+      "node": "HFX_037_PREVIEW_RIM_COLOR_v064",
+      "result": "PASS"
+    },
+    {
+      "stage": "V064_PREVIEW_BUILD",
+      "node": "HFX_037_PREVIEW_METADATA_ANCHOR_v064",
+      "result": "PASS"
+    },
+    {
+      "stage": "V068_FINAL_BUILD",
+      "node": "HFX_037_FINAL_WRAP_WIDTH_v070",
+      "result": "PASS"
+    },
+    {
+      "stage": "V068_FINAL_BUILD",
+      "node": "HFX_037_FINAL_WRAP_INTENSITY_v070",
+      "result": "PASS"
+    },
+    {
+      "stage": "V068_FINAL_BUILD",
+      "node": "HFX_037_FINAL_RIM_COLOR_v070",
+      "result": "PASS"
+    },
+    {
+      "stage": "V068_FINAL_BUILD",
+      "node": "HFX_037_FINAL_SUBJECT_EDGE_MASK_v070",
+      "result": "PASS"
+    },
+    {
+      "stage": "V068_FINAL_BUILD",
+      "node": "HFX_037_FINAL_FALLOFF_CURVE_v070",
+      "result": "PASS"
+    },
+    {
+      "stage": "V068_FINAL_BUILD",
+      "node": "HFX_037_FINAL_LIGHTWRAP_OUTPUT_v070",
+      "result": "PASS"
+    },
+    {
+      "stage": "V068_FINAL_BUILD",
+      "node": "HFX_037_FINAL_METADATA_ANCHOR_v070",
+      "result": "PASS"
+    }
+  ],
+  "output_checks": [
+    {
+      "output": "OUT_FINAL_WRAP_WIDTH",
+      "result": "PASS"
+    },
+    {
+      "output": "OUT_FINAL_WRAP_INTENSITY",
+      "result": "PASS"
+    },
+    {
+      "output": "OUT_FINAL_RIM_COLOR",
+      "result": "PASS"
+    },
+    {
+      "output": "OUT_FINAL_SUBJECT_EDGE_MASK",
+      "result": "PASS"
+    },
+    {
+      "output": "OUT_FINAL_FALLOFF_CURVE",
+      "result": "PASS"
+    },
+    {
+      "output": "OUT_FINAL_LIGHTWRAP_OUTPUT",
+      "result": "PASS"
+    },
+    {
+      "output": "OUT_FINAL_METADATA",
+      "result": "PASS"
+    }
+  ],
+  "cook_results": {
+    "V064_HFX_037_PREVIEW_EDGE_WRAP_v064": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V064_HFX_037_PREVIEW_RIM_COLOR_v064": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V064_HFX_037_PREVIEW_METADATA_ANCHOR_v064": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V065_HFX_037_PREVIEW_EDGE_WRAP_v064": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V065_HFX_037_PREVIEW_RIM_COLOR_v064": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V065_HFX_037_PREVIEW_METADATA_ANCHOR_v064": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V066_HFX_037_MID_WRAP_WIDTH_v066": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V066_HFX_037_MID_WRAP_INTENSITY_v066": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V066_HFX_037_MID_RIM_COLOR_v066": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V066_HFX_037_MID_SUBJECT_EDGE_MASK_v066": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V066_HFX_037_MID_METADATA_ANCHOR_v066": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V067_HFX_037_MID_WRAP_WIDTH_v066": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V067_HFX_037_MID_WRAP_INTENSITY_v066": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V067_HFX_037_MID_RIM_COLOR_v066": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V067_HFX_037_MID_SUBJECT_EDGE_MASK_v066": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V067_HFX_037_MID_METADATA_ANCHOR_v066": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V068_HFX_037_FINAL_WRAP_WIDTH_v070": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V068_HFX_037_FINAL_WRAP_INTENSITY_v070": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V068_HFX_037_FINAL_RIM_COLOR_v070": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V068_HFX_037_FINAL_SUBJECT_EDGE_MASK_v070": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V068_HFX_037_FINAL_FALLOFF_CURVE_v070": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V068_HFX_037_FINAL_LIGHTWRAP_OUTPUT_v070": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V068_HFX_037_FINAL_METADATA_ANCHOR_v070": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ]
+  },
+  "pollution": []
+}

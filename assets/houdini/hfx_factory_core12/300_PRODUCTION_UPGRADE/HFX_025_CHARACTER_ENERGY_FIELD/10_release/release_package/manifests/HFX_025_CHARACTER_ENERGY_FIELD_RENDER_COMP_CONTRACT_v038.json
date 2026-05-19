@@ -1,0 +1,31 @@
+{
+  "status": "HFX_025_RENDER_COMP_CONTRACT_V038_READY",
+  "asset_id": "HFX_025",
+  "asset_name": "Character Energy Field",
+  "required_passes": [
+    "OUT_FINAL_BODY_AURA",
+    "OUT_FINAL_RIM_LIGHT_FIELD",
+    "OUT_FINAL_PARTICLE_ORBIT",
+    "OUT_FINAL_ENERGY_FILAMENTS",
+    "OUT_FINAL_SUBJECT_HOLDOUT",
+    "OUT_FINAL_LIGHTWRAP",
+    "OUT_FINAL_ZDEPTH",
+    "OUT_FINAL_ALPHA",
+    "OUT_FINAL_METADATA"
+  ],
+  "target_uses": [
+    "anime aura",
+    "superhero energy field",
+    "character power-up",
+    "magic body glow",
+    "rim-light integration"
+  ],
+  "dependencies": [
+    "HFX_033",
+    "HFX_036",
+    "HFX_037"
+  ],
+  "comfyui_source_of_truth_forbidden": true,
+  "single_flat_beauty_only_forbidden": true,
+  "delivery_allowed": false
+}

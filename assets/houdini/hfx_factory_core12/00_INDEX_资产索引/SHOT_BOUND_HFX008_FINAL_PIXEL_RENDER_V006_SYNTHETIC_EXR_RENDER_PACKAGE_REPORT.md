@@ -1,0 +1,87 @@
+# SHOT_BOUND_HFX008_FINAL_PIXEL_RENDER_V006 Synthetic EXR Render Package Report
+
+Generated: 2026-05-19T16:55:56
+
+Status: SHOT_BOUND_SYNTHETIC_EXR_RENDER_PACKAGE_RUNNING
+
+## Previous Stage Checks
+
+- PASS: SHOT_BOUND_HFX008_FINAL_PIXEL_RENDER_V001
+- PASS: SHOT_BOUND_HFX008_FINAL_PIXEL_RENDER_V002_PREFLIGHT
+- PASS: SHOT_BOUND_HFX008_FINAL_PIXEL_RENDER_V003_CONTROLLED_PREVIEW_RENDER
+- PASS: SHOT_BOUND_HFX008_FINAL_PIXEL_RENDER_V004_PREVIEW_VALIDATION
+- PASS: SHOT_BOUND_HFX008_FINAL_PIXEL_RENDER_V005_SYNTHETIC_FINAL_CONTEXT_DECISION
+
+## Input File Checks / Copy
+
+- PASS: copied V001 shot-bound HIP -> `400_SHOT_BOUND_FINAL_PIXEL/HFX008_SHOT001_V006_SYNTHETIC_EXR_RENDER_PACKAGE/00_inputs/SHOT_001_HFX008_FINAL_PIXEL_RENDER_PACKAGE_v001.hip`
+- PASS: copied V001 render pass manifest -> `400_SHOT_BOUND_FINAL_PIXEL/HFX008_SHOT001_V006_SYNTHETIC_EXR_RENDER_PACKAGE/00_inputs/SHOT_001_HFX008_RENDER_PASS_MANIFEST_v001.json`
+- PASS: copied V003 controlled preview HIP -> `400_SHOT_BOUND_FINAL_PIXEL/HFX008_SHOT001_V006_SYNTHETIC_EXR_RENDER_PACKAGE/00_inputs/SHOT_001_HFX008_CONTROLLED_PREVIEW_RENDER_v003.hip`
+- PASS: copied V004 preview validation -> `400_SHOT_BOUND_FINAL_PIXEL/HFX008_SHOT001_V006_SYNTHETIC_EXR_RENDER_PACKAGE/00_inputs/SHOT_001_HFX008_PREVIEW_VALIDATION_v004.json`
+- PASS: copied V005 synthetic final context decision -> `400_SHOT_BOUND_FINAL_PIXEL/HFX008_SHOT001_V006_SYNTHETIC_EXR_RENDER_PACKAGE/00_inputs/SHOT_001_HFX008_SYNTHETIC_FINAL_CONTEXT_DECISION_v005.json`
+- PASS: copied V005 render unlock contract -> `400_SHOT_BOUND_FINAL_PIXEL/HFX008_SHOT001_V006_SYNTHETIC_EXR_RENDER_PACKAGE/00_inputs/SHOT_001_HFX008_RENDER_UNLOCK_CONTRACT_v005.json`
+- PASS: copied V005 decision validation -> `400_SHOT_BOUND_FINAL_PIXEL/HFX008_SHOT001_V006_SYNTHETIC_EXR_RENDER_PACKAGE/00_inputs/SHOT_001_HFX008_SYNTHETIC_FINAL_CONTEXT_DECISION_VALIDATION_v005.json`
+
+## V005 Render Unlock Policy Checks
+
+- PASS: v005_decision_approved
+- PASS: synthetic_final_context_approved
+- PASS: production_exr_render_allowed_next
+- PASS: delivery_still_blocked
+- PASS: hollywood_claim_still_blocked
+- PASS: render_unlock_ready
+- PASS: unlock_production_exr_true
+- PASS: unlock_delivery_false
+- PASS: validation_v005_pass
+- PASS: ready_for_v006
+
+## Synthetic EXR Pass Package Generation
+
+- PASS: generated synthetic EXR placeholder sidecars = 42
+
+## Frame / Pass Matrix Checks
+
+- PASS: frame 0001 has all 7 synthetic EXR pass sidecars
+- PASS: frame 0012 has all 7 synthetic EXR pass sidecars
+- PASS: frame 0024 has all 7 synthetic EXR pass sidecars
+- PASS: frame 0048 has all 7 synthetic EXR pass sidecars
+- PASS: frame 0072 has all 7 synthetic EXR pass sidecars
+- PASS: frame 0120 has all 7 synthetic EXR pass sidecars
+- PASS: pass `beauty` has all 6 frames
+- PASS: pass `emission_mask` has all 6 frames
+- PASS: pass `distortion_vector` has all 6 frames
+- PASS: pass `dust_contact` has all 6 frames
+- PASS: pass `zdepth_falloff` has all 6 frames
+- PASS: pass `contact_shadow` has all 6 frames
+- PASS: pass `metadata` has all 6 frames
+
+## Generated File Checks
+
+- PASS: `400_SHOT_BOUND_FINAL_PIXEL/HFX008_SHOT001_V006_SYNTHETIC_EXR_RENDER_PACKAGE/01_render_plan/SHOT_001_HFX008_SYNTHETIC_EXR_RENDER_PLAN_v006.json`
+- PASS: `400_SHOT_BOUND_FINAL_PIXEL/HFX008_SHOT001_V006_SYNTHETIC_EXR_RENDER_PACKAGE/05_manifests/SHOT_001_HFX008_SYNTHETIC_EXR_PACKAGE_MANIFEST_v006.json`
+- PASS: `400_SHOT_BOUND_FINAL_PIXEL/HFX008_SHOT001_V006_SYNTHETIC_EXR_RENDER_PACKAGE/05_manifests/SHOT_001_HFX008_FRAME_PASS_MATRIX_v006.json`
+- PASS: `400_SHOT_BOUND_FINAL_PIXEL/HFX008_SHOT001_V006_SYNTHETIC_EXR_RENDER_PACKAGE/03_comp_handoff/SHOT_001_HFX008_SYNTHETIC_EXR_COMP_HANDOFF_v006.json`
+- PASS: `400_SHOT_BOUND_FINAL_PIXEL/HFX008_SHOT001_V006_SYNTHETIC_EXR_RENDER_PACKAGE/04_validation/SHOT_001_HFX008_SYNTHETIC_EXR_RENDER_PACKAGE_VALIDATION_v006.json`
+- PASS: `400_SHOT_BOUND_FINAL_PIXEL/HFX008_SHOT001_V006_SYNTHETIC_EXR_RENDER_PACKAGE/04_validation/SHOT_001_HFX008_SYNTHETIC_EXR_RENDER_PACKAGE_VALIDATION_v006.md`
+- PASS: `400_SHOT_BOUND_FINAL_PIXEL/HFX008_SHOT001_V006_SYNTHETIC_EXR_RENDER_PACKAGE/06_docs/README_SHOT_001_HFX008_SYNTHETIC_EXR_RENDER_PACKAGE_v006.md`
+
+## Pollution Check
+
+Result: PASS
+No video/archive/macOS metadata pollution found in V006 synthetic EXR package.
+
+## Summary
+
+- Shot: SHOT_001_TEST_REAL_FX_BINDING
+- Asset: HFX_008 Energy Shockwave
+- Synthetic EXR pass package: PASS
+- Expected pass sidecars: 42
+- Actual pass sidecars: 42
+- Actual OpenEXR pixels rendered: false
+- Delivery: blocked
+- Hollywood final-pixel claim: blocked
+- Next: SHOT_BOUND_HFX008_FINAL_PIXEL_RENDER_V007_EXR_PACKAGE_VALIDATION
+
+---
+
+Final Status: SHOT_BOUND_HFX008_FINAL_PIXEL_RENDER_V006_SYNTHETIC_EXR_RENDER_PACKAGE_PASS

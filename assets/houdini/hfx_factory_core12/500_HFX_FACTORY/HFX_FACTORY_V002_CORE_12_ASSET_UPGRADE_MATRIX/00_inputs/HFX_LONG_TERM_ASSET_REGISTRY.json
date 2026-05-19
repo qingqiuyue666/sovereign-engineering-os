@@ -1,0 +1,45 @@
+{
+  "status": "HFX_LONG_TERM_ASSET_REGISTRY_READY",
+  "assets": [
+    {
+      "status": "HFX_008_LONG_TERM_ASSET_REGISTRY_ENTRY_V011_READY",
+      "asset_id": "HFX_008",
+      "asset_name": "Energy Shockwave",
+      "asset_class": "energy_shockwave",
+      "registry_role": "FX_FACTORY_REFERENCE_ASSET",
+      "quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+      "shot_bound_reference": {
+        "shot_id": "SHOT_001_TEST_REAL_FX_BINDING",
+        "take_id": "TAKE_A",
+        "pipeline_status": "V001_TO_V011_PASS"
+      },
+      "release_paths": {
+        "asset_release_root": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/10_release/release_package",
+        "final_candidate_hip": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/10_release/release_package/hip/HFX_008_ENERGY_SHOCKWAVE_FINAL_TIER_v007.hip",
+        "source_hda": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/10_release/release_package/source/qqy_hfx_energy_shockwave_v009C.hda",
+        "shot_bound_delivery_candidate": "400_SHOT_BOUND_FINAL_PIXEL/HFX008_SHOT001_V010_DELIVERY_CANDIDATE",
+        "final_system_seal": "400_SHOT_BOUND_FINAL_PIXEL/HFX008_SHOT001_V011_FINAL_ASSET_SYSTEM_SEAL/01_final_seal/SHOT_001_HFX008_FINAL_ASSET_SYSTEM_SEAL_v011.json"
+      },
+      "reuse_contract": {
+        "new_shot_use": "derive_from_release_package_and_factory_template",
+        "direct_mutation_of_sealed_source": false,
+        "required_next_for_new_shot": [
+          "copy_release_asset",
+          "bind_shot_id_take_id",
+          "declare_camera_plate_or_synthetic_context",
+          "select_quality_tier",
+          "validate_output_passes",
+          "generate_shot_bound_package",
+          "validate_comp_handoff"
+        ]
+      },
+      "not_completed_by_this_entry": [
+        "other_11_core_assets",
+        "actual_OpenEXR_pixel_render",
+        "actual_final_video_delivery",
+        "real_footage_camera_solve"
+      ]
+    }
+  ],
+  "last_updated": "2026-05-19T17:32:23"
+}

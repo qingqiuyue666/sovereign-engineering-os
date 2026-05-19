@@ -1,0 +1,279 @@
+{
+  "status": "HFX_B05_CINEMATIC_COMPOSITING_RENDER_PASSES_V001_VALIDATION_PASS",
+  "generated": "2026-05-17T22:44:27",
+  "assets": [
+    {
+      "asset": "26_发光通道_能量Emission/HFX_033_Glow_Emission_Pass",
+      "result": "PASS",
+      "checks": [
+        {
+          "check": "asset_folder",
+          "result": "PASS"
+        },
+        {
+          "check": "00_preview",
+          "result": "PASS"
+        },
+        {
+          "check": "01_hip",
+          "result": "PASS"
+        },
+        {
+          "check": "02_cache",
+          "result": "PASS"
+        },
+        {
+          "check": "04_export",
+          "result": "PASS"
+        },
+        {
+          "check": "05_notes",
+          "result": "PASS"
+        }
+      ]
+    },
+    {
+      "asset": "27_深度雾_ZDepth/HFX_034_ZDepth_Fog_Pass",
+      "result": "PASS",
+      "checks": [
+        {
+          "check": "asset_folder",
+          "result": "PASS"
+        },
+        {
+          "check": "00_preview",
+          "result": "PASS"
+        },
+        {
+          "check": "01_hip",
+          "result": "PASS"
+        },
+        {
+          "check": "02_cache",
+          "result": "PASS"
+        },
+        {
+          "check": "04_export",
+          "result": "PASS"
+        },
+        {
+          "check": "05_notes",
+          "result": "PASS"
+        }
+      ]
+    },
+    {
+      "asset": "28_热浪扭曲_冲击波Mask/HFX_035_Distortion_Heat_Shockwave_Mask",
+      "result": "PASS",
+      "checks": [
+        {
+          "check": "asset_folder",
+          "result": "PASS"
+        },
+        {
+          "check": "00_preview",
+          "result": "PASS"
+        },
+        {
+          "check": "01_hip",
+          "result": "PASS"
+        },
+        {
+          "check": "02_cache",
+          "result": "PASS"
+        },
+        {
+          "check": "04_export",
+          "result": "PASS"
+        },
+        {
+          "check": "05_notes",
+          "result": "PASS"
+        }
+      ]
+    },
+    {
+      "asset": "29_Alpha遮挡_HoldoutMatte/HFX_036_Alpha_Holdout_Matte",
+      "result": "PASS",
+      "checks": [
+        {
+          "check": "asset_folder",
+          "result": "PASS"
+        },
+        {
+          "check": "00_preview",
+          "result": "PASS"
+        },
+        {
+          "check": "01_hip",
+          "result": "PASS"
+        },
+        {
+          "check": "02_cache",
+          "result": "PASS"
+        },
+        {
+          "check": "04_export",
+          "result": "PASS"
+        },
+        {
+          "check": "05_notes",
+          "result": "PASS"
+        }
+      ]
+    },
+    {
+      "asset": "30_边缘光_LightWrap融合/HFX_037_LightWrap_Rim_Interaction",
+      "result": "PASS",
+      "checks": [
+        {
+          "check": "asset_folder",
+          "result": "PASS"
+        },
+        {
+          "check": "00_preview",
+          "result": "PASS"
+        },
+        {
+          "check": "01_hip",
+          "result": "PASS"
+        },
+        {
+          "check": "02_cache",
+          "result": "PASS"
+        },
+        {
+          "check": "04_export",
+          "result": "PASS"
+        },
+        {
+          "check": "05_notes",
+          "result": "PASS"
+        }
+      ]
+    },
+    {
+      "asset": "31_接触阴影_地面融合/HFX_038_ContactShadow_Ground_Integration",
+      "result": "PASS",
+      "checks": [
+        {
+          "check": "asset_folder",
+          "result": "PASS"
+        },
+        {
+          "check": "00_preview",
+          "result": "PASS"
+        },
+        {
+          "check": "01_hip",
+          "result": "PASS"
+        },
+        {
+          "check": "02_cache",
+          "result": "PASS"
+        },
+        {
+          "check": "04_export",
+          "result": "PASS"
+        },
+        {
+          "check": "05_notes",
+          "result": "PASS"
+        }
+      ]
+    },
+    {
+      "asset": "32_镜头脏污_BloomStreak/HFX_039_LensDirt_BloomStreak_Proxy",
+      "result": "PASS",
+      "checks": [
+        {
+          "check": "asset_folder",
+          "result": "PASS"
+        },
+        {
+          "check": "00_preview",
+          "result": "PASS"
+        },
+        {
+          "check": "01_hip",
+          "result": "PASS"
+        },
+        {
+          "check": "02_cache",
+          "result": "PASS"
+        },
+        {
+          "check": "04_export",
+          "result": "PASS"
+        },
+        {
+          "check": "05_notes",
+          "result": "PASS"
+        }
+      ]
+    },
+    {
+      "asset": "33_交付模板_Unreal_DaVinci_AE/HFX_040_Unreal_DaVinci_AE_Handoff_Template",
+      "result": "PASS",
+      "checks": [
+        {
+          "check": "asset_folder",
+          "result": "PASS"
+        },
+        {
+          "check": "00_preview",
+          "result": "PASS"
+        },
+        {
+          "check": "01_hip",
+          "result": "PASS"
+        },
+        {
+          "check": "02_cache",
+          "result": "PASS"
+        },
+        {
+          "check": "04_export",
+          "result": "PASS"
+        },
+        {
+          "check": "05_notes",
+          "result": "PASS"
+        }
+      ]
+    }
+  ],
+  "global_files": [
+    {
+      "path": "00_INDEX_资产索引/HFX_B05_CINEMATIC_COMPOSITING_RENDER_PASSES_V001_RULEBOOK.md",
+      "result": "PASS"
+    },
+    {
+      "path": "00_INDEX_资产索引/HFX_B05_CINEMATIC_COMPOSITING_RENDER_PASSES_V001_REGISTRY.md",
+      "result": "PASS"
+    }
+  ],
+  "upstream": [
+    {
+      "file": "HFX_V013_FINAL_SEAL_REPORT.md",
+      "marker": "Final Status: HFX_V013_FINAL_SEAL_PASS",
+      "result": "PASS"
+    },
+    {
+      "file": "HFX_B02_ADVANCED_CORE_V013_FINAL_SEAL_REPORT.md",
+      "marker": "Final Status: HFX_B02_ADVANCED_CORE_V013_FINAL_SEAL_PASS",
+      "result": "PASS"
+    },
+    {
+      "file": "HFX_B03_DESTRUCTION_CLOTH_FLUID_V013_FINAL_SEAL_REPORT.md",
+      "marker": "Final Status: HFX_B03_DESTRUCTION_CLOTH_FLUID_V013_FINAL_SEAL_PASS",
+      "result": "PASS"
+    },
+    {
+      "file": "HFX_B04_CHARACTER_MAGIC_ENVIRONMENT_V013_FINAL_SEAL_REPORT.md",
+      "marker": "Final Status: HFX_B04_CHARACTER_MAGIC_ENVIRONMENT_V013_FINAL_SEAL_PASS",
+      "result": "PASS"
+    }
+  ],
+  "pollution": []
+}

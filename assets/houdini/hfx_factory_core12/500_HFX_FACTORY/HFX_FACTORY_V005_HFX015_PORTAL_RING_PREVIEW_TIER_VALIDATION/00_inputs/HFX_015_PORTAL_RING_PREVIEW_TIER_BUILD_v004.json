@@ -1,0 +1,225 @@
+{
+  "status": "HFX_015_PORTAL_RING_PREVIEW_TIER_BUILD_V004_READY",
+  "asset_id": "HFX_015",
+  "asset_name": "Portal Ring",
+  "quality_tier": "PREVIEW",
+  "preview_hip": "300_PRODUCTION_UPGRADE/HFX_015_PORTAL_RING/01_preview/hip/HFX_015_PORTAL_RING_PREVIEW_TIER_v004.hip",
+  "preview_hip_mirror": "500_HFX_FACTORY/HFX_FACTORY_V004_HFX015_PORTAL_RING_PREVIEW_TIER_BUILD/02_preview_hip/HFX_015_PORTAL_RING_PREVIEW_TIER_v004.hip",
+  "required_nodes": [
+    "HFX_015_PREVIEW_PORTAL_CORE_v004",
+    "HFX_015_PREVIEW_RIM_EMISSION_v004",
+    "HFX_015_PREVIEW_INNER_SURFACE_PROXY_v004",
+    "HFX_015_PREVIEW_DISTORTION_PROXY_v004",
+    "HFX_015_PREVIEW_METADATA_ANCHOR_v004"
+  ],
+  "required_outputs": [
+    "OUT_PREVIEW_PORTAL_CORE",
+    "OUT_PREVIEW_RIM_EMISSION",
+    "OUT_PREVIEW_INNER_SURFACE_PROXY",
+    "OUT_PREVIEW_DISTORTION_PROXY",
+    "OUT_PREVIEW_METADATA"
+  ],
+  "test_frames": [
+    1,
+    12,
+    24,
+    48,
+    72,
+    120
+  ],
+  "cook_results": {
+    "HFX_015_PREVIEW_PORTAL_CORE_v004": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "HFX_015_PREVIEW_RIM_EMISSION_v004": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "HFX_015_PREVIEW_INNER_SURFACE_PROXY_v004": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "HFX_015_PREVIEW_DISTORTION_PROXY_v004": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "HFX_015_PREVIEW_METADATA_ANCHOR_v004": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ]
+  },
+  "render_export_allowed": false,
+  "delivery_allowed": false,
+  "next_stage": "HFX_FACTORY_V005_HFX015_PORTAL_RING_PREVIEW_TIER_VALIDATION"
+}

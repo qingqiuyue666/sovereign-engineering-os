@@ -1,0 +1,88 @@
+{
+  "status": "HFX_015_PORTAL_RING_PARAMETER_CONTRACT_V003_READY",
+  "asset_id": "HFX_015",
+  "required_parameters": [
+    "asset_id",
+    "asset_name",
+    "shot_id",
+    "take_id",
+    "quality_tier",
+    "scale",
+    "duration",
+    "start_frame",
+    "end_frame",
+    "fps",
+    "portal_radius",
+    "ring_thickness",
+    "edge_noise",
+    "inner_depth",
+    "spark_density",
+    "portal_rotation_speed",
+    "rim_emission",
+    "inner_surface_opacity",
+    "distortion_amount",
+    "zdepth_falloff",
+    "alpha_softness",
+    "lightwrap_strength",
+    "ground_contact_strength",
+    "color_primary",
+    "color_secondary",
+    "emission_strength",
+    "noise_seed",
+    "cache_version",
+    "render_version",
+    "comp_version"
+  ],
+  "parameter_groups": {
+    "identity": [
+      "asset_id",
+      "asset_name",
+      "shot_id",
+      "take_id"
+    ],
+    "timing": [
+      "start_frame",
+      "end_frame",
+      "fps",
+      "duration"
+    ],
+    "shape": [
+      "portal_radius",
+      "ring_thickness",
+      "inner_depth",
+      "scale"
+    ],
+    "motion": [
+      "portal_rotation_speed",
+      "edge_noise",
+      "noise_seed"
+    ],
+    "look": [
+      "color_primary",
+      "color_secondary",
+      "rim_emission",
+      "emission_strength",
+      "inner_surface_opacity"
+    ],
+    "integration": [
+      "distortion_amount",
+      "zdepth_falloff",
+      "alpha_softness",
+      "lightwrap_strength",
+      "ground_contact_strength"
+    ],
+    "pipeline": [
+      "quality_tier",
+      "cache_version",
+      "render_version",
+      "comp_version"
+    ]
+  },
+  "preset_profiles_required": [
+    "CINEMATIC_BLUE_PORTAL",
+    "ANIME_GOLD_MAGIC_GATE",
+    "DARK_SPACE_RIFT_PORTAL",
+    "SUBTLE_HEAT_PORTAL",
+    "HIGH_ENERGY_HERO_PORTAL"
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "status": "HFX_008_PREVIEW_TIER_VALIDATION_V004_READY",
+  "asset_id": "HFX_008",
+  "asset_name": "Energy Shockwave",
+  "tier": "PREVIEW",
+  "quality_claim": "PREVIEW_ONLY",
+  "validated": true,
+  "preview_hip": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/01_preview/hip/HFX_008_ENERGY_SHOCKWAVE_PREVIEW_TIER_v003.hip",
+  "cook_results": [
+    {
+      "frame": 1,
+      "result": "PASS",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "frame": 12,
+      "result": "PASS",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "frame": 24,
+      "result": "PASS",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "frame": 48,
+      "result": "PASS",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "frame": 72,
+      "result": "PASS",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "frame": 120,
+      "result": "PASS",
+      "errors": [],
+      "warnings": []
+    }
+  ],
+  "render_export_allowed": false,
+  "delivery_allowed": false,
+  "final_quality_claim_allowed": false,
+  "sealed_source_mutation_forbidden": true,
+  "preview_tier_complete": true,
+  "mid_tier_allowed_next": true,
+  "next_stage": "HFX_PRODUCTION_UPGRADE_V005_HFX008_MID_TIER_BUILD"
+}

@@ -1,0 +1,26 @@
+{
+  "status": "HFX_015_BATCH_FINALIZE_V007_TO_V014_PASS",
+  "validated": true,
+  "asset_id": "HFX_015",
+  "asset_name": "Portal Ring",
+  "completed_stages": [
+    "V007_MID_VALIDATION",
+    "V008_FINAL_BUILD",
+    "V009_FINAL_VALIDATION",
+    "V010_RELEASE_SEAL",
+    "V011_SHOT_BOUND_TEMPLATE",
+    "V012_RENDER_COMP_CONTRACT",
+    "V013_DELIVERY_CANDIDATE",
+    "V014_FINAL_ASSET_SEAL"
+  ],
+  "hfx015_ready_as_long_term_asset": true,
+  "hfx015_ready_as_reusable_portal_template": true,
+  "release_package": "300_PRODUCTION_UPGRADE/HFX_015_PORTAL_RING/10_release/release_package",
+  "release_hip": "300_PRODUCTION_UPGRADE/HFX_015_PORTAL_RING/10_release/release_package/hip/HFX_015_PORTAL_RING_FINAL_CANDIDATE_v014.hip",
+  "registry_updated": true,
+  "factory_state_updated": true,
+  "next_asset_to_build": "HFX_016",
+  "next_stage": "HFX_FACTORY_V015_HFX016_HEAT_DISTORTION_SOURCE_RESOLUTION",
+  "all_houdini_fx_top_tier_complete": false,
+  "pollution": []
+}

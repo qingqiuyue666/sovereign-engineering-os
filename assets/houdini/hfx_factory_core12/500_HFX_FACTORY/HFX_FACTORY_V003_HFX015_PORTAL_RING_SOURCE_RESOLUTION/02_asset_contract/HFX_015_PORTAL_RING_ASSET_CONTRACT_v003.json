@@ -1,0 +1,62 @@
+{
+  "status": "HFX_015_PORTAL_RING_ASSET_CONTRACT_V003_READY",
+  "asset_id": "HFX_015",
+  "asset_name": "Portal Ring",
+  "asset_class": "portal_ring",
+  "target_use_cases": [
+    "portal entrance",
+    "magic gate",
+    "space transition",
+    "character arrival",
+    "environment portal",
+    "anime summoning circle vertical gate",
+    "short-form hero transition"
+  ],
+  "quality_tiers": {
+    "PREVIEW": {
+      "goal": "fast portal ring layout with radial core, rim emission, and placeholder distortion",
+      "must_include": [
+        "ring_core",
+        "rim_emission",
+        "inner_surface_proxy",
+        "distortion_proxy",
+        "metadata"
+      ],
+      "render_claim_allowed": false
+    },
+    "MID": {
+      "goal": "lookdev-ready portal with sparks, animated edge noise, alpha, zdepth, distortion pass",
+      "must_include": [
+        "portal_core",
+        "portal_rim",
+        "portal_sparks",
+        "inner_surface",
+        "distortion_vector",
+        "zdepth",
+        "alpha"
+      ],
+      "render_claim_allowed": false
+    },
+    "FINAL_CANDIDATE": {
+      "goal": "production final-candidate portal asset with pass contracts, shot binding, cache policy, comp handoff",
+      "must_include": [
+        "beauty",
+        "emission",
+        "alpha",
+        "zdepth",
+        "distortion_vector",
+        "lightwrap",
+        "contact_shadow",
+        "metadata"
+      ],
+      "render_claim_allowed": false
+    }
+  },
+  "reuse_policy": {
+    "reuse_by_parameter_adjustment": true,
+    "node_rebuild_for_shot_variation_forbidden": true,
+    "shot_binding_required": true,
+    "pass_based_comp_required": true,
+    "sealed_source_mutation_forbidden_after_release": true
+  }
+}

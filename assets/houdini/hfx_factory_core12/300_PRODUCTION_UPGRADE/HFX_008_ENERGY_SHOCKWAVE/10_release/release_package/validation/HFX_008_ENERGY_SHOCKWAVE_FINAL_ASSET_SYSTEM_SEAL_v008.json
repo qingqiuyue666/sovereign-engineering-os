@@ -1,0 +1,22 @@
+{
+  "status": "HFX_FACTORY_V008_HFX008_ENERGY_SHOCKWAVE_FINAL_ASSET_SYSTEM_SEAL_PASS",
+  "asset_id": "HFX_008",
+  "asset_name": "Energy Shockwave",
+  "asset_class": "energy_shockwave",
+  "quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+  "registry_role": "FX_FACTORY_CORE_ASSET",
+  "hfx008_ready_as_long_term_asset": true,
+  "hfx008_ready_as_reusable_energy_shockwave_template": true,
+  "release_package": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/10_release/release_package",
+  "release_hip": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/10_release/release_package/hip/HFX_008_ENERGY_SHOCKWAVE_FINAL_TIER_v007.hip",
+  "release_hip_sha256": "9493bd2f7de4cfe544d4527fb6b57ab3783e52f424a42c6befde18e505c0ef54",
+  "source_contract": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/10_release/release_package/source/qqy_hfx_energy_shockwave_v008_source_contract.json",
+  "render_comp_contract": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/10_release/release_package/manifests/HFX_008_ENERGY_SHOCKWAVE_RENDER_COMP_CONTRACT_v008.json",
+  "shot_template": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/10_release/release_package/manifests/HFX_008_ENERGY_SHOCKWAVE_SHOT_BOUND_TEMPLATE_v008.json",
+  "direct_mutation_forbidden": true,
+  "derive_per_shot": true,
+  "render_export_allowed": false,
+  "delivery_allowed": false,
+  "generated_by": "HFX_008_FINAL_SEAL_MINIMAL_FIX",
+  "generated": "2026-05-19T21:54:06"
+}

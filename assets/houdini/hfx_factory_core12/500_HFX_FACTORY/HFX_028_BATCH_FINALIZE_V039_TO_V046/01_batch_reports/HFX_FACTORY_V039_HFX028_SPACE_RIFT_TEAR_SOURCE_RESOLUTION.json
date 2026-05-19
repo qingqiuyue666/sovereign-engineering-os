@@ -1,0 +1,26 @@
+{
+  "status": "HFX_FACTORY_V039_HFX028_SPACE_RIFT_TEAR_SOURCE_RESOLUTION_PASS",
+  "asset_id": "HFX_028",
+  "asset_name": "Space Rift Tear",
+  "source_type": "procedural_factory_build",
+  "required_parameters": [
+    "rift_curve",
+    "edge_emission",
+    "inner_void_depth",
+    "tear_width",
+    "distortion_strength",
+    "particle_suction"
+  ],
+  "required_passes": [
+    "OUT_FINAL_RIFT_CORE",
+    "OUT_FINAL_EDGE_EMISSION",
+    "OUT_FINAL_INNER_VOID",
+    "OUT_FINAL_DISTORTION_VECTOR",
+    "OUT_FINAL_PARTICLE_SUCTION",
+    "OUT_FINAL_ZDEPTH",
+    "OUT_FINAL_ALPHA",
+    "OUT_FINAL_LIGHTWRAP",
+    "OUT_FINAL_METADATA"
+  ],
+  "next_stage": "HFX_FACTORY_V040_HFX028_SPACE_RIFT_TEAR_PREVIEW_BUILD"
+}

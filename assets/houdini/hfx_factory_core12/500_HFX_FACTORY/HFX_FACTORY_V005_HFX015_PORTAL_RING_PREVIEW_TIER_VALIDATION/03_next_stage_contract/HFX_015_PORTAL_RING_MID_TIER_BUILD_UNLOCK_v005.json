@@ -1,0 +1,26 @@
+{
+  "status": "HFX_015_PORTAL_RING_MID_TIER_BUILD_UNLOCK_V005_READY",
+  "asset_id": "HFX_015",
+  "asset_name": "Portal Ring",
+  "current_stage": "PREVIEW_TIER_VALIDATED",
+  "preview_validation_passed": true,
+  "mid_tier_build_allowed_next": true,
+  "mid_tier_required_additions": [
+    "animated_edge_noise",
+    "spark_layer",
+    "improved_inner_surface",
+    "alpha_pass",
+    "zdepth_pass",
+    "distortion_vector_pass",
+    "rim_emission_pass",
+    "portal_specific_pass_manifest",
+    "mid_tier_cook_validation"
+  ],
+  "blocked_claims": [
+    "HFX_015 final candidate complete",
+    "HFX_015 release sealed",
+    "HFX_015 delivery ready",
+    "Hollywood final-pixel portal complete"
+  ],
+  "next_stage": "HFX_FACTORY_V006_HFX015_PORTAL_RING_MID_TIER_BUILD"
+}

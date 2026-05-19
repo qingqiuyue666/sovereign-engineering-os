@@ -1,0 +1,18 @@
+{
+  "status": "HFX_FACTORY_V021_HFX016_HEAT_DISTORTION_FINAL_CANDIDATE_VALIDATION_PASS",
+  "asset_id": "HFX_016",
+  "asset_name": "Heat Distortion",
+  "final_candidate_validated": true,
+  "final_candidate_hip": "300_PRODUCTION_UPGRADE/HFX_016_HEAT_DISTORTION/03_final/hip/HFX_016_HEAT_DISTORTION_FINAL_CANDIDATE_v022.hip",
+  "required_outputs": [
+    "OUT_FINAL_HEAT_FIELD",
+    "OUT_FINAL_DISTORTION_VECTOR",
+    "OUT_FINAL_FALLOFF_MASK",
+    "OUT_FINAL_ZDEPTH_PROXY",
+    "OUT_FINAL_REFRACTION_EDGE",
+    "OUT_FINAL_METADATA"
+  ],
+  "render_export_allowed": false,
+  "delivery_allowed": false,
+  "next_stage": "HFX_FACTORY_V022_HFX016_HEAT_DISTORTION_FINAL_ASSET_SYSTEM_SEAL"
+}

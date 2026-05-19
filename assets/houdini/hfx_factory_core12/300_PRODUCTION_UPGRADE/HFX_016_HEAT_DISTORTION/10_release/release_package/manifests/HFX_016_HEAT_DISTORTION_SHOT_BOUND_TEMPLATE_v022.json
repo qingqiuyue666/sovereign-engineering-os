@@ -1,0 +1,17 @@
+{
+  "status": "HFX_016_SHOT_BOUND_TEMPLATE_V022_READY",
+  "asset_id": "HFX_016",
+  "asset_name": "Heat Distortion",
+  "required_binding_fields": [
+    "shot_id",
+    "take_id",
+    "frame_start",
+    "frame_end",
+    "camera_mode",
+    "plate_mode",
+    "distortion_strength",
+    "zdepth_falloff"
+  ],
+  "derive_per_shot": true,
+  "direct_mutation_forbidden": true
+}

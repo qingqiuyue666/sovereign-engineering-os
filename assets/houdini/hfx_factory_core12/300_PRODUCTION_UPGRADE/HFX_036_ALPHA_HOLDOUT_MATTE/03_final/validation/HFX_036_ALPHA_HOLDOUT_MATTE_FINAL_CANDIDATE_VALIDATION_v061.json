@@ -1,0 +1,18 @@
+{
+  "status": "HFX_FACTORY_V061_HFX036_ALPHA_HOLDOUT_MATTE_FINAL_CANDIDATE_VALIDATION_PASS",
+  "asset_id": "HFX_036",
+  "asset_name": "Alpha Holdout Matte",
+  "final_candidate_validated": true,
+  "final_candidate_hip": "300_PRODUCTION_UPGRADE/HFX_036_ALPHA_HOLDOUT_MATTE/03_final/hip/HFX_036_ALPHA_HOLDOUT_MATTE_FINAL_CANDIDATE_v062.hip",
+  "required_outputs": [
+    "OUT_FINAL_ALPHA_CORE",
+    "OUT_FINAL_EDGE_EXPAND",
+    "OUT_FINAL_EDGE_FEATHER",
+    "OUT_FINAL_HOLDOUT_STRENGTH",
+    "OUT_FINAL_TEMPORAL_SMOOTH_PROXY",
+    "OUT_FINAL_MATTE_OUTPUT",
+    "OUT_FINAL_METADATA"
+  ],
+  "render_export_allowed": false,
+  "delivery_allowed": false
+}

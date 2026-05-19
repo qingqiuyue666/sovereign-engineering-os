@@ -1,0 +1,428 @@
+{
+  "status": "HFX_PRODUCTION_UPGRADE_V007_HFX008_FINAL_TIER_BUILD_PASS",
+  "generated": "2026-05-19T01:04:09",
+  "asset_id": "HFX_008",
+  "asset_name": "Energy Shockwave",
+  "tier": "FINAL_CANDIDATE",
+  "final_hip": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/03_final/hip/HFX_008_ENERGY_SHOCKWAVE_FINAL_TIER_v007.hip",
+  "files": [
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/03_final/hip/HFX_008_ENERGY_SHOCKWAVE_FINAL_TIER_v007.hip",
+      "sha256": "9493bd2f7de4cfe544d4527fb6b57ab3783e52f424a42c6befde18e505c0ef54",
+      "size_bytes": 392736
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/03_final/manifests/HFX_008_FINAL_TIER_SPEC_v007.json",
+      "sha256": "a9e31aea7bfa50f91895a874afd7df5ed3a466fcbed2c05fceeacd07d53170b6",
+      "size_bytes": 7349
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/03_final/docs/HFX_008_FINAL_TIER_SPEC_v007.md",
+      "sha256": "2a1456ae6b06e60414faae8bf0a7d5a80c5a228890ebbc42b65d29032e8e9041",
+      "size_bytes": 1298
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/03_final/manifests/HFX_008_FINAL_PASS_MANIFEST_v007.json",
+      "sha256": "fcb67ae3f3882b1fede1c9ec7e62f6549dd50fc44f7955451eb08965d8093e2f",
+      "size_bytes": 907
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/03_final/manifests/HFX_008_FINAL_CACHE_POLICY_v007.json",
+      "sha256": "127b2ce8a41abe7e6dea237a0f49388c835f7f8bf613803bba56ae4436d38587",
+      "size_bytes": 556
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/06_comp/HFX_008_FINAL_COMP_HANDOFF_v007.json",
+      "sha256": "891cda25d2c2c8e58e19aeb36c842bcd1342a6c80173ac7b649fcdeeb02d8a74",
+      "size_bytes": 886
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/03_final/validation/HFX_008_FINAL_TIER_BUILD_VALIDATION_v007.md",
+      "sha256": "a9650146ecaa2d917de4515a07055e25f6eb2b4bb75fdfdc3f720d36919e87d9",
+      "size_bytes": 809
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/03_final/docs/README_HFX_008_FINAL_TIER_v007.md",
+      "sha256": "1b4809ca18d1354fa3dbe7f37160b2aeb146f43d7933108f744dcb7f3e3142bc",
+      "size_bytes": 540
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/03_final/manifests/HFX_PRODUCTION_UPGRADE_V007_HFX008_FINAL_TIER_BUILD_MANIFEST.json",
+      "sha256": "b6bd7064f31996587cedd838de1ae1c998ec89077bea084190e796a93ffb1318",
+      "size_bytes": 10036
+    }
+  ],
+  "hda": {
+    "source_hda": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/00_source/qqy_hfx_energy_shockwave_v009C.hda",
+    "hda_type": "qqy::hfx_energy_shockwave::9.0",
+    "definition_names": [
+      "qqy::hfx_energy_shockwave::9.0"
+    ]
+  },
+  "nodes": [
+    {
+      "node_name": "HFX_008_FINAL_SHOCKWAVE_CORE_v007",
+      "node_path": "/obj/HFX_008_FINAL_SHOCKWAVE_CORE_v007",
+      "type": "qqy::hfx_energy_shockwave::9.0",
+      "cook_all_pass": true
+    },
+    {
+      "node_name": "HFX_008_FINAL_OUTPUT_CONTRACT_v007",
+      "node_path": "/obj/HFX_008_FINAL_OUTPUT_CONTRACT_v007",
+      "type": "geo",
+      "cook_all_pass": true
+    },
+    {
+      "node_name": "HFX_008_FINAL_ENERGY_EMISSION_MASK_v007",
+      "node_path": "/obj/HFX_008_FINAL_ENERGY_EMISSION_MASK_v007",
+      "type": "geo",
+      "cook_all_pass": true
+    },
+    {
+      "node_name": "HFX_008_FINAL_DISTORTION_VECTOR_PROXY_v007",
+      "node_path": "/obj/HFX_008_FINAL_DISTORTION_VECTOR_PROXY_v007",
+      "type": "geo",
+      "cook_all_pass": true
+    },
+    {
+      "node_name": "HFX_008_FINAL_DUST_CONTACT_FIELD_v007",
+      "node_path": "/obj/HFX_008_FINAL_DUST_CONTACT_FIELD_v007",
+      "type": "geo",
+      "cook_all_pass": true
+    },
+    {
+      "node_name": "HFX_008_FINAL_ZDEPTH_FALLOFF_PROXY_v007",
+      "node_path": "/obj/HFX_008_FINAL_ZDEPTH_FALLOFF_PROXY_v007",
+      "type": "geo",
+      "cook_all_pass": true
+    },
+    {
+      "node_name": "HFX_008_FINAL_CONTACT_SHADOW_MASK_v007",
+      "node_path": "/obj/HFX_008_FINAL_CONTACT_SHADOW_MASK_v007",
+      "type": "geo",
+      "cook_all_pass": true
+    },
+    {
+      "node_name": "HFX_008_FINAL_METADATA_ANCHOR_v007",
+      "node_path": "/obj/HFX_008_FINAL_METADATA_ANCHOR_v007",
+      "type": "geo",
+      "cook_all_pass": true
+    }
+  ],
+  "cook_results": {
+    "HFX_008_FINAL_SHOCKWAVE_CORE_v007": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "HFX_008_FINAL_OUTPUT_CONTRACT_v007": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "HFX_008_FINAL_ENERGY_EMISSION_MASK_v007": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "HFX_008_FINAL_DISTORTION_VECTOR_PROXY_v007": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "HFX_008_FINAL_DUST_CONTACT_FIELD_v007": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "HFX_008_FINAL_ZDEPTH_FALLOFF_PROXY_v007": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "HFX_008_FINAL_CONTACT_SHADOW_MASK_v007": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "HFX_008_FINAL_METADATA_ANCHOR_v007": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ]
+  },
+  "required_outputs": [
+    "OUT_FINAL_SHOCKWAVE_CORE",
+    "OUT_FINAL_ENERGY_EMISSION_MASK",
+    "OUT_FINAL_DISTORTION_VECTOR_PROXY",
+    "OUT_FINAL_DUST_CONTACT_FIELD",
+    "OUT_FINAL_ZDEPTH_FALLOFF_PROXY",
+    "OUT_FINAL_CONTACT_SHADOW_MASK",
+    "OUT_FINAL_METADATA_ANCHOR"
+  ],
+  "pollution": []
+}

@@ -1,0 +1,24 @@
+{
+  "status": "HFX_FACTORY_V055_HFX036_ALPHA_HOLDOUT_MATTE_SOURCE_RESOLUTION_PASS",
+  "asset_id": "HFX_036",
+  "asset_name": "Alpha Holdout Matte",
+  "source_type": "procedural_factory_build",
+  "required_parameters": [
+    "matte_source",
+    "edge_expand",
+    "edge_feather",
+    "holdout_strength",
+    "temporal_smoothing",
+    "alpha_threshold"
+  ],
+  "required_passes": [
+    "OUT_FINAL_ALPHA_CORE",
+    "OUT_FINAL_EDGE_EXPAND",
+    "OUT_FINAL_EDGE_FEATHER",
+    "OUT_FINAL_HOLDOUT_STRENGTH",
+    "OUT_FINAL_TEMPORAL_SMOOTH_PROXY",
+    "OUT_FINAL_MATTE_OUTPUT",
+    "OUT_FINAL_METADATA"
+  ],
+  "next_stage": "HFX_FACTORY_V056_HFX036_ALPHA_HOLDOUT_MATTE_PREVIEW_BUILD"
+}

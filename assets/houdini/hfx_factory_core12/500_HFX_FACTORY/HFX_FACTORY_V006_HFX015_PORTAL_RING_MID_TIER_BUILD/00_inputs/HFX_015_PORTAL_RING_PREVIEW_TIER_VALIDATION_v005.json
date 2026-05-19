@@ -1,0 +1,37 @@
+{
+  "status": "HFX_FACTORY_V005_HFX015_PORTAL_RING_PREVIEW_TIER_VALIDATION_PASS",
+  "validated": true,
+  "asset_id": "HFX_015",
+  "asset_name": "Portal Ring",
+  "asset_class": "portal_ring",
+  "quality_tier": "PREVIEW",
+  "preview_tier_validated": true,
+  "preview_hip": "300_PRODUCTION_UPGRADE/HFX_015_PORTAL_RING/01_preview/hip/HFX_015_PORTAL_RING_PREVIEW_TIER_v004.hip",
+  "required_nodes": [
+    "HFX_015_PREVIEW_PORTAL_CORE_v004",
+    "HFX_015_PREVIEW_RIM_EMISSION_v004",
+    "HFX_015_PREVIEW_INNER_SURFACE_PROXY_v004",
+    "HFX_015_PREVIEW_DISTORTION_PROXY_v004",
+    "HFX_015_PREVIEW_METADATA_ANCHOR_v004"
+  ],
+  "required_outputs": [
+    "OUT_PREVIEW_PORTAL_CORE",
+    "OUT_PREVIEW_RIM_EMISSION",
+    "OUT_PREVIEW_INNER_SURFACE_PROXY",
+    "OUT_PREVIEW_DISTORTION_PROXY",
+    "OUT_PREVIEW_METADATA"
+  ],
+  "test_frames": [
+    1,
+    12,
+    24,
+    48,
+    72,
+    120
+  ],
+  "render_export_allowed": false,
+  "delivery_allowed": false,
+  "mid_tier_build_allowed_next": true,
+  "next_stage": "HFX_FACTORY_V006_HFX015_PORTAL_RING_MID_TIER_BUILD",
+  "all_houdini_fx_top_tier_complete": false
+}

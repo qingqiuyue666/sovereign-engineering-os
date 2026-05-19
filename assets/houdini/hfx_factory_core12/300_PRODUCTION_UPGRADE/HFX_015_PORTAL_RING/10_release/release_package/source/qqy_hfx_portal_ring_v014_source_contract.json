@@ -1,0 +1,8 @@
+{
+  "status": "HFX_015_SOURCE_CONTRACT_V014_READY",
+  "asset_id": "HFX_015",
+  "asset_name": "Portal Ring",
+  "note": "This records the source contract. A real HDA can be exported later; the sealed HIP is current source of truth.",
+  "sealed_hip": "300_PRODUCTION_UPGRADE/HFX_015_PORTAL_RING/10_release/release_package/hip/HFX_015_PORTAL_RING_FINAL_CANDIDATE_v014.hip",
+  "direct_mutation_forbidden": true
+}

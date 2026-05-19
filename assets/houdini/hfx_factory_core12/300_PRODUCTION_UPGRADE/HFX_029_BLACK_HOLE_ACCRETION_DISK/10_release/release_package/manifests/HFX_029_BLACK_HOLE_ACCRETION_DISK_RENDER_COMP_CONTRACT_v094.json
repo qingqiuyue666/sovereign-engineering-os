@@ -1,0 +1,31 @@
+{
+  "status": "HFX_029_RENDER_COMP_CONTRACT_V094_READY",
+  "asset_id": "HFX_029",
+  "asset_name": "Black Hole Accretion Disk",
+  "required_passes": [
+    "OUT_FINAL_EVENT_HORIZON",
+    "OUT_FINAL_ACCRETION_DISK",
+    "OUT_FINAL_LENSING_RING",
+    "OUT_FINAL_PARTICLE_ORBIT",
+    "OUT_FINAL_GRAVITY_DISTORTION",
+    "OUT_FINAL_GLOW_EMISSION_LINK",
+    "OUT_FINAL_ZDEPTH",
+    "OUT_FINAL_ALPHA",
+    "OUT_FINAL_METADATA"
+  ],
+  "target_uses": [
+    "black hole",
+    "accretion disk",
+    "gravity lensing",
+    "space vortex",
+    "cosmic portal",
+    "anime singularity"
+  ],
+  "dependencies": [
+    "HFX_016",
+    "HFX_033"
+  ],
+  "comfyui_source_of_truth_forbidden": true,
+  "single_flat_beauty_only_forbidden": true,
+  "delivery_allowed": false
+}

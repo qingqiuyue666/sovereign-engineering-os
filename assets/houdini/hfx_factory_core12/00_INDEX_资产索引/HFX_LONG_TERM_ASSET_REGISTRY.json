@@ -1,0 +1,335 @@
+{
+  "status": "HFX_LONG_TERM_ASSET_REGISTRY_READY",
+  "assets": [
+    {
+      "status": "HFX_008_LONG_TERM_ASSET_REGISTRY_ENTRY_READY",
+      "asset_id": "HFX_008",
+      "asset_name": "Energy Shockwave",
+      "asset_class": "energy_shockwave",
+      "registry_role": "FX_FACTORY_CORE_ASSET",
+      "quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+      "shot_bound_reference": {
+        "shot_id": "SHOT_001_TEST_REAL_FX_BINDING",
+        "take_id": "TAKE_A",
+        "pipeline_status": "V001_TO_V011_PASS"
+      },
+      "release_paths": {
+        "release_root": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/10_release/release_package",
+        "release_hip": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/10_release/release_package/hip/HFX_008_ENERGY_SHOCKWAVE_FINAL_TIER_v007.hip",
+        "source_contract": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/10_release/release_package/source/qqy_hfx_energy_shockwave_v008_source_contract.json",
+        "final_asset_seal": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/10_release/release_package/validation/HFX_008_ENERGY_SHOCKWAVE_FINAL_ASSET_SYSTEM_SEAL_v008.json"
+      },
+      "reuse_contract": {
+        "use_cases": [
+          "energy shockwave",
+          "impact ring",
+          "blast wave",
+          "anime power burst",
+          "superhero impact"
+        ],
+        "derive_per_shot": true,
+        "direct_mutation_forbidden": true,
+        "parameter_adjustment_required": true
+      },
+      "not_completed_by_this_entry": [
+        "other_11_core_assets",
+        "actual_OpenEXR_pixel_render",
+        "actual_final_video_delivery",
+        "real_footage_camera_solve"
+      ]
+    },
+    {
+      "status": "HFX_015_LONG_TERM_ASSET_REGISTRY_ENTRY_READY",
+      "asset_id": "HFX_015",
+      "asset_name": "Portal Ring",
+      "asset_class": "portal_ring",
+      "quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+      "registry_role": "FX_FACTORY_CORE_ASSET",
+      "release_paths": {
+        "release_root": "300_PRODUCTION_UPGRADE/HFX_015_PORTAL_RING/10_release/release_package",
+        "release_hip": "300_PRODUCTION_UPGRADE/HFX_015_PORTAL_RING/10_release/release_package/hip/HFX_015_PORTAL_RING_FINAL_CANDIDATE_v014.hip",
+        "source_contract": "300_PRODUCTION_UPGRADE/HFX_015_PORTAL_RING/10_release/release_package/source/qqy_hfx_portal_ring_v014_source_contract.json",
+        "final_asset_seal": "300_PRODUCTION_UPGRADE/HFX_015_PORTAL_RING/10_release/release_package/validation/HFX_015_PORTAL_RING_FINAL_ASSET_SYSTEM_SEAL_v014.json"
+      },
+      "reuse_contract": {
+        "use_cases": [
+          "portal entrance",
+          "magic gate",
+          "space transition",
+          "character arrival",
+          "anime summoning gate"
+        ],
+        "derive_per_shot": true,
+        "direct_mutation_forbidden": true,
+        "parameter_adjustment_required": true
+      }
+    },
+    {
+      "status": "HFX_016_LONG_TERM_ASSET_REGISTRY_ENTRY_READY",
+      "asset_id": "HFX_016",
+      "asset_name": "Heat Distortion",
+      "asset_class": "heat_distortion",
+      "quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+      "registry_role": "FX_FACTORY_CORE_ASSET",
+      "release_paths": {
+        "release_root": "300_PRODUCTION_UPGRADE/HFX_016_HEAT_DISTORTION/10_release/release_package",
+        "release_hip": "300_PRODUCTION_UPGRADE/HFX_016_HEAT_DISTORTION/10_release/release_package/hip/HFX_016_HEAT_DISTORTION_FINAL_CANDIDATE_v022.hip",
+        "source_contract": "300_PRODUCTION_UPGRADE/HFX_016_HEAT_DISTORTION/10_release/release_package/source/qqy_hfx_heat_distortion_v022_source_contract.json",
+        "final_asset_seal": "300_PRODUCTION_UPGRADE/HFX_016_HEAT_DISTORTION/10_release/release_package/validation/HFX_016_HEAT_DISTORTION_FINAL_ASSET_SYSTEM_SEAL_v022.json"
+      },
+      "reuse_contract": {
+        "use_cases": [
+          "heat shimmer",
+          "portal distortion",
+          "pyro heat",
+          "engine exhaust",
+          "space ripple",
+          "energy refraction"
+        ],
+        "derive_per_shot": true,
+        "direct_mutation_forbidden": true,
+        "parameter_adjustment_required": true
+      }
+    },
+    {
+      "status": "HFX_021_LONG_TERM_ASSET_REGISTRY_ENTRY_READY",
+      "asset_id": "HFX_021",
+      "asset_name": "Advanced Pyro Explosion",
+      "asset_class": "pyro_explosion",
+      "quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+      "registry_role": "FX_FACTORY_CORE_ASSET",
+      "release_paths": {
+        "release_root": "300_PRODUCTION_UPGRADE/HFX_021_ADVANCED_PYRO_EXPLOSION/10_release/release_package",
+        "release_hip": "300_PRODUCTION_UPGRADE/HFX_021_ADVANCED_PYRO_EXPLOSION/10_release/release_package/hip/HFX_021_ADVANCED_PYRO_EXPLOSION_FINAL_CANDIDATE_v030.hip",
+        "source_contract": "300_PRODUCTION_UPGRADE/HFX_021_ADVANCED_PYRO_EXPLOSION/10_release/release_package/source/qqy_hfx_advanced_pyro_explosion_v030_source_contract.json",
+        "final_asset_seal": "300_PRODUCTION_UPGRADE/HFX_021_ADVANCED_PYRO_EXPLOSION/10_release/release_package/validation/HFX_021_ADVANCED_PYRO_EXPLOSION_FINAL_ASSET_SYSTEM_SEAL_v030.json"
+      },
+      "reuse_contract": {
+        "use_cases": [
+          "explosion",
+          "fireball",
+          "impact blast",
+          "debris burst",
+          "shockwave",
+          "pyro hero shot"
+        ],
+        "derive_per_shot": true,
+        "direct_mutation_forbidden": true,
+        "parameter_adjustment_required": true
+      }
+    },
+    {
+      "status": "HFX_025_LONG_TERM_ASSET_REGISTRY_ENTRY_READY",
+      "asset_id": "HFX_025",
+      "asset_name": "Character Energy Field",
+      "asset_class": "character_energy_field",
+      "quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+      "registry_role": "FX_FACTORY_CORE_ASSET",
+      "release_paths": {
+        "release_root": "300_PRODUCTION_UPGRADE/HFX_025_CHARACTER_ENERGY_FIELD/10_release/release_package",
+        "release_hip": "300_PRODUCTION_UPGRADE/HFX_025_CHARACTER_ENERGY_FIELD/10_release/release_package/hip/HFX_025_CHARACTER_ENERGY_FIELD_FINAL_CANDIDATE_v038.hip",
+        "source_contract": "300_PRODUCTION_UPGRADE/HFX_025_CHARACTER_ENERGY_FIELD/10_release/release_package/source/qqy_hfx_character_energy_field_v038_source_contract.json",
+        "final_asset_seal": "300_PRODUCTION_UPGRADE/HFX_025_CHARACTER_ENERGY_FIELD/10_release/release_package/validation/HFX_025_CHARACTER_ENERGY_FIELD_FINAL_ASSET_SYSTEM_SEAL_v038.json"
+      },
+      "reuse_contract": {
+        "use_cases": [
+          "anime aura",
+          "superhero energy field",
+          "character power-up",
+          "magic body glow",
+          "rim-light integration"
+        ],
+        "derive_per_shot": true,
+        "direct_mutation_forbidden": true,
+        "parameter_adjustment_required": true
+      }
+    },
+    {
+      "status": "HFX_028_LONG_TERM_ASSET_REGISTRY_ENTRY_READY",
+      "asset_id": "HFX_028",
+      "asset_name": "Space Rift Tear",
+      "asset_class": "space_rift",
+      "quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+      "registry_role": "FX_FACTORY_CORE_ASSET",
+      "release_paths": {
+        "release_root": "300_PRODUCTION_UPGRADE/HFX_028_SPACE_RIFT_TEAR/10_release/release_package",
+        "release_hip": "300_PRODUCTION_UPGRADE/HFX_028_SPACE_RIFT_TEAR/10_release/release_package/hip/HFX_028_SPACE_RIFT_TEAR_FINAL_CANDIDATE_v046.hip",
+        "source_contract": "300_PRODUCTION_UPGRADE/HFX_028_SPACE_RIFT_TEAR/10_release/release_package/source/qqy_hfx_space_rift_tear_v046_source_contract.json",
+        "final_asset_seal": "300_PRODUCTION_UPGRADE/HFX_028_SPACE_RIFT_TEAR/10_release/release_package/validation/HFX_028_SPACE_RIFT_TEAR_FINAL_ASSET_SYSTEM_SEAL_v046.json"
+      },
+      "reuse_contract": {
+        "use_cases": [
+          "space rift",
+          "dimension tear",
+          "anime transition",
+          "portal fracture",
+          "void slash"
+        ],
+        "derive_per_shot": true,
+        "direct_mutation_forbidden": true,
+        "parameter_adjustment_required": true
+      }
+    },
+    {
+      "status": "HFX_033_LONG_TERM_ASSET_REGISTRY_ENTRY_READY",
+      "asset_id": "HFX_033",
+      "asset_name": "Glow Emission Pass",
+      "asset_class": "glow_emission",
+      "quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+      "registry_role": "FX_FACTORY_CORE_ASSET",
+      "release_paths": {
+        "release_root": "300_PRODUCTION_UPGRADE/HFX_033_GLOW_EMISSION_PASS/10_release/release_package",
+        "release_hip": "300_PRODUCTION_UPGRADE/HFX_033_GLOW_EMISSION_PASS/10_release/release_package/hip/HFX_033_GLOW_EMISSION_PASS_FINAL_CANDIDATE_v054.hip",
+        "source_contract": "300_PRODUCTION_UPGRADE/HFX_033_GLOW_EMISSION_PASS/10_release/release_package/source/qqy_hfx_glow_emission_pass_v054_source_contract.json",
+        "final_asset_seal": "300_PRODUCTION_UPGRADE/HFX_033_GLOW_EMISSION_PASS/10_release/release_package/validation/HFX_033_GLOW_EMISSION_PASS_FINAL_ASSET_SYSTEM_SEAL_v054.json"
+      },
+      "reuse_contract": {
+        "use_cases": [
+          "glow",
+          "emission",
+          "bloom",
+          "threshold mask",
+          "energy polish",
+          "portal polish",
+          "aura polish"
+        ],
+        "derive_per_shot": true,
+        "direct_mutation_forbidden": true,
+        "parameter_adjustment_required": true
+      }
+    },
+    {
+      "status": "HFX_036_LONG_TERM_ASSET_REGISTRY_ENTRY_READY",
+      "asset_id": "HFX_036",
+      "asset_name": "Alpha Holdout Matte",
+      "asset_class": "alpha_holdout",
+      "quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+      "registry_role": "FX_FACTORY_CORE_ASSET",
+      "release_paths": {
+        "release_root": "300_PRODUCTION_UPGRADE/HFX_036_ALPHA_HOLDOUT_MATTE/10_release/release_package",
+        "release_hip": "300_PRODUCTION_UPGRADE/HFX_036_ALPHA_HOLDOUT_MATTE/10_release/release_package/hip/HFX_036_ALPHA_HOLDOUT_MATTE_FINAL_CANDIDATE_v062.hip",
+        "source_contract": "300_PRODUCTION_UPGRADE/HFX_036_ALPHA_HOLDOUT_MATTE/10_release/release_package/source/qqy_hfx_alpha_holdout_matte_v062_source_contract.json",
+        "final_asset_seal": "300_PRODUCTION_UPGRADE/HFX_036_ALPHA_HOLDOUT_MATTE/10_release/release_package/validation/HFX_036_ALPHA_HOLDOUT_MATTE_FINAL_ASSET_SYSTEM_SEAL_v062.json"
+      },
+      "reuse_contract": {
+        "use_cases": [
+          "alpha matte",
+          "holdout",
+          "subject occlusion",
+          "edge expand",
+          "edge feather",
+          "green-screen integration"
+        ],
+        "derive_per_shot": true,
+        "direct_mutation_forbidden": true,
+        "parameter_adjustment_required": true
+      }
+    },
+    {
+      "status": "HFX_037_LONG_TERM_ASSET_REGISTRY_ENTRY_READY",
+      "asset_id": "HFX_037",
+      "asset_name": "LightWrap Rim Interaction",
+      "asset_class": "lightwrap_rim",
+      "quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+      "registry_role": "FX_FACTORY_CORE_ASSET",
+      "release_paths": {
+        "release_root": "300_PRODUCTION_UPGRADE/HFX_037_LIGHTWRAP_RIM_INTERACTION/10_release/release_package",
+        "release_hip": "300_PRODUCTION_UPGRADE/HFX_037_LIGHTWRAP_RIM_INTERACTION/10_release/release_package/hip/HFX_037_LIGHTWRAP_RIM_INTERACTION_FINAL_CANDIDATE_v070.hip",
+        "source_contract": "300_PRODUCTION_UPGRADE/HFX_037_LIGHTWRAP_RIM_INTERACTION/10_release/release_package/source/qqy_hfx_lightwrap_rim_interaction_v070_source_contract.json",
+        "final_asset_seal": "300_PRODUCTION_UPGRADE/HFX_037_LIGHTWRAP_RIM_INTERACTION/10_release/release_package/validation/HFX_037_LIGHTWRAP_RIM_INTERACTION_FINAL_ASSET_SYSTEM_SEAL_v070.json"
+      },
+      "reuse_contract": {
+        "use_cases": [
+          "lightwrap",
+          "rim interaction",
+          "subject edge integration",
+          "green-screen composite",
+          "FX-to-subject interaction"
+        ],
+        "derive_per_shot": true,
+        "direct_mutation_forbidden": true,
+        "parameter_adjustment_required": true
+      }
+    },
+    {
+      "status": "HFX_038_LONG_TERM_ASSET_REGISTRY_ENTRY_READY",
+      "asset_id": "HFX_038",
+      "asset_name": "ContactShadow Ground Integration",
+      "asset_class": "contact_shadow",
+      "quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+      "registry_role": "FX_FACTORY_CORE_ASSET",
+      "release_paths": {
+        "release_root": "300_PRODUCTION_UPGRADE/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION/10_release/release_package",
+        "release_hip": "300_PRODUCTION_UPGRADE/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION/10_release/release_package/hip/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION_FINAL_CANDIDATE_v078.hip",
+        "source_contract": "300_PRODUCTION_UPGRADE/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION/10_release/release_package/source/qqy_hfx_contactshadow_ground_integration_v078_source_contract.json",
+        "final_asset_seal": "300_PRODUCTION_UPGRADE/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION/10_release/release_package/validation/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION_FINAL_ASSET_SYSTEM_SEAL_v078.json"
+      },
+      "reuse_contract": {
+        "use_cases": [
+          "contact shadow",
+          "grounding",
+          "ground occlusion",
+          "FX-to-floor integration",
+          "subject-to-floor integration"
+        ],
+        "derive_per_shot": true,
+        "direct_mutation_forbidden": true,
+        "parameter_adjustment_required": true
+      }
+    },
+    {
+      "status": "HFX_027_LONG_TERM_ASSET_REGISTRY_ENTRY_READY",
+      "asset_id": "HFX_027",
+      "asset_name": "Summoning Portal Gate",
+      "asset_class": "summoning_portal_gate",
+      "quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+      "registry_role": "FX_FACTORY_CORE_ASSET",
+      "release_paths": {
+        "release_root": "300_PRODUCTION_UPGRADE/HFX_027_SUMMONING_PORTAL_GATE/10_release/release_package",
+        "release_hip": "300_PRODUCTION_UPGRADE/HFX_027_SUMMONING_PORTAL_GATE/10_release/release_package/hip/HFX_027_SUMMONING_PORTAL_GATE_FINAL_CANDIDATE_v086.hip",
+        "source_contract": "300_PRODUCTION_UPGRADE/HFX_027_SUMMONING_PORTAL_GATE/10_release/release_package/source/qqy_hfx_summoning_portal_gate_v086_source_contract.json",
+        "final_asset_seal": "300_PRODUCTION_UPGRADE/HFX_027_SUMMONING_PORTAL_GATE/10_release/release_package/validation/HFX_027_SUMMONING_PORTAL_GATE_FINAL_ASSET_SYSTEM_SEAL_v086.json"
+      },
+      "reuse_contract": {
+        "use_cases": [
+          "summoning gate",
+          "anime magic circle",
+          "character arrival",
+          "portal summon",
+          "ritual gate"
+        ],
+        "derive_per_shot": true,
+        "direct_mutation_forbidden": true,
+        "parameter_adjustment_required": true
+      }
+    },
+    {
+      "status": "HFX_029_LONG_TERM_ASSET_REGISTRY_ENTRY_READY",
+      "asset_id": "HFX_029",
+      "asset_name": "Black Hole Accretion Disk",
+      "asset_class": "black_hole_accretion_disk",
+      "quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+      "registry_role": "FX_FACTORY_CORE_ASSET",
+      "release_paths": {
+        "release_root": "300_PRODUCTION_UPGRADE/HFX_029_BLACK_HOLE_ACCRETION_DISK/10_release/release_package",
+        "release_hip": "300_PRODUCTION_UPGRADE/HFX_029_BLACK_HOLE_ACCRETION_DISK/10_release/release_package/hip/HFX_029_BLACK_HOLE_ACCRETION_DISK_FINAL_CANDIDATE_v094.hip",
+        "source_contract": "300_PRODUCTION_UPGRADE/HFX_029_BLACK_HOLE_ACCRETION_DISK/10_release/release_package/source/qqy_hfx_black_hole_accretion_disk_v094_source_contract.json",
+        "final_asset_seal": "300_PRODUCTION_UPGRADE/HFX_029_BLACK_HOLE_ACCRETION_DISK/10_release/release_package/validation/HFX_029_BLACK_HOLE_ACCRETION_DISK_FINAL_ASSET_SYSTEM_SEAL_v094.json"
+      },
+      "reuse_contract": {
+        "use_cases": [
+          "black hole",
+          "accretion disk",
+          "gravity lensing",
+          "space vortex",
+          "cosmic portal",
+          "anime singularity"
+        ],
+        "derive_per_shot": true,
+        "direct_mutation_forbidden": true,
+        "parameter_adjustment_required": true
+      }
+    }
+  ],
+  "last_updated": "2026-05-19T21:54:06"
+}

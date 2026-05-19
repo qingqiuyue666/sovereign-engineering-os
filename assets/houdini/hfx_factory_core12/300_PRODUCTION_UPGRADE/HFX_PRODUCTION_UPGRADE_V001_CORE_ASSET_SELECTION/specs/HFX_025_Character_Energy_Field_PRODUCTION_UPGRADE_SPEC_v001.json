@@ -1,0 +1,111 @@
+{
+  "status": "HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTED",
+  "asset": {
+    "asset_id": "HFX_025",
+    "name": "Character Energy Field",
+    "batch": "B04",
+    "priority": "P0",
+    "upgrade_class": "character_aura_energy",
+    "current_level": "PREVIEW_PROXY",
+    "target_level": "PRODUCTION_FINAL",
+    "why_core": "Useful for real person, green-screen, anime-style hero character and cinematic reveal shots.",
+    "required_disciplines": [
+      "particles",
+      "surface_proxy",
+      "shader",
+      "motion_trails",
+      "lightwrap",
+      "holdout",
+      "comp"
+    ],
+    "preview_goal": "character-centered aura proxy",
+    "mid_goal": "layered aura with animated field, sparks and rim interaction",
+    "final_goal": "subject-aware energy field with holdout, lightwrap, emission, rim, contact and comp integration passes",
+    "required_outputs": [
+      "emission_mask",
+      "rim_mask",
+      "particle_pass",
+      "alpha_holdout",
+      "lightwrap",
+      "metadata_manifest"
+    ],
+    "blocked_until": [
+      "subject_proxy_or_plate_declared",
+      "camera_declared",
+      "scale_declared"
+    ]
+  },
+  "quality_tiers": {
+    "PREVIEW": {
+      "purpose": "composition, timing, blocking, fast iteration",
+      "allowed": [
+        "low density",
+        "proxy geometry",
+        "fast cook",
+        "viewport preview",
+        "no final render claim"
+      ],
+      "blocked": [
+        "final delivery",
+        "client-grade render",
+        "claiming film quality"
+      ]
+    },
+    "MID": {
+      "purpose": "short-form usable quality and look development",
+      "allowed": [
+        "medium density",
+        "shot-local cache",
+        "basic shader",
+        "separated core passes",
+        "preview comp"
+      ],
+      "blocked": [
+        "final-pixel claim without FINAL tier validation"
+      ]
+    },
+    "FINAL": {
+      "purpose": "production-grade hero shot output",
+      "allowed": [
+        "high-density simulation",
+        "versioned cache",
+        "shot camera",
+        "ACES colorspace",
+        "EXR pass separation",
+        "final comp validation"
+      ],
+      "blocked": [
+        "unversioned export",
+        "flattened comp before review",
+        "missing pass manifest",
+        "missing camera/plate context"
+      ]
+    }
+  },
+  "upgrade_contract": {
+    "do_not_modify_existing_final_seals": true,
+    "all_upgrade_work_goes_under_300_PRODUCTION_UPGRADE": true,
+    "shot_local_derivation_required_for_real_use": true,
+    "preview_mid_final_tiers_required": true,
+    "render_export_blocked_until_tier_specific_validation": true,
+    "final_quality_requires_real_or_approved_synthetic_shot_context": true
+  },
+  "v002_entry_conditions": [
+    "source HDA/HIP resolved",
+    "quality tier selected",
+    "shot context declared",
+    "camera/scale/colorspace declared",
+    "cache budget declared if simulation-based",
+    "pass manifest declared"
+  ],
+  "blocked_conditions": [
+    "modifying sealed release directly",
+    "claiming final quality from preview proxy",
+    "missing camera or scale context",
+    "missing colorspace",
+    "missing pass manifest",
+    "unversioned cache/export",
+    "flattened comp before review"
+  ],
+  "next_stage": "HFX_PRODUCTION_UPGRADE_V002_SINGLE_ASSET_SOURCE_RESOLUTION"
+}

@@ -1,0 +1,142 @@
+{
+  "status": "HFX_B04_CHARACTER_MAGIC_ENVIRONMENT_V003_TRIGGER_ANIMATION_PASS",
+  "generated": "2026-05-17T19:11:04",
+  "assets": [
+    {
+      "asset": "HFX_025_Character_Energy_Field",
+      "rel": "18_角色能量_周身气场/HFX_025_Character_Energy_Field",
+      "result": "PASS",
+      "trigger_frame": 1,
+      "duration": 160,
+      "safe_mode": "LIGHT_VEX",
+      "main_out": "OUT_ENERGY_FIELD_MAIN",
+      "layers": [
+        "OUT_AURA_SHELL",
+        "OUT_ORBIT_PARTICLES",
+        "OUT_GLOW_MASK",
+        "OUT_TRIGGER_METADATA"
+      ],
+      "hip": "18_角色能量_周身气场/HFX_025_Character_Energy_Field/01_hip/HFX_025_Character_Energy_Field_v003.hip",
+      "readme_v003": "18_角色能量_周身气场/HFX_025_Character_Energy_Field/05_notes/README_v003.md"
+    },
+    {
+      "asset": "HFX_026_Ground_Magic_Rune_Circle",
+      "rel": "19_魔法阵_地面符文/HFX_026_Ground_Magic_Rune_Circle",
+      "result": "PASS",
+      "trigger_frame": 12,
+      "duration": 120,
+      "safe_mode": "NO_VEX",
+      "main_out": "OUT_RUNE_CIRCLE_MAIN",
+      "layers": [
+        "OUT_RING_LINES",
+        "OUT_RUNE_GLYPHS",
+        "OUT_GLOW_MASK",
+        "OUT_TRIGGER_METADATA"
+      ],
+      "hip": "19_魔法阵_地面符文/HFX_026_Ground_Magic_Rune_Circle/01_hip/HFX_026_Ground_Magic_Rune_Circle_v003.hip",
+      "readme_v003": "19_魔法阵_地面符文/HFX_026_Ground_Magic_Rune_Circle/05_notes/README_v003.md"
+    },
+    {
+      "asset": "HFX_027_Summoning_Portal_Gate",
+      "rel": "20_召唤门_传送空间/HFX_027_Summoning_Portal_Gate",
+      "result": "PASS",
+      "trigger_frame": 18,
+      "duration": 144,
+      "safe_mode": "LIGHT_VEX",
+      "main_out": "OUT_PORTAL_GATE_MAIN",
+      "layers": [
+        "OUT_PORTAL_RING",
+        "OUT_PORTAL_INTERIOR",
+        "OUT_EDGE_ENERGY",
+        "OUT_TRIGGER_METADATA"
+      ],
+      "hip": "20_召唤门_传送空间/HFX_027_Summoning_Portal_Gate/01_hip/HFX_027_Summoning_Portal_Gate_v003.hip",
+      "readme_v003": "20_召唤门_传送空间/HFX_027_Summoning_Portal_Gate/05_notes/README_v003.md"
+    },
+    {
+      "asset": "HFX_028_Space_Rift_Tear",
+      "rel": "21_空间裂缝_维度撕裂/HFX_028_Space_Rift_Tear",
+      "result": "PASS",
+      "trigger_frame": 16,
+      "duration": 120,
+      "safe_mode": "NO_VEX",
+      "main_out": "OUT_RIFT_TEAR_MAIN",
+      "layers": [
+        "OUT_RIFT_EDGE",
+        "OUT_VOID_CORE",
+        "OUT_DISTORTION_MASK",
+        "OUT_TRIGGER_METADATA"
+      ],
+      "hip": "21_空间裂缝_维度撕裂/HFX_028_Space_Rift_Tear/01_hip/HFX_028_Space_Rift_Tear_v003.hip",
+      "readme_v003": "21_空间裂缝_维度撕裂/HFX_028_Space_Rift_Tear/05_notes/README_v003.md"
+    },
+    {
+      "asset": "HFX_029_Black_Hole_Accretion_Disk",
+      "rel": "22_黑洞吸积盘_引力扭曲/HFX_029_Black_Hole_Accretion_Disk",
+      "result": "PASS",
+      "trigger_frame": 1,
+      "duration": 180,
+      "safe_mode": "LIGHT_VEX",
+      "main_out": "OUT_BLACK_HOLE_MAIN",
+      "layers": [
+        "OUT_ACCRETION_DISK",
+        "OUT_GRAVITY_LENS_MASK",
+        "OUT_PARTICLE_SPIRAL",
+        "OUT_TRIGGER_METADATA"
+      ],
+      "hip": "22_黑洞吸积盘_引力扭曲/HFX_029_Black_Hole_Accretion_Disk/01_hip/HFX_029_Black_Hole_Accretion_Disk_v003.hip",
+      "readme_v003": "22_黑洞吸积盘_引力扭曲/HFX_029_Black_Hole_Accretion_Disk/05_notes/README_v003.md"
+    },
+    {
+      "asset": "HFX_030_Ice_Freeze_Spread",
+      "rel": "23_冰冻蔓延_霜纹扩散/HFX_030_Ice_Freeze_Spread",
+      "result": "PASS",
+      "trigger_frame": 10,
+      "duration": 130,
+      "safe_mode": "NO_VEX",
+      "main_out": "OUT_ICE_SPREAD_MAIN",
+      "layers": [
+        "OUT_FROST_LINES",
+        "OUT_ICE_CRYSTALS",
+        "OUT_FREEZE_MASK",
+        "OUT_TRIGGER_METADATA"
+      ],
+      "hip": "23_冰冻蔓延_霜纹扩散/HFX_030_Ice_Freeze_Spread/01_hip/HFX_030_Ice_Freeze_Spread_v003.hip",
+      "readme_v003": "23_冰冻蔓延_霜纹扩散/HFX_030_Ice_Freeze_Spread/05_notes/README_v003.md"
+    },
+    {
+      "asset": "HFX_031_Ground_Fire_Crawl",
+      "rel": "24_地火蔓延_火线扩散/HFX_031_Ground_Fire_Crawl",
+      "result": "PASS",
+      "trigger_frame": 8,
+      "duration": 120,
+      "safe_mode": "NO_VEX",
+      "main_out": "OUT_GROUND_FIRE_MAIN",
+      "layers": [
+        "OUT_FIRE_FRONT",
+        "OUT_EMBER_TRAIL",
+        "OUT_HEAT_MASK",
+        "OUT_TRIGGER_METADATA"
+      ],
+      "hip": "24_地火蔓延_火线扩散/HFX_031_Ground_Fire_Crawl/01_hip/HFX_031_Ground_Fire_Crawl_v003.hip",
+      "readme_v003": "24_地火蔓延_火线扩散/HFX_031_Ground_Fire_Crawl/05_notes/README_v003.md"
+    },
+    {
+      "asset": "HFX_032_EMP_Scan_Wave",
+      "rel": "25_电磁脉冲_扫描波/HFX_032_EMP_Scan_Wave",
+      "result": "PASS",
+      "trigger_frame": 6,
+      "duration": 96,
+      "safe_mode": "NO_VEX",
+      "main_out": "OUT_EMP_SCAN_MAIN",
+      "layers": [
+        "OUT_SCAN_RING",
+        "OUT_GRID_LINES",
+        "OUT_GLITCH_MASK",
+        "OUT_TRIGGER_METADATA"
+      ],
+      "hip": "25_电磁脉冲_扫描波/HFX_032_EMP_Scan_Wave/01_hip/HFX_032_EMP_Scan_Wave_v003.hip",
+      "readme_v003": "25_电磁脉冲_扫描波/HFX_032_EMP_Scan_Wave/05_notes/README_v003.md"
+    }
+  ]
+}

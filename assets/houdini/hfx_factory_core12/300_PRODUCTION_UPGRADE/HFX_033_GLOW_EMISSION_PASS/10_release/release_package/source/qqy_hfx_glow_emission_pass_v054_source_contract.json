@@ -1,0 +1,8 @@
+{
+  "status": "HFX_033_SOURCE_CONTRACT_V054_READY",
+  "asset_id": "HFX_033",
+  "asset_name": "Glow Emission Pass",
+  "source_of_truth": "300_PRODUCTION_UPGRADE/HFX_033_GLOW_EMISSION_PASS/10_release/release_package/hip/HFX_033_GLOW_EMISSION_PASS_FINAL_CANDIDATE_v054.hip",
+  "direct_mutation_forbidden": true,
+  "derive_per_shot": true
+}

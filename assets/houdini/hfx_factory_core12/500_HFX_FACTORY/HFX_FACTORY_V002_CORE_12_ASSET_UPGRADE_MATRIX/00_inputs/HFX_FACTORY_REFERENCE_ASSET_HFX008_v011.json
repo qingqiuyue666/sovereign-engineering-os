@@ -1,0 +1,52 @@
+{
+  "status": "HFX_FACTORY_REFERENCE_TEMPLATE_FROM_HFX008_V011_READY",
+  "reference_asset_id": "HFX_008",
+  "reference_asset_name": "Energy Shockwave",
+  "purpose": "Use HFX_008 as the proven template for upgrading remaining core assets into the Houdini FX Factory.",
+  "required_factory_stages_for_each_core_asset": [
+    "source_resolution",
+    "preview_tier_build",
+    "preview_tier_validation",
+    "mid_tier_build",
+    "mid_tier_validation",
+    "final_candidate_tier_build",
+    "final_candidate_tier_validation",
+    "final_candidate_release_seal",
+    "shot_bound_render_package",
+    "render_preflight",
+    "controlled_preview",
+    "preview_validation",
+    "synthetic_or_real_context_decision",
+    "render_package",
+    "render_package_validation",
+    "comp_package",
+    "final_look_validation",
+    "delivery_candidate",
+    "final_asset_system_seal"
+  ],
+  "required_asset_interfaces": [
+    "parameterized_controls",
+    "PREVIEW_MID_FINAL_quality_tiers",
+    "pass_manifest",
+    "cache_policy",
+    "comp_handoff",
+    "shot_binding_contract",
+    "validation_reports",
+    "release_package",
+    "claim_contract"
+  ],
+  "remaining_core_assets_to_upgrade": [
+    "HFX_015 Portal Ring",
+    "HFX_016 Heat Distortion",
+    "HFX_021 Advanced Pyro Explosion",
+    "HFX_025 Character Energy Field",
+    "HFX_027 Summoning Portal Gate",
+    "HFX_028 Space Rift Tear",
+    "HFX_029 Black Hole Accretion Disk",
+    "HFX_033 Glow Emission Pass",
+    "HFX_036 Alpha Holdout Matte",
+    "HFX_037 LightWrap Rim Interaction",
+    "HFX_038 ContactShadow Ground Integration"
+  ],
+  "next_global_stage": "HFX_FACTORY_V001_CORE_ASSET_FACTORY_PROTOCOL"
+}

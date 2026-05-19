@@ -1,0 +1,17 @@
+{
+  "status": "HFX_008_FINAL_CACHE_POLICY_V007_READY",
+  "asset_id": "HFX_008",
+  "asset_name": "Energy Shockwave",
+  "cache_root": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/04_cache",
+  "cache_policy": {
+    "versioned_cache_required": true,
+    "overwrite_forbidden": true,
+    "bgeo_allowed": true,
+    "vdb_allowed": true,
+    "abc_allowed": true,
+    "unversioned_cache_forbidden": true,
+    "cache_execution_at_v007": "blocked"
+  },
+  "render_export_allowed": false,
+  "next_stage": "HFX_PRODUCTION_UPGRADE_V008_HFX008_FINAL_TIER_VALIDATION"
+}

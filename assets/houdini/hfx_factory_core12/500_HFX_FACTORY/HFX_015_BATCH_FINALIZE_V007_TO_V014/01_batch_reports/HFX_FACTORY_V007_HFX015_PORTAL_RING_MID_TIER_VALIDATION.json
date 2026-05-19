@@ -1,0 +1,7 @@
+{
+  "status": "HFX_FACTORY_V007_HFX015_PORTAL_RING_MID_TIER_VALIDATION_PASS",
+  "asset_id": "HFX_015",
+  "asset_name": "Portal Ring",
+  "mid_tier_validated": true,
+  "next_stage": "HFX_FACTORY_V008_HFX015_PORTAL_RING_FINAL_CANDIDATE_BUILD"
+}

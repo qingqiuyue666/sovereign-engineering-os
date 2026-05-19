@@ -1,0 +1,434 @@
+{
+  "status": "HFX_PRODUCTION_UPGRADE_V006_HFX008_MID_TIER_VALIDATION_PASS",
+  "generated": "2026-05-18T23:19:49",
+  "asset_id": "HFX_008",
+  "asset_name": "Energy Shockwave",
+  "tier": "MID",
+  "files": [
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/02_mid/hip/HFX_008_ENERGY_SHOCKWAVE_MID_TIER_v005.hip",
+      "sha256": "1539c9918cb8b2bb111554e6be6efb954cd2a4c320373dbaacbbc3258a774f8b",
+      "size_bytes": 286164
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/02_mid/manifests/HFX_008_MID_TIER_SPEC_v005.json",
+      "sha256": "df22b7e4c39c103a31007336d002f38d4fead91a3aceeeca81205dfe679171c5",
+      "size_bytes": 4916
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/02_mid/docs/HFX_008_MID_TIER_SPEC_v005.md",
+      "sha256": "7419f372cbba8c0909e50bdd4835f81138ba2d9aa3caaf0f447e0636d6f12150",
+      "size_bytes": 1031
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/02_mid/validation/HFX_008_MID_TIER_BUILD_VALIDATION_v005.md",
+      "sha256": "02fb443ec1999ca96f0ca4e5a663c354a3a03b072e0d93decb7005f3ddfec5fa",
+      "size_bytes": 638
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/02_mid/docs/README_HFX_008_MID_TIER_v005.md",
+      "sha256": "c08cc8616193f7d9ddb8b9c258e40c7274d1768e3b57ad63eb91516a2415f314",
+      "size_bytes": 520
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/02_mid/manifests/HFX_PRODUCTION_UPGRADE_V005_HFX008_MID_TIER_BUILD_MANIFEST.json",
+      "sha256": "4c965b2380ccbf48a70ea1ec31f6acbfa6f8b374f8325c4e256a56bedbd6e7f5",
+      "size_bytes": 6523
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/02_mid/validation/HFX_008_MID_TIER_VALIDATION_v006.json",
+      "sha256": "d1fc3efa044b1f520f76f21f750aae1497317208611cb8bc8965cf6c539f6adf",
+      "size_bytes": 4533
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/02_mid/validation/HFX_008_MID_TIER_VALIDATION_v006.md",
+      "sha256": "a270f0065ef894faebc078c933f9da4e7860a861e9cad27a36614339d766e548",
+      "size_bytes": 1124
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/02_mid/docs/README_HFX_008_MID_TIER_v006_VALIDATED.md",
+      "sha256": "581a0f0e2222f272622b34e71312ee9c81920e2c660e18374975059ce8136db3",
+      "size_bytes": 470
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/02_mid/manifests/HFX_PRODUCTION_UPGRADE_V006_HFX008_MID_TIER_VALIDATION_MANIFEST.json",
+      "sha256": "e500f57ef2b986b04ccdd11b35fa2c8c4af2a3c322f1d90cd2ec21cb04a0d218",
+      "size_bytes": 11566
+    }
+  ],
+  "previous_checks": [
+    {
+      "label": "HFX Production Upgrade v001",
+      "file": "HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION_REPORT.md",
+      "marker": "Final Status: HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTION_PASS",
+      "result": "PASS"
+    },
+    {
+      "label": "HFX_008 Source Resolution v002",
+      "file": "HFX_PRODUCTION_UPGRADE_V002_HFX008_SOURCE_RESOLUTION_REPORT.md",
+      "marker": "Final Status: HFX_PRODUCTION_UPGRADE_V002_HFX008_SOURCE_RESOLUTION_PASS",
+      "result": "PASS"
+    },
+    {
+      "label": "HFX_008 Preview Tier Build v003",
+      "file": "HFX_PRODUCTION_UPGRADE_V003_HFX008_PREVIEW_TIER_BUILD_REPORT.md",
+      "marker": "Final Status: HFX_PRODUCTION_UPGRADE_V003_HFX008_PREVIEW_TIER_BUILD_PASS",
+      "result": "PASS"
+    },
+    {
+      "label": "HFX_008 Preview Tier Validation v004",
+      "file": "HFX_PRODUCTION_UPGRADE_V004_HFX008_PREVIEW_TIER_VALIDATION_REPORT.md",
+      "marker": "Final Status: HFX_PRODUCTION_UPGRADE_V004_HFX008_PREVIEW_TIER_VALIDATION_PASS",
+      "result": "PASS"
+    },
+    {
+      "label": "HFX_008 MID Tier Build v005",
+      "file": "HFX_PRODUCTION_UPGRADE_V005_HFX008_MID_TIER_BUILD_REPORT.md",
+      "marker": "Final Status: HFX_PRODUCTION_UPGRADE_V005_HFX008_MID_TIER_BUILD_PASS",
+      "result": "PASS"
+    }
+  ],
+  "mid_file_checks": [
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/02_mid/hip/HFX_008_ENERGY_SHOCKWAVE_MID_TIER_v005.hip",
+      "result": "PASS",
+      "sha256": "1539c9918cb8b2bb111554e6be6efb954cd2a4c320373dbaacbbc3258a774f8b",
+      "size_bytes": 286164
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/02_mid/manifests/HFX_008_MID_TIER_SPEC_v005.json",
+      "result": "PASS",
+      "sha256": "df22b7e4c39c103a31007336d002f38d4fead91a3aceeeca81205dfe679171c5",
+      "size_bytes": 4916
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/02_mid/docs/HFX_008_MID_TIER_SPEC_v005.md",
+      "result": "PASS",
+      "sha256": "7419f372cbba8c0909e50bdd4835f81138ba2d9aa3caaf0f447e0636d6f12150",
+      "size_bytes": 1031
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/02_mid/validation/HFX_008_MID_TIER_BUILD_VALIDATION_v005.md",
+      "result": "PASS",
+      "sha256": "02fb443ec1999ca96f0ca4e5a663c354a3a03b072e0d93decb7005f3ddfec5fa",
+      "size_bytes": 638
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/02_mid/docs/README_HFX_008_MID_TIER_v005.md",
+      "result": "PASS",
+      "sha256": "c08cc8616193f7d9ddb8b9c258e40c7274d1768e3b57ad63eb91516a2415f314",
+      "size_bytes": 520
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/02_mid/manifests/HFX_PRODUCTION_UPGRADE_V005_HFX008_MID_TIER_BUILD_MANIFEST.json",
+      "result": "PASS",
+      "sha256": "4c965b2380ccbf48a70ea1ec31f6acbfa6f8b374f8325c4e256a56bedbd6e7f5",
+      "size_bytes": 6523
+    }
+  ],
+  "policy_checks": [
+    {
+      "check": "v005_status_pass",
+      "result": "PASS"
+    },
+    {
+      "check": "asset_id_correct",
+      "result": "PASS"
+    },
+    {
+      "check": "tier_mid",
+      "result": "PASS"
+    },
+    {
+      "check": "mid_hip_recorded",
+      "result": "PASS"
+    },
+    {
+      "check": "hda_type_resolved",
+      "result": "PASS"
+    },
+    {
+      "check": "spec_mid_lookdev_only",
+      "result": "PASS"
+    },
+    {
+      "check": "spec_render_export_blocked",
+      "result": "PASS"
+    },
+    {
+      "check": "spec_delivery_blocked",
+      "result": "PASS"
+    },
+    {
+      "check": "spec_final_quality_blocked",
+      "result": "PASS"
+    },
+    {
+      "check": "spec_sealed_source_immutable",
+      "result": "PASS"
+    }
+  ],
+  "node_checks": [
+    {
+      "node_name": "HFX_008_MID_SHOCKWAVE_CORE_v005",
+      "result": "PASS",
+      "node_record": {
+        "node_name": "HFX_008_MID_SHOCKWAVE_CORE_v005",
+        "node_path": "/obj/HFX_008_MID_SHOCKWAVE_CORE_v005",
+        "type": "qqy::hfx_energy_shockwave::9.0",
+        "cook_all_pass": true
+      }
+    },
+    {
+      "node_name": "HFX_008_MID_SUPPORT_PASSES_v005",
+      "result": "PASS",
+      "node_record": {
+        "node_name": "HFX_008_MID_SUPPORT_PASSES_v005",
+        "node_path": "/obj/HFX_008_MID_SUPPORT_PASSES_v005",
+        "type": "geo",
+        "cook_all_pass": true
+      }
+    },
+    {
+      "node_name": "HFX_008_MID_EMISSION_MASK_PROXY_v005",
+      "result": "PASS",
+      "node_record": {
+        "node_name": "HFX_008_MID_EMISSION_MASK_PROXY_v005",
+        "node_path": "/obj/HFX_008_MID_EMISSION_MASK_PROXY_v005",
+        "type": "geo",
+        "cook_all_pass": true
+      }
+    },
+    {
+      "node_name": "HFX_008_MID_DISTORTION_MASK_PROXY_v005",
+      "result": "PASS",
+      "node_record": {
+        "node_name": "HFX_008_MID_DISTORTION_MASK_PROXY_v005",
+        "node_path": "/obj/HFX_008_MID_DISTORTION_MASK_PROXY_v005",
+        "type": "geo",
+        "cook_all_pass": true
+      }
+    },
+    {
+      "node_name": "HFX_008_MID_ZDEPTH_PROXY_v005",
+      "result": "PASS",
+      "node_record": {
+        "node_name": "HFX_008_MID_ZDEPTH_PROXY_v005",
+        "node_path": "/obj/HFX_008_MID_ZDEPTH_PROXY_v005",
+        "type": "geo",
+        "cook_all_pass": true
+      }
+    }
+  ],
+  "support_pass_checks": [
+    {
+      "support_pass": "OUT_MID_DUST_CONTACT_PROXY",
+      "result": "PASS"
+    },
+    {
+      "support_pass": "OUT_MID_EMISSION_MASK_PROXY",
+      "result": "PASS"
+    },
+    {
+      "support_pass": "OUT_MID_DISTORTION_MASK_PROXY",
+      "result": "PASS"
+    },
+    {
+      "support_pass": "OUT_MID_ZDEPTH_PROXY",
+      "result": "PASS"
+    }
+  ],
+  "cook_results": {
+    "HFX_008_MID_SHOCKWAVE_CORE_v005": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "HFX_008_MID_SUPPORT_PASSES_v005": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "HFX_008_MID_EMISSION_MASK_PROXY_v005": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "HFX_008_MID_DISTORTION_MASK_PROXY_v005": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "HFX_008_MID_ZDEPTH_PROXY_v005": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ]
+  },
+  "pollution": []
+}

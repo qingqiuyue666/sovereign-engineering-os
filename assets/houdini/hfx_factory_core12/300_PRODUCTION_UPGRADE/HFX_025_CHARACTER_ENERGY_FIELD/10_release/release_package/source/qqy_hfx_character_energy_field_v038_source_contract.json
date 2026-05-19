@@ -1,0 +1,8 @@
+{
+  "status": "HFX_025_SOURCE_CONTRACT_V038_READY",
+  "asset_id": "HFX_025",
+  "asset_name": "Character Energy Field",
+  "source_of_truth": "300_PRODUCTION_UPGRADE/HFX_025_CHARACTER_ENERGY_FIELD/10_release/release_package/hip/HFX_025_CHARACTER_ENERGY_FIELD_FINAL_CANDIDATE_v038.hip",
+  "direct_mutation_forbidden": true,
+  "derive_per_shot": true
+}

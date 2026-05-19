@@ -1,0 +1,31 @@
+{
+  "status": "HFX_028_RENDER_COMP_CONTRACT_V046_READY",
+  "asset_id": "HFX_028",
+  "asset_name": "Space Rift Tear",
+  "required_passes": [
+    "OUT_FINAL_RIFT_CORE",
+    "OUT_FINAL_EDGE_EMISSION",
+    "OUT_FINAL_INNER_VOID",
+    "OUT_FINAL_DISTORTION_VECTOR",
+    "OUT_FINAL_PARTICLE_SUCTION",
+    "OUT_FINAL_ZDEPTH",
+    "OUT_FINAL_ALPHA",
+    "OUT_FINAL_LIGHTWRAP",
+    "OUT_FINAL_METADATA"
+  ],
+  "target_uses": [
+    "space rift",
+    "dimension tear",
+    "anime transition",
+    "portal fracture",
+    "void slash"
+  ],
+  "dependencies": [
+    "HFX_015",
+    "HFX_016",
+    "HFX_033"
+  ],
+  "comfyui_source_of_truth_forbidden": true,
+  "single_flat_beauty_only_forbidden": true,
+  "delivery_allowed": false
+}

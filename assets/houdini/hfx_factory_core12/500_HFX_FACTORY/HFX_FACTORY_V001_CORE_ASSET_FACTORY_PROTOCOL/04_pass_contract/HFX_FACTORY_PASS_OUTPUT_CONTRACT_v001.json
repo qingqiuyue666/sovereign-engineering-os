@@ -1,0 +1,29 @@
+{
+  "status": "HFX_FACTORY_PASS_OUTPUT_CONTRACT_V001_READY",
+  "required_passes": [
+    "beauty",
+    "emission",
+    "alpha",
+    "zdepth",
+    "distortion_vector",
+    "dust",
+    "smoke",
+    "fire",
+    "debris",
+    "contact_shadow",
+    "lightwrap",
+    "holdout",
+    "matte",
+    "metadata"
+  ],
+  "pass_policy": {
+    "single_flat_beauty_only_forbidden": true,
+    "metadata_required": true,
+    "zdepth_required_for_final_candidate": true,
+    "alpha_or_holdout_required_for_subject_integration": true,
+    "distortion_vector_required_for_heat_portal_space_fx": true,
+    "contact_shadow_required_for_grounded_fx": true,
+    "emission_required_for_energy_magic_portal_fx": true,
+    "comp_handoff_required": true
+  }
+}
