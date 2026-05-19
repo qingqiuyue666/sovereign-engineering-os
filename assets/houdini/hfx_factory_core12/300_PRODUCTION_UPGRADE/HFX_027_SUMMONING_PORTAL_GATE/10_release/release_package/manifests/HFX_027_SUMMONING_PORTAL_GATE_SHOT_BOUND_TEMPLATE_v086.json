@@ -1,0 +1,20 @@
+{
+  "status": "HFX_027_SHOT_BOUND_TEMPLATE_V086_READY",
+  "asset_id": "HFX_027",
+  "asset_name": "Summoning Portal Gate",
+  "required_binding_fields": [
+    "shot_id",
+    "take_id",
+    "frame_start",
+    "frame_end",
+    "summon_radius",
+    "glyph_density",
+    "inner_gate_depth",
+    "particle_ascent",
+    "portal_core_link",
+    "glow_link",
+    "contactshadow_link"
+  ],
+  "derive_per_shot": true,
+  "direct_mutation_forbidden": true
+}

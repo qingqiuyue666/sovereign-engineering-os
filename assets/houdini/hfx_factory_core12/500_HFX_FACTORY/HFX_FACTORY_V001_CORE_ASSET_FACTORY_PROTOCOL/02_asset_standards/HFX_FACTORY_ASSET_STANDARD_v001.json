@@ -1,0 +1,46 @@
+{
+  "status": "HFX_FACTORY_ASSET_STANDARD_V001_READY",
+  "factory_name": "Houdini Production FX Factory",
+  "minimum_asset_requirements": {
+    "must_be_hda": true,
+    "must_have_hero_hip": true,
+    "must_have_preview_mid_final_tiers": true,
+    "must_have_parameter_interface": true,
+    "must_have_pass_manifest": true,
+    "must_have_cache_policy": true,
+    "must_have_comp_handoff": true,
+    "must_have_shot_binding_contract": true,
+    "must_have_validation_reports": true,
+    "must_have_release_package": true,
+    "must_have_claim_contract": true,
+    "sealed_source_direct_mutation_forbidden": true
+  },
+  "quality_tiers": {
+    "PREVIEW": {
+      "purpose": "blocking, timing, scale, fast shot layout",
+      "allowed_claim": "preview_only",
+      "not_allowed": [
+        "final_pixel",
+        "delivery",
+        "production_render"
+      ]
+    },
+    "MID": {
+      "purpose": "lookdev, layered support passes, short-form quality testing",
+      "allowed_claim": "mid_lookdev_only",
+      "not_allowed": [
+        "final_pixel",
+        "delivery",
+        "unvalidated_render"
+      ]
+    },
+    "FINAL_CANDIDATE": {
+      "purpose": "production final-candidate structure with pass output and comp handoff",
+      "allowed_claim": "production_final_candidate_asset",
+      "not_allowed": [
+        "public_delivery_without_shot_seal",
+        "real_footage_claim_without_plate_camera_binding"
+      ]
+    }
+  }
+}

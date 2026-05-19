@@ -1,0 +1,24 @@
+{
+  "status": "HFX_FACTORY_FINAL_GLOBAL_SEAL_PASS",
+  "validated": true,
+  "generated": "2026-05-19T21:58:58",
+  "factory_id": "HFX_FACTORY_CORE_12",
+  "asset_count_required": 12,
+  "asset_count_passed": 12,
+  "completed_core_asset_count": 12,
+  "pending_core_asset_count": 0,
+  "all_houdini_fx_top_tier_complete": true,
+  "next_stage": "HFX_FACTORY_FINAL_GLOBAL_SEAL",
+  "pollution": [],
+  "allowed_claims": [
+    "HFX_FACTORY_CORE_12_ASSETS_COMPLETE",
+    "HFX_FACTORY_FINAL_GLOBAL_SEAL_PASS",
+    "HFX_FACTORY_LONG_TERM_REUSABLE_TEMPLATE_SYSTEM_READY"
+  ],
+  "blocked_claims": [
+    "Hollywood final-pixel shot complete",
+    "actual OpenEXR pixels rendered",
+    "actual final comp rendered",
+    "client/public delivery ready"
+  ]
+}

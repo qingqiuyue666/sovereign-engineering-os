@@ -1,0 +1,422 @@
+{
+  "status": "SHOT_PIPELINE_V005_HERO_HIP_DERIVATION_BUILD_PASS",
+  "generated": "2026-05-18T14:39:20",
+  "shot_id": "SHOT_001_TEST_REAL_FX_BINDING",
+  "take_id": "TAKE_A",
+  "hero_hip": "200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING/03_houdini/hero_hip/SHOT_001_TEST_REAL_FX_BINDING_TAKE_A_hero_v005.hip",
+  "assets": [
+    {
+      "asset_id": "HFX_008",
+      "name": "Energy Shockwave",
+      "batch": "B01",
+      "role": "primary_test_fx",
+      "hda_path": "100_RELEASE/HFX_V013_FINAL_SEAL/release_package/hda/qqy_hfx_energy_shockwave_v009C.hda",
+      "result": "PASS",
+      "hda_type": "qqy::hfx_energy_shockwave::9.0",
+      "definition_names": [
+        "qqy::hfx_energy_shockwave::9.0"
+      ],
+      "node_path": "/obj/SHOT_HFX_008_ENERGY_SHOCKWAVE",
+      "cook": {
+        "errors": [],
+        "warnings": []
+      },
+      "multi_frame_cook": [
+        {
+          "frame": 1,
+          "result": "PASS",
+          "errors": [],
+          "warnings": []
+        },
+        {
+          "frame": 12,
+          "result": "PASS",
+          "errors": [],
+          "warnings": []
+        },
+        {
+          "frame": 24,
+          "result": "PASS",
+          "errors": [],
+          "warnings": []
+        },
+        {
+          "frame": 48,
+          "result": "PASS",
+          "errors": [],
+          "warnings": []
+        },
+        {
+          "frame": 72,
+          "result": "PASS",
+          "errors": [],
+          "warnings": []
+        },
+        {
+          "frame": 120,
+          "result": "PASS",
+          "errors": [],
+          "warnings": []
+        }
+      ]
+    },
+    {
+      "asset_id": "HFX_033",
+      "name": "Glow Emission Pass",
+      "batch": "B05",
+      "role": "emission_support_pass",
+      "hda_path": "100_RELEASE/HFX_B05_V012_FINAL_SEAL/release_package/hda/qqy_hfx_glow_emission_pass_b05_v008.hda",
+      "result": "PASS",
+      "hda_type": "qqy::hfx_glow_emission_pass::5.0",
+      "definition_names": [
+        "qqy::hfx_glow_emission_pass::5.0"
+      ],
+      "node_path": "/obj/SHOT_HFX_033_GLOW_EMISSION_PASS",
+      "cook": {
+        "errors": [],
+        "warnings": []
+      },
+      "multi_frame_cook": [
+        {
+          "frame": 1,
+          "result": "PASS",
+          "errors": [],
+          "warnings": []
+        },
+        {
+          "frame": 12,
+          "result": "PASS",
+          "errors": [],
+          "warnings": []
+        },
+        {
+          "frame": 24,
+          "result": "PASS",
+          "errors": [],
+          "warnings": []
+        },
+        {
+          "frame": 48,
+          "result": "PASS",
+          "errors": [],
+          "warnings": []
+        },
+        {
+          "frame": 72,
+          "result": "PASS",
+          "errors": [],
+          "warnings": []
+        },
+        {
+          "frame": 120,
+          "result": "PASS",
+          "errors": [],
+          "warnings": []
+        }
+      ]
+    },
+    {
+      "asset_id": "HFX_034",
+      "name": "ZDepth Fog Pass",
+      "batch": "B05",
+      "role": "depth_support_pass",
+      "hda_path": "100_RELEASE/HFX_B05_V012_FINAL_SEAL/release_package/hda/qqy_hfx_zdepth_fog_pass_b05_v008.hda",
+      "result": "PASS",
+      "hda_type": "qqy::hfx_zdepth_fog_pass::5.0",
+      "definition_names": [
+        "qqy::hfx_zdepth_fog_pass::5.0"
+      ],
+      "node_path": "/obj/SHOT_HFX_034_ZDEPTH_FOG_PASS",
+      "cook": {
+        "errors": [],
+        "warnings": []
+      },
+      "multi_frame_cook": [
+        {
+          "frame": 1,
+          "result": "PASS",
+          "errors": [],
+          "warnings": []
+        },
+        {
+          "frame": 12,
+          "result": "PASS",
+          "errors": [],
+          "warnings": []
+        },
+        {
+          "frame": 24,
+          "result": "PASS",
+          "errors": [],
+          "warnings": []
+        },
+        {
+          "frame": 48,
+          "result": "PASS",
+          "errors": [],
+          "warnings": []
+        },
+        {
+          "frame": 72,
+          "result": "PASS",
+          "errors": [],
+          "warnings": []
+        },
+        {
+          "frame": 120,
+          "result": "PASS",
+          "errors": [],
+          "warnings": []
+        }
+      ]
+    },
+    {
+      "asset_id": "HFX_036",
+      "name": "Alpha Holdout Matte",
+      "batch": "B05",
+      "role": "matte_support_pass",
+      "hda_path": "100_RELEASE/HFX_B05_V012_FINAL_SEAL/release_package/hda/qqy_hfx_alpha_holdout_matte_b05_v008.hda",
+      "result": "PASS",
+      "hda_type": "qqy::hfx_alpha_holdout_matte::5.0",
+      "definition_names": [
+        "qqy::hfx_alpha_holdout_matte::5.0"
+      ],
+      "node_path": "/obj/SHOT_HFX_036_ALPHA_HOLDOUT_MATTE",
+      "cook": {
+        "errors": [],
+        "warnings": []
+      },
+      "multi_frame_cook": [
+        {
+          "frame": 1,
+          "result": "PASS",
+          "errors": [],
+          "warnings": []
+        },
+        {
+          "frame": 12,
+          "result": "PASS",
+          "errors": [],
+          "warnings": []
+        },
+        {
+          "frame": 24,
+          "result": "PASS",
+          "errors": [],
+          "warnings": []
+        },
+        {
+          "frame": 48,
+          "result": "PASS",
+          "errors": [],
+          "warnings": []
+        },
+        {
+          "frame": 72,
+          "result": "PASS",
+          "errors": [],
+          "warnings": []
+        },
+        {
+          "frame": 120,
+          "result": "PASS",
+          "errors": [],
+          "warnings": []
+        }
+      ]
+    },
+    {
+      "asset_id": "HFX_037",
+      "name": "LightWrap Rim Interaction",
+      "batch": "B05",
+      "role": "edge_integration_pass",
+      "hda_path": "100_RELEASE/HFX_B05_V012_FINAL_SEAL/release_package/hda/qqy_hfx_lightwrap_rim_interaction_b05_v008.hda",
+      "result": "PASS",
+      "hda_type": "qqy::hfx_lightwrap_rim_interaction::5.0",
+      "definition_names": [
+        "qqy::hfx_lightwrap_rim_interaction::5.0"
+      ],
+      "node_path": "/obj/SHOT_HFX_037_LIGHTWRAP_RIM",
+      "cook": {
+        "errors": [],
+        "warnings": []
+      },
+      "multi_frame_cook": [
+        {
+          "frame": 1,
+          "result": "PASS",
+          "errors": [],
+          "warnings": []
+        },
+        {
+          "frame": 12,
+          "result": "PASS",
+          "errors": [],
+          "warnings": []
+        },
+        {
+          "frame": 24,
+          "result": "PASS",
+          "errors": [],
+          "warnings": []
+        },
+        {
+          "frame": 48,
+          "result": "PASS",
+          "errors": [],
+          "warnings": []
+        },
+        {
+          "frame": 72,
+          "result": "PASS",
+          "errors": [],
+          "warnings": []
+        },
+        {
+          "frame": 120,
+          "result": "PASS",
+          "errors": [],
+          "warnings": []
+        }
+      ]
+    },
+    {
+      "asset_id": "HFX_038",
+      "name": "ContactShadow Ground Integration",
+      "batch": "B05",
+      "role": "grounding_support_pass",
+      "hda_path": "100_RELEASE/HFX_B05_V012_FINAL_SEAL/release_package/hda/qqy_hfx_contact_shadow_ground_integration_b05_v008.hda",
+      "result": "PASS",
+      "hda_type": "qqy::hfx_contact_shadow_ground_integration::5.0",
+      "definition_names": [
+        "qqy::hfx_contact_shadow_ground_integration::5.0"
+      ],
+      "node_path": "/obj/SHOT_HFX_038_CONTACT_SHADOW",
+      "cook": {
+        "errors": [],
+        "warnings": []
+      },
+      "multi_frame_cook": [
+        {
+          "frame": 1,
+          "result": "PASS",
+          "errors": [],
+          "warnings": []
+        },
+        {
+          "frame": 12,
+          "result": "PASS",
+          "errors": [],
+          "warnings": []
+        },
+        {
+          "frame": 24,
+          "result": "PASS",
+          "errors": [],
+          "warnings": []
+        },
+        {
+          "frame": 48,
+          "result": "PASS",
+          "errors": [],
+          "warnings": []
+        },
+        {
+          "frame": 72,
+          "result": "PASS",
+          "errors": [],
+          "warnings": []
+        },
+        {
+          "frame": 120,
+          "result": "PASS",
+          "errors": [],
+          "warnings": []
+        }
+      ]
+    },
+    {
+      "asset_id": "HFX_040",
+      "name": "Unreal DaVinci AE Handoff Template",
+      "batch": "B05",
+      "role": "handoff_contract",
+      "hda_path": "100_RELEASE/HFX_B05_V012_FINAL_SEAL/release_package/hda/qqy_hfx_unreal_davinci_ae_handoff_template_b05_v008.hda",
+      "result": "PASS",
+      "hda_type": "qqy::hfx_unreal_davinci_ae_handoff_template::5.0",
+      "definition_names": [
+        "qqy::hfx_unreal_davinci_ae_handoff_template::5.0"
+      ],
+      "node_path": "/obj/SHOT_HFX_040_HANDOFF_TEMPLATE",
+      "cook": {
+        "errors": [],
+        "warnings": []
+      },
+      "multi_frame_cook": [
+        {
+          "frame": 1,
+          "result": "PASS",
+          "errors": [],
+          "warnings": []
+        },
+        {
+          "frame": 12,
+          "result": "PASS",
+          "errors": [],
+          "warnings": []
+        },
+        {
+          "frame": 24,
+          "result": "PASS",
+          "errors": [],
+          "warnings": []
+        },
+        {
+          "frame": 48,
+          "result": "PASS",
+          "errors": [],
+          "warnings": []
+        },
+        {
+          "frame": 72,
+          "result": "PASS",
+          "errors": [],
+          "warnings": []
+        },
+        {
+          "frame": 120,
+          "result": "PASS",
+          "errors": [],
+          "warnings": []
+        }
+      ]
+    }
+  ],
+  "files": [
+    {
+      "path": "200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING/03_houdini/hero_hip/SHOT_001_TEST_REAL_FX_BINDING_TAKE_A_hero_v005.hip",
+      "sha256": "a3bdf5bef4f455aa4fa2e6d6b03f5357b48c0c377ce1de1f65f3e42bc2c47f94",
+      "size_bytes": 132208
+    },
+    {
+      "path": "200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING/03_houdini/HERO_HIP_DERIVATION_BUILD_v005.json",
+      "sha256": "bdc2d13ef133ce1714a81996b4065fe5ade49dcab84f7020155e6e8684051b82",
+      "size_bytes": 10052
+    },
+    {
+      "path": "200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING/03_houdini/HERO_HIP_DERIVATION_BUILD_v005.md",
+      "sha256": "c253cc7985b5146937e542cc0f1bfdca0dfe02693c59f5d60ed2ae7741c8a9d8",
+      "size_bytes": 912
+    },
+    {
+      "path": "200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING/07_validation/SHOT_VALIDATION_HERO_HIP_BUILD_v005.md",
+      "sha256": "fac32a73fa036d136b97e8747d1ef14603ddb68c3f4b008d838c2c6f8509a6f0",
+      "size_bytes": 373
+    },
+    {
+      "path": "200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING/08_notes/README_V005_HERO_HIP_BUILD.md",
+      "sha256": "66e9a05e2e1ac3d13f28d160a7b60b4a8eb55efc33037406958296c83436f2fa",
+      "size_bytes": 428
+    }
+  ],
+  "pollution": []
+}

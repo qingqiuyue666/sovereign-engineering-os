@@ -1,0 +1,61 @@
+{
+  "status": "HFX_015_PORTAL_RING_PREVIEW_TIER_SPEC_V004_READY",
+  "asset_id": "HFX_015",
+  "asset_name": "Portal Ring",
+  "asset_class": "portal_ring",
+  "quality_tier": "PREVIEW",
+  "purpose": "Fast portal ring layout, timing, scale, radial composition, rim emission, inner-surface proxy, and placeholder distortion.",
+  "not_allowed_claims": [
+    "MID lookdev complete",
+    "FINAL_CANDIDATE complete",
+    "production render complete",
+    "Hollywood final-pixel portal complete"
+  ],
+  "required_nodes": [
+    "HFX_015_PREVIEW_PORTAL_CORE_v004",
+    "HFX_015_PREVIEW_RIM_EMISSION_v004",
+    "HFX_015_PREVIEW_INNER_SURFACE_PROXY_v004",
+    "HFX_015_PREVIEW_DISTORTION_PROXY_v004",
+    "HFX_015_PREVIEW_METADATA_ANCHOR_v004"
+  ],
+  "required_outputs": [
+    "OUT_PREVIEW_PORTAL_CORE",
+    "OUT_PREVIEW_RIM_EMISSION",
+    "OUT_PREVIEW_INNER_SURFACE_PROXY",
+    "OUT_PREVIEW_DISTORTION_PROXY",
+    "OUT_PREVIEW_METADATA"
+  ],
+  "test_frames": [
+    1,
+    12,
+    24,
+    48,
+    72,
+    120
+  ],
+  "default_parameters": {
+    "portal_radius": 2.25,
+    "ring_thickness": 0.08,
+    "inner_depth": 0.35,
+    "edge_noise": 0.18,
+    "spark_density": 96,
+    "portal_rotation_speed": 0.18,
+    "rim_emission": 1.0,
+    "distortion_amount": 0.35,
+    "alpha_softness": 0.22,
+    "lightwrap_strength": 0.35,
+    "color_primary": [
+      0.2,
+      0.55,
+      1.0
+    ],
+    "color_secondary": [
+      0.95,
+      0.75,
+      0.2
+    ]
+  },
+  "render_export_allowed": false,
+  "delivery_allowed": false,
+  "next_stage": "HFX_FACTORY_V005_HFX015_PORTAL_RING_PREVIEW_TIER_VALIDATION"
+}

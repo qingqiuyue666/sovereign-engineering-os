@@ -1,0 +1,26 @@
+{
+  "status": "HFX_016_BATCH_FINALIZE_V015_TO_V022_PASS",
+  "validated": true,
+  "asset_id": "HFX_016",
+  "asset_name": "Heat Distortion",
+  "completed_stages": [
+    "V015_SOURCE_RESOLUTION",
+    "V016_PREVIEW_BUILD",
+    "V017_PREVIEW_VALIDATION",
+    "V018_MID_BUILD",
+    "V019_MID_VALIDATION",
+    "V020_FINAL_BUILD",
+    "V021_FINAL_VALIDATION",
+    "V022_FINAL_ASSET_SEAL"
+  ],
+  "hfx016_ready_as_long_term_asset": true,
+  "hfx016_ready_as_reusable_heat_distortion_template": true,
+  "release_package": "300_PRODUCTION_UPGRADE/HFX_016_HEAT_DISTORTION/10_release/release_package",
+  "release_hip": "300_PRODUCTION_UPGRADE/HFX_016_HEAT_DISTORTION/10_release/release_package/hip/HFX_016_HEAT_DISTORTION_FINAL_CANDIDATE_v022.hip",
+  "registry_updated": true,
+  "factory_state_updated": true,
+  "next_asset_to_build": "HFX_021",
+  "next_stage": "HFX_FACTORY_V023_HFX021_ADVANCED_PYRO_EXPLOSION_SOURCE_RESOLUTION",
+  "all_houdini_fx_top_tier_complete": false,
+  "pollution": []
+}

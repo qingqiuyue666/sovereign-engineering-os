@@ -1,0 +1,85 @@
+# SHOT_BOUND_HFX008_FINAL_PIXEL_RENDER_V001 Report
+
+Generated: 2026-05-19T15:55:21
+
+Status: SHOT_BOUND_FINAL_PIXEL_RENDER_PACKAGE_RUNNING
+
+## Previous Stage Checks
+
+- PASS: HFX_008 Final Candidate Seal v009
+- PASS: Shot Pipeline v001
+- PASS: Shot Pipeline v002
+- PASS: Shot Pipeline v003
+- PASS: Shot Pipeline v004
+- PASS: Shot Pipeline v005
+
+## Source Asset Checks / Copy
+
+- PASS: copied source final candidate HIP -> `400_SHOT_BOUND_FINAL_PIXEL/HFX008_SHOT001_V001_RENDER_PACKAGE/00_source_asset/HFX_008_ENERGY_SHOCKWAVE_FINAL_TIER_v007.hip`
+- PASS: copied source working HDA -> `400_SHOT_BOUND_FINAL_PIXEL/HFX008_SHOT001_V001_RENDER_PACKAGE/00_source_asset/qqy_hfx_energy_shockwave_v009C.hda`
+- PASS: copied source pass manifest -> `400_SHOT_BOUND_FINAL_PIXEL/HFX008_SHOT001_V001_RENDER_PACKAGE/00_source_asset/HFX_008_FINAL_PASS_MANIFEST_v007.json`
+- PASS: copied source cache policy -> `400_SHOT_BOUND_FINAL_PIXEL/HFX008_SHOT001_V001_RENDER_PACKAGE/00_source_asset/HFX_008_FINAL_CACHE_POLICY_v007.json`
+- PASS: copied source comp handoff -> `400_SHOT_BOUND_FINAL_PIXEL/HFX008_SHOT001_V001_RENDER_PACKAGE/00_source_asset/HFX_008_FINAL_COMP_HANDOFF_v007.json`
+- PASS: copied source v009 package manifest -> `400_SHOT_BOUND_FINAL_PIXEL/HFX008_SHOT001_V001_RENDER_PACKAGE/00_source_asset/HFX_008_FINAL_CANDIDATE_RELEASE_PACKAGE_MANIFEST_v009.json`
+
+## Shot Binding Checks
+
+- PASS: shot_manifest_exists
+- PASS: plate_binding_exists
+- PASS: camera_binding_exists
+- PASS: shot_id_correct
+- PASS: take_id_correct
+- PASS: synthetic_binding_mode
+- PASS: synthetic_plate_declared
+- PASS: synthetic_camera_declared
+- PASS: render_blocked_prior
+- PASS: delivery_blocked_prior
+
+## Shot-Bound HIP Build / Reopen / Cook
+
+- PASS: output exists `OUT_FINAL_SHOCKWAVE_CORE`
+- PASS: output exists `OUT_FINAL_ENERGY_EMISSION_MASK`
+- PASS: output exists `OUT_FINAL_DISTORTION_VECTOR_PROXY`
+- PASS: output exists `OUT_FINAL_DUST_CONTACT_FIELD`
+- PASS: output exists `OUT_FINAL_ZDEPTH_FALLOFF_PROXY`
+- PASS: output exists `OUT_FINAL_CONTACT_SHADOW_MASK`
+- PASS: output exists `OUT_FINAL_METADATA_ANCHOR`
+- PASS: `HFX_008_FINAL_SHOCKWAVE_CORE_v007` six-frame cook all PASS
+- PASS: `HFX_008_FINAL_OUTPUT_CONTRACT_v007` six-frame cook all PASS
+- PASS: `HFX_008_FINAL_ENERGY_EMISSION_MASK_v007` six-frame cook all PASS
+- PASS: `HFX_008_FINAL_DISTORTION_VECTOR_PROXY_v007` six-frame cook all PASS
+- PASS: `HFX_008_FINAL_DUST_CONTACT_FIELD_v007` six-frame cook all PASS
+- PASS: `HFX_008_FINAL_ZDEPTH_FALLOFF_PROXY_v007` six-frame cook all PASS
+- PASS: `HFX_008_FINAL_CONTACT_SHADOW_MASK_v007` six-frame cook all PASS
+- PASS: `HFX_008_FINAL_METADATA_ANCHOR_v007` six-frame cook all PASS
+- PASS: `SHOT_BOUND_METADATA_ANCHOR_v001` six-frame cook all PASS
+- PASS: shot-bound HIP saved `400_SHOT_BOUND_FINAL_PIXEL/HFX008_SHOT001_V001_RENDER_PACKAGE/02_hip/SHOT_001_HFX008_FINAL_PIXEL_RENDER_PACKAGE_v001.hip`
+
+## Generated File Checks
+
+- PASS: `400_SHOT_BOUND_FINAL_PIXEL/HFX008_SHOT001_V001_RENDER_PACKAGE/01_shot_binding/SHOT_001_HFX008_SHOT_BINDING_v001.json`
+- PASS: `400_SHOT_BOUND_FINAL_PIXEL/HFX008_SHOT001_V001_RENDER_PACKAGE/07_manifests/SHOT_001_HFX008_RENDER_PASS_MANIFEST_v001.json`
+- PASS: `400_SHOT_BOUND_FINAL_PIXEL/HFX008_SHOT001_V001_RENDER_PACKAGE/07_manifests/SHOT_001_HFX008_CACHE_POLICY_v001.json`
+- PASS: `400_SHOT_BOUND_FINAL_PIXEL/HFX008_SHOT001_V001_RENDER_PACKAGE/05_comp/SHOT_001_HFX008_COMP_HANDOFF_v001.json`
+- PASS: `400_SHOT_BOUND_FINAL_PIXEL/HFX008_SHOT001_V001_RENDER_PACKAGE/06_validation/SHOT_001_HFX008_RENDER_PACKAGE_VALIDATION_v001.json`
+- PASS: `400_SHOT_BOUND_FINAL_PIXEL/HFX008_SHOT001_V001_RENDER_PACKAGE/06_validation/SHOT_001_HFX008_RENDER_PACKAGE_VALIDATION_v001.md`
+- PASS: `400_SHOT_BOUND_FINAL_PIXEL/HFX008_SHOT001_V001_RENDER_PACKAGE/08_docs/README_SHOT_001_HFX008_FINAL_PIXEL_RENDER_PACKAGE_v001.md`
+
+## Pollution Check
+
+Result: PASS
+No video/archive/macOS metadata pollution found in shot-bound package.
+
+## Summary
+
+- Shot: SHOT_001_TEST_REAL_FX_BINDING
+- Asset: HFX_008 Energy Shockwave
+- Package: shot-bound final-pixel render package v001
+- Render/export: blocked
+- Delivery: blocked
+- Hollywood final-pixel claim: blocked
+- Next: SHOT_BOUND_HFX008_FINAL_PIXEL_RENDER_V002_RENDER_EXECUTION_PREFLIGHT
+
+---
+
+Final Status: SHOT_BOUND_HFX008_FINAL_PIXEL_RENDER_V001_PASS

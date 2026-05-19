@@ -1,0 +1,26 @@
+{
+  "status": "HFX_025_BATCH_FINALIZE_V031_TO_V038_PASS",
+  "validated": true,
+  "asset_id": "HFX_025",
+  "asset_name": "Character Energy Field",
+  "completed_stages": [
+    "V031_SOURCE_RESOLUTION",
+    "V032_PREVIEW_BUILD",
+    "V033_PREVIEW_VALIDATION",
+    "V034_MID_BUILD",
+    "V035_MID_VALIDATION",
+    "V036_FINAL_BUILD",
+    "V037_FINAL_VALIDATION",
+    "V038_FINAL_ASSET_SEAL"
+  ],
+  "hfx025_ready_as_long_term_asset": true,
+  "hfx025_ready_as_reusable_character_energy_template": true,
+  "release_package": "300_PRODUCTION_UPGRADE/HFX_025_CHARACTER_ENERGY_FIELD/10_release/release_package",
+  "release_hip": "300_PRODUCTION_UPGRADE/HFX_025_CHARACTER_ENERGY_FIELD/10_release/release_package/hip/HFX_025_CHARACTER_ENERGY_FIELD_FINAL_CANDIDATE_v038.hip",
+  "registry_updated": true,
+  "factory_state_updated": true,
+  "next_asset_to_build": "HFX_028",
+  "next_stage": "HFX_FACTORY_V039_HFX028_SPACE_RIFT_TEAR_SOURCE_RESOLUTION",
+  "all_houdini_fx_top_tier_complete": false,
+  "pollution": []
+}

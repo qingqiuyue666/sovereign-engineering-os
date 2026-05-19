@@ -1,0 +1,31 @@
+{
+  "status": "HFX_015_PORTAL_RING_PREVIEW_OUTPUT_CONTRACT_VALIDATED_V005_READY",
+  "asset_id": "HFX_015",
+  "asset_name": "Portal Ring",
+  "quality_tier": "PREVIEW",
+  "validated_outputs": [
+    "OUT_PREVIEW_PORTAL_CORE",
+    "OUT_PREVIEW_RIM_EMISSION",
+    "OUT_PREVIEW_INNER_SURFACE_PROXY",
+    "OUT_PREVIEW_DISTORTION_PROXY",
+    "OUT_PREVIEW_METADATA"
+  ],
+  "validated_nodes": [
+    "HFX_015_PREVIEW_PORTAL_CORE_v004",
+    "HFX_015_PREVIEW_RIM_EMISSION_v004",
+    "HFX_015_PREVIEW_INNER_SURFACE_PROXY_v004",
+    "HFX_015_PREVIEW_DISTORTION_PROXY_v004",
+    "HFX_015_PREVIEW_METADATA_ANCHOR_v004"
+  ],
+  "test_frames": [
+    1,
+    12,
+    24,
+    48,
+    72,
+    120
+  ],
+  "render_export_allowed": false,
+  "delivery_allowed": false,
+  "next_stage": "HFX_FACTORY_V006_HFX015_PORTAL_RING_MID_TIER_BUILD"
+}

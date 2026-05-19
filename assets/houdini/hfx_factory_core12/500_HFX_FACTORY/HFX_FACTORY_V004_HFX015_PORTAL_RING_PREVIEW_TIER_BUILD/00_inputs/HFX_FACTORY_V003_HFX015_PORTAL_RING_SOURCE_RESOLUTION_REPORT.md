@@ -1,0 +1,71 @@
+# HFX Factory v003 HFX_015 Portal Ring Source Resolution Report
+
+Generated: 2026-05-19T18:51:28
+
+Status: HFX015_PORTAL_RING_SOURCE_RESOLUTION_RUNNING
+
+## Previous Stage Checks
+
+- PASS: HFX Factory v002 Core 12 Asset Upgrade Matrix
+
+## Input Checks / Copy
+
+- PASS: copied HFX Factory v002 report -> `500_HFX_FACTORY/HFX_FACTORY_V003_HFX015_PORTAL_RING_SOURCE_RESOLUTION/00_inputs/HFX_FACTORY_V002_CORE_12_ASSET_UPGRADE_MATRIX_REPORT.md`
+- PASS: copied HFX Factory state -> `500_HFX_FACTORY/HFX_FACTORY_V003_HFX015_PORTAL_RING_SOURCE_RESOLUTION/00_inputs/HFX_FACTORY_STATE.json`
+- PASS: copied HFX Factory v002 matrix -> `500_HFX_FACTORY/HFX_FACTORY_V003_HFX015_PORTAL_RING_SOURCE_RESOLUTION/00_inputs/HFX_FACTORY_CORE_12_ASSET_UPGRADE_MATRIX_v002.json`
+- PASS: copied HFX_015 v002 factory profile -> `500_HFX_FACTORY/HFX_FACTORY_V003_HFX015_PORTAL_RING_SOURCE_RESOLUTION/00_inputs/HFX_015_portal_ring_FACTORY_PROFILE_v002.json`
+- PASS: copied HFX_008 factory reference -> `500_HFX_FACTORY/HFX_FACTORY_V003_HFX015_PORTAL_RING_SOURCE_RESOLUTION/00_inputs/HFX_FACTORY_REFERENCE_ASSET_HFX008_v011.json`
+
+## Factory State Checks
+
+- PASS: factory_state_v002_ready
+- PASS: next_asset_hfx015
+- PASS: next_stage_v003_hfx015
+- PASS: matrix_v002_ready
+- PASS: hfx015_profile_ready
+- PASS: hfx015_asset_id_correct
+- PASS: hfx015_status_pending
+
+## Contract Checks
+
+- PASS: source_resolution_ready
+- PASS: asset_contract_ready
+- PASS: parameter_contract_ready
+- PASS: pass_contract_ready
+- PASS: quality_tiers_3
+- PASS: parameter_count_gt_25
+- PASS: required_pass_count_gt_10
+- PASS: external_hda_not_required
+- PASS: procedural_factory_build
+- PASS: next_stage_preview_build
+
+## Generated File Checks
+
+- PASS: `500_HFX_FACTORY/HFX_FACTORY_V003_HFX015_PORTAL_RING_SOURCE_RESOLUTION/01_source_resolution/HFX_015_PORTAL_RING_SOURCE_RESOLUTION_v003.json`
+- PASS: `500_HFX_FACTORY/HFX_FACTORY_V003_HFX015_PORTAL_RING_SOURCE_RESOLUTION/02_asset_contract/HFX_015_PORTAL_RING_ASSET_CONTRACT_v003.json`
+- PASS: `500_HFX_FACTORY/HFX_FACTORY_V003_HFX015_PORTAL_RING_SOURCE_RESOLUTION/03_parameter_contract/HFX_015_PORTAL_RING_PARAMETER_CONTRACT_v003.json`
+- PASS: `500_HFX_FACTORY/HFX_FACTORY_V003_HFX015_PORTAL_RING_SOURCE_RESOLUTION/04_pass_contract/HFX_015_PORTAL_RING_PASS_CONTRACT_v003.json`
+- PASS: `500_HFX_FACTORY/HFX_FACTORY_V003_HFX015_PORTAL_RING_SOURCE_RESOLUTION/05_validation/HFX_015_PORTAL_RING_SOURCE_RESOLUTION_VALIDATION_v003.json`
+- PASS: `500_HFX_FACTORY/HFX_FACTORY_V003_HFX015_PORTAL_RING_SOURCE_RESOLUTION/05_validation/HFX_015_PORTAL_RING_SOURCE_RESOLUTION_VALIDATION_v003.md`
+- PASS: `500_HFX_FACTORY/HFX_FACTORY_V003_HFX015_PORTAL_RING_SOURCE_RESOLUTION/07_docs/README_HFX_015_PORTAL_RING_SOURCE_RESOLUTION_v003.md`
+- PASS: `00_INDEX_资产索引/HFX_015_PORTAL_RING_SOURCE_RESOLUTION_v003.json`
+- PASS: `00_INDEX_资产索引/HFX_FACTORY_STATE.json`
+
+## Pollution Check
+
+Result: PASS
+No video/archive/macOS metadata pollution found in HFX_015 source resolution package.
+
+## Summary
+
+- Factory: Houdini Production FX Factory
+- Stage: HFX_FACTORY_V003_HFX015_PORTAL_RING_SOURCE_RESOLUTION
+- Asset: HFX_015 Portal Ring
+- Source strategy: procedural_factory_build
+- Source resolution: PASS
+- Next: HFX_FACTORY_V004_HFX015_PORTAL_RING_PREVIEW_TIER_BUILD
+- All Houdini FX top-tier complete: false
+
+---
+
+Final Status: HFX_FACTORY_V003_HFX015_PORTAL_RING_SOURCE_RESOLUTION_PASS

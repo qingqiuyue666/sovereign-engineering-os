@@ -1,0 +1,20 @@
+{
+  "status": "HFX_008_SHOT_BOUND_TEMPLATE_V008_READY",
+  "asset_id": "HFX_008",
+  "asset_name": "Energy Shockwave",
+  "required_binding_fields": [
+    "shot_id",
+    "take_id",
+    "frame_start",
+    "frame_end",
+    "shockwave_radius",
+    "shockwave_width",
+    "distortion_strength",
+    "glow_intensity",
+    "alpha_strength"
+  ],
+  "derive_per_shot": true,
+  "direct_mutation_forbidden": true,
+  "generated_by": "HFX_008_FINAL_SEAL_MINIMAL_FIX",
+  "generated": "2026-05-19T21:54:06"
+}

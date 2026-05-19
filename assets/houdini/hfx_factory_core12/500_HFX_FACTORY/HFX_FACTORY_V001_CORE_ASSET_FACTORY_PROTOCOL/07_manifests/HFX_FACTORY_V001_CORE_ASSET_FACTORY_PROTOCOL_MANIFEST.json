@@ -1,0 +1,236 @@
+{
+  "status": "HFX_FACTORY_V001_CORE_ASSET_FACTORY_PROTOCOL_PASS",
+  "generated": "2026-05-19T18:21:07",
+  "factory_root": "500_HFX_FACTORY/HFX_FACTORY_V001_CORE_ASSET_FACTORY_PROTOCOL",
+  "files": [
+    {
+      "path": "500_HFX_FACTORY/HFX_FACTORY_V001_CORE_ASSET_FACTORY_PROTOCOL/00_inputs/HFX_FACTORY_REFERENCE_ASSET_HFX008_v011.json",
+      "sha256": "83b2641deb385907f7fda31a07ff01396a12e2924bb874bb9b43cac4534c838a",
+      "size_bytes": 1659
+    },
+    {
+      "path": "500_HFX_FACTORY/HFX_FACTORY_V001_CORE_ASSET_FACTORY_PROTOCOL/00_inputs/HFX_LONG_TERM_ASSET_REGISTRY.json",
+      "sha256": "035e0507ee2d1fcef5e31c9625c8260d42a10d98808e0a850478c47ba9057b5d",
+      "size_bytes": 1972
+    },
+    {
+      "path": "500_HFX_FACTORY/HFX_FACTORY_V001_CORE_ASSET_FACTORY_PROTOCOL/00_inputs/SHOT_BOUND_HFX008_FINAL_PIXEL_RENDER_V011_FINAL_ASSET_SYSTEM_SEAL_REPORT.md",
+      "sha256": "dfbf4c4e7a5daaff88587d814259fc3694164195ba985b3e60fcff865a563497",
+      "size_bytes": 5092
+    },
+    {
+      "path": "500_HFX_FACTORY/HFX_FACTORY_V001_CORE_ASSET_FACTORY_PROTOCOL/02_asset_standards/HFX_FACTORY_ASSET_STANDARD_v001.json",
+      "sha256": "1a3a05fcdc3586e9aa43b74d4dbea0d501c58ef7fdea4b7c070925e347fd00af",
+      "size_bytes": 1431
+    },
+    {
+      "path": "500_HFX_FACTORY/HFX_FACTORY_V001_CORE_ASSET_FACTORY_PROTOCOL/03_parameter_interface/HFX_FACTORY_PARAMETER_INTERFACE_STANDARD_v001.json",
+      "sha256": "4fc4fdc962aad3964c6e4ec4b3936109e4d94184ace0aead39b7abf25dc567c7",
+      "size_bytes": 1369
+    },
+    {
+      "path": "500_HFX_FACTORY/HFX_FACTORY_V001_CORE_ASSET_FACTORY_PROTOCOL/04_pass_contract/HFX_FACTORY_PASS_OUTPUT_CONTRACT_v001.json",
+      "sha256": "afc08305435e9115af3ff15da676bcaca90aec0f701ab497d987fad32b07651a",
+      "size_bytes": 728
+    },
+    {
+      "path": "500_HFX_FACTORY/HFX_FACTORY_V001_CORE_ASSET_FACTORY_PROTOCOL/05_shot_binding_contract/HFX_FACTORY_SHOT_BINDING_CONTRACT_v001.json",
+      "sha256": "6516a68dfe313e9c74f27ff1b7766036b4a4b9499afeb70759949670b9d3ca38",
+      "size_bytes": 908
+    },
+    {
+      "path": "500_HFX_FACTORY/HFX_FACTORY_V001_CORE_ASSET_FACTORY_PROTOCOL/01_protocol/HFX_FACTORY_CORE_ASSET_FACTORY_PROTOCOL_v001.json",
+      "sha256": "56444c5b22e58f8ffd78cd5df2ca37d8efa8ae4c594349927bd3cbb0f196afb9",
+      "size_bytes": 5084
+    },
+    {
+      "path": "00_INDEX_资产索引/HFX_FACTORY_CORE_ASSET_FACTORY_PROTOCOL_v001.json",
+      "sha256": "56444c5b22e58f8ffd78cd5df2ca37d8efa8ae4c594349927bd3cbb0f196afb9",
+      "size_bytes": 5084
+    },
+    {
+      "path": "00_INDEX_资产索引/HFX_FACTORY_STATE.json",
+      "sha256": "9d2b55773640a40f0a293aed88a8175838bf8ddd2921e1953a5e4fca89b7b4ee",
+      "size_bytes": 606
+    },
+    {
+      "path": "500_HFX_FACTORY/HFX_FACTORY_V001_CORE_ASSET_FACTORY_PROTOCOL/06_validation/HFX_FACTORY_V001_CORE_ASSET_FACTORY_PROTOCOL_VALIDATION.json",
+      "sha256": "23b1f364df4c9d07848b425c5c92c6811e87a95e8c6f4fafc16fee5e3500915e",
+      "size_bytes": 477
+    },
+    {
+      "path": "500_HFX_FACTORY/HFX_FACTORY_V001_CORE_ASSET_FACTORY_PROTOCOL/06_validation/HFX_FACTORY_V001_CORE_ASSET_FACTORY_PROTOCOL_VALIDATION.md",
+      "sha256": "a9cf3486f569a606f83b0579e9eb556bffbc6577463671ee5fd9ed3969fba8f9",
+      "size_bytes": 799
+    },
+    {
+      "path": "500_HFX_FACTORY/HFX_FACTORY_V001_CORE_ASSET_FACTORY_PROTOCOL/08_docs/README_HFX_FACTORY_V001_CORE_ASSET_FACTORY_PROTOCOL.md",
+      "sha256": "71532f9ad6efc1356cc2f853d5bf2d7c4df3c70599e0c25ddd5db24ca0aa8353",
+      "size_bytes": 520
+    },
+    {
+      "path": "500_HFX_FACTORY/HFX_FACTORY_V001_CORE_ASSET_FACTORY_PROTOCOL/07_manifests/HFX_FACTORY_V001_CORE_ASSET_FACTORY_PROTOCOL_MANIFEST.json",
+      "sha256": "4dc200cd648444089e6c41853a43974810e035d611f587c653078c068d36c42e",
+      "size_bytes": 8010
+    }
+  ],
+  "previous_checks": [
+    {
+      "label": "HFX_008 Final Asset System Seal v011",
+      "file": "SHOT_BOUND_HFX008_FINAL_PIXEL_RENDER_V011_FINAL_ASSET_SYSTEM_SEAL_REPORT.md",
+      "marker": "Final Status: SHOT_BOUND_HFX008_FINAL_PIXEL_RENDER_V011_FINAL_ASSET_SYSTEM_SEAL_PASS",
+      "result": "PASS"
+    }
+  ],
+  "input_checks": [
+    {
+      "label": "HFX_008 factory reference template",
+      "source": "00_INDEX_资产索引/HFX_FACTORY_REFERENCE_ASSET_HFX008_v011.json",
+      "result": "PASS",
+      "copied_path": "500_HFX_FACTORY/HFX_FACTORY_V001_CORE_ASSET_FACTORY_PROTOCOL/00_inputs/HFX_FACTORY_REFERENCE_ASSET_HFX008_v011.json",
+      "sha256": "83b2641deb385907f7fda31a07ff01396a12e2924bb874bb9b43cac4534c838a",
+      "size_bytes": 1659
+    },
+    {
+      "label": "HFX long-term asset registry",
+      "source": "00_INDEX_资产索引/HFX_LONG_TERM_ASSET_REGISTRY.json",
+      "result": "PASS",
+      "copied_path": "500_HFX_FACTORY/HFX_FACTORY_V001_CORE_ASSET_FACTORY_PROTOCOL/00_inputs/HFX_LONG_TERM_ASSET_REGISTRY.json",
+      "sha256": "035e0507ee2d1fcef5e31c9625c8260d42a10d98808e0a850478c47ba9057b5d",
+      "size_bytes": 1972
+    },
+    {
+      "label": "HFX_008 V011 seal report",
+      "source": "00_INDEX_资产索引/SHOT_BOUND_HFX008_FINAL_PIXEL_RENDER_V011_FINAL_ASSET_SYSTEM_SEAL_REPORT.md",
+      "result": "PASS",
+      "copied_path": "500_HFX_FACTORY/HFX_FACTORY_V001_CORE_ASSET_FACTORY_PROTOCOL/00_inputs/SHOT_BOUND_HFX008_FINAL_PIXEL_RENDER_V011_FINAL_ASSET_SYSTEM_SEAL_REPORT.md",
+      "sha256": "dfbf4c4e7a5daaff88587d814259fc3694164195ba985b3e60fcff865a563497",
+      "size_bytes": 5092
+    }
+  ],
+  "protocol_checks": [
+    {
+      "check": "hfx008_registry_verified",
+      "result": "PASS"
+    },
+    {
+      "check": "core_asset_count_12",
+      "result": "PASS"
+    },
+    {
+      "check": "completed_core_asset_count_1",
+      "result": "PASS"
+    },
+    {
+      "check": "pending_core_asset_count_11",
+      "result": "PASS"
+    },
+    {
+      "check": "factory_stage_count_19",
+      "result": "PASS"
+    },
+    {
+      "check": "required_parameter_count_gt_30",
+      "result": "PASS"
+    },
+    {
+      "check": "required_pass_count_14",
+      "result": "PASS"
+    },
+    {
+      "check": "sealed_source_mutation_forbidden",
+      "result": "PASS"
+    },
+    {
+      "check": "node_rebuild_for_variation_forbidden",
+      "result": "PASS"
+    },
+    {
+      "check": "single_flat_beauty_forbidden",
+      "result": "PASS"
+    },
+    {
+      "check": "shot_binding_required",
+      "result": "PASS"
+    },
+    {
+      "check": "next_stage_v002_matrix",
+      "result": "PASS"
+    }
+  ],
+  "asset_checks": [
+    {
+      "asset_id": "HFX_008",
+      "asset_name": "Energy Shockwave",
+      "status": "REFERENCE_COMPLETE",
+      "result": "PASS"
+    },
+    {
+      "asset_id": "HFX_015",
+      "asset_name": "Portal Ring",
+      "status": "PENDING_FACTORY_UPGRADE",
+      "result": "PASS"
+    },
+    {
+      "asset_id": "HFX_016",
+      "asset_name": "Heat Distortion",
+      "status": "PENDING_FACTORY_UPGRADE",
+      "result": "PASS"
+    },
+    {
+      "asset_id": "HFX_021",
+      "asset_name": "Advanced Pyro Explosion",
+      "status": "PENDING_FACTORY_UPGRADE",
+      "result": "PASS"
+    },
+    {
+      "asset_id": "HFX_025",
+      "asset_name": "Character Energy Field",
+      "status": "PENDING_FACTORY_UPGRADE",
+      "result": "PASS"
+    },
+    {
+      "asset_id": "HFX_028",
+      "asset_name": "Space Rift Tear",
+      "status": "PENDING_FACTORY_UPGRADE",
+      "result": "PASS"
+    },
+    {
+      "asset_id": "HFX_033",
+      "asset_name": "Glow Emission Pass",
+      "status": "PENDING_FACTORY_UPGRADE",
+      "result": "PASS"
+    },
+    {
+      "asset_id": "HFX_036",
+      "asset_name": "Alpha Holdout Matte",
+      "status": "PENDING_FACTORY_UPGRADE",
+      "result": "PASS"
+    },
+    {
+      "asset_id": "HFX_037",
+      "asset_name": "LightWrap Rim Interaction",
+      "status": "PENDING_FACTORY_UPGRADE",
+      "result": "PASS"
+    },
+    {
+      "asset_id": "HFX_038",
+      "asset_name": "ContactShadow Ground Integration",
+      "status": "PENDING_FACTORY_UPGRADE",
+      "result": "PASS"
+    },
+    {
+      "asset_id": "HFX_027",
+      "asset_name": "Summoning Portal Gate",
+      "status": "PENDING_FACTORY_UPGRADE",
+      "result": "PASS"
+    },
+    {
+      "asset_id": "HFX_029",
+      "asset_name": "Black Hole Accretion Disk",
+      "status": "PENDING_FACTORY_UPGRADE",
+      "result": "PASS"
+    }
+  ],
+  "pollution": []
+}

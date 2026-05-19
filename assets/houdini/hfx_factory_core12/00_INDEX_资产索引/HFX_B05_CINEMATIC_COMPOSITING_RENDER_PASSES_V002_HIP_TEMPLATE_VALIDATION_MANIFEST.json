@@ -1,0 +1,55 @@
+{
+  "status": "HFX_B05_CINEMATIC_COMPOSITING_RENDER_PASSES_V002_HIP_TEMPLATE_VALIDATION_PASS",
+  "generated": "2026-05-17T22:55:19",
+  "assets": [
+    {
+      "asset": "HFX_033_Glow_Emission_Pass",
+      "hip": "26_发光通道_能量Emission/HFX_033_Glow_Emission_Pass/01_hip/HFX_033_Glow_Emission_Pass_v002.hip",
+      "result": "PASS",
+      "missing_nodes": []
+    },
+    {
+      "asset": "HFX_034_ZDepth_Fog_Pass",
+      "hip": "27_深度雾_ZDepth/HFX_034_ZDepth_Fog_Pass/01_hip/HFX_034_ZDepth_Fog_Pass_v002.hip",
+      "result": "PASS",
+      "missing_nodes": []
+    },
+    {
+      "asset": "HFX_035_Distortion_Heat_Shockwave_Mask",
+      "hip": "28_热浪扭曲_冲击波Mask/HFX_035_Distortion_Heat_Shockwave_Mask/01_hip/HFX_035_Distortion_Heat_Shockwave_Mask_v002.hip",
+      "result": "PASS",
+      "missing_nodes": []
+    },
+    {
+      "asset": "HFX_036_Alpha_Holdout_Matte",
+      "hip": "29_Alpha遮挡_HoldoutMatte/HFX_036_Alpha_Holdout_Matte/01_hip/HFX_036_Alpha_Holdout_Matte_v002.hip",
+      "result": "PASS",
+      "missing_nodes": []
+    },
+    {
+      "asset": "HFX_037_LightWrap_Rim_Interaction",
+      "hip": "30_边缘光_LightWrap融合/HFX_037_LightWrap_Rim_Interaction/01_hip/HFX_037_LightWrap_Rim_Interaction_v002.hip",
+      "result": "PASS",
+      "missing_nodes": []
+    },
+    {
+      "asset": "HFX_038_ContactShadow_Ground_Integration",
+      "hip": "31_接触阴影_地面融合/HFX_038_ContactShadow_Ground_Integration/01_hip/HFX_038_ContactShadow_Ground_Integration_v002.hip",
+      "result": "PASS",
+      "missing_nodes": []
+    },
+    {
+      "asset": "HFX_039_LensDirt_BloomStreak_Proxy",
+      "hip": "32_镜头脏污_BloomStreak/HFX_039_LensDirt_BloomStreak_Proxy/01_hip/HFX_039_LensDirt_BloomStreak_Proxy_v002.hip",
+      "result": "PASS",
+      "missing_nodes": []
+    },
+    {
+      "asset": "HFX_040_Unreal_DaVinci_AE_Handoff_Template",
+      "hip": "33_交付模板_Unreal_DaVinci_AE/HFX_040_Unreal_DaVinci_AE_Handoff_Template/01_hip/HFX_040_Unreal_DaVinci_AE_Handoff_Template_v002.hip",
+      "result": "PASS",
+      "missing_nodes": []
+    }
+  ],
+  "pollution": []
+}

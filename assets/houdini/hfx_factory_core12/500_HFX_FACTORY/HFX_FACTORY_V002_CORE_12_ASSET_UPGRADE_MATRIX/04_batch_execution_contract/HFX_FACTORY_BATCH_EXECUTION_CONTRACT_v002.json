@@ -1,0 +1,28 @@
+{
+  "status": "HFX_FACTORY_BATCH_EXECUTION_CONTRACT_V002_READY",
+  "batch_policy": {
+    "one_asset_at_a_time": true,
+    "full_lifecycle_required_per_asset": true,
+    "source_resolution_before_build": true,
+    "preview_mid_final_required": true,
+    "validation_required_before_next_asset": true,
+    "release_package_required": true,
+    "claim_contract_required": true,
+    "global_registry_update_required": true,
+    "silent_failure_forbidden": true,
+    "pollution_check_required": true
+  },
+  "minimum_done_definition_per_asset": [
+    "source resolved",
+    "HDA or working HIP identified",
+    "PREVIEW tier built and validated",
+    "MID tier built and validated",
+    "FINAL_CANDIDATE tier built and validated",
+    "release package sealed",
+    "factory registry updated",
+    "claim contract generated",
+    "next-shot reuse contract generated"
+  ],
+  "next_asset": "HFX_015",
+  "next_stage": "HFX_FACTORY_V003_HFX015_PORTAL_RING_SOURCE_RESOLUTION"
+}

@@ -1,0 +1,142 @@
+{
+  "status": "HFX_B05_CINEMATIC_COMPOSITING_RENDER_PASSES_V003_TRIGGER_ANIMATION_PASS",
+  "generated": "2026-05-17T22:59:26",
+  "assets": [
+    {
+      "asset": "HFX_033_Glow_Emission_Pass",
+      "rel": "26_发光通道_能量Emission/HFX_033_Glow_Emission_Pass",
+      "result": "PASS",
+      "trigger_frame": 1,
+      "duration": 120,
+      "safe_mode": "LIGHT_VEX",
+      "main_out": "OUT_GLOW_EMISSION_MAIN",
+      "layers": [
+        "OUT_EMISSION_MASK",
+        "OUT_COLOR_BLEED_MASK",
+        "OUT_BLOOM_SOURCE",
+        "OUT_TRIGGER_METADATA"
+      ],
+      "hip": "26_发光通道_能量Emission/HFX_033_Glow_Emission_Pass/01_hip/HFX_033_Glow_Emission_Pass_v003.hip",
+      "readme_v003": "26_发光通道_能量Emission/HFX_033_Glow_Emission_Pass/05_notes/README_v003.md"
+    },
+    {
+      "asset": "HFX_034_ZDepth_Fog_Pass",
+      "rel": "27_深度雾_ZDepth/HFX_034_ZDepth_Fog_Pass",
+      "result": "PASS",
+      "trigger_frame": 1,
+      "duration": 180,
+      "safe_mode": "LIGHT_VEX",
+      "main_out": "OUT_ZDEPTH_FOG_MAIN",
+      "layers": [
+        "OUT_ZDEPTH_MASK",
+        "OUT_DISTANCE_FOG",
+        "OUT_ATMOSPHERE_LAYER",
+        "OUT_TRIGGER_METADATA"
+      ],
+      "hip": "27_深度雾_ZDepth/HFX_034_ZDepth_Fog_Pass/01_hip/HFX_034_ZDepth_Fog_Pass_v003.hip",
+      "readme_v003": "27_深度雾_ZDepth/HFX_034_ZDepth_Fog_Pass/05_notes/README_v003.md"
+    },
+    {
+      "asset": "HFX_035_Distortion_Heat_Shockwave_Mask",
+      "rel": "28_热浪扭曲_冲击波Mask/HFX_035_Distortion_Heat_Shockwave_Mask",
+      "result": "PASS",
+      "trigger_frame": 8,
+      "duration": 96,
+      "safe_mode": "LIGHT_VEX",
+      "main_out": "OUT_DISTORTION_MAIN",
+      "layers": [
+        "OUT_HEAT_MASK",
+        "OUT_SHOCKWAVE_RING",
+        "OUT_REFRACTION_VECTOR_PROXY",
+        "OUT_TRIGGER_METADATA"
+      ],
+      "hip": "28_热浪扭曲_冲击波Mask/HFX_035_Distortion_Heat_Shockwave_Mask/01_hip/HFX_035_Distortion_Heat_Shockwave_Mask_v003.hip",
+      "readme_v003": "28_热浪扭曲_冲击波Mask/HFX_035_Distortion_Heat_Shockwave_Mask/05_notes/README_v003.md"
+    },
+    {
+      "asset": "HFX_036_Alpha_Holdout_Matte",
+      "rel": "29_Alpha遮挡_HoldoutMatte/HFX_036_Alpha_Holdout_Matte",
+      "result": "PASS",
+      "trigger_frame": 1,
+      "duration": 160,
+      "safe_mode": "LIGHT_VEX",
+      "main_out": "OUT_ALPHA_HOLDOUT_MAIN",
+      "layers": [
+        "OUT_FOREGROUND_MATTE",
+        "OUT_OCCLUSION_MATTE",
+        "OUT_EDGE_MATTE",
+        "OUT_TRIGGER_METADATA"
+      ],
+      "hip": "29_Alpha遮挡_HoldoutMatte/HFX_036_Alpha_Holdout_Matte/01_hip/HFX_036_Alpha_Holdout_Matte_v003.hip",
+      "readme_v003": "29_Alpha遮挡_HoldoutMatte/HFX_036_Alpha_Holdout_Matte/05_notes/README_v003.md"
+    },
+    {
+      "asset": "HFX_037_LightWrap_Rim_Interaction",
+      "rel": "30_边缘光_LightWrap融合/HFX_037_LightWrap_Rim_Interaction",
+      "result": "PASS",
+      "trigger_frame": 1,
+      "duration": 160,
+      "safe_mode": "LIGHT_VEX",
+      "main_out": "OUT_LIGHTWRAP_MAIN",
+      "layers": [
+        "OUT_RIM_MASK",
+        "OUT_EDGE_SPILL",
+        "OUT_BACKLIGHT_INTERACTION",
+        "OUT_TRIGGER_METADATA"
+      ],
+      "hip": "30_边缘光_LightWrap融合/HFX_037_LightWrap_Rim_Interaction/01_hip/HFX_037_LightWrap_Rim_Interaction_v003.hip",
+      "readme_v003": "30_边缘光_LightWrap融合/HFX_037_LightWrap_Rim_Interaction/05_notes/README_v003.md"
+    },
+    {
+      "asset": "HFX_038_ContactShadow_Ground_Integration",
+      "rel": "31_接触阴影_地面融合/HFX_038_ContactShadow_Ground_Integration",
+      "result": "PASS",
+      "trigger_frame": 1,
+      "duration": 160,
+      "safe_mode": "NO_VEX",
+      "main_out": "OUT_CONTACT_SHADOW_MAIN",
+      "layers": [
+        "OUT_GROUND_MATTE",
+        "OUT_FOOT_CONTACT",
+        "OUT_FX_CONTACT_MASK",
+        "OUT_TRIGGER_METADATA"
+      ],
+      "hip": "31_接触阴影_地面融合/HFX_038_ContactShadow_Ground_Integration/01_hip/HFX_038_ContactShadow_Ground_Integration_v003.hip",
+      "readme_v003": "31_接触阴影_地面融合/HFX_038_ContactShadow_Ground_Integration/05_notes/README_v003.md"
+    },
+    {
+      "asset": "HFX_039_LensDirt_BloomStreak_Proxy",
+      "rel": "32_镜头脏污_BloomStreak/HFX_039_LensDirt_BloomStreak_Proxy",
+      "result": "PASS",
+      "trigger_frame": 1,
+      "duration": 160,
+      "safe_mode": "NO_VEX",
+      "main_out": "OUT_LENS_DIRT_MAIN",
+      "layers": [
+        "OUT_BLOOM_STREAK",
+        "OUT_DIRT_MASK",
+        "OUT_FLARE_RESPONSE",
+        "OUT_TRIGGER_METADATA"
+      ],
+      "hip": "32_镜头脏污_BloomStreak/HFX_039_LensDirt_BloomStreak_Proxy/01_hip/HFX_039_LensDirt_BloomStreak_Proxy_v003.hip",
+      "readme_v003": "32_镜头脏污_BloomStreak/HFX_039_LensDirt_BloomStreak_Proxy/05_notes/README_v003.md"
+    },
+    {
+      "asset": "HFX_040_Unreal_DaVinci_AE_Handoff_Template",
+      "rel": "33_交付模板_Unreal_DaVinci_AE/HFX_040_Unreal_DaVinci_AE_Handoff_Template",
+      "result": "PASS",
+      "trigger_frame": 1,
+      "duration": 160,
+      "safe_mode": "LIGHT_VEX",
+      "main_out": "OUT_HANDOFF_PACKAGE_MAIN",
+      "layers": [
+        "OUT_PASS_MANIFEST",
+        "OUT_NAMING_POLICY",
+        "OUT_DELIVERY_CHECKLIST",
+        "OUT_TRIGGER_METADATA"
+      ],
+      "hip": "33_交付模板_Unreal_DaVinci_AE/HFX_040_Unreal_DaVinci_AE_Handoff_Template/01_hip/HFX_040_Unreal_DaVinci_AE_Handoff_Template_v003.hip",
+      "readme_v003": "33_交付模板_Unreal_DaVinci_AE/HFX_040_Unreal_DaVinci_AE_Handoff_Template/05_notes/README_v003.md"
+    }
+  ]
+}

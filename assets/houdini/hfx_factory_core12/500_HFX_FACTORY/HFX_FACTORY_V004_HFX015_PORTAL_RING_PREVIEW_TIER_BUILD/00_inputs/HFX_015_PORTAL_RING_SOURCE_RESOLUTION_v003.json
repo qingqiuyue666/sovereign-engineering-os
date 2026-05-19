@@ -1,0 +1,33 @@
+{
+  "status": "HFX_015_PORTAL_RING_SOURCE_RESOLUTION_V003_READY",
+  "generated": "2026-05-19T18:51:28",
+  "asset_id": "HFX_015",
+  "asset_name": "Portal Ring",
+  "asset_class": "portal_ring",
+  "factory_stage": "source_resolution",
+  "source_strategy": {
+    "source_type": "procedural_factory_build",
+    "external_hda_required_at_this_stage": false,
+    "derived_from_hfx008_reference_pattern": true,
+    "sealed_source_available": false,
+    "reason": "HFX_015 Portal Ring will be generated as a new procedural HDA/HIP asset under the factory protocol, using HFX_008 as lifecycle reference, not as visual source."
+  },
+  "asset_root": "300_PRODUCTION_UPGRADE/HFX_015_PORTAL_RING",
+  "source_root": "300_PRODUCTION_UPGRADE/HFX_015_PORTAL_RING/00_source",
+  "quality_tiers_required": [
+    "PREVIEW",
+    "MID",
+    "FINAL_CANDIDATE"
+  ],
+  "next_required_stage": "HFX_FACTORY_V004_HFX015_PORTAL_RING_PREVIEW_TIER_BUILD",
+  "blocked_claims": [
+    "HFX_015 production asset complete",
+    "HFX_015 final candidate complete",
+    "HFX_015 delivery ready",
+    "Hollywood final-pixel portal complete"
+  ],
+  "allowed_claims": [
+    "HFX_015 source resolution ready",
+    "HFX_015 factory build allowed next"
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "status": "HFX_FACTORY_V003_HFX015_PORTAL_RING_SOURCE_RESOLUTION_VALIDATION_PASS",
+  "validated": true,
+  "asset_id": "HFX_015",
+  "asset_name": "Portal Ring",
+  "asset_class": "portal_ring",
+  "source_resolution_ready": true,
+  "asset_contract_ready": true,
+  "parameter_contract_ready": true,
+  "pass_contract_ready": true,
+  "quality_tiers_required": [
+    "PREVIEW",
+    "MID",
+    "FINAL_CANDIDATE"
+  ],
+  "next_stage": "HFX_FACTORY_V004_HFX015_PORTAL_RING_PREVIEW_TIER_BUILD",
+  "all_houdini_fx_top_tier_complete": false
+}

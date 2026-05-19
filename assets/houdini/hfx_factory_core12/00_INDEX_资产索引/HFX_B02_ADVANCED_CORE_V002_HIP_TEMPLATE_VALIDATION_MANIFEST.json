@@ -1,0 +1,55 @@
+{
+  "status": "HFX_B02_ADVANCED_CORE_V002_HIP_TEMPLATE_VALIDATION_PASS",
+  "generated": "2026-05-17T18:11:03",
+  "assets": [
+    {
+      "asset": "HFX_009_Volumetric_Fog_Bank",
+      "hip": "06_体积雾气_环境烟雾/HFX_009_Volumetric_Fog_Bank/01_hip/HFX_009_Volumetric_Fog_Bank_v002.hip",
+      "result": "PASS",
+      "missing_nodes": []
+    },
+    {
+      "asset": "HFX_010_Smoke_Plume_Column",
+      "hip": "06_体积雾气_环境烟雾/HFX_010_Smoke_Plume_Column/01_hip/HFX_010_Smoke_Plume_Column_v002.hip",
+      "result": "PASS",
+      "missing_nodes": []
+    },
+    {
+      "asset": "HFX_011_Ember_Ash_Field",
+      "hip": "07_粒子火星_灰烬火花/HFX_011_Ember_Ash_Field/01_hip/HFX_011_Ember_Ash_Field_v002.hip",
+      "result": "PASS",
+      "missing_nodes": []
+    },
+    {
+      "asset": "HFX_012_Sparks_Impact_Spray",
+      "hip": "07_粒子火星_灰烬火花/HFX_012_Sparks_Impact_Spray/01_hip/HFX_012_Sparks_Impact_Spray_v002.hip",
+      "result": "PASS",
+      "missing_nodes": []
+    },
+    {
+      "asset": "HFX_013_Debris_Burst_Radial",
+      "hip": "08_碎片爆发_二级破坏/HFX_013_Debris_Burst_Radial/01_hip/HFX_013_Debris_Burst_Radial_v002.hip",
+      "result": "PASS",
+      "missing_nodes": []
+    },
+    {
+      "asset": "HFX_014_Magic_Particle_Aura",
+      "hip": "09_魔法能量_空间场/HFX_014_Magic_Particle_Aura/01_hip/HFX_014_Magic_Particle_Aura_v002.hip",
+      "result": "PASS",
+      "missing_nodes": []
+    },
+    {
+      "asset": "HFX_015_Portal_Ring_Field",
+      "hip": "09_魔法能量_空间场/HFX_015_Portal_Ring_Field/01_hip/HFX_015_Portal_Ring_Field_v002.hip",
+      "result": "PASS",
+      "missing_nodes": []
+    },
+    {
+      "asset": "HFX_016_Heat_Distortion_Field",
+      "hip": "10_热浪扭曲_空气扰动/HFX_016_Heat_Distortion_Field/01_hip/HFX_016_Heat_Distortion_Field_v002.hip",
+      "result": "PASS",
+      "missing_nodes": []
+    }
+  ],
+  "pollution": []
+}

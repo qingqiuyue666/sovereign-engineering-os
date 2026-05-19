@@ -1,0 +1,85 @@
+{
+  "status": "HFX_008_TIER_CONTRACT_V002_READY",
+  "asset_id": "HFX_008",
+  "asset_name": "Energy Shockwave",
+  "source": {
+    "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/00_source/qqy_hfx_energy_shockwave_v009C.hda",
+    "sha256": "5a337ccbca9d15f251d27f1e4776b48f3d89e9239982ccf66d512bf59fe0c2d7",
+    "size_bytes": 32317,
+    "source_original": "100_RELEASE/HFX_V013_FINAL_SEAL/release_package/hda/qqy_hfx_energy_shockwave_v009C.hda",
+    "copy_policy": "working copy only; original sealed release remains immutable"
+  },
+  "sealed_source_policy": {
+    "sealed_release_mutation_forbidden": true,
+    "working_copy_allowed": true,
+    "upgrade_work_root": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE"
+  },
+  "tiers": {
+    "PREVIEW": {
+      "folder": "01_preview",
+      "goal": "fast readable radial shockwave timing and scale proxy",
+      "allowed": [
+        "viewport preview",
+        "low-density proxy",
+        "fast cook",
+        "no final-quality claim"
+      ],
+      "blocked": [
+        "final delivery",
+        "production render claim",
+        "unversioned export overwrite"
+      ],
+      "required_outputs": [
+        "beauty_proxy",
+        "metadata_manifest"
+      ]
+    },
+    "MID": {
+      "folder": "02_mid",
+      "goal": "layered shockwave with dust/heat/rim/emission support and basic comp passes",
+      "allowed": [
+        "medium detail",
+        "shot-local cache",
+        "preview render",
+        "separated support masks"
+      ],
+      "blocked": [
+        "final-pixel claim without FINAL validation"
+      ],
+      "required_outputs": [
+        "beauty_proxy",
+        "emission_mask",
+        "distortion_mask",
+        "zdepth",
+        "contact_shadow",
+        "metadata_manifest"
+      ]
+    },
+    "FINAL": {
+      "folder": "03_final",
+      "goal": "cinematic energy shockwave with layered energy ring, contact dust/debris, distortion vector, glow/emission, z-depth and comp-ready EXR passes",
+      "allowed": [
+        "shot-bound high quality",
+        "versioned cache",
+        "EXR separated passes",
+        "ACES declared comp handoff"
+      ],
+      "blocked": [
+        "missing camera/scale/colorspace",
+        "flattened comp before review",
+        "missing pass manifest",
+        "unversioned cache/export"
+      ],
+      "required_outputs": [
+        "beauty",
+        "emission_mask",
+        "distortion_vector",
+        "zdepth",
+        "contact_shadow",
+        "dust_mask",
+        "metadata_manifest"
+      ]
+    }
+  },
+  "next_stage": "HFX_PRODUCTION_UPGRADE_V003_HFX008_PREVIEW_TIER_BUILD"
+}

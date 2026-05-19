@@ -1,0 +1,29 @@
+{
+  "status": "HFX_008_RENDER_COMP_CONTRACT_V008_READY",
+  "asset_id": "HFX_008",
+  "asset_name": "Energy Shockwave",
+  "required_passes": [
+    "OUT_FINAL_SHOCKWAVE_CORE",
+    "OUT_FINAL_SHOCKWAVE_RING",
+    "OUT_FINAL_DISTORTION_PROXY",
+    "OUT_FINAL_GLOW_PASS",
+    "OUT_FINAL_ALPHA",
+    "OUT_FINAL_METADATA"
+  ],
+  "target_uses": [
+    "energy shockwave",
+    "impact ring",
+    "blast wave",
+    "anime power burst",
+    "superhero impact"
+  ],
+  "dependencies": [
+    "HFX_016",
+    "HFX_033"
+  ],
+  "comfyui_source_of_truth_forbidden": true,
+  "single_flat_beauty_only_forbidden": true,
+  "delivery_allowed": false,
+  "generated_by": "HFX_008_FINAL_SEAL_MINIMAL_FIX",
+  "generated": "2026-05-19T21:54:06"
+}

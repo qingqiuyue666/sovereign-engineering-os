@@ -1,0 +1,437 @@
+{
+  "status": "HFX_FACTORY_V004_HFX015_PORTAL_RING_PREVIEW_TIER_BUILD_PASS",
+  "generated": "2026-05-19T18:55:01",
+  "asset_id": "HFX_015",
+  "asset_name": "Portal Ring",
+  "asset_class": "portal_ring",
+  "v004_root": "500_HFX_FACTORY/HFX_FACTORY_V004_HFX015_PORTAL_RING_PREVIEW_TIER_BUILD",
+  "preview_root": "300_PRODUCTION_UPGRADE/HFX_015_PORTAL_RING/01_preview",
+  "files": [
+    {
+      "path": "500_HFX_FACTORY/HFX_FACTORY_V004_HFX015_PORTAL_RING_PREVIEW_TIER_BUILD/00_inputs/HFX_FACTORY_V003_HFX015_PORTAL_RING_SOURCE_RESOLUTION_REPORT.md",
+      "sha256": "af5aeb1b2d1735c3fed66856a6238b21dbd69ad55b80d3d632b886df0232c45f",
+      "size_bytes": 3373
+    },
+    {
+      "path": "500_HFX_FACTORY/HFX_FACTORY_V004_HFX015_PORTAL_RING_PREVIEW_TIER_BUILD/00_inputs/HFX_015_PORTAL_RING_SOURCE_RESOLUTION_v003.json",
+      "sha256": "08ee523d4b96ec649a2493035658621b26d0be53e07977e8e6a1060f133e5a69",
+      "size_bytes": 1212
+    },
+    {
+      "path": "500_HFX_FACTORY/HFX_FACTORY_V004_HFX015_PORTAL_RING_PREVIEW_TIER_BUILD/00_inputs/HFX_015_PORTAL_RING_ASSET_CONTRACT_v003.json",
+      "sha256": "c90bcee9a64789aa8070fc364f0517029aa41b7714215292169967be71d8954c",
+      "size_bytes": 1707
+    },
+    {
+      "path": "500_HFX_FACTORY/HFX_FACTORY_V004_HFX015_PORTAL_RING_PREVIEW_TIER_BUILD/00_inputs/HFX_015_PORTAL_RING_PARAMETER_CONTRACT_v003.json",
+      "sha256": "3272eea2466227f641c3e3abdfa652bd19f61da922bc9c61921c2ad2544fb360",
+      "size_bytes": 1759
+    },
+    {
+      "path": "500_HFX_FACTORY/HFX_FACTORY_V004_HFX015_PORTAL_RING_PREVIEW_TIER_BUILD/00_inputs/HFX_015_PORTAL_RING_PASS_CONTRACT_v003.json",
+      "sha256": "2c2d99f18597945be0916ca286a6ae3c75535b59599dcb2415315dd2ba5d98b2",
+      "size_bytes": 1153
+    },
+    {
+      "path": "500_HFX_FACTORY/HFX_FACTORY_V004_HFX015_PORTAL_RING_PREVIEW_TIER_BUILD/00_inputs/HFX_FACTORY_STATE.json",
+      "sha256": "cc4287dcf4af1d6f94ae43cf2ef7e108c5f0ff1926eb6047b673baf8011ad170",
+      "size_bytes": 824
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_015_PORTAL_RING/01_preview/hip/HFX_015_PORTAL_RING_PREVIEW_TIER_v004.hip",
+      "sha256": "c956922d15c3e0b1746a0c5f1b1dfca2aa2ccb42efaaf53485811a4b78dbe02e",
+      "size_bytes": 177904
+    },
+    {
+      "path": "500_HFX_FACTORY/HFX_FACTORY_V004_HFX015_PORTAL_RING_PREVIEW_TIER_BUILD/02_preview_hip/HFX_015_PORTAL_RING_PREVIEW_TIER_v004.hip",
+      "sha256": "c956922d15c3e0b1746a0c5f1b1dfca2aa2ccb42efaaf53485811a4b78dbe02e",
+      "size_bytes": 177904
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_015_PORTAL_RING/01_preview/manifests/HFX_015_PORTAL_RING_PREVIEW_TIER_SPEC_v004.json",
+      "sha256": "57301704cdbd97d564a2e7e04e10dc82d0182b61dbc45f5c96ec4d9602f10667",
+      "size_bytes": 1581
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_015_PORTAL_RING/01_preview/docs/HFX_015_PORTAL_RING_PREVIEW_TIER_SPEC_v004.md",
+      "sha256": "975a9d12cd2de1b6d8bd10bc8b69a0e42bf90faf70f140b78db00242ec381f6d",
+      "size_bytes": 841
+    },
+    {
+      "path": "500_HFX_FACTORY/HFX_FACTORY_V004_HFX015_PORTAL_RING_PREVIEW_TIER_BUILD/03_preview_contract/HFX_015_PORTAL_RING_PREVIEW_BUILD_CONTRACT_v004.json",
+      "sha256": "e5721ac70a4346b8e37a7f342d0e594420aad16fb4aec4667f104724167a9790",
+      "size_bytes": 747
+    },
+    {
+      "path": "500_HFX_FACTORY/HFX_FACTORY_V004_HFX015_PORTAL_RING_PREVIEW_TIER_BUILD/01_preview_build/HFX_015_PORTAL_RING_PREVIEW_BUILD_RECORD_v004.json",
+      "sha256": "e768d358fc47f63db5892d2b030869c9e10ee491f3f0a658b857edc04597b1e4",
+      "size_bytes": 4630
+    },
+    {
+      "path": "00_INDEX_资产索引/HFX_015_PORTAL_RING_PREVIEW_TIER_BUILD_v004.json",
+      "sha256": "e768d358fc47f63db5892d2b030869c9e10ee491f3f0a658b857edc04597b1e4",
+      "size_bytes": 4630
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_015_PORTAL_RING/01_preview/validation/HFX_015_PORTAL_RING_PREVIEW_TIER_BUILD_VALIDATION_v004.json",
+      "sha256": "5dea13f595bef34cd8a40bb9aa43acf0e660bdbe701bb52bc6f9829c8dbd1fed",
+      "size_bytes": 447
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_015_PORTAL_RING/01_preview/validation/HFX_015_PORTAL_RING_PREVIEW_TIER_BUILD_VALIDATION_v004.md",
+      "sha256": "2aa3b90d611d1828cc5e6d4802e174289d69bb33020522bccd9e1df2c8563e39",
+      "size_bytes": 684
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_015_PORTAL_RING/01_preview/docs/README_HFX_015_PORTAL_RING_PREVIEW_TIER_v004.md",
+      "sha256": "16b977cfbc9256f98f9d3af77ee9d91848a85d014997808d98376e7794ac51ef",
+      "size_bytes": 367
+    },
+    {
+      "path": "00_INDEX_资产索引/HFX_FACTORY_STATE.json",
+      "sha256": "8b34359239cce4098187f4cbaffe60c09b9a5a247a78d04cc513a7c473493ad0",
+      "size_bytes": 874
+    },
+    {
+      "path": "500_HFX_FACTORY/HFX_FACTORY_V004_HFX015_PORTAL_RING_PREVIEW_TIER_BUILD/05_manifests/HFX_FACTORY_V004_HFX015_PORTAL_RING_PREVIEW_TIER_BUILD_MANIFEST.json",
+      "sha256": "72b3fd83998db90e137151ae863c6079a9d99fd4dfd4cff37cc0c7fde9f2b5c3",
+      "size_bytes": 13421
+    }
+  ],
+  "previous_checks": [
+    {
+      "label": "HFX Factory v003 HFX_015 Portal Ring Source Resolution",
+      "file": "HFX_FACTORY_V003_HFX015_PORTAL_RING_SOURCE_RESOLUTION_REPORT.md",
+      "marker": "Final Status: HFX_FACTORY_V003_HFX015_PORTAL_RING_SOURCE_RESOLUTION_PASS",
+      "result": "PASS"
+    }
+  ],
+  "input_checks": [
+    {
+      "label": "HFX_015 v003 source resolution report",
+      "source": "00_INDEX_资产索引/HFX_FACTORY_V003_HFX015_PORTAL_RING_SOURCE_RESOLUTION_REPORT.md",
+      "result": "PASS",
+      "copied_path": "500_HFX_FACTORY/HFX_FACTORY_V004_HFX015_PORTAL_RING_PREVIEW_TIER_BUILD/00_inputs/HFX_FACTORY_V003_HFX015_PORTAL_RING_SOURCE_RESOLUTION_REPORT.md",
+      "sha256": "af5aeb1b2d1735c3fed66856a6238b21dbd69ad55b80d3d632b886df0232c45f",
+      "size_bytes": 3373
+    },
+    {
+      "label": "HFX_015 v003 source resolution global record",
+      "source": "00_INDEX_资产索引/HFX_015_PORTAL_RING_SOURCE_RESOLUTION_v003.json",
+      "result": "PASS",
+      "copied_path": "500_HFX_FACTORY/HFX_FACTORY_V004_HFX015_PORTAL_RING_PREVIEW_TIER_BUILD/00_inputs/HFX_015_PORTAL_RING_SOURCE_RESOLUTION_v003.json",
+      "sha256": "08ee523d4b96ec649a2493035658621b26d0be53e07977e8e6a1060f133e5a69",
+      "size_bytes": 1212
+    },
+    {
+      "label": "HFX_015 v003 asset contract",
+      "source": "500_HFX_FACTORY/HFX_FACTORY_V003_HFX015_PORTAL_RING_SOURCE_RESOLUTION/02_asset_contract/HFX_015_PORTAL_RING_ASSET_CONTRACT_v003.json",
+      "result": "PASS",
+      "copied_path": "500_HFX_FACTORY/HFX_FACTORY_V004_HFX015_PORTAL_RING_PREVIEW_TIER_BUILD/00_inputs/HFX_015_PORTAL_RING_ASSET_CONTRACT_v003.json",
+      "sha256": "c90bcee9a64789aa8070fc364f0517029aa41b7714215292169967be71d8954c",
+      "size_bytes": 1707
+    },
+    {
+      "label": "HFX_015 v003 parameter contract",
+      "source": "500_HFX_FACTORY/HFX_FACTORY_V003_HFX015_PORTAL_RING_SOURCE_RESOLUTION/03_parameter_contract/HFX_015_PORTAL_RING_PARAMETER_CONTRACT_v003.json",
+      "result": "PASS",
+      "copied_path": "500_HFX_FACTORY/HFX_FACTORY_V004_HFX015_PORTAL_RING_PREVIEW_TIER_BUILD/00_inputs/HFX_015_PORTAL_RING_PARAMETER_CONTRACT_v003.json",
+      "sha256": "3272eea2466227f641c3e3abdfa652bd19f61da922bc9c61921c2ad2544fb360",
+      "size_bytes": 1759
+    },
+    {
+      "label": "HFX_015 v003 pass contract",
+      "source": "500_HFX_FACTORY/HFX_FACTORY_V003_HFX015_PORTAL_RING_SOURCE_RESOLUTION/04_pass_contract/HFX_015_PORTAL_RING_PASS_CONTRACT_v003.json",
+      "result": "PASS",
+      "copied_path": "500_HFX_FACTORY/HFX_FACTORY_V004_HFX015_PORTAL_RING_PREVIEW_TIER_BUILD/00_inputs/HFX_015_PORTAL_RING_PASS_CONTRACT_v003.json",
+      "sha256": "2c2d99f18597945be0916ca286a6ae3c75535b59599dcb2415315dd2ba5d98b2",
+      "size_bytes": 1153
+    },
+    {
+      "label": "HFX Factory state",
+      "source": "00_INDEX_资产索引/HFX_FACTORY_STATE.json",
+      "result": "PASS",
+      "copied_path": "500_HFX_FACTORY/HFX_FACTORY_V004_HFX015_PORTAL_RING_PREVIEW_TIER_BUILD/00_inputs/HFX_FACTORY_STATE.json",
+      "sha256": "cc4287dcf4af1d6f94ae43cf2ef7e108c5f0ff1926eb6047b673baf8011ad170",
+      "size_bytes": 824
+    }
+  ],
+  "contract_checks": [
+    {
+      "check": "source_resolution_ready",
+      "result": "PASS"
+    },
+    {
+      "check": "asset_contract_ready",
+      "result": "PASS"
+    },
+    {
+      "check": "parameter_contract_ready",
+      "result": "PASS"
+    },
+    {
+      "check": "pass_contract_ready",
+      "result": "PASS"
+    },
+    {
+      "check": "factory_state_hfx015_ready",
+      "result": "PASS"
+    },
+    {
+      "check": "factory_state_next_stage_preview",
+      "result": "PASS"
+    }
+  ],
+  "node_checks": [
+    {
+      "node_name": "HFX_015_PREVIEW_PORTAL_CORE_v004",
+      "node_path": "/obj/HFX_015_PREVIEW_PORTAL_CORE_v004",
+      "node_type": "geo",
+      "cook_all_pass": true,
+      "result": "PASS"
+    },
+    {
+      "node_name": "HFX_015_PREVIEW_RIM_EMISSION_v004",
+      "node_path": "/obj/HFX_015_PREVIEW_RIM_EMISSION_v004",
+      "node_type": "geo",
+      "cook_all_pass": true,
+      "result": "PASS"
+    },
+    {
+      "node_name": "HFX_015_PREVIEW_INNER_SURFACE_PROXY_v004",
+      "node_path": "/obj/HFX_015_PREVIEW_INNER_SURFACE_PROXY_v004",
+      "node_type": "geo",
+      "cook_all_pass": true,
+      "result": "PASS"
+    },
+    {
+      "node_name": "HFX_015_PREVIEW_DISTORTION_PROXY_v004",
+      "node_path": "/obj/HFX_015_PREVIEW_DISTORTION_PROXY_v004",
+      "node_type": "geo",
+      "cook_all_pass": true,
+      "result": "PASS"
+    },
+    {
+      "node_name": "HFX_015_PREVIEW_METADATA_ANCHOR_v004",
+      "node_path": "/obj/HFX_015_PREVIEW_METADATA_ANCHOR_v004",
+      "node_type": "geo",
+      "cook_all_pass": true,
+      "result": "PASS"
+    }
+  ],
+  "cook_results": {
+    "HFX_015_PREVIEW_PORTAL_CORE_v004": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "HFX_015_PREVIEW_RIM_EMISSION_v004": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "HFX_015_PREVIEW_INNER_SURFACE_PROXY_v004": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "HFX_015_PREVIEW_DISTORTION_PROXY_v004": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "HFX_015_PREVIEW_METADATA_ANCHOR_v004": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ]
+  },
+  "output_checks": [
+    {
+      "output": "OUT_PREVIEW_PORTAL_CORE",
+      "result": "PASS"
+    },
+    {
+      "output": "OUT_PREVIEW_RIM_EMISSION",
+      "result": "PASS"
+    },
+    {
+      "output": "OUT_PREVIEW_INNER_SURFACE_PROXY",
+      "result": "PASS"
+    },
+    {
+      "output": "OUT_PREVIEW_DISTORTION_PROXY",
+      "result": "PASS"
+    },
+    {
+      "output": "OUT_PREVIEW_METADATA",
+      "result": "PASS"
+    }
+  ],
+  "pollution": []
+}

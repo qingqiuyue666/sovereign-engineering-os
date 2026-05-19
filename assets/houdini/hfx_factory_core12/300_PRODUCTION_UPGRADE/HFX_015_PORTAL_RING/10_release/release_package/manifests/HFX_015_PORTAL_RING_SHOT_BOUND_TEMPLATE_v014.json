@@ -1,0 +1,29 @@
+{
+  "status": "HFX_FACTORY_V011_HFX015_PORTAL_RING_SHOT_BOUND_TEMPLATE_PASS",
+  "asset_id": "HFX_015",
+  "asset_name": "Portal Ring",
+  "template_role": "shot_bound_portal_ring_template",
+  "required_binding_fields": [
+    "shot_id",
+    "take_id",
+    "frame_start",
+    "frame_end",
+    "fps",
+    "plate_mode",
+    "camera_mode",
+    "context_mode",
+    "colorspace",
+    "portal_radius",
+    "portal_position",
+    "portal_orientation",
+    "subject_holdout_enabled",
+    "ground_contact_enabled"
+  ],
+  "allowed_contexts": [
+    "synthetic_test_context",
+    "real_plate_camera_bound_context",
+    "unreal_scene_context",
+    "green_screen_subject_context"
+  ],
+  "next_stage": "HFX_FACTORY_V012_HFX015_PORTAL_RING_RENDER_COMP_CONTRACT"
+}

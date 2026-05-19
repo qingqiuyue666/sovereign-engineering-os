@@ -1,0 +1,79 @@
+{
+  "status": "HFX_B03_DESTRUCTION_CLOTH_FLUID_V008_HDA_PACKAGING_PREFLIGHT_PASS",
+  "generated": "2026-05-17T18:55:42",
+  "assets": [
+    {
+      "asset": "HFX_017_Building_Fracture_Collapse",
+      "rel": "11_大规模破坏_建筑碎裂/HFX_017_Building_Fracture_Collapse",
+      "result": "PASS",
+      "missing": [],
+      "preflight_md": "11_大规模破坏_建筑碎裂/HFX_017_Building_Fracture_Collapse/05_notes/HDA_PACKAGING_PREFLIGHT_v008.md",
+      "preflight_json": "11_大规模破坏_建筑碎裂/HFX_017_Building_Fracture_Collapse/05_notes/HDA_PACKAGING_PREFLIGHT_v008.json",
+      "readme_v008": "11_大规模破坏_建筑碎裂/HFX_017_Building_Fracture_Collapse/05_notes/README_v008.md"
+    },
+    {
+      "asset": "HFX_018_Glass_Shatter_Burst",
+      "rel": "11_大规模破坏_建筑碎裂/HFX_018_Glass_Shatter_Burst",
+      "result": "PASS",
+      "missing": [],
+      "preflight_md": "11_大规模破坏_建筑碎裂/HFX_018_Glass_Shatter_Burst/05_notes/HDA_PACKAGING_PREFLIGHT_v008.md",
+      "preflight_json": "11_大规模破坏_建筑碎裂/HFX_018_Glass_Shatter_Burst/05_notes/HDA_PACKAGING_PREFLIGHT_v008.json",
+      "readme_v008": "11_大规模破坏_建筑碎裂/HFX_018_Glass_Shatter_Burst/05_notes/README_v008.md"
+    },
+    {
+      "asset": "HFX_019_Vellum_Cape_Cloth_Sim",
+      "rel": "12_布料披风_角色动力学/HFX_019_Vellum_Cape_Cloth_Sim",
+      "result": "PASS",
+      "missing": [],
+      "preflight_md": "12_布料披风_角色动力学/HFX_019_Vellum_Cape_Cloth_Sim/05_notes/HDA_PACKAGING_PREFLIGHT_v008.md",
+      "preflight_json": "12_布料披风_角色动力学/HFX_019_Vellum_Cape_Cloth_Sim/05_notes/HDA_PACKAGING_PREFLIGHT_v008.json",
+      "readme_v008": "12_布料披风_角色动力学/HFX_019_Vellum_Cape_Cloth_Sim/05_notes/README_v008.md"
+    },
+    {
+      "asset": "HFX_020_FLIP_Water_Splash",
+      "rel": "13_水体液体_FLIP/HFX_020_FLIP_Water_Splash",
+      "result": "PASS",
+      "missing": [],
+      "preflight_md": "13_水体液体_FLIP/HFX_020_FLIP_Water_Splash/05_notes/HDA_PACKAGING_PREFLIGHT_v008.md",
+      "preflight_json": "13_水体液体_FLIP/HFX_020_FLIP_Water_Splash/05_notes/HDA_PACKAGING_PREFLIGHT_v008.json",
+      "readme_v008": "13_水体液体_FLIP/HFX_020_FLIP_Water_Splash/05_notes/README_v008.md"
+    },
+    {
+      "asset": "HFX_021_Advanced_Pyro_Explosion",
+      "rel": "14_高级爆炸_Pyro/HFX_021_Advanced_Pyro_Explosion",
+      "result": "PASS",
+      "missing": [],
+      "preflight_md": "14_高级爆炸_Pyro/HFX_021_Advanced_Pyro_Explosion/05_notes/HDA_PACKAGING_PREFLIGHT_v008.md",
+      "preflight_json": "14_高级爆炸_Pyro/HFX_021_Advanced_Pyro_Explosion/05_notes/HDA_PACKAGING_PREFLIGHT_v008.json",
+      "readme_v008": "14_高级爆炸_Pyro/HFX_021_Advanced_Pyro_Explosion/05_notes/README_v008.md"
+    },
+    {
+      "asset": "HFX_022_Storm_Cloud_Volume",
+      "rel": "15_风暴云_环境体积/HFX_022_Storm_Cloud_Volume",
+      "result": "PASS",
+      "missing": [],
+      "preflight_md": "15_风暴云_环境体积/HFX_022_Storm_Cloud_Volume/05_notes/HDA_PACKAGING_PREFLIGHT_v008.md",
+      "preflight_json": "15_风暴云_环境体积/HFX_022_Storm_Cloud_Volume/05_notes/HDA_PACKAGING_PREFLIGHT_v008.json",
+      "readme_v008": "15_风暴云_环境体积/HFX_022_Storm_Cloud_Volume/05_notes/README_v008.md"
+    },
+    {
+      "asset": "HFX_023_Ground_Collapse_Sinkhole",
+      "rel": "16_地面塌陷_岩层崩解/HFX_023_Ground_Collapse_Sinkhole",
+      "result": "PASS",
+      "missing": [],
+      "preflight_md": "16_地面塌陷_岩层崩解/HFX_023_Ground_Collapse_Sinkhole/05_notes/HDA_PACKAGING_PREFLIGHT_v008.md",
+      "preflight_json": "16_地面塌陷_岩层崩解/HFX_023_Ground_Collapse_Sinkhole/05_notes/HDA_PACKAGING_PREFLIGHT_v008.json",
+      "readme_v008": "16_地面塌陷_岩层崩解/HFX_023_Ground_Collapse_Sinkhole/05_notes/README_v008.md"
+    },
+    {
+      "asset": "HFX_024_Energy_Shield_Shatter",
+      "rel": "17_能量护盾_屏障破碎/HFX_024_Energy_Shield_Shatter",
+      "result": "PASS",
+      "missing": [],
+      "preflight_md": "17_能量护盾_屏障破碎/HFX_024_Energy_Shield_Shatter/05_notes/HDA_PACKAGING_PREFLIGHT_v008.md",
+      "preflight_json": "17_能量护盾_屏障破碎/HFX_024_Energy_Shield_Shatter/05_notes/HDA_PACKAGING_PREFLIGHT_v008.json",
+      "readme_v008": "17_能量护盾_屏障破碎/HFX_024_Energy_Shield_Shatter/05_notes/README_v008.md"
+    }
+  ],
+  "pollution": []
+}

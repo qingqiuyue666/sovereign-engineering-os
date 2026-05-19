@@ -1,0 +1,26 @@
+{
+  "status": "HFX_028_BATCH_FINALIZE_V039_TO_V046_PASS",
+  "validated": true,
+  "asset_id": "HFX_028",
+  "asset_name": "Space Rift Tear",
+  "completed_stages": [
+    "V039_SOURCE_RESOLUTION",
+    "V040_PREVIEW_BUILD",
+    "V041_PREVIEW_VALIDATION",
+    "V042_MID_BUILD",
+    "V043_MID_VALIDATION",
+    "V044_FINAL_BUILD",
+    "V045_FINAL_VALIDATION",
+    "V046_FINAL_ASSET_SEAL"
+  ],
+  "hfx028_ready_as_long_term_asset": true,
+  "hfx028_ready_as_reusable_space_rift_template": true,
+  "release_package": "300_PRODUCTION_UPGRADE/HFX_028_SPACE_RIFT_TEAR/10_release/release_package",
+  "release_hip": "300_PRODUCTION_UPGRADE/HFX_028_SPACE_RIFT_TEAR/10_release/release_package/hip/HFX_028_SPACE_RIFT_TEAR_FINAL_CANDIDATE_v046.hip",
+  "registry_updated": true,
+  "factory_state_updated": true,
+  "next_asset_to_build": "HFX_033",
+  "next_stage": "HFX_FACTORY_V047_HFX033_GLOW_EMISSION_PASS_SOURCE_RESOLUTION",
+  "all_houdini_fx_top_tier_complete": false,
+  "pollution": []
+}

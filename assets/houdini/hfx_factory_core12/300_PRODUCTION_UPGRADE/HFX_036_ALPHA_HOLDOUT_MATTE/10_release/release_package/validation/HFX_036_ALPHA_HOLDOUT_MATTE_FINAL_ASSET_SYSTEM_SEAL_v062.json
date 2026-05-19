@@ -1,0 +1,15 @@
+{
+  "status": "HFX_FACTORY_V062_HFX036_ALPHA_HOLDOUT_MATTE_FINAL_ASSET_SYSTEM_SEAL_PASS",
+  "asset_id": "HFX_036",
+  "asset_name": "Alpha Holdout Matte",
+  "asset_class": "alpha_holdout",
+  "quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+  "registry_role": "FX_FACTORY_CORE_ASSET",
+  "hfx036_ready_as_long_term_asset": true,
+  "hfx036_ready_as_reusable_alpha_holdout_template": true,
+  "release_package": "300_PRODUCTION_UPGRADE/HFX_036_ALPHA_HOLDOUT_MATTE/10_release/release_package",
+  "release_hip": "300_PRODUCTION_UPGRADE/HFX_036_ALPHA_HOLDOUT_MATTE/10_release/release_package/hip/HFX_036_ALPHA_HOLDOUT_MATTE_FINAL_CANDIDATE_v062.hip",
+  "all_houdini_fx_top_tier_complete": false,
+  "next_asset_to_build": "HFX_037",
+  "next_stage": "HFX_FACTORY_V063_HFX037_LIGHTWRAP_RIM_INTERACTION_SOURCE_RESOLUTION"
+}

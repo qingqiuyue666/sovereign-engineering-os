@@ -1,0 +1,28 @@
+{
+  "status": "HFX_FACTORY_V008_HFX015_PORTAL_RING_FINAL_CANDIDATE_BUILD_PASS",
+  "asset_id": "HFX_015",
+  "asset_name": "Portal Ring",
+  "final_candidate_hip": "300_PRODUCTION_UPGRADE/HFX_015_PORTAL_RING/03_final/hip/HFX_015_PORTAL_RING_FINAL_CANDIDATE_v014.hip",
+  "release_hip": "300_PRODUCTION_UPGRADE/HFX_015_PORTAL_RING/10_release/release_package/hip/HFX_015_PORTAL_RING_FINAL_CANDIDATE_v014.hip",
+  "required_outputs": [
+    "OUT_FINAL_PORTAL_CORE",
+    "OUT_FINAL_RIM_EMISSION",
+    "OUT_FINAL_INNER_SURFACE",
+    "OUT_FINAL_SPARK_FIELD",
+    "OUT_FINAL_DISTORTION_VECTOR",
+    "OUT_FINAL_ALPHA",
+    "OUT_FINAL_ZDEPTH",
+    "OUT_FINAL_LIGHTWRAP",
+    "OUT_FINAL_CONTACT_SHADOW",
+    "OUT_FINAL_METADATA"
+  ],
+  "test_frames": [
+    1,
+    12,
+    24,
+    48,
+    72,
+    120
+  ],
+  "next_stage": "HFX_FACTORY_V009_HFX015_PORTAL_RING_FINAL_CANDIDATE_VALIDATION"
+}

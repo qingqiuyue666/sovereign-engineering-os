@@ -1,0 +1,110 @@
+{
+  "status": "HFX_B02_ADVANCED_CORE_V002_HIP_TEMPLATE_PASS",
+  "generated": "2026-05-17T18:10:58",
+  "assets": [
+    {
+      "asset": "HFX_009_Volumetric_Fog_Bank",
+      "rel": "06_体积雾气_环境烟雾/HFX_009_Volumetric_Fog_Bank",
+      "result": "PASS",
+      "hip": "06_体积雾气_环境烟雾/HFX_009_Volumetric_Fog_Bank/01_hip/HFX_009_Volumetric_Fog_Bank_v002.hip",
+      "readme_v002": "06_体积雾气_环境烟雾/HFX_009_Volumetric_Fog_Bank/05_notes/README_v002.md",
+      "main_out": "OUT_FOG_BANK_MAIN",
+      "layers": [
+        "OUT_DENSITY_ONLY",
+        "OUT_LIGHT_BEAM_MASK",
+        "OUT_DEPTH_FADE_MASK"
+      ]
+    },
+    {
+      "asset": "HFX_010_Smoke_Plume_Column",
+      "rel": "06_体积雾气_环境烟雾/HFX_010_Smoke_Plume_Column",
+      "result": "PASS",
+      "hip": "06_体积雾气_环境烟雾/HFX_010_Smoke_Plume_Column/01_hip/HFX_010_Smoke_Plume_Column_v002.hip",
+      "readme_v002": "06_体积雾气_环境烟雾/HFX_010_Smoke_Plume_Column/05_notes/README_v002.md",
+      "main_out": "OUT_SMOKE_PLUME_MAIN",
+      "layers": [
+        "OUT_DENSITY_ONLY",
+        "OUT_TOP_ROLL",
+        "OUT_BASE_SPREAD"
+      ]
+    },
+    {
+      "asset": "HFX_011_Ember_Ash_Field",
+      "rel": "07_粒子火星_灰烬火花/HFX_011_Ember_Ash_Field",
+      "result": "PASS",
+      "hip": "07_粒子火星_灰烬火花/HFX_011_Ember_Ash_Field/01_hip/HFX_011_Ember_Ash_Field_v002.hip",
+      "readme_v002": "07_粒子火星_灰烬火花/HFX_011_Ember_Ash_Field/05_notes/README_v002.md",
+      "main_out": "OUT_EMBER_ASH_MAIN",
+      "layers": [
+        "OUT_EMBERS_ONLY",
+        "OUT_ASH_ONLY",
+        "OUT_FOREGROUND_LAYER"
+      ]
+    },
+    {
+      "asset": "HFX_012_Sparks_Impact_Spray",
+      "rel": "07_粒子火星_灰烬火花/HFX_012_Sparks_Impact_Spray",
+      "result": "PASS",
+      "hip": "07_粒子火星_灰烬火花/HFX_012_Sparks_Impact_Spray/01_hip/HFX_012_Sparks_Impact_Spray_v002.hip",
+      "readme_v002": "07_粒子火星_灰烬火花/HFX_012_Sparks_Impact_Spray/05_notes/README_v002.md",
+      "main_out": "OUT_SPARKS_MAIN",
+      "layers": [
+        "OUT_HOT_SPARKS",
+        "OUT_TRAILS_ONLY",
+        "OUT_CONTACT_FLASH"
+      ]
+    },
+    {
+      "asset": "HFX_013_Debris_Burst_Radial",
+      "rel": "08_碎片爆发_二级破坏/HFX_013_Debris_Burst_Radial",
+      "result": "PASS",
+      "hip": "08_碎片爆发_二级破坏/HFX_013_Debris_Burst_Radial/01_hip/HFX_013_Debris_Burst_Radial_v002.hip",
+      "readme_v002": "08_碎片爆发_二级破坏/HFX_013_Debris_Burst_Radial/05_notes/README_v002.md",
+      "main_out": "OUT_DEBRIS_BURST_MAIN",
+      "layers": [
+        "OUT_LARGE_DEBRIS",
+        "OUT_SMALL_DEBRIS",
+        "OUT_DUST_PROXY"
+      ]
+    },
+    {
+      "asset": "HFX_014_Magic_Particle_Aura",
+      "rel": "09_魔法能量_空间场/HFX_014_Magic_Particle_Aura",
+      "result": "PASS",
+      "hip": "09_魔法能量_空间场/HFX_014_Magic_Particle_Aura/01_hip/HFX_014_Magic_Particle_Aura_v002.hip",
+      "readme_v002": "09_魔法能量_空间场/HFX_014_Magic_Particle_Aura/05_notes/README_v002.md",
+      "main_out": "OUT_MAGIC_AURA_MAIN",
+      "layers": [
+        "OUT_CORE_PARTICLES",
+        "OUT_ORBITING_PARTICLES",
+        "OUT_GLOW_FIELD"
+      ]
+    },
+    {
+      "asset": "HFX_015_Portal_Ring_Field",
+      "rel": "09_魔法能量_空间场/HFX_015_Portal_Ring_Field",
+      "result": "PASS",
+      "hip": "09_魔法能量_空间场/HFX_015_Portal_Ring_Field/01_hip/HFX_015_Portal_Ring_Field_v002.hip",
+      "readme_v002": "09_魔法能量_空间场/HFX_015_Portal_Ring_Field/05_notes/README_v002.md",
+      "main_out": "OUT_PORTAL_RING_MAIN",
+      "layers": [
+        "OUT_RING_CORE",
+        "OUT_EDGE_SPARKS",
+        "OUT_DISTORTION_MASK"
+      ]
+    },
+    {
+      "asset": "HFX_016_Heat_Distortion_Field",
+      "rel": "10_热浪扭曲_空气扰动/HFX_016_Heat_Distortion_Field",
+      "result": "PASS",
+      "hip": "10_热浪扭曲_空气扰动/HFX_016_Heat_Distortion_Field/01_hip/HFX_016_Heat_Distortion_Field_v002.hip",
+      "readme_v002": "10_热浪扭曲_空气扰动/HFX_016_Heat_Distortion_Field/05_notes/README_v002.md",
+      "main_out": "OUT_HEAT_DISTORTION_MAIN",
+      "layers": [
+        "OUT_VECTOR_FIELD",
+        "OUT_MASK_ONLY",
+        "OUT_NOISE_FIELD"
+      ]
+    }
+  ]
+}

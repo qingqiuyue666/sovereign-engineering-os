@@ -1,0 +1,33 @@
+# HFX_021 Batch Finalize V023 to V030 Report
+
+Generated: 2026-05-19T19:56:58
+
+Status: HFX_021_BATCH_FINALIZE_RUNNING
+
+## Preflight
+
+- PASS: HFX_016 batch report
+- PASS: HFX_016 final seal
+- PASS: Factory state
+- PASS: Factory matrix
+
+## Batch Stage Results
+
+- PASS: V023_SOURCE_RESOLUTION
+- PASS: V024_PREVIEW_BUILD
+- PASS: V025_PREVIEW_VALIDATION
+- PASS: V026_MID_BUILD
+- PASS: V027_MID_VALIDATION
+- PASS: V028_FINAL_BUILD
+- PASS: V029_FINAL_VALIDATION
+- PASS: V030_FINAL_ASSET_SEAL
+
+## Final Summary
+
+- HFX_021 long-term asset: READY
+- Release package: 300_PRODUCTION_UPGRADE/HFX_021_ADVANCED_PYRO_EXPLOSION/10_release/release_package
+- Release HIP: 300_PRODUCTION_UPGRADE/HFX_021_ADVANCED_PYRO_EXPLOSION/10_release/release_package/hip/HFX_021_ADVANCED_PYRO_EXPLOSION_FINAL_CANDIDATE_v030.hip
+- Next asset: HFX_025 Character Energy Field
+- All Houdini FX top-tier complete: false
+
+Final Status: HFX_021_BATCH_FINALIZE_V023_TO_V030_PASS

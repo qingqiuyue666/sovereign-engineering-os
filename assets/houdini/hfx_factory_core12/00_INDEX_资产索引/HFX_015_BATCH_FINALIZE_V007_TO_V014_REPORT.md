@@ -1,0 +1,33 @@
+# HFX_015 Batch Finalize V007 to V014 Report
+
+Generated: 2026-05-19T19:29:04
+
+Status: HFX_015_BATCH_FINALIZE_RUNNING
+
+## Preflight
+
+- PASS: V006 report
+- PASS: V006 global build
+- PASS: MID HIP
+- PASS: Factory state
+
+## Batch Stage Results
+
+- PASS: V007_MID_VALIDATION
+- PASS: V008_FINAL_BUILD
+- PASS: V009_FINAL_VALIDATION
+- PASS: V010_RELEASE_SEAL
+- PASS: V011_SHOT_BOUND_TEMPLATE
+- PASS: V012_RENDER_COMP_CONTRACT
+- PASS: V013_DELIVERY_CANDIDATE
+- PASS: V014_FINAL_ASSET_SEAL
+
+## Final Summary
+
+- HFX_015 long-term asset: READY
+- Release package: 300_PRODUCTION_UPGRADE/HFX_015_PORTAL_RING/10_release/release_package
+- Release HIP: 300_PRODUCTION_UPGRADE/HFX_015_PORTAL_RING/10_release/release_package/hip/HFX_015_PORTAL_RING_FINAL_CANDIDATE_v014.hip
+- Next asset: HFX_016 Heat Distortion
+- All Houdini FX top-tier complete: false
+
+Final Status: HFX_015_BATCH_FINALIZE_V007_TO_V014_PASS

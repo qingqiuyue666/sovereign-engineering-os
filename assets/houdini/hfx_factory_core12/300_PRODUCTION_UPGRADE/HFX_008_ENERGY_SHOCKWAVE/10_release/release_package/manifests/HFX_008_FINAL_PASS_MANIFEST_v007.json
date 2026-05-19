@@ -1,0 +1,28 @@
+{
+  "status": "HFX_008_FINAL_PASS_MANIFEST_V007_READY",
+  "asset_id": "HFX_008",
+  "asset_name": "Energy Shockwave",
+  "tier": "FINAL_CANDIDATE",
+  "required_outputs": [
+    "OUT_FINAL_SHOCKWAVE_CORE",
+    "OUT_FINAL_ENERGY_EMISSION_MASK",
+    "OUT_FINAL_DISTORTION_VECTOR_PROXY",
+    "OUT_FINAL_DUST_CONTACT_FIELD",
+    "OUT_FINAL_ZDEPTH_FALLOFF_PROXY",
+    "OUT_FINAL_CONTACT_SHADOW_MASK",
+    "OUT_FINAL_METADATA_ANCHOR"
+  ],
+  "pass_policy": {
+    "exr_pass_separation_required": true,
+    "beauty_pass_required_later": true,
+    "emission_mask_required": true,
+    "distortion_vector_required": true,
+    "zdepth_required": true,
+    "contact_shadow_required": true,
+    "metadata_manifest_required": true,
+    "flattened_comp_forbidden_before_review": true
+  },
+  "render_export_allowed": false,
+  "delivery_allowed": false,
+  "next_stage": "HFX_PRODUCTION_UPGRADE_V008_HFX008_FINAL_TIER_VALIDATION"
+}

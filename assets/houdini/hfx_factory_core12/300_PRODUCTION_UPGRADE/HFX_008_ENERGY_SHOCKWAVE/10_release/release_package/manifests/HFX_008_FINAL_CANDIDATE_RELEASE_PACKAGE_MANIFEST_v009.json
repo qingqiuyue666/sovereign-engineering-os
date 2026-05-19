@@ -1,0 +1,123 @@
+{
+  "status": "HFX_008_FINAL_CANDIDATE_RELEASE_PACKAGE_V009_READY",
+  "asset_id": "HFX_008",
+  "asset_name": "Energy Shockwave",
+  "asset_claim": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+  "tier": "FINAL_CANDIDATE_SEALED",
+  "package_root": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/10_release/release_package",
+  "included_files": [
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/10_release/release_package/hip/HFX_008_ENERGY_SHOCKWAVE_FINAL_TIER_v007.hip",
+      "sha256": "9493bd2f7de4cfe544d4527fb6b57ab3783e52f424a42c6befde18e505c0ef54",
+      "size_bytes": 392736
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/10_release/release_package/source/qqy_hfx_energy_shockwave_v009C.hda",
+      "sha256": "5a337ccbca9d15f251d27f1e4776b48f3d89e9239982ccf66d512bf59fe0c2d7",
+      "size_bytes": 32317
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/10_release/release_package/docs/HFX_008_FINAL_TIER_SPEC_v007.md",
+      "sha256": "2a1456ae6b06e60414faae8bf0a7d5a80c5a228890ebbc42b65d29032e8e9041",
+      "size_bytes": 1298
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/10_release/release_package/docs/README_HFX_008_FINAL_TIER_v007.md",
+      "sha256": "1b4809ca18d1354fa3dbe7f37160b2aeb146f43d7933108f744dcb7f3e3142bc",
+      "size_bytes": 540
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/10_release/release_package/docs/README_HFX_008_FINAL_TIER_v008_VALIDATED.md",
+      "sha256": "7949b4ba08a6dfece7fc10fe5620a44621f789eb969af29a10bb05b4e20a7eee",
+      "size_bytes": 562
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/10_release/release_package/manifests/HFX_008_FINAL_CACHE_POLICY_v007.json",
+      "sha256": "127b2ce8a41abe7e6dea237a0f49388c835f7f8bf613803bba56ae4436d38587",
+      "size_bytes": 556
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/10_release/release_package/manifests/HFX_008_FINAL_PASS_MANIFEST_v007.json",
+      "sha256": "fcb67ae3f3882b1fede1c9ec7e62f6549dd50fc44f7955451eb08965d8093e2f",
+      "size_bytes": 907
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/10_release/release_package/manifests/HFX_008_FINAL_TIER_SPEC_v007.json",
+      "sha256": "a9e31aea7bfa50f91895a874afd7df5ed3a466fcbed2c05fceeacd07d53170b6",
+      "size_bytes": 7349
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/10_release/release_package/manifests/HFX_PRODUCTION_UPGRADE_V007_HFX008_FINAL_TIER_BUILD_MANIFEST.json",
+      "sha256": "b9c5da81090ac6e3457d7473fcff1d0a996eb7728b357e07df82433f396033d7",
+      "size_bytes": 10309
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/10_release/release_package/manifests/HFX_PRODUCTION_UPGRADE_V008_HFX008_FINAL_TIER_VALIDATION_MANIFEST.json",
+      "sha256": "43ebb3b141ee2e03f96f76da8ae1f32a577ea60f7648232526afe63a44cdfd40",
+      "size_bytes": 18130
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/10_release/release_package/validation/HFX_008_FINAL_TIER_BUILD_VALIDATION_v007.md",
+      "sha256": "a9650146ecaa2d917de4515a07055e25f6eb2b4bb75fdfdc3f720d36919e87d9",
+      "size_bytes": 809
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/10_release/release_package/validation/HFX_008_FINAL_TIER_VALIDATION_v008.json",
+      "sha256": "a40bcb1553877c001fe5530b8e6f87b3507d828408879bf71d1d16567f6b9159",
+      "size_bytes": 7124
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/10_release/release_package/validation/HFX_008_FINAL_TIER_VALIDATION_v008.md",
+      "sha256": "17515db05da7f0e6f2019fb1726cad462f502006d49714cc1dd0179743197507",
+      "size_bytes": 1197
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/10_release/release_package/docs/HFX_008_PREVIEW_TIER_SPEC_v003.md",
+      "sha256": "4fc9c1155e3de4d2d288850b11fa881ecc3545266d6ca1d4f442e9f2aaf33e08",
+      "size_bytes": 846
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/10_release/release_package/validation/HFX_008_PREVIEW_TIER_VALIDATION_v004.md",
+      "sha256": "1c2b269f773207f7993b03ba733873e002cdae8cf1daab7c41b3fe6e75fe2a26",
+      "size_bytes": 700
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/10_release/release_package/docs/HFX_008_MID_TIER_SPEC_v005.md",
+      "sha256": "7419f372cbba8c0909e50bdd4835f81138ba2d9aa3caaf0f447e0636d6f12150",
+      "size_bytes": 1031
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/10_release/release_package/validation/HFX_008_MID_TIER_VALIDATION_v006.md",
+      "sha256": "a270f0065ef894faebc078c933f9da4e7860a861e9cad27a36614339d766e548",
+      "size_bytes": 1124
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/10_release/release_package/manifests/HFX_008_FINAL_COMP_HANDOFF_v007.json",
+      "sha256": "891cda25d2c2c8e58e19aeb36c842bcd1342a6c80173ac7b649fcdeeb02d8a74",
+      "size_bytes": 886
+    }
+  ],
+  "quality_claim_allowed": {
+    "production_final_candidate_asset": true,
+    "hollywood_final_pixel_shot": false,
+    "final_rendered_delivery": false,
+    "client_final_output": false
+  },
+  "blocked_until_real_final_pixel": [
+    "shot_bound_render",
+    "EXR_pass_export",
+    "AE_or_DaVinci_comp",
+    "final_grade",
+    "real_or_approved_synthetic_camera_context",
+    "delivery_validation"
+  ],
+  "policy": {
+    "sealed_source_mutation_forbidden": true,
+    "render_export_blocked_in_seal_stage": true,
+    "delivery_blocked_in_seal_stage": true,
+    "exr_pass_separation_required_for_future_render": true,
+    "flattened_comp_forbidden_before_review": true,
+    "comfyui_post_repair_only": true
+  },
+  "next_stage": "SHOT_BOUND_HFX008_FINAL_PIXEL_RENDER_V001"
+}

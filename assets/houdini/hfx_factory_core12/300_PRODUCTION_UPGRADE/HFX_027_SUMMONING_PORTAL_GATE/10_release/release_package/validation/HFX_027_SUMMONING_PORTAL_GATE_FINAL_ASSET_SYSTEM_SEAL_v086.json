@@ -1,0 +1,15 @@
+{
+  "status": "HFX_FACTORY_V086_HFX027_SUMMONING_PORTAL_GATE_FINAL_ASSET_SYSTEM_SEAL_PASS",
+  "asset_id": "HFX_027",
+  "asset_name": "Summoning Portal Gate",
+  "asset_class": "summoning_portal_gate",
+  "quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+  "registry_role": "FX_FACTORY_CORE_ASSET",
+  "hfx027_ready_as_long_term_asset": true,
+  "hfx027_ready_as_reusable_summoning_portal_template": true,
+  "release_package": "300_PRODUCTION_UPGRADE/HFX_027_SUMMONING_PORTAL_GATE/10_release/release_package",
+  "release_hip": "300_PRODUCTION_UPGRADE/HFX_027_SUMMONING_PORTAL_GATE/10_release/release_package/hip/HFX_027_SUMMONING_PORTAL_GATE_FINAL_CANDIDATE_v086.hip",
+  "all_houdini_fx_top_tier_complete": false,
+  "next_asset_to_build": "HFX_029",
+  "next_stage": "HFX_FACTORY_V087_HFX029_BLACK_HOLE_ACCRETION_DISK_SOURCE_RESOLUTION"
+}

@@ -1,0 +1,79 @@
+{
+  "status": "HFX_B04_CHARACTER_MAGIC_ENVIRONMENT_V009_HDA_PACKAGE_BUILD_PASS",
+  "generated": "2026-05-17T19:21:24",
+  "assets": [
+    {
+      "asset": "HFX_025_Character_Energy_Field",
+      "result": "PASS",
+      "hda": "18_角色能量_周身气场/HFX_025_Character_Energy_Field/03_hda/qqy_hfx_character_energy_field_b04_v009.hda",
+      "hda_type": "qqy::hfx_character_energy_field::4.0",
+      "build_json": "18_角色能量_周身气场/HFX_025_Character_Energy_Field/05_notes/HDA_PACKAGE_BUILD_v009.json",
+      "build_md": "18_角色能量_周身气场/HFX_025_Character_Energy_Field/05_notes/HDA_PACKAGE_BUILD_v009.md",
+      "readme_v009": "18_角色能量_周身气场/HFX_025_Character_Energy_Field/05_notes/README_v009.md"
+    },
+    {
+      "asset": "HFX_026_Ground_Magic_Rune_Circle",
+      "result": "PASS",
+      "hda": "19_魔法阵_地面符文/HFX_026_Ground_Magic_Rune_Circle/03_hda/qqy_hfx_ground_magic_rune_circle_b04_v009.hda",
+      "hda_type": "qqy::hfx_ground_magic_rune_circle::4.0",
+      "build_json": "19_魔法阵_地面符文/HFX_026_Ground_Magic_Rune_Circle/05_notes/HDA_PACKAGE_BUILD_v009.json",
+      "build_md": "19_魔法阵_地面符文/HFX_026_Ground_Magic_Rune_Circle/05_notes/HDA_PACKAGE_BUILD_v009.md",
+      "readme_v009": "19_魔法阵_地面符文/HFX_026_Ground_Magic_Rune_Circle/05_notes/README_v009.md"
+    },
+    {
+      "asset": "HFX_027_Summoning_Portal_Gate",
+      "result": "PASS",
+      "hda": "20_召唤门_传送空间/HFX_027_Summoning_Portal_Gate/03_hda/qqy_hfx_summoning_portal_gate_b04_v009.hda",
+      "hda_type": "qqy::hfx_summoning_portal_gate::4.0",
+      "build_json": "20_召唤门_传送空间/HFX_027_Summoning_Portal_Gate/05_notes/HDA_PACKAGE_BUILD_v009.json",
+      "build_md": "20_召唤门_传送空间/HFX_027_Summoning_Portal_Gate/05_notes/HDA_PACKAGE_BUILD_v009.md",
+      "readme_v009": "20_召唤门_传送空间/HFX_027_Summoning_Portal_Gate/05_notes/README_v009.md"
+    },
+    {
+      "asset": "HFX_028_Space_Rift_Tear",
+      "result": "PASS",
+      "hda": "21_空间裂缝_维度撕裂/HFX_028_Space_Rift_Tear/03_hda/qqy_hfx_space_rift_tear_b04_v009.hda",
+      "hda_type": "qqy::hfx_space_rift_tear::4.0",
+      "build_json": "21_空间裂缝_维度撕裂/HFX_028_Space_Rift_Tear/05_notes/HDA_PACKAGE_BUILD_v009.json",
+      "build_md": "21_空间裂缝_维度撕裂/HFX_028_Space_Rift_Tear/05_notes/HDA_PACKAGE_BUILD_v009.md",
+      "readme_v009": "21_空间裂缝_维度撕裂/HFX_028_Space_Rift_Tear/05_notes/README_v009.md"
+    },
+    {
+      "asset": "HFX_029_Black_Hole_Accretion_Disk",
+      "result": "PASS",
+      "hda": "22_黑洞吸积盘_引力扭曲/HFX_029_Black_Hole_Accretion_Disk/03_hda/qqy_hfx_black_hole_accretion_disk_b04_v009.hda",
+      "hda_type": "qqy::hfx_black_hole_accretion_disk::4.0",
+      "build_json": "22_黑洞吸积盘_引力扭曲/HFX_029_Black_Hole_Accretion_Disk/05_notes/HDA_PACKAGE_BUILD_v009.json",
+      "build_md": "22_黑洞吸积盘_引力扭曲/HFX_029_Black_Hole_Accretion_Disk/05_notes/HDA_PACKAGE_BUILD_v009.md",
+      "readme_v009": "22_黑洞吸积盘_引力扭曲/HFX_029_Black_Hole_Accretion_Disk/05_notes/README_v009.md"
+    },
+    {
+      "asset": "HFX_030_Ice_Freeze_Spread",
+      "result": "PASS",
+      "hda": "23_冰冻蔓延_霜纹扩散/HFX_030_Ice_Freeze_Spread/03_hda/qqy_hfx_ice_freeze_spread_b04_v009.hda",
+      "hda_type": "qqy::hfx_ice_freeze_spread::4.0",
+      "build_json": "23_冰冻蔓延_霜纹扩散/HFX_030_Ice_Freeze_Spread/05_notes/HDA_PACKAGE_BUILD_v009.json",
+      "build_md": "23_冰冻蔓延_霜纹扩散/HFX_030_Ice_Freeze_Spread/05_notes/HDA_PACKAGE_BUILD_v009.md",
+      "readme_v009": "23_冰冻蔓延_霜纹扩散/HFX_030_Ice_Freeze_Spread/05_notes/README_v009.md"
+    },
+    {
+      "asset": "HFX_031_Ground_Fire_Crawl",
+      "result": "PASS",
+      "hda": "24_地火蔓延_火线扩散/HFX_031_Ground_Fire_Crawl/03_hda/qqy_hfx_ground_fire_crawl_b04_v009.hda",
+      "hda_type": "qqy::hfx_ground_fire_crawl::4.0",
+      "build_json": "24_地火蔓延_火线扩散/HFX_031_Ground_Fire_Crawl/05_notes/HDA_PACKAGE_BUILD_v009.json",
+      "build_md": "24_地火蔓延_火线扩散/HFX_031_Ground_Fire_Crawl/05_notes/HDA_PACKAGE_BUILD_v009.md",
+      "readme_v009": "24_地火蔓延_火线扩散/HFX_031_Ground_Fire_Crawl/05_notes/README_v009.md"
+    },
+    {
+      "asset": "HFX_032_EMP_Scan_Wave",
+      "result": "PASS",
+      "hda": "25_电磁脉冲_扫描波/HFX_032_EMP_Scan_Wave/03_hda/qqy_hfx_emp_scan_wave_b04_v009.hda",
+      "hda_type": "qqy::hfx_emp_scan_wave::4.0",
+      "build_json": "25_电磁脉冲_扫描波/HFX_032_EMP_Scan_Wave/05_notes/HDA_PACKAGE_BUILD_v009.json",
+      "build_md": "25_电磁脉冲_扫描波/HFX_032_EMP_Scan_Wave/05_notes/HDA_PACKAGE_BUILD_v009.md",
+      "readme_v009": "25_电磁脉冲_扫描波/HFX_032_EMP_Scan_Wave/05_notes/README_v009.md"
+    }
+  ],
+  "pollution": []
+}

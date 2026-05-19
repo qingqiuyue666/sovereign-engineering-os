@@ -1,0 +1,259 @@
+{
+  "status": "HFX_FACTORY_CORE_12_RELEASE_INDEX_READY",
+  "generated": "2026-05-19T21:58:58",
+  "asset_count": 12,
+  "assets": [
+    {
+      "asset_id": "HFX_008",
+      "asset_name": "Energy Shockwave",
+      "asset_class": "energy_shockwave",
+      "batch_report_exists": true,
+      "batch_report_pass": true,
+      "release_hip_count": 1,
+      "release_hip_exists": true,
+      "final_seal_count": 1,
+      "final_seal_exists": true,
+      "registry_entry_exists": true,
+      "registry_quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+      "registry_role": "FX_FACTORY_CORE_ASSET",
+      "release_hips": [
+        "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/10_release/release_package/hip/HFX_008_ENERGY_SHOCKWAVE_FINAL_TIER_v007.hip"
+      ],
+      "final_seals": [
+        "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/10_release/release_package/validation/HFX_008_ENERGY_SHOCKWAVE_FINAL_ASSET_SYSTEM_SEAL_v008.json"
+      ],
+      "pass": true
+    },
+    {
+      "asset_id": "HFX_015",
+      "asset_name": "Portal Ring",
+      "asset_class": "portal_ring",
+      "batch_report_exists": true,
+      "batch_report_pass": true,
+      "release_hip_count": 1,
+      "release_hip_exists": true,
+      "final_seal_count": 1,
+      "final_seal_exists": true,
+      "registry_entry_exists": true,
+      "registry_quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+      "registry_role": "FX_FACTORY_CORE_ASSET",
+      "release_hips": [
+        "300_PRODUCTION_UPGRADE/HFX_015_PORTAL_RING/10_release/release_package/hip/HFX_015_PORTAL_RING_FINAL_CANDIDATE_v014.hip"
+      ],
+      "final_seals": [
+        "300_PRODUCTION_UPGRADE/HFX_015_PORTAL_RING/10_release/release_package/validation/HFX_015_PORTAL_RING_FINAL_ASSET_SYSTEM_SEAL_v014.json"
+      ],
+      "pass": true
+    },
+    {
+      "asset_id": "HFX_016",
+      "asset_name": "Heat Distortion",
+      "asset_class": "heat_distortion",
+      "batch_report_exists": true,
+      "batch_report_pass": true,
+      "release_hip_count": 1,
+      "release_hip_exists": true,
+      "final_seal_count": 1,
+      "final_seal_exists": true,
+      "registry_entry_exists": true,
+      "registry_quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+      "registry_role": "FX_FACTORY_CORE_ASSET",
+      "release_hips": [
+        "300_PRODUCTION_UPGRADE/HFX_016_HEAT_DISTORTION/10_release/release_package/hip/HFX_016_HEAT_DISTORTION_FINAL_CANDIDATE_v022.hip"
+      ],
+      "final_seals": [
+        "300_PRODUCTION_UPGRADE/HFX_016_HEAT_DISTORTION/10_release/release_package/validation/HFX_016_HEAT_DISTORTION_FINAL_ASSET_SYSTEM_SEAL_v022.json"
+      ],
+      "pass": true
+    },
+    {
+      "asset_id": "HFX_021",
+      "asset_name": "Advanced Pyro Explosion",
+      "asset_class": "pyro_explosion",
+      "batch_report_exists": true,
+      "batch_report_pass": true,
+      "release_hip_count": 1,
+      "release_hip_exists": true,
+      "final_seal_count": 1,
+      "final_seal_exists": true,
+      "registry_entry_exists": true,
+      "registry_quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+      "registry_role": "FX_FACTORY_CORE_ASSET",
+      "release_hips": [
+        "300_PRODUCTION_UPGRADE/HFX_021_ADVANCED_PYRO_EXPLOSION/10_release/release_package/hip/HFX_021_ADVANCED_PYRO_EXPLOSION_FINAL_CANDIDATE_v030.hip"
+      ],
+      "final_seals": [
+        "300_PRODUCTION_UPGRADE/HFX_021_ADVANCED_PYRO_EXPLOSION/10_release/release_package/validation/HFX_021_ADVANCED_PYRO_EXPLOSION_FINAL_ASSET_SYSTEM_SEAL_v030.json"
+      ],
+      "pass": true
+    },
+    {
+      "asset_id": "HFX_025",
+      "asset_name": "Character Energy Field",
+      "asset_class": "character_energy_field",
+      "batch_report_exists": true,
+      "batch_report_pass": true,
+      "release_hip_count": 1,
+      "release_hip_exists": true,
+      "final_seal_count": 1,
+      "final_seal_exists": true,
+      "registry_entry_exists": true,
+      "registry_quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+      "registry_role": "FX_FACTORY_CORE_ASSET",
+      "release_hips": [
+        "300_PRODUCTION_UPGRADE/HFX_025_CHARACTER_ENERGY_FIELD/10_release/release_package/hip/HFX_025_CHARACTER_ENERGY_FIELD_FINAL_CANDIDATE_v038.hip"
+      ],
+      "final_seals": [
+        "300_PRODUCTION_UPGRADE/HFX_025_CHARACTER_ENERGY_FIELD/10_release/release_package/validation/HFX_025_CHARACTER_ENERGY_FIELD_FINAL_ASSET_SYSTEM_SEAL_v038.json"
+      ],
+      "pass": true
+    },
+    {
+      "asset_id": "HFX_028",
+      "asset_name": "Space Rift Tear",
+      "asset_class": "space_rift",
+      "batch_report_exists": true,
+      "batch_report_pass": true,
+      "release_hip_count": 1,
+      "release_hip_exists": true,
+      "final_seal_count": 1,
+      "final_seal_exists": true,
+      "registry_entry_exists": true,
+      "registry_quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+      "registry_role": "FX_FACTORY_CORE_ASSET",
+      "release_hips": [
+        "300_PRODUCTION_UPGRADE/HFX_028_SPACE_RIFT_TEAR/10_release/release_package/hip/HFX_028_SPACE_RIFT_TEAR_FINAL_CANDIDATE_v046.hip"
+      ],
+      "final_seals": [
+        "300_PRODUCTION_UPGRADE/HFX_028_SPACE_RIFT_TEAR/10_release/release_package/validation/HFX_028_SPACE_RIFT_TEAR_FINAL_ASSET_SYSTEM_SEAL_v046.json"
+      ],
+      "pass": true
+    },
+    {
+      "asset_id": "HFX_033",
+      "asset_name": "Glow Emission Pass",
+      "asset_class": "glow_emission",
+      "batch_report_exists": true,
+      "batch_report_pass": true,
+      "release_hip_count": 1,
+      "release_hip_exists": true,
+      "final_seal_count": 1,
+      "final_seal_exists": true,
+      "registry_entry_exists": true,
+      "registry_quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+      "registry_role": "FX_FACTORY_CORE_ASSET",
+      "release_hips": [
+        "300_PRODUCTION_UPGRADE/HFX_033_GLOW_EMISSION_PASS/10_release/release_package/hip/HFX_033_GLOW_EMISSION_PASS_FINAL_CANDIDATE_v054.hip"
+      ],
+      "final_seals": [
+        "300_PRODUCTION_UPGRADE/HFX_033_GLOW_EMISSION_PASS/10_release/release_package/validation/HFX_033_GLOW_EMISSION_PASS_FINAL_ASSET_SYSTEM_SEAL_v054.json"
+      ],
+      "pass": true
+    },
+    {
+      "asset_id": "HFX_036",
+      "asset_name": "Alpha Holdout Matte",
+      "asset_class": "alpha_holdout",
+      "batch_report_exists": true,
+      "batch_report_pass": true,
+      "release_hip_count": 1,
+      "release_hip_exists": true,
+      "final_seal_count": 1,
+      "final_seal_exists": true,
+      "registry_entry_exists": true,
+      "registry_quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+      "registry_role": "FX_FACTORY_CORE_ASSET",
+      "release_hips": [
+        "300_PRODUCTION_UPGRADE/HFX_036_ALPHA_HOLDOUT_MATTE/10_release/release_package/hip/HFX_036_ALPHA_HOLDOUT_MATTE_FINAL_CANDIDATE_v062.hip"
+      ],
+      "final_seals": [
+        "300_PRODUCTION_UPGRADE/HFX_036_ALPHA_HOLDOUT_MATTE/10_release/release_package/validation/HFX_036_ALPHA_HOLDOUT_MATTE_FINAL_ASSET_SYSTEM_SEAL_v062.json"
+      ],
+      "pass": true
+    },
+    {
+      "asset_id": "HFX_037",
+      "asset_name": "LightWrap Rim Interaction",
+      "asset_class": "lightwrap_rim",
+      "batch_report_exists": true,
+      "batch_report_pass": true,
+      "release_hip_count": 1,
+      "release_hip_exists": true,
+      "final_seal_count": 1,
+      "final_seal_exists": true,
+      "registry_entry_exists": true,
+      "registry_quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+      "registry_role": "FX_FACTORY_CORE_ASSET",
+      "release_hips": [
+        "300_PRODUCTION_UPGRADE/HFX_037_LIGHTWRAP_RIM_INTERACTION/10_release/release_package/hip/HFX_037_LIGHTWRAP_RIM_INTERACTION_FINAL_CANDIDATE_v070.hip"
+      ],
+      "final_seals": [
+        "300_PRODUCTION_UPGRADE/HFX_037_LIGHTWRAP_RIM_INTERACTION/10_release/release_package/validation/HFX_037_LIGHTWRAP_RIM_INTERACTION_FINAL_ASSET_SYSTEM_SEAL_v070.json"
+      ],
+      "pass": true
+    },
+    {
+      "asset_id": "HFX_038",
+      "asset_name": "ContactShadow Ground Integration",
+      "asset_class": "contact_shadow",
+      "batch_report_exists": true,
+      "batch_report_pass": true,
+      "release_hip_count": 1,
+      "release_hip_exists": true,
+      "final_seal_count": 1,
+      "final_seal_exists": true,
+      "registry_entry_exists": true,
+      "registry_quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+      "registry_role": "FX_FACTORY_CORE_ASSET",
+      "release_hips": [
+        "300_PRODUCTION_UPGRADE/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION/10_release/release_package/hip/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION_FINAL_CANDIDATE_v078.hip"
+      ],
+      "final_seals": [
+        "300_PRODUCTION_UPGRADE/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION/10_release/release_package/validation/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION_FINAL_ASSET_SYSTEM_SEAL_v078.json"
+      ],
+      "pass": true
+    },
+    {
+      "asset_id": "HFX_027",
+      "asset_name": "Summoning Portal Gate",
+      "asset_class": "summoning_portal_gate",
+      "batch_report_exists": true,
+      "batch_report_pass": true,
+      "release_hip_count": 1,
+      "release_hip_exists": true,
+      "final_seal_count": 1,
+      "final_seal_exists": true,
+      "registry_entry_exists": true,
+      "registry_quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+      "registry_role": "FX_FACTORY_CORE_ASSET",
+      "release_hips": [
+        "300_PRODUCTION_UPGRADE/HFX_027_SUMMONING_PORTAL_GATE/10_release/release_package/hip/HFX_027_SUMMONING_PORTAL_GATE_FINAL_CANDIDATE_v086.hip"
+      ],
+      "final_seals": [
+        "300_PRODUCTION_UPGRADE/HFX_027_SUMMONING_PORTAL_GATE/10_release/release_package/validation/HFX_027_SUMMONING_PORTAL_GATE_FINAL_ASSET_SYSTEM_SEAL_v086.json"
+      ],
+      "pass": true
+    },
+    {
+      "asset_id": "HFX_029",
+      "asset_name": "Black Hole Accretion Disk",
+      "asset_class": "black_hole_accretion_disk",
+      "batch_report_exists": true,
+      "batch_report_pass": true,
+      "release_hip_count": 1,
+      "release_hip_exists": true,
+      "final_seal_count": 1,
+      "final_seal_exists": true,
+      "registry_entry_exists": true,
+      "registry_quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+      "registry_role": "FX_FACTORY_CORE_ASSET",
+      "release_hips": [
+        "300_PRODUCTION_UPGRADE/HFX_029_BLACK_HOLE_ACCRETION_DISK/10_release/release_package/hip/HFX_029_BLACK_HOLE_ACCRETION_DISK_FINAL_CANDIDATE_v094.hip"
+      ],
+      "final_seals": [
+        "300_PRODUCTION_UPGRADE/HFX_029_BLACK_HOLE_ACCRETION_DISK/10_release/release_package/validation/HFX_029_BLACK_HOLE_ACCRETION_DISK_FINAL_ASSET_SYSTEM_SEAL_v094.json"
+      ],
+      "pass": true
+    }
+  ]
+}

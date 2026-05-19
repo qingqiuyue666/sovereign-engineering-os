@@ -1,0 +1,65 @@
+=== 未整理 SORTED_ASSETS 文件夹结构 ===
+../未整理/_SORTED_ASSETS
+../未整理/_SORTED_ASSETS/GEO_CACHE
+../未整理/_SORTED_ASSETS/GEO_CACHE/_NESTED_EXTRACTED
+../未整理/_SORTED_ASSETS/GEO_CACHE/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 03_Week_03
+../未整理/_SORTED_ASSETS/GEO_CACHE/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 03_Week_03/work
+../未整理/_SORTED_ASSETS/GEO_CACHE/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 04_Week_04
+../未整理/_SORTED_ASSETS/GEO_CACHE/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 04_Week_04/Week_04
+../未整理/_SORTED_ASSETS/GEO_CACHE/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 07_Week 07
+../未整理/_SORTED_ASSETS/GEO_CACHE/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 07_Week 07/Week 07
+../未整理/_SORTED_ASSETS/HDA_TOOLS
+../未整理/_SORTED_ASSETS/HDA_TOOLS/_NESTED_EXTRACTED
+../未整理/_SORTED_ASSETS/HDA_TOOLS/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 01_Week_01
+../未整理/_SORTED_ASSETS/HDA_TOOLS/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 01_Week_01/work
+../未整理/_SORTED_ASSETS/HOUDINI_PROJECTS
+../未整理/_SORTED_ASSETS/HOUDINI_PROJECTS/_NESTED_EXTRACTED
+../未整理/_SORTED_ASSETS/HOUDINI_PROJECTS/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 01_Week_01
+../未整理/_SORTED_ASSETS/HOUDINI_PROJECTS/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 01_Week_01/work
+../未整理/_SORTED_ASSETS/HOUDINI_PROJECTS/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 02_Week 02
+../未整理/_SORTED_ASSETS/HOUDINI_PROJECTS/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 02_Week 02/Week 02
+../未整理/_SORTED_ASSETS/HOUDINI_PROJECTS/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 03_Week_03
+../未整理/_SORTED_ASSETS/HOUDINI_PROJECTS/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 03_Week_03/work
+../未整理/_SORTED_ASSETS/HOUDINI_PROJECTS/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 04_Week_04
+../未整理/_SORTED_ASSETS/HOUDINI_PROJECTS/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 04_Week_04/Week_04
+../未整理/_SORTED_ASSETS/HOUDINI_PROJECTS/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 06_Week 06
+../未整理/_SORTED_ASSETS/HOUDINI_PROJECTS/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 06_Week 06/Week 06
+../未整理/_SORTED_ASSETS/HOUDINI_PROJECTS/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 07_Week 07
+../未整理/_SORTED_ASSETS/HOUDINI_PROJECTS/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 07_Week 07/Week 07
+../未整理/_SORTED_ASSETS/MODELS
+../未整理/_SORTED_ASSETS/MODELS/_NESTED_EXTRACTED
+../未整理/_SORTED_ASSETS/MODELS/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 01_Week_01
+../未整理/_SORTED_ASSETS/MODELS/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 01_Week_01/work
+../未整理/_SORTED_ASSETS/MODELS/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 02_Week 02
+../未整理/_SORTED_ASSETS/MODELS/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 02_Week 02/Week 02
+../未整理/_SORTED_ASSETS/MODELS/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 03_Week_03
+../未整理/_SORTED_ASSETS/MODELS/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 03_Week_03/work
+../未整理/_SORTED_ASSETS/MODELS/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 04_Week_04
+../未整理/_SORTED_ASSETS/MODELS/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 04_Week_04/Week_04
+../未整理/_SORTED_ASSETS/MODELS/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 06_Week 06
+../未整理/_SORTED_ASSETS/MODELS/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 06_Week 06/Week 06
+../未整理/_SORTED_ASSETS/OTHER
+../未整理/_SORTED_ASSETS/RENDER_TEXTURE_RAT
+../未整理/_SORTED_ASSETS/RENDER_TEXTURE_RAT/_NESTED_EXTRACTED
+../未整理/_SORTED_ASSETS/RENDER_TEXTURE_RAT/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 01_Week_01
+../未整理/_SORTED_ASSETS/RENDER_TEXTURE_RAT/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 01_Week_01/work
+../未整理/_SORTED_ASSETS/RENDER_TEXTURE_RAT/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 02_Week 02
+../未整理/_SORTED_ASSETS/RENDER_TEXTURE_RAT/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 02_Week 02/Week 02
+../未整理/_SORTED_ASSETS/RENDER_TEXTURE_RAT/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 03_Week_03
+../未整理/_SORTED_ASSETS/RENDER_TEXTURE_RAT/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 03_Week_03/work
+../未整理/_SORTED_ASSETS/RENDER_TEXTURE_RAT/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 04_Week_04
+../未整理/_SORTED_ASSETS/RENDER_TEXTURE_RAT/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 04_Week_04/Week_04
+../未整理/_SORTED_ASSETS/RENDER_TEXTURE_RAT/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 06_Week 06
+../未整理/_SORTED_ASSETS/RENDER_TEXTURE_RAT/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 06_Week 06/Week 06
+../未整理/_SORTED_ASSETS/USD_SCENES
+../未整理/_SORTED_ASSETS/USD_SCENES/_NESTED_EXTRACTED
+../未整理/_SORTED_ASSETS/USD_SCENES/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 01_Week_01
+../未整理/_SORTED_ASSETS/USD_SCENES/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 01_Week_01/work
+../未整理/_SORTED_ASSETS/USD_SCENES/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 02_Week 02
+../未整理/_SORTED_ASSETS/USD_SCENES/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 02_Week 02/Week 02
+../未整理/_SORTED_ASSETS/USD_SCENES/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 03_Week_03
+../未整理/_SORTED_ASSETS/USD_SCENES/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 03_Week_03/work
+../未整理/_SORTED_ASSETS/USD_SCENES/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 04_Week_04
+../未整理/_SORTED_ASSETS/USD_SCENES/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 04_Week_04/Week_04
+../未整理/_SORTED_ASSETS/USD_SCENES/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 06_Week 06
+../未整理/_SORTED_ASSETS/USD_SCENES/_NESTED_EXTRACTED/Advanced Lighting in Houdini_Rebelway Advanced Lighting in Houdini_Project_Week 06_Week 06/Week 06

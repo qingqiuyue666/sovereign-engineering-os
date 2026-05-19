@@ -1,0 +1,1122 @@
+{
+  "status": "HFX_038_BATCH_FINALIZE_V071_TO_V078_PASS",
+  "generated": "2026-05-19T21:27:10",
+  "asset_id": "HFX_038",
+  "asset_name": "ContactShadow Ground Integration",
+  "asset_class": "contact_shadow",
+  "batch_root": "500_HFX_FACTORY/HFX_038_BATCH_FINALIZE_V071_TO_V078",
+  "files": [
+    {
+      "path": "500_HFX_FACTORY/HFX_038_BATCH_FINALIZE_V071_TO_V078/00_inputs/HFX_037_BATCH_FINALIZE_V063_TO_V070_REPORT.md",
+      "sha256": "6c3660cc02023a2339456a4fb0ee844b84dbf750bdf4959f337edee2c9494237",
+      "size_bytes": 954
+    },
+    {
+      "path": "500_HFX_FACTORY/HFX_038_BATCH_FINALIZE_V071_TO_V078/00_inputs/HFX_037_LIGHTWRAP_RIM_INTERACTION_FINAL_ASSET_SYSTEM_SEAL_v070.json",
+      "sha256": "6c4279092fc8776466756a60f087277e0cc5eb19637181fcf9b517be99daed0c",
+      "size_bytes": 847
+    },
+    {
+      "path": "500_HFX_FACTORY/HFX_038_BATCH_FINALIZE_V071_TO_V078/00_inputs/HFX_FACTORY_STATE.json",
+      "sha256": "b4d43955e4690add0601498edb5f803d436f05a5c1c4eb8106a65b6ea9fea59d",
+      "size_bytes": 1938
+    },
+    {
+      "path": "500_HFX_FACTORY/HFX_038_BATCH_FINALIZE_V071_TO_V078/00_inputs/HFX_FACTORY_CORE_12_ASSET_UPGRADE_MATRIX_v002.json",
+      "sha256": "ff808d8fef452abd61cc6fa468a09aad10abf9526dd35ed76f6e30a67cf7eead",
+      "size_bytes": 11128
+    },
+    {
+      "path": "500_HFX_FACTORY/HFX_038_BATCH_FINALIZE_V071_TO_V078/01_batch_reports/HFX_FACTORY_V071_HFX038_CONTACTSHADOW_GROUND_INTEGRATION_SOURCE_RESOLUTION.json",
+      "sha256": "6fc72bd502501ce8e99c3fd9be3dab6d1654dec294ba7e7f517f60276aabe7c6",
+      "size_bytes": 719
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION/01_preview/hip/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION_PREVIEW_TIER_v071.hip",
+      "sha256": "43784d6dabb4048e0849730ae319519082b1b9b2c8a4cc78d5f682ff0d130f97",
+      "size_bytes": 107501
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION/01_preview/validation/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION_PREVIEW_BUILD_v072.json",
+      "sha256": "ed03e05d4257a57ac8abd4528da138c2fdfaea47471862055cfe76f6530895ce",
+      "size_bytes": 255
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION/01_preview/validation/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION_PREVIEW_VALIDATION_v073.json",
+      "sha256": "d76ef1d846a11ff6877c4049d26c691728532d9ea19a257e6bc84515f3647e80",
+      "size_bytes": 127
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION/02_mid/hip/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION_MID_TIER_v073.hip",
+      "sha256": "0224685b372aa2fdcd186064f49bb740b6e52380f466e97a295f90db27a2ebc9",
+      "size_bytes": 265521
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION/02_mid/validation/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION_MID_BUILD_v074.json",
+      "sha256": "5cf1452223612f812d234023c84c036f13439aa2c3cfbac09bc37e10fe17c981",
+      "size_bytes": 239
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION/02_mid/validation/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION_MID_VALIDATION_v075.json",
+      "sha256": "47dbf8fa99e81e74597ea85e7a9003ce8cfcf93b4aa0921aac51a097fe8fc574",
+      "size_bytes": 119
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION/03_final/hip/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION_FINAL_CANDIDATE_v078.hip",
+      "sha256": "7047b8bbf777b649fde64a591dfafaebaaab9562c0ef1c480bcfa5bc5e412611",
+      "size_bytes": 487008
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION/10_release/release_package/hip/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION_FINAL_CANDIDATE_v078.hip",
+      "sha256": "7047b8bbf777b649fde64a591dfafaebaaab9562c0ef1c480bcfa5bc5e412611",
+      "size_bytes": 487008
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION/03_final/validation/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION_FINAL_CANDIDATE_BUILD_v076.json",
+      "sha256": "c688a53062b92076445666f14f38db20a5fdf47fcd01ab77faf5a497c8de4e4d",
+      "size_bytes": 696
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION/03_final/validation/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION_FINAL_CANDIDATE_VALIDATION_v077.json",
+      "sha256": "3bb97689a5369bdb115ce7707662425049b7995af7b14e3b6f7706958c0e36af",
+      "size_bytes": 697
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION/10_release/release_package/source/qqy_hfx_contactshadow_ground_integration_v078_source_contract.json",
+      "sha256": "2cb9b3e2f1713a3918f733ad80e88f38f35690021a215ebee61d50978fa04de4",
+      "size_bytes": 378
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION/10_release/release_package/manifests/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION_RENDER_COMP_CONTRACT_v078.json",
+      "sha256": "9feb9e65be154e0409d437021412157b41dab54e184cd70cd85a18832373a08f",
+      "size_bytes": 702
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION/10_release/release_package/manifests/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION_SHOT_BOUND_TEMPLATE_v078.json",
+      "sha256": "a058faebc0f07d9d4e420addfcb2c64f62e272ad47be8468f980c0d9f55466e4",
+      "size_bytes": 435
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION/10_release/release_package/validation/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION_FINAL_ASSET_SYSTEM_SEAL_v078.json",
+      "sha256": "e360f31dde79c402cec2c903b459c4676b4873588333846357574273cb195cd1",
+      "size_bytes": 876
+    },
+    {
+      "path": "00_INDEX_资产索引/HFX_LONG_TERM_ASSET_REGISTRY.json",
+      "sha256": "fb744d3c71d50d6c38a550712328e67e78ea890923a2cabaacd72f637306bb7d",
+      "size_bytes": 14931
+    },
+    {
+      "path": "00_INDEX_资产索引/HFX_FACTORY_STATE.json",
+      "sha256": "c9a97ccf95e29d9dd3f44bd50e98cf4b06f4da5bcca97625e18b9945e77b53ef",
+      "size_bytes": 2038
+    },
+    {
+      "path": "00_INDEX_资产索引/HFX_FACTORY_CORE_12_ASSET_UPGRADE_MATRIX_v002.json",
+      "sha256": "27f35584ddc90d397473ead3967c070d11353db22c6eea6889e9cf95d03c0a0d",
+      "size_bytes": 11160
+    },
+    {
+      "path": "500_HFX_FACTORY/HFX_038_BATCH_FINALIZE_V071_TO_V078/02_validation/HFX_038_BATCH_FINALIZE_V071_TO_V078_VALIDATION.json",
+      "sha256": "ad9e4ec9969e66b91bcebbdc187a05b92c87b768783d7f90a151ac8f9a7c9d68",
+      "size_bytes": 1044
+    },
+    {
+      "path": "500_HFX_FACTORY/HFX_038_BATCH_FINALIZE_V071_TO_V078/02_validation/HFX_038_BATCH_FINALIZE_V071_TO_V078_VALIDATION.md",
+      "sha256": "388bb8417dd033eb5301eb0be1e975beaa50cfaa23fd1923b8ffbbfe1ff08b00",
+      "size_bytes": 957
+    },
+    {
+      "path": "500_HFX_FACTORY/HFX_038_BATCH_FINALIZE_V071_TO_V078/04_docs/README_HFX_038_BATCH_FINALIZE_V071_TO_V078.md",
+      "sha256": "d55ec0894adcad6dcb5b1c92d03f072251112553d130a9b7f8e8aae6b8b6c463",
+      "size_bytes": 198
+    },
+    {
+      "path": "500_HFX_FACTORY/HFX_038_BATCH_FINALIZE_V071_TO_V078/03_manifests/HFX_038_BATCH_FINALIZE_V071_TO_V078_MANIFEST.json",
+      "sha256": "f589528c7181bee1b0c5f0974cf77551c553c5e4e59a6690693d994f22216560",
+      "size_bytes": 25945
+    }
+  ],
+  "preflight_checks": [
+    {
+      "label": "HFX_037 batch report",
+      "path": "00_INDEX_资产索引/HFX_037_BATCH_FINALIZE_V063_TO_V070_REPORT.md",
+      "result": "PASS"
+    },
+    {
+      "label": "HFX_037 final seal",
+      "path": "300_PRODUCTION_UPGRADE/HFX_037_LIGHTWRAP_RIM_INTERACTION/10_release/release_package/validation/HFX_037_LIGHTWRAP_RIM_INTERACTION_FINAL_ASSET_SYSTEM_SEAL_v070.json",
+      "result": "PASS"
+    },
+    {
+      "label": "Factory state",
+      "path": "00_INDEX_资产索引/HFX_FACTORY_STATE.json",
+      "result": "PASS"
+    },
+    {
+      "label": "Factory matrix",
+      "path": "00_INDEX_资产索引/HFX_FACTORY_CORE_12_ASSET_UPGRADE_MATRIX_v002.json",
+      "result": "PASS"
+    }
+  ],
+  "stage_checks": [],
+  "node_checks": [
+    {
+      "stage": "V072_PREVIEW_BUILD",
+      "node": "HFX_038_PREVIEW_CONTACT_DISC_v072",
+      "result": "PASS"
+    },
+    {
+      "stage": "V072_PREVIEW_BUILD",
+      "node": "HFX_038_PREVIEW_GROUND_PLANE_v072",
+      "result": "PASS"
+    },
+    {
+      "stage": "V072_PREVIEW_BUILD",
+      "node": "HFX_038_PREVIEW_METADATA_ANCHOR_v072",
+      "result": "PASS"
+    },
+    {
+      "stage": "V076_FINAL_BUILD",
+      "node": "HFX_038_FINAL_CONTACT_CORE_v078",
+      "result": "PASS"
+    },
+    {
+      "stage": "V076_FINAL_BUILD",
+      "node": "HFX_038_FINAL_SOFT_FALLOFF_v078",
+      "result": "PASS"
+    },
+    {
+      "stage": "V076_FINAL_BUILD",
+      "node": "HFX_038_FINAL_GROUND_OCCLUSION_v078",
+      "result": "PASS"
+    },
+    {
+      "stage": "V076_FINAL_BUILD",
+      "node": "HFX_038_FINAL_DIRECTIONAL_SHADOW_v078",
+      "result": "PASS"
+    },
+    {
+      "stage": "V076_FINAL_BUILD",
+      "node": "HFX_038_FINAL_ALPHA_MASK_v078",
+      "result": "PASS"
+    },
+    {
+      "stage": "V076_FINAL_BUILD",
+      "node": "HFX_038_FINAL_ZDEPTH_GROUND_v078",
+      "result": "PASS"
+    },
+    {
+      "stage": "V076_FINAL_BUILD",
+      "node": "HFX_038_FINAL_METADATA_ANCHOR_v078",
+      "result": "PASS"
+    }
+  ],
+  "output_checks": [
+    {
+      "output": "OUT_FINAL_CONTACT_CORE",
+      "result": "PASS"
+    },
+    {
+      "output": "OUT_FINAL_SOFT_FALLOFF",
+      "result": "PASS"
+    },
+    {
+      "output": "OUT_FINAL_GROUND_OCCLUSION",
+      "result": "PASS"
+    },
+    {
+      "output": "OUT_FINAL_DIRECTIONAL_SHADOW",
+      "result": "PASS"
+    },
+    {
+      "output": "OUT_FINAL_ALPHA_MASK",
+      "result": "PASS"
+    },
+    {
+      "output": "OUT_FINAL_ZDEPTH_GROUND",
+      "result": "PASS"
+    },
+    {
+      "output": "OUT_FINAL_METADATA",
+      "result": "PASS"
+    }
+  ],
+  "cook_results": {
+    "V072_HFX_038_PREVIEW_CONTACT_DISC_v072": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V072_HFX_038_PREVIEW_GROUND_PLANE_v072": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V072_HFX_038_PREVIEW_METADATA_ANCHOR_v072": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V073_HFX_038_PREVIEW_CONTACT_DISC_v072": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V073_HFX_038_PREVIEW_GROUND_PLANE_v072": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V073_HFX_038_PREVIEW_METADATA_ANCHOR_v072": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V074_HFX_038_MID_CONTACT_CORE_v074": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V074_HFX_038_MID_SOFT_FALLOFF_v074": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V074_HFX_038_MID_GROUND_OCCLUSION_v074": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V074_HFX_038_MID_DIRECTIONAL_SHADOW_v074": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V074_HFX_038_MID_METADATA_ANCHOR_v074": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V075_HFX_038_MID_CONTACT_CORE_v074": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V075_HFX_038_MID_SOFT_FALLOFF_v074": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V075_HFX_038_MID_GROUND_OCCLUSION_v074": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V075_HFX_038_MID_DIRECTIONAL_SHADOW_v074": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V075_HFX_038_MID_METADATA_ANCHOR_v074": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V076_HFX_038_FINAL_CONTACT_CORE_v078": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V076_HFX_038_FINAL_SOFT_FALLOFF_v078": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V076_HFX_038_FINAL_GROUND_OCCLUSION_v078": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V076_HFX_038_FINAL_DIRECTIONAL_SHADOW_v078": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V076_HFX_038_FINAL_ALPHA_MASK_v078": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V076_HFX_038_FINAL_ZDEPTH_GROUND_v078": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "V076_HFX_038_FINAL_METADATA_ANCHOR_v078": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ]
+  },
+  "pollution": []
+}

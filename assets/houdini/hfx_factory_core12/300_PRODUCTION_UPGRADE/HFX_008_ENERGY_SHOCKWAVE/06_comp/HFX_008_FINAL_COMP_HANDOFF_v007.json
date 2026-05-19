@@ -1,0 +1,29 @@
+{
+  "status": "HFX_008_FINAL_COMP_HANDOFF_V007_READY",
+  "asset_id": "HFX_008",
+  "asset_name": "Energy Shockwave",
+  "tier": "FINAL_CANDIDATE",
+  "handoff_targets": [
+    "DaVinci",
+    "AE",
+    "ComfyUI_post_repair_only"
+  ],
+  "colorspace_policy": "ACEScg_source_Rec709_display_downstream_required_later",
+  "passes": [
+    "OUT_FINAL_SHOCKWAVE_CORE",
+    "OUT_FINAL_ENERGY_EMISSION_MASK",
+    "OUT_FINAL_DISTORTION_VECTOR_PROXY",
+    "OUT_FINAL_DUST_CONTACT_FIELD",
+    "OUT_FINAL_ZDEPTH_FALLOFF_PROXY",
+    "OUT_FINAL_CONTACT_SHADOW_MASK",
+    "OUT_FINAL_METADATA_ANCHOR"
+  ],
+  "rules": {
+    "flattening_forbidden_before_review": true,
+    "comfyui_source_of_truth_forbidden": true,
+    "comfyui_post_repair_only": true,
+    "davinci_final_grade_required_later": true
+  },
+  "delivery_allowed": false,
+  "next_stage": "HFX_PRODUCTION_UPGRADE_V008_HFX008_FINAL_TIER_VALIDATION"
+}

@@ -1,0 +1,28 @@
+{
+  "status": "HFX_015_PORTAL_RING_MID_BUILD_CONTRACT_V006_READY",
+  "asset_id": "HFX_015",
+  "quality_tier": "MID",
+  "hip_path": "300_PRODUCTION_UPGRADE/HFX_015_PORTAL_RING/02_mid/hip/HFX_015_PORTAL_RING_MID_TIER_v006.hip",
+  "mirror_hip_path": "500_HFX_FACTORY/HFX_FACTORY_V006_HFX015_PORTAL_RING_MID_TIER_BUILD/02_mid_hip/HFX_015_PORTAL_RING_MID_TIER_v006.hip",
+  "required_outputs": [
+    "OUT_MID_PORTAL_CORE",
+    "OUT_MID_RIM_EMISSION",
+    "OUT_MID_INNER_SURFACE",
+    "OUT_MID_SPARK_LAYER",
+    "OUT_MID_DISTORTION_VECTOR",
+    "OUT_MID_ALPHA",
+    "OUT_MID_ZDEPTH",
+    "OUT_MID_METADATA"
+  ],
+  "cook_test_required": true,
+  "frames": [
+    1,
+    12,
+    24,
+    48,
+    72,
+    120
+  ],
+  "render_export_allowed": false,
+  "delivery_allowed": false
+}

@@ -1,0 +1,18 @@
+{
+  "status": "HFX_FACTORY_V069_HFX037_LIGHTWRAP_RIM_INTERACTION_FINAL_CANDIDATE_VALIDATION_PASS",
+  "asset_id": "HFX_037",
+  "asset_name": "LightWrap Rim Interaction",
+  "final_candidate_validated": true,
+  "final_candidate_hip": "300_PRODUCTION_UPGRADE/HFX_037_LIGHTWRAP_RIM_INTERACTION/03_final/hip/HFX_037_LIGHTWRAP_RIM_INTERACTION_FINAL_CANDIDATE_v070.hip",
+  "required_outputs": [
+    "OUT_FINAL_WRAP_WIDTH",
+    "OUT_FINAL_WRAP_INTENSITY",
+    "OUT_FINAL_RIM_COLOR",
+    "OUT_FINAL_SUBJECT_EDGE_MASK",
+    "OUT_FINAL_FALLOFF_CURVE",
+    "OUT_FINAL_LIGHTWRAP_OUTPUT",
+    "OUT_FINAL_METADATA"
+  ],
+  "render_export_allowed": false,
+  "delivery_allowed": false
+}

@@ -1,0 +1,19 @@
+{
+  "status": "HFX_038_SHOT_BOUND_TEMPLATE_V078_READY",
+  "asset_id": "HFX_038",
+  "asset_name": "ContactShadow Ground Integration",
+  "required_binding_fields": [
+    "shot_id",
+    "take_id",
+    "frame_start",
+    "frame_end",
+    "contact_radius",
+    "falloff_softness",
+    "ground_occlusion",
+    "directional_bias",
+    "alpha_strength",
+    "zdepth_ground"
+  ],
+  "derive_per_shot": true,
+  "direct_mutation_forbidden": true
+}

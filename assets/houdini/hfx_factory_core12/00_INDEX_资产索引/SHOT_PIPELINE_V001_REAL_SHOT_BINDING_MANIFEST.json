@@ -1,0 +1,157 @@
+{
+  "status": "SHOT_PIPELINE_V001_REAL_SHOT_BINDING_PASS",
+  "generated": "2026-05-17T23:57:52",
+  "shot_template": "SHOT_TEMPLATE_V001_REAL_SHOT_BINDING",
+  "repair": "accepted Batch 01 as legacy hda-only sealed release; B02-B05 remain full release packages",
+  "files": [
+    {
+      "path": "200_SHOTS/SHOT_TEMPLATE_V001_REAL_SHOT_BINDING/shot_manifest_v001.json",
+      "sha256": "6df8401b1f4dec97f1a6ae2e6dfc2d5332c7aa164900e5f0a305be7e9c337151",
+      "size_bytes": 2286
+    },
+    {
+      "path": "200_SHOTS/SHOT_TEMPLATE_V001_REAL_SHOT_BINDING/00_plate/PLATE_BINDING_v001.json",
+      "sha256": "461c509eb5f299965ce99be9aaf16b23aceec45a12dae5ff1f64f777322eef00",
+      "size_bytes": 478
+    },
+    {
+      "path": "200_SHOTS/SHOT_TEMPLATE_V001_REAL_SHOT_BINDING/01_camera/CAMERA_BINDING_v001.json",
+      "sha256": "2327c187178689e2f8ae9badcad587a744a7748d33bd913fa009564aa3d566c2",
+      "size_bytes": 442
+    },
+    {
+      "path": "200_SHOTS/SHOT_TEMPLATE_V001_REAL_SHOT_BINDING/02_unreal/UNREAL_BINDING_v001.json",
+      "sha256": "59e19758529049ee4ca8858152cd5eca30cb28e845c0f2044920e548fc89ee49",
+      "size_bytes": 369
+    },
+    {
+      "path": "200_SHOTS/SHOT_TEMPLATE_V001_REAL_SHOT_BINDING/03_houdini/HFX_ASSET_SELECTION_v001.json",
+      "sha256": "67c8223fece44664bfec1f304d6af82d67f00d69d4329fe5337ff6cb405fcb0b",
+      "size_bytes": 6073
+    },
+    {
+      "path": "200_SHOTS/SHOT_TEMPLATE_V001_REAL_SHOT_BINDING/05_comp/COMP_PASS_MAP_v001.json",
+      "sha256": "c6ed1affa1e9a572a0f3814a4574ea0cdf93779b11a813b4202a817bc58e473f",
+      "size_bytes": 800
+    },
+    {
+      "path": "200_SHOTS/SHOT_TEMPLATE_V001_REAL_SHOT_BINDING/06_delivery/SHOT_HANDOFF_MANIFEST_v001.json",
+      "sha256": "88cd451cbcab1347af64e9f9778075cf96cd7789291cd8b36b255742ea41b6ac",
+      "size_bytes": 520
+    },
+    {
+      "path": "200_SHOTS/SHOT_TEMPLATE_V001_REAL_SHOT_BINDING/07_validation/SHOT_VALIDATION_CHECKLIST_v001.md",
+      "sha256": "3121d522403c4dcbc169444aebc80312246bad1aa342e1b0f2376deba9082349",
+      "size_bytes": 1305
+    },
+    {
+      "path": "200_SHOTS/SHOT_TEMPLATE_V001_REAL_SHOT_BINDING/README_SHOT_TEMPLATE_V001.md",
+      "sha256": "ee4f92c0d209805cff25529925c93eacd9cbd96dd90dba7c85af0df16bbc0b60",
+      "size_bytes": 907
+    },
+    {
+      "path": "00_INDEX_资产索引/SHOT_PIPELINE_V001_REAL_SHOT_BINDING_RULEBOOK.md",
+      "sha256": "e1a8c8dc079c36ce39ffe162c425e0aa75681dcb86dd16abfb2a34f8b5e98124",
+      "size_bytes": 1472
+    }
+  ],
+  "final_seals": [
+    {
+      "batch": "Batch 01",
+      "file": "HFX_V013_FINAL_SEAL_REPORT.md",
+      "marker": "Final Status: HFX_V013_FINAL_SEAL_PASS",
+      "result": "PASS"
+    },
+    {
+      "batch": "Batch 02",
+      "file": "HFX_B02_ADVANCED_CORE_V013_FINAL_SEAL_REPORT.md",
+      "marker": "Final Status: HFX_B02_ADVANCED_CORE_V013_FINAL_SEAL_PASS",
+      "result": "PASS"
+    },
+    {
+      "batch": "Batch 03",
+      "file": "HFX_B03_DESTRUCTION_CLOTH_FLUID_V013_FINAL_SEAL_REPORT.md",
+      "marker": "Final Status: HFX_B03_DESTRUCTION_CLOTH_FLUID_V013_FINAL_SEAL_PASS",
+      "result": "PASS"
+    },
+    {
+      "batch": "Batch 04",
+      "file": "HFX_B04_CHARACTER_MAGIC_ENVIRONMENT_V013_FINAL_SEAL_REPORT.md",
+      "marker": "Final Status: HFX_B04_CHARACTER_MAGIC_ENVIRONMENT_V013_FINAL_SEAL_PASS",
+      "result": "PASS"
+    },
+    {
+      "batch": "Batch 05",
+      "file": "HFX_B05_CINEMATIC_COMPOSITING_RENDER_PASSES_V012_FINAL_SEAL_REPORT.md",
+      "marker": "Final Status: HFX_B05_CINEMATIC_COMPOSITING_RENDER_PASSES_V012_FINAL_SEAL_PASS",
+      "result": "PASS"
+    }
+  ],
+  "releases": [
+    {
+      "batch": "B01",
+      "role": "core_action_fx",
+      "asset_range": "HFX_001-HFX_008",
+      "release_root": "100_RELEASE/HFX_V013_FINAL_SEAL/release_package",
+      "mode": "legacy_hda_only_sealed_release",
+      "result": "PASS",
+      "hda_count": 8,
+      "hip_count": 0,
+      "docs_exists": false,
+      "notes": [
+        "HIP directory not required for legacy B01 sealed release",
+        "Docs directory not required for legacy B01 sealed release"
+      ]
+    },
+    {
+      "batch": "B02",
+      "role": "cinematic_support_fx",
+      "asset_range": "HFX_009-HFX_016",
+      "release_root": "100_RELEASE/HFX_B02_V013_FINAL_SEAL/release_package",
+      "mode": "full_release_package",
+      "result": "PASS",
+      "hda_count": 8,
+      "hip_count": 8,
+      "docs_exists": true,
+      "notes": []
+    },
+    {
+      "batch": "B03",
+      "role": "heavyweight_hollywood_support_fx",
+      "asset_range": "HFX_017-HFX_024",
+      "release_root": "100_RELEASE/HFX_B03_V013_FINAL_SEAL/release_package",
+      "mode": "full_release_package",
+      "result": "PASS",
+      "hda_count": 8,
+      "hip_count": 8,
+      "docs_exists": true,
+      "notes": []
+    },
+    {
+      "batch": "B04",
+      "role": "character_magic_environment_stylized_fx",
+      "asset_range": "HFX_025-HFX_032",
+      "release_root": "100_RELEASE/HFX_B04_V013_FINAL_SEAL/release_package",
+      "mode": "full_release_package",
+      "result": "PASS",
+      "hda_count": 8,
+      "hip_count": 8,
+      "docs_exists": true,
+      "notes": []
+    },
+    {
+      "batch": "B05",
+      "role": "compositing_render_pass_handoff_layer",
+      "asset_range": "HFX_033-HFX_040",
+      "release_root": "100_RELEASE/HFX_B05_V012_FINAL_SEAL/release_package",
+      "mode": "full_release_package",
+      "result": "PASS",
+      "hda_count": 8,
+      "hip_count": 8,
+      "docs_exists": true,
+      "notes": []
+    }
+  ],
+  "hfx_asset_library_count": 40,
+  "pollution": []
+}

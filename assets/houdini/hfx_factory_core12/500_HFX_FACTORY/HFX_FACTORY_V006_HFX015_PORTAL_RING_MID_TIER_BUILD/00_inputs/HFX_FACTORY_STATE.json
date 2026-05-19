@@ -1,0 +1,21 @@
+{
+  "status": "HFX_FACTORY_STATE_V005_HFX015_PREVIEW_TIER_VALIDATION_READY",
+  "generated": "2026-05-19T18:35:07",
+  "reference_asset": "HFX_008",
+  "reference_asset_ready": true,
+  "core_asset_count": 12,
+  "completed_core_asset_count": 1,
+  "pending_core_asset_count": 11,
+  "next_asset_to_build": "HFX_015",
+  "next_stage": "HFX_FACTORY_V006_HFX015_PORTAL_RING_MID_TIER_BUILD",
+  "all_houdini_fx_top_tier_complete": false,
+  "matrix": "500_HFX_FACTORY/HFX_FACTORY_V002_CORE_12_ASSET_UPGRADE_MATRIX/01_upgrade_matrix/HFX_FACTORY_CORE_12_ASSET_UPGRADE_MATRIX_v002.json",
+  "global_matrix": "00_INDEX_资产索引/HFX_FACTORY_CORE_12_ASSET_UPGRADE_MATRIX_v002.json",
+  "current_asset": "HFX_015",
+  "current_asset_stage": "preview_tier_validation",
+  "hfx015_source_resolution_ready": true,
+  "last_updated": "2026-05-19T19:16:35",
+  "hfx015_preview_tier_build_ready": true,
+  "hfx015_preview_tier_validation_ready": true,
+  "hfx015_mid_tier_build_allowed_next": true
+}

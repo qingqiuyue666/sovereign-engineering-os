@@ -1,0 +1,19 @@
+{
+  "status": "HFX_037_SHOT_BOUND_TEMPLATE_V070_READY",
+  "asset_id": "HFX_037",
+  "asset_name": "LightWrap Rim Interaction",
+  "required_binding_fields": [
+    "shot_id",
+    "take_id",
+    "frame_start",
+    "frame_end",
+    "wrap_width",
+    "wrap_intensity",
+    "rim_color",
+    "subject_edge_mask",
+    "falloff_curve",
+    "edge_softness"
+  ],
+  "derive_per_shot": true,
+  "direct_mutation_forbidden": true
+}

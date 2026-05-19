@@ -1,0 +1,735 @@
+{
+  "status": "HFX_B02_ADVANCED_CORE_V011_RUNTIME_SMOKE_TEST_PASS",
+  "generated": "2026-05-17T18:29:46",
+  "test_frames": [
+    1,
+    12,
+    24,
+    48,
+    72,
+    120
+  ],
+  "assets": [
+    {
+      "asset": "HFX_009_Volumetric_Fog_Bank",
+      "result": "PASS",
+      "hda": "06_体积雾气_环境烟雾/HFX_009_Volumetric_Fog_Bank/03_hda/qqy_hfx_volumetric_fog_bank_b02_v009.hda",
+      "hda_type": "qqy::hfx_volumetric_fog_bank::2.0",
+      "instance_name": "SMOKE_HFX_009_Volumetric_Fog_Bank_v011",
+      "frames": [
+        {
+          "frame": 1,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_009_Volumetric_Fog_Bank_v011/OUT_FOG_BANK_MAIN",
+            "points": 700,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        },
+        {
+          "frame": 12,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_009_Volumetric_Fog_Bank_v011/OUT_FOG_BANK_MAIN",
+            "points": 700,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        },
+        {
+          "frame": 24,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_009_Volumetric_Fog_Bank_v011/OUT_FOG_BANK_MAIN",
+            "points": 700,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        },
+        {
+          "frame": 48,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_009_Volumetric_Fog_Bank_v011/OUT_FOG_BANK_MAIN",
+            "points": 700,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        },
+        {
+          "frame": 72,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_009_Volumetric_Fog_Bank_v011/OUT_FOG_BANK_MAIN",
+            "points": 700,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        },
+        {
+          "frame": 120,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_009_Volumetric_Fog_Bank_v011/OUT_FOG_BANK_MAIN",
+            "points": 700,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        }
+      ],
+      "smoke_json": "06_体积雾气_环境烟雾/HFX_009_Volumetric_Fog_Bank/05_notes/RUNTIME_SMOKE_TEST_v011.json",
+      "smoke_md": "06_体积雾气_环境烟雾/HFX_009_Volumetric_Fog_Bank/05_notes/RUNTIME_SMOKE_TEST_v011.md",
+      "readme_v011": "06_体积雾气_环境烟雾/HFX_009_Volumetric_Fog_Bank/05_notes/README_v011.md"
+    },
+    {
+      "asset": "HFX_010_Smoke_Plume_Column",
+      "result": "PASS",
+      "hda": "06_体积雾气_环境烟雾/HFX_010_Smoke_Plume_Column/03_hda/qqy_hfx_smoke_plume_column_b02_v009.hda",
+      "hda_type": "qqy::hfx_smoke_plume_column::2.0",
+      "instance_name": "SMOKE_HFX_010_Smoke_Plume_Column_v011",
+      "frames": [
+        {
+          "frame": 1,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_010_Smoke_Plume_Column_v011/OUT_SMOKE_PLUME_MAIN",
+            "points": 620,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        },
+        {
+          "frame": 12,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_010_Smoke_Plume_Column_v011/OUT_SMOKE_PLUME_MAIN",
+            "points": 620,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        },
+        {
+          "frame": 24,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_010_Smoke_Plume_Column_v011/OUT_SMOKE_PLUME_MAIN",
+            "points": 620,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        },
+        {
+          "frame": 48,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_010_Smoke_Plume_Column_v011/OUT_SMOKE_PLUME_MAIN",
+            "points": 620,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        },
+        {
+          "frame": 72,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_010_Smoke_Plume_Column_v011/OUT_SMOKE_PLUME_MAIN",
+            "points": 620,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        },
+        {
+          "frame": 120,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_010_Smoke_Plume_Column_v011/OUT_SMOKE_PLUME_MAIN",
+            "points": 620,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        }
+      ],
+      "smoke_json": "06_体积雾气_环境烟雾/HFX_010_Smoke_Plume_Column/05_notes/RUNTIME_SMOKE_TEST_v011.json",
+      "smoke_md": "06_体积雾气_环境烟雾/HFX_010_Smoke_Plume_Column/05_notes/RUNTIME_SMOKE_TEST_v011.md",
+      "readme_v011": "06_体积雾气_环境烟雾/HFX_010_Smoke_Plume_Column/05_notes/README_v011.md"
+    },
+    {
+      "asset": "HFX_011_Ember_Ash_Field",
+      "result": "PASS",
+      "hda": "07_粒子火星_灰烬火花/HFX_011_Ember_Ash_Field/03_hda/qqy_hfx_ember_ash_field_b02_v009.hda",
+      "hda_type": "qqy::hfx_ember_ash_field::2.0",
+      "instance_name": "SMOKE_HFX_011_Ember_Ash_Field_v011",
+      "frames": [
+        {
+          "frame": 1,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_011_Ember_Ash_Field_v011/OUT_EMBER_ASH_MAIN",
+            "points": 520,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        },
+        {
+          "frame": 12,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_011_Ember_Ash_Field_v011/OUT_EMBER_ASH_MAIN",
+            "points": 520,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        },
+        {
+          "frame": 24,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_011_Ember_Ash_Field_v011/OUT_EMBER_ASH_MAIN",
+            "points": 520,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        },
+        {
+          "frame": 48,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_011_Ember_Ash_Field_v011/OUT_EMBER_ASH_MAIN",
+            "points": 520,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        },
+        {
+          "frame": 72,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_011_Ember_Ash_Field_v011/OUT_EMBER_ASH_MAIN",
+            "points": 520,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        },
+        {
+          "frame": 120,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_011_Ember_Ash_Field_v011/OUT_EMBER_ASH_MAIN",
+            "points": 520,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        }
+      ],
+      "smoke_json": "07_粒子火星_灰烬火花/HFX_011_Ember_Ash_Field/05_notes/RUNTIME_SMOKE_TEST_v011.json",
+      "smoke_md": "07_粒子火星_灰烬火花/HFX_011_Ember_Ash_Field/05_notes/RUNTIME_SMOKE_TEST_v011.md",
+      "readme_v011": "07_粒子火星_灰烬火花/HFX_011_Ember_Ash_Field/05_notes/README_v011.md"
+    },
+    {
+      "asset": "HFX_012_Sparks_Impact_Spray",
+      "result": "PASS",
+      "hda": "07_粒子火星_灰烬火花/HFX_012_Sparks_Impact_Spray/03_hda/qqy_hfx_sparks_impact_spray_b02_v009.hda",
+      "hda_type": "qqy::hfx_sparks_impact_spray::2.0",
+      "instance_name": "SMOKE_HFX_012_Sparks_Impact_Spray_v011",
+      "frames": [
+        {
+          "frame": 1,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_012_Sparks_Impact_Spray_v011/OUT_SPARKS_MAIN",
+            "points": 360,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        },
+        {
+          "frame": 12,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_012_Sparks_Impact_Spray_v011/OUT_SPARKS_MAIN",
+            "points": 360,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        },
+        {
+          "frame": 24,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_012_Sparks_Impact_Spray_v011/OUT_SPARKS_MAIN",
+            "points": 360,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        },
+        {
+          "frame": 48,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_012_Sparks_Impact_Spray_v011/OUT_SPARKS_MAIN",
+            "points": 360,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        },
+        {
+          "frame": 72,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_012_Sparks_Impact_Spray_v011/OUT_SPARKS_MAIN",
+            "points": 360,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        },
+        {
+          "frame": 120,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_012_Sparks_Impact_Spray_v011/OUT_SPARKS_MAIN",
+            "points": 360,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        }
+      ],
+      "smoke_json": "07_粒子火星_灰烬火花/HFX_012_Sparks_Impact_Spray/05_notes/RUNTIME_SMOKE_TEST_v011.json",
+      "smoke_md": "07_粒子火星_灰烬火花/HFX_012_Sparks_Impact_Spray/05_notes/RUNTIME_SMOKE_TEST_v011.md",
+      "readme_v011": "07_粒子火星_灰烬火花/HFX_012_Sparks_Impact_Spray/05_notes/README_v011.md"
+    },
+    {
+      "asset": "HFX_013_Debris_Burst_Radial",
+      "result": "PASS",
+      "hda": "08_碎片爆发_二级破坏/HFX_013_Debris_Burst_Radial/03_hda/qqy_hfx_debris_burst_radial_b02_v009.hda",
+      "hda_type": "qqy::hfx_debris_burst_radial::2.0",
+      "instance_name": "SMOKE_HFX_013_Debris_Burst_Radial_v011",
+      "frames": [
+        {
+          "frame": 1,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_013_Debris_Burst_Radial_v011/OUT_DEBRIS_BURST_MAIN",
+            "points": 180,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        },
+        {
+          "frame": 12,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_013_Debris_Burst_Radial_v011/OUT_DEBRIS_BURST_MAIN",
+            "points": 180,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        },
+        {
+          "frame": 24,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_013_Debris_Burst_Radial_v011/OUT_DEBRIS_BURST_MAIN",
+            "points": 180,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        },
+        {
+          "frame": 48,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_013_Debris_Burst_Radial_v011/OUT_DEBRIS_BURST_MAIN",
+            "points": 180,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        },
+        {
+          "frame": 72,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_013_Debris_Burst_Radial_v011/OUT_DEBRIS_BURST_MAIN",
+            "points": 180,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        },
+        {
+          "frame": 120,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_013_Debris_Burst_Radial_v011/OUT_DEBRIS_BURST_MAIN",
+            "points": 180,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        }
+      ],
+      "smoke_json": "08_碎片爆发_二级破坏/HFX_013_Debris_Burst_Radial/05_notes/RUNTIME_SMOKE_TEST_v011.json",
+      "smoke_md": "08_碎片爆发_二级破坏/HFX_013_Debris_Burst_Radial/05_notes/RUNTIME_SMOKE_TEST_v011.md",
+      "readme_v011": "08_碎片爆发_二级破坏/HFX_013_Debris_Burst_Radial/05_notes/README_v011.md"
+    },
+    {
+      "asset": "HFX_014_Magic_Particle_Aura",
+      "result": "PASS",
+      "hda": "09_魔法能量_空间场/HFX_014_Magic_Particle_Aura/03_hda/qqy_hfx_magic_particle_aura_b02_v009.hda",
+      "hda_type": "qqy::hfx_magic_particle_aura::2.0",
+      "instance_name": "SMOKE_HFX_014_Magic_Particle_Aura_v011",
+      "frames": [
+        {
+          "frame": 1,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_014_Magic_Particle_Aura_v011/OUT_MAGIC_AURA_MAIN",
+            "points": 420,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        },
+        {
+          "frame": 12,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_014_Magic_Particle_Aura_v011/OUT_MAGIC_AURA_MAIN",
+            "points": 420,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        },
+        {
+          "frame": 24,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_014_Magic_Particle_Aura_v011/OUT_MAGIC_AURA_MAIN",
+            "points": 420,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        },
+        {
+          "frame": 48,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_014_Magic_Particle_Aura_v011/OUT_MAGIC_AURA_MAIN",
+            "points": 420,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        },
+        {
+          "frame": 72,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_014_Magic_Particle_Aura_v011/OUT_MAGIC_AURA_MAIN",
+            "points": 420,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        },
+        {
+          "frame": 120,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_014_Magic_Particle_Aura_v011/OUT_MAGIC_AURA_MAIN",
+            "points": 420,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        }
+      ],
+      "smoke_json": "09_魔法能量_空间场/HFX_014_Magic_Particle_Aura/05_notes/RUNTIME_SMOKE_TEST_v011.json",
+      "smoke_md": "09_魔法能量_空间场/HFX_014_Magic_Particle_Aura/05_notes/RUNTIME_SMOKE_TEST_v011.md",
+      "readme_v011": "09_魔法能量_空间场/HFX_014_Magic_Particle_Aura/05_notes/README_v011.md"
+    },
+    {
+      "asset": "HFX_015_Portal_Ring_Field",
+      "result": "PASS",
+      "hda": "09_魔法能量_空间场/HFX_015_Portal_Ring_Field/03_hda/qqy_hfx_portal_ring_field_b02_v009.hda",
+      "hda_type": "qqy::hfx_portal_ring_field::2.0",
+      "instance_name": "SMOKE_HFX_015_Portal_Ring_Field_v011",
+      "frames": [
+        {
+          "frame": 1,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_015_Portal_Ring_Field_v011/OUT_PORTAL_RING_MAIN",
+            "points": 360,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        },
+        {
+          "frame": 12,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_015_Portal_Ring_Field_v011/OUT_PORTAL_RING_MAIN",
+            "points": 360,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        },
+        {
+          "frame": 24,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_015_Portal_Ring_Field_v011/OUT_PORTAL_RING_MAIN",
+            "points": 360,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        },
+        {
+          "frame": 48,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_015_Portal_Ring_Field_v011/OUT_PORTAL_RING_MAIN",
+            "points": 360,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        },
+        {
+          "frame": 72,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_015_Portal_Ring_Field_v011/OUT_PORTAL_RING_MAIN",
+            "points": 360,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        },
+        {
+          "frame": 120,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_015_Portal_Ring_Field_v011/OUT_PORTAL_RING_MAIN",
+            "points": 360,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        }
+      ],
+      "smoke_json": "09_魔法能量_空间场/HFX_015_Portal_Ring_Field/05_notes/RUNTIME_SMOKE_TEST_v011.json",
+      "smoke_md": "09_魔法能量_空间场/HFX_015_Portal_Ring_Field/05_notes/RUNTIME_SMOKE_TEST_v011.md",
+      "readme_v011": "09_魔法能量_空间场/HFX_015_Portal_Ring_Field/05_notes/README_v011.md"
+    },
+    {
+      "asset": "HFX_016_Heat_Distortion_Field",
+      "result": "PASS",
+      "hda": "10_热浪扭曲_空气扰动/HFX_016_Heat_Distortion_Field/03_hda/qqy_hfx_heat_distortion_field_b02_v009.hda",
+      "hda_type": "qqy::hfx_heat_distortion_field::2.0",
+      "instance_name": "SMOKE_HFX_016_Heat_Distortion_Field_v011",
+      "frames": [
+        {
+          "frame": 1,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_016_Heat_Distortion_Field_v011/OUT_HEAT_DISTORTION_MAIN",
+            "points": 480,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        },
+        {
+          "frame": 12,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_016_Heat_Distortion_Field_v011/OUT_HEAT_DISTORTION_MAIN",
+            "points": 480,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        },
+        {
+          "frame": 24,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_016_Heat_Distortion_Field_v011/OUT_HEAT_DISTORTION_MAIN",
+            "points": 480,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        },
+        {
+          "frame": 48,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_016_Heat_Distortion_Field_v011/OUT_HEAT_DISTORTION_MAIN",
+            "points": 480,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        },
+        {
+          "frame": 72,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_016_Heat_Distortion_Field_v011/OUT_HEAT_DISTORTION_MAIN",
+            "points": 480,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        },
+        {
+          "frame": 120,
+          "result": "PASS",
+          "errors": [],
+          "warnings": [],
+          "geometry": {
+            "sop_path": "/obj/SMOKE_HFX_016_Heat_Distortion_Field_v011/OUT_HEAT_DISTORTION_MAIN",
+            "points": 480,
+            "prims": 0,
+            "vertices": null,
+            "non_empty": true
+          }
+        }
+      ],
+      "smoke_json": "10_热浪扭曲_空气扰动/HFX_016_Heat_Distortion_Field/05_notes/RUNTIME_SMOKE_TEST_v011.json",
+      "smoke_md": "10_热浪扭曲_空气扰动/HFX_016_Heat_Distortion_Field/05_notes/RUNTIME_SMOKE_TEST_v011.md",
+      "readme_v011": "10_热浪扭曲_空气扰动/HFX_016_Heat_Distortion_Field/05_notes/README_v011.md"
+    }
+  ],
+  "pollution": []
+}

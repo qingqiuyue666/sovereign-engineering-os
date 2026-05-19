@@ -1,0 +1,112 @@
+{
+  "status": "HFX_025_FACTORY_PROFILE_V002_READY",
+  "asset": {
+    "asset_id": "HFX_025",
+    "asset_name": "Character Energy Field",
+    "asset_class": "character_energy_field",
+    "upgrade_order": 5,
+    "tier": "CHARACTER_BOUND_HERO_FX",
+    "factory_status": "PENDING_FACTORY_UPGRADE",
+    "complexity": "HIGH",
+    "priority_reason": "essential for anime / superhero / energy aura character shots",
+    "special_parameters": [
+      "body_mask_source",
+      "aura_radius",
+      "aura_intensity",
+      "particle_orbit_speed",
+      "rim_light_strength",
+      "subject_holdout"
+    ],
+    "required_passes_extra": [
+      "emission",
+      "alpha",
+      "lightwrap",
+      "holdout",
+      "zdepth"
+    ],
+    "next_action": "HFX_FACTORY_V006_HFX025_CHARACTER_ENERGY_FIELD_SOURCE_RESOLUTION"
+  },
+  "common_parameters": [
+    "asset_id",
+    "asset_name",
+    "shot_id",
+    "take_id",
+    "quality_tier",
+    "scale",
+    "duration",
+    "start_frame",
+    "end_frame",
+    "fps",
+    "intensity",
+    "radius",
+    "speed",
+    "direction",
+    "falloff",
+    "color_primary",
+    "color_secondary",
+    "emission_strength",
+    "distortion_amount",
+    "density",
+    "turbulence",
+    "noise_seed",
+    "ground_contact_strength",
+    "subject_holdout_enabled",
+    "camera_distance_compensation",
+    "cache_version",
+    "render_version",
+    "comp_version"
+  ],
+  "special_parameters": [
+    "body_mask_source",
+    "aura_radius",
+    "aura_intensity",
+    "particle_orbit_speed",
+    "rim_light_strength",
+    "subject_holdout"
+  ],
+  "required_passes": [
+    "alpha",
+    "beauty",
+    "contact_shadow",
+    "distortion_vector",
+    "emission",
+    "holdout",
+    "lightwrap",
+    "matte",
+    "metadata",
+    "zdepth"
+  ],
+  "required_stages": [
+    "source_resolution",
+    "preview_tier_build",
+    "preview_tier_validation",
+    "mid_tier_build",
+    "mid_tier_validation",
+    "final_candidate_tier_build",
+    "final_candidate_tier_validation",
+    "final_candidate_release_seal",
+    "shot_bound_render_package",
+    "render_execution_preflight",
+    "controlled_preview_render",
+    "preview_validation",
+    "synthetic_or_real_context_decision",
+    "structured_render_package",
+    "render_package_validation",
+    "comp_package",
+    "final_look_validation",
+    "delivery_candidate",
+    "final_asset_system_seal"
+  ],
+  "quality_tiers": [
+    "PREVIEW",
+    "MID",
+    "FINAL_CANDIDATE"
+  ],
+  "reuse_policy": {
+    "reuse_by_parameter_adjustment": true,
+    "shot_binding_required": true,
+    "sealed_source_mutation_forbidden": true,
+    "pass_based_comp_required": true
+  },
+  "next_action": "HFX_FACTORY_V006_HFX025_CHARACTER_ENERGY_FIELD_SOURCE_RESOLUTION"
+}

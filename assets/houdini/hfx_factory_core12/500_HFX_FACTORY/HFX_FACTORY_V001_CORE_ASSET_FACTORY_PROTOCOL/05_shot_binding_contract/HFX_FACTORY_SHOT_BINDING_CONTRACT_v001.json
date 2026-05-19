@@ -1,0 +1,35 @@
+{
+  "status": "HFX_FACTORY_SHOT_BINDING_CONTRACT_V001_READY",
+  "required_binding_fields": [
+    "asset_id",
+    "asset_name",
+    "shot_id",
+    "take_id",
+    "frame_start",
+    "frame_end",
+    "fps",
+    "plate_mode",
+    "camera_mode",
+    "context_mode",
+    "colorspace",
+    "quality_tier",
+    "cache_root",
+    "render_root",
+    "comp_root",
+    "claim_limits"
+  ],
+  "supported_contexts": [
+    "synthetic_test_context",
+    "real_plate_camera_bound_context",
+    "unreal_scene_context",
+    "blender_abc_usd_context",
+    "green_screen_subject_context"
+  ],
+  "binding_policy": {
+    "real_footage_claim_requires_real_plate": true,
+    "real_camera_claim_requires_camera_binding": true,
+    "synthetic_context_must_be_declared": true,
+    "delivery_claim_requires_final_delivery_seal": true,
+    "hollywood_final_pixel_claim_requires_actual_pixels_comp_grade_and_delivery_validation": true
+  }
+}

@@ -1,0 +1,108 @@
+{
+  "status": "HFX_033_FACTORY_PROFILE_V002_READY",
+  "asset": {
+    "asset_id": "HFX_033",
+    "asset_name": "Glow Emission Pass",
+    "asset_class": "glow_emission",
+    "upgrade_order": 7,
+    "tier": "COMP_SUPPORT",
+    "factory_status": "PENDING_FACTORY_UPGRADE",
+    "complexity": "MEDIUM",
+    "priority_reason": "shared emission layer for all energy/magic/portal assets",
+    "special_parameters": [
+      "emission_threshold",
+      "bloom_radius",
+      "glow_falloff",
+      "color_temperature",
+      "mask_softness"
+    ],
+    "required_passes_extra": [
+      "emission",
+      "alpha",
+      "metadata"
+    ],
+    "next_action": "HFX_FACTORY_V008_HFX033_GLOW_EMISSION_PASS_SOURCE_RESOLUTION"
+  },
+  "common_parameters": [
+    "asset_id",
+    "asset_name",
+    "shot_id",
+    "take_id",
+    "quality_tier",
+    "scale",
+    "duration",
+    "start_frame",
+    "end_frame",
+    "fps",
+    "intensity",
+    "radius",
+    "speed",
+    "direction",
+    "falloff",
+    "color_primary",
+    "color_secondary",
+    "emission_strength",
+    "distortion_amount",
+    "density",
+    "turbulence",
+    "noise_seed",
+    "ground_contact_strength",
+    "subject_holdout_enabled",
+    "camera_distance_compensation",
+    "cache_version",
+    "render_version",
+    "comp_version"
+  ],
+  "special_parameters": [
+    "emission_threshold",
+    "bloom_radius",
+    "glow_falloff",
+    "color_temperature",
+    "mask_softness"
+  ],
+  "required_passes": [
+    "alpha",
+    "beauty",
+    "contact_shadow",
+    "distortion_vector",
+    "emission",
+    "holdout",
+    "lightwrap",
+    "matte",
+    "metadata",
+    "zdepth"
+  ],
+  "required_stages": [
+    "source_resolution",
+    "preview_tier_build",
+    "preview_tier_validation",
+    "mid_tier_build",
+    "mid_tier_validation",
+    "final_candidate_tier_build",
+    "final_candidate_tier_validation",
+    "final_candidate_release_seal",
+    "shot_bound_render_package",
+    "render_execution_preflight",
+    "controlled_preview_render",
+    "preview_validation",
+    "synthetic_or_real_context_decision",
+    "structured_render_package",
+    "render_package_validation",
+    "comp_package",
+    "final_look_validation",
+    "delivery_candidate",
+    "final_asset_system_seal"
+  ],
+  "quality_tiers": [
+    "PREVIEW",
+    "MID",
+    "FINAL_CANDIDATE"
+  ],
+  "reuse_policy": {
+    "reuse_by_parameter_adjustment": true,
+    "shot_binding_required": true,
+    "sealed_source_mutation_forbidden": true,
+    "pass_based_comp_required": true
+  },
+  "next_action": "HFX_FACTORY_V008_HFX033_GLOW_EMISSION_PASS_SOURCE_RESOLUTION"
+}

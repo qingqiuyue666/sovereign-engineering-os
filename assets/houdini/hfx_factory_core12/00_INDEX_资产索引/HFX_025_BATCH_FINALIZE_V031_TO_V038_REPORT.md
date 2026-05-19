@@ -1,0 +1,33 @@
+# HFX_025 Batch Finalize V031 to V038 Report
+
+Generated: 2026-05-19T20:05:54
+
+Status: HFX_025_BATCH_FINALIZE_RUNNING
+
+## Preflight
+
+- PASS: HFX_021 batch report
+- PASS: HFX_021 final seal
+- PASS: Factory state
+- PASS: Factory matrix
+
+## Batch Stage Results
+
+- PASS: V031_SOURCE_RESOLUTION
+- PASS: V032_PREVIEW_BUILD
+- PASS: V033_PREVIEW_VALIDATION
+- PASS: V034_MID_BUILD
+- PASS: V035_MID_VALIDATION
+- PASS: V036_FINAL_BUILD
+- PASS: V037_FINAL_VALIDATION
+- PASS: V038_FINAL_ASSET_SEAL
+
+## Final Summary
+
+- HFX_025 long-term asset: READY
+- Release package: 300_PRODUCTION_UPGRADE/HFX_025_CHARACTER_ENERGY_FIELD/10_release/release_package
+- Release HIP: 300_PRODUCTION_UPGRADE/HFX_025_CHARACTER_ENERGY_FIELD/10_release/release_package/hip/HFX_025_CHARACTER_ENERGY_FIELD_FINAL_CANDIDATE_v038.hip
+- Next asset: HFX_028 Space Rift Tear
+- All Houdini FX top-tier complete: false
+
+Final Status: HFX_025_BATCH_FINALIZE_V031_TO_V038_PASS

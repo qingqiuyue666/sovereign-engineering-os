@@ -1,0 +1,27 @@
+{
+  "status": "HFX_033_RENDER_COMP_CONTRACT_V054_READY",
+  "asset_id": "HFX_033",
+  "asset_name": "Glow Emission Pass",
+  "required_passes": [
+    "OUT_FINAL_EMISSION_SOURCE",
+    "OUT_FINAL_THRESHOLD_MASK",
+    "OUT_FINAL_BLOOM_RADIUS",
+    "OUT_FINAL_GLOW_FALLOFF",
+    "OUT_FINAL_COLOR_TEMPERATURE",
+    "OUT_FINAL_ALPHA_MASK",
+    "OUT_FINAL_METADATA"
+  ],
+  "target_uses": [
+    "glow",
+    "emission",
+    "bloom",
+    "threshold mask",
+    "energy polish",
+    "portal polish",
+    "aura polish"
+  ],
+  "dependencies": [],
+  "comfyui_source_of_truth_forbidden": true,
+  "single_flat_beauty_only_forbidden": true,
+  "delivery_allowed": false
+}

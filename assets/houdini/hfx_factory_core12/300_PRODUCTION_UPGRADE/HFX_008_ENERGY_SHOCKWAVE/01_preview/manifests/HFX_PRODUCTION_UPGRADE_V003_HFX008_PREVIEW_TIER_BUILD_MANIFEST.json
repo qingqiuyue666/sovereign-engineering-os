@@ -1,0 +1,86 @@
+{
+  "status": "HFX_PRODUCTION_UPGRADE_V003_HFX008_PREVIEW_TIER_BUILD_PASS",
+  "generated": "2026-05-18T19:39:29",
+  "asset_id": "HFX_008",
+  "asset_name": "Energy Shockwave",
+  "tier": "PREVIEW",
+  "preview_hip": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/01_preview/hip/HFX_008_ENERGY_SHOCKWAVE_PREVIEW_TIER_v003.hip",
+  "files": [
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/01_preview/hip/HFX_008_ENERGY_SHOCKWAVE_PREVIEW_TIER_v003.hip",
+      "sha256": "475b9938cc8deead5dbf950bbd1e978c75bef94787c71b98f1d7f0153e6b318d",
+      "size_bytes": 99978
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/01_preview/manifests/HFX_008_PREVIEW_TIER_SPEC_v003.json",
+      "sha256": "e87e727ca68ab4aee28d444b1723adb0d2bf816c61621a5ed64b19e808e46563",
+      "size_bytes": 1744
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/01_preview/docs/HFX_008_PREVIEW_TIER_SPEC_v003.md",
+      "sha256": "4fc9c1155e3de4d2d288850b11fa881ecc3545266d6ca1d4f442e9f2aaf33e08",
+      "size_bytes": 846
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/01_preview/validation/HFX_008_PREVIEW_TIER_BUILD_VALIDATION_v003.md",
+      "sha256": "c779c39dd314214884bec5ff8ef98c2400a68aaa331b8e21ebfa7fd2199f31d0",
+      "size_bytes": 501
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/01_preview/docs/README_HFX_008_PREVIEW_TIER_v003.md",
+      "sha256": "e0f8ec3205f9e95f3bff8c19b3bc6da7dc562ccf156e60c1ccd2cafe1c9a4144",
+      "size_bytes": 493
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/01_preview/manifests/HFX_PRODUCTION_UPGRADE_V003_HFX008_PREVIEW_TIER_BUILD_MANIFEST.json",
+      "sha256": "4ff5c4d6d36dad3a646062fa5e91423ad8e4f4457fbca7f8a18fda8478d7d91d",
+      "size_bytes": 2441
+    }
+  ],
+  "hda": {
+    "source_hda": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/00_source/qqy_hfx_energy_shockwave_v009C.hda",
+    "hda_type": "qqy::hfx_energy_shockwave::9.0",
+    "definition_names": [
+      "qqy::hfx_energy_shockwave::9.0"
+    ]
+  },
+  "cook_results": [
+    {
+      "frame": 1,
+      "result": "PASS",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "frame": 12,
+      "result": "PASS",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "frame": 24,
+      "result": "PASS",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "frame": 48,
+      "result": "PASS",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "frame": 72,
+      "result": "PASS",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "frame": 120,
+      "result": "PASS",
+      "errors": [],
+      "warnings": []
+    }
+  ],
+  "pollution": []
+}

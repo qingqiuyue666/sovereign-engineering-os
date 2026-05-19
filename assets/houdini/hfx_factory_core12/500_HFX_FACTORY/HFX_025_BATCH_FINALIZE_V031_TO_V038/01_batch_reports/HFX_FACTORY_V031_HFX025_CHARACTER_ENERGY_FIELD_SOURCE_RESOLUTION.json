@@ -1,0 +1,28 @@
+{
+  "status": "HFX_FACTORY_V031_HFX025_CHARACTER_ENERGY_FIELD_SOURCE_RESOLUTION_PASS",
+  "asset_id": "HFX_025",
+  "asset_name": "Character Energy Field",
+  "source_type": "procedural_factory_build",
+  "required_parameters": [
+    "body_mask_source",
+    "aura_radius",
+    "aura_intensity",
+    "particle_orbit_speed",
+    "rim_light_strength",
+    "subject_holdout",
+    "lightwrap_strength",
+    "zdepth_falloff"
+  ],
+  "required_passes": [
+    "OUT_FINAL_BODY_AURA",
+    "OUT_FINAL_RIM_LIGHT_FIELD",
+    "OUT_FINAL_PARTICLE_ORBIT",
+    "OUT_FINAL_ENERGY_FILAMENTS",
+    "OUT_FINAL_SUBJECT_HOLDOUT",
+    "OUT_FINAL_LIGHTWRAP",
+    "OUT_FINAL_ZDEPTH",
+    "OUT_FINAL_ALPHA",
+    "OUT_FINAL_METADATA"
+  ],
+  "next_stage": "HFX_FACTORY_V032_HFX025_CHARACTER_ENERGY_FIELD_PREVIEW_BUILD"
+}

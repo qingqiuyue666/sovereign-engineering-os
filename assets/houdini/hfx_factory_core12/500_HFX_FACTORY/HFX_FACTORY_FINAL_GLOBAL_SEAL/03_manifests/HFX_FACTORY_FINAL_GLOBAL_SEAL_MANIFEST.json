@@ -1,0 +1,449 @@
+{
+  "status": "HFX_FACTORY_FINAL_GLOBAL_SEAL_PASS",
+  "generated": "2026-05-19T21:58:58",
+  "factory_id": "HFX_FACTORY_CORE_12",
+  "files": [
+    {
+      "path": "500_HFX_FACTORY/HFX_FACTORY_FINAL_GLOBAL_SEAL/05_release_index/HFX_FACTORY_CORE_12_RELEASE_INDEX.json",
+      "sha256": "f1f44884641afee521abbbda84766a4716c7b764ffaf4b99a9aed9a3b9c10e6a",
+      "size_bytes": 10550
+    },
+    {
+      "path": "500_HFX_FACTORY/HFX_FACTORY_FINAL_GLOBAL_SEAL/05_release_index/HFX_FACTORY_CORE_12_ASSET_TABLE.md",
+      "sha256": "e941d8dd3b4b0777d666979fa6cdcf434fdff6ceb287ba0cca254d1e03bb91ad",
+      "size_bytes": 1117
+    },
+    {
+      "path": "500_HFX_FACTORY/HFX_FACTORY_FINAL_GLOBAL_SEAL/02_validation/HFX_FACTORY_FINAL_GLOBAL_SEAL_VALIDATION.json",
+      "sha256": "93808dfd01b910f1f9e4d35e9512f3e1e1507276a9a5b7f6015b07417afe38db",
+      "size_bytes": 737
+    },
+    {
+      "path": "500_HFX_FACTORY/HFX_FACTORY_FINAL_GLOBAL_SEAL/02_validation/HFX_FACTORY_FINAL_GLOBAL_SEAL_VALIDATION.md",
+      "sha256": "4e4d45061d196efe498501d45e5cd43d25b4fa828d17d0e96737fcb7cf273a98",
+      "size_bytes": 812
+    },
+    {
+      "path": "500_HFX_FACTORY/HFX_FACTORY_FINAL_GLOBAL_SEAL/04_docs/README_HFX_FACTORY_FINAL_GLOBAL_SEAL.md",
+      "sha256": "e8a912a1e96ebb566e116711277bb0fd3474aca061e2bc9945ab475d1ecb714c",
+      "size_bytes": 452
+    },
+    {
+      "path": "00_INDEX_资产索引/HFX_FACTORY_FINAL_GLOBAL_SEAL_REPORT.md",
+      "sha256": "c079f7e51462387cedf73cc0e047212cf9df532140aaf8fb74255a5ed0fbac4c",
+      "size_bytes": 3506
+    },
+    {
+      "path": "00_INDEX_资产索引/HFX_FACTORY_STATE.json",
+      "sha256": "19d5aa7f2c1735b6b5b428b4dc0b70eec31e24b8cc68e5dba7b9fa6567470d41",
+      "size_bytes": 2100
+    },
+    {
+      "path": "00_INDEX_资产索引/HFX_FACTORY_CORE_12_ASSET_UPGRADE_MATRIX_v002.json",
+      "sha256": "15da205e2955b88fb163534e6393ad24efd3123b201fa0793a1e7ec9eab8ee40",
+      "size_bytes": 11341
+    },
+    {
+      "path": "00_INDEX_资产索引/HFX_LONG_TERM_ASSET_REGISTRY.json",
+      "sha256": "4436b09a7327309440618490f1fc4404adaa01ee677f76d324cdf33e3dd3e38f",
+      "size_bytes": 16065
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/10_release/release_package/hip/HFX_008_ENERGY_SHOCKWAVE_FINAL_TIER_v007.hip",
+      "sha256": "9493bd2f7de4cfe544d4527fb6b57ab3783e52f424a42c6befde18e505c0ef54",
+      "size_bytes": 392736
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/10_release/release_package/validation/HFX_008_ENERGY_SHOCKWAVE_FINAL_ASSET_SYSTEM_SEAL_v008.json",
+      "sha256": "2537b60a65af8c10d52af77d3951c4025670543c4250eaddc37dbb1ab01cc3a4",
+      "size_bytes": 1430
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_015_PORTAL_RING/10_release/release_package/hip/HFX_015_PORTAL_RING_FINAL_CANDIDATE_v014.hip",
+      "sha256": "61fcfff89ab6286aa9826050835a07e1ad29ffa19f2669702a7247a6d83536e0",
+      "size_bytes": 666719
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_015_PORTAL_RING/10_release/release_package/validation/HFX_015_PORTAL_RING_FINAL_ASSET_SYSTEM_SEAL_v014.json",
+      "sha256": "09ea0bdeed0d47d16275f442914bb7c76363a6c5589babd0fd474499f2751440",
+      "size_bytes": 755
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_016_HEAT_DISTORTION/10_release/release_package/hip/HFX_016_HEAT_DISTORTION_FINAL_CANDIDATE_v022.hip",
+      "sha256": "e100d3b3fa8c8ac8d140227076d5cc6306b598a34d2807420d454077407b25cb",
+      "size_bytes": 484844
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_016_HEAT_DISTORTION/10_release/release_package/validation/HFX_016_HEAT_DISTORTION_FINAL_ASSET_SYSTEM_SEAL_v022.json",
+      "sha256": "fb42c7de5f11ae31f944b8753aeaf241cfbaa5338c0a1f27f3bffcce330f0a00",
+      "size_bytes": 796
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_021_ADVANCED_PYRO_EXPLOSION/10_release/release_package/hip/HFX_021_ADVANCED_PYRO_EXPLOSION_FINAL_CANDIDATE_v030.hip",
+      "sha256": "9e8b7f11ea64635c61aaccca6a373e7e3083384a213044fd4d9c1004676a4f82",
+      "size_bytes": 689525
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_021_ADVANCED_PYRO_EXPLOSION/10_release/release_package/validation/HFX_021_ADVANCED_PYRO_EXPLOSION_FINAL_ASSET_SYSTEM_SEAL_v030.json",
+      "sha256": "3d3b9511e176ab556d68f92d56ee6de895f8dfd341d341048c0028d12f3a1dbb",
+      "size_bytes": 833
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_025_CHARACTER_ENERGY_FIELD/10_release/release_package/hip/HFX_025_CHARACTER_ENERGY_FIELD_FINAL_CANDIDATE_v038.hip",
+      "sha256": "d8e23958423efb31e062adb10ab664c09ab0a01451a2a9c32d899bef253a299c",
+      "size_bytes": 548857
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_025_CHARACTER_ENERGY_FIELD/10_release/release_package/validation/HFX_025_CHARACTER_ENERGY_FIELD_FINAL_ASSET_SYSTEM_SEAL_v038.json",
+      "sha256": "0af1b54d9cafceb4b35ad0af3629c05c6b5eb1efd47c8ac9f8df15112c6a4248",
+      "size_bytes": 831
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_028_SPACE_RIFT_TEAR/10_release/release_package/hip/HFX_028_SPACE_RIFT_TEAR_FINAL_CANDIDATE_v046.hip",
+      "sha256": "79bdb193744d99dd276013b5848988770b1cfe666f5437d6ec91908941a9037d",
+      "size_bytes": 577132
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_028_SPACE_RIFT_TEAR/10_release/release_package/validation/HFX_028_SPACE_RIFT_TEAR_FINAL_ASSET_SYSTEM_SEAL_v046.json",
+      "sha256": "e6809ae3d843a39732d8c500bb85f3a277f2aa71bca4d40492d8c64b78b4f3a5",
+      "size_bytes": 781
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_033_GLOW_EMISSION_PASS/10_release/release_package/hip/HFX_033_GLOW_EMISSION_PASS_FINAL_CANDIDATE_v054.hip",
+      "sha256": "9cc9516bf109d873073876d2746b19305fc52824a7f8add2826cbdeed5fd024b",
+      "size_bytes": 521070
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_033_GLOW_EMISSION_PASS/10_release/release_package/validation/HFX_033_GLOW_EMISSION_PASS_FINAL_ASSET_SYSTEM_SEAL_v054.json",
+      "sha256": "59d6c532dd2010fec99bb713ee459c4409098482d26e8096b152f4be07c4ed0e",
+      "size_bytes": 803
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_036_ALPHA_HOLDOUT_MATTE/10_release/release_package/hip/HFX_036_ALPHA_HOLDOUT_MATTE_FINAL_CANDIDATE_v062.hip",
+      "sha256": "546662e5275c3d402f6b565fb5178e3649811db106205272311eb675715d5dd8",
+      "size_bytes": 491888
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_036_ALPHA_HOLDOUT_MATTE/10_release/release_package/validation/HFX_036_ALPHA_HOLDOUT_MATTE_FINAL_ASSET_SYSTEM_SEAL_v062.json",
+      "sha256": "deceba4186128390185e221b17594425c1043bb1490e7a6c3f71ec5692e57540",
+      "size_bytes": 814
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_037_LIGHTWRAP_RIM_INTERACTION/10_release/release_package/hip/HFX_037_LIGHTWRAP_RIM_INTERACTION_FINAL_CANDIDATE_v070.hip",
+      "sha256": "588b6b0ecbde6cd43f4d388126e641349b29cf4f003e9224ed873dcc2600deaf",
+      "size_bytes": 497254
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_037_LIGHTWRAP_RIM_INTERACTION/10_release/release_package/validation/HFX_037_LIGHTWRAP_RIM_INTERACTION_FINAL_ASSET_SYSTEM_SEAL_v070.json",
+      "sha256": "6c4279092fc8776466756a60f087277e0cc5eb19637181fcf9b517be99daed0c",
+      "size_bytes": 847
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION/10_release/release_package/hip/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION_FINAL_CANDIDATE_v078.hip",
+      "sha256": "7047b8bbf777b649fde64a591dfafaebaaab9562c0ef1c480bcfa5bc5e412611",
+      "size_bytes": 487008
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION/10_release/release_package/validation/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION_FINAL_ASSET_SYSTEM_SEAL_v078.json",
+      "sha256": "e360f31dde79c402cec2c903b459c4676b4873588333846357574273cb195cd1",
+      "size_bytes": 876
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_027_SUMMONING_PORTAL_GATE/10_release/release_package/hip/HFX_027_SUMMONING_PORTAL_GATE_FINAL_CANDIDATE_v086.hip",
+      "sha256": "946f593b59077a8e19a92636c2f2cb8069c7407fba180b886945601af93a5577",
+      "size_bytes": 568509
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_027_SUMMONING_PORTAL_GATE/10_release/release_package/validation/HFX_027_SUMMONING_PORTAL_GATE_FINAL_ASSET_SYSTEM_SEAL_v086.json",
+      "sha256": "cc94c9c66af52fad58af0b50081ada6ab5b3201a1c6328d070f4307970151642",
+      "size_bytes": 835
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_029_BLACK_HOLE_ACCRETION_DISK/10_release/release_package/hip/HFX_029_BLACK_HOLE_ACCRETION_DISK_FINAL_CANDIDATE_v094.hip",
+      "sha256": "655b26454bd64b7dca1e1a9a3a5ceeab224962cf31dd0afa0a35628ad2974c82",
+      "size_bytes": 534138
+    },
+    {
+      "path": "300_PRODUCTION_UPGRADE/HFX_029_BLACK_HOLE_ACCRETION_DISK/10_release/release_package/validation/HFX_029_BLACK_HOLE_ACCRETION_DISK_FINAL_ASSET_SYSTEM_SEAL_v094.json",
+      "sha256": "7482bb300feab7fd81d51776fd375c7fb4654369f8f4e1c360dad9c05f8e5bc1",
+      "size_bytes": 809
+    },
+    {
+      "path": "500_HFX_FACTORY/HFX_FACTORY_FINAL_GLOBAL_SEAL/03_manifests/HFX_FACTORY_FINAL_GLOBAL_SEAL_MANIFEST.json",
+      "sha256": "7d6edb1fa8ba63ade3718c11435464a0a435f85646aee96f2a472a04c331ec09",
+      "size_bytes": 20019
+    }
+  ],
+  "asset_checks": [
+    {
+      "asset_id": "HFX_008",
+      "asset_name": "Energy Shockwave",
+      "asset_class": "energy_shockwave",
+      "batch_report_exists": true,
+      "batch_report_pass": true,
+      "release_hip_count": 1,
+      "release_hip_exists": true,
+      "final_seal_count": 1,
+      "final_seal_exists": true,
+      "registry_entry_exists": true,
+      "registry_quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+      "registry_role": "FX_FACTORY_CORE_ASSET",
+      "release_hips": [
+        "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/10_release/release_package/hip/HFX_008_ENERGY_SHOCKWAVE_FINAL_TIER_v007.hip"
+      ],
+      "final_seals": [
+        "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/10_release/release_package/validation/HFX_008_ENERGY_SHOCKWAVE_FINAL_ASSET_SYSTEM_SEAL_v008.json"
+      ],
+      "pass": true
+    },
+    {
+      "asset_id": "HFX_015",
+      "asset_name": "Portal Ring",
+      "asset_class": "portal_ring",
+      "batch_report_exists": true,
+      "batch_report_pass": true,
+      "release_hip_count": 1,
+      "release_hip_exists": true,
+      "final_seal_count": 1,
+      "final_seal_exists": true,
+      "registry_entry_exists": true,
+      "registry_quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+      "registry_role": "FX_FACTORY_CORE_ASSET",
+      "release_hips": [
+        "300_PRODUCTION_UPGRADE/HFX_015_PORTAL_RING/10_release/release_package/hip/HFX_015_PORTAL_RING_FINAL_CANDIDATE_v014.hip"
+      ],
+      "final_seals": [
+        "300_PRODUCTION_UPGRADE/HFX_015_PORTAL_RING/10_release/release_package/validation/HFX_015_PORTAL_RING_FINAL_ASSET_SYSTEM_SEAL_v014.json"
+      ],
+      "pass": true
+    },
+    {
+      "asset_id": "HFX_016",
+      "asset_name": "Heat Distortion",
+      "asset_class": "heat_distortion",
+      "batch_report_exists": true,
+      "batch_report_pass": true,
+      "release_hip_count": 1,
+      "release_hip_exists": true,
+      "final_seal_count": 1,
+      "final_seal_exists": true,
+      "registry_entry_exists": true,
+      "registry_quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+      "registry_role": "FX_FACTORY_CORE_ASSET",
+      "release_hips": [
+        "300_PRODUCTION_UPGRADE/HFX_016_HEAT_DISTORTION/10_release/release_package/hip/HFX_016_HEAT_DISTORTION_FINAL_CANDIDATE_v022.hip"
+      ],
+      "final_seals": [
+        "300_PRODUCTION_UPGRADE/HFX_016_HEAT_DISTORTION/10_release/release_package/validation/HFX_016_HEAT_DISTORTION_FINAL_ASSET_SYSTEM_SEAL_v022.json"
+      ],
+      "pass": true
+    },
+    {
+      "asset_id": "HFX_021",
+      "asset_name": "Advanced Pyro Explosion",
+      "asset_class": "pyro_explosion",
+      "batch_report_exists": true,
+      "batch_report_pass": true,
+      "release_hip_count": 1,
+      "release_hip_exists": true,
+      "final_seal_count": 1,
+      "final_seal_exists": true,
+      "registry_entry_exists": true,
+      "registry_quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+      "registry_role": "FX_FACTORY_CORE_ASSET",
+      "release_hips": [
+        "300_PRODUCTION_UPGRADE/HFX_021_ADVANCED_PYRO_EXPLOSION/10_release/release_package/hip/HFX_021_ADVANCED_PYRO_EXPLOSION_FINAL_CANDIDATE_v030.hip"
+      ],
+      "final_seals": [
+        "300_PRODUCTION_UPGRADE/HFX_021_ADVANCED_PYRO_EXPLOSION/10_release/release_package/validation/HFX_021_ADVANCED_PYRO_EXPLOSION_FINAL_ASSET_SYSTEM_SEAL_v030.json"
+      ],
+      "pass": true
+    },
+    {
+      "asset_id": "HFX_025",
+      "asset_name": "Character Energy Field",
+      "asset_class": "character_energy_field",
+      "batch_report_exists": true,
+      "batch_report_pass": true,
+      "release_hip_count": 1,
+      "release_hip_exists": true,
+      "final_seal_count": 1,
+      "final_seal_exists": true,
+      "registry_entry_exists": true,
+      "registry_quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+      "registry_role": "FX_FACTORY_CORE_ASSET",
+      "release_hips": [
+        "300_PRODUCTION_UPGRADE/HFX_025_CHARACTER_ENERGY_FIELD/10_release/release_package/hip/HFX_025_CHARACTER_ENERGY_FIELD_FINAL_CANDIDATE_v038.hip"
+      ],
+      "final_seals": [
+        "300_PRODUCTION_UPGRADE/HFX_025_CHARACTER_ENERGY_FIELD/10_release/release_package/validation/HFX_025_CHARACTER_ENERGY_FIELD_FINAL_ASSET_SYSTEM_SEAL_v038.json"
+      ],
+      "pass": true
+    },
+    {
+      "asset_id": "HFX_028",
+      "asset_name": "Space Rift Tear",
+      "asset_class": "space_rift",
+      "batch_report_exists": true,
+      "batch_report_pass": true,
+      "release_hip_count": 1,
+      "release_hip_exists": true,
+      "final_seal_count": 1,
+      "final_seal_exists": true,
+      "registry_entry_exists": true,
+      "registry_quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+      "registry_role": "FX_FACTORY_CORE_ASSET",
+      "release_hips": [
+        "300_PRODUCTION_UPGRADE/HFX_028_SPACE_RIFT_TEAR/10_release/release_package/hip/HFX_028_SPACE_RIFT_TEAR_FINAL_CANDIDATE_v046.hip"
+      ],
+      "final_seals": [
+        "300_PRODUCTION_UPGRADE/HFX_028_SPACE_RIFT_TEAR/10_release/release_package/validation/HFX_028_SPACE_RIFT_TEAR_FINAL_ASSET_SYSTEM_SEAL_v046.json"
+      ],
+      "pass": true
+    },
+    {
+      "asset_id": "HFX_033",
+      "asset_name": "Glow Emission Pass",
+      "asset_class": "glow_emission",
+      "batch_report_exists": true,
+      "batch_report_pass": true,
+      "release_hip_count": 1,
+      "release_hip_exists": true,
+      "final_seal_count": 1,
+      "final_seal_exists": true,
+      "registry_entry_exists": true,
+      "registry_quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+      "registry_role": "FX_FACTORY_CORE_ASSET",
+      "release_hips": [
+        "300_PRODUCTION_UPGRADE/HFX_033_GLOW_EMISSION_PASS/10_release/release_package/hip/HFX_033_GLOW_EMISSION_PASS_FINAL_CANDIDATE_v054.hip"
+      ],
+      "final_seals": [
+        "300_PRODUCTION_UPGRADE/HFX_033_GLOW_EMISSION_PASS/10_release/release_package/validation/HFX_033_GLOW_EMISSION_PASS_FINAL_ASSET_SYSTEM_SEAL_v054.json"
+      ],
+      "pass": true
+    },
+    {
+      "asset_id": "HFX_036",
+      "asset_name": "Alpha Holdout Matte",
+      "asset_class": "alpha_holdout",
+      "batch_report_exists": true,
+      "batch_report_pass": true,
+      "release_hip_count": 1,
+      "release_hip_exists": true,
+      "final_seal_count": 1,
+      "final_seal_exists": true,
+      "registry_entry_exists": true,
+      "registry_quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+      "registry_role": "FX_FACTORY_CORE_ASSET",
+      "release_hips": [
+        "300_PRODUCTION_UPGRADE/HFX_036_ALPHA_HOLDOUT_MATTE/10_release/release_package/hip/HFX_036_ALPHA_HOLDOUT_MATTE_FINAL_CANDIDATE_v062.hip"
+      ],
+      "final_seals": [
+        "300_PRODUCTION_UPGRADE/HFX_036_ALPHA_HOLDOUT_MATTE/10_release/release_package/validation/HFX_036_ALPHA_HOLDOUT_MATTE_FINAL_ASSET_SYSTEM_SEAL_v062.json"
+      ],
+      "pass": true
+    },
+    {
+      "asset_id": "HFX_037",
+      "asset_name": "LightWrap Rim Interaction",
+      "asset_class": "lightwrap_rim",
+      "batch_report_exists": true,
+      "batch_report_pass": true,
+      "release_hip_count": 1,
+      "release_hip_exists": true,
+      "final_seal_count": 1,
+      "final_seal_exists": true,
+      "registry_entry_exists": true,
+      "registry_quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+      "registry_role": "FX_FACTORY_CORE_ASSET",
+      "release_hips": [
+        "300_PRODUCTION_UPGRADE/HFX_037_LIGHTWRAP_RIM_INTERACTION/10_release/release_package/hip/HFX_037_LIGHTWRAP_RIM_INTERACTION_FINAL_CANDIDATE_v070.hip"
+      ],
+      "final_seals": [
+        "300_PRODUCTION_UPGRADE/HFX_037_LIGHTWRAP_RIM_INTERACTION/10_release/release_package/validation/HFX_037_LIGHTWRAP_RIM_INTERACTION_FINAL_ASSET_SYSTEM_SEAL_v070.json"
+      ],
+      "pass": true
+    },
+    {
+      "asset_id": "HFX_038",
+      "asset_name": "ContactShadow Ground Integration",
+      "asset_class": "contact_shadow",
+      "batch_report_exists": true,
+      "batch_report_pass": true,
+      "release_hip_count": 1,
+      "release_hip_exists": true,
+      "final_seal_count": 1,
+      "final_seal_exists": true,
+      "registry_entry_exists": true,
+      "registry_quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+      "registry_role": "FX_FACTORY_CORE_ASSET",
+      "release_hips": [
+        "300_PRODUCTION_UPGRADE/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION/10_release/release_package/hip/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION_FINAL_CANDIDATE_v078.hip"
+      ],
+      "final_seals": [
+        "300_PRODUCTION_UPGRADE/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION/10_release/release_package/validation/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION_FINAL_ASSET_SYSTEM_SEAL_v078.json"
+      ],
+      "pass": true
+    },
+    {
+      "asset_id": "HFX_027",
+      "asset_name": "Summoning Portal Gate",
+      "asset_class": "summoning_portal_gate",
+      "batch_report_exists": true,
+      "batch_report_pass": true,
+      "release_hip_count": 1,
+      "release_hip_exists": true,
+      "final_seal_count": 1,
+      "final_seal_exists": true,
+      "registry_entry_exists": true,
+      "registry_quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+      "registry_role": "FX_FACTORY_CORE_ASSET",
+      "release_hips": [
+        "300_PRODUCTION_UPGRADE/HFX_027_SUMMONING_PORTAL_GATE/10_release/release_package/hip/HFX_027_SUMMONING_PORTAL_GATE_FINAL_CANDIDATE_v086.hip"
+      ],
+      "final_seals": [
+        "300_PRODUCTION_UPGRADE/HFX_027_SUMMONING_PORTAL_GATE/10_release/release_package/validation/HFX_027_SUMMONING_PORTAL_GATE_FINAL_ASSET_SYSTEM_SEAL_v086.json"
+      ],
+      "pass": true
+    },
+    {
+      "asset_id": "HFX_029",
+      "asset_name": "Black Hole Accretion Disk",
+      "asset_class": "black_hole_accretion_disk",
+      "batch_report_exists": true,
+      "batch_report_pass": true,
+      "release_hip_count": 1,
+      "release_hip_exists": true,
+      "final_seal_count": 1,
+      "final_seal_exists": true,
+      "registry_entry_exists": true,
+      "registry_quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+      "registry_role": "FX_FACTORY_CORE_ASSET",
+      "release_hips": [
+        "300_PRODUCTION_UPGRADE/HFX_029_BLACK_HOLE_ACCRETION_DISK/10_release/release_package/hip/HFX_029_BLACK_HOLE_ACCRETION_DISK_FINAL_CANDIDATE_v094.hip"
+      ],
+      "final_seals": [
+        "300_PRODUCTION_UPGRADE/HFX_029_BLACK_HOLE_ACCRETION_DISK/10_release/release_package/validation/HFX_029_BLACK_HOLE_ACCRETION_DISK_FINAL_ASSET_SYSTEM_SEAL_v094.json"
+      ],
+      "pass": true
+    }
+  ],
+  "global_checks": [
+    {
+      "registry_exists": true,
+      "factory_state_exists": true,
+      "matrix_exists": true,
+      "registry_asset_count": 12,
+      "required_asset_count": 12,
+      "factory_state_completed_core_asset_count": 12,
+      "factory_state_pending_core_asset_count": 0,
+      "factory_state_all_houdini_fx_top_tier_complete": true,
+      "factory_state_next_stage": "HFX_FACTORY_FINAL_GLOBAL_SEAL",
+      "matrix_completed_asset_count": 12,
+      "matrix_pending_asset_count": 0,
+      "matrix_all_houdini_fx_top_tier_complete": true,
+      "pass": true
+    }
+  ],
+  "pollution": []
+}

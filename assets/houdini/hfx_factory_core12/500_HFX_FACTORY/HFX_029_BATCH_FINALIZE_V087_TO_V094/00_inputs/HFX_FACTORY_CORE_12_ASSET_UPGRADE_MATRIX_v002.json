@@ -1,0 +1,368 @@
+{
+  "status": "HFX_FACTORY_CORE_12_ASSET_UPGRADE_MATRIX_V002_READY",
+  "generated": "2026-05-19T18:35:07",
+  "factory_name": "Houdini Production FX Factory",
+  "reference_asset": {
+    "asset_id": "HFX_008",
+    "asset_name": "Energy Shockwave",
+    "ready": true,
+    "role": "reference_asset"
+  },
+  "asset_count": 12,
+  "completed_asset_count": 11,
+  "pending_asset_count": 1,
+  "factory_stages": [
+    "source_resolution",
+    "preview_tier_build",
+    "preview_tier_validation",
+    "mid_tier_build",
+    "mid_tier_validation",
+    "final_candidate_tier_build",
+    "final_candidate_tier_validation",
+    "final_candidate_release_seal",
+    "shot_bound_render_package",
+    "render_execution_preflight",
+    "controlled_preview_render",
+    "preview_validation",
+    "synthetic_or_real_context_decision",
+    "structured_render_package",
+    "render_package_validation",
+    "comp_package",
+    "final_look_validation",
+    "delivery_candidate",
+    "final_asset_system_seal"
+  ],
+  "core_assets": [
+    {
+      "asset_id": "HFX_008",
+      "asset_name": "Energy Shockwave",
+      "asset_class": "energy_shockwave",
+      "upgrade_order": 1,
+      "tier": "REFERENCE_COMPLETE",
+      "factory_status": "SEALED_REFERENCE",
+      "complexity": "HIGH",
+      "priority_reason": "already completed; used as protocol reference",
+      "special_parameters": [
+        "shockwave_radius",
+        "ring_width",
+        "energy_decay",
+        "radial_speed",
+        "dust_contact_amount"
+      ],
+      "required_passes_extra": [
+        "dust",
+        "distortion_vector"
+      ],
+      "next_action": "KEEP_AS_REFERENCE_DO_NOT_REBUILD"
+    },
+    {
+      "asset_id": "HFX_015",
+      "asset_name": "Portal Ring",
+      "asset_class": "portal_ring",
+      "upgrade_order": 2,
+      "tier": "PRIMARY_BUILD_NEXT",
+      "factory_status": "SEALED_CORE_ASSET",
+      "complexity": "HIGH",
+      "priority_reason": "highest reuse value for transitions, magic gates, character entrances, environment portals",
+      "special_parameters": [
+        "portal_radius",
+        "ring_thickness",
+        "edge_noise",
+        "inner_depth",
+        "spark_density",
+        "portal_rotation_speed",
+        "rim_emission"
+      ],
+      "required_passes_extra": [
+        "emission",
+        "distortion_vector",
+        "alpha",
+        "zdepth",
+        "lightwrap"
+      ],
+      "next_action": "HFX_FACTORY_V003_HFX015_PORTAL_RING_SOURCE_RESOLUTION",
+      "status": "REFERENCE_COMPLETE"
+    },
+    {
+      "asset_id": "HFX_016",
+      "asset_name": "Heat Distortion",
+      "asset_class": "heat_distortion",
+      "upgrade_order": 3,
+      "tier": "PRIMARY_BUILD_NEXT",
+      "factory_status": "SEALED_CORE_ASSET",
+      "complexity": "MEDIUM",
+      "priority_reason": "critical integration layer for energy, fire, portal, explosion, space-rift assets",
+      "special_parameters": [
+        "distortion_strength",
+        "distortion_scale",
+        "heat_rise_speed",
+        "noise_frequency",
+        "falloff_distance"
+      ],
+      "required_passes_extra": [
+        "distortion_vector",
+        "zdepth",
+        "alpha"
+      ],
+      "next_action": "HFX_FACTORY_V004_HFX016_HEAT_DISTORTION_SOURCE_RESOLUTION",
+      "status": "REFERENCE_COMPLETE"
+    },
+    {
+      "asset_id": "HFX_021",
+      "asset_name": "Advanced Pyro Explosion",
+      "asset_class": "pyro_explosion",
+      "upgrade_order": 4,
+      "tier": "PRIMARY_BUILD_NEXT",
+      "factory_status": "SEALED_CORE_ASSET",
+      "complexity": "VERY_HIGH",
+      "priority_reason": "core cinematic FX class; needs smoke/fire/debris/cache discipline",
+      "special_parameters": [
+        "blast_radius",
+        "fire_amount",
+        "smoke_amount",
+        "fuel",
+        "temperature",
+        "buoyancy",
+        "debris_amount",
+        "shockwave_link"
+      ],
+      "required_passes_extra": [
+        "fire",
+        "smoke",
+        "debris",
+        "emission",
+        "zdepth",
+        "contact_shadow"
+      ],
+      "next_action": "HFX_FACTORY_V005_HFX021_ADVANCED_PYRO_EXPLOSION_SOURCE_RESOLUTION",
+      "status": "REFERENCE_COMPLETE"
+    },
+    {
+      "asset_id": "HFX_025",
+      "asset_name": "Character Energy Field",
+      "asset_class": "character_energy_field",
+      "upgrade_order": 5,
+      "tier": "PRIMARY_BUILD_NEXT",
+      "factory_status": "SEALED_CORE_ASSET",
+      "complexity": "HIGH",
+      "priority_reason": "essential for anime / superhero / energy aura character shots",
+      "special_parameters": [
+        "body_mask_source",
+        "aura_radius",
+        "aura_intensity",
+        "particle_orbit_speed",
+        "rim_light_strength",
+        "subject_holdout"
+      ],
+      "required_passes_extra": [
+        "emission",
+        "alpha",
+        "lightwrap",
+        "holdout",
+        "zdepth"
+      ],
+      "next_action": "HFX_FACTORY_V006_HFX025_CHARACTER_ENERGY_FIELD_SOURCE_RESOLUTION",
+      "status": "REFERENCE_COMPLETE"
+    },
+    {
+      "asset_id": "HFX_028",
+      "asset_name": "Space Rift Tear",
+      "asset_class": "space_rift",
+      "upgrade_order": 6,
+      "tier": "PRIMARY_BUILD_NEXT",
+      "factory_status": "SEALED_CORE_ASSET",
+      "complexity": "HIGH",
+      "priority_reason": "high visual value for anime/cinematic spatial rupture and transition shots",
+      "special_parameters": [
+        "rift_curve",
+        "edge_emission",
+        "inner_void_depth",
+        "tear_width",
+        "distortion_strength",
+        "particle_suction"
+      ],
+      "required_passes_extra": [
+        "emission",
+        "distortion_vector",
+        "alpha",
+        "zdepth",
+        "lightwrap"
+      ],
+      "next_action": "HFX_FACTORY_V007_HFX028_SPACE_RIFT_TEAR_SOURCE_RESOLUTION",
+      "status": "REFERENCE_COMPLETE"
+    },
+    {
+      "asset_id": "HFX_033",
+      "asset_name": "Glow Emission Pass",
+      "asset_class": "glow_emission",
+      "upgrade_order": 7,
+      "tier": "PRIMARY_BUILD_NEXT",
+      "factory_status": "SEALED_CORE_ASSET",
+      "complexity": "MEDIUM",
+      "priority_reason": "shared emission layer for all energy/magic/portal assets",
+      "special_parameters": [
+        "emission_threshold",
+        "bloom_radius",
+        "glow_falloff",
+        "color_temperature",
+        "mask_softness"
+      ],
+      "required_passes_extra": [
+        "emission",
+        "alpha",
+        "metadata"
+      ],
+      "next_action": "HFX_FACTORY_V008_HFX033_GLOW_EMISSION_PASS_SOURCE_RESOLUTION",
+      "status": "REFERENCE_COMPLETE"
+    },
+    {
+      "asset_id": "HFX_036",
+      "asset_name": "Alpha Holdout Matte",
+      "asset_class": "alpha_holdout",
+      "upgrade_order": 8,
+      "tier": "PRIMARY_BUILD_NEXT",
+      "factory_status": "SEALED_CORE_ASSET",
+      "complexity": "MEDIUM",
+      "priority_reason": "required for subject/FX occlusion and green-screen integration",
+      "special_parameters": [
+        "matte_source",
+        "edge_expand",
+        "edge_feather",
+        "holdout_strength",
+        "temporal_smoothing"
+      ],
+      "required_passes_extra": [
+        "alpha",
+        "holdout",
+        "matte"
+      ],
+      "next_action": "HFX_FACTORY_V009_HFX036_ALPHA_HOLDOUT_MATTE_SOURCE_RESOLUTION",
+      "status": "REFERENCE_COMPLETE"
+    },
+    {
+      "asset_id": "HFX_037",
+      "asset_name": "LightWrap Rim Interaction",
+      "asset_class": "lightwrap_rim",
+      "upgrade_order": 9,
+      "tier": "PRIMARY_BUILD_NEXT",
+      "factory_status": "SEALED_CORE_ASSET",
+      "complexity": "MEDIUM",
+      "priority_reason": "critical for integrating CG FX around real/green-screen subjects",
+      "special_parameters": [
+        "wrap_width",
+        "wrap_intensity",
+        "rim_color",
+        "subject_edge_mask",
+        "falloff_curve"
+      ],
+      "required_passes_extra": [
+        "lightwrap",
+        "alpha",
+        "emission",
+        "metadata"
+      ],
+      "next_action": "HFX_FACTORY_V010_HFX037_LIGHTWRAP_RIM_INTERACTION_SOURCE_RESOLUTION",
+      "status": "REFERENCE_COMPLETE"
+    },
+    {
+      "asset_id": "HFX_038",
+      "asset_name": "ContactShadow Ground Integration",
+      "asset_class": "contact_shadow",
+      "upgrade_order": 10,
+      "tier": "PRIMARY_BUILD_NEXT",
+      "factory_status": "SEALED_CORE_ASSET",
+      "complexity": "MEDIUM",
+      "priority_reason": "prevents floating FX; required for grounded cinematic integration",
+      "special_parameters": [
+        "ground_plane_source",
+        "shadow_radius",
+        "shadow_density",
+        "contact_falloff",
+        "surface_roughness"
+      ],
+      "required_passes_extra": [
+        "contact_shadow",
+        "zdepth",
+        "matte"
+      ],
+      "next_action": "HFX_FACTORY_V011_HFX038_CONTACTSHADOW_GROUND_INTEGRATION_SOURCE_RESOLUTION",
+      "status": "REFERENCE_COMPLETE"
+    },
+    {
+      "asset_id": "HFX_027",
+      "asset_name": "Summoning Portal Gate",
+      "asset_class": "summoning_portal_gate",
+      "upgrade_order": 11,
+      "tier": "PRIMARY_BUILD_NEXT",
+      "factory_status": "SEALED_CORE_ASSET",
+      "complexity": "VERY_HIGH",
+      "priority_reason": "complex composite asset built from portal/rune/emission/distortion dependencies",
+      "special_parameters": [
+        "gate_radius",
+        "rune_count",
+        "rune_rotation",
+        "floor_circle_radius",
+        "spark_density",
+        "summon_column_height"
+      ],
+      "required_passes_extra": [
+        "emission",
+        "distortion_vector",
+        "alpha",
+        "zdepth",
+        "contact_shadow",
+        "lightwrap"
+      ],
+      "depends_on": [
+        "HFX_015",
+        "HFX_033",
+        "HFX_037",
+        "HFX_038"
+      ],
+      "next_action": "HFX_FACTORY_V012_HFX027_SUMMONING_PORTAL_GATE_SOURCE_RESOLUTION",
+      "status": "REFERENCE_COMPLETE"
+    },
+    {
+      "asset_id": "HFX_029",
+      "asset_name": "Black Hole Accretion Disk",
+      "asset_class": "black_hole_accretion",
+      "upgrade_order": 12,
+      "tier": "PRIMARY_BUILD_NEXT",
+      "factory_status": "PENDING_FACTORY_UPGRADE",
+      "complexity": "VERY_HIGH",
+      "priority_reason": "advanced lensing/space effect; should be built after distortion/emission/rift support layers",
+      "special_parameters": [
+        "event_horizon_radius",
+        "accretion_disk_width",
+        "disk_rotation_speed",
+        "lensing_strength",
+        "particle_suction",
+        "background_distortion"
+      ],
+      "required_passes_extra": [
+        "emission",
+        "distortion_vector",
+        "zdepth",
+        "alpha",
+        "metadata"
+      ],
+      "depends_on": [
+        "HFX_016",
+        "HFX_028",
+        "HFX_033"
+      ],
+      "next_action": "HFX_FACTORY_V013_HFX029_BLACK_HOLE_ACCRETION_DISK_SOURCE_RESOLUTION"
+    }
+  ],
+  "policy": {
+    "do_not_rebuild_hfx008": true,
+    "use_hfx008_as_reference_template": true,
+    "upgrade_assets_by_order": true,
+    "support_assets_before_complex_composite_assets": true,
+    "sealed_source_mutation_forbidden": true,
+    "node_rewire_for_shot_variation_forbidden": true,
+    "parameter_adjustment_required_for_reuse": true
+  },
+  "next_stage": "HFX_FACTORY_V087_HFX029_BLACK_HOLE_ACCRETION_DISK_SOURCE_RESOLUTION",
+  "next_asset_to_build": "HFX_029"
+}

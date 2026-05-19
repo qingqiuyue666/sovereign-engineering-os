@@ -1,0 +1,142 @@
+{
+  "status": "HFX_B03_DESTRUCTION_CLOTH_FLUID_V003_TRIGGER_ANIMATION_PASS",
+  "generated": "2026-05-17T18:47:06",
+  "assets": [
+    {
+      "asset": "HFX_017_Building_Fracture_Collapse",
+      "rel": "11_大规模破坏_建筑碎裂/HFX_017_Building_Fracture_Collapse",
+      "result": "PASS",
+      "trigger_frame": 18,
+      "duration": 96,
+      "safe_mode": "NO_VEX",
+      "main_out": "OUT_COLLAPSE_MAIN",
+      "layers": [
+        "OUT_LARGE_CHUNKS",
+        "OUT_SMALL_CHUNKS",
+        "OUT_DUST_PROXY",
+        "OUT_TRIGGER_METADATA"
+      ],
+      "hip": "11_大规模破坏_建筑碎裂/HFX_017_Building_Fracture_Collapse/01_hip/HFX_017_Building_Fracture_Collapse_v003.hip",
+      "readme_v003": "11_大规模破坏_建筑碎裂/HFX_017_Building_Fracture_Collapse/05_notes/README_v003.md"
+    },
+    {
+      "asset": "HFX_018_Glass_Shatter_Burst",
+      "rel": "11_大规模破坏_建筑碎裂/HFX_018_Glass_Shatter_Burst",
+      "result": "PASS",
+      "trigger_frame": 12,
+      "duration": 64,
+      "safe_mode": "LIGHT_VEX",
+      "main_out": "OUT_GLASS_SHATTER_MAIN",
+      "layers": [
+        "OUT_LARGE_SHARDS",
+        "OUT_SMALL_SHARDS",
+        "OUT_GLASS_DUST",
+        "OUT_TRIGGER_METADATA"
+      ],
+      "hip": "11_大规模破坏_建筑碎裂/HFX_018_Glass_Shatter_Burst/01_hip/HFX_018_Glass_Shatter_Burst_v003.hip",
+      "readme_v003": "11_大规模破坏_建筑碎裂/HFX_018_Glass_Shatter_Burst/05_notes/README_v003.md"
+    },
+    {
+      "asset": "HFX_019_Vellum_Cape_Cloth_Sim",
+      "rel": "12_布料披风_角色动力学/HFX_019_Vellum_Cape_Cloth_Sim",
+      "result": "PASS",
+      "trigger_frame": 1,
+      "duration": 180,
+      "safe_mode": "LIGHT_VEX",
+      "main_out": "OUT_CLOTH_MAIN",
+      "layers": [
+        "OUT_CLOTH_LOWRES_PROXY",
+        "OUT_PINNED_POINTS",
+        "OUT_WIND_FIELD_PROXY",
+        "OUT_TRIGGER_METADATA"
+      ],
+      "hip": "12_布料披风_角色动力学/HFX_019_Vellum_Cape_Cloth_Sim/01_hip/HFX_019_Vellum_Cape_Cloth_Sim_v003.hip",
+      "readme_v003": "12_布料披风_角色动力学/HFX_019_Vellum_Cape_Cloth_Sim/05_notes/README_v003.md"
+    },
+    {
+      "asset": "HFX_020_FLIP_Water_Splash",
+      "rel": "13_水体液体_FLIP/HFX_020_FLIP_Water_Splash",
+      "result": "PASS",
+      "trigger_frame": 10,
+      "duration": 88,
+      "safe_mode": "LIGHT_VEX",
+      "main_out": "OUT_WATER_SPLASH_MAIN",
+      "layers": [
+        "OUT_MESH_SURFACE",
+        "OUT_DROPLETS",
+        "OUT_WHITEWATER_PROXY",
+        "OUT_TRIGGER_METADATA"
+      ],
+      "hip": "13_水体液体_FLIP/HFX_020_FLIP_Water_Splash/01_hip/HFX_020_FLIP_Water_Splash_v003.hip",
+      "readme_v003": "13_水体液体_FLIP/HFX_020_FLIP_Water_Splash/05_notes/README_v003.md"
+    },
+    {
+      "asset": "HFX_021_Advanced_Pyro_Explosion",
+      "rel": "14_高级爆炸_Pyro/HFX_021_Advanced_Pyro_Explosion",
+      "result": "PASS",
+      "trigger_frame": 14,
+      "duration": 120,
+      "safe_mode": "LIGHT_VEX",
+      "main_out": "OUT_PYRO_EXPLOSION_MAIN",
+      "layers": [
+        "OUT_FIRE_CORE",
+        "OUT_SMOKE_ROLL",
+        "OUT_BLAST_MASK",
+        "OUT_TRIGGER_METADATA"
+      ],
+      "hip": "14_高级爆炸_Pyro/HFX_021_Advanced_Pyro_Explosion/01_hip/HFX_021_Advanced_Pyro_Explosion_v003.hip",
+      "readme_v003": "14_高级爆炸_Pyro/HFX_021_Advanced_Pyro_Explosion/05_notes/README_v003.md"
+    },
+    {
+      "asset": "HFX_022_Storm_Cloud_Volume",
+      "rel": "15_风暴云_环境体积/HFX_022_Storm_Cloud_Volume",
+      "result": "PASS",
+      "trigger_frame": 1,
+      "duration": 180,
+      "safe_mode": "LIGHT_VEX",
+      "main_out": "OUT_STORM_CLOUD_MAIN",
+      "layers": [
+        "OUT_DENSITY_VOLUME",
+        "OUT_LIGHTING_MASK",
+        "OUT_EDGE_BREAKUP",
+        "OUT_TRIGGER_METADATA"
+      ],
+      "hip": "15_风暴云_环境体积/HFX_022_Storm_Cloud_Volume/01_hip/HFX_022_Storm_Cloud_Volume_v003.hip",
+      "readme_v003": "15_风暴云_环境体积/HFX_022_Storm_Cloud_Volume/05_notes/README_v003.md"
+    },
+    {
+      "asset": "HFX_023_Ground_Collapse_Sinkhole",
+      "rel": "16_地面塌陷_岩层崩解/HFX_023_Ground_Collapse_Sinkhole",
+      "result": "PASS",
+      "trigger_frame": 16,
+      "duration": 110,
+      "safe_mode": "LIGHT_VEX",
+      "main_out": "OUT_GROUND_COLLAPSE_MAIN",
+      "layers": [
+        "OUT_TERRAIN_PLATES",
+        "OUT_FALLING_ROCKS",
+        "OUT_CRACK_MASK",
+        "OUT_TRIGGER_METADATA"
+      ],
+      "hip": "16_地面塌陷_岩层崩解/HFX_023_Ground_Collapse_Sinkhole/01_hip/HFX_023_Ground_Collapse_Sinkhole_v003.hip",
+      "readme_v003": "16_地面塌陷_岩层崩解/HFX_023_Ground_Collapse_Sinkhole/05_notes/README_v003.md"
+    },
+    {
+      "asset": "HFX_024_Energy_Shield_Shatter",
+      "rel": "17_能量护盾_屏障破碎/HFX_024_Energy_Shield_Shatter",
+      "result": "PASS",
+      "trigger_frame": 20,
+      "duration": 84,
+      "safe_mode": "LIGHT_VEX",
+      "main_out": "OUT_SHIELD_SHATTER_MAIN",
+      "layers": [
+        "OUT_SHIELD_PIECES",
+        "OUT_CRACK_LINES",
+        "OUT_ENERGY_RIPPLE",
+        "OUT_TRIGGER_METADATA"
+      ],
+      "hip": "17_能量护盾_屏障破碎/HFX_024_Energy_Shield_Shatter/01_hip/HFX_024_Energy_Shield_Shatter_v003.hip",
+      "readme_v003": "17_能量护盾_屏障破碎/HFX_024_Energy_Shield_Shatter/05_notes/README_v003.md"
+    }
+  ]
+}

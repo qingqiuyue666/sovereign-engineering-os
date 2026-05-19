@@ -1,0 +1,62 @@
+# HFX Production Upgrade v007 HFX_008 FINAL Tier Build Report
+
+Generated: 2026-05-19T01:04:09
+
+Status: HFX_008_FINAL_TIER_BUILD_RUNNING
+
+## Previous Stage Checks
+
+- PASS: HFX Production Upgrade v001
+- PASS: HFX_008 Source Resolution v002
+- PASS: HFX_008 Preview Tier Build v003
+- PASS: HFX_008 Preview Tier Validation v004
+- PASS: HFX_008 MID Tier Build v005
+- PASS: HFX_008 MID Tier Validation v006
+
+## Source Checks
+
+- PASS: source HDA exists `300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/00_source/qqy_hfx_energy_shockwave_v009C.hda`
+- PASS: MID HIP exists `300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/02_mid/hip/HFX_008_ENERGY_SHOCKWAVE_MID_TIER_v005.hip`
+
+## FINAL Candidate HIP Build
+
+- PASS: source HDA installed
+- PASS: resolved HDA type `qqy::hfx_energy_shockwave::9.0`
+- PASS: HFX_008_FINAL_SHOCKWAVE_CORE_v007 cook passed frames [1, 12, 24, 48, 72, 120]
+- PASS: HFX_008_FINAL_OUTPUT_CONTRACT_v007 cook passed frames [1, 12, 24, 48, 72, 120]
+- PASS: HFX_008_FINAL_ENERGY_EMISSION_MASK_v007 cook passed frames [1, 12, 24, 48, 72, 120]
+- PASS: HFX_008_FINAL_DISTORTION_VECTOR_PROXY_v007 cook passed frames [1, 12, 24, 48, 72, 120]
+- PASS: HFX_008_FINAL_DUST_CONTACT_FIELD_v007 cook passed frames [1, 12, 24, 48, 72, 120]
+- PASS: HFX_008_FINAL_ZDEPTH_FALLOFF_PROXY_v007 cook passed frames [1, 12, 24, 48, 72, 120]
+- PASS: HFX_008_FINAL_CONTACT_SHADOW_MASK_v007 cook passed frames [1, 12, 24, 48, 72, 120]
+- PASS: HFX_008_FINAL_METADATA_ANCHOR_v007 cook passed frames [1, 12, 24, 48, 72, 120]
+- PASS: FINAL candidate HIP saved `300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/03_final/hip/HFX_008_ENERGY_SHOCKWAVE_FINAL_TIER_v007.hip`
+
+## Generated File Checks
+
+- PASS: `300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/03_final/manifests/HFX_008_FINAL_TIER_SPEC_v007.json`
+- PASS: `300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/03_final/docs/HFX_008_FINAL_TIER_SPEC_v007.md`
+- PASS: `300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/03_final/manifests/HFX_008_FINAL_PASS_MANIFEST_v007.json`
+- PASS: `300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/03_final/manifests/HFX_008_FINAL_CACHE_POLICY_v007.json`
+- PASS: `300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/06_comp/HFX_008_FINAL_COMP_HANDOFF_v007.json`
+- PASS: `300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/03_final/validation/HFX_008_FINAL_TIER_BUILD_VALIDATION_v007.md`
+- PASS: `300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/03_final/docs/README_HFX_008_FINAL_TIER_v007.md`
+
+## Pollution Check
+
+Result: PASS
+No video/archive/macOS metadata pollution found in FINAL tier workspace.
+
+## Summary
+
+- Asset: HFX_008 Energy Shockwave
+- Tier: FINAL_CANDIDATE
+- Quality Claim: FINAL_CANDIDATE_STRUCTURE_ONLY
+- FINAL Candidate HIP created: true
+- Render/export: blocked
+- Delivery: blocked
+- Next: HFX_PRODUCTION_UPGRADE_V008_HFX008_FINAL_TIER_VALIDATION
+
+---
+
+Final Status: HFX_PRODUCTION_UPGRADE_V007_HFX008_FINAL_TIER_BUILD_PASS

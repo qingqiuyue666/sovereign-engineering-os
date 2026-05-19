@@ -1,0 +1,68 @@
+# SHOT Pipeline v003 Synthetic Plate / Camera Binding Report
+
+Generated: 2026-05-18T00:07:02
+
+Status: SYNTHETIC_PLATE_CAMERA_BINDING_RUNNING
+
+## Previous Stage Checks
+
+- PASS: SHOT_PIPELINE_V001_REAL_SHOT_BINDING_REPORT.md marker found
+- PASS: SHOT_PIPELINE_V002_SHOT_INSTANTIATION_REPORT.md marker found
+
+## Shot Root / V002 File Checks
+
+- PASS: shot root exists: `200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING`
+- PASS: `200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING/shot_manifest_v002.json`
+- PASS: `200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING/00_plate/PLATE_BINDING_v002.json`
+- PASS: `200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING/01_camera/CAMERA_BINDING_v002.json`
+- PASS: `200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING/02_unreal/UNREAL_BINDING_v002.json`
+- PASS: `200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING/03_houdini/HFX_ASSET_SELECTION_v002.json`
+- PASS: `200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING/05_comp/COMP_PASS_MAP_v002.json`
+- PASS: `200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING/06_delivery/SHOT_HANDOFF_MANIFEST_v002.json`
+- PASS: `200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING/07_validation/SHOT_VALIDATION_CHECKLIST_v002.md`
+- PASS: `200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING/README_SHOT_001_TEST_REAL_FX_BINDING.md`
+- PASS: v002 shot_id / take_id consistent
+
+## V003 Generated File Checks
+
+- PASS: `200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING/shot_manifest_v003.json`
+- PASS: `200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING/00_plate/PLATE_BINDING_v003_SYNTHETIC.json`
+- PASS: `200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING/01_camera/CAMERA_BINDING_v003_SYNTHETIC.json`
+- PASS: `200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING/02_unreal/UNREAL_BINDING_v003.json`
+- PASS: `200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING/03_houdini/HFX_ASSET_SELECTION_v003.json`
+- PASS: `200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING/05_comp/COMP_PASS_MAP_v003.json`
+- PASS: `200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING/06_delivery/SHOT_HANDOFF_MANIFEST_v003.json`
+- PASS: `200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING/07_validation/SHOT_VALIDATION_SYNTHETIC_BINDING_v003.md`
+- PASS: `200_SHOTS/SHOT_001_TEST_REAL_FX_BINDING/08_notes/README_V003_SYNTHETIC_BINDING.md`
+
+## V003 Policy Checks
+
+- PASS: shot_id
+- PASS: take_id
+- PASS: synthetic_plate_declared
+- PASS: synthetic_camera_declared
+- PASS: render_blocked
+- PASS: delivery_blocked
+- PASS: sealed_assets_immutable
+- PASS: real_world_claim_blocked
+
+## Pollution Check
+
+Result: PASS
+No video/archive/macOS metadata pollution found in shot package.
+
+## Summary
+
+- Shot ID: SHOT_001_TEST_REAL_FX_BINDING
+- Take ID: TAKE_A
+- Binding Mode: synthetic_test_binding
+- Real plate: unbound
+- Real camera: unbound
+- Unreal: optional / unbound
+- Hero HIP derivation: allowed next
+- Render/export: blocked
+- Delivery: blocked
+
+---
+
+Final Status: SHOT_PIPELINE_V003_SYNTHETIC_PLATE_CAMERA_BINDING_PASS

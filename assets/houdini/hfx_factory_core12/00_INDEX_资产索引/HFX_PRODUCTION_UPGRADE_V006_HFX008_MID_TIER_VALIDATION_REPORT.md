@@ -1,0 +1,86 @@
+# HFX Production Upgrade v006 HFX_008 MID Tier Validation Report
+
+Generated: 2026-05-18T23:19:49
+
+Status: HFX_008_MID_TIER_VALIDATION_RUNNING
+
+## Previous Stage Checks
+
+- PASS: HFX Production Upgrade v001
+- PASS: HFX_008 Source Resolution v002
+- PASS: HFX_008 Preview Tier Build v003
+- PASS: HFX_008 Preview Tier Validation v004
+- PASS: HFX_008 MID Tier Build v005
+
+## MID File Checks
+
+- PASS: `300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/02_mid/hip/HFX_008_ENERGY_SHOCKWAVE_MID_TIER_v005.hip`
+- PASS: `300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/02_mid/manifests/HFX_008_MID_TIER_SPEC_v005.json`
+- PASS: `300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/02_mid/docs/HFX_008_MID_TIER_SPEC_v005.md`
+- PASS: `300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/02_mid/validation/HFX_008_MID_TIER_BUILD_VALIDATION_v005.md`
+- PASS: `300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/02_mid/docs/README_HFX_008_MID_TIER_v005.md`
+- PASS: `300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/02_mid/manifests/HFX_PRODUCTION_UPGRADE_V005_HFX008_MID_TIER_BUILD_MANIFEST.json`
+
+## V005 Manifest / Spec Policy Checks
+
+- PASS: v005_status_pass
+- PASS: asset_id_correct
+- PASS: tier_mid
+- PASS: mid_hip_recorded
+- PASS: hda_type_resolved
+- PASS: spec_mid_lookdev_only
+- PASS: spec_render_export_blocked
+- PASS: spec_delivery_blocked
+- PASS: spec_final_quality_blocked
+- PASS: spec_sealed_source_immutable
+
+## MID Node Checks
+
+- PASS: HFX_008_MID_SHOCKWAVE_CORE_v005
+- PASS: HFX_008_MID_SUPPORT_PASSES_v005
+- PASS: HFX_008_MID_EMISSION_MASK_PROXY_v005
+- PASS: HFX_008_MID_DISTORTION_MASK_PROXY_v005
+- PASS: HFX_008_MID_ZDEPTH_PROXY_v005
+
+## MID Cook Results Checks
+
+- PASS: HFX_008_MID_SHOCKWAVE_CORE_v005 six-frame cook all PASS
+- PASS: HFX_008_MID_SUPPORT_PASSES_v005 six-frame cook all PASS
+- PASS: HFX_008_MID_EMISSION_MASK_PROXY_v005 six-frame cook all PASS
+- PASS: HFX_008_MID_DISTORTION_MASK_PROXY_v005 six-frame cook all PASS
+- PASS: HFX_008_MID_ZDEPTH_PROXY_v005 six-frame cook all PASS
+
+## MID Support Pass Checks
+
+- PASS: OUT_MID_DUST_CONTACT_PROXY
+- PASS: OUT_MID_EMISSION_MASK_PROXY
+- PASS: OUT_MID_DISTORTION_MASK_PROXY
+- PASS: OUT_MID_ZDEPTH_PROXY
+- PASS: MID HIP exists `300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/02_mid/hip/HFX_008_ENERGY_SHOCKWAVE_MID_TIER_v005.hip`
+
+## Generated File Checks
+
+- PASS: `300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/02_mid/validation/HFX_008_MID_TIER_VALIDATION_v006.json`
+- PASS: `300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/02_mid/validation/HFX_008_MID_TIER_VALIDATION_v006.md`
+- PASS: `300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/02_mid/docs/README_HFX_008_MID_TIER_v006_VALIDATED.md`
+
+## Pollution Check
+
+Result: PASS
+No video/archive/macOS metadata pollution found in MID tier workspace.
+
+## Summary
+
+- Asset: HFX_008 Energy Shockwave
+- Tier: MID
+- V005 build: PASS
+- V006 validation: PASS
+- Quality claim: MID_LOOKDEV_ONLY
+- Render/export: blocked
+- Delivery: blocked
+- Final quality claim: blocked
+- Next: HFX_PRODUCTION_UPGRADE_V007_HFX008_FINAL_TIER_BUILD
+
+---
+
+Final Status: HFX_PRODUCTION_UPGRADE_V006_HFX008_MID_TIER_VALIDATION_PASS

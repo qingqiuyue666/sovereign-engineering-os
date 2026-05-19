@@ -1,0 +1,108 @@
+{
+  "status": "HFX_PRODUCTION_UPGRADE_V001_CORE_ASSET_SELECTED",
+  "asset": {
+    "asset_id": "HFX_037",
+    "name": "LightWrap Rim Interaction",
+    "batch": "B05",
+    "priority": "P0",
+    "upgrade_class": "cg_live_action_edge_integration",
+    "current_level": "SUPPORT_PROXY",
+    "target_level": "PRODUCTION_SUPPORT_FINAL",
+    "why_core": "Key to making CG/Houdini FX feel integrated with real footage instead of pasted on top.",
+    "required_disciplines": [
+      "lightwrap",
+      "rim",
+      "edge_detection",
+      "comp",
+      "colorspace"
+    ],
+    "preview_goal": "basic rim mask",
+    "mid_goal": "separated rim/edge spill/backlight pass",
+    "final_goal": "shot-ready lightwrap with controllable rim softness, spill intensity, backlight interaction and ACES-safe comp handoff",
+    "required_outputs": [
+      "rim_mask",
+      "edge_spill",
+      "backlight_interaction",
+      "wrap_alpha",
+      "metadata_manifest"
+    ],
+    "blocked_until": [
+      "plate_declared",
+      "colorspace_declared",
+      "comp_target_declared"
+    ]
+  },
+  "quality_tiers": {
+    "PREVIEW": {
+      "purpose": "composition, timing, blocking, fast iteration",
+      "allowed": [
+        "low density",
+        "proxy geometry",
+        "fast cook",
+        "viewport preview",
+        "no final render claim"
+      ],
+      "blocked": [
+        "final delivery",
+        "client-grade render",
+        "claiming film quality"
+      ]
+    },
+    "MID": {
+      "purpose": "short-form usable quality and look development",
+      "allowed": [
+        "medium density",
+        "shot-local cache",
+        "basic shader",
+        "separated core passes",
+        "preview comp"
+      ],
+      "blocked": [
+        "final-pixel claim without FINAL tier validation"
+      ]
+    },
+    "FINAL": {
+      "purpose": "production-grade hero shot output",
+      "allowed": [
+        "high-density simulation",
+        "versioned cache",
+        "shot camera",
+        "ACES colorspace",
+        "EXR pass separation",
+        "final comp validation"
+      ],
+      "blocked": [
+        "unversioned export",
+        "flattened comp before review",
+        "missing pass manifest",
+        "missing camera/plate context"
+      ]
+    }
+  },
+  "upgrade_contract": {
+    "do_not_modify_existing_final_seals": true,
+    "all_upgrade_work_goes_under_300_PRODUCTION_UPGRADE": true,
+    "shot_local_derivation_required_for_real_use": true,
+    "preview_mid_final_tiers_required": true,
+    "render_export_blocked_until_tier_specific_validation": true,
+    "final_quality_requires_real_or_approved_synthetic_shot_context": true
+  },
+  "v002_entry_conditions": [
+    "source HDA/HIP resolved",
+    "quality tier selected",
+    "shot context declared",
+    "camera/scale/colorspace declared",
+    "cache budget declared if simulation-based",
+    "pass manifest declared"
+  ],
+  "blocked_conditions": [
+    "modifying sealed release directly",
+    "claiming final quality from preview proxy",
+    "missing camera or scale context",
+    "missing colorspace",
+    "missing pass manifest",
+    "unversioned cache/export",
+    "flattened comp before review"
+  ],
+  "next_stage": "HFX_PRODUCTION_UPGRADE_V002_SINGLE_ASSET_SOURCE_RESOLUTION"
+}

@@ -1,0 +1,15 @@
+{
+  "status": "HFX_FACTORY_V094_HFX029_BLACK_HOLE_ACCRETION_DISK_FINAL_ASSET_SYSTEM_SEAL_PASS",
+  "asset_id": "HFX_029",
+  "asset_name": "Black Hole Accretion Disk",
+  "asset_class": "black_hole_accretion_disk",
+  "quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+  "registry_role": "FX_FACTORY_CORE_ASSET",
+  "hfx029_ready_as_long_term_asset": true,
+  "hfx029_ready_as_reusable_black_hole_template": true,
+  "release_package": "300_PRODUCTION_UPGRADE/HFX_029_BLACK_HOLE_ACCRETION_DISK/10_release/release_package",
+  "release_hip": "300_PRODUCTION_UPGRADE/HFX_029_BLACK_HOLE_ACCRETION_DISK/10_release/release_package/hip/HFX_029_BLACK_HOLE_ACCRETION_DISK_FINAL_CANDIDATE_v094.hip",
+  "all_houdini_fx_top_tier_complete": true,
+  "next_asset_to_build": null,
+  "next_stage": "HFX_FACTORY_FINAL_GLOBAL_SEAL"
+}

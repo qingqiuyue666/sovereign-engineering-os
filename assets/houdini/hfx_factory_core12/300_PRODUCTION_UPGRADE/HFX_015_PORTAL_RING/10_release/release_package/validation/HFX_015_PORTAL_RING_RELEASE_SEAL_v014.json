@@ -1,0 +1,12 @@
+{
+  "status": "HFX_FACTORY_V010_HFX015_PORTAL_RING_RELEASE_SEAL_PASS",
+  "asset_id": "HFX_015",
+  "asset_name": "Portal Ring",
+  "asset_class": "portal_ring",
+  "quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+  "release_root": "300_PRODUCTION_UPGRADE/HFX_015_PORTAL_RING/10_release/release_package",
+  "release_hip": "300_PRODUCTION_UPGRADE/HFX_015_PORTAL_RING/10_release/release_package/hip/HFX_015_PORTAL_RING_FINAL_CANDIDATE_v014.hip",
+  "source_contract": "300_PRODUCTION_UPGRADE/HFX_015_PORTAL_RING/10_release/release_package/source/qqy_hfx_portal_ring_v014_source_contract.json",
+  "sealed_source_direct_mutation_forbidden": true,
+  "next_stage": "HFX_FACTORY_V011_HFX015_PORTAL_RING_SHOT_BOUND_TEMPLATE"
+}

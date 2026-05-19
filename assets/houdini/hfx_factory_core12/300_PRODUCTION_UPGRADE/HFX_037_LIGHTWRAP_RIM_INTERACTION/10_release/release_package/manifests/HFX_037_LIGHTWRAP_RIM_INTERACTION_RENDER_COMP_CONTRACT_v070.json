@@ -1,0 +1,28 @@
+{
+  "status": "HFX_037_RENDER_COMP_CONTRACT_V070_READY",
+  "asset_id": "HFX_037",
+  "asset_name": "LightWrap Rim Interaction",
+  "required_passes": [
+    "OUT_FINAL_WRAP_WIDTH",
+    "OUT_FINAL_WRAP_INTENSITY",
+    "OUT_FINAL_RIM_COLOR",
+    "OUT_FINAL_SUBJECT_EDGE_MASK",
+    "OUT_FINAL_FALLOFF_CURVE",
+    "OUT_FINAL_LIGHTWRAP_OUTPUT",
+    "OUT_FINAL_METADATA"
+  ],
+  "target_uses": [
+    "lightwrap",
+    "rim interaction",
+    "subject edge integration",
+    "green-screen composite",
+    "FX-to-subject interaction"
+  ],
+  "dependencies": [
+    "HFX_033",
+    "HFX_036"
+  ],
+  "comfyui_source_of_truth_forbidden": true,
+  "single_flat_beauty_only_forbidden": true,
+  "delivery_allowed": false
+}

@@ -1,0 +1,24 @@
+{
+  "status": "HFX_016_RENDER_COMP_CONTRACT_V022_READY",
+  "asset_id": "HFX_016",
+  "asset_name": "Heat Distortion",
+  "required_passes": [
+    "OUT_FINAL_HEAT_FIELD",
+    "OUT_FINAL_DISTORTION_VECTOR",
+    "OUT_FINAL_FALLOFF_MASK",
+    "OUT_FINAL_ZDEPTH_PROXY",
+    "OUT_FINAL_REFRACTION_EDGE",
+    "OUT_FINAL_METADATA"
+  ],
+  "target_uses": [
+    "heat shimmer",
+    "portal distortion",
+    "pyro heat",
+    "engine exhaust",
+    "space ripple",
+    "energy refraction"
+  ],
+  "comfyui_source_of_truth_forbidden": true,
+  "single_flat_beauty_only_forbidden": true,
+  "delivery_allowed": false
+}

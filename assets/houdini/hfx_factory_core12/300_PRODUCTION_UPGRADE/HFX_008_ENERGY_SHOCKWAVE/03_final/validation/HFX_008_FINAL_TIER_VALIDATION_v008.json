@@ -1,0 +1,343 @@
+{
+  "status": "HFX_008_FINAL_TIER_VALIDATION_V008_READY",
+  "asset_id": "HFX_008",
+  "asset_name": "Energy Shockwave",
+  "tier": "FINAL_CANDIDATE_VALIDATED",
+  "validated": true,
+  "final_hip": "300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/03_final/hip/HFX_008_ENERGY_SHOCKWAVE_FINAL_TIER_v007.hip",
+  "required_outputs": [
+    "OUT_FINAL_SHOCKWAVE_CORE",
+    "OUT_FINAL_ENERGY_EMISSION_MASK",
+    "OUT_FINAL_DISTORTION_VECTOR_PROXY",
+    "OUT_FINAL_DUST_CONTACT_FIELD",
+    "OUT_FINAL_ZDEPTH_FALLOFF_PROXY",
+    "OUT_FINAL_CONTACT_SHADOW_MASK",
+    "OUT_FINAL_METADATA_ANCHOR"
+  ],
+  "required_obj_nodes": [
+    "HFX_008_FINAL_SHOCKWAVE_CORE_v007",
+    "HFX_008_FINAL_OUTPUT_CONTRACT_v007",
+    "HFX_008_FINAL_ENERGY_EMISSION_MASK_v007",
+    "HFX_008_FINAL_DISTORTION_VECTOR_PROXY_v007",
+    "HFX_008_FINAL_DUST_CONTACT_FIELD_v007",
+    "HFX_008_FINAL_ZDEPTH_FALLOFF_PROXY_v007",
+    "HFX_008_FINAL_CONTACT_SHADOW_MASK_v007",
+    "HFX_008_FINAL_METADATA_ANCHOR_v007"
+  ],
+  "cook_results": {
+    "HFX_008_FINAL_SHOCKWAVE_CORE_v007": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "HFX_008_FINAL_OUTPUT_CONTRACT_v007": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "HFX_008_FINAL_ENERGY_EMISSION_MASK_v007": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "HFX_008_FINAL_DISTORTION_VECTOR_PROXY_v007": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "HFX_008_FINAL_DUST_CONTACT_FIELD_v007": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "HFX_008_FINAL_ZDEPTH_FALLOFF_PROXY_v007": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "HFX_008_FINAL_CONTACT_SHADOW_MASK_v007": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ],
+    "HFX_008_FINAL_METADATA_ANCHOR_v007": [
+      {
+        "frame": 1,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 12,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 24,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 48,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 72,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      },
+      {
+        "frame": 120,
+        "result": "PASS",
+        "errors": [],
+        "warnings": []
+      }
+    ]
+  },
+  "render_export_allowed": false,
+  "delivery_allowed": false,
+  "hollywood_final_pixel_claim_allowed": false,
+  "production_asset_claim_allowed": true,
+  "asset_claim": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+  "sealed_source_mutation_forbidden": true,
+  "exr_pass_separation_required": true,
+  "flattened_comp_forbidden_before_review": true,
+  "real_shot_render_required_for_final_pixel": true,
+  "next_stage": "HFX_PRODUCTION_UPGRADE_V009_HFX008_FINAL_CANDIDATE_SEAL"
+}

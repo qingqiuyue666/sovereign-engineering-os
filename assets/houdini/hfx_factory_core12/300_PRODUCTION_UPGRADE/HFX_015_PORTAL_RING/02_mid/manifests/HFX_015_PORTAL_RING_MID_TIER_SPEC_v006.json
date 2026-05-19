@@ -1,0 +1,67 @@
+{
+  "status": "HFX_015_PORTAL_RING_MID_TIER_SPEC_V006_READY",
+  "asset_id": "HFX_015",
+  "asset_name": "Portal Ring",
+  "asset_class": "portal_ring",
+  "quality_tier": "MID",
+  "purpose": "Lookdev-ready portal with improved core, animated rim proxy, spark layer, alpha, zdepth, and distortion-vector pass structure.",
+  "not_allowed_claims": [
+    "FINAL_CANDIDATE complete",
+    "release sealed",
+    "production render complete",
+    "Hollywood final-pixel portal complete",
+    "delivery ready"
+  ],
+  "required_nodes": [
+    "HFX_015_MID_PORTAL_CORE_v006",
+    "HFX_015_MID_RIM_EMISSION_v006",
+    "HFX_015_MID_INNER_SURFACE_v006",
+    "HFX_015_MID_SPARK_LAYER_v006",
+    "HFX_015_MID_DISTORTION_VECTOR_v006",
+    "HFX_015_MID_ALPHA_ZDEPTH_v006",
+    "HFX_015_MID_METADATA_ANCHOR_v006"
+  ],
+  "required_outputs": [
+    "OUT_MID_PORTAL_CORE",
+    "OUT_MID_RIM_EMISSION",
+    "OUT_MID_INNER_SURFACE",
+    "OUT_MID_SPARK_LAYER",
+    "OUT_MID_DISTORTION_VECTOR",
+    "OUT_MID_ALPHA",
+    "OUT_MID_ZDEPTH",
+    "OUT_MID_METADATA"
+  ],
+  "test_frames": [
+    1,
+    12,
+    24,
+    48,
+    72,
+    120
+  ],
+  "default_parameters": {
+    "portal_radius": 2.45,
+    "ring_thickness": 0.07,
+    "inner_depth": 0.55,
+    "edge_noise": 0.32,
+    "spark_density": 220,
+    "portal_rotation_speed": 0.32,
+    "rim_emission": 1.65,
+    "distortion_amount": 0.62,
+    "alpha_softness": 0.16,
+    "lightwrap_strength": 0.48,
+    "color_primary": [
+      0.14,
+      0.48,
+      1.0
+    ],
+    "color_secondary": [
+      1.0,
+      0.68,
+      0.18
+    ]
+  },
+  "render_export_allowed": false,
+  "delivery_allowed": false,
+  "next_stage": "HFX_FACTORY_V007_HFX015_PORTAL_RING_MID_TIER_VALIDATION"
+}

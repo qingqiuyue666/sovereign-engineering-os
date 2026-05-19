@@ -1,0 +1,135 @@
+{
+  "status": "HFX_B03_DESTRUCTION_CLOTH_FLUID_V010_HDA_INSTALL_VALIDATION_PASS",
+  "generated": "2026-05-17T18:58:47",
+  "assets": [
+    {
+      "asset": "HFX_017_Building_Fracture_Collapse",
+      "result": "PASS",
+      "hda": "11_大规模破坏_建筑碎裂/HFX_017_Building_Fracture_Collapse/03_hda/qqy_hfx_building_fracture_collapse_b03_v009.hda",
+      "hda_type": "qqy::hfx_building_fracture_collapse::3.0",
+      "instance_name": "TEST_HFX_017_Building_Fracture_Collapse_v010",
+      "install_json": "11_大规模破坏_建筑碎裂/HFX_017_Building_Fracture_Collapse/05_notes/HDA_INSTALL_VALIDATION_v010.json",
+      "install_md": "11_大规模破坏_建筑碎裂/HFX_017_Building_Fracture_Collapse/05_notes/HDA_INSTALL_VALIDATION_v010.md",
+      "readme_v010": "11_大规模破坏_建筑碎裂/HFX_017_Building_Fracture_Collapse/05_notes/README_v010.md",
+      "definition_count": 1,
+      "found_type_names": [
+        "qqy::hfx_building_fracture_collapse::3.0"
+      ],
+      "instance_path": "/obj/TEST_HFX_017_Building_Fracture_Collapse_v010",
+      "install_validated": true
+    },
+    {
+      "asset": "HFX_018_Glass_Shatter_Burst",
+      "result": "PASS",
+      "hda": "11_大规模破坏_建筑碎裂/HFX_018_Glass_Shatter_Burst/03_hda/qqy_hfx_glass_shatter_burst_b03_v009.hda",
+      "hda_type": "qqy::hfx_glass_shatter_burst::3.0",
+      "instance_name": "TEST_HFX_018_Glass_Shatter_Burst_v010",
+      "install_json": "11_大规模破坏_建筑碎裂/HFX_018_Glass_Shatter_Burst/05_notes/HDA_INSTALL_VALIDATION_v010.json",
+      "install_md": "11_大规模破坏_建筑碎裂/HFX_018_Glass_Shatter_Burst/05_notes/HDA_INSTALL_VALIDATION_v010.md",
+      "readme_v010": "11_大规模破坏_建筑碎裂/HFX_018_Glass_Shatter_Burst/05_notes/README_v010.md",
+      "definition_count": 1,
+      "found_type_names": [
+        "qqy::hfx_glass_shatter_burst::3.0"
+      ],
+      "instance_path": "/obj/TEST_HFX_018_Glass_Shatter_Burst_v010",
+      "install_validated": true
+    },
+    {
+      "asset": "HFX_019_Vellum_Cape_Cloth_Sim",
+      "result": "PASS",
+      "hda": "12_布料披风_角色动力学/HFX_019_Vellum_Cape_Cloth_Sim/03_hda/qqy_hfx_vellum_cape_cloth_sim_b03_v009.hda",
+      "hda_type": "qqy::hfx_vellum_cape_cloth_sim::3.0",
+      "instance_name": "TEST_HFX_019_Vellum_Cape_Cloth_Sim_v010",
+      "install_json": "12_布料披风_角色动力学/HFX_019_Vellum_Cape_Cloth_Sim/05_notes/HDA_INSTALL_VALIDATION_v010.json",
+      "install_md": "12_布料披风_角色动力学/HFX_019_Vellum_Cape_Cloth_Sim/05_notes/HDA_INSTALL_VALIDATION_v010.md",
+      "readme_v010": "12_布料披风_角色动力学/HFX_019_Vellum_Cape_Cloth_Sim/05_notes/README_v010.md",
+      "definition_count": 1,
+      "found_type_names": [
+        "qqy::hfx_vellum_cape_cloth_sim::3.0"
+      ],
+      "instance_path": "/obj/TEST_HFX_019_Vellum_Cape_Cloth_Sim_v010",
+      "install_validated": true
+    },
+    {
+      "asset": "HFX_020_FLIP_Water_Splash",
+      "result": "PASS",
+      "hda": "13_水体液体_FLIP/HFX_020_FLIP_Water_Splash/03_hda/qqy_hfx_flip_water_splash_b03_v009.hda",
+      "hda_type": "qqy::hfx_flip_water_splash::3.0",
+      "instance_name": "TEST_HFX_020_FLIP_Water_Splash_v010",
+      "install_json": "13_水体液体_FLIP/HFX_020_FLIP_Water_Splash/05_notes/HDA_INSTALL_VALIDATION_v010.json",
+      "install_md": "13_水体液体_FLIP/HFX_020_FLIP_Water_Splash/05_notes/HDA_INSTALL_VALIDATION_v010.md",
+      "readme_v010": "13_水体液体_FLIP/HFX_020_FLIP_Water_Splash/05_notes/README_v010.md",
+      "definition_count": 1,
+      "found_type_names": [
+        "qqy::hfx_flip_water_splash::3.0"
+      ],
+      "instance_path": "/obj/TEST_HFX_020_FLIP_Water_Splash_v010",
+      "install_validated": true
+    },
+    {
+      "asset": "HFX_021_Advanced_Pyro_Explosion",
+      "result": "PASS",
+      "hda": "14_高级爆炸_Pyro/HFX_021_Advanced_Pyro_Explosion/03_hda/qqy_hfx_advanced_pyro_explosion_b03_v009.hda",
+      "hda_type": "qqy::hfx_advanced_pyro_explosion::3.0",
+      "instance_name": "TEST_HFX_021_Advanced_Pyro_Explosion_v010",
+      "install_json": "14_高级爆炸_Pyro/HFX_021_Advanced_Pyro_Explosion/05_notes/HDA_INSTALL_VALIDATION_v010.json",
+      "install_md": "14_高级爆炸_Pyro/HFX_021_Advanced_Pyro_Explosion/05_notes/HDA_INSTALL_VALIDATION_v010.md",
+      "readme_v010": "14_高级爆炸_Pyro/HFX_021_Advanced_Pyro_Explosion/05_notes/README_v010.md",
+      "definition_count": 1,
+      "found_type_names": [
+        "qqy::hfx_advanced_pyro_explosion::3.0"
+      ],
+      "instance_path": "/obj/TEST_HFX_021_Advanced_Pyro_Explosion_v010",
+      "install_validated": true
+    },
+    {
+      "asset": "HFX_022_Storm_Cloud_Volume",
+      "result": "PASS",
+      "hda": "15_风暴云_环境体积/HFX_022_Storm_Cloud_Volume/03_hda/qqy_hfx_storm_cloud_volume_b03_v009.hda",
+      "hda_type": "qqy::hfx_storm_cloud_volume::3.0",
+      "instance_name": "TEST_HFX_022_Storm_Cloud_Volume_v010",
+      "install_json": "15_风暴云_环境体积/HFX_022_Storm_Cloud_Volume/05_notes/HDA_INSTALL_VALIDATION_v010.json",
+      "install_md": "15_风暴云_环境体积/HFX_022_Storm_Cloud_Volume/05_notes/HDA_INSTALL_VALIDATION_v010.md",
+      "readme_v010": "15_风暴云_环境体积/HFX_022_Storm_Cloud_Volume/05_notes/README_v010.md",
+      "definition_count": 1,
+      "found_type_names": [
+        "qqy::hfx_storm_cloud_volume::3.0"
+      ],
+      "instance_path": "/obj/TEST_HFX_022_Storm_Cloud_Volume_v010",
+      "install_validated": true
+    },
+    {
+      "asset": "HFX_023_Ground_Collapse_Sinkhole",
+      "result": "PASS",
+      "hda": "16_地面塌陷_岩层崩解/HFX_023_Ground_Collapse_Sinkhole/03_hda/qqy_hfx_ground_collapse_sinkhole_b03_v009.hda",
+      "hda_type": "qqy::hfx_ground_collapse_sinkhole::3.0",
+      "instance_name": "TEST_HFX_023_Ground_Collapse_Sinkhole_v010",
+      "install_json": "16_地面塌陷_岩层崩解/HFX_023_Ground_Collapse_Sinkhole/05_notes/HDA_INSTALL_VALIDATION_v010.json",
+      "install_md": "16_地面塌陷_岩层崩解/HFX_023_Ground_Collapse_Sinkhole/05_notes/HDA_INSTALL_VALIDATION_v010.md",
+      "readme_v010": "16_地面塌陷_岩层崩解/HFX_023_Ground_Collapse_Sinkhole/05_notes/README_v010.md",
+      "definition_count": 1,
+      "found_type_names": [
+        "qqy::hfx_ground_collapse_sinkhole::3.0"
+      ],
+      "instance_path": "/obj/TEST_HFX_023_Ground_Collapse_Sinkhole_v010",
+      "install_validated": true
+    },
+    {
+      "asset": "HFX_024_Energy_Shield_Shatter",
+      "result": "PASS",
+      "hda": "17_能量护盾_屏障破碎/HFX_024_Energy_Shield_Shatter/03_hda/qqy_hfx_energy_shield_shatter_b03_v009.hda",
+      "hda_type": "qqy::hfx_energy_shield_shatter::3.0",
+      "instance_name": "TEST_HFX_024_Energy_Shield_Shatter_v010",
+      "install_json": "17_能量护盾_屏障破碎/HFX_024_Energy_Shield_Shatter/05_notes/HDA_INSTALL_VALIDATION_v010.json",
+      "install_md": "17_能量护盾_屏障破碎/HFX_024_Energy_Shield_Shatter/05_notes/HDA_INSTALL_VALIDATION_v010.md",
+      "readme_v010": "17_能量护盾_屏障破碎/HFX_024_Energy_Shield_Shatter/05_notes/README_v010.md",
+      "definition_count": 1,
+      "found_type_names": [
+        "qqy::hfx_energy_shield_shatter::3.0"
+      ],
+      "instance_path": "/obj/TEST_HFX_024_Energy_Shield_Shatter_v010",
+      "install_validated": true
+    }
+  ],
+  "pollution": []
+}

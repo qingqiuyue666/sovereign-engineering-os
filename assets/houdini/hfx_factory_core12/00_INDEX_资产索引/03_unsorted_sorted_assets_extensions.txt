@@ -1,0 +1,12 @@
+=== 未整理 SORTED_ASSETS 文件类型统计 ===
+ 631 rat
+  57 usdc
+  38 bgeo
+  36 usd
+  22 usda
+  21 hiplc
+  19 fbx
+  12 sc
+   5 hda
+   2 abc
+   1 ds_store

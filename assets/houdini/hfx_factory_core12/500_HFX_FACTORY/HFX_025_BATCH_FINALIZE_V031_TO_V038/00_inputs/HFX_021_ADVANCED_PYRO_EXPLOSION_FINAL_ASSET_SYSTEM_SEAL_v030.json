@@ -1,0 +1,15 @@
+{
+  "status": "HFX_FACTORY_V030_HFX021_ADVANCED_PYRO_EXPLOSION_FINAL_ASSET_SYSTEM_SEAL_PASS",
+  "asset_id": "HFX_021",
+  "asset_name": "Advanced Pyro Explosion",
+  "asset_class": "pyro_explosion",
+  "quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+  "registry_role": "FX_FACTORY_CORE_ASSET",
+  "hfx021_ready_as_long_term_asset": true,
+  "hfx021_ready_as_reusable_pyro_explosion_template": true,
+  "release_package": "300_PRODUCTION_UPGRADE/HFX_021_ADVANCED_PYRO_EXPLOSION/10_release/release_package",
+  "release_hip": "300_PRODUCTION_UPGRADE/HFX_021_ADVANCED_PYRO_EXPLOSION/10_release/release_package/hip/HFX_021_ADVANCED_PYRO_EXPLOSION_FINAL_CANDIDATE_v030.hip",
+  "all_houdini_fx_top_tier_complete": false,
+  "next_asset_to_build": "HFX_025",
+  "next_stage": "HFX_FACTORY_V031_HFX025_CHARACTER_ENERGY_FIELD_SOURCE_RESOLUTION"
+}

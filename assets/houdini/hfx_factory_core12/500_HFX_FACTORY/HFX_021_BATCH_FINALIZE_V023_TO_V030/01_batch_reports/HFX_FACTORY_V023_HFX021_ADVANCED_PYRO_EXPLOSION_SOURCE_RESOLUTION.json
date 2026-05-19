@@ -1,0 +1,30 @@
+{
+  "status": "HFX_FACTORY_V023_HFX021_ADVANCED_PYRO_EXPLOSION_SOURCE_RESOLUTION_PASS",
+  "asset_id": "HFX_021",
+  "asset_name": "Advanced Pyro Explosion",
+  "source_type": "procedural_factory_build",
+  "required_parameters": [
+    "blast_radius",
+    "fire_amount",
+    "smoke_amount",
+    "debris_amount",
+    "shockwave_radius",
+    "heat_distortion_link",
+    "contact_shadow_strength",
+    "zdepth_falloff",
+    "noise_seed"
+  ],
+  "required_passes": [
+    "OUT_FINAL_BLAST_CORE",
+    "OUT_FINAL_FIRE_EMISSION",
+    "OUT_FINAL_SMOKE_VOLUME_PROXY",
+    "OUT_FINAL_DEBRIS_FIELD",
+    "OUT_FINAL_SHOCKWAVE_RING",
+    "OUT_FINAL_HEAT_DISTORTION_LINK",
+    "OUT_FINAL_CONTACT_SHADOW",
+    "OUT_FINAL_ZDEPTH",
+    "OUT_FINAL_ALPHA_HOLDOUT",
+    "OUT_FINAL_METADATA"
+  ],
+  "next_stage": "HFX_FACTORY_V024_HFX021_ADVANCED_PYRO_EXPLOSION_PREVIEW_BUILD"
+}

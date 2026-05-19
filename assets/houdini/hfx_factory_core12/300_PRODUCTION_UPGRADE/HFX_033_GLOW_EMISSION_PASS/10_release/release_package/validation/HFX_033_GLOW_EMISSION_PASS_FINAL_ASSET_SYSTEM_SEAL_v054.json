@@ -1,0 +1,15 @@
+{
+  "status": "HFX_FACTORY_V054_HFX033_GLOW_EMISSION_PASS_FINAL_ASSET_SYSTEM_SEAL_PASS",
+  "asset_id": "HFX_033",
+  "asset_name": "Glow Emission Pass",
+  "asset_class": "glow_emission",
+  "quality_level": "PRODUCTION_FINAL_CANDIDATE_ASSET",
+  "registry_role": "FX_FACTORY_CORE_ASSET",
+  "hfx033_ready_as_long_term_asset": true,
+  "hfx033_ready_as_reusable_glow_emission_template": true,
+  "release_package": "300_PRODUCTION_UPGRADE/HFX_033_GLOW_EMISSION_PASS/10_release/release_package",
+  "release_hip": "300_PRODUCTION_UPGRADE/HFX_033_GLOW_EMISSION_PASS/10_release/release_package/hip/HFX_033_GLOW_EMISSION_PASS_FINAL_CANDIDATE_v054.hip",
+  "all_houdini_fx_top_tier_complete": false,
+  "next_asset_to_build": "HFX_036",
+  "next_stage": "HFX_FACTORY_V055_HFX036_ALPHA_HOLDOUT_MATTE_SOURCE_RESOLUTION"
+}

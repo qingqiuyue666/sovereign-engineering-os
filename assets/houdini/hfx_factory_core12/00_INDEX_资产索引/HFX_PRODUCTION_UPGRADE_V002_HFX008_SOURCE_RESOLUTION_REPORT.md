@@ -1,0 +1,59 @@
+# HFX Production Upgrade v002 HFX_008 Source Resolution Report
+
+Generated: 2026-05-18T18:52:10
+
+Status: HFX_008_SOURCE_RESOLUTION_RUNNING
+
+## Previous Stage Checks
+
+- PASS: HFX Production Upgrade v001
+
+## Source Candidate Search
+
+- PASS: selected source HDA `100_RELEASE/HFX_V013_FINAL_SEAL/release_package/hda/qqy_hfx_energy_shockwave_v009C.hda`
+  - score: 28
+  - sha256: 5a337ccbca9d15f251d27f1e4776b48f3d89e9239982ccf66d512bf59fe0c2d7
+- PASS: copied source HDA working copy `300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/00_source/qqy_hfx_energy_shockwave_v009C.hda`
+
+## Upgrade Directory Checks
+
+- PASS: writable dir `300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/00_source`
+- PASS: writable dir `300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/01_preview`
+- PASS: writable dir `300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/02_mid`
+- PASS: writable dir `300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/03_final`
+- PASS: writable dir `300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/04_cache/bgeo`
+- PASS: writable dir `300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/04_cache/vdb`
+- PASS: writable dir `300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/04_cache/abc`
+- PASS: writable dir `300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/05_render/exr`
+- PASS: writable dir `300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/05_render/preview`
+- PASS: writable dir `300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/06_comp`
+- PASS: writable dir `300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/07_validation`
+- PASS: writable dir `300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/08_manifests`
+- PASS: writable dir `300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/09_docs`
+
+## Generated File Checks
+
+- PASS: `300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/00_source/HFX_008_SOURCE_RESOLUTION_v002.json`
+- PASS: `300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/00_source/HFX_008_SOURCE_RESOLUTION_v002.md`
+- PASS: `300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/08_manifests/HFX_008_TIER_CONTRACT_v002.json`
+- PASS: `300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/07_validation/HFX_008_SOURCE_RESOLUTION_VALIDATION_v002.md`
+- PASS: `300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/09_docs/README_HFX_008_PRODUCTION_UPGRADE_v002.md`
+
+## Pollution Check
+
+Result: PASS
+No video/archive/macOS metadata pollution found in HFX_008 upgrade workspace.
+
+## Summary
+
+- Asset: HFX_008 Energy Shockwave
+- Source model: B01 legacy HDA-only accepted
+- Working copy created: true
+- PREVIEW / MID / FINAL tier contract: ready
+- Render/export: blocked
+- Delivery: blocked
+- Next: HFX_PRODUCTION_UPGRADE_V003_HFX008_PREVIEW_TIER_BUILD
+
+---
+
+Final Status: HFX_PRODUCTION_UPGRADE_V002_HFX008_SOURCE_RESOLUTION_PASS

@@ -1,0 +1,20 @@
+{
+  "status": "HFX_025_SHOT_BOUND_TEMPLATE_V038_READY",
+  "asset_id": "HFX_025",
+  "asset_name": "Character Energy Field",
+  "required_binding_fields": [
+    "shot_id",
+    "take_id",
+    "frame_start",
+    "frame_end",
+    "camera_mode",
+    "plate_mode",
+    "body_mask_source",
+    "subject_holdout",
+    "aura_radius",
+    "aura_intensity",
+    "rim_light_strength"
+  ],
+  "derive_per_shot": true,
+  "direct_mutation_forbidden": true
+}

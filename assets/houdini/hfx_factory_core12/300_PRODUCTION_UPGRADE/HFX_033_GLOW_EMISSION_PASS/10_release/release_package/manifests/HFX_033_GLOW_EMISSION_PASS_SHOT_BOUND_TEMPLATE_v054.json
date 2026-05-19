@@ -1,0 +1,19 @@
+{
+  "status": "HFX_033_SHOT_BOUND_TEMPLATE_V054_READY",
+  "asset_id": "HFX_033",
+  "asset_name": "Glow Emission Pass",
+  "required_binding_fields": [
+    "shot_id",
+    "take_id",
+    "frame_start",
+    "frame_end",
+    "emission_source",
+    "emission_threshold",
+    "bloom_radius",
+    "glow_falloff",
+    "color_temperature",
+    "mask_softness"
+  ],
+  "derive_per_shot": true,
+  "direct_mutation_forbidden": true
+}
