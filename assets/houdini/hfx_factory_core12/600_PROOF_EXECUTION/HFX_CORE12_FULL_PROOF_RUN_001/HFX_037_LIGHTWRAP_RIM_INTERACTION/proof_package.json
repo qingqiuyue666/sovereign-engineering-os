@@ -1,0 +1,71 @@
+{
+  "acceptance_criteria": [
+    "Shot proof is executed and reviewed for the exact promoted asset.",
+    "Render proof artifact manifest exists and hashes match recorded artifacts.",
+    "Comp review confirms integration behavior and records an explicit acceptance decision.",
+    "Rollback and quarantine route remain active for proof mismatch or unsafe claim.",
+    "No unlicensed external asset dependency is required for acceptance."
+  ],
+  "acceptance_decision": "pending_execution",
+  "actual_proof_artifacts": [],
+  "asset_id": "HFX_037",
+  "asset_name": "Lightwrap Rim Interaction",
+  "comp_proof_status": "package_created",
+  "content_hash": "sha256:9b24c988b1c0d408cab093e3d75ddce2a385894774a44c0e9dd4f3efa7049682",
+  "expected_artifacts": [
+    "HFX_037 shot binding receipt with asset version, camera, frame range, and scale notes.",
+    "HFX_037 render proof manifest with artifact paths, pass list, and deterministic hashes.",
+    "HFX_037 comp review record with integration notes and reviewer acceptance decision."
+  ],
+  "external_asset_dependency_status": {
+    "declaration": "External friend asset decision remains deferred; no external dependency is enabled by this proof package.",
+    "status": "internal_only_external_friend_assets_deferred",
+    "unlicensed_external_dependency": false
+  },
+  "final_claim_allowed": false,
+  "minimum_comp_review_checklist": [
+    "Review alpha, holdout, lightwrap, contact, distortion, glow, and integration behavior where applicable.",
+    "Record reviewer, decision, rejection reasons, and acceptance notes.",
+    "Block acceptance when render or comp artifacts are missing.",
+    "Keep final_claim_allowed false until shot, render, and comp proof are accepted."
+  ],
+  "minimum_render_proof_checklist": [
+    "Execute the render proof in the Houdini/render environment.",
+    "Record render settings, pass list, frame range, artifact names, and hashes.",
+    "Keep failed, missing, or partial renders in a blocked proof state.",
+    "Do not promote render status from package_created until real artifacts exist."
+  ],
+  "minimum_shot_proof_checklist": [
+    "Bind the promoted asset version to a named proof shot.",
+    "Record camera, frame range, plate or synthetic-plate label, and scale assumptions.",
+    "Record the source HIP/HDA closure path without mutating the source asset.",
+    "Seal the shot receipt with deterministic artifact names and hashes."
+  ],
+  "missing_proof_artifacts": [
+    "actual shot execution receipt",
+    "actual render artifact manifest",
+    "actual comp review artifact",
+    "reviewed acceptance receipt"
+  ],
+  "next_required_action": "Execute this proof package in the Houdini/render/comp environment and record reviewed artifacts.",
+  "observed_at": "not_provided",
+  "promotion_closure_path": "assets/houdini/hfx_factory_core12/300_PRODUCTION_UPGRADE/HFX_037_LIGHTWRAP_RIM_INTERACTION/HFX_037_PROMOTION_CLOSURE.json",
+  "promotion_status": "production_complete_pending_shot_proof",
+  "proof_package_markdown_path": "assets/houdini/hfx_factory_core12/600_PROOF_EXECUTION/HFX_CORE12_FULL_PROOF_RUN_001/HFX_037_LIGHTWRAP_RIM_INTERACTION/proof_package.md",
+  "proof_package_path": "assets/houdini/hfx_factory_core12/600_PROOF_EXECUTION/HFX_CORE12_FULL_PROOF_RUN_001/HFX_037_LIGHTWRAP_RIM_INTERACTION/proof_package.json",
+  "proof_package_status": "package_created",
+  "quarantine_trigger": "Unlicensed external asset dependency, unsafe proof claim, corrupted artifact record, or missing required proof artifact.",
+  "rejection_criteria": [
+    "Missing shot execution receipt.",
+    "Missing render artifact manifest.",
+    "Missing comp review artifact.",
+    "Hash mismatch, manifest disagreement, unsafe completion claim, or unlicensed dependency."
+  ],
+  "remaining_gate": "actual shot/render/comp execution and reviewed acceptance are pending",
+  "render_proof_status": "package_created",
+  "review_status": "package_created",
+  "rollback_quarantine_route_path": "assets/houdini/hfx_factory_core12/00_INDEX_资产索引/HFX_CORE12_ROLLBACK_QUARANTINE_ROUTES.json",
+  "rollback_trigger": "Proof artifact mismatch, failed review, missing accepted render/comp evidence, or promotion state disagreement.",
+  "shot_proof_status": "package_created",
+  "shot_render_proof_plan_path": "assets/houdini/hfx_factory_core12/00_INDEX_资产索引/HFX_CORE12_SHOT_RENDER_PROOF_PLAN.json"
+}
