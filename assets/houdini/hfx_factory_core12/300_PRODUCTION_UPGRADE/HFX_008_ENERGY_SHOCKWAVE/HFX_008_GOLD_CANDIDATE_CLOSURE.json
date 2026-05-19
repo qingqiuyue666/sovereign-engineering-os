@@ -1,0 +1,43 @@
+{
+  "asset_id": "HFX_008",
+  "asset_name": "Energy Shockwave",
+  "boundary_conditions": [
+    "no_houdini_launch",
+    "no_hython_execution",
+    "no_render_execution",
+    "no_hip_or_hda_mutation",
+    "no_external_raw_asset_commit"
+  ],
+  "closure_id": "hfx-008-gold-candidate-closure-v1",
+  "closure_status": "gold_complete",
+  "code_version": "0.1.0",
+  "content_hash": "sha256:456de1060cfa02ecfdf04bd024434e42f055a58cfaeb7a9f62c18e554e8b2172",
+  "evidence_gates": {
+    "checksum_exists": true,
+    "external_asset_dependencies_declared": true,
+    "input_contract_documented": true,
+    "known_limitations_documented": true,
+    "manifest_exists": true,
+    "no_fake_film_grade_claim": true,
+    "no_unlicensed_third_party_raw_asset_dependency": true,
+    "no_zero_byte_critical_files": true,
+    "output_pass_contract_documented": true,
+    "parameter_interface_documented": true,
+    "preview_proof_exists": true,
+    "real_hip_or_hda_exists": true,
+    "render_comp_report_exists": true,
+    "rollback_or_quarantine_route_exists": true,
+    "shot_binding_exists": true,
+    "validation_report_exists": true
+  },
+  "evidence_notes": [
+    "Reusable HDA and release HIP are present in the internal HFX_008 package.",
+    "Preview, mid, final, release, validation, manifest, checksum, shot-bound template, and render/comp contract evidence are present.",
+    "gold_complete is an internal reusable asset closure only; it is not a final-pixel film-grade shot claim."
+  ],
+  "main_commit": "d13e9aa8f65c8b64d3da08b9a55ff5087b87beb3",
+  "missing_gates": [],
+  "observed_at": "not_provided",
+  "policy_version": "hfx-asset-closure-v1",
+  "repository_url": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os"
+}
