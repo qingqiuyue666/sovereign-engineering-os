@@ -1,0 +1,241 @@
+{
+  "assets": [
+    {
+      "allowed_synthetic_proof": "Synthetic plate/camera proof is allowed only when labeled synthetic and not used as final-status evidence.",
+      "asset_id": "HFX_008",
+      "asset_name": "Energy Shockwave",
+      "minimum_preview_proof": "Non-final preview artifact or preview validation record tied to the exact asset version.",
+      "minimum_render_comp_proof": "Reviewed render/comp package with artifact names, hashes, pass list, and acceptance notes.",
+      "minimum_shot_proof": "HFX_008 bound to a named shot manifest with camera, scale, frame range, and expected integration notes.",
+      "no_fake_final_pixel_claim_boundary": "Proof remains planned in this branch; no final-pixel status is asserted.",
+      "proof_artifact_naming": "HFX_008_SHOT_RENDER_COMP_PROOF_v###",
+      "rejection_conditions": [
+        "Missing shot binding",
+        "Missing render/comp proof artifact",
+        "Unlabeled synthetic proof",
+        "Unsafe final-status language",
+        "Unlicensed external raw dependency"
+      ],
+      "required_final_proof": "Executed shot/render/comp proof reviewed against the asset-specific acceptance gate.",
+      "review_gate": "Manual HFX steward review plus checksum and manifest match."
+    },
+    {
+      "allowed_synthetic_proof": "Synthetic plate/camera proof is allowed only when labeled synthetic and not used as final-status evidence.",
+      "asset_id": "HFX_015",
+      "asset_name": "Portal Ring",
+      "minimum_preview_proof": "Non-final preview artifact or preview validation record tied to the exact asset version.",
+      "minimum_render_comp_proof": "Reviewed render/comp package with artifact names, hashes, pass list, and acceptance notes.",
+      "minimum_shot_proof": "HFX_015 bound to a named shot manifest with camera, scale, frame range, and expected integration notes.",
+      "no_fake_final_pixel_claim_boundary": "Proof remains planned in this branch; no final-pixel status is asserted.",
+      "proof_artifact_naming": "HFX_015_SHOT_RENDER_COMP_PROOF_v###",
+      "rejection_conditions": [
+        "Missing shot binding",
+        "Missing render/comp proof artifact",
+        "Unlabeled synthetic proof",
+        "Unsafe final-status language",
+        "Unlicensed external raw dependency"
+      ],
+      "required_final_proof": "Executed shot/render/comp proof reviewed against the asset-specific acceptance gate.",
+      "review_gate": "Manual HFX steward review plus checksum and manifest match."
+    },
+    {
+      "allowed_synthetic_proof": "Synthetic plate/camera proof is allowed only when labeled synthetic and not used as final-status evidence.",
+      "asset_id": "HFX_016",
+      "asset_name": "Heat Distortion",
+      "minimum_preview_proof": "Non-final preview artifact or preview validation record tied to the exact asset version.",
+      "minimum_render_comp_proof": "Reviewed render/comp package with artifact names, hashes, pass list, and acceptance notes.",
+      "minimum_shot_proof": "HFX_016 bound to a named shot manifest with camera, scale, frame range, and expected integration notes.",
+      "no_fake_final_pixel_claim_boundary": "Proof remains planned in this branch; no final-pixel status is asserted.",
+      "proof_artifact_naming": "HFX_016_SHOT_RENDER_COMP_PROOF_v###",
+      "rejection_conditions": [
+        "Missing shot binding",
+        "Missing render/comp proof artifact",
+        "Unlabeled synthetic proof",
+        "Unsafe final-status language",
+        "Unlicensed external raw dependency"
+      ],
+      "required_final_proof": "Executed shot/render/comp proof reviewed against the asset-specific acceptance gate.",
+      "review_gate": "Manual HFX steward review plus checksum and manifest match."
+    },
+    {
+      "allowed_synthetic_proof": "Synthetic plate/camera proof is allowed only when labeled synthetic and not used as final-status evidence.",
+      "asset_id": "HFX_021",
+      "asset_name": "Pyro Explosion",
+      "minimum_preview_proof": "Non-final preview artifact or preview validation record tied to the exact asset version.",
+      "minimum_render_comp_proof": "Reviewed render/comp package with artifact names, hashes, pass list, and acceptance notes.",
+      "minimum_shot_proof": "HFX_021 bound to a named shot manifest with camera, scale, frame range, and expected integration notes.",
+      "no_fake_final_pixel_claim_boundary": "Proof remains planned in this branch; no final-pixel status is asserted.",
+      "proof_artifact_naming": "HFX_021_SHOT_RENDER_COMP_PROOF_v###",
+      "rejection_conditions": [
+        "Missing shot binding",
+        "Missing render/comp proof artifact",
+        "Unlabeled synthetic proof",
+        "Unsafe final-status language",
+        "Unlicensed external raw dependency"
+      ],
+      "required_final_proof": "Executed shot/render/comp proof reviewed against the asset-specific acceptance gate.",
+      "review_gate": "Manual HFX steward review plus checksum and manifest match."
+    },
+    {
+      "allowed_synthetic_proof": "Synthetic plate/camera proof is allowed only when labeled synthetic and not used as final-status evidence.",
+      "asset_id": "HFX_025",
+      "asset_name": "Character Energy Field",
+      "minimum_preview_proof": "Non-final preview artifact or preview validation record tied to the exact asset version.",
+      "minimum_render_comp_proof": "Reviewed render/comp package with artifact names, hashes, pass list, and acceptance notes.",
+      "minimum_shot_proof": "HFX_025 bound to a named shot manifest with camera, scale, frame range, and expected integration notes.",
+      "no_fake_final_pixel_claim_boundary": "Proof remains planned in this branch; no final-pixel status is asserted.",
+      "proof_artifact_naming": "HFX_025_SHOT_RENDER_COMP_PROOF_v###",
+      "rejection_conditions": [
+        "Missing shot binding",
+        "Missing render/comp proof artifact",
+        "Unlabeled synthetic proof",
+        "Unsafe final-status language",
+        "Unlicensed external raw dependency"
+      ],
+      "required_final_proof": "Executed shot/render/comp proof reviewed against the asset-specific acceptance gate.",
+      "review_gate": "Manual HFX steward review plus checksum and manifest match."
+    },
+    {
+      "allowed_synthetic_proof": "Synthetic plate/camera proof is allowed only when labeled synthetic and not used as final-status evidence.",
+      "asset_id": "HFX_027",
+      "asset_name": "Summoning Portal Gate",
+      "minimum_preview_proof": "Non-final preview artifact or preview validation record tied to the exact asset version.",
+      "minimum_render_comp_proof": "Reviewed render/comp package with artifact names, hashes, pass list, and acceptance notes.",
+      "minimum_shot_proof": "HFX_027 bound to a named shot manifest with camera, scale, frame range, and expected integration notes.",
+      "no_fake_final_pixel_claim_boundary": "Proof remains planned in this branch; no final-pixel status is asserted.",
+      "proof_artifact_naming": "HFX_027_SHOT_RENDER_COMP_PROOF_v###",
+      "rejection_conditions": [
+        "Missing shot binding",
+        "Missing render/comp proof artifact",
+        "Unlabeled synthetic proof",
+        "Unsafe final-status language",
+        "Unlicensed external raw dependency"
+      ],
+      "required_final_proof": "Executed shot/render/comp proof reviewed against the asset-specific acceptance gate.",
+      "review_gate": "Manual HFX steward review plus checksum and manifest match."
+    },
+    {
+      "allowed_synthetic_proof": "Synthetic plate/camera proof is allowed only when labeled synthetic and not used as final-status evidence.",
+      "asset_id": "HFX_028",
+      "asset_name": "Space Rift Tear",
+      "minimum_preview_proof": "Non-final preview artifact or preview validation record tied to the exact asset version.",
+      "minimum_render_comp_proof": "Reviewed render/comp package with artifact names, hashes, pass list, and acceptance notes.",
+      "minimum_shot_proof": "HFX_028 bound to a named shot manifest with camera, scale, frame range, and expected integration notes.",
+      "no_fake_final_pixel_claim_boundary": "Proof remains planned in this branch; no final-pixel status is asserted.",
+      "proof_artifact_naming": "HFX_028_SHOT_RENDER_COMP_PROOF_v###",
+      "rejection_conditions": [
+        "Missing shot binding",
+        "Missing render/comp proof artifact",
+        "Unlabeled synthetic proof",
+        "Unsafe final-status language",
+        "Unlicensed external raw dependency"
+      ],
+      "required_final_proof": "Executed shot/render/comp proof reviewed against the asset-specific acceptance gate.",
+      "review_gate": "Manual HFX steward review plus checksum and manifest match."
+    },
+    {
+      "allowed_synthetic_proof": "Synthetic plate/camera proof is allowed only when labeled synthetic and not used as final-status evidence.",
+      "asset_id": "HFX_029",
+      "asset_name": "Black Hole Accretion Disk",
+      "minimum_preview_proof": "Non-final preview artifact or preview validation record tied to the exact asset version.",
+      "minimum_render_comp_proof": "Reviewed render/comp package with artifact names, hashes, pass list, and acceptance notes.",
+      "minimum_shot_proof": "HFX_029 bound to a named shot manifest with camera, scale, frame range, and expected integration notes.",
+      "no_fake_final_pixel_claim_boundary": "Proof remains planned in this branch; no final-pixel status is asserted.",
+      "proof_artifact_naming": "HFX_029_SHOT_RENDER_COMP_PROOF_v###",
+      "rejection_conditions": [
+        "Missing shot binding",
+        "Missing render/comp proof artifact",
+        "Unlabeled synthetic proof",
+        "Unsafe final-status language",
+        "Unlicensed external raw dependency"
+      ],
+      "required_final_proof": "Executed shot/render/comp proof reviewed against the asset-specific acceptance gate.",
+      "review_gate": "Manual HFX steward review plus checksum and manifest match."
+    },
+    {
+      "allowed_synthetic_proof": "Synthetic plate/camera proof is allowed only when labeled synthetic and not used as final-status evidence.",
+      "asset_id": "HFX_033",
+      "asset_name": "Glow Emission Pass",
+      "minimum_preview_proof": "Non-final preview artifact or preview validation record tied to the exact asset version.",
+      "minimum_render_comp_proof": "Reviewed render/comp package with artifact names, hashes, pass list, and acceptance notes.",
+      "minimum_shot_proof": "HFX_033 bound to a named shot manifest with camera, scale, frame range, and expected integration notes.",
+      "no_fake_final_pixel_claim_boundary": "Proof remains planned in this branch; no final-pixel status is asserted.",
+      "proof_artifact_naming": "HFX_033_SHOT_RENDER_COMP_PROOF_v###",
+      "rejection_conditions": [
+        "Missing shot binding",
+        "Missing render/comp proof artifact",
+        "Unlabeled synthetic proof",
+        "Unsafe final-status language",
+        "Unlicensed external raw dependency"
+      ],
+      "required_final_proof": "Executed shot/render/comp proof reviewed against the asset-specific acceptance gate.",
+      "review_gate": "Manual HFX steward review plus checksum and manifest match."
+    },
+    {
+      "allowed_synthetic_proof": "Synthetic plate/camera proof is allowed only when labeled synthetic and not used as final-status evidence.",
+      "asset_id": "HFX_036",
+      "asset_name": "Alpha Holdout Matte",
+      "minimum_preview_proof": "Non-final preview artifact or preview validation record tied to the exact asset version.",
+      "minimum_render_comp_proof": "Reviewed render/comp package with artifact names, hashes, pass list, and acceptance notes.",
+      "minimum_shot_proof": "HFX_036 bound to a named shot manifest with camera, scale, frame range, and expected integration notes.",
+      "no_fake_final_pixel_claim_boundary": "Proof remains planned in this branch; no final-pixel status is asserted.",
+      "proof_artifact_naming": "HFX_036_SHOT_RENDER_COMP_PROOF_v###",
+      "rejection_conditions": [
+        "Missing shot binding",
+        "Missing render/comp proof artifact",
+        "Unlabeled synthetic proof",
+        "Unsafe final-status language",
+        "Unlicensed external raw dependency"
+      ],
+      "required_final_proof": "Executed shot/render/comp proof reviewed against the asset-specific acceptance gate.",
+      "review_gate": "Manual HFX steward review plus checksum and manifest match."
+    },
+    {
+      "allowed_synthetic_proof": "Synthetic plate/camera proof is allowed only when labeled synthetic and not used as final-status evidence.",
+      "asset_id": "HFX_037",
+      "asset_name": "Lightwrap Rim Interaction",
+      "minimum_preview_proof": "Non-final preview artifact or preview validation record tied to the exact asset version.",
+      "minimum_render_comp_proof": "Reviewed render/comp package with artifact names, hashes, pass list, and acceptance notes.",
+      "minimum_shot_proof": "HFX_037 bound to a named shot manifest with camera, scale, frame range, and expected integration notes.",
+      "no_fake_final_pixel_claim_boundary": "Proof remains planned in this branch; no final-pixel status is asserted.",
+      "proof_artifact_naming": "HFX_037_SHOT_RENDER_COMP_PROOF_v###",
+      "rejection_conditions": [
+        "Missing shot binding",
+        "Missing render/comp proof artifact",
+        "Unlabeled synthetic proof",
+        "Unsafe final-status language",
+        "Unlicensed external raw dependency"
+      ],
+      "required_final_proof": "Executed shot/render/comp proof reviewed against the asset-specific acceptance gate.",
+      "review_gate": "Manual HFX steward review plus checksum and manifest match."
+    },
+    {
+      "allowed_synthetic_proof": "Synthetic plate/camera proof is allowed only when labeled synthetic and not used as final-status evidence.",
+      "asset_id": "HFX_038",
+      "asset_name": "Contact Shadow Ground Integration",
+      "minimum_preview_proof": "Non-final preview artifact or preview validation record tied to the exact asset version.",
+      "minimum_render_comp_proof": "Reviewed render/comp package with artifact names, hashes, pass list, and acceptance notes.",
+      "minimum_shot_proof": "HFX_038 bound to a named shot manifest with camera, scale, frame range, and expected integration notes.",
+      "no_fake_final_pixel_claim_boundary": "Proof remains planned in this branch; no final-pixel status is asserted.",
+      "proof_artifact_naming": "HFX_038_SHOT_RENDER_COMP_PROOF_v###",
+      "rejection_conditions": [
+        "Missing shot binding",
+        "Missing render/comp proof artifact",
+        "Unlabeled synthetic proof",
+        "Unsafe final-status language",
+        "Unlicensed external raw dependency"
+      ],
+      "required_final_proof": "Executed shot/render/comp proof reviewed against the asset-specific acceptance gate.",
+      "review_gate": "Manual HFX steward review plus checksum and manifest match."
+    }
+  ],
+  "code_version": "0.1.0",
+  "content_hash": "sha256:4ac9c8a0ddf1caf26a505292931125dd40f7ead7691c847cd67a40782f19c918",
+  "main_commit": "4f8b4dd4d60fea56d3e516b55c85f8fcf567b5c7",
+  "observed_at": "not_provided",
+  "plan_id": "hfx-core12-shot-render-proof-plan-v1",
+  "policy_version": "hfx-core12-promotion-closure-v1",
+  "proof_execution_status": "planned_not_executed",
+  "repository_url": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os",
+  "run_id": "hfx-core12-full-promotion-closure-v1"
+}

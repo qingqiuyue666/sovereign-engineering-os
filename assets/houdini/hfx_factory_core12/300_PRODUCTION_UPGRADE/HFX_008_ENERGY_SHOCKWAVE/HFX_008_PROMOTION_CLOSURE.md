@@ -1,0 +1,85 @@
+# HFX_008 Energy Shockwave Promotion Closure
+
+| Field | Value |
+| --- | --- |
+| asset_id | HFX_008 |
+| asset_name | Energy Shockwave |
+| current_reality_status | gold_complete |
+| target_promotion_status | gold_complete |
+| promotion_decision | gold_complete |
+| policy_version | hfx-core12-promotion-closure-v1 |
+| code_version | 0.1.0 |
+| content_hash | sha256:4794d4c2ccd44e77ce1c7b1954b26f720aa41713351ba82ecfe47f660cb48bd2 |
+| observed_at | not_provided |
+
+## Current Evidence Summary
+- checksum_evidence:
+  - paths:
+    - assets/houdini/hfx_factory_core12/300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/08_manifests/HFX_008_V002_SHA256SUMS.txt
+  - present: true
+  - summary: Checksum evidence is present in existing manifests; observed_at is not part of any content hash.
+- hip_or_hda_evidence:
+  - paths:
+    - assets/houdini/hfx_factory_core12/300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/00_source/qqy_hfx_energy_shockwave_v009C.hda
+    - assets/houdini/hfx_factory_core12/300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/10_release/release_package/hip/HFX_008_ENERGY_SHOCKWAVE_FINAL_TIER_v007.hip
+  - present: true
+  - summary: Reusable internal HIP/HDA evidence is present; this branch does not mutate HIP/HDA files.
+- manifest_evidence:
+  - paths:
+    - assets/houdini/hfx_factory_core12/300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/08_manifests/HFX_PRODUCTION_UPGRADE_V002_HFX008_SOURCE_RESOLUTION_MANIFEST.json
+  - present: true
+  - summary: Manifest evidence is present for the reusable internal asset closure.
+- preview_evidence:
+  - paths:
+    - assets/houdini/hfx_factory_core12/00_INDEX_资产索引/HFX_008_BATCH_FINALIZE_REPORT.md
+    - assets/houdini/hfx_factory_core12/300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/01_preview/hip
+  - present: true
+  - summary: Preview-tier or preview-policy evidence exists in repository records; this branch creates no image or video preview.
+- render_or_comp_evidence:
+  - paths:
+    - assets/houdini/hfx_factory_core12/00_INDEX_资产索引/SHOT_BOUND_HFX008_FINAL_PIXEL_RENDER_V011_FINAL_ASSET_SYSTEM_SEAL_REPORT.md
+    - assets/houdini/hfx_factory_core12/300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/06_comp/HFX_008_FINAL_COMP_HANDOFF_v007.json
+  - present: true
+  - summary: Internal render/comp package evidence exists for the reusable HFX_008 closure; it is not a final public film-grade status claim.
+- shot_binding_evidence:
+  - paths:
+    - assets/houdini/hfx_factory_core12/00_INDEX_资产索引/HFX_CORE12_SHOT_RENDER_PROOF_PLAN.json
+    - assets/houdini/hfx_factory_core12/00_INDEX_资产索引/SHOT_001_TEST_REAL_FX_BINDING_HERO_HIP_ASSET_INDEX_v007.json
+  - present: true
+  - summary: Shot binding or shot-bound contract evidence exists; final proof execution remains governed by the proof plan.
+- validation_evidence:
+  - paths:
+    - assets/houdini/hfx_factory_core12/00_INDEX_资产索引/HFX_008_BATCH_FINALIZE_REPORT.md
+    - assets/houdini/hfx_factory_core12/300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/07_validation
+  - present: true
+  - summary: Validation evidence is present and is referenced without launching Houdini or executing a render.
+
+## Rollback Route
+- action: Return promotion state to production_candidate, preserve existing evidence and manifest records, and require manual review before promotion reentry.
+- present: true
+- route_id: HFX_008_rollback_route_v1
+- safe_state: Audit-only closure state with no HIP/HDA mutation, no external raw asset enablement, and no generated media.
+- trigger: HFX_008 evidence mismatch, unsafe claim, missing final proof, or manifest/checksum disagreement.
+
+## Quarantine Route
+- action: Mark the closure blocked for promotion, isolate the disputed evidence reference, preserve original records, and require manual review before reentry.
+- present: true
+- route_id: HFX_008_quarantine_route_v1
+- safe_state: Audit-only closure state with no HIP/HDA mutation, no external raw asset enablement, and no generated media.
+- trigger: HFX_008 evidence mismatch, unsafe claim, missing final proof, or manifest/checksum disagreement.
+
+## External Asset Dependency Declaration
+- declaration: No external raw asset dependency is required or added by this promotion closure; external friend asset review remains deferred.
+- status: internal_only_external_friend_assets_deferred
+- unlicensed_external_dependency: false
+
+## Missing Gates
+- none
+
+## Next Required Actions
+- Keep rollback and quarantine route active for every promotion reentry.
+- Keep external friend asset decision deferred until internal closure and license review.
+- Do not assert final film-grade or Hollywood-grade status until reviewed shot/render/comp proof exists.
+
+## Claim Boundary
+No final film-grade or Hollywood-grade status is asserted until reviewed shot/render/comp proof exists.
