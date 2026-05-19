@@ -1,0 +1,38 @@
+{
+  "claimed_boundaries_preserved": [
+    "no provider execution introduced",
+    "no production autonomy introduced",
+    "no protected root files changed"
+  ],
+  "claimed_branch": "codex-noncore-production-assets-v1",
+  "claimed_commit": "25c09fe5b7a2d7d5e2bb53a873eceadd458f2e42",
+  "claimed_files_changed": [
+    "docs/operator/examples/code_audit/ai_worker_result_review_sample_material.json",
+    "docs/operator/examples/code_audit/ai_worker_result_review_sample_report.md"
+  ],
+  "claimed_results": [
+    "sample report was rendered from synthetic caller-provided material only",
+    "worker claims are not trusted without human review"
+  ],
+  "claimed_risks": [
+    "sample worker output must not be mistaken for live branch verification"
+  ],
+  "claimed_rollback_plan": [
+    "remove sample worker review files as a unit if sample review artifacts are rejected"
+  ],
+  "claimed_tests_run": [
+    "caller-provided sample verification summary only",
+    "python3 -m unittest tests.tracer_bullet.test_code_audit_sample_pack -v"
+  ],
+  "code_version": "0.1.0",
+  "contradiction_findings": [],
+  "missing_sections": [],
+  "packet_id": "ai-worker-result-review-sample-pack-v1",
+  "policy_version": "ai-worker-result-review-packet-v1",
+  "required_human_checks": [
+    "confirm sample scope is explicit",
+    "confirm no live verification is implied"
+  ],
+  "review_decision": "requires_human_verification",
+  "worker_name": "codex-sample-worker"
+}

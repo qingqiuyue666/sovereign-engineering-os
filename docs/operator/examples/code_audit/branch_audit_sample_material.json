@@ -1,0 +1,45 @@
+{
+  "added_files": [
+    "docs/operator/examples/code_audit/branch_audit_sample_material.json",
+    "docs/operator/examples/code_audit/branch_audit_sample_report.md"
+  ],
+  "base_branch": "main",
+  "base_commit": "15c09fe5b7a2d7d5e2bb53a873eceadd458f2e32",
+  "boundary_findings": [
+    "caller-provided material only",
+    "sample pack does not run git or tests internally",
+    "no provider execution introduced"
+  ],
+  "changed_files": [
+    "docs/operator/examples/code_audit/branch_audit_sample_material.json",
+    "docs/operator/examples/code_audit/branch_audit_sample_report.md",
+    "docs/operator/report_gallery.md"
+  ],
+  "code_version": "0.1.0",
+  "deleted_files": [],
+  "feature_branch": "codex-noncore-production-assets-v1",
+  "forbidden_changes": [],
+  "head_commit": "25c09fe5b7a2d7d5e2bb53a873eceadd458f2e42",
+  "merge_blockers": [],
+  "modified_files": [
+    "docs/operator/report_gallery.md"
+  ],
+  "policy_version": "branch-audit-report-v1",
+  "recommended_action": "defer",
+  "report_id": "branch-audit-sample-pack-v1",
+  "repository_url": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os",
+  "risk_matrix": [
+    {
+      "risk_id": "R-SAMPLE-1",
+      "status": "watch",
+      "summary": "sample claims must remain scoped to caller-provided synthetic material only"
+    }
+  ],
+  "rollback_plan": [
+    "remove sample pack files as a unit if the private example set is rejected"
+  ],
+  "test_matrix": {
+    "sample_scope": "caller-provided synthetic example only",
+    "verification_summary": "sample material demonstrates structure only and does not prove live verification"
+  }
+}

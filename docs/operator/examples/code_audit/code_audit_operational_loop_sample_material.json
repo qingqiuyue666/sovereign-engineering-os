@@ -1,0 +1,48 @@
+{
+  "blocked_actions": [
+    "provider execution",
+    "production autonomy",
+    "external execution"
+  ],
+  "code_version": "0.1.0",
+  "human_review_points": [
+    "before sample formats are reused for real work",
+    "before any merge or rollback decision"
+  ],
+  "loop_id": "code-audit-operational-loop-sample-pack-v1",
+  "loop_steps": [
+    "AI worker receives handoff packet.",
+    "AI worker implements branch.",
+    "AI worker returns final report.",
+    "Operator builds AI worker result review packet.",
+    "Operator builds branch audit report.",
+    "Operator builds merge readiness report.",
+    "Human reviews.",
+    "Merge only if approved.",
+    "Post-merge retrospective is generated.",
+    "Daily report is updated."
+  ],
+  "main_commit": "15c09fe5b7a2d7d5e2bb53a873eceadd458f2e32",
+  "policy_version": "code-audit-operational-loop-v1",
+  "repository_url": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os",
+  "required_reports": [
+    "AI worker handoff packet",
+    "AI worker result review packet",
+    "branch audit report",
+    "merge readiness report",
+    "post-merge retrospective report",
+    "code audit daily report"
+  ],
+  "required_verification": [
+    "caller-provided sample verification summaries only",
+    "human review before any real decision"
+  ],
+  "stop_conditions": [
+    "missing sample evidence",
+    "blocked capability language is weakened"
+  ],
+  "success_criteria": [
+    "all required sample reports exist",
+    "sample scope is explicit in every rendered report"
+  ]
+}

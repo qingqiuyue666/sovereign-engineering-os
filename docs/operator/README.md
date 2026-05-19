@@ -14,6 +14,14 @@ This directory is the private navigation layer for the operator and future AI wo
 - [Creative Asset Factory v1](creative_asset_factory_v1.md)
 - [Macro Signal Research Boundary](macro_signal_research_boundary.md)
 - [Private Production Roadmap](private_production_roadmap.md)
+- [Private Report Gallery](report_gallery.md)
+- [Operator Examples Index](examples/README.md)
+- [Operator Review Forms](forms/README.md)
+- [Task Intake Templates](task_intake/README.md)
+- [Production Sprint Artifacts](sprints/README.md)
+- [Private Knowledge Base Index](knowledge_base/README.md)
+- [Workspace Hygiene and Naming Guide](workspace_hygiene.md)
+- [Non-Core Asset Kit Manifest](noncore_asset_kit_manifest.md)
 
 ## Existing Reports
 
