@@ -1,0 +1,68 @@
+{
+  "camera_path": "/show/HFX_DEMO/assets/camera/SEQ010_SH010_camera.abc",
+  "comp_target": "nuke_contract_v001",
+  "fps": 24,
+  "frame_end": 1120,
+  "frame_start": 1001,
+  "hdri_path": "/show/HFX_DEMO/assets/lighting/warehouse_impact_hdri.exr",
+  "lens_profile_path": "/show/HFX_DEMO/assets/lens/prime_35mm_lens_profile.json",
+  "notes": "Energy impact setup: shockwave, heat distortion, glow, alpha, lightwrap, and contact integration.",
+  "output_root": "/tmp/hfx_shot_binding_output",
+  "plate_path": "/show/HFX_DEMO/plates/SEQ010/SH010/plate_main.%04d.exr",
+  "project_id": "HFX_DEMO",
+  "render_target": "houdini_karma_contract_v001",
+  "requested_assets": [
+    {
+      "asset_id": "HFX_008",
+      "dependency_policy": "copy_release_hip_bind_parameters_only",
+      "enabled": true,
+      "parameter_overrides": {
+        "energy_scale": 1.35,
+        "impact_frame_offset": 12
+      }
+    },
+    {
+      "asset_id": "HFX_016",
+      "dependency_policy": "copy_release_hip_bind_parameters_only",
+      "enabled": true,
+      "parameter_overrides": {
+        "distortion_strength": 0.42
+      }
+    },
+    {
+      "asset_id": "HFX_033",
+      "dependency_policy": "copy_release_hip_bind_parameters_only",
+      "enabled": true,
+      "parameter_overrides": {
+        "emission_gain": 1.2
+      }
+    },
+    {
+      "asset_id": "HFX_036",
+      "dependency_policy": "copy_release_hip_bind_parameters_only",
+      "enabled": true,
+      "parameter_overrides": {
+        "edge_dilate_px": 3
+      }
+    },
+    {
+      "asset_id": "HFX_037",
+      "dependency_policy": "copy_release_hip_bind_parameters_only",
+      "enabled": true,
+      "parameter_overrides": {
+        "lightwrap_gain": 0.4
+      }
+    },
+    {
+      "asset_id": "HFX_038",
+      "dependency_policy": "copy_release_hip_bind_parameters_only",
+      "enabled": true,
+      "parameter_overrides": {
+        "shadow_density": 0.5
+      }
+    }
+  ],
+  "sequence_id": "SEQ010",
+  "shot_id": "SH010",
+  "take_id": "TAKE_A"
+}

@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "asset_id": {
+      "type": "string"
+    },
+    "asset_name": {
+      "type": "string"
+    },
+    "binding_record_path": {
+      "type": "string"
+    },
+    "copied_shot_hip_sha256": {
+      "type": "string"
+    },
+    "dependency_policy": {
+      "type": "string"
+    },
+    "enabled": {
+      "type": "boolean"
+    },
+    "final_asset_seal": {
+      "type": "string"
+    },
+    "parameter_file": {
+      "type": "string"
+    },
+    "registry_entry_snapshot": {
+      "type": "object"
+    },
+    "release_hip": {
+      "type": "string"
+    },
+    "release_root": {
+      "type": "string"
+    },
+    "schema_type": {
+      "const": "ShotAssetBinding"
+    },
+    "shot_hip": {
+      "type": "string"
+    },
+    "shot_id": {
+      "type": "string"
+    },
+    "source_reference_file": {
+      "type": "string"
+    },
+    "source_release_hip_sha256": {
+      "type": "string"
+    },
+    "take_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_type",
+    "asset_id",
+    "asset_name",
+    "enabled",
+    "shot_id",
+    "take_id",
+    "release_root",
+    "release_hip",
+    "shot_hip",
+    "final_asset_seal",
+    "source_release_hip_sha256",
+    "copied_shot_hip_sha256",
+    "parameter_file",
+    "source_reference_file",
+    "dependency_policy",
+    "registry_entry_snapshot"
+  ],
+  "title": "ShotAssetBinding",
+  "type": "object"
+}

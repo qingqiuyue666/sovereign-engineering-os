@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "blocked_claims": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "checks": {
+      "items": {
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "forbidden_output_roots": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "package_root": {
+      "type": "string"
+    },
+    "project_id": {
+      "type": "string"
+    },
+    "release_roots_guarded": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "schema_type": {
+      "const": "MutationGuardReport"
+    },
+    "sequence_id": {
+      "type": "string"
+    },
+    "shot_id": {
+      "type": "string"
+    },
+    "source_release_hip_hash_checks": {
+      "items": {
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "status": {
+      "enum": [
+        "PASS",
+        "FAIL"
+      ]
+    },
+    "take_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_type",
+    "status",
+    "project_id",
+    "sequence_id",
+    "shot_id",
+    "take_id",
+    "package_root",
+    "forbidden_output_roots",
+    "release_roots_guarded",
+    "source_release_hip_hash_checks",
+    "checks",
+    "blocked_claims"
+  ],
+  "title": "MutationGuardReport",
+  "type": "object"
+}
