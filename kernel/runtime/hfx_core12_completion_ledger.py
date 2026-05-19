@@ -27,6 +27,9 @@ _CODE_VERSION = "0.1.0"
 _COMPLETION_DECISIONS = (
     "complete",
     "incomplete",
+    "proof_package_complete_pending_execution",
+    "proof_execution_complete_pending_review",
+    "proof_review_complete",
     "promotion_closure_complete_pending_shot_proof",
     "audit_complete_assets_incomplete",
     "blocked",
@@ -77,10 +80,17 @@ class HFXCore12CompletionLedger:
     policy_version: str = _POLICY_VERSION
     code_version: str = _CODE_VERSION
     full_promotion_closure_run_id: str = ""
+    full_proof_run_id: str = ""
     per_asset_closure_paths: tuple[object, ...] = ()
+    per_asset_proof_package_paths: tuple[object, ...] = ()
     rollback_quarantine_route_path: str = ""
     shot_render_proof_plan_path: str = ""
     promotion_matrix_path: str = ""
+    proof_package_root_path: str = ""
+    proof_execution_matrix_path: str = ""
+    proof_execution_status: str = ""
+    final_remaining_gate: str = ""
+    final_claim_allowed_summary: str = ""
     rollback_quarantine_route_status: str = ""
     shot_render_proof_plan_status: str = ""
     exact_remaining_gates: tuple[object, ...] = ()
@@ -97,14 +107,21 @@ class HFXCore12CompletionLedger:
             "external_asset_policy": self.external_asset_policy,
             "external_asset_decision": self.external_asset_decision,
             "exact_remaining_gates": list(self.exact_remaining_gates),
+            "final_claim_allowed_summary": self.final_claim_allowed_summary,
+            "final_remaining_gate": self.final_remaining_gate,
             "full_promotion_closure_run_id": self.full_promotion_closure_run_id,
+            "full_proof_run_id": self.full_proof_run_id,
             "gold_assets": list(self.gold_assets),
             "ledger_id": self.ledger_id,
             "main_commit": self.main_commit,
             "next_required_actions": list(self.next_required_actions),
             "partial_candidates": list(self.partial_candidates),
             "per_asset_closure_paths": list(self.per_asset_closure_paths),
+            "per_asset_proof_package_paths": list(self.per_asset_proof_package_paths),
             "policy_version": self.policy_version,
+            "proof_execution_matrix_path": self.proof_execution_matrix_path,
+            "proof_execution_status": self.proof_execution_status,
+            "proof_package_root_path": self.proof_package_root_path,
             "promotion_matrix_path": self.promotion_matrix_path,
             "production_candidates": list(self.production_candidates),
             "repository_url": self.repository_url,
@@ -166,16 +183,24 @@ def build_hfx_core12_completion_ledger(
         policy_version=normalized["policy_version"],
         code_version=normalized["code_version"],
         full_promotion_closure_run_id=_optional_string(normalized, "full_promotion_closure_run_id"),
+        full_proof_run_id=_optional_string(normalized, "full_proof_run_id"),
         per_asset_closure_paths=tuple(_optional_string_list(normalized, "per_asset_closure_paths")),
+        per_asset_proof_package_paths=tuple(_optional_string_list(normalized, "per_asset_proof_package_paths")),
         rollback_quarantine_route_path=_optional_string(normalized, "rollback_quarantine_route_path"),
         shot_render_proof_plan_path=_optional_string(normalized, "shot_render_proof_plan_path"),
         promotion_matrix_path=_optional_string(normalized, "promotion_matrix_path"),
+        proof_package_root_path=_optional_string(normalized, "proof_package_root_path"),
+        proof_execution_matrix_path=_optional_string(normalized, "proof_execution_matrix_path"),
+        proof_execution_status=_optional_string(normalized, "proof_execution_status"),
+        final_remaining_gate=_optional_string(normalized, "final_remaining_gate"),
+        final_claim_allowed_summary=_optional_string(normalized, "final_claim_allowed_summary"),
         rollback_quarantine_route_status=_optional_string(normalized, "rollback_quarantine_route_status"),
         shot_render_proof_plan_status=_optional_string(normalized, "shot_render_proof_plan_status"),
         exact_remaining_gates=tuple(_optional_string_list(normalized, "exact_remaining_gates")),
         external_asset_decision=_optional_string(normalized, "external_asset_decision"),
         observed_at=observed,
     )
+    _validate_proof_package_decision(ledger)
     return replace(ledger, content_hash=compute_content_hash(ledger.deterministic_material()))
 
 
@@ -192,6 +217,9 @@ def render_hfx_core12_completion_ledger_markdown(ledger: HFXCore12CompletionLedg
             ("main_commit", ledger.main_commit),
             ("completion_decision", ledger.completion_decision),
             ("full_promotion_closure_run_id", ledger.full_promotion_closure_run_id),
+            ("full_proof_run_id", ledger.full_proof_run_id),
+            ("proof_execution_status", ledger.proof_execution_status),
+            ("final_claim_allowed_summary", ledger.final_claim_allowed_summary),
             ("rollback_quarantine_route_status", ledger.rollback_quarantine_route_status),
             ("shot_render_proof_plan_status", ledger.shot_render_proof_plan_status),
             ("policy_version", ledger.policy_version),
@@ -207,9 +235,13 @@ def render_hfx_core12_completion_ledger_markdown(ledger: HFXCore12CompletionLedg
             ("Shell Only Assets", list(ledger.shell_only_assets)),
             ("Blocked Assets", list(ledger.blocked_assets)),
             ("Per Asset Closure Paths", list(ledger.per_asset_closure_paths)),
+            ("Per Asset Proof Package Paths", list(ledger.per_asset_proof_package_paths)),
             ("Rollback Quarantine Route Path", ledger.rollback_quarantine_route_path),
             ("Shot Render Proof Plan Path", ledger.shot_render_proof_plan_path),
             ("Promotion Matrix Path", ledger.promotion_matrix_path),
+            ("Proof Package Root Path", ledger.proof_package_root_path),
+            ("Proof Execution Matrix Path", ledger.proof_execution_matrix_path),
+            ("Final Remaining Gate", ledger.final_remaining_gate),
             ("Exact Remaining Gates", list(ledger.exact_remaining_gates)),
             ("External Asset Decision", ledger.external_asset_decision),
             ("External Asset Policy", ledger.external_asset_policy),
@@ -279,6 +311,28 @@ def _all_assets_complete(core12_assets: list[dict[str, object]]) -> bool:
         and asset.get("final_claim_allowed", True) is True
         for asset in core12_assets
     )
+
+
+def _validate_proof_package_decision(ledger: HFXCore12CompletionLedger) -> None:
+    if ledger.completion_decision != "proof_package_complete_pending_execution":
+        return
+    required_strings = {
+        "full_proof_run_id": ledger.full_proof_run_id,
+        "proof_package_root_path": ledger.proof_package_root_path,
+        "proof_execution_matrix_path": ledger.proof_execution_matrix_path,
+        "proof_execution_status": ledger.proof_execution_status,
+        "final_remaining_gate": ledger.final_remaining_gate,
+        "final_claim_allowed_summary": ledger.final_claim_allowed_summary,
+    }
+    for field, value in required_strings.items():
+        if not value:
+            raise ValueError(f"{field}_required_for_proof_package_decision")
+    if len(ledger.per_asset_proof_package_paths) != 12:
+        raise ValueError("per_asset_proof_package_paths_must_list_all_12_assets")
+    if ledger.proof_execution_status != "package_created_pending_actual_execution":
+        raise ValueError("proof_execution_status_must_be_package_created_pending_actual_execution")
+    if "false" not in ledger.final_claim_allowed_summary.lower():
+        raise ValueError("final_claim_allowed_summary_must_block_final_claims")
 
 
 def _optional_string(material: Mapping[str, object], field: str) -> str:

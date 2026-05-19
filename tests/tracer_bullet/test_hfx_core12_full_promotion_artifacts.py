@@ -198,11 +198,13 @@ class HFXCore12FullPromotionArtifactTests(unittest.TestCase):
     def test_updated_ledger_records_all_closure_and_plan_paths(self):
         payload = load_json(LEDGER_JSON)
 
-        self.assertEqual(payload["completion_decision"], "promotion_closure_complete_pending_shot_proof")
+        self.assertEqual(payload["completion_decision"], "proof_package_complete_pending_execution")
         self.assertEqual(len(payload["per_asset_closure_paths"]), 12)
         self.assertEqual(payload["promotion_matrix_path"], MATRIX_JSON.as_posix())
         self.assertEqual(payload["rollback_quarantine_route_path"], ROUTE_JSON.as_posix())
         self.assertEqual(payload["shot_render_proof_plan_path"], PROOF_JSON.as_posix())
+        self.assertEqual(len(payload["per_asset_proof_package_paths"]), 12)
+        self.assertEqual(payload["proof_execution_status"], "package_created_pending_actual_execution")
         self.assertIn("Deferred", payload["external_asset_decision"])
 
     def test_ledger_does_not_claim_complete_unless_final_gates_true(self):
