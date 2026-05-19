@@ -1,0 +1,40 @@
+{
+  "blocked_capabilities_preserved": [
+    "real provider execution remains blocked",
+    "production autonomy remains blocked",
+    "external actions remain blocked"
+  ],
+  "code_version": "0.1.0",
+  "files_added": [
+    "docs/operator/examples/code_audit/post_merge_retrospective_sample_material.json",
+    "docs/operator/examples/code_audit/post_merge_retrospective_sample_report.md"
+  ],
+  "files_deleted": [],
+  "files_modified": [
+    "docs/operator/report_gallery.md"
+  ],
+  "lessons_learned": [
+    "sample-only reports should restate sample-only boundaries in every packet"
+  ],
+  "merge_commit": "35c09fe5b7a2d7d5e2bb53a873eceadd458f2e52",
+  "merged_branch": "codex-noncore-production-assets-v1",
+  "merged_capabilities": [
+    "private code audit sample pack example set",
+    "operator report gallery navigation"
+  ],
+  "next_actions": [
+    "use the sample pack as a formatting reference only"
+  ],
+  "policy_version": "post-merge-retrospective-report-v1",
+  "report_id": "post-merge-retrospective-sample-pack-v1",
+  "repository_url": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os",
+  "risks_retained": [
+    "sample retrospective remains synthetic and must not be treated as post-merge evidence"
+  ],
+  "rollback_route": [
+    "remove sample retrospective files as a unit if the example set is revised or rejected"
+  ],
+  "tests_after_merge": [
+    "caller reported sample test pass in sample scope only"
+  ]
+}

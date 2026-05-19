@@ -1,0 +1,64 @@
+{
+  "blocked_capability_status": {
+    "violations": []
+  },
+  "changed_files": [
+    "docs/operator/examples/code_audit/merge_readiness_sample_material.json",
+    "docs/operator/examples/code_audit/merge_readiness_sample_report.md",
+    "docs/operator/forms/merge_readiness_form.md"
+  ],
+  "clean_tree_status": {
+    "status": "caller reported clean in sample scope"
+  },
+  "code_version": "0.1.0",
+  "diff_check_status": {
+    "status": "caller reported checked in sample scope"
+  },
+  "merge_blockers": [
+    "sample pack is demonstrative only and must not be treated as an actual merge gate decision"
+  ],
+  "merge_decision": "needs_human_review",
+  "policy_version": "merge-readiness-report-v1",
+  "protected_files_status": {
+    "Makefile": {
+      "safe": true,
+      "status": "unchanged"
+    },
+    "governance_files": {
+      "safe": true,
+      "status": "unchanged"
+    },
+    "health_gate_wiring": {
+      "safe": true,
+      "status": "unchanged"
+    },
+    "root_README": {
+      "safe": true,
+      "status": "unchanged"
+    },
+    "root_integrity_manifests": {
+      "safe": true,
+      "status": "unchanged"
+    },
+    "schema_files": {
+      "safe": true,
+      "status": "unchanged"
+    }
+  },
+  "report_id": "merge-readiness-sample-pack-v1",
+  "repository_url": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os",
+  "rollback_plan": [
+    "remove sample merge readiness assets as a unit if the sample pack is not approved"
+  ],
+  "root_integrity_status": {
+    "status": "caller reported preserved in sample scope"
+  },
+  "source_branch": "codex-noncore-production-assets-v1",
+  "source_commit": "25c09fe5b7a2d7d5e2bb53a873eceadd458f2e42",
+  "target_branch": "main",
+  "target_commit": "15c09fe5b7a2d7d5e2bb53a873eceadd458f2e32",
+  "test_matrix": {
+    "required_verification": "sample pack does not prove git diff, clean tree, or live merge readiness",
+    "sample_scope": "caller-provided synthetic example only"
+  }
+}
