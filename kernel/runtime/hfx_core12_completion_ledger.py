@@ -24,7 +24,13 @@ __all__ = [
 
 _POLICY_VERSION = "hfx-core12-completion-ledger-v1"
 _CODE_VERSION = "0.1.0"
-_COMPLETION_DECISIONS = ("complete", "incomplete", "blocked", "audit_complete_assets_incomplete")
+_COMPLETION_DECISIONS = (
+    "complete",
+    "incomplete",
+    "promotion_closure_complete_pending_shot_proof",
+    "audit_complete_assets_incomplete",
+    "blocked",
+)
 _STRING_FIELDS = (
     "ledger_id",
     "repository_url",
@@ -70,6 +76,15 @@ class HFXCore12CompletionLedger:
     completion_decision: str
     policy_version: str = _POLICY_VERSION
     code_version: str = _CODE_VERSION
+    full_promotion_closure_run_id: str = ""
+    per_asset_closure_paths: tuple[object, ...] = ()
+    rollback_quarantine_route_path: str = ""
+    shot_render_proof_plan_path: str = ""
+    promotion_matrix_path: str = ""
+    rollback_quarantine_route_status: str = ""
+    shot_render_proof_plan_status: str = ""
+    exact_remaining_gates: tuple[object, ...] = ()
+    external_asset_decision: str = ""
     content_hash: str = ""
     observed_at: str = OBSERVED_AT_NOT_PROVIDED
 
@@ -80,15 +95,24 @@ class HFXCore12CompletionLedger:
             "completion_decision": self.completion_decision,
             "core12_assets": [dict(asset) for asset in self.core12_assets],
             "external_asset_policy": self.external_asset_policy,
+            "external_asset_decision": self.external_asset_decision,
+            "exact_remaining_gates": list(self.exact_remaining_gates),
+            "full_promotion_closure_run_id": self.full_promotion_closure_run_id,
             "gold_assets": list(self.gold_assets),
             "ledger_id": self.ledger_id,
             "main_commit": self.main_commit,
             "next_required_actions": list(self.next_required_actions),
             "partial_candidates": list(self.partial_candidates),
+            "per_asset_closure_paths": list(self.per_asset_closure_paths),
             "policy_version": self.policy_version,
+            "promotion_matrix_path": self.promotion_matrix_path,
             "production_candidates": list(self.production_candidates),
             "repository_url": self.repository_url,
+            "rollback_quarantine_route_path": self.rollback_quarantine_route_path,
+            "rollback_quarantine_route_status": self.rollback_quarantine_route_status,
             "shell_only_assets": list(self.shell_only_assets),
+            "shot_render_proof_plan_path": self.shot_render_proof_plan_path,
+            "shot_render_proof_plan_status": self.shot_render_proof_plan_status,
         }
 
     def as_dict(self) -> dict[str, object]:
@@ -120,6 +144,8 @@ def build_hfx_core12_completion_ledger(
     core12_assets = _normalize_ledger_assets(normalized["core12_assets"])
     if normalized["completion_decision"] == "complete" and not _all_assets_complete(core12_assets):
         raise ValueError("incomplete_asset_blocks_complete")
+    if normalized["completion_decision"] == "complete" and normalized.get("exact_remaining_gates"):
+        raise ValueError("remaining_gates_block_complete")
     if "deferred" not in normalized["external_asset_policy"].lower():
         raise ValueError("external_asset_policy_must_be_deferred")
     if "no github storage decision" not in normalized["external_asset_policy"].lower():
@@ -139,6 +165,15 @@ def build_hfx_core12_completion_ledger(
         completion_decision=normalized["completion_decision"],
         policy_version=normalized["policy_version"],
         code_version=normalized["code_version"],
+        full_promotion_closure_run_id=_optional_string(normalized, "full_promotion_closure_run_id"),
+        per_asset_closure_paths=tuple(_optional_string_list(normalized, "per_asset_closure_paths")),
+        rollback_quarantine_route_path=_optional_string(normalized, "rollback_quarantine_route_path"),
+        shot_render_proof_plan_path=_optional_string(normalized, "shot_render_proof_plan_path"),
+        promotion_matrix_path=_optional_string(normalized, "promotion_matrix_path"),
+        rollback_quarantine_route_status=_optional_string(normalized, "rollback_quarantine_route_status"),
+        shot_render_proof_plan_status=_optional_string(normalized, "shot_render_proof_plan_status"),
+        exact_remaining_gates=tuple(_optional_string_list(normalized, "exact_remaining_gates")),
+        external_asset_decision=_optional_string(normalized, "external_asset_decision"),
         observed_at=observed,
     )
     return replace(ledger, content_hash=compute_content_hash(ledger.deterministic_material()))
@@ -156,6 +191,9 @@ def render_hfx_core12_completion_ledger_markdown(ledger: HFXCore12CompletionLedg
             ("repository_url", ledger.repository_url),
             ("main_commit", ledger.main_commit),
             ("completion_decision", ledger.completion_decision),
+            ("full_promotion_closure_run_id", ledger.full_promotion_closure_run_id),
+            ("rollback_quarantine_route_status", ledger.rollback_quarantine_route_status),
+            ("shot_render_proof_plan_status", ledger.shot_render_proof_plan_status),
             ("policy_version", ledger.policy_version),
             ("code_version", ledger.code_version),
             ("content_hash", ledger.content_hash),
@@ -168,11 +206,17 @@ def render_hfx_core12_completion_ledger_markdown(ledger: HFXCore12CompletionLedg
             ("Partial Candidates", list(ledger.partial_candidates)),
             ("Shell Only Assets", list(ledger.shell_only_assets)),
             ("Blocked Assets", list(ledger.blocked_assets)),
+            ("Per Asset Closure Paths", list(ledger.per_asset_closure_paths)),
+            ("Rollback Quarantine Route Path", ledger.rollback_quarantine_route_path),
+            ("Shot Render Proof Plan Path", ledger.shot_render_proof_plan_path),
+            ("Promotion Matrix Path", ledger.promotion_matrix_path),
+            ("Exact Remaining Gates", list(ledger.exact_remaining_gates)),
+            ("External Asset Decision", ledger.external_asset_decision),
             ("External Asset Policy", ledger.external_asset_policy),
             ("Next Required Actions", list(ledger.next_required_actions)),
             (
                 "Completion Rule",
-                "complete is allowed only when all 12 assets are gold_complete or production_complete with validated evidence.",
+                "complete is allowed only when all 12 assets are gold_complete or production_complete with validated final evidence and no remaining gates.",
             ),
         ),
     )
@@ -194,12 +238,35 @@ def _normalize_ledger_assets(value: object) -> list[dict[str, object]]:
         asset_id = row["asset_id"]
         if asset_id in by_id:
             raise ValueError(f"duplicate_asset:{asset_id}")
-        by_id[asset_id] = {
+        normalized_row = {
             "asset_id": row["asset_id"],
             "asset_name": row["asset_name"],
             "completion_status": row["completion_status"],
             "validated_evidence": row["validated_evidence"],
         }
+        for field in (
+            "closure_path",
+            "rollback_quarantine_route_status",
+            "shot_render_proof_plan_status",
+            "promotion_matrix_status",
+            "next_required_action",
+        ):
+            if field in row:
+                if not isinstance(row[field], str) or not row[field]:
+                    raise ValueError(f"{field}_must_be_nonempty_string")
+                normalized_row[field] = row[field]
+        for field in ("missing_gates", "exact_remaining_gates"):
+            if field in row:
+                if not isinstance(row[field], list) or any(
+                    not isinstance(item, str) or not item for item in row[field]
+                ):
+                    raise ValueError(f"{field}_must_be_string_list")
+                normalized_row[field] = list(row[field])
+        if "final_claim_allowed" in row:
+            if not isinstance(row["final_claim_allowed"], bool):
+                raise ValueError("final_claim_allowed_must_be_bool")
+            normalized_row["final_claim_allowed"] = row["final_claim_allowed"]
+        by_id[asset_id] = normalized_row
     if list(sorted(by_id)) != list(sorted(required_order)):
         raise ValueError("core12_assets_must_list_all_12_assets")
     return [by_id[asset_id] for asset_id in required_order]
@@ -209,5 +276,24 @@ def _all_assets_complete(core12_assets: list[dict[str, object]]) -> bool:
     complete_states = {"gold_complete", "production_complete"}
     return all(
         asset.get("completion_status") in complete_states and asset.get("validated_evidence") is True
+        and asset.get("final_claim_allowed", True) is True
         for asset in core12_assets
     )
+
+
+def _optional_string(material: Mapping[str, object], field: str) -> str:
+    if field not in material:
+        return ""
+    if not isinstance(material[field], str):
+        raise ValueError(f"{field}_must_be_string")
+    return material[field]
+
+
+def _optional_string_list(material: Mapping[str, object], field: str) -> list[str]:
+    if field not in material:
+        return []
+    if not isinstance(material[field], list):
+        raise ValueError(f"{field}_must_be_list")
+    if any(not isinstance(item, str) or not item for item in material[field]):
+        raise ValueError(f"{field}_must_be_string_list")
+    return list(material[field])
