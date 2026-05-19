@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "comp_target": {
+      "type": "string"
+    },
+    "contract_type": {
+      "enum": [
+        "render",
+        "comp"
+      ]
+    },
+    "explicit_blocked_claims": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "explicit_final_pixel_blocking_conditions": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "expected_comp_app_options": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "fps": {
+      "type": "number"
+    },
+    "frame_end": {
+      "type": "integer"
+    },
+    "frame_start": {
+      "type": "integer"
+    },
+    "input_paths": {
+      "type": "object"
+    },
+    "per_asset_comp_notes": {
+      "items": {
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "per_asset_expected_pass_list": {
+      "items": {
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "render_target": {
+      "type": "string"
+    },
+    "required_inputs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "required_outputs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "schema_type": {
+      "const": "RenderCompChecklist"
+    },
+    "shot_id": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "take_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_type",
+    "contract_type",
+    "status",
+    "shot_id",
+    "take_id"
+  ],
+  "title": "RenderCompChecklist",
+  "type": "object"
+}

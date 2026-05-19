@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "asset_id": {
+      "type": "string"
+    },
+    "asset_name": {
+      "type": "string"
+    },
+    "copied_shot_hip": {
+      "type": "string"
+    },
+    "dependency_policy": {
+      "type": "string"
+    },
+    "direct_release_mutation_forbidden": {
+      "type": "boolean"
+    },
+    "enabled": {
+      "type": "boolean"
+    },
+    "parameter_defaults": {
+      "type": "object"
+    },
+    "parameter_overrides": {
+      "type": "object"
+    },
+    "resolved_parameters": {
+      "type": "object"
+    },
+    "schema_type": {
+      "const": "ShotParameterSet"
+    },
+    "shot_id": {
+      "type": "string"
+    },
+    "source_release_hip": {
+      "type": "string"
+    },
+    "take_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_type",
+    "asset_id",
+    "asset_name",
+    "shot_id",
+    "take_id",
+    "enabled",
+    "dependency_policy",
+    "parameter_defaults",
+    "parameter_overrides",
+    "resolved_parameters",
+    "source_release_hip",
+    "copied_shot_hip",
+    "direct_release_mutation_forbidden"
+  ],
+  "title": "ShotParameterSet",
+  "type": "object"
+}

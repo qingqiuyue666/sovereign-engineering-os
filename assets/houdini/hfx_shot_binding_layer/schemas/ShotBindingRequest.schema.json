@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "camera_path": {
+      "type": "string"
+    },
+    "comp_target": {
+      "type": "string"
+    },
+    "fps": {
+      "exclusiveMinimum": 0,
+      "type": "number"
+    },
+    "frame_end": {
+      "type": "integer"
+    },
+    "frame_start": {
+      "type": "integer"
+    },
+    "hdri_path": {
+      "type": "string"
+    },
+    "lens_profile_path": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "output_root": {
+      "type": "string"
+    },
+    "plate_path": {
+      "type": "string"
+    },
+    "project_id": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$",
+      "type": "string"
+    },
+    "render_target": {
+      "type": "string"
+    },
+    "requested_assets": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "asset_id": {
+            "type": "string"
+          },
+          "dependency_policy": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "parameter_overrides": {
+            "additionalProperties": true,
+            "type": "object"
+          }
+        },
+        "required": [
+          "asset_id",
+          "enabled",
+          "parameter_overrides",
+          "dependency_policy"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": false
+    },
+    "sequence_id": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$",
+      "type": "string"
+    },
+    "shot_id": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$",
+      "type": "string"
+    },
+    "take_id": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "project_id",
+    "sequence_id",
+    "shot_id",
+    "take_id",
+    "frame_start",
+    "frame_end",
+    "fps",
+    "plate_path",
+    "camera_path",
+    "hdri_path",
+    "lens_profile_path",
+    "output_root",
+    "requested_assets",
+    "render_target",
+    "comp_target",
+    "notes"
+  ],
+  "title": "ShotBindingRequest",
+  "type": "object"
+}

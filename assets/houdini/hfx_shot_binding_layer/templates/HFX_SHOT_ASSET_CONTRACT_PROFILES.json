@@ -1,0 +1,210 @@
+{
+  "asset_profiles": {
+    "HFX_008": {
+      "comp_notes": [
+        "Composite the shockwave emission over the plate with distortion isolated as a separate refraction/vector treatment.",
+        "Use the alpha pass to keep the impact ring editable during downstream comp review."
+      ],
+      "expected_passes": [
+        "shockwave_beauty",
+        "shockwave_emission",
+        "shockwave_distortion",
+        "shockwave_alpha"
+      ],
+      "parameter_defaults": {
+        "energy_scale": 1.0,
+        "falloff_radius_m": 8.0,
+        "impact_frame_offset": 0,
+        "shockwave_width_m": 0.45
+      }
+    },
+    "HFX_015": {
+      "comp_notes": [
+        "Keep portal core and ring energy as separate emission controls.",
+        "Depth and alpha passes are required for performer or set integration."
+      ],
+      "expected_passes": [
+        "portal_core_emission",
+        "portal_ring_energy",
+        "portal_depth_mask",
+        "portal_alpha"
+      ],
+      "parameter_defaults": {
+        "portal_radius_m": 2.2,
+        "ring_energy": 1.0,
+        "spark_density": 0.55,
+        "surface_alignment": "camera_facing"
+      }
+    },
+    "HFX_016": {
+      "comp_notes": [
+        "Treat heat distortion as a non-beauty utility pass until render automation produces validated pixel outputs.",
+        "Use the mask to limit refraction to hot air regions."
+      ],
+      "expected_passes": [
+        "heat_distortion_vectors",
+        "heat_refraction_mask"
+      ],
+      "parameter_defaults": {
+        "distortion_strength": 0.35,
+        "heat_blur_radius_px": 12,
+        "noise_frequency": 2.5,
+        "temporal_wobble": 0.25
+      }
+    },
+    "HFX_021": {
+      "comp_notes": [
+        "Use fire, smoke, shadow matte, and alpha as separate comp layers.",
+        "No simulation cache or OpenEXR output is created by this binding layer."
+      ],
+      "expected_passes": [
+        "pyro_beauty",
+        "pyro_fire_emission",
+        "pyro_smoke_density",
+        "pyro_shadow_matte",
+        "pyro_alpha"
+      ],
+      "parameter_defaults": {
+        "blast_energy": 1.0,
+        "smoke_density": 0.7,
+        "source_radius_m": 1.5,
+        "turbulence_scale": 0.6
+      }
+    },
+    "HFX_025": {
+      "comp_notes": [
+        "Keep the character field emission independent from interaction masks.",
+        "Use the alpha pass to preserve roto and costume edge control."
+      ],
+      "expected_passes": [
+        "field_emission",
+        "field_interaction_mask",
+        "field_alpha"
+      ],
+      "parameter_defaults": {
+        "field_intensity": 1.0,
+        "skin_offset_cm": 5.0,
+        "spark_rate": 0.4,
+        "surface_bind_mode": "character_proxy"
+      }
+    },
+    "HFX_027": {
+      "comp_notes": [
+        "Use gate emission, particles, depth, and alpha as separate comp controls.",
+        "This package binds the reusable template; it does not render a portal arrival shot."
+      ],
+      "expected_passes": [
+        "portal_gate_emission",
+        "portal_gate_particles",
+        "portal_gate_depth_mask",
+        "portal_gate_alpha"
+      ],
+      "parameter_defaults": {
+        "gate_height_m": 3.2,
+        "gate_width_m": 1.8,
+        "particle_spawn_rate": 0.65,
+        "threshold_open": 0.5
+      }
+    },
+    "HFX_028": {
+      "comp_notes": [
+        "Treat rift interior distortion separately from edge emission.",
+        "Alpha must remain editable for matte refinement around the tear edge."
+      ],
+      "expected_passes": [
+        "rift_edge_emission",
+        "rift_interior_distortion",
+        "rift_alpha"
+      ],
+      "parameter_defaults": {
+        "rift_length_m": 4.0,
+        "rift_noise_scale": 0.8,
+        "rift_open_amount": 0.75,
+        "tear_edge_brightness": 1.0
+      }
+    },
+    "HFX_029": {
+      "comp_notes": [
+        "Keep gravitational lensing distortion isolated from accretion emission.",
+        "Use alpha and emission passes for separate grade and holdout review."
+      ],
+      "expected_passes": [
+        "accretion_beauty",
+        "accretion_emission",
+        "gravitational_lensing_distortion",
+        "accretion_alpha"
+      ],
+      "parameter_defaults": {
+        "accretion_radius_m": 6.0,
+        "disk_spin_rate": 0.45,
+        "lensing_strength": 0.65,
+        "singularity_scale": 1.0
+      }
+    },
+    "HFX_033": {
+      "comp_notes": [
+        "Use glow emission as an additive comp contribution only after render validation exists.",
+        "The mask pass should remain separate for grade isolation."
+      ],
+      "expected_passes": [
+        "glow_emission",
+        "glow_mask"
+      ],
+      "parameter_defaults": {
+        "bloom_threshold": 0.8,
+        "emission_gain": 1.0,
+        "mask_softness_px": 8,
+        "saturation_bias": 0.1
+      }
+    },
+    "HFX_036": {
+      "comp_notes": [
+        "Use the holdout matte as a utility pass for plate protection.",
+        "Do not flatten alpha decisions into final comp inside this binding layer."
+      ],
+      "expected_passes": [
+        "alpha_holdout_matte",
+        "object_alpha"
+      ],
+      "parameter_defaults": {
+        "edge_dilate_px": 2,
+        "holdout_mode": "foreground",
+        "matte_softness_px": 1.5,
+        "premultiply": true
+      }
+    },
+    "HFX_037": {
+      "comp_notes": [
+        "Use rim interaction as a controllable lightwrap layer around the subject edge.",
+        "Keep the rim mask editable for integration review."
+      ],
+      "expected_passes": [
+        "lightwrap_rim",
+        "rim_mask"
+      ],
+      "parameter_defaults": {
+        "edge_width_px": 12,
+        "lightwrap_gain": 0.35,
+        "rim_bias": 0.1,
+        "wrap_source": "plate_luminance"
+      }
+    },
+    "HFX_038": {
+      "comp_notes": [
+        "Use contact shadow and ground matte as separate integration layers.",
+        "Ground contact must be validated against plate geometry in the next layer."
+      ],
+      "expected_passes": [
+        "contact_shadow",
+        "ground_matte"
+      ],
+      "parameter_defaults": {
+        "contact_softness_px": 18,
+        "ground_projection_mode": "camera",
+        "shadow_density": 0.45,
+        "shadow_falloff_m": 3.0
+      }
+    }
+  },
+  "status": "HFX_SHOT_ASSET_CONTRACT_PROFILES_READY"
+}

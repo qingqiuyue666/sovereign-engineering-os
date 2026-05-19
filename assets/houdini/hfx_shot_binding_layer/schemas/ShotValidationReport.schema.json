@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "blocked_claims": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "checks": {
+      "items": {
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "manifest_path": {
+      "type": "string"
+    },
+    "package_root": {
+      "type": "string"
+    },
+    "schema_type": {
+      "const": "ShotValidationReport"
+    },
+    "shot_id": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "PASS",
+        "FAIL"
+      ]
+    },
+    "take_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_type",
+    "status",
+    "shot_id",
+    "take_id",
+    "package_root",
+    "manifest_path",
+    "checks",
+    "blocked_claims"
+  ],
+  "title": "ShotValidationReport",
+  "type": "object"
+}

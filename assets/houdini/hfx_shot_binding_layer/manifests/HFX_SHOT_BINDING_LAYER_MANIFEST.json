@@ -1,0 +1,109 @@
+{
+  "excluded_self_referential_outputs": [
+    "manifests/HFX_SHOT_BINDING_LAYER_FILE_TREE.txt",
+    "manifests/HFX_SHOT_BINDING_LAYER_MANIFEST.json",
+    "manifests/HFX_SHOT_BINDING_LAYER_SHA256SUMS.txt",
+    "validation/HFX_SHOT_BINDING_LAYER_GLOBAL_SEAL.json",
+    "validation/HFX_SHOT_BINDING_LAYER_GLOBAL_SEAL.md"
+  ],
+  "file_count": 19,
+  "files": [
+    {
+      "path": "README_HFX_SHOT_BINDING_LAYER.md",
+      "sha256": "a156bf3d97edcd156c20d7529f3bf5f94b91d451e31d746b290dc7bb32512caa",
+      "size_bytes": 2612
+    },
+    {
+      "path": "docs/HFX_SHOT_BINDING_OPERATOR_MANUAL.md",
+      "sha256": "23ee1d86e17328b320a05b06e2f03ba729d6f5cf80cea03cdea3c60c78c9eab3",
+      "size_bytes": 3456
+    },
+    {
+      "path": "examples/shot_request_black_hole.json",
+      "sha256": "8cc76898922e197660e6a64c3f6889c2f2f7524216037a305bb64bd758656c15",
+      "size_bytes": 1871
+    },
+    {
+      "path": "examples/shot_request_energy_impact.json",
+      "sha256": "5782bfd79821ad66d99301f1f8af53c21477032304e5dbf03791f0b52dc06a2a",
+      "size_bytes": 1991
+    },
+    {
+      "path": "examples/shot_request_portal_arrival.json",
+      "sha256": "c674d263e914f9d71fd72b9a6c05c24b65d36af72789fa559be73e910412e466",
+      "size_bytes": 2244
+    },
+    {
+      "path": "schemas/MutationGuardReport.schema.json",
+      "sha256": "f9a58eceb5bd059cc03c9a0e7cb088b5aaa4696f31f52bda424040cc84fc1893",
+      "size_bytes": 1379
+    },
+    {
+      "path": "schemas/RenderCompChecklist.schema.json",
+      "sha256": "830c10ed9cb5798c892cf977ce472c210e3f57631b1cbad3233ba74a9630fba8",
+      "size_bytes": 1666
+    },
+    {
+      "path": "schemas/ShotAssetBinding.schema.json",
+      "sha256": "556de36d56b53026b49eef274bbc0859de37d006b9b9e96fb90eef326699eb9f",
+      "size_bytes": 1467
+    },
+    {
+      "path": "schemas/ShotBindingManifest.schema.json",
+      "sha256": "c231e954ddfd573bacdcd3663760b7ebbb14a13a52cb45021392155135cdfc02",
+      "size_bytes": 1501
+    },
+    {
+      "path": "schemas/ShotBindingRequest.schema.json",
+      "sha256": "980e453e55e0a12f849ed6c05a6592c9a9aa85a8ff40ad3cfd82354fe4c00aa0",
+      "size_bytes": 2146
+    },
+    {
+      "path": "schemas/ShotParameterSet.schema.json",
+      "sha256": "5115b527f34242297a89b6beb306c28385038dba48aa9135c5a8e8e5d905f7b9",
+      "size_bytes": 1205
+    },
+    {
+      "path": "schemas/ShotValidationReport.schema.json",
+      "sha256": "a25776d6950d3973910a7ec658b3765fc26ad31aeb5a2d2e459d164d4a74edf6",
+      "size_bytes": 877
+    },
+    {
+      "path": "templates/HFX_SHOT_ASSET_CONTRACT_PROFILES.json",
+      "sha256": "e44f08b7e8e96e4f893409a2d836809ad523bb1d6b53bd2683c806dbb36f2c01",
+      "size_bytes": 6257
+    },
+    {
+      "path": "tests/test_hfx_shot_binding_layer.py",
+      "sha256": "2d485a18db6343e291fea2efa13cce020c5e534d3b998c4e502144b3b1e8014f",
+      "size_bytes": 5824
+    },
+    {
+      "path": "tools/hfx_bind_shot.py",
+      "sha256": "8c974a06d4ccb5f1949decc46bea58e8ddda4c320af94a288e5aefa4b852a70f",
+      "size_bytes": 844
+    },
+    {
+      "path": "tools/hfx_shot_binding_global_seal.py",
+      "sha256": "a321034f354f6727156458789e0d1b9c41994f76de2903036f108f8daa5a6121",
+      "size_bytes": 776
+    },
+    {
+      "path": "tools/hfx_shot_binding_lib.py",
+      "sha256": "1b65a0c2b7eb5302d29e164054611a632f1e167daf45342d2f902c8afdcbb289",
+      "size_bytes": 44955
+    },
+    {
+      "path": "tools/hfx_validate_shot_package.py",
+      "sha256": "391d5305a7d8de7c5f58525facbaacfd3baa7a5a33414435c61c4539823a7972",
+      "size_bytes": 878
+    },
+    {
+      "path": "tools/run_hfx_shot_binding_tests.sh",
+      "sha256": "396a13edd520ccd75b1e883ee3d8f2af94ae15ae4bf1e29b1a8f4353369ae065",
+      "size_bytes": 347
+    }
+  ],
+  "layer_root": "assets/houdini/hfx_shot_binding_layer",
+  "status": "HFX_SHOT_BINDING_LAYER_MANIFEST_READY"
+}

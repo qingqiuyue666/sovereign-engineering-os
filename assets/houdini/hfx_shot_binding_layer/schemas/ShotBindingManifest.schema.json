@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "asset_bindings": {
+      "items": {
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "comp_contract": {
+      "type": "string"
+    },
+    "explicit_blocked_claims": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "mutation_guard_report": {
+      "type": "string"
+    },
+    "operator_guide": {
+      "type": "string"
+    },
+    "package_root": {
+      "type": "string"
+    },
+    "project_id": {
+      "type": "string"
+    },
+    "render_contract": {
+      "type": "string"
+    },
+    "request_snapshot": {
+      "type": "string"
+    },
+    "schema_type": {
+      "const": "ShotBindingManifest"
+    },
+    "sequence_id": {
+      "type": "string"
+    },
+    "shot_id": {
+      "type": "string"
+    },
+    "source_authority": {
+      "type": "object"
+    },
+    "status": {
+      "type": "string"
+    },
+    "take_id": {
+      "type": "string"
+    },
+    "validation_report": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_type",
+    "status",
+    "project_id",
+    "sequence_id",
+    "shot_id",
+    "take_id",
+    "package_root",
+    "source_authority",
+    "request_snapshot",
+    "asset_bindings",
+    "render_contract",
+    "comp_contract",
+    "operator_guide",
+    "mutation_guard_report",
+    "validation_report",
+    "explicit_blocked_claims"
+  ],
+  "title": "ShotBindingManifest",
+  "type": "object"
+}

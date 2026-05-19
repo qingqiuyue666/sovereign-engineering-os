@@ -1,0 +1,77 @@
+{
+  "camera_path": "/show/HFX_DEMO/assets/camera/SEQ020_SH030_camera.abc",
+  "comp_target": "nuke_contract_v001",
+  "fps": 24,
+  "frame_end": 1096,
+  "frame_start": 1001,
+  "hdri_path": "/show/HFX_DEMO/assets/lighting/alley_portal_hdri.exr",
+  "lens_profile_path": "/show/HFX_DEMO/assets/lens/anamorphic_50mm_lens_profile.json",
+  "notes": "Portal arrival setup: portal ring, character energy, summoning gate, glow, alpha, lightwrap, and contact integration.",
+  "output_root": "/tmp/hfx_shot_binding_output",
+  "plate_path": "/show/HFX_DEMO/plates/SEQ020/SH030/plate_main.%04d.exr",
+  "project_id": "HFX_DEMO",
+  "render_target": "houdini_karma_contract_v001",
+  "requested_assets": [
+    {
+      "asset_id": "HFX_015",
+      "dependency_policy": "copy_release_hip_bind_parameters_only",
+      "enabled": true,
+      "parameter_overrides": {
+        "portal_radius_m": 2.6,
+        "ring_energy": 1.25
+      }
+    },
+    {
+      "asset_id": "HFX_025",
+      "dependency_policy": "copy_release_hip_bind_parameters_only",
+      "enabled": true,
+      "parameter_overrides": {
+        "field_intensity": 1.15
+      }
+    },
+    {
+      "asset_id": "HFX_027",
+      "dependency_policy": "copy_release_hip_bind_parameters_only",
+      "enabled": true,
+      "parameter_overrides": {
+        "gate_height_m": 3.5,
+        "threshold_open": 0.65
+      }
+    },
+    {
+      "asset_id": "HFX_033",
+      "dependency_policy": "copy_release_hip_bind_parameters_only",
+      "enabled": true,
+      "parameter_overrides": {
+        "emission_gain": 1.4
+      }
+    },
+    {
+      "asset_id": "HFX_036",
+      "dependency_policy": "copy_release_hip_bind_parameters_only",
+      "enabled": true,
+      "parameter_overrides": {
+        "matte_softness_px": 2.0
+      }
+    },
+    {
+      "asset_id": "HFX_037",
+      "dependency_policy": "copy_release_hip_bind_parameters_only",
+      "enabled": true,
+      "parameter_overrides": {
+        "edge_width_px": 16
+      }
+    },
+    {
+      "asset_id": "HFX_038",
+      "dependency_policy": "copy_release_hip_bind_parameters_only",
+      "enabled": true,
+      "parameter_overrides": {
+        "contact_softness_px": 22
+      }
+    }
+  ],
+  "sequence_id": "SEQ020",
+  "shot_id": "SH030",
+  "take_id": "TAKE_B"
+}

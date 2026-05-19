@@ -1,0 +1,136 @@
+{
+  "allowed_claims": [
+    "HFX_SHOT_BINDING_LAYER_GLOBAL_SEAL_PASS",
+    "deterministic auditable per-shot binding packages generated",
+    "Core 12 release HIP files copied into shot working packages without source mutation"
+  ],
+  "blocked_claims": [
+    "Hollywood final-pixel shot complete",
+    "actual OpenEXR pixels rendered",
+    "actual final comp rendered",
+    "client/public delivery ready"
+  ],
+  "checks": [
+    {
+      "check_id": "factory_core12_global_seal",
+      "detail": "/Users/qqy/Documents/GitHub/sovereign-engineering-os/assets/houdini/hfx_factory_core12/500_HFX_FACTORY/HFX_FACTORY_FINAL_GLOBAL_SEAL/02_validation/HFX_FACTORY_FINAL_GLOBAL_SEAL_VALIDATION.json",
+      "passed": true
+    },
+    {
+      "check_id": "shot_binding_schemas",
+      "detail": "7 schemas",
+      "passed": true
+    },
+    {
+      "check_id": "example_shot_request_energy_impact_binds_and_validates",
+      "detail": "/private/tmp/hfx_shot_binding_output/HFX_DEMO/SEQ010/SH010/TAKE_A",
+      "passed": true
+    },
+    {
+      "check_id": "example_shot_request_portal_arrival_binds_and_validates",
+      "detail": "/private/tmp/hfx_shot_binding_output/HFX_DEMO/SEQ020/SH030/TAKE_B",
+      "passed": true
+    },
+    {
+      "check_id": "example_shot_request_black_hole_binds_and_validates",
+      "detail": "/private/tmp/hfx_shot_binding_output/HFX_DEMO/SEQ090/SH005/TAKE_C",
+      "passed": true
+    },
+    {
+      "check_id": "layer_manifest_outputs",
+      "detail": "/Users/qqy/Documents/GitHub/sovereign-engineering-os/assets/houdini/hfx_shot_binding_layer/manifests/HFX_SHOT_BINDING_LAYER_MANIFEST.json",
+      "passed": true
+    }
+  ],
+  "example_packages": [
+    {
+      "asset_count": 6,
+      "bind_status": "HFX_SHOT_BINDING_PACKAGE_READY",
+      "package_root": "/private/tmp/hfx_shot_binding_output/HFX_DEMO/SEQ010/SH010/TAKE_A",
+      "request": "/Users/qqy/Documents/GitHub/sovereign-engineering-os/assets/houdini/hfx_shot_binding_layer/examples/shot_request_energy_impact.json",
+      "validation_status": "PASS"
+    },
+    {
+      "asset_count": 7,
+      "bind_status": "HFX_SHOT_BINDING_PACKAGE_READY",
+      "package_root": "/private/tmp/hfx_shot_binding_output/HFX_DEMO/SEQ020/SH030/TAKE_B",
+      "request": "/Users/qqy/Documents/GitHub/sovereign-engineering-os/assets/houdini/hfx_shot_binding_layer/examples/shot_request_portal_arrival.json",
+      "validation_status": "PASS"
+    },
+    {
+      "asset_count": 5,
+      "bind_status": "HFX_SHOT_BINDING_PACKAGE_READY",
+      "package_root": "/private/tmp/hfx_shot_binding_output/HFX_DEMO/SEQ090/SH005/TAKE_C",
+      "request": "/Users/qqy/Documents/GitHub/sovereign-engineering-os/assets/houdini/hfx_shot_binding_layer/examples/shot_request_black_hole.json",
+      "validation_status": "PASS"
+    }
+  ],
+  "layer_id": "HFX_FACTORY_SHOT_BINDING_LAYER",
+  "layer_manifest": {
+    "file_count": 19,
+    "file_tree_path": "/Users/qqy/Documents/GitHub/sovereign-engineering-os/assets/houdini/hfx_shot_binding_layer/manifests/HFX_SHOT_BINDING_LAYER_FILE_TREE.txt",
+    "manifest_path": "/Users/qqy/Documents/GitHub/sovereign-engineering-os/assets/houdini/hfx_shot_binding_layer/manifests/HFX_SHOT_BINDING_LAYER_MANIFEST.json",
+    "sha256sums_path": "/Users/qqy/Documents/GitHub/sovereign-engineering-os/assets/houdini/hfx_shot_binding_layer/manifests/HFX_SHOT_BINDING_LAYER_SHA256SUMS.txt"
+  },
+  "next_layer_recommendation": "Houdini batch render automation, EXR validation, comp automation, and final-pixel review gates.",
+  "schema_validation": {
+    "checks": [
+      {
+        "check_id": "schema_MutationGuardReport.schema.json_is_strict_object",
+        "detail": "/Users/qqy/Documents/GitHub/sovereign-engineering-os/assets/houdini/hfx_shot_binding_layer/schemas/MutationGuardReport.schema.json",
+        "passed": true
+      },
+      {
+        "check_id": "schema_RenderCompChecklist.schema.json_is_strict_object",
+        "detail": "/Users/qqy/Documents/GitHub/sovereign-engineering-os/assets/houdini/hfx_shot_binding_layer/schemas/RenderCompChecklist.schema.json",
+        "passed": true
+      },
+      {
+        "check_id": "schema_ShotAssetBinding.schema.json_is_strict_object",
+        "detail": "/Users/qqy/Documents/GitHub/sovereign-engineering-os/assets/houdini/hfx_shot_binding_layer/schemas/ShotAssetBinding.schema.json",
+        "passed": true
+      },
+      {
+        "check_id": "schema_ShotBindingManifest.schema.json_is_strict_object",
+        "detail": "/Users/qqy/Documents/GitHub/sovereign-engineering-os/assets/houdini/hfx_shot_binding_layer/schemas/ShotBindingManifest.schema.json",
+        "passed": true
+      },
+      {
+        "check_id": "schema_ShotBindingRequest.schema.json_is_strict_object",
+        "detail": "/Users/qqy/Documents/GitHub/sovereign-engineering-os/assets/houdini/hfx_shot_binding_layer/schemas/ShotBindingRequest.schema.json",
+        "passed": true
+      },
+      {
+        "check_id": "shot_binding_request_required_fields",
+        "detail": "/Users/qqy/Documents/GitHub/sovereign-engineering-os/assets/houdini/hfx_shot_binding_layer/schemas/ShotBindingRequest.schema.json",
+        "passed": true
+      },
+      {
+        "check_id": "schema_ShotParameterSet.schema.json_is_strict_object",
+        "detail": "/Users/qqy/Documents/GitHub/sovereign-engineering-os/assets/houdini/hfx_shot_binding_layer/schemas/ShotParameterSet.schema.json",
+        "passed": true
+      },
+      {
+        "check_id": "schema_ShotValidationReport.schema.json_is_strict_object",
+        "detail": "/Users/qqy/Documents/GitHub/sovereign-engineering-os/assets/houdini/hfx_shot_binding_layer/schemas/ShotValidationReport.schema.json",
+        "passed": true
+      },
+      {
+        "check_id": "all_required_schema_titles_present",
+        "detail": "",
+        "passed": true
+      }
+    ],
+    "schema_count": 7,
+    "status": "PASS"
+  },
+  "source_authority": {
+    "asset_count_passed": 12,
+    "asset_count_required": 12,
+    "factory_core12_global_seal_status": "HFX_FACTORY_FINAL_GLOBAL_SEAL_PASS",
+    "global_seal_path": "/Users/qqy/Documents/GitHub/sovereign-engineering-os/assets/houdini/hfx_factory_core12/500_HFX_FACTORY/HFX_FACTORY_FINAL_GLOBAL_SEAL/02_validation/HFX_FACTORY_FINAL_GLOBAL_SEAL_VALIDATION.json",
+    "registry_path": "/Users/qqy/Documents/GitHub/sovereign-engineering-os/assets/houdini/hfx_factory_core12/00_INDEX_\u8d44\u4ea7\u7d22\u5f15/HFX_LONG_TERM_ASSET_REGISTRY.json"
+  },
+  "status": "HFX_SHOT_BINDING_LAYER_GLOBAL_SEAL_PASS",
+  "validated": true
+}
