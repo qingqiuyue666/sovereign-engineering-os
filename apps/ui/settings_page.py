@@ -1,23 +1,51 @@
-"""Settings and execution-boundary page for Phase 2."""
+"""Settings view absorbing runtime boundaries and system health."""
 
 from __future__ import annotations
 
 from apps.ui import QFrame, QGridLayout, QLabel, QPushButton, QVBoxLayout, QWidget
 from apps.ui.i18n import UiText, language_display_options
 from apps.ui.motion import MotionIntensity, normalize_motion_intensity
+from apps.ui.read_models import RuntimeSnapshot
+
+SETTINGS_SECTIONS: tuple[str, ...] = (
+    "Runtime",
+    "Language",
+    "Motion",
+    "Boundaries",
+    "Paths",
+    "Workers",
+    "Publishing",
+    "System Health",
+)
+
+SYSTEM_HEALTH_SETTINGS_FIELDS: tuple[str, ...] = (
+    "memory",
+    "WAL state",
+    "DB connection state",
+    "last smoke result",
+    "last CI result",
+    "warnings",
+)
 
 SETTINGS_BOUNDARY_FIELDS: tuple[str, ...] = (
     "Language: Auto / English / Chinese",
     "Motion Intensity: Minimal / Standard / High Energy",
+    "Runtime",
     "Local-only mode",
     "External network disabled",
+    "Boundaries",
     "Asset root paths",
     "Artifact root path",
+    "Paths",
     "Allowed workers",
+    "Workers",
     "Dangerous action gates",
     "Human review gates",
     "Publish policy",
     "GitHub summary-only policy",
+    "Publishing",
+    "System Health",
+    *SYSTEM_HEALTH_SETTINGS_FIELDS,
 )
 
 
@@ -33,6 +61,16 @@ class SettingsPage(QWidget):
         self.title = QLabel(self.text.tr("page.settings"), self)
         self.title.setObjectName("SettingsBoundariesTitle")
         layout.addWidget(self.title)
+
+        self.section_strip = QGridLayout()
+        self.section_strip.setSpacing(8)
+        self._section_labels: dict[str, QLabel] = {}
+        for index, section in enumerate(SETTINGS_SECTIONS):
+            label = QLabel(section, self)
+            label.setProperty("role", "eyebrow")
+            self._section_labels[section] = label
+            self.section_strip.addWidget(_panel(section, label), index // 4, index % 4)
+        layout.addLayout(self.section_strip)
 
         self.language_panel = QFrame(self)
         self.language_panel.setProperty("role", "metricCard")
@@ -83,6 +121,16 @@ class SettingsPage(QWidget):
             self._boundary_values[label] = value_label
             grid.addWidget(_panel(label, value_label), index // 2, index % 2)
         layout.addLayout(grid)
+
+        self.system_health_grid = QGridLayout()
+        self.system_health_grid.setSpacing(10)
+        self._system_health_values: dict[str, QLabel] = {}
+        for index, field in enumerate(SYSTEM_HEALTH_SETTINGS_FIELDS):
+            value_label = QLabel("--", self)
+            value_label.setWordWrap(True)
+            self._system_health_values[field] = value_label
+            self.system_health_grid.addWidget(_panel(field, value_label), index // 3, index % 3)
+        layout.addLayout(self.system_health_grid)
         layout.addStretch(1)
         self._refresh_buttons()
 
@@ -103,8 +151,26 @@ class SettingsPage(QWidget):
     def required_fields(self) -> tuple[str, ...]:
         return SETTINGS_BOUNDARY_FIELDS
 
+    def required_sections(self) -> tuple[str, ...]:
+        return SETTINGS_SECTIONS
+
     def rendered_boundaries(self) -> dict[str, str]:
         return {key: value.text() for key, value in self._boundary_values.items()}
+
+    def rendered_system_health(self) -> dict[str, str]:
+        return {key: value.text() for key, value in self._system_health_values.items()}
+
+    def render_snapshot(self, snapshot: RuntimeSnapshot) -> None:
+        values = {
+            "memory": snapshot.memory_pressure,
+            "WAL state": snapshot.wal_status,
+            "DB connection state": "Available" if snapshot.database_available else "Unavailable",
+            "last smoke result": snapshot.desktop_smoke_summary,
+            "last CI result": "Not projected by desktop UI",
+            "warnings": str(snapshot.warning_count),
+        }
+        for key, value in values.items():
+            self._system_health_values[key].setText(str(value))
 
     def apply_language(self, language: str) -> None:
         self.text.set_language(language)
@@ -119,6 +185,18 @@ class SettingsPage(QWidget):
             (MotionIntensity.HIGH_ENERGY, "motion.high_energy"),
         ):
             self.motion_buttons[intensity].setText(self.text.tr(key))
+        section_keys = {
+            "Runtime": "settings.runtime",
+            "Language": "settings.language",
+            "Motion": "settings.motion_intensity",
+            "Boundaries": "settings.boundaries",
+            "Paths": "settings.paths",
+            "Workers": "settings.workers",
+            "Publishing": "settings.publishing",
+            "System Health": "settings.system_health",
+        }
+        for section, key in section_keys.items():
+            self._section_labels[section].setText(self.text.tr(key))
         self._refresh_buttons()
 
     def _refresh_buttons(self) -> None:

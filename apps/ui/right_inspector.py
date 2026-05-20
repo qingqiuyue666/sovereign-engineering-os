@@ -30,13 +30,26 @@ class RightInspector(QFrame):
         self.show_no_selection()
 
     def show_no_selection(self) -> None:
-        self._render("No Selection", {"state": "Select a job, event, or artifact"})
+        self._render("No Selection", {"state": self.text.tr("inspector.empty")})
+
+    def empty_state_text(self) -> str:
+        values = self.values()
+        return values.get("state", "")
+
+    def show_mission(self, values: dict[str, object] | None) -> None:
+        if values is None:
+            self.show_no_selection()
+            return
+        self._render("Selected Mission", values)
 
     def show_job(self, job: JobRow | None) -> None:
+        self.show_run(job)
+
+    def show_run(self, job: JobRow | None) -> None:
         if job is None:
             self.show_no_selection()
             return
-        self._render("Selected Job", job.metadata())
+        self._render("Selected Run", job.metadata())
 
     def show_event(self, event: EventRow | None) -> None:
         if event is None:
@@ -69,6 +82,24 @@ class RightInspector(QFrame):
             return
         self._render("Selected Artifact", artifact.metadata())
 
+    def show_review(self, values: dict[str, object] | None) -> None:
+        if values is None:
+            self.show_no_selection()
+            return
+        self._render("Selected Review", values)
+
+    def show_failure(self, values: dict[str, object] | None) -> None:
+        if values is None:
+            self.show_no_selection()
+            return
+        self._render("Selected Failure", values)
+
+    def show_setting_boundary(self, values: dict[str, object] | None) -> None:
+        if values is None:
+            self.show_no_selection()
+            return
+        self._render("Selected Setting", values)
+
     def show_system_health(self, values: dict[str, object]) -> None:
         self._render("System Health", values)
 
@@ -89,6 +120,8 @@ class RightInspector(QFrame):
     def apply_language(self, language: str) -> None:
         self.text.set_language(language)
         self.title.setText("Inspector")
+        if self.state_label.text() == "No Selection":
+            self.show_no_selection()
 
     def _clear(self) -> None:
         while self.form.rowCount():

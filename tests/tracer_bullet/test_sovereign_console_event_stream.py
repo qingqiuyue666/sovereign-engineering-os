@@ -19,10 +19,14 @@ class SovereignConsoleEventStreamTests(unittest.TestCase):
 
     def test_event_stream_is_capped(self) -> None:
         stream = LiveEventStream()
-        self.assertEqual(stream.capped_blocks(), 1000)
-        self.assertEqual(MAX_EVENT_BLOCKS, 1000)
+        self.assertEqual(stream.capped_blocks(), 120)
+        self.assertEqual(MAX_EVENT_BLOCKS, 120)
+        self.assertFalse(stream.is_expanded())
+        self.assertIn("Event Stream", stream.title_text())
+        self.assertIn("Black Box", stream.title_text())
         source = Path("apps/ui/live_event_stream.py").read_text(encoding="utf-8")
         self.assertIn("setMaximumBlockCount", source)
+        self.assertIn("COLLAPSED_HEIGHT", source)
 
     def test_fake_snapshot_contains_required_event_names(self) -> None:
         event_types = {event.event_type for event in fake_phase1_snapshot().latest_events}

@@ -43,13 +43,14 @@ def resolve_sync_state(
     *,
     now_ms: int | None = None,
     stale_after_ms: int = SYNC_STALE_AFTER_MS,
+    had_healthy_projection: bool = False,
 ) -> SyncState:
     if not snapshot.runtime_available or not snapshot.database_available:
-        return SyncState.LOST
+        return SyncState.LOST if had_healthy_projection else SyncState.DEGRADED
     if snapshot.age_ms(now_ms=now_ms) > stale_after_ms:
-        return SyncState.LOST
+        return SyncState.LOST if had_healthy_projection else SyncState.DEGRADED
     if snapshot.sync_stale:
-        return SyncState.DEGRADED
+        return SyncState.LOST if had_healthy_projection else SyncState.DEGRADED
     return SyncState.HEALTHY
 
 

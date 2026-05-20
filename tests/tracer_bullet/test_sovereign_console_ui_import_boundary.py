@@ -21,6 +21,10 @@ UI_MODULES = (
     "apps.ui.main_window",
     "apps.ui.system_pulse_bar",
     "apps.ui.navigation_rail",
+    "apps.ui.workspace_page",
+    "apps.ui.runs_page",
+    "apps.ui.artifacts_page",
+    "apps.ui.reviews_page",
     "apps.ui.dashboard_page",
     "apps.ui.job_queue_page",
     "apps.ui.right_inspector",
@@ -83,7 +87,7 @@ class SovereignConsoleUiImportBoundaryTests(unittest.TestCase):
 
         inspector = RightInspector()
         inspector.show_job(snapshot.latest_jobs[0])
-        self.assertEqual(inspector.state_label.text(), "Selected Job")
+        self.assertEqual(inspector.state_label.text(), "Selected Run")
 
 
 def _ui_source_paths() -> tuple[Path, ...]:

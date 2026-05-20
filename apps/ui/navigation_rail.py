@@ -1,30 +1,33 @@
-"""Left navigation rail for the single-window console workspace."""
+"""Reduced left navigation rail for the unified workspace product."""
 
 from __future__ import annotations
 
 from apps.ui import QFrame, QLabel, QToolButton, QVBoxLayout, Signal
 from apps.ui.i18n import UiText
+from apps.ui.read_models import RuntimeSnapshot
 
-NAVIGATION_ITEMS: tuple[tuple[str, tuple[tuple[str, str, str], ...]], ...] = (
-    ("nav.observe", (("dashboard", "Dashboard", "page.dashboard"), ("system_health", "System Health", "page.system_health"))),
-    (
-        "nav.dispatch",
-        (
-            ("job_queue", "Job Queue", "page.job_queue"),
-            ("hfx_factory", "HFX Factory", "page.hfx_factory"),
-            ("hfx_landing_chain", "HFX_008 Landing Chain", "page.hfx_landing_chain"),
-            ("context_packs", "Context Packs", "page.context_packs"),
-        ),
-    ),
-    (
-        "nav.govern",
-        (
-            ("human_review", "Human Review", "page.human_review"),
-            ("failure_quarantine", "Failure Quarantine", "page.failure_quarantine"),
-            ("artifact_store", "Artifact Store", "page.artifact_store"),
-        ),
-    ),
-    ("nav.settings_group", (("settings", "Settings", "page.settings"),)),
+PRIMARY_NAVIGATION_ITEMS: tuple[tuple[str, str, str], ...] = (
+    ("workspace", "Workspace", "page.workspace"),
+    ("runs", "Runs", "page.runs"),
+    ("artifacts", "Artifacts", "page.artifacts"),
+    ("reviews", "Reviews", "page.reviews"),
+    ("settings", "Settings", "page.settings"),
+)
+
+NAVIGATION_ITEMS = PRIMARY_NAVIGATION_ITEMS
+
+REMOVED_FIRST_LEVEL_LABELS: tuple[str, ...] = (
+    "Dashboard",
+    "System Health",
+    "Job Queue",
+    "HFX Factory",
+    "HFX_008 Landing Chain",
+    "Context Packs",
+    "Human Review",
+    "Failure Quarantine",
+    "Artifact Store",
+    "Asset Library",
+    "Settings / Boundaries",
 )
 
 
@@ -35,31 +38,38 @@ class NavigationRail(QFrame):
         super().__init__(parent)
         self.text = UiText(language)
         self.setObjectName("NavRail")
-        self.setFixedWidth(200)
+        self.setFixedWidth(184)
         self._buttons: dict[str, QToolButton] = {}
+        self._badges: dict[str, QLabel] = {}
         self._button_label_keys: dict[str, str] = {}
-        self._group_labels: dict[str, QLabel] = {}
         layout = QVBoxLayout(self)
         layout.setContentsMargins(10, 12, 10, 12)
         layout.setSpacing(6)
-        for group_key, items in NAVIGATION_ITEMS:
-            label = QLabel(self.text.tr(group_key).upper(), self)
-            label.setProperty("role", "eyebrow")
-            self._group_labels[group_key] = label
-            layout.addWidget(label)
-            for page_id, fallback_text, label_key in items:
-                button = QToolButton(self)
-                button.setText(self.text.tr(label_key) if label_key else fallback_text)
-                button.setCheckable(True)
-                button.setObjectName(f"Nav_{page_id}")
-                clicked = getattr(button, "clicked", None)
-                if hasattr(clicked, "connect"):
-                    clicked.connect(lambda _checked=False, value=page_id: self.select_page(value))
-                self._buttons[page_id] = button
-                self._button_label_keys[page_id] = label_key
-                layout.addWidget(button)
+
+        self.product_label = QLabel("Sovereign Console", self)
+        self.product_label.setProperty("role", "eyebrow")
+        layout.addWidget(self.product_label)
+
+        for page_id, fallback_text, label_key in PRIMARY_NAVIGATION_ITEMS:
+            button = QToolButton(self)
+            button.setText(self.text.tr(label_key) if label_key else fallback_text)
+            button.setCheckable(True)
+            button.setObjectName(f"Nav_{page_id}")
+            clicked = getattr(button, "clicked", None)
+            if hasattr(clicked, "connect"):
+                clicked.connect(lambda _checked=False, value=page_id: self.select_page(value))
+            self._buttons[page_id] = button
+            self._button_label_keys[page_id] = label_key
+            layout.addWidget(button)
+
+            badge = QLabel("", self)
+            badge.setObjectName(f"NavBadge_{page_id}")
+            badge.setProperty("role", "eyebrow")
+            self._badges[page_id] = badge
+            layout.addWidget(badge)
+
         layout.addStretch(1)
-        self.select_page("dashboard", emit=False)
+        self.select_page("workspace", emit=False)
 
     def select_page(self, page_id: str, *, emit: bool = True) -> None:
         for key, button in self._buttons.items():
@@ -67,18 +77,34 @@ class NavigationRail(QFrame):
         if emit:
             self.page_selected.emit(page_id)
 
+    def render_badges(self, snapshot: RuntimeSnapshot) -> None:
+        pending_reviews = sum(1 for artifact in snapshot.latest_artifacts if artifact.review_status in {"needs_review", "new"})
+        quarantined_artifacts = sum(1 for artifact in snapshot.latest_artifacts if artifact.quarantine_status != "clean")
+        values = {
+            "workspace": "",
+            "runs": str(snapshot.queue_depth) if snapshot.queue_depth else "",
+            "artifacts": str(snapshot.latest_artifacts_count) if snapshot.latest_artifacts_count else "",
+            "reviews": str(pending_reviews + snapshot.quarantined_jobs + quarantined_artifacts)
+            if pending_reviews or snapshot.quarantined_jobs or quarantined_artifacts
+            else "",
+            "settings": str(snapshot.warning_count) if snapshot.warning_count else "",
+        }
+        for page_id, value in values.items():
+            self._badges[page_id].setText(value)
+
     def labels(self) -> tuple[str, ...]:
-        values: list[str] = []
-        for _group, items in NAVIGATION_ITEMS:
-            values.extend(text for _page_id, text, _label_key in items)
-        return tuple(values)
+        return tuple(text for _page_id, text, _label_key in PRIMARY_NAVIGATION_ITEMS)
 
     def visible_labels(self) -> tuple[str, ...]:
         return tuple(button.text() for button in self._buttons.values())
 
+    def page_ids(self) -> tuple[str, ...]:
+        return tuple(self._buttons)
+
+    def removed_first_level_labels(self) -> tuple[str, ...]:
+        return REMOVED_FIRST_LEVEL_LABELS
+
     def apply_language(self, language: str) -> None:
         self.text.set_language(language)
-        for group_key, label in self._group_labels.items():
-            label.setText(self.text.tr(group_key).upper())
         for page_id, button in self._buttons.items():
             button.setText(self.text.tr(self._button_label_keys[page_id]))

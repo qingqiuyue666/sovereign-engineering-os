@@ -38,10 +38,11 @@ class SyncLostOverlay(QFrame):
         snapshot: RuntimeSnapshot,
         *,
         action_controls: tuple[object, ...] | list[object] = (),
+        had_healthy_projection: bool = False,
     ) -> None:
         if action_controls:
             self.bind_action_controls(action_controls)
-        self.set_sync_state(resolve_sync_state(snapshot))
+        self.set_sync_state(resolve_sync_state(snapshot, had_healthy_projection=had_healthy_projection))
 
     def set_sync_lost(self, lost: bool) -> None:
         self.set_sync_state(SyncState.LOST if lost else SyncState.HEALTHY)
@@ -49,7 +50,7 @@ class SyncLostOverlay(QFrame):
     def set_sync_state(self, state: SyncState | str) -> None:
         self._sync_state = SyncState(state) if not isinstance(state, SyncState) else state
         self.setProperty("syncState", self._sync_state.value)
-        self.setVisible(self._sync_state is not SyncState.HEALTHY)
+        self.setVisible(self._sync_state is SyncState.LOST)
         if self._sync_state is SyncState.LOST:
             self.title.setText(self.text.tr("sync.lost.title"))
             self.detail.setText(self.text.tr("sync.lost.detail"))
@@ -59,7 +60,7 @@ class SyncLostOverlay(QFrame):
         for control, originally_enabled in self._bound_controls:
             if hasattr(control, "setEnabled"):
                 control.setEnabled(False if risky_actions_locked(self._sync_state) else originally_enabled)
-        if self._sync_state is not SyncState.HEALTHY:
+        if self._sync_state is SyncState.LOST:
             self.style().unpolish(self)
             self.style().polish(self)
             self.raise_()

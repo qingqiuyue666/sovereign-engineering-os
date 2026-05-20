@@ -57,6 +57,7 @@ class OSEngineGuiExecutionSplitTests(unittest.TestCase):
 
     def test_facade_snapshot_reports_unavailable_without_starting_worker(self) -> None:
         from apps.sovereign_desktop import DesktopOsEngineFacade
+        from apps.ui.motion import SyncState, resolve_sync_state
 
         with tempfile.TemporaryDirectory() as temp_dir_name:
             runtime_root = Path(temp_dir_name)
@@ -64,7 +65,8 @@ class OSEngineGuiExecutionSplitTests(unittest.TestCase):
             facade.initialize()
             snapshot = facade.snapshot()
             self.assertEqual(snapshot.runtime_status, "Unavailable")
-            self.assertTrue(snapshot.is_sync_lost())
+            self.assertFalse(snapshot.is_sync_lost())
+            self.assertEqual(resolve_sync_state(snapshot), SyncState.DEGRADED)
 
     def test_no_env_file_read_or_raw_network_default_in_gui_source(self) -> None:
         source = APP_SOURCE.read_text(encoding="utf-8")
