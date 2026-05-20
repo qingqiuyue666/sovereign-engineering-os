@@ -1,0 +1,23 @@
+{
+  "final_pixels_authorized": false,
+  "generated_by": "bootstrap_hfx_pipeline.py",
+  "layer_index": 2,
+  "layer_name": "hfx_aov_pass_contract_layer",
+  "maximum_allowed_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+  "purpose": "Define AOV requirements for twelve HFX assets and a global pass matrix.",
+  "required_files": [
+    "twelve_asset_aov_contract.schema.json",
+    "global_aov_matrix.schema.json",
+    "twelve_asset_aov_contract.contract.md",
+    "global_aov_matrix.contract.md",
+    "twelve_asset_aov_validator.py",
+    "global_aov_matrix_validator.py",
+    "GLOBAL_SEAL.json",
+    "GLOBAL_SEAL.contract.md",
+    "global_seal_validator.py",
+    "layer_manifest.json"
+  ],
+  "system_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+  "title": "HFX AOV Pass Contract Layer",
+  "validation_policy": "fail_closed"
+}

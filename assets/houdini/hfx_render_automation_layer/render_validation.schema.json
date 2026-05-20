@@ -1,0 +1,45 @@
+{
+  "$id": "urn:hfx:houdini:pipeline:schema:hfx_render_validation",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "approved_for_submission": {
+      "default": false,
+      "type": "boolean"
+    },
+    "blocked_frames": {
+      "default": [],
+      "description": "Frames that cannot be submitted or accepted.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "checks": {
+      "additionalProperties": {
+        "type": "boolean"
+      },
+      "default": {},
+      "type": "object"
+    },
+    "job_id": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "blocked",
+        "ready_for_validation",
+        "sealed"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [
+    "job_id",
+    "checks",
+    "approved_for_submission",
+    "status"
+  ],
+  "title": "HFX Render Validation",
+  "type": "object"
+}

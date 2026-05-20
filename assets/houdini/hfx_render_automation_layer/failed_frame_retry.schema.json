@@ -1,0 +1,48 @@
+{
+  "$id": "urn:hfx:houdini:pipeline:schema:hfx_failed_frame_retry",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "failed_frames": {
+      "default": [],
+      "description": "Frame numbers or frame ranges to retry.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "job_id": {
+      "type": "string"
+    },
+    "max_attempts": {
+      "default": 1,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "retry_policy": {
+      "enum": [
+        "single_retry",
+        "retry_with_cleanup",
+        "manual_review"
+      ],
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "ready_for_validation",
+        "blocked",
+        "sealed"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [
+    "job_id",
+    "failed_frames",
+    "retry_policy",
+    "status"
+  ],
+  "title": "HFX Failed Frame Retry",
+  "type": "object"
+}

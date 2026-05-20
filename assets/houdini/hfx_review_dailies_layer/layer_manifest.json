@@ -1,0 +1,26 @@
+{
+  "final_pixels_authorized": false,
+  "generated_by": "bootstrap_hfx_pipeline.py",
+  "layer_index": 9,
+  "layer_name": "hfx_review_dailies_layer",
+  "maximum_allowed_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+  "purpose": "Define review packages, contact sheet contracts, and dailies reports.",
+  "required_files": [
+    "review_package.schema.json",
+    "contact_sheet.schema.json",
+    "dailies_report.schema.json",
+    "review_package.contract.md",
+    "contact_sheet.contract.md",
+    "dailies_report.contract.md",
+    "review_package_validator.py",
+    "contact_sheet_validator.py",
+    "dailies_report_validator.py",
+    "GLOBAL_SEAL.json",
+    "GLOBAL_SEAL.contract.md",
+    "global_seal_validator.py",
+    "layer_manifest.json"
+  ],
+  "system_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+  "title": "HFX Review Dailies Layer",
+  "validation_policy": "fail_closed"
+}

@@ -1,0 +1,49 @@
+{
+  "$id": "urn:hfx:houdini:pipeline:schema:hfx_tracking_validation_report",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "blocking_findings": {
+      "default": [],
+      "description": "Reasons tracking cannot be approved.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "checks": {
+      "additionalProperties": {
+        "type": "boolean"
+      },
+      "default": {},
+      "type": "object"
+    },
+    "shot_id": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "blocked",
+        "ready_for_validation",
+        "sealed"
+      ],
+      "type": "string"
+    },
+    "track_source": {
+      "type": "string"
+    },
+    "tracking_approved": {
+      "default": false,
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "shot_id",
+    "track_source",
+    "checks",
+    "tracking_approved",
+    "status"
+  ],
+  "title": "HFX Tracking Validation Report",
+  "type": "object"
+}

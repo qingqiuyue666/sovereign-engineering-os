@@ -1,0 +1,47 @@
+{
+  "$id": "urn:hfx:houdini:pipeline:schema:hfx_color_pipeline",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "display_transform": {
+      "default": "sRGB",
+      "type": "string"
+    },
+    "lut_registry": {
+      "default": [],
+      "description": "Approved LUT ids or paths.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "ocio_config": {
+      "type": "string"
+    },
+    "show_id": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "ready_for_validation",
+        "blocked",
+        "sealed"
+      ],
+      "type": "string"
+    },
+    "working_space": {
+      "default": "ACEScg",
+      "type": "string"
+    }
+  },
+  "required": [
+    "show_id",
+    "working_space",
+    "display_transform",
+    "ocio_config",
+    "status"
+  ],
+  "title": "HFX Color Pipeline",
+  "type": "object"
+}

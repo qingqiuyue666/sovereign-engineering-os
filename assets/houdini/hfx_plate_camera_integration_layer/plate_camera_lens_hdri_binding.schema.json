@@ -1,0 +1,118 @@
+{
+  "$id": "urn:hfx:houdini:pipeline:schema:hfx_plate_camera_lens_hdri_binding",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "camera": {
+      "additionalProperties": false,
+      "properties": {
+        "camera_id": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "unit_scale": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "camera_id",
+        "path",
+        "unit_scale"
+      ],
+      "type": "object"
+    },
+    "hdri": {
+      "additionalProperties": false,
+      "properties": {
+        "exposure_reference": {
+          "type": "string"
+        },
+        "hdri_id": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "hdri_id",
+        "path",
+        "exposure_reference"
+      ],
+      "type": "object"
+    },
+    "lens": {
+      "additionalProperties": false,
+      "properties": {
+        "distortion_model": {
+          "type": "string"
+        },
+        "lens_id": {
+          "type": "string"
+        },
+        "metadata_path": {
+          "default": "",
+          "type": "string"
+        }
+      },
+      "required": [
+        "lens_id",
+        "distortion_model"
+      ],
+      "type": "object"
+    },
+    "plate": {
+      "additionalProperties": false,
+      "properties": {
+        "colorspace": {
+          "type": "string"
+        },
+        "frame_range": {
+          "default": [],
+          "description": "Start and end frame labels.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "path": {
+          "type": "string"
+        },
+        "plate_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "plate_id",
+        "path",
+        "frame_range",
+        "colorspace"
+      ],
+      "type": "object"
+    },
+    "shot_id": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "ready_for_validation",
+        "blocked",
+        "sealed"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [
+    "shot_id",
+    "plate",
+    "camera",
+    "lens",
+    "hdri",
+    "status"
+  ],
+  "title": "HFX Plate Camera Lens HDRI Binding",
+  "type": "object"
+}

@@ -1,0 +1,46 @@
+{
+  "$id": "urn:hfx:houdini:pipeline:schema:hfx_final_pixel_claim",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Fail-closed schema for final pixel claims. In this scaffold, all claims remain blocked.",
+  "properties": {
+    "block_reason": {
+      "default": "Fail-closed: final pixels cannot be claimed by this scaffold.",
+      "type": "string"
+    },
+    "claim_id": {
+      "type": "string"
+    },
+    "claim_status": {
+      "enum": [
+        "blocked"
+      ],
+      "type": "string"
+    },
+    "exr_paths": {
+      "default": [],
+      "description": "Real EXR paths offered as evidence.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "shot_id": {
+      "type": "string"
+    },
+    "verified_real_exrs": {
+      "const": false,
+      "description": "Bootstrap state cannot verify real EXRs.",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "claim_id",
+    "shot_id",
+    "exr_paths",
+    "verified_real_exrs",
+    "claim_status"
+  ],
+  "title": "HFX Final Pixel Claim",
+  "type": "object"
+}

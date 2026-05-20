@@ -1,0 +1,47 @@
+{
+  "$id": "urn:hfx:houdini:pipeline:schema:hfx_delivery_manifest",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "client_id": {
+      "type": "string"
+    },
+    "color_pipeline": {
+      "default": "",
+      "type": "string"
+    },
+    "delivery_id": {
+      "type": "string"
+    },
+    "final_pixel_claim_status": {
+      "enum": [
+        "blocked"
+      ],
+      "type": "string"
+    },
+    "items": {
+      "default": [],
+      "description": "Delivery item ids or paths.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "blocked"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [
+    "delivery_id",
+    "client_id",
+    "items",
+    "final_pixel_claim_status",
+    "status"
+  ],
+  "title": "HFX Delivery Manifest",
+  "type": "object"
+}

@@ -1,0 +1,51 @@
+{
+  "$id": "urn:hfx:houdini:pipeline:schema:hfx_desktop_inbox_scan",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "allowed_extensions": {
+      "default": [],
+      "description": "Extensions accepted by the intake gate.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "dedupe_strategy": {
+      "enum": [
+        "sha256",
+        "name_version",
+        "manual_review"
+      ],
+      "type": "string"
+    },
+    "quarantine_root": {
+      "type": "string"
+    },
+    "scan_roots": {
+      "default": [],
+      "description": "Inbox paths searched for incoming production resources.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "ready_for_validation",
+        "blocked",
+        "sealed"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [
+    "scan_roots",
+    "allowed_extensions",
+    "quarantine_root",
+    "status"
+  ],
+  "title": "HFX Desktop Inbox Scan",
+  "type": "object"
+}

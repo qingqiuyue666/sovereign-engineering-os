@@ -1,0 +1,51 @@
+{
+  "$id": "urn:hfx:houdini:pipeline:schema:hfx_review_package",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "media_items": {
+      "default": [],
+      "description": "Reviewable media paths or ids.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "notes": {
+      "default": "",
+      "type": "string"
+    },
+    "review_id": {
+      "type": "string"
+    },
+    "review_targets": {
+      "default": [],
+      "description": "Systems or stakeholders receiving this package.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "shot_id": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "ready_for_validation",
+        "blocked",
+        "sealed"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [
+    "review_id",
+    "shot_id",
+    "media_items",
+    "review_targets",
+    "status"
+  ],
+  "title": "HFX Review Package",
+  "type": "object"
+}

@@ -1,0 +1,137 @@
+{
+  "$id": "urn:hfx:houdini:pipeline:schema:hfx_master_pipeline_global_seal",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "delivery_policy": {
+      "additionalProperties": false,
+      "properties": {
+        "client_delivery_allowed": {
+          "const": false,
+          "type": "boolean"
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "client_delivery_allowed",
+        "reason"
+      ],
+      "type": "object"
+    },
+    "final_pixel_gate": {
+      "additionalProperties": false,
+      "properties": {
+        "claim_policy": {
+          "enum": [
+            "fail_closed"
+          ],
+          "type": "string"
+        },
+        "current_state": {
+          "const": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+          "type": "string"
+        },
+        "delivery_policy": {
+          "enum": [
+            "blocked"
+          ],
+          "type": "string"
+        },
+        "real_exr_required": {
+          "const": true,
+          "type": "boolean"
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "claim_policy",
+        "delivery_policy",
+        "real_exr_required",
+        "current_state",
+        "reason"
+      ],
+      "type": "object"
+    },
+    "houdini_root": {
+      "type": "string"
+    },
+    "layers": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "final_pixels_authorized": {
+            "const": false,
+            "type": "boolean"
+          },
+          "index": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "required_files": {
+            "default": [],
+            "description": "Files expected inside this layer.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "status": {
+            "enum": [
+              "CONTRACT_SCAFFOLDED",
+              "BLOCKED_NO_FINAL_PIXELS"
+            ],
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "index",
+          "name",
+          "title",
+          "status",
+          "required_files",
+          "final_pixels_authorized"
+        ],
+        "type": "object"
+      },
+      "maxItems": 12,
+      "minItems": 12,
+      "type": "array"
+    },
+    "maximum_allowed_state": {
+      "const": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+      "type": "string"
+    },
+    "output": {
+      "const": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+      "type": "string"
+    },
+    "pipeline_root": {
+      "type": "string"
+    },
+    "seal_id": {
+      "type": "string"
+    },
+    "system_state": {
+      "const": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+      "type": "string"
+    }
+  },
+  "required": [
+    "seal_id",
+    "system_state",
+    "maximum_allowed_state",
+    "layers",
+    "final_pixel_gate"
+  ],
+  "title": "HFX Master Pipeline Global Seal",
+  "type": "object"
+}

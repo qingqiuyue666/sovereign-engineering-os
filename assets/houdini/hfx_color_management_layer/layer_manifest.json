@@ -1,0 +1,23 @@
+{
+  "final_pixels_authorized": false,
+  "generated_by": "bootstrap_hfx_pipeline.py",
+  "layer_index": 8,
+  "layer_name": "hfx_color_management_layer",
+  "maximum_allowed_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+  "purpose": "Define show color pipeline contracts and placeholder ACES/OCIO gates.",
+  "required_files": [
+    "color_pipeline.schema.json",
+    "aces_ocio_placeholder.schema.json",
+    "color_pipeline.contract.md",
+    "aces_ocio_placeholder.contract.md",
+    "color_pipeline_validator.py",
+    "aces_ocio_placeholder_validator.py",
+    "GLOBAL_SEAL.json",
+    "GLOBAL_SEAL.contract.md",
+    "global_seal_validator.py",
+    "layer_manifest.json"
+  ],
+  "system_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+  "title": "HFX Color Management Layer",
+  "validation_policy": "fail_closed"
+}

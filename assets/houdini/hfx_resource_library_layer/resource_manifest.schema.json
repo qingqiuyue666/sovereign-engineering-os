@@ -1,0 +1,63 @@
+{
+  "$id": "urn:hfx:houdini:pipeline:schema:hfx_resource_manifest",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "checksum": {
+      "default": "",
+      "type": "string"
+    },
+    "license_id": {
+      "type": "string"
+    },
+    "metadata": {
+      "default": {},
+      "type": "object"
+    },
+    "resource_id": {
+      "type": "string"
+    },
+    "resource_type": {
+      "enum": [
+        "texture",
+        "model",
+        "hdri",
+        "plate",
+        "reference",
+        "cache",
+        "document"
+      ],
+      "type": "string"
+    },
+    "source_path": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "ready_for_validation",
+        "blocked",
+        "sealed"
+      ],
+      "type": "string"
+    },
+    "usage_scope": {
+      "default": [],
+      "description": "Approved show, sequence, shot, or internal-use scopes.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+    "resource_id",
+    "resource_type",
+    "source_path",
+    "license_id",
+    "usage_scope",
+    "status"
+  ],
+  "title": "HFX Resource Manifest",
+  "type": "object"
+}

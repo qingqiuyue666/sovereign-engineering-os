@@ -1,0 +1,60 @@
+{
+  "$id": "urn:hfx:houdini:pipeline:schema:hfx_after_effects_instruction",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "host_application": {
+      "const": "after_effects",
+      "type": "string"
+    },
+    "inputs": {
+      "default": [],
+      "description": "Input manifests, plates, or render products.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "instruction_id": {
+      "type": "string"
+    },
+    "operations": {
+      "default": [],
+      "description": "Ordered high-level operations for the host app.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "outputs": {
+      "default": [],
+      "description": "Expected script, project, or review artifacts.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "shot_id": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "ready_for_validation",
+        "blocked",
+        "sealed"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [
+    "instruction_id",
+    "host_application",
+    "shot_id",
+    "inputs",
+    "outputs",
+    "status"
+  ],
+  "title": "HFX After Effects Instruction",
+  "type": "object"
+}

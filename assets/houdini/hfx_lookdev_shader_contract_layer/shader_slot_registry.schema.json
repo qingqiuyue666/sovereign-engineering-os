@@ -1,0 +1,59 @@
+{
+  "$id": "urn:hfx:houdini:pipeline:schema:hfx_shader_slot_registry",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "registry_version": {
+      "pattern": "^v[0-9]{3,}$",
+      "type": "string"
+    },
+    "slots": {
+      "default": [],
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "allowed_value_types": {
+            "default": [],
+            "description": "Accepted value or node types.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "semantic": {
+            "type": "string"
+          },
+          "slot_name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "slot_name",
+          "semantic",
+          "required"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "ready_for_validation",
+        "blocked",
+        "sealed"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [
+    "registry_version",
+    "slots",
+    "status"
+  ],
+  "title": "HFX Shader Slot Registry",
+  "type": "object"
+}

@@ -758,19 +758,7 @@ LAYER_SPECS = [
             ("hda_readiness_report.schema.json", schema_hda_readiness_report),
             (
                 "GLOBAL_SEAL.json",
-                lambda: {
-                    "seal_id": "hfx_assetization_layer_global_seal",
-                    "system_state": SYSTEM_STATE,
-                    "layer": "hfx_assetization_layer",
-                    "sealed": False,
-                    "seal_policy": "contract_scaffold_only",
-                    "final_pixels_authorized": False,
-                    "required_contracts": [
-                        "asset_publish_manifest.schema.json",
-                        "parameter_interface_contract.schema.json",
-                        "hda_readiness_report.schema.json",
-                    ],
-                },
+                lambda: build_layer_global_seal(layer_by_name("hfx_assetization_layer")),
             ),
             (
                 "asset_publish_manifest.contract.md",
@@ -1435,8 +1423,88 @@ LAYER_SPECS = [
 ]
 
 
+GLOBAL_LAYER_FILE_NAMES = (
+    "GLOBAL_SEAL.json",
+    "GLOBAL_SEAL.contract.md",
+    "global_seal_validator.py",
+)
+
+
+def layer_by_name(layer_name):
+    for layer in LAYER_SPECS:
+        if layer["name"] == layer_name:
+            return layer
+    raise KeyError(layer_name)
+
+
+def ordered_unique(values):
+    seen = set()
+    result = []
+    for value in values:
+        if value not in seen:
+            result.append(value)
+            seen.add(value)
+    return result
+
+
+def declared_layer_files(layer):
+    return [name for name, _ in layer["files"]]
+
+
 def layer_required_files(layer):
-    return [name for name, _ in layer["files"]] + ["layer_manifest.json"]
+    return ordered_unique(declared_layer_files(layer) + list(GLOBAL_LAYER_FILE_NAMES) + ["layer_manifest.json"])
+
+
+def build_layer_global_seal(layer):
+    return {
+        "seal_id": layer["name"] + "_GLOBAL_SEAL",
+        "layer_index": layer["index"],
+        "layer_name": layer["name"],
+        "title": layer["title"],
+        "purpose": layer["purpose"],
+        "system_state": SYSTEM_STATE,
+        "maximum_allowed_state": MAXIMUM_ALLOWED_STATE,
+        "seal_status": "CONTRACT_SCAFFOLD_SEALED",
+        "validation_policy": "fail_closed",
+        "final_pixels_authorized": False,
+        "client_delivery_authorized": False,
+        "required_files": layer_required_files(layer),
+        "blocked_claim_policy": "block_all_final_pixel_claims_without_real_exr_validation",
+    }
+
+
+def build_layer_global_seal_contract(layer):
+    return contract(
+        layer["title"] + " Global Seal Contract",
+        "Aggregate this layer's schemas, contracts, validators, and manifest into a fail-closed scaffold seal.",
+        [
+            "Layer schema files.",
+            "Layer Markdown contracts.",
+            "Layer Python validator templates.",
+            "Layer manifest.",
+        ],
+        ["GLOBAL_SEAL.json", "GLOBAL_SEAL.contract.md", "global_seal_validator.py"],
+        [
+            "All required layer files must exist.",
+            "Layer seal cannot authorize final pixels.",
+            "Layer seal cannot authorize client delivery.",
+        ],
+    )
+
+
+def layer_global_files(layer):
+    return [
+        ("GLOBAL_SEAL.json", lambda: build_layer_global_seal(layer)),
+        ("GLOBAL_SEAL.contract.md", lambda: build_layer_global_seal_contract(layer)),
+        (
+            "global_seal_validator.py",
+            lambda: validator_template(
+                layer["name"],
+                "global_seal_validator",
+                "Validate the " + layer["name"] + " global scaffold seal.",
+            ),
+        ),
+    ]
 
 
 def build_layer_manifest(layer):
@@ -1472,8 +1540,8 @@ def build_master_seal():
         "seal_id": "HFX_MASTER_PIPELINE_GLOBAL_SEAL",
         "system_state": SYSTEM_STATE,
         "maximum_allowed_state": MAXIMUM_ALLOWED_STATE,
-        "pipeline_root": str(PIPELINE_ROOT),
-        "houdini_root": str(HOUDINI_ROOT),
+        "pipeline_root": ".",
+        "houdini_root": "assets/houdini",
         "layers": layers,
         "final_pixel_gate": {
             "claim_policy": "fail_closed",
@@ -1526,6 +1594,16 @@ def bootstrap():
         layer_written = 0
         layer_skipped = 0
         for file_name, producer in layer["files"]:
+            status = write_file(layer_dir / file_name, producer)
+            summary[status] += 1
+            if status == "written":
+                layer_written += 1
+            else:
+                layer_skipped += 1
+        declared_files = set(declared_layer_files(layer))
+        for file_name, producer in layer_global_files(layer):
+            if file_name in declared_files:
+                continue
             status = write_file(layer_dir / file_name, producer)
             summary[status] += 1
             if status == "written":

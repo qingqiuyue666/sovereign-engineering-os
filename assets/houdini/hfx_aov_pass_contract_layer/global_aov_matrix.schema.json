@@ -1,0 +1,71 @@
+{
+  "$id": "urn:hfx:houdini:pipeline:schema:hfx_global_aov_matrix",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "aovs": {
+      "default": [],
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "data_type": {
+            "enum": [
+              "float",
+              "vector",
+              "color",
+              "integer",
+              "string"
+            ],
+            "type": "string"
+          },
+          "description": {
+            "default": "",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "data_type",
+          "required"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "matrix_version": {
+      "pattern": "^v[0-9]{3,}$",
+      "type": "string"
+    },
+    "renderer_targets": {
+      "default": [],
+      "description": "Renderer integrations that must honor this matrix.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "ready_for_validation",
+        "blocked",
+        "sealed"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [
+    "matrix_version",
+    "aovs",
+    "renderer_targets",
+    "status"
+  ],
+  "title": "HFX Global AOV Matrix",
+  "type": "object"
+}

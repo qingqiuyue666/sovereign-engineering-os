@@ -1,0 +1,73 @@
+{
+  "$id": "urn:hfx:houdini:pipeline:schema:hfx_parameter_interface_contract",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "asset_id": {
+      "type": "string"
+    },
+    "locked_parameters": {
+      "default": [],
+      "description": "Internal controls that cannot be modified downstream.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "parameter_groups": {
+      "default": [],
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "parameters": {
+            "default": [],
+            "description": "Published parameter names.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "name",
+          "parameters"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "public_controls": {
+      "default": [],
+      "description": "Controls exposed to artists and automation.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "ready_for_validation",
+        "blocked",
+        "sealed"
+      ],
+      "type": "string"
+    },
+    "versioned_defaults": {
+      "default": {},
+      "type": "object"
+    }
+  },
+  "required": [
+    "asset_id",
+    "parameter_groups",
+    "locked_parameters",
+    "public_controls",
+    "status"
+  ],
+  "title": "HFX Parameter Interface Contract",
+  "type": "object"
+}

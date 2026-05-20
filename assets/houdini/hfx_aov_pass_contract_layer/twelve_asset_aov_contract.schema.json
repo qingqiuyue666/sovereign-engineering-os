@@ -1,0 +1,77 @@
+{
+  "$id": "urn:hfx:houdini:pipeline:schema:hfx_twelve_asset_aov_contract",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "asset_count": {
+      "const": 12,
+      "type": "integer"
+    },
+    "assets": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "aov_profile": {
+            "type": "string"
+          },
+          "asset_id": {
+            "type": "string"
+          },
+          "required_overrides": {
+            "default": [],
+            "description": "Asset-specific AOV overrides.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "asset_id",
+          "aov_profile"
+        ],
+        "type": "object"
+      },
+      "maxItems": 12,
+      "minItems": 12,
+      "type": "array"
+    },
+    "optional_aovs": {
+      "default": [],
+      "description": "AOV names that may be emitted when approved.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "required_aovs": {
+      "default": [],
+      "description": "AOV names required for every asset.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "show_id": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "ready_for_validation",
+        "blocked",
+        "sealed"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [
+    "show_id",
+    "asset_count",
+    "assets",
+    "required_aovs",
+    "status"
+  ],
+  "title": "HFX Twelve Asset AOV Contract",
+  "type": "object"
+}

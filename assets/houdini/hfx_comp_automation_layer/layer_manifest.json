@@ -1,0 +1,26 @@
+{
+  "final_pixels_authorized": false,
+  "generated_by": "bootstrap_hfx_pipeline.py",
+  "layer_index": 7,
+  "layer_name": "hfx_comp_automation_layer",
+  "maximum_allowed_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+  "purpose": "Define instruction-generator schemas for Nuke, After Effects, and DaVinci Resolve handoff.",
+  "required_files": [
+    "nuke_instruction.schema.json",
+    "after_effects_instruction.schema.json",
+    "davinci_resolve_instruction.schema.json",
+    "nuke_instruction_generator.contract.md",
+    "after_effects_instruction_generator.contract.md",
+    "davinci_resolve_instruction_generator.contract.md",
+    "nuke_instruction_validator.py",
+    "after_effects_instruction_validator.py",
+    "davinci_resolve_instruction_validator.py",
+    "GLOBAL_SEAL.json",
+    "GLOBAL_SEAL.contract.md",
+    "global_seal_validator.py",
+    "layer_manifest.json"
+  ],
+  "system_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+  "title": "HFX Comp Automation Layer",
+  "validation_policy": "fail_closed"
+}

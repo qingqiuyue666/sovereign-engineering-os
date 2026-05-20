@@ -1,0 +1,26 @@
+{
+  "blocked_claim_policy": "block_all_final_pixel_claims_without_real_exr_validation",
+  "client_delivery_authorized": false,
+  "final_pixels_authorized": false,
+  "layer_index": 5,
+  "layer_name": "hfx_plate_camera_integration_layer",
+  "maximum_allowed_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+  "purpose": "Define plate, camera, lens, HDRI, and tracking report binding contracts.",
+  "required_files": [
+    "plate_camera_lens_hdri_binding.schema.json",
+    "tracking_validation_report.schema.json",
+    "plate_camera_lens_hdri_binding.contract.md",
+    "tracking_validation_report.contract.md",
+    "plate_camera_lens_hdri_binding_validator.py",
+    "tracking_validation_report_validator.py",
+    "GLOBAL_SEAL.json",
+    "GLOBAL_SEAL.contract.md",
+    "global_seal_validator.py",
+    "layer_manifest.json"
+  ],
+  "seal_id": "hfx_plate_camera_integration_layer_GLOBAL_SEAL",
+  "seal_status": "CONTRACT_SCAFFOLD_SEALED",
+  "system_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+  "title": "HFX Plate Camera Integration Layer",
+  "validation_policy": "fail_closed"
+}

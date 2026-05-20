@@ -1,0 +1,40 @@
+{
+  "$id": "urn:hfx:houdini:pipeline:schema:hfx_aces_ocio_placeholder",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "aces_version": {
+      "type": "string"
+    },
+    "blocked_until_real_config": {
+      "const": true,
+      "type": "boolean"
+    },
+    "config_id": {
+      "type": "string"
+    },
+    "ocio_version": {
+      "type": "string"
+    },
+    "placeholder_only": {
+      "const": true,
+      "type": "boolean"
+    },
+    "status": {
+      "enum": [
+        "blocked",
+        "placeholder"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [
+    "config_id",
+    "aces_version",
+    "ocio_version",
+    "placeholder_only",
+    "status"
+  ],
+  "title": "HFX ACES OCIO Placeholder",
+  "type": "object"
+}

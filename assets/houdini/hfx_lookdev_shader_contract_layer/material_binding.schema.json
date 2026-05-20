@@ -1,0 +1,57 @@
+{
+  "$id": "urn:hfx:houdini:pipeline:schema:hfx_material_binding",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "asset_id": {
+      "type": "string"
+    },
+    "bindings": {
+      "default": [],
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "geometry_path": {
+            "type": "string"
+          },
+          "material_id": {
+            "type": "string"
+          },
+          "shader_slot_profile": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "geometry_path",
+          "material_id",
+          "shader_slot_profile"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "ready_for_validation",
+        "blocked",
+        "sealed"
+      ],
+      "type": "string"
+    },
+    "unbound_policy": {
+      "enum": [
+        "block",
+        "warn_only"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [
+    "asset_id",
+    "bindings",
+    "status"
+  ],
+  "title": "HFX Material Binding",
+  "type": "object"
+}

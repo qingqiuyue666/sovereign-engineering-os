@@ -1,0 +1,51 @@
+{
+  "$id": "urn:hfx:houdini:pipeline:schema:hfx_license_record",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "expires": {
+      "description": "ISO date or NEVER.",
+      "type": "string"
+    },
+    "license_id": {
+      "type": "string"
+    },
+    "permitted_uses": {
+      "default": [],
+      "description": "Allowed production and distribution uses.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "restricted_uses": {
+      "default": [],
+      "description": "Uses that must remain blocked.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "source": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "valid",
+        "expired",
+        "blocked"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [
+    "license_id",
+    "source",
+    "permitted_uses",
+    "expires",
+    "status"
+  ],
+  "title": "HFX License Record",
+  "type": "object"
+}

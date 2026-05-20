@@ -1,0 +1,26 @@
+{
+  "final_pixels_authorized": false,
+  "generated_by": "bootstrap_hfx_pipeline.py",
+  "layer_index": 1,
+  "layer_name": "hfx_assetization_layer",
+  "maximum_allowed_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+  "purpose": "Define publish manifests, public HDA interfaces, readiness reports, and local asset seals.",
+  "required_files": [
+    "asset_publish_manifest.schema.json",
+    "parameter_interface_contract.schema.json",
+    "hda_readiness_report.schema.json",
+    "GLOBAL_SEAL.json",
+    "asset_publish_manifest.contract.md",
+    "parameter_interface_contract.contract.md",
+    "hda_readiness_report.contract.md",
+    "GLOBAL_SEAL.contract.md",
+    "asset_publish_manifest_validator.py",
+    "parameter_interface_validator.py",
+    "hda_readiness_validator.py",
+    "global_seal_validator.py",
+    "layer_manifest.json"
+  ],
+  "system_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+  "title": "HFX Assetization Layer",
+  "validation_policy": "fail_closed"
+}

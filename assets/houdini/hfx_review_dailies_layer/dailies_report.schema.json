@@ -1,0 +1,47 @@
+{
+  "$id": "urn:hfx:houdini:pipeline:schema:hfx_dailies_report",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "decisions": {
+      "default": [],
+      "description": "Approved notes, holds, and required follow-ups.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "items": {
+      "default": [],
+      "description": "Review package ids covered in the dailies session.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "report_id": {
+      "type": "string"
+    },
+    "session_id": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "ready_for_validation",
+        "blocked",
+        "sealed"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [
+    "report_id",
+    "session_id",
+    "items",
+    "decisions",
+    "status"
+  ],
+  "title": "HFX Dailies Report",
+  "type": "object"
+}

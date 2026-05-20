@@ -1,0 +1,27 @@
+{
+  "blocked_claim_policy": "block_all_final_pixel_claims_without_real_exr_validation",
+  "client_delivery_authorized": false,
+  "final_pixels_authorized": false,
+  "layer_index": 10,
+  "layer_name": "hfx_final_pixel_gate_layer",
+  "maximum_allowed_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+  "purpose": "Fail closed on final pixel claims unless real EXR evidence and production validators exist.",
+  "required_files": [
+    "final_pixel_claim.schema.json",
+    "blocked_claim_registry.schema.json",
+    "blocked_claim_registry.json",
+    "final_pixel_gate.contract.md",
+    "blocked_claim_registry.contract.md",
+    "final_pixel_claim_validator.py",
+    "blocked_claim_registry_validator.py",
+    "GLOBAL_SEAL.json",
+    "GLOBAL_SEAL.contract.md",
+    "global_seal_validator.py",
+    "layer_manifest.json"
+  ],
+  "seal_id": "hfx_final_pixel_gate_layer_GLOBAL_SEAL",
+  "seal_status": "CONTRACT_SCAFFOLD_SEALED",
+  "system_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+  "title": "HFX Final Pixel Gate Layer",
+  "validation_policy": "fail_closed"
+}

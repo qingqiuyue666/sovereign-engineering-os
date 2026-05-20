@@ -1,0 +1,7 @@
+{
+  "all_claims_blocked": true,
+  "claims": [],
+  "policy": "No final pixel claim can pass in bootstrap scaffold state.",
+  "registry_id": "hfx_blocked_final_pixel_claim_registry",
+  "system_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS"
+}

@@ -1,0 +1,52 @@
+{
+  "$id": "urn:hfx:houdini:pipeline:schema:hfx_contact_sheet",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "burnins": {
+      "default": [],
+      "description": "Approved metadata burn-ins.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "contact_sheet_id": {
+      "type": "string"
+    },
+    "layout": {
+      "enum": [
+        "grid_3x4",
+        "grid_4x4",
+        "sequence_strip",
+        "custom"
+      ],
+      "type": "string"
+    },
+    "source_media": {
+      "default": [],
+      "description": "Media items to include in the contact sheet.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "ready_for_validation",
+        "blocked",
+        "sealed"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [
+    "contact_sheet_id",
+    "source_media",
+    "layout",
+    "status"
+  ],
+  "title": "HFX Contact Sheet",
+  "type": "object"
+}

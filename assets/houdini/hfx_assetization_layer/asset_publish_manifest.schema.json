@@ -1,0 +1,87 @@
+{
+  "$id": "urn:hfx:houdini:pipeline:schema:hfx_asset_publish_manifest",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "asset_id": {
+      "pattern": "^hfx_[a-z0-9_]+$",
+      "type": "string"
+    },
+    "asset_name": {
+      "type": "string"
+    },
+    "asset_type": {
+      "enum": [
+        "fx",
+        "crowd",
+        "environment",
+        "prop",
+        "vehicle",
+        "creature",
+        "utility"
+      ],
+      "type": "string"
+    },
+    "department": {
+      "enum": [
+        "hfx",
+        "lookdev",
+        "lighting",
+        "pipeline",
+        "layout"
+      ],
+      "type": "string"
+    },
+    "dependencies": {
+      "default": [],
+      "description": "Upstream contracts or package ids required by this asset.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "hda_path": {
+      "type": "string"
+    },
+    "houdini_version": {
+      "type": "string"
+    },
+    "interface_contract": {
+      "type": "string"
+    },
+    "notes": {
+      "default": "",
+      "type": "string"
+    },
+    "publish_version": {
+      "pattern": "^v[0-9]{3,}$",
+      "type": "string"
+    },
+    "source_scene_path": {
+      "default": "",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "ready_for_validation",
+        "blocked",
+        "sealed"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [
+    "asset_id",
+    "asset_name",
+    "asset_type",
+    "department",
+    "publish_version",
+    "houdini_version",
+    "hda_path",
+    "interface_contract",
+    "status"
+  ],
+  "title": "HFX Asset Publish Manifest",
+  "type": "object"
+}

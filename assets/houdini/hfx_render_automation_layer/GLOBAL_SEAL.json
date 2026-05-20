@@ -1,0 +1,29 @@
+{
+  "blocked_claim_policy": "block_all_final_pixel_claims_without_real_exr_validation",
+  "client_delivery_authorized": false,
+  "final_pixels_authorized": false,
+  "layer_index": 6,
+  "layer_name": "hfx_render_automation_layer",
+  "maximum_allowed_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+  "purpose": "Define render jobs, pre-submit validation, and failed frame retry behavior.",
+  "required_files": [
+    "render_job.schema.json",
+    "render_validation.schema.json",
+    "failed_frame_retry.schema.json",
+    "render_job.contract.md",
+    "render_validation.contract.md",
+    "failed_frame_retry.contract.md",
+    "render_job_validator.py",
+    "render_validation_validator.py",
+    "failed_frame_retry_validator.py",
+    "GLOBAL_SEAL.json",
+    "GLOBAL_SEAL.contract.md",
+    "global_seal_validator.py",
+    "layer_manifest.json"
+  ],
+  "seal_id": "hfx_render_automation_layer_GLOBAL_SEAL",
+  "seal_status": "CONTRACT_SCAFFOLD_SEALED",
+  "system_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+  "title": "HFX Render Automation Layer",
+  "validation_policy": "fail_closed"
+}

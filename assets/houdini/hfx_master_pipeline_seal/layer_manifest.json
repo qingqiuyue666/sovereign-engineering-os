@@ -1,0 +1,21 @@
+{
+  "final_pixels_authorized": false,
+  "generated_by": "bootstrap_hfx_pipeline.py",
+  "layer_index": 12,
+  "layer_name": "hfx_master_pipeline_seal",
+  "maximum_allowed_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+  "purpose": "Evaluate the scaffolded contract layers and emit the only legal master system state.",
+  "required_files": [
+    "master_pipeline_seal.schema.json",
+    "HFX_MASTER_PIPELINE_GLOBAL_SEAL.json",
+    "master_pipeline_seal.contract.md",
+    "master_pipeline_seal_validator.py",
+    "GLOBAL_SEAL.json",
+    "GLOBAL_SEAL.contract.md",
+    "global_seal_validator.py",
+    "layer_manifest.json"
+  ],
+  "system_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+  "title": "HFX Master Pipeline Seal",
+  "validation_policy": "fail_closed"
+}

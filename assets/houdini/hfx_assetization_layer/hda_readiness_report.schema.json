@@ -1,0 +1,49 @@
+{
+  "$id": "urn:hfx:houdini:pipeline:schema:hfx_hda_readiness_report",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "asset_id": {
+      "type": "string"
+    },
+    "blocking_findings": {
+      "default": [],
+      "description": "Reasons the HDA cannot be published.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "checks": {
+      "additionalProperties": {
+        "type": "boolean"
+      },
+      "default": {},
+      "type": "object"
+    },
+    "hda_path": {
+      "type": "string"
+    },
+    "ready_for_publish": {
+      "default": false,
+      "type": "boolean"
+    },
+    "status": {
+      "enum": [
+        "blocked",
+        "ready_for_validation",
+        "sealed"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [
+    "asset_id",
+    "hda_path",
+    "checks",
+    "ready_for_publish",
+    "status"
+  ],
+  "title": "HFX HDA Readiness Report",
+  "type": "object"
+}

@@ -1,0 +1,50 @@
+{
+  "$id": "urn:hfx:houdini:pipeline:schema:hfx_blocked_final_pixel_claim_registry",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "all_claims_blocked": {
+      "const": true,
+      "type": "boolean"
+    },
+    "claims": {
+      "default": [],
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "claim_id": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "shot_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "claim_id",
+          "shot_id",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "registry_id": {
+      "type": "string"
+    },
+    "system_state": {
+      "const": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+      "type": "string"
+    }
+  },
+  "required": [
+    "registry_id",
+    "claims",
+    "all_claims_blocked",
+    "system_state"
+  ],
+  "title": "HFX Blocked Final Pixel Claim Registry",
+  "type": "object"
+}

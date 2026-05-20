@@ -1,0 +1,29 @@
+{
+  "blocked_claim_policy": "block_all_final_pixel_claims_without_real_exr_validation",
+  "client_delivery_authorized": false,
+  "final_pixels_authorized": false,
+  "layer_index": 3,
+  "layer_name": "hfx_resource_library_layer",
+  "maximum_allowed_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+  "purpose": "Define resource intake, manifesting, license validation, quarantine, and scan behavior.",
+  "required_files": [
+    "desktop_inbox_scan.schema.json",
+    "resource_manifest.schema.json",
+    "license_record.schema.json",
+    "desktop_inbox_scanner_logic.contract.md",
+    "resource_manifest.contract.md",
+    "license_validator.contract.md",
+    "desktop_inbox_scanner.py",
+    "resource_manifest_validator.py",
+    "license_validator.py",
+    "GLOBAL_SEAL.json",
+    "GLOBAL_SEAL.contract.md",
+    "global_seal_validator.py",
+    "layer_manifest.json"
+  ],
+  "seal_id": "hfx_resource_library_layer_GLOBAL_SEAL",
+  "seal_status": "CONTRACT_SCAFFOLD_SEALED",
+  "system_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+  "title": "HFX Resource Library Layer",
+  "validation_policy": "fail_closed"
+}

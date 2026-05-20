@@ -1,0 +1,68 @@
+{
+  "$id": "urn:hfx:houdini:pipeline:schema:hfx_render_job",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "aov_contract": {
+      "type": "string"
+    },
+    "farm_pool": {
+      "default": "",
+      "type": "string"
+    },
+    "frame_range": {
+      "default": [],
+      "description": "Start, end, and optional step.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "job_id": {
+      "type": "string"
+    },
+    "priority": {
+      "default": 50,
+      "maximum": 100,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "renderer": {
+      "enum": [
+        "karma",
+        "arnold",
+        "renderman",
+        "redshift",
+        "other"
+      ],
+      "type": "string"
+    },
+    "shot_id": {
+      "type": "string"
+    },
+    "show_id": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "ready_for_validation",
+        "blocked",
+        "submitted",
+        "sealed"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [
+    "job_id",
+    "show_id",
+    "shot_id",
+    "renderer",
+    "frame_range",
+    "aov_contract",
+    "status"
+  ],
+  "title": "HFX Render Job",
+  "type": "object"
+}

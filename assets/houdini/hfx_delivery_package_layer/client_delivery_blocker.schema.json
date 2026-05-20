@@ -1,0 +1,38 @@
+{
+  "$id": "urn:hfx:houdini:pipeline:schema:hfx_client_delivery_blocker",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "blocked": {
+      "const": true,
+      "type": "boolean"
+    },
+    "blocker_id": {
+      "type": "string"
+    },
+    "delivery_id": {
+      "type": "string"
+    },
+    "reasons": {
+      "default": [],
+      "description": "Reasons client delivery must not proceed.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "system_state": {
+      "const": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+      "type": "string"
+    }
+  },
+  "required": [
+    "blocker_id",
+    "delivery_id",
+    "blocked",
+    "reasons",
+    "system_state"
+  ],
+  "title": "HFX Client Delivery Blocker",
+  "type": "object"
+}
