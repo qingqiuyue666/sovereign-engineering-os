@@ -20,15 +20,22 @@ class SovereignConsoleSyncLostOverlayTests(unittest.TestCase):
         healthy = fake_phase1_snapshot()
         stale = fake_phase1_snapshot(stale=True)
         self.assertFalse(healthy.is_sync_lost())
-        self.assertTrue(stale.is_sync_lost())
-        self.assertTrue(healthy.is_sync_lost(now_ms=healthy.captured_at_ms + SYNC_STALE_AFTER_MS + 1))
+        self.assertFalse(stale.is_sync_lost())
+        self.assertTrue(stale.is_sync_lost(had_healthy_projection=True))
+        self.assertFalse(healthy.is_sync_lost(now_ms=healthy.captured_at_ms + SYNC_STALE_AFTER_MS + 1))
+        self.assertTrue(
+            healthy.is_sync_lost(
+                now_ms=healthy.captured_at_ms + SYNC_STALE_AFTER_MS + 1,
+                had_healthy_projection=True,
+            )
+        )
 
     def test_overlay_visible_when_stale_and_hidden_when_healthy(self) -> None:
         overlay = SyncLostOverlay()
         button = QPushButton("Submit")
         button.setEnabled(True)
 
-        overlay.apply_snapshot(fake_phase1_snapshot(stale=True), action_controls=(button,))
+        overlay.apply_snapshot(fake_phase1_snapshot(stale=True), action_controls=(button,), had_healthy_projection=True)
         self.assertTrue(overlay.is_sync_lost())
         self.assertTrue(overlay.isVisible())
         self.assertFalse(button.isEnabled())

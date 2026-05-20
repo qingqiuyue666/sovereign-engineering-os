@@ -1,4 +1,4 @@
-"""Spec checks for Sovereign Console UI Phase 1."""
+"""Spec checks for Sovereign Console unified workspace UI."""
 
 from __future__ import annotations
 
@@ -14,35 +14,26 @@ class SovereignConsoleUiSpecTests(unittest.TestCase):
         text = SPEC.read_text(encoding="utf-8")
         required = (
             "Sovereign Console",
-            "Sovereign C2",
-            "Light-Dark Hybrid Living Production Console",
-            "single-window workspace",
+            "unified production workspace",
+            "Workspace",
+            "Runs",
+            "Artifacts",
+            "Reviews",
+            "Settings",
             "read-model and command-issuer only",
-            "never owns execution",
-            "System Pulse Bar",
-            "Navigation",
+            "OS Runtime Facade",
+            "System Pulse",
+            "Reduced left rail",
             "QStackedWidget",
-            "Right Inspector",
-            "Live Event Stream",
+            "Inspector",
+            "Event Stream / Black Box",
             "QTableView",
             "QAbstractTableModel",
             "QTableWidget",
-            "QStyledItemDelegate",
-            "Sync Lost Overlay",
-            "strict status lexicon",
-            "forbidden fake completion labels",
-            "Phase 1",
-            "Phase 2",
-            "Phase 3",
-            "macOS `.app` packaging",
-            "Command Palette",
-            "HFX chain custom view",
-            "Qt main thread",
-            "bounded queries with `LIMIT`",
-            "full-table scans",
-            "write SQLite from GUI widgets",
-            "direct process APIs",
-            "network by default",
+            "HFX_008 Energy Shockwave",
+            "Runtime projection unavailable. Read-only workspace is active.",
+            "SYSTEM SYNC LOST",
+            "Startup with no runtime projection must be Degraded",
         )
         for phrase in required:
             with self.subTest(phrase=phrase):

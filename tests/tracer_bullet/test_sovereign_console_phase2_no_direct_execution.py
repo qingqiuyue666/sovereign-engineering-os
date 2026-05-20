@@ -27,6 +27,10 @@ FORBIDDEN_LABELS = (
 class SovereignConsolePhase2NoDirectExecutionTests(unittest.TestCase):
     def test_importing_phase2_ui_modules_does_not_execute_process_or_network(self) -> None:
         modules = (
+            "apps.ui.workspace_page",
+            "apps.ui.runs_page",
+            "apps.ui.artifacts_page",
+            "apps.ui.reviews_page",
             "apps.ui.artifact_store_page",
             "apps.ui.hfx_factory_page",
             "apps.ui.hfx_landing_chain_page",
@@ -87,7 +91,7 @@ class SovereignConsolePhase2NoDirectExecutionTests(unittest.TestCase):
                 self.assertNotIn(label, text)
 
     def test_job_queue_keeps_table_model_contract(self) -> None:
-        source = Path("apps/ui/job_queue_page.py").read_text(encoding="utf-8")
+        source = Path("apps/ui/runs_page.py").read_text(encoding="utf-8")
         models = Path("apps/ui/models.py").read_text(encoding="utf-8")
         self.assertIn("QTableView", source)
         self.assertIn("QAbstractTableModel", models)

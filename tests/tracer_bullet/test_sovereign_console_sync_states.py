@@ -21,13 +21,22 @@ class SovereignConsoleSyncStatesTests(unittest.TestCase):
     def test_sync_states_resolve_healthy_degraded_lost(self) -> None:
         healthy = fake_phase1_snapshot()
         degraded = replace(healthy, sync_stale=True, runtime_available=True, database_available=True)
-        lost = replace(healthy, runtime_available=False)
+        unavailable = replace(healthy, runtime_available=False)
 
         self.assertEqual(resolve_sync_state(healthy), SyncState.HEALTHY)
         self.assertEqual(resolve_sync_state(degraded, now_ms=degraded.captured_at_ms), SyncState.DEGRADED)
-        self.assertEqual(resolve_sync_state(lost), SyncState.LOST)
+        self.assertEqual(resolve_sync_state(unavailable), SyncState.DEGRADED)
+        self.assertEqual(resolve_sync_state(unavailable, had_healthy_projection=True), SyncState.LOST)
         self.assertEqual(
             resolve_sync_state(healthy, now_ms=healthy.captured_at_ms + SYNC_STALE_AFTER_MS + 1),
+            SyncState.DEGRADED,
+        )
+        self.assertEqual(
+            resolve_sync_state(
+                healthy,
+                now_ms=healthy.captured_at_ms + SYNC_STALE_AFTER_MS + 1,
+                had_healthy_projection=True,
+            ),
             SyncState.LOST,
         )
 

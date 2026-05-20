@@ -1,4 +1,4 @@
-"""Phase 2 page import and shell wiring tests."""
+"""Unified workspace page import and shell wiring tests."""
 
 from __future__ import annotations
 
@@ -13,6 +13,12 @@ PHASE2_MODULES = (
     "apps.ui.translations",
     "apps.ui.motion",
     "apps.ui.energy_widgets",
+    "apps.ui.mission_widgets",
+    "apps.ui.workspace_page",
+    "apps.ui.runs_page",
+    "apps.ui.artifacts_page",
+    "apps.ui.reviews_page",
+    "apps.ui.settings_page",
     "apps.ui.artifact_store_page",
     "apps.ui.hfx_factory_page",
     "apps.ui.hfx_landing_chain_page",
@@ -20,19 +26,13 @@ PHASE2_MODULES = (
     "apps.ui.failure_quarantine_page",
     "apps.ui.context_packs_page",
     "apps.ui.system_health_page",
-    "apps.ui.settings_page",
 )
 
 EXPECTED_PAGE_IDS = {
-    "dashboard",
-    "job_queue",
-    "system_health",
-    "hfx_factory",
-    "hfx_landing_chain",
-    "context_packs",
-    "human_review",
-    "failure_quarantine",
-    "artifact_store",
+    "workspace",
+    "runs",
+    "artifacts",
+    "reviews",
     "settings",
 }
 
@@ -58,8 +58,8 @@ class SovereignConsolePhase2PagesTests(unittest.TestCase):
         from apps.ui.main_window import SovereignConsoleMainWindow
 
         window = SovereignConsoleMainWindow()
-        self.assertTrue(EXPECTED_PAGE_IDS.issubset(set(window._page_indexes)))
-        self.assertFalse({"asset_library"}.intersection(window._page_indexes))
+        self.assertEqual(set(window._page_indexes), EXPECTED_PAGE_IDS)
+        self.assertEqual(window.workspace.currentIndex(), window._page_indexes["workspace"])
         window.close()
 
     @unittest.skipUnless(PYSIDE6_AVAILABLE, "PySide6 not installed")
@@ -67,33 +67,33 @@ class SovereignConsolePhase2PagesTests(unittest.TestCase):
         from apps.ui.main_window import SovereignConsoleMainWindow
 
         window = SovereignConsoleMainWindow(language="en")
-        self.assertIn("Dashboard", window.navigation.visible_labels())
+        self.assertEqual(window.navigation.visible_labels(), ("Workspace", "Runs", "Artifacts", "Reviews", "Settings"))
         window.set_language("zh")
-        self.assertIn("仪表盘", window.navigation.visible_labels())
+        self.assertEqual(window.navigation.visible_labels(), ("工作台", "运行", "产物", "审查", "设置"))
         window.close()
 
     @unittest.skipUnless(PYSIDE6_AVAILABLE, "PySide6 not installed")
-    def test_hfx_factory_displays_required_fields(self) -> None:
-        from apps.ui.hfx_factory_page import HfxFactoryPage
+    def test_workspace_displays_required_mission_fields(self) -> None:
+        from apps.ui.workspace_page import WorkspacePage
         from apps.ui.read_models import fake_phase1_snapshot
 
-        page = HfxFactoryPage()
+        page = WorkspacePage()
         fields = set(page.required_fields())
         for field in (
-            "Core12",
-            "HFX_008 summary",
-            "topology audit status",
-            "proof artifact status",
-            "validation status",
-            "human review status",
-            "resource package status",
-            "final_claim_allowed",
-            "next action",
-            "blocked reason",
+            "current mission",
+            "command area",
+            "next required action",
+            "HFX_008 compact chain",
+            "recent runs",
+            "recent artifacts",
+            "pending reviews count",
+            "quarantined count",
+            "context packet quick actions",
         ):
             self.assertIn(field, fields)
         page.render_snapshot(fake_phase1_snapshot())
-        self.assertEqual(page.rendered_values()["final_claim_allowed"], "False")
+        self.assertEqual(page.rendered_mission()["mission_id"], "HFX_008")
+        self.assertEqual(page.rendered_mission()["mission_name"], "HFX_008 Energy Shockwave")
 
 
 if __name__ == "__main__":

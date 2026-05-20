@@ -38,6 +38,11 @@ def application_stylesheet() -> str:
         background: #FFFFFF;
         border-bottom: 1px solid #D1D1D6;
     }
+    QFrame[role="pulseChip"] {
+        background: #F7F7F8;
+        border: 1px solid #D1D1D6;
+        border-radius: 6px;
+    }
     QFrame#NavRail {
         background: #F7F7F8;
         border-right: 1px solid #D1D1D6;
@@ -59,14 +64,15 @@ def application_stylesheet() -> str:
         border: 1px solid #D1D1D6;
         border-radius: 8px;
     }
-    QLabel#DashboardWarningStrip, QLabel#JobQueueFilterStrip {
+    QLabel#DashboardWarningStrip, QLabel#JobQueueFilterStrip, QLabel#RunsFilterStrip, QLabel#WorkspaceDegradedBanner,
+    QLabel#GlobalDegradedBanner {
         background: #FFF4E5;
         color: #6E6E73;
         border: 1px solid #FF9500;
         border-radius: 6px;
         padding: 7px 10px;
     }
-    QFrame#ArtifactPreview {
+    QFrame#ArtifactPreview, QFrame#ArtifactObservatoryPreview {
         background: #FFFFFF;
         border: 1px solid #00A6A6;
         border-radius: 8px;
@@ -103,6 +109,14 @@ def application_stylesheet() -> str:
     QPushButton:disabled {
         color: #86868B;
         background: #F5F5F7;
+    }
+    QFrame#LiveEventStreamFrame {
+        background: #0D0D0D;
+        border-top: 1px solid #1E1E1E;
+    }
+    QFrame#EventStreamTitleBar, QLabel#EventStreamTitle {
+        background: #0D0D0D;
+        color: #E5E5EA;
     }
     QPlainTextEdit#LiveEventStream {
         background: #0D0D0D;

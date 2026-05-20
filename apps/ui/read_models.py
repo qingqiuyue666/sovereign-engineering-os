@@ -1,4 +1,4 @@
-"""Bounded read models for the Sovereign Console Phase 1 shell."""
+"""Bounded read models for the Sovereign Console shell."""
 
 from __future__ import annotations
 
@@ -124,7 +124,17 @@ class RuntimeSnapshot:
         now = int(time.time() * 1000) if now_ms is None else int(now_ms)
         return max(0, now - int(self.captured_at_ms))
 
-    def is_sync_lost(self, *, now_ms: int | None = None, stale_after_ms: int = SYNC_STALE_AFTER_MS) -> bool:
+    def is_sync_lost(
+        self,
+        *,
+        now_ms: int | None = None,
+        stale_after_ms: int = SYNC_STALE_AFTER_MS,
+        had_healthy_projection: bool = False,
+    ) -> bool:
+        """Return true only for an unexpected loss after a known healthy projection."""
+
+        if not had_healthy_projection:
+            return False
         return (
             self.sync_stale
             or not self.runtime_available
@@ -454,7 +464,7 @@ def _unavailable_snapshot(captured_at_ms: int, *, database_available: bool) -> R
         memory_pressure=_memory_pressure_label(),
         warning_count=1,
         next_required_action="Reconnect local runtime projection",
-        sync_stale=True,
+        sync_stale=False,
         runtime_available=False,
         database_available=database_available,
     )
