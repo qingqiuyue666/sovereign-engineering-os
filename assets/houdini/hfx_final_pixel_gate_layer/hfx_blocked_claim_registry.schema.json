@@ -1,0 +1,120 @@
+{
+  "$id": "sovereign-engineering-os://assets/houdini/hfx_final_pixel_gate_layer/hfx_blocked_claim_registry.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Default schema for final-pixel blocked claim governance.",
+  "properties": {
+    "blocked_claims": {
+      "description": "Claims that cannot be made by this pipeline yet.",
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "blocked_until_gate": {
+            "description": "Gate that must pass before the claim can be considered.",
+            "minLength": 1,
+            "type": "string"
+          },
+          "claim_id": {
+            "description": "Stable claim identifier.",
+            "minLength": 1,
+            "type": "string"
+          },
+          "claim_text": {
+            "description": "Claim currently blocked.",
+            "minLength": 1,
+            "type": "string"
+          },
+          "owner": {
+            "description": "Owner responsible for clearing the claim.",
+            "minLength": 1,
+            "type": "string"
+          },
+          "reason": {
+            "description": "Reason the claim is blocked.",
+            "minLength": 1,
+            "type": "string"
+          },
+          "status": {
+            "description": "Blocked claim lifecycle status.",
+            "enum": [
+              "active",
+              "resolved",
+              "superseded"
+            ],
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "claim_id",
+          "claim_text",
+          "reason",
+          "blocked_until_gate",
+          "owner",
+          "status"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "contract_layer": {
+      "const": "hfx_final_pixel_gate_layer",
+      "description": "Owning HFX contract layer.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "contract_status": {
+      "description": "Lifecycle state for the contract payload.",
+      "enum": [
+        "draft",
+        "ready_for_review",
+        "approved",
+        "blocked"
+      ],
+      "minLength": 1,
+      "type": "string"
+    },
+    "final_pixel_claim": {
+      "const": false,
+      "description": "Must remain false while this scaffold is not producing final pixels.",
+      "type": "boolean"
+    },
+    "global_block_enabled": {
+      "const": true,
+      "description": "Must remain true while the master seal blocks final pixels.",
+      "type": "boolean"
+    },
+    "notes": {
+      "description": "Optional governance notes.",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "registry_id": {
+      "description": "Stable blocked claim registry identifier.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "hfx-blocked-claim-registry-v1",
+      "description": "Exact schema version for this contract payload.",
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "contract_layer",
+    "contract_status",
+    "final_pixel_claim",
+    "registry_id",
+    "global_block_enabled",
+    "blocked_claims"
+  ],
+  "title": "HFX Blocked Claim Registry Schema",
+  "type": "object"
+}

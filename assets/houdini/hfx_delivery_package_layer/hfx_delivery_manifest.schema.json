@@ -1,0 +1,126 @@
+{
+  "$id": "sovereign-engineering-os://assets/houdini/hfx_delivery_package_layer/hfx_delivery_manifest.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Default schema for delivery package governance.",
+  "properties": {
+    "approvals": {
+      "description": "Named approvals required for delivery.",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "checksums_manifest_ref": {
+      "description": "Logical checksum manifest reference.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "color_contract_ref": {
+      "description": "Color-management contract reference.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "contract_layer": {
+      "const": "hfx_delivery_package_layer",
+      "description": "Owning HFX contract layer.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "contract_status": {
+      "description": "Lifecycle state for the contract payload.",
+      "enum": [
+        "draft",
+        "ready_for_review",
+        "approved",
+        "blocked"
+      ],
+      "minLength": 1,
+      "type": "string"
+    },
+    "deliverables": {
+      "description": "Logical deliverable references.",
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "description": "Human-readable slot or artifact name.",
+            "minLength": 1,
+            "type": "string"
+          },
+          "ref": {
+            "description": "Logical reference to a contract artifact.",
+            "minLength": 1,
+            "type": "string"
+          },
+          "required": {
+            "default": true,
+            "description": "Whether the referenced artifact is required.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "ref"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "delivery_id": {
+      "description": "Stable delivery package identifier.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "final_pixel_claim": {
+      "const": false,
+      "description": "Must remain false while this scaffold is not producing final pixels.",
+      "type": "boolean"
+    },
+    "notes": {
+      "description": "Optional governance notes.",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "package_version": {
+      "description": "Delivery package version.",
+      "minLength": 1,
+      "pattern": "^v[0-9]{3,}$",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "hfx-delivery-manifest-v1",
+      "description": "Exact schema version for this contract payload.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "shots": {
+      "description": "Shot identifiers included in the package.",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    }
+  },
+  "required": [
+    "schema_version",
+    "contract_layer",
+    "contract_status",
+    "final_pixel_claim",
+    "delivery_id",
+    "package_version",
+    "shots",
+    "deliverables",
+    "approvals"
+  ],
+  "title": "HFX Delivery Manifest Schema",
+  "type": "object"
+}

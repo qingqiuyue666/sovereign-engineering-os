@@ -1,0 +1,113 @@
+{
+  "$id": "sovereign-engineering-os://assets/houdini/hfx_review_dailies_layer/hfx_qc_checklist.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Default schema for review and dailies QC checklists.",
+  "properties": {
+    "checklist_id": {
+      "description": "Stable QC checklist identifier.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "checks": {
+      "description": "QC checks required for the review gate.",
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "description": "Stable check identifier.",
+            "minLength": 1,
+            "type": "string"
+          },
+          "label": {
+            "description": "Human-readable check label.",
+            "minLength": 1,
+            "type": "string"
+          },
+          "required": {
+            "description": "Whether this check blocks approval when failed.",
+            "type": "boolean"
+          },
+          "severity": {
+            "description": "Severity of failure.",
+            "enum": [
+              "info",
+              "warning",
+              "error",
+              "blocker"
+            ],
+            "minLength": 1,
+            "type": "string"
+          },
+          "status": {
+            "description": "Current check status.",
+            "enum": [
+              "pending",
+              "pass",
+              "fail",
+              "waived"
+            ],
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "severity",
+          "required",
+          "status"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "contract_layer": {
+      "const": "hfx_review_dailies_layer",
+      "description": "Owning HFX contract layer.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "contract_status": {
+      "description": "Lifecycle state for the contract payload.",
+      "enum": [
+        "draft",
+        "ready_for_review",
+        "approved",
+        "blocked"
+      ],
+      "minLength": 1,
+      "type": "string"
+    },
+    "final_pixel_claim": {
+      "const": false,
+      "description": "Must remain false while this scaffold is not producing final pixels.",
+      "type": "boolean"
+    },
+    "notes": {
+      "description": "Optional governance notes.",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "schema_version": {
+      "const": "hfx-qc-checklist-v1",
+      "description": "Exact schema version for this contract payload.",
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "contract_layer",
+    "contract_status",
+    "final_pixel_claim",
+    "checklist_id",
+    "checks"
+  ],
+  "title": "HFX QC Checklist Schema",
+  "type": "object"
+}

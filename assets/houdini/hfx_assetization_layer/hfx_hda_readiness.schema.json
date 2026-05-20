@@ -1,0 +1,100 @@
+{
+  "$id": "sovereign-engineering-os://assets/houdini/hfx_assetization_layer/hfx_hda_readiness.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Default schema for declaring HDA interface readiness.",
+  "properties": {
+    "contract_layer": {
+      "const": "hfx_assetization_layer",
+      "description": "Owning HFX contract layer.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "contract_status": {
+      "description": "Lifecycle state for the contract payload.",
+      "enum": [
+        "draft",
+        "ready_for_review",
+        "approved",
+        "blocked"
+      ],
+      "minLength": 1,
+      "type": "string"
+    },
+    "final_pixel_claim": {
+      "const": false,
+      "description": "Must remain false while this scaffold is not producing final pixels.",
+      "type": "boolean"
+    },
+    "hda_name": {
+      "description": "Name of the Houdini Digital Asset.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "interface_locked": {
+      "description": "Whether the HDA interface is frozen for downstream contracts.",
+      "type": "boolean"
+    },
+    "notes": {
+      "description": "Optional governance notes.",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "parameter_contract_version": {
+      "description": "Version of the public parameter contract.",
+      "minLength": 1,
+      "pattern": "^v[0-9]+$",
+      "type": "string"
+    },
+    "required_inputs": {
+      "description": "Named HDA inputs required by the interface contract.",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "required_outputs": {
+      "description": "Named outputs promised by the HDA contract.",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "schema_version": {
+      "const": "hfx-hda-readiness-v1",
+      "description": "Exact schema version for this contract payload.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "unsafe_external_file_refs": {
+      "description": "External references that must be resolved or banned.",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    }
+  },
+  "required": [
+    "schema_version",
+    "contract_layer",
+    "contract_status",
+    "final_pixel_claim",
+    "hda_name",
+    "interface_locked",
+    "parameter_contract_version",
+    "required_inputs",
+    "required_outputs"
+  ],
+  "title": "HFX HDA Readiness Schema",
+  "type": "object"
+}

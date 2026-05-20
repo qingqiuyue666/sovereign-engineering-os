@@ -1,0 +1,138 @@
+{
+  "$id": "sovereign-engineering-os://assets/houdini/hfx_aov_pass_contract_layer/hfx_global_aov_matrix.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Default schema for the global render pass and AOV contract.",
+  "properties": {
+    "aovs": {
+      "description": "AOV declarations required by this render layer.",
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "approval_status": {
+            "description": "Review state for this AOV.",
+            "enum": [
+              "draft",
+              "approved",
+              "blocked"
+            ],
+            "minLength": 1,
+            "type": "string"
+          },
+          "bit_depth": {
+            "description": "Intended storage precision.",
+            "enum": [
+              "half",
+              "float",
+              "uint16",
+              "uint32"
+            ],
+            "minLength": 1,
+            "type": "string"
+          },
+          "channel_type": {
+            "description": "Channel data class.",
+            "enum": [
+              "color",
+              "scalar",
+              "vector",
+              "id",
+              "utility"
+            ],
+            "minLength": 1,
+            "type": "string"
+          },
+          "color_space_role": {
+            "description": "Color-management role for the AOV.",
+            "minLength": 1,
+            "type": "string"
+          },
+          "name": {
+            "description": "AOV name.",
+            "minLength": 1,
+            "type": "string"
+          },
+          "owner": {
+            "description": "Owner responsible for the AOV.",
+            "minLength": 1,
+            "type": "string"
+          },
+          "required_for_final": {
+            "default": false,
+            "description": "Whether this AOV would be required after final-pixel gates open.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "channel_type",
+          "bit_depth",
+          "color_space_role",
+          "owner",
+          "approval_status"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "contract_layer": {
+      "const": "hfx_aov_pass_contract_layer",
+      "description": "Owning HFX contract layer.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "contract_status": {
+      "description": "Lifecycle state for the contract payload.",
+      "enum": [
+        "draft",
+        "ready_for_review",
+        "approved",
+        "blocked"
+      ],
+      "minLength": 1,
+      "type": "string"
+    },
+    "final_pixel_claim": {
+      "const": false,
+      "description": "Must remain false while this scaffold is not producing final pixels.",
+      "type": "boolean"
+    },
+    "notes": {
+      "description": "Optional governance notes.",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "render_layer_name": {
+      "description": "Governed render layer name.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "hfx-global-aov-matrix-v1",
+      "description": "Exact schema version for this contract payload.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "show_id": {
+      "description": "Show or project identifier.",
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "contract_layer",
+    "contract_status",
+    "final_pixel_claim",
+    "show_id",
+    "render_layer_name",
+    "aovs"
+  ],
+  "title": "HFX Global AOV Matrix Schema",
+  "type": "object"
+}

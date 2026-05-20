@@ -1,0 +1,95 @@
+{
+  "$id": "sovereign-engineering-os://assets/houdini/hfx_plate_camera_integration_layer/hfx_lens_metadata.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Default schema for lens and calibration metadata.",
+  "properties": {
+    "calibration_ref": {
+      "description": "Logical reference to lens calibration metadata.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "contract_layer": {
+      "const": "hfx_plate_camera_integration_layer",
+      "description": "Owning HFX contract layer.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "contract_status": {
+      "description": "Lifecycle state for the contract payload.",
+      "enum": [
+        "draft",
+        "ready_for_review",
+        "approved",
+        "blocked"
+      ],
+      "minLength": 1,
+      "type": "string"
+    },
+    "distortion_model": {
+      "description": "Lens distortion model.",
+      "enum": [
+        "none",
+        "brown_conrady",
+        "anamorphic",
+        "stmap_ref",
+        "custom_contract"
+      ],
+      "minLength": 1,
+      "type": "string"
+    },
+    "final_pixel_claim": {
+      "const": false,
+      "description": "Must remain false while this scaffold is not producing final pixels.",
+      "type": "boolean"
+    },
+    "focal_length_mm": {
+      "description": "Focal length in millimeters.",
+      "exclusiveMinimum": 0.0,
+      "type": "number"
+    },
+    "lens_id": {
+      "description": "Stable lens identifier.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "notes": {
+      "description": "Optional governance notes.",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "schema_version": {
+      "const": "hfx-lens-metadata-v1",
+      "description": "Exact schema version for this contract payload.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "sensor_width_mm": {
+      "description": "Sensor width in millimeters.",
+      "exclusiveMinimum": 0.0,
+      "type": "number"
+    },
+    "units": {
+      "const": "millimeters",
+      "description": "Unit convention for lens metadata.",
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "contract_layer",
+    "contract_status",
+    "final_pixel_claim",
+    "lens_id",
+    "focal_length_mm",
+    "sensor_width_mm",
+    "distortion_model"
+  ],
+  "title": "HFX Lens Metadata Schema",
+  "type": "object"
+}

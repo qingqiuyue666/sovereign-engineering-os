@@ -1,0 +1,103 @@
+{
+  "$id": "sovereign-engineering-os://assets/houdini/hfx_lookdev_shader_contract_layer/hfx_shader_parameter_contract.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Default schema for shader parameter declarations.",
+  "properties": {
+    "contract_layer": {
+      "const": "hfx_lookdev_shader_contract_layer",
+      "description": "Owning HFX contract layer.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "contract_status": {
+      "description": "Lifecycle state for the contract payload.",
+      "enum": [
+        "draft",
+        "ready_for_review",
+        "approved",
+        "blocked"
+      ],
+      "minLength": 1,
+      "type": "string"
+    },
+    "final_pixel_claim": {
+      "const": false,
+      "description": "Must remain false while this scaffold is not producing final pixels.",
+      "type": "boolean"
+    },
+    "notes": {
+      "description": "Optional governance notes.",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "parameters": {
+      "description": "Public shader parameters and defaults.",
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "artist_editable": {
+            "default": true,
+            "description": "Whether artists may edit this parameter.",
+            "type": "boolean"
+          },
+          "default_policy": {
+            "description": "How a default is supplied or blocked.",
+            "minLength": 1,
+            "type": "string"
+          },
+          "name": {
+            "description": "Parameter name.",
+            "minLength": 1,
+            "type": "string"
+          },
+          "value_type": {
+            "description": "Contracted value type.",
+            "enum": [
+              "float",
+              "integer",
+              "boolean",
+              "string",
+              "color",
+              "vector"
+            ],
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "value_type",
+          "default_policy"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "hfx-shader-parameter-contract-v1",
+      "description": "Exact schema version for this contract payload.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "shader_id": {
+      "description": "Stable shader contract identifier.",
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "contract_layer",
+    "contract_status",
+    "final_pixel_claim",
+    "shader_id",
+    "parameters"
+  ],
+  "title": "HFX Shader Parameter Contract Schema",
+  "type": "object"
+}

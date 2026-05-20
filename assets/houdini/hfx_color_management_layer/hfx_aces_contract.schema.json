@@ -1,0 +1,90 @@
+{
+  "$id": "sovereign-engineering-os://assets/houdini/hfx_color_management_layer/hfx_aces_contract.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Default schema for ACES color pipeline declarations.",
+  "properties": {
+    "aces_version": {
+      "description": "ACES version declaration.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "approval_status": {
+      "description": "Color contract approval state.",
+      "enum": [
+        "draft",
+        "approved",
+        "blocked"
+      ],
+      "minLength": 1,
+      "type": "string"
+    },
+    "contract_layer": {
+      "const": "hfx_color_management_layer",
+      "description": "Owning HFX contract layer.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "contract_status": {
+      "description": "Lifecycle state for the contract payload.",
+      "enum": [
+        "draft",
+        "ready_for_review",
+        "approved",
+        "blocked"
+      ],
+      "minLength": 1,
+      "type": "string"
+    },
+    "final_pixel_claim": {
+      "const": false,
+      "description": "Must remain false while this scaffold is not producing final pixels.",
+      "type": "boolean"
+    },
+    "interchange_space": {
+      "description": "Interchange color space.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "notes": {
+      "description": "Optional governance notes.",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "required_transforms": {
+      "description": "Named transforms required by downstream contracts.",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "schema_version": {
+      "const": "hfx-aces-contract-v1",
+      "description": "Exact schema version for this contract payload.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "working_space": {
+      "description": "Working color space.",
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "contract_layer",
+    "contract_status",
+    "final_pixel_claim",
+    "aces_version",
+    "working_space",
+    "interchange_space"
+  ],
+  "title": "HFX ACES Contract Schema",
+  "type": "object"
+}

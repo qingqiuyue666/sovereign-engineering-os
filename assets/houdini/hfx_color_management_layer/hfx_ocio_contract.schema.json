@@ -1,0 +1,89 @@
+{
+  "$id": "sovereign-engineering-os://assets/houdini/hfx_color_management_layer/hfx_ocio_contract.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Default schema for OpenColorIO contract declarations.",
+  "properties": {
+    "config_ref": {
+      "description": "Logical OCIO config reference.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "config_version": {
+      "description": "Declared OCIO config version.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "contract_layer": {
+      "const": "hfx_color_management_layer",
+      "description": "Owning HFX contract layer.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "contract_status": {
+      "description": "Lifecycle state for the contract payload.",
+      "enum": [
+        "draft",
+        "ready_for_review",
+        "approved",
+        "blocked"
+      ],
+      "minLength": 1,
+      "type": "string"
+    },
+    "display_views": {
+      "description": "Allowed display/view combinations.",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "final_pixel_claim": {
+      "const": false,
+      "description": "Must remain false while this scaffold is not producing final pixels.",
+      "type": "boolean"
+    },
+    "no_lut_payload": {
+      "const": true,
+      "description": "Must remain true so LUT payloads are not embedded.",
+      "type": "boolean"
+    },
+    "notes": {
+      "description": "Optional governance notes.",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "roles": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Named OCIO roles mapped to logical color spaces.",
+      "type": "object"
+    },
+    "schema_version": {
+      "const": "hfx-ocio-contract-v1",
+      "description": "Exact schema version for this contract payload.",
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "contract_layer",
+    "contract_status",
+    "final_pixel_claim",
+    "config_ref",
+    "config_version",
+    "roles",
+    "display_views",
+    "no_lut_payload"
+  ],
+  "title": "HFX OCIO Contract Schema",
+  "type": "object"
+}

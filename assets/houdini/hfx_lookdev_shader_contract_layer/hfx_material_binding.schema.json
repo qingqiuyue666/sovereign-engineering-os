@@ -1,0 +1,111 @@
+{
+  "$id": "sovereign-engineering-os://assets/houdini/hfx_lookdev_shader_contract_layer/hfx_material_binding.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Default schema for logical material-to-geometry binding.",
+  "properties": {
+    "approval_owner": {
+      "description": "Lookdev owner for this binding.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "contract_layer": {
+      "const": "hfx_lookdev_shader_contract_layer",
+      "description": "Owning HFX contract layer.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "contract_status": {
+      "description": "Lifecycle state for the contract payload.",
+      "enum": [
+        "draft",
+        "ready_for_review",
+        "approved",
+        "blocked"
+      ],
+      "minLength": 1,
+      "type": "string"
+    },
+    "final_pixel_claim": {
+      "const": false,
+      "description": "Must remain false while this scaffold is not producing final pixels.",
+      "type": "boolean"
+    },
+    "geometry_binding_query": {
+      "description": "Logical query for the intended geometry binding.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "material_id": {
+      "description": "Stable material identifier.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "notes": {
+      "description": "Optional governance notes.",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "schema_version": {
+      "const": "hfx-material-binding-v1",
+      "description": "Exact schema version for this contract payload.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "shader_family": {
+      "description": "Approved shader family.",
+      "enum": [
+        "principled",
+        "karma_materialx",
+        "usd_preview",
+        "custom_contract"
+      ],
+      "minLength": 1,
+      "type": "string"
+    },
+    "texture_slots": {
+      "description": "Texture slot references without binary texture payloads.",
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "description": "Human-readable slot or artifact name.",
+            "minLength": 1,
+            "type": "string"
+          },
+          "ref": {
+            "description": "Logical reference to a contract artifact.",
+            "minLength": 1,
+            "type": "string"
+          },
+          "required": {
+            "default": true,
+            "description": "Whether the referenced artifact is required.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "ref"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "contract_layer",
+    "contract_status",
+    "final_pixel_claim",
+    "material_id",
+    "geometry_binding_query",
+    "shader_family"
+  ],
+  "title": "HFX Material Binding Schema",
+  "type": "object"
+}
