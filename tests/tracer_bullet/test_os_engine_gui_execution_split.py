@@ -44,32 +44,27 @@ class OSEngineGuiExecutionSplitTests(unittest.TestCase):
             with self.subTest(token=token):
                 self.assertNotIn(token, source)
 
-    def test_job_submission_path_goes_through_event_sourced_queue_without_auto_execution(self) -> None:
+    def test_phase1_desktop_facade_is_read_model_without_queue_mutation(self) -> None:
         source = APP_SOURCE.read_text(encoding="utf-8")
         self.assertIn("DesktopOsEngineFacade", source)
-        self.assertIn("self.queue.create_job", source)
-        self.assertIn("self.queue.enqueue_job", source)
+        self.assertIn("ReadModelProvider", source)
+        self.assertIn("snapshot(", source)
+        self.assertNotIn("self.queue.create_job", source)
+        self.assertNotIn("self.queue.enqueue_job", source)
         self.assertNotIn("JobQueueManager", source)
         self.assertNotIn(".start_job(", source)
         self.assertNotIn("run(", source.lower().replace("asyncio.run", ""))
 
-    def test_facade_submission_projects_pending_state_without_starting_worker(self) -> None:
+    def test_facade_snapshot_reports_unavailable_without_starting_worker(self) -> None:
         from apps.sovereign_desktop import DesktopOsEngineFacade
 
         with tempfile.TemporaryDirectory() as temp_dir_name:
             runtime_root = Path(temp_dir_name)
             facade = DesktopOsEngineFacade(repo_root=Path.cwd(), runtime_root=runtime_root)
             facade.initialize()
-            state = facade.submit_job_request(
-                job_type="git",
-                inputs={"command": ["git", "status", "--short"]},
-                max_runtime=30,
-                memory_limit=256,
-            )
-            self.assertEqual(state.current_status, "pending")
-            self.assertEqual(state.last_event_type, "JobQueued")
-            self.assertEqual(state.event_count, 4)
-            self.assertEqual(facade.list_job_states()[0].current_status, "pending")
+            snapshot = facade.snapshot()
+            self.assertEqual(snapshot.runtime_status, "Unavailable")
+            self.assertTrue(snapshot.is_sync_lost())
 
     def test_no_env_file_read_or_raw_network_default_in_gui_source(self) -> None:
         source = APP_SOURCE.read_text(encoding="utf-8")
