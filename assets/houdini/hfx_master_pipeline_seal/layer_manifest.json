@@ -10,9 +10,13 @@
     "HFX_MASTER_PIPELINE_GLOBAL_SEAL.json",
     "master_pipeline_seal.contract.md",
     "master_pipeline_seal_validator.py",
+    "hfx_master_pipeline_validate.py",
+    "README_HFX_MASTER_PIPELINE_SEAL.md",
     "GLOBAL_SEAL.json",
     "GLOBAL_SEAL.contract.md",
     "global_seal_validator.py",
+    "fixtures/pass_minimal_no_final_pixels.json",
+    "fixtures/fail_forbidden_final_pixel_claim.json",
     "layer_manifest.json"
   ],
   "system_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",

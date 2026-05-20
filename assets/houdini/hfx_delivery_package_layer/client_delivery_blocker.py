@@ -1,34 +1,29 @@
+#!/usr/bin/env python3
 """
-Client Delivery Blocker
+Fail-closed client delivery blocker for hfx_delivery_package_layer.
+"""
 
-Generated validator template for hfx_delivery_package_layer.
-Purpose: Validate that client delivery remains blocked when final pixels are unavailable.
-"""
+import json
+
 
 SYSTEM_STATE = 'HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS'
-LAYER_NAME = 'hfx_delivery_package_layer'
-VALIDATOR_NAME = 'client_delivery_blocker'
 
 
 def validate(payload=None, context=None):
-    """Return a fail-closed validation envelope.
-
-    Implement production validation here. Until implementation is complete,
-    this scaffold does not certify final pixels or client deliverables.
-    """
     payload = payload or {}
     context = context or {}
     return {
         "ok": False,
-        "status": 'BLOCKED',
+        "status": "CLIENT_DELIVERY_BLOCKED",
         "system_state": SYSTEM_STATE,
-        "reason": "Validator scaffold has not been implemented for production approval.",
-        "layer": LAYER_NAME,
-        "validator": VALIDATOR_NAME,
+        "reason": "Client/public delivery is blocked in the no-final-pixels scaffold state.",
+        "final_pixels_authorized": False,
+        "client_delivery_allowed": False,
+        "public_delivery_allowed": False,
         "payload_keys": sorted(payload.keys()),
         "context_keys": sorted(context.keys()),
     }
 
 
 if __name__ == "__main__":
-    print(validate())
+    print(json.dumps(validate(), indent=2, sort_keys=True))

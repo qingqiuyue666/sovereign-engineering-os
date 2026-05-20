@@ -15,6 +15,8 @@
     "GLOBAL_SEAL.json",
     "GLOBAL_SEAL.contract.md",
     "global_seal_validator.py",
+    "fixtures/pass_minimal_no_final_pixels.json",
+    "fixtures/fail_forbidden_final_pixel_claim.json",
     "layer_manifest.json"
   ],
   "system_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",

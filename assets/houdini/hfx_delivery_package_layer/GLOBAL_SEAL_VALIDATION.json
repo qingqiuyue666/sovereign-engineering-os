@@ -1,0 +1,131 @@
+{
+  "checks": [
+    {
+      "detail": "/Users/qqy/Documents/Codex/2026-05-20/system-override-hfx-render-automation-hardening/sovereign-engineering-os/assets/houdini/hfx_delivery_package_layer/layer_manifest.json",
+      "name": "layer_manifest_exists",
+      "pass": true
+    },
+    {
+      "detail": "/Users/qqy/Documents/Codex/2026-05-20/system-override-hfx-render-automation-hardening/sovereign-engineering-os/assets/houdini/hfx_delivery_package_layer/GLOBAL_SEAL.json",
+      "name": "global_seal_exists",
+      "pass": true
+    },
+    {
+      "detail": "delivery_manifest.schema.json",
+      "name": "required_file_exists",
+      "pass": true
+    },
+    {
+      "detail": "client_delivery_blocker.schema.json",
+      "name": "required_file_exists",
+      "pass": true
+    },
+    {
+      "detail": "delivery_manifest.contract.md",
+      "name": "required_file_exists",
+      "pass": true
+    },
+    {
+      "detail": "client_delivery_blocker.contract.md",
+      "name": "required_file_exists",
+      "pass": true
+    },
+    {
+      "detail": "delivery_manifest_validator.py",
+      "name": "required_file_exists",
+      "pass": true
+    },
+    {
+      "detail": "client_delivery_blocker.py",
+      "name": "required_file_exists",
+      "pass": true
+    },
+    {
+      "detail": "GLOBAL_SEAL.json",
+      "name": "required_file_exists",
+      "pass": true
+    },
+    {
+      "detail": "GLOBAL_SEAL.contract.md",
+      "name": "required_file_exists",
+      "pass": true
+    },
+    {
+      "detail": "global_seal_validator.py",
+      "name": "required_file_exists",
+      "pass": true
+    },
+    {
+      "detail": "fixtures/pass_minimal_no_final_pixels.json",
+      "name": "required_file_exists",
+      "pass": true
+    },
+    {
+      "detail": "fixtures/fail_forbidden_final_pixel_claim.json",
+      "name": "required_file_exists",
+      "pass": true
+    },
+    {
+      "detail": "layer_manifest.json",
+      "name": "required_file_exists",
+      "pass": true
+    },
+    {
+      "detail": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+      "name": "manifest_system_state",
+      "pass": true
+    },
+    {
+      "detail": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+      "name": "seal_system_state",
+      "pass": true
+    },
+    {
+      "detail": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+      "name": "manifest_maximum_allowed_state",
+      "pass": true
+    },
+    {
+      "detail": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+      "name": "seal_maximum_allowed_state",
+      "pass": true
+    },
+    {
+      "detail": "fail_closed",
+      "name": "manifest_validation_policy",
+      "pass": true
+    },
+    {
+      "detail": "fail_closed",
+      "name": "seal_validation_policy",
+      "pass": true
+    },
+    {
+      "detail": false,
+      "name": "manifest_final_pixels_false",
+      "pass": true
+    },
+    {
+      "detail": false,
+      "name": "seal_final_pixels_false",
+      "pass": true
+    },
+    {
+      "detail": false,
+      "name": "seal_client_delivery_false",
+      "pass": true
+    },
+    {
+      "detail": [],
+      "name": "forbidden_authorization_absent",
+      "pass": true
+    }
+  ],
+  "client_delivery_allowed": false,
+  "failures": [],
+  "final_pixels_authorized": false,
+  "layer_name": "hfx_delivery_package_layer",
+  "status": "PASS",
+  "system_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+  "validation_policy": "fail_closed"
+}

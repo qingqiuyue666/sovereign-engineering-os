@@ -1,0 +1,9 @@
+{
+  "client_delivery_allowed": false,
+  "description": "Minimal scaffold fixture that stays below final-pixel and delivery authorization.",
+  "final_pixels_authorized": false,
+  "fixture_id": "hfx_resource_library_layer_pass_minimal_no_final_pixels",
+  "maximum_allowed_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+  "system_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+  "validation_policy": "fail_closed"
+}

@@ -1,0 +1,10 @@
+{
+  "client_delivery_allowed": true,
+  "description": "Negative fixture used to prove final-pixel and delivery authorization claims are rejected.",
+  "expected_status": "BLOCKED",
+  "final_pixels_authorized": true,
+  "fixture_id": "hfx_final_pixel_gate_layer_fail_forbidden_final_pixel_claim",
+  "forbidden_claim_attempted": true,
+  "system_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+  "validation_policy": "fail_closed"
+}

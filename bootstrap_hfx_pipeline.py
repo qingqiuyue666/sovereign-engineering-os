@@ -15,6 +15,7 @@ import pathlib
 
 
 SYSTEM_STATE = "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS"
+VALIDATION_PASS_STATE = "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS_PASS"
 MAXIMUM_ALLOWED_STATE = SYSTEM_STATE
 PIPELINE_ROOT = pathlib.Path(
     os.environ.get("HFX_PIPELINE_ROOT", pathlib.Path(__file__).resolve().parent)
@@ -106,8 +107,17 @@ def contract(title, purpose, inputs=None, outputs=None, gates=None, fail_closed=
     return "\n".join(lines)
 
 
-def validator_template(layer_name, validator_name, purpose, fail_closed=True, final_pixel_gate=False):
+def validator_template(
+    layer_name,
+    validator_name,
+    purpose,
+    fail_closed=True,
+    final_pixel_gate=False,
+    blocked_status=None,
+    blocked_claims=None,
+):
     default_status = "BLOCKED" if fail_closed else "SCAFFOLD_ONLY"
+    blocked_claims = blocked_claims or []
     lines = [
         '"""',
         validator_name.replace("_", " ").title(),
@@ -135,22 +145,35 @@ def validator_template(layer_name, validator_name, purpose, fail_closed=True, fi
             [
                 "    exr_paths = payload.get(\"exr_paths\") or []",
                 "    verified_real_exrs = bool(payload.get(\"verified_real_exrs\"))",
-                "    if not exr_paths or not verified_real_exrs:",
-                "        return {",
-                "            \"ok\": False,",
-                "            \"status\": \"FINAL_PIXEL_CLAIM_BLOCKED\",",
-                "            \"system_state\": SYSTEM_STATE,",
-                "            \"reason\": \"Fail-closed: no verified real EXR evidence was supplied.\",",
-                "            \"layer\": LAYER_NAME,",
-                "            \"validator\": VALIDATOR_NAME,",
-                "        }",
                 "    return {",
                 "        \"ok\": False,",
                 "        \"status\": \"FINAL_PIXEL_CLAIM_BLOCKED\",",
                 "        \"system_state\": SYSTEM_STATE,",
-                "        \"reason\": \"Fail-closed scaffold: EXR metadata alone cannot authorize final pixels.\",",
+                "        \"reason\": \"Fail-closed scaffold: final-pixel authorization is blocked even when metadata is supplied.\",",
                 "        \"layer\": LAYER_NAME,",
                 "        \"validator\": VALIDATOR_NAME,",
+                "        \"exr_paths_supplied\": bool(exr_paths),",
+                "        \"verified_real_exrs_supplied\": verified_real_exrs,",
+                "        \"final_pixels_authorized\": False,",
+                "        \"metadata_only_authorized\": False,",
+                "    }",
+            ]
+        )
+    elif blocked_claims:
+        lines.extend(
+            [
+                "    return {",
+                "        \"ok\": False,",
+                "        \"status\": " + repr(blocked_status or default_status) + ",",
+                "        \"system_state\": SYSTEM_STATE,",
+                "        \"reason\": \"Fail-closed scaffold validator blocks production completion claims.\",",
+                "        \"layer\": LAYER_NAME,",
+                "        \"validator\": VALIDATOR_NAME,",
+                "        \"blocked_claims\": " + repr(blocked_claims) + ",",
+                "        \"final_pixels_authorized\": False,",
+                "        \"client_delivery_allowed\": False,",
+                "        \"payload_keys\": sorted(payload.keys()),",
+                "        \"context_keys\": sorted(context.keys()),",
                 "    }",
             ]
         )
@@ -179,6 +202,532 @@ def validator_template(layer_name, validator_name, purpose, fail_closed=True, fi
         ]
     )
     return "\n".join(lines)
+
+
+def global_seal_validator_template(layer_name):
+    return f'''#!/usr/bin/env python3
+"""
+Fail-closed global seal validator for {layer_name}.
+"""
+
+import json
+import pathlib
+import sys
+
+
+SYSTEM_STATE = {SYSTEM_STATE!r}
+LAYER_NAME = {layer_name!r}
+VALIDATION_FILE = "GLOBAL_SEAL_VALIDATION.json"
+
+
+def read_json(path):
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def collect_authorization_violations(value, path="$"):
+    violations = []
+    forbidden_true_keys = {{
+        "final_pixels_authorized",
+        "final_pixel_authorized",
+        "final_pixel_ready",
+        "final_pixel_render_complete",
+        "actual_openexr_rendered",
+        "actual_exr_rendered",
+        "client_delivery_authorized",
+        "client_delivery_allowed",
+        "delivery_ready",
+        "public_delivery_ready",
+    }}
+    forbidden_string_tokens = {{
+        "HFX_MASTER_PIPELINE_FINAL_PIXEL_READY",
+        "FINAL_PIXEL_RENDER_COMPLETE",
+        "CLIENT_DELIVERY_READY",
+    }}
+    if isinstance(value, dict):
+        for key, child in value.items():
+            child_path = f"{{path}}.{{key}}"
+            if key in forbidden_true_keys and child is True:
+                violations.append(f"{{child_path}} is true")
+            violations.extend(collect_authorization_violations(child, child_path))
+    elif isinstance(value, list):
+        for index, child in enumerate(value):
+            violations.extend(collect_authorization_violations(child, f"{{path}}[{{index}}]"))
+    elif isinstance(value, str):
+        for token in forbidden_string_tokens:
+            if token in value:
+                violations.append(f"{{path}} contains {{token}}")
+    return violations
+
+
+def validate():
+    layer_dir = pathlib.Path(__file__).resolve().parent
+    checks = []
+    failures = []
+
+    manifest_path = layer_dir / "layer_manifest.json"
+    seal_path = layer_dir / "GLOBAL_SEAL.json"
+
+    def check(name, condition, detail):
+        checks.append({{"name": name, "pass": bool(condition), "detail": detail}})
+        if not condition:
+            failures.append(f"{{name}}: {{detail}}")
+
+    check("layer_manifest_exists", manifest_path.exists(), str(manifest_path))
+    check("global_seal_exists", seal_path.exists(), str(seal_path))
+
+    manifest = {{}}
+    seal = {{}}
+    if manifest_path.exists():
+        manifest = read_json(manifest_path)
+    if seal_path.exists():
+        seal = read_json(seal_path)
+
+    for file_name in manifest.get("required_files", []):
+        required_path = layer_dir / file_name
+        check("required_file_exists", required_path.exists(), file_name)
+
+    check("manifest_system_state", manifest.get("system_state") == SYSTEM_STATE, manifest.get("system_state"))
+    check("seal_system_state", seal.get("system_state") == SYSTEM_STATE, seal.get("system_state"))
+    check(
+        "manifest_maximum_allowed_state",
+        manifest.get("maximum_allowed_state") == SYSTEM_STATE,
+        manifest.get("maximum_allowed_state"),
+    )
+    check(
+        "seal_maximum_allowed_state",
+        seal.get("maximum_allowed_state") == SYSTEM_STATE,
+        seal.get("maximum_allowed_state"),
+    )
+    check("manifest_validation_policy", manifest.get("validation_policy") == "fail_closed", manifest.get("validation_policy"))
+    check("seal_validation_policy", seal.get("validation_policy") == "fail_closed", seal.get("validation_policy"))
+    check("manifest_final_pixels_false", manifest.get("final_pixels_authorized") is False, manifest.get("final_pixels_authorized"))
+    check("seal_final_pixels_false", seal.get("final_pixels_authorized") is False, seal.get("final_pixels_authorized"))
+    check(
+        "seal_client_delivery_false",
+        seal.get("client_delivery_authorized") is False,
+        seal.get("client_delivery_authorized"),
+    )
+
+    authorization_violations = collect_authorization_violations({{"manifest": manifest, "seal": seal}})
+    check(
+        "forbidden_authorization_absent",
+        not authorization_violations,
+        authorization_violations,
+    )
+
+    report = {{
+        "layer_name": LAYER_NAME,
+        "status": "PASS" if not failures else "FAIL",
+        "system_state": SYSTEM_STATE,
+        "final_pixels_authorized": False,
+        "client_delivery_allowed": False,
+        "validation_policy": "fail_closed",
+        "checks": checks,
+        "failures": failures,
+    }}
+    (layer_dir / VALIDATION_FILE).write_text(json.dumps(report, indent=2, sort_keys=True) + "\\n", encoding="utf-8")
+    return report
+
+
+def main():
+    report = validate()
+    print(report["status"])
+    return 0 if report["status"] == "PASS" else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+'''
+
+
+def desktop_inbox_scanner_template(layer_name):
+    return f'''#!/usr/bin/env python3
+"""
+Scaffold-only desktop inbox scanner for {layer_name}.
+"""
+
+import json
+import pathlib
+
+
+SYSTEM_STATE = {SYSTEM_STATE!r}
+DEFAULT_INBOX = pathlib.Path("/Users/qqy/Desktop/HFX_RESOURCE_INBOX/")
+
+
+def scan(inbox_path=None):
+    inbox = pathlib.Path(inbox_path) if inbox_path else DEFAULT_INBOX
+    exists = inbox.exists()
+    files = []
+    if exists:
+        files = [str(path) for path in sorted(inbox.iterdir()) if path.is_file()]
+    return {{
+        "ok": True,
+        "status": "NO_RESOURCES_FOUND_SCAFFOLD_REPORT" if not files else "RESOURCE_CANDIDATES_FOUND_SCAFFOLD_REPORT",
+        "system_state": SYSTEM_STATE,
+        "inbox_path": str(inbox),
+        "inbox_exists": exists,
+        "resource_count": len(files),
+        "resources_complete": False,
+        "final_pixels_authorized": False,
+        "client_delivery_allowed": False,
+        "resources": files,
+        "reason": "Missing or empty inbox is valid for scaffold validation and does not certify resource completion.",
+    }}
+
+
+def validate(payload=None, context=None):
+    payload = payload or {{}}
+    return scan(payload.get("inbox_path"))
+
+
+if __name__ == "__main__":
+    print(json.dumps(validate(), indent=2, sort_keys=True))
+'''
+
+
+def client_delivery_blocker_template(layer_name):
+    return f'''#!/usr/bin/env python3
+"""
+Fail-closed client delivery blocker for {layer_name}.
+"""
+
+import json
+
+
+SYSTEM_STATE = {SYSTEM_STATE!r}
+
+
+def validate(payload=None, context=None):
+    payload = payload or {{}}
+    context = context or {{}}
+    return {{
+        "ok": False,
+        "status": "CLIENT_DELIVERY_BLOCKED",
+        "system_state": SYSTEM_STATE,
+        "reason": "Client/public delivery is blocked in the no-final-pixels scaffold state.",
+        "final_pixels_authorized": False,
+        "client_delivery_allowed": False,
+        "public_delivery_allowed": False,
+        "payload_keys": sorted(payload.keys()),
+        "context_keys": sorted(context.keys()),
+    }}
+
+
+if __name__ == "__main__":
+    print(json.dumps(validate(), indent=2, sort_keys=True))
+'''
+
+
+def pass_fixture(layer_name):
+    return {
+        "fixture_id": layer_name + "_pass_minimal_no_final_pixels",
+        "system_state": SYSTEM_STATE,
+        "maximum_allowed_state": MAXIMUM_ALLOWED_STATE,
+        "validation_policy": "fail_closed",
+        "final_pixels_authorized": False,
+        "client_delivery_allowed": False,
+        "description": "Minimal scaffold fixture that stays below final-pixel and delivery authorization.",
+    }
+
+
+def fail_fixture(layer_name):
+    return {
+        "fixture_id": layer_name + "_fail_forbidden_final_pixel_claim",
+        "system_state": SYSTEM_STATE,
+        "validation_policy": "fail_closed",
+        "forbidden_claim_attempted": True,
+        "final_pixels_authorized": True,
+        "client_delivery_allowed": True,
+        "expected_status": "BLOCKED",
+        "description": "Negative fixture used to prove final-pixel and delivery authorization claims are rejected.",
+    }
+
+
+def master_pipeline_validator_template():
+    layer_names = [
+        "hfx_assetization_layer",
+        "hfx_aov_pass_contract_layer",
+        "hfx_resource_library_layer",
+        "hfx_lookdev_shader_contract_layer",
+        "hfx_plate_camera_integration_layer",
+        "hfx_render_automation_layer",
+        "hfx_comp_automation_layer",
+        "hfx_color_management_layer",
+        "hfx_review_dailies_layer",
+        "hfx_final_pixel_gate_layer",
+        "hfx_delivery_package_layer",
+        "hfx_master_pipeline_seal",
+    ]
+    return f'''#!/usr/bin/env python3
+"""
+Runtime validator for the HFX master pipeline no-final-pixels scaffold.
+"""
+
+import hashlib
+import json
+import pathlib
+import subprocess
+import sys
+
+
+SYSTEM_STATE = {SYSTEM_STATE!r}
+PASS_STATE = {VALIDATION_PASS_STATE!r}
+LAYER_NAMES = {layer_names!r}
+OUTPUT_NAMES = {{
+    "HFX_MASTER_PIPELINE_VALIDATION_REPORT.json",
+    "HFX_MASTER_PIPELINE_VALIDATION_REPORT.md",
+    "HFX_MASTER_PIPELINE_MANIFEST.json",
+    "HFX_MASTER_PIPELINE_SHA256SUMS.txt",
+    "HFX_MASTER_PIPELINE_FILE_TREE.txt",
+}}
+
+
+def repo_root():
+    return pathlib.Path(__file__).resolve().parents[3]
+
+
+def rel(path):
+    return str(path.relative_to(repo_root()))
+
+
+def read_json(path):
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def write_json(path, payload):
+    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\\n", encoding="utf-8")
+
+
+def status_pass(data):
+    status = str(data.get("status", ""))
+    return data.get("validated") is True or status.endswith("_PASS") or status == "PASS"
+
+
+def run_layer_validator(layer_dir):
+    validator = layer_dir / "global_seal_validator.py"
+    result = subprocess.run(
+        [sys.executable, str(validator)],
+        cwd=str(repo_root()),
+        text=True,
+        capture_output=True,
+    )
+    report_path = layer_dir / "GLOBAL_SEAL_VALIDATION.json"
+    report = read_json(report_path) if report_path.exists() else {{}}
+    return {{
+        "validator": rel(validator),
+        "returncode": result.returncode,
+        "stdout": result.stdout.strip(),
+        "stderr": result.stderr.strip(),
+        "report_path": rel(report_path),
+        "status": report.get("status", "MISSING"),
+        "pass": result.returncode == 0 and report.get("status") == "PASS",
+    }}
+
+
+def validate_reference(path, label):
+    if not path.exists():
+        return {{
+            "label": label,
+            "path": rel(path),
+            "present": False,
+            "authoritative": False,
+            "status": "REFERENCE_MISSING_NON_AUTHORITATIVE",
+            "pass": True,
+            "final_pixels_authorized": False,
+        }}
+    data = read_json(path)
+    passed = status_pass(data)
+    return {{
+        "label": label,
+        "path": rel(path),
+        "present": True,
+        "authoritative": passed,
+        "status": data.get("status", "UNKNOWN"),
+        "validated": data.get("validated"),
+        "pass": passed,
+        "final_pixels_authorized": False,
+    }}
+
+
+def collect_files(root):
+    paths = []
+    for layer_name in LAYER_NAMES:
+        layer_dir = root / "assets" / "houdini" / layer_name
+        if layer_dir.exists():
+            paths.extend(path for path in layer_dir.rglob("*") if path.is_file())
+    return sorted(paths, key=lambda path: rel(path))
+
+
+def sha256(path):
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def build_markdown(report):
+    lines = [
+        "# HFX Master Pipeline Validation Report",
+        "",
+        "- Status: `" + report["status"] + "`",
+        "- System state: `" + report["system_state"] + "`",
+        "- Final pixels authorized: `false`",
+        "- Client delivery allowed: `false`",
+        "- Claim policy: `fail_closed`",
+        "",
+        "## Layer Validators",
+    ]
+    for layer in report["layers"]:
+        lines.append("- `" + layer["name"] + "`: `" + layer["validation"]["status"] + "`")
+    lines.extend(["", "## References"])
+    for reference in report["references"]:
+        lines.append("- `" + reference["label"] + "`: `" + reference["status"] + "`")
+    lines.append("")
+    return "\\n".join(lines)
+
+
+def validate():
+    root = repo_root()
+    houdini_root = root / "assets" / "houdini"
+    output_dir = houdini_root / "hfx_master_pipeline_seal"
+    failures = []
+    layers = []
+
+    for index, layer_name in enumerate(LAYER_NAMES, start=1):
+        layer_dir = houdini_root / layer_name
+        layer = {{
+            "index": index,
+            "name": layer_name,
+            "path": rel(layer_dir),
+            "exists": layer_dir.is_dir(),
+            "manifest_exists": (layer_dir / "layer_manifest.json").is_file(),
+            "global_seal_exists": (layer_dir / "GLOBAL_SEAL.json").is_file(),
+            "global_validator_exists": (layer_dir / "global_seal_validator.py").is_file(),
+            "final_pixels_authorized": False,
+        }}
+        for key in ("exists", "manifest_exists", "global_seal_exists", "global_validator_exists"):
+            if not layer[key]:
+                failures.append(layer_name + ":" + key)
+        if layer["global_validator_exists"]:
+            layer["validation"] = run_layer_validator(layer_dir)
+            if not layer["validation"]["pass"]:
+                failures.append(layer_name + ":global_validator")
+        else:
+            layer["validation"] = {{"status": "MISSING", "pass": False}}
+        layers.append(layer)
+
+    master_seal_path = output_dir / "HFX_MASTER_PIPELINE_GLOBAL_SEAL.json"
+    master_seal = read_json(master_seal_path)
+    master_checks = {{
+        "system_state": master_seal.get("system_state") == SYSTEM_STATE,
+        "output": master_seal.get("output") == SYSTEM_STATE,
+        "maximum_allowed_state": master_seal.get("maximum_allowed_state") == SYSTEM_STATE,
+        "final_pixels_authorized": master_seal.get("final_pixels_authorized") is False,
+        "client_delivery_allowed": master_seal.get("client_delivery_allowed") is False
+        and master_seal.get("delivery_policy", {{}}).get("client_delivery_allowed") is False,
+        "final_pixel_gate_claim_policy": master_seal.get("final_pixel_gate", {{}}).get("claim_policy") == "fail_closed",
+        "real_exr_required": master_seal.get("final_pixel_gate", {{}}).get("real_exr_required") is True,
+    }}
+    for key, passed in master_checks.items():
+        if not passed:
+            failures.append("master_seal:" + key)
+
+    references = [
+        validate_reference(
+            houdini_root
+            / "hfx_factory_core12"
+            / "500_HFX_FACTORY"
+            / "HFX_FACTORY_FINAL_GLOBAL_SEAL"
+            / "02_validation"
+            / "HFX_FACTORY_FINAL_GLOBAL_SEAL_VALIDATION.json",
+            "Core 12 factory global seal",
+        ),
+        validate_reference(
+            houdini_root / "hfx_shot_binding_layer" / "validation" / "HFX_SHOT_BINDING_LAYER_GLOBAL_SEAL.json",
+            "Shot Binding Layer global seal",
+        ),
+    ]
+    for reference in references:
+        if reference["present"] and not reference["pass"]:
+            failures.append(reference["label"] + ":reference_status")
+
+    report = {{
+        "status": PASS_STATE if not failures else "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS_BLOCKED",
+        "system_state": SYSTEM_STATE,
+        "output": SYSTEM_STATE,
+        "maximum_allowed_state": SYSTEM_STATE,
+        "final_pixels_authorized": False,
+        "client_delivery_allowed": False,
+        "final_pixel_gate": {{
+            "claim_policy": "fail_closed",
+            "real_exr_required": True,
+            "final_pixel_claim_status": "FINAL_PIXEL_CLAIM_BLOCKED",
+        }},
+        "layers": layers,
+        "references": references,
+        "master_checks": master_checks,
+        "failures": failures,
+    }}
+
+    report_json = output_dir / "HFX_MASTER_PIPELINE_VALIDATION_REPORT.json"
+    report_md = output_dir / "HFX_MASTER_PIPELINE_VALIDATION_REPORT.md"
+    manifest_path = output_dir / "HFX_MASTER_PIPELINE_MANIFEST.json"
+    file_tree_path = output_dir / "HFX_MASTER_PIPELINE_FILE_TREE.txt"
+    sha_path = output_dir / "HFX_MASTER_PIPELINE_SHA256SUMS.txt"
+
+    write_json(report_json, report)
+    report_md.write_text(build_markdown(report), encoding="utf-8")
+
+    files = collect_files(root)
+    file_tree_lines = [rel(path) for path in files]
+    file_tree_path.write_text("\\n".join(file_tree_lines) + "\\n", encoding="utf-8")
+
+    manifest = {{
+        "manifest_id": "HFX_MASTER_PIPELINE_MANIFEST",
+        "status": report["status"],
+        "system_state": SYSTEM_STATE,
+        "layer_count": len(LAYER_NAMES),
+        "layers": LAYER_NAMES,
+        "outputs": sorted(OUTPUT_NAMES),
+        "file_count": len(files),
+        "final_pixels_authorized": False,
+        "client_delivery_allowed": False,
+    }}
+    write_json(manifest_path, manifest)
+
+    checksum_files = [path for path in collect_files(root) if path != sha_path]
+    sha_lines = [sha256(path) + "  " + rel(path) for path in checksum_files]
+    sha_path.write_text("\\n".join(sha_lines) + "\\n", encoding="utf-8")
+    return report
+
+
+def main():
+    report = validate()
+    print(report["status"])
+    return 0 if report["status"] == PASS_STATE else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+'''
+
+
+def master_pipeline_readme():
+    return """# HFX Master Pipeline Seal
+
+This branch creates a validated no-final-pixels HFX master pipeline scaffold.
+
+It does not create real resources.
+It does not create real shaders.
+It does not render EXR.
+It does not produce final comp.
+It does not authorize client delivery.
+
+Current legal state is `HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS`.
+
+Next implementation layer should be resource ingestion, render automation execution, and comp automation execution.
+"""
 
 
 def schema_asset_publish_manifest():
@@ -695,7 +1244,15 @@ def schema_client_delivery_blocker():
 def schema_master_pipeline_seal():
     return object_schema(
         "HFX Master Pipeline Global Seal",
-        required=["seal_id", "system_state", "maximum_allowed_state", "layers", "final_pixel_gate"],
+        required=[
+            "seal_id",
+            "system_state",
+            "maximum_allowed_state",
+            "final_pixels_authorized",
+            "client_delivery_allowed",
+            "layers",
+            "final_pixel_gate",
+        ],
         properties={
             "seal_id": {"type": "string"},
             "system_state": {"type": "string", "const": SYSTEM_STATE},
@@ -720,6 +1277,8 @@ def schema_master_pipeline_seal():
             },
             "pipeline_root": {"type": "string"},
             "houdini_root": {"type": "string"},
+            "final_pixels_authorized": {"type": "boolean", "const": False},
+            "client_delivery_allowed": {"type": "boolean", "const": False},
             "final_pixel_gate": {
                 "type": "object",
                 "additionalProperties": False,
@@ -826,11 +1385,7 @@ LAYER_SPECS = [
             ),
             (
                 "global_seal_validator.py",
-                lambda: validator_template(
-                    "hfx_assetization_layer",
-                    "global_seal_validator",
-                    "Validate the assetization layer seal envelope.",
-                ),
+                lambda: global_seal_validator_template("hfx_assetization_layer"),
             ),
         ],
     },
@@ -921,11 +1476,7 @@ LAYER_SPECS = [
             ),
             (
                 "desktop_inbox_scanner.py",
-                lambda: validator_template(
-                    "hfx_resource_library_layer",
-                    "desktop_inbox_scanner",
-                    "Template for scanning desktop inbox locations into resource candidates.",
-                ),
+                lambda: desktop_inbox_scanner_template("hfx_resource_library_layer"),
             ),
             (
                 "resource_manifest_validator.py",
@@ -1082,6 +1633,12 @@ LAYER_SPECS = [
                     "hfx_render_automation_layer",
                     "render_job_validator",
                     "Validate render job manifests.",
+                    blocked_status="RENDER_AUTOMATION_BLOCKED",
+                    blocked_claims=[
+                        "actual OpenEXR rendered",
+                        "final-pixel render complete",
+                        "delivery ready",
+                    ],
                 ),
             ),
             (
@@ -1090,6 +1647,12 @@ LAYER_SPECS = [
                     "hfx_render_automation_layer",
                     "render_validation_validator",
                     "Validate render pre-submit gates.",
+                    blocked_status="RENDER_AUTOMATION_BLOCKED",
+                    blocked_claims=[
+                        "actual OpenEXR rendered",
+                        "final-pixel render complete",
+                        "delivery ready",
+                    ],
                 ),
             ),
             (
@@ -1098,6 +1661,12 @@ LAYER_SPECS = [
                     "hfx_render_automation_layer",
                     "failed_frame_retry_validator",
                     "Validate failed frame retry requests.",
+                    blocked_status="RENDER_AUTOMATION_BLOCKED",
+                    blocked_claims=[
+                        "actual OpenEXR rendered",
+                        "final-pixel render complete",
+                        "delivery ready",
+                    ],
                 ),
             ),
         ],
@@ -1147,6 +1716,12 @@ LAYER_SPECS = [
                     "hfx_comp_automation_layer",
                     "nuke_instruction_validator",
                     "Validate Nuke instruction manifests.",
+                    blocked_status="COMP_AUTOMATION_BLOCKED",
+                    blocked_claims=[
+                        "final comp rendered",
+                        "review movie complete",
+                        "client delivery ready",
+                    ],
                 ),
             ),
             (
@@ -1155,6 +1730,12 @@ LAYER_SPECS = [
                     "hfx_comp_automation_layer",
                     "after_effects_instruction_validator",
                     "Validate After Effects instruction manifests.",
+                    blocked_status="COMP_AUTOMATION_BLOCKED",
+                    blocked_claims=[
+                        "final comp rendered",
+                        "review movie complete",
+                        "client delivery ready",
+                    ],
                 ),
             ),
             (
@@ -1163,6 +1744,12 @@ LAYER_SPECS = [
                     "hfx_comp_automation_layer",
                     "davinci_resolve_instruction_validator",
                     "Validate DaVinci Resolve instruction manifests.",
+                    blocked_status="COMP_AUTOMATION_BLOCKED",
+                    blocked_claims=[
+                        "final comp rendered",
+                        "review movie complete",
+                        "client delivery ready",
+                    ],
                 ),
             ),
         ],
@@ -1377,11 +1964,7 @@ LAYER_SPECS = [
             ),
             (
                 "client_delivery_blocker.py",
-                lambda: validator_template(
-                    "hfx_delivery_package_layer",
-                    "client_delivery_blocker",
-                    "Validate that client delivery remains blocked when final pixels are unavailable.",
-                ),
+                lambda: client_delivery_blocker_template("hfx_delivery_package_layer"),
             ),
         ],
     },
@@ -1418,6 +2001,14 @@ LAYER_SPECS = [
                     "Validate the master pipeline seal envelope.",
                 ),
             ),
+            (
+                "hfx_master_pipeline_validate.py",
+                master_pipeline_validator_template,
+            ),
+            (
+                "README_HFX_MASTER_PIPELINE_SEAL.md",
+                master_pipeline_readme,
+            ),
         ],
     },
 ]
@@ -1427,6 +2018,11 @@ GLOBAL_LAYER_FILE_NAMES = (
     "GLOBAL_SEAL.json",
     "GLOBAL_SEAL.contract.md",
     "global_seal_validator.py",
+)
+
+FIXTURE_FILE_NAMES = (
+    "fixtures/pass_minimal_no_final_pixels.json",
+    "fixtures/fail_forbidden_final_pixel_claim.json",
 )
 
 
@@ -1452,7 +2048,9 @@ def declared_layer_files(layer):
 
 
 def layer_required_files(layer):
-    return ordered_unique(declared_layer_files(layer) + list(GLOBAL_LAYER_FILE_NAMES) + ["layer_manifest.json"])
+    return ordered_unique(
+        declared_layer_files(layer) + list(GLOBAL_LAYER_FILE_NAMES) + list(FIXTURE_FILE_NAMES) + ["layer_manifest.json"]
+    )
 
 
 def build_layer_global_seal(layer):
@@ -1498,11 +2096,15 @@ def layer_global_files(layer):
         ("GLOBAL_SEAL.contract.md", lambda: build_layer_global_seal_contract(layer)),
         (
             "global_seal_validator.py",
-            lambda: validator_template(
-                layer["name"],
-                "global_seal_validator",
-                "Validate the " + layer["name"] + " global scaffold seal.",
-            ),
+            lambda: global_seal_validator_template(layer["name"]),
+        ),
+        (
+            "fixtures/pass_minimal_no_final_pixels.json",
+            lambda: pass_fixture(layer["name"]),
+        ),
+        (
+            "fixtures/fail_forbidden_final_pixel_claim.json",
+            lambda: fail_fixture(layer["name"]),
         ),
     ]
 
@@ -1542,6 +2144,8 @@ def build_master_seal():
         "maximum_allowed_state": MAXIMUM_ALLOWED_STATE,
         "pipeline_root": ".",
         "houdini_root": "assets/houdini",
+        "final_pixels_authorized": False,
+        "client_delivery_allowed": False,
         "layers": layers,
         "final_pixel_gate": {
             "claim_policy": "fail_closed",

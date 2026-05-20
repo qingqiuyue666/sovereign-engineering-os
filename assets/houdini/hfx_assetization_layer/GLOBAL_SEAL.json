@@ -19,6 +19,8 @@
     "parameter_interface_validator.py",
     "hda_readiness_validator.py",
     "global_seal_validator.py",
+    "fixtures/pass_minimal_no_final_pixels.json",
+    "fixtures/fail_forbidden_final_pixel_claim.json",
     "layer_manifest.json"
   ],
   "seal_id": "hfx_assetization_layer_GLOBAL_SEAL",

@@ -1,0 +1,30 @@
+{
+  "client_delivery_allowed": false,
+  "file_count": 179,
+  "final_pixels_authorized": false,
+  "layer_count": 12,
+  "layers": [
+    "hfx_assetization_layer",
+    "hfx_aov_pass_contract_layer",
+    "hfx_resource_library_layer",
+    "hfx_lookdev_shader_contract_layer",
+    "hfx_plate_camera_integration_layer",
+    "hfx_render_automation_layer",
+    "hfx_comp_automation_layer",
+    "hfx_color_management_layer",
+    "hfx_review_dailies_layer",
+    "hfx_final_pixel_gate_layer",
+    "hfx_delivery_package_layer",
+    "hfx_master_pipeline_seal"
+  ],
+  "manifest_id": "HFX_MASTER_PIPELINE_MANIFEST",
+  "outputs": [
+    "HFX_MASTER_PIPELINE_FILE_TREE.txt",
+    "HFX_MASTER_PIPELINE_MANIFEST.json",
+    "HFX_MASTER_PIPELINE_SHA256SUMS.txt",
+    "HFX_MASTER_PIPELINE_VALIDATION_REPORT.json",
+    "HFX_MASTER_PIPELINE_VALIDATION_REPORT.md"
+  ],
+  "status": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS_PASS",
+  "system_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS"
+}

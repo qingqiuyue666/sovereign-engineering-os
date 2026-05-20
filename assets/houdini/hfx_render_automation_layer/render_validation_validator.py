@@ -20,11 +20,14 @@ def validate(payload=None, context=None):
     context = context or {}
     return {
         "ok": False,
-        "status": 'BLOCKED',
+        "status": 'RENDER_AUTOMATION_BLOCKED',
         "system_state": SYSTEM_STATE,
-        "reason": "Validator scaffold has not been implemented for production approval.",
+        "reason": "Fail-closed scaffold validator blocks production completion claims.",
         "layer": LAYER_NAME,
         "validator": VALIDATOR_NAME,
+        "blocked_claims": ['actual OpenEXR rendered', 'final-pixel render complete', 'delivery ready'],
+        "final_pixels_authorized": False,
+        "client_delivery_allowed": False,
         "payload_keys": sorted(payload.keys()),
         "context_keys": sorted(context.keys()),
     }

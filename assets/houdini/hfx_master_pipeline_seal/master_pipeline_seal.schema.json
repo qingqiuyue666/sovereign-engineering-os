@@ -3,6 +3,10 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": {
+    "client_delivery_allowed": {
+      "const": false,
+      "type": "boolean"
+    },
     "delivery_policy": {
       "additionalProperties": false,
       "properties": {
@@ -55,6 +59,10 @@
         "reason"
       ],
       "type": "object"
+    },
+    "final_pixels_authorized": {
+      "const": false,
+      "type": "boolean"
     },
     "houdini_root": {
       "type": "string"
@@ -129,6 +137,8 @@
     "seal_id",
     "system_state",
     "maximum_allowed_state",
+    "final_pixels_authorized",
+    "client_delivery_allowed",
     "layers",
     "final_pixel_gate"
   ],

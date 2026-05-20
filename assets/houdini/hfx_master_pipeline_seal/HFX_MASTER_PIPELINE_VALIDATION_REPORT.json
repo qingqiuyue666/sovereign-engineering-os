@@ -1,0 +1,275 @@
+{
+  "client_delivery_allowed": false,
+  "failures": [],
+  "final_pixel_gate": {
+    "claim_policy": "fail_closed",
+    "final_pixel_claim_status": "FINAL_PIXEL_CLAIM_BLOCKED",
+    "real_exr_required": true
+  },
+  "final_pixels_authorized": false,
+  "layers": [
+    {
+      "exists": true,
+      "final_pixels_authorized": false,
+      "global_seal_exists": true,
+      "global_validator_exists": true,
+      "index": 1,
+      "manifest_exists": true,
+      "name": "hfx_assetization_layer",
+      "path": "assets/houdini/hfx_assetization_layer",
+      "validation": {
+        "pass": true,
+        "report_path": "assets/houdini/hfx_assetization_layer/GLOBAL_SEAL_VALIDATION.json",
+        "returncode": 0,
+        "status": "PASS",
+        "stderr": "",
+        "stdout": "PASS",
+        "validator": "assets/houdini/hfx_assetization_layer/global_seal_validator.py"
+      }
+    },
+    {
+      "exists": true,
+      "final_pixels_authorized": false,
+      "global_seal_exists": true,
+      "global_validator_exists": true,
+      "index": 2,
+      "manifest_exists": true,
+      "name": "hfx_aov_pass_contract_layer",
+      "path": "assets/houdini/hfx_aov_pass_contract_layer",
+      "validation": {
+        "pass": true,
+        "report_path": "assets/houdini/hfx_aov_pass_contract_layer/GLOBAL_SEAL_VALIDATION.json",
+        "returncode": 0,
+        "status": "PASS",
+        "stderr": "",
+        "stdout": "PASS",
+        "validator": "assets/houdini/hfx_aov_pass_contract_layer/global_seal_validator.py"
+      }
+    },
+    {
+      "exists": true,
+      "final_pixels_authorized": false,
+      "global_seal_exists": true,
+      "global_validator_exists": true,
+      "index": 3,
+      "manifest_exists": true,
+      "name": "hfx_resource_library_layer",
+      "path": "assets/houdini/hfx_resource_library_layer",
+      "validation": {
+        "pass": true,
+        "report_path": "assets/houdini/hfx_resource_library_layer/GLOBAL_SEAL_VALIDATION.json",
+        "returncode": 0,
+        "status": "PASS",
+        "stderr": "",
+        "stdout": "PASS",
+        "validator": "assets/houdini/hfx_resource_library_layer/global_seal_validator.py"
+      }
+    },
+    {
+      "exists": true,
+      "final_pixels_authorized": false,
+      "global_seal_exists": true,
+      "global_validator_exists": true,
+      "index": 4,
+      "manifest_exists": true,
+      "name": "hfx_lookdev_shader_contract_layer",
+      "path": "assets/houdini/hfx_lookdev_shader_contract_layer",
+      "validation": {
+        "pass": true,
+        "report_path": "assets/houdini/hfx_lookdev_shader_contract_layer/GLOBAL_SEAL_VALIDATION.json",
+        "returncode": 0,
+        "status": "PASS",
+        "stderr": "",
+        "stdout": "PASS",
+        "validator": "assets/houdini/hfx_lookdev_shader_contract_layer/global_seal_validator.py"
+      }
+    },
+    {
+      "exists": true,
+      "final_pixels_authorized": false,
+      "global_seal_exists": true,
+      "global_validator_exists": true,
+      "index": 5,
+      "manifest_exists": true,
+      "name": "hfx_plate_camera_integration_layer",
+      "path": "assets/houdini/hfx_plate_camera_integration_layer",
+      "validation": {
+        "pass": true,
+        "report_path": "assets/houdini/hfx_plate_camera_integration_layer/GLOBAL_SEAL_VALIDATION.json",
+        "returncode": 0,
+        "status": "PASS",
+        "stderr": "",
+        "stdout": "PASS",
+        "validator": "assets/houdini/hfx_plate_camera_integration_layer/global_seal_validator.py"
+      }
+    },
+    {
+      "exists": true,
+      "final_pixels_authorized": false,
+      "global_seal_exists": true,
+      "global_validator_exists": true,
+      "index": 6,
+      "manifest_exists": true,
+      "name": "hfx_render_automation_layer",
+      "path": "assets/houdini/hfx_render_automation_layer",
+      "validation": {
+        "pass": true,
+        "report_path": "assets/houdini/hfx_render_automation_layer/GLOBAL_SEAL_VALIDATION.json",
+        "returncode": 0,
+        "status": "PASS",
+        "stderr": "",
+        "stdout": "PASS",
+        "validator": "assets/houdini/hfx_render_automation_layer/global_seal_validator.py"
+      }
+    },
+    {
+      "exists": true,
+      "final_pixels_authorized": false,
+      "global_seal_exists": true,
+      "global_validator_exists": true,
+      "index": 7,
+      "manifest_exists": true,
+      "name": "hfx_comp_automation_layer",
+      "path": "assets/houdini/hfx_comp_automation_layer",
+      "validation": {
+        "pass": true,
+        "report_path": "assets/houdini/hfx_comp_automation_layer/GLOBAL_SEAL_VALIDATION.json",
+        "returncode": 0,
+        "status": "PASS",
+        "stderr": "",
+        "stdout": "PASS",
+        "validator": "assets/houdini/hfx_comp_automation_layer/global_seal_validator.py"
+      }
+    },
+    {
+      "exists": true,
+      "final_pixels_authorized": false,
+      "global_seal_exists": true,
+      "global_validator_exists": true,
+      "index": 8,
+      "manifest_exists": true,
+      "name": "hfx_color_management_layer",
+      "path": "assets/houdini/hfx_color_management_layer",
+      "validation": {
+        "pass": true,
+        "report_path": "assets/houdini/hfx_color_management_layer/GLOBAL_SEAL_VALIDATION.json",
+        "returncode": 0,
+        "status": "PASS",
+        "stderr": "",
+        "stdout": "PASS",
+        "validator": "assets/houdini/hfx_color_management_layer/global_seal_validator.py"
+      }
+    },
+    {
+      "exists": true,
+      "final_pixels_authorized": false,
+      "global_seal_exists": true,
+      "global_validator_exists": true,
+      "index": 9,
+      "manifest_exists": true,
+      "name": "hfx_review_dailies_layer",
+      "path": "assets/houdini/hfx_review_dailies_layer",
+      "validation": {
+        "pass": true,
+        "report_path": "assets/houdini/hfx_review_dailies_layer/GLOBAL_SEAL_VALIDATION.json",
+        "returncode": 0,
+        "status": "PASS",
+        "stderr": "",
+        "stdout": "PASS",
+        "validator": "assets/houdini/hfx_review_dailies_layer/global_seal_validator.py"
+      }
+    },
+    {
+      "exists": true,
+      "final_pixels_authorized": false,
+      "global_seal_exists": true,
+      "global_validator_exists": true,
+      "index": 10,
+      "manifest_exists": true,
+      "name": "hfx_final_pixel_gate_layer",
+      "path": "assets/houdini/hfx_final_pixel_gate_layer",
+      "validation": {
+        "pass": true,
+        "report_path": "assets/houdini/hfx_final_pixel_gate_layer/GLOBAL_SEAL_VALIDATION.json",
+        "returncode": 0,
+        "status": "PASS",
+        "stderr": "",
+        "stdout": "PASS",
+        "validator": "assets/houdini/hfx_final_pixel_gate_layer/global_seal_validator.py"
+      }
+    },
+    {
+      "exists": true,
+      "final_pixels_authorized": false,
+      "global_seal_exists": true,
+      "global_validator_exists": true,
+      "index": 11,
+      "manifest_exists": true,
+      "name": "hfx_delivery_package_layer",
+      "path": "assets/houdini/hfx_delivery_package_layer",
+      "validation": {
+        "pass": true,
+        "report_path": "assets/houdini/hfx_delivery_package_layer/GLOBAL_SEAL_VALIDATION.json",
+        "returncode": 0,
+        "status": "PASS",
+        "stderr": "",
+        "stdout": "PASS",
+        "validator": "assets/houdini/hfx_delivery_package_layer/global_seal_validator.py"
+      }
+    },
+    {
+      "exists": true,
+      "final_pixels_authorized": false,
+      "global_seal_exists": true,
+      "global_validator_exists": true,
+      "index": 12,
+      "manifest_exists": true,
+      "name": "hfx_master_pipeline_seal",
+      "path": "assets/houdini/hfx_master_pipeline_seal",
+      "validation": {
+        "pass": true,
+        "report_path": "assets/houdini/hfx_master_pipeline_seal/GLOBAL_SEAL_VALIDATION.json",
+        "returncode": 0,
+        "status": "PASS",
+        "stderr": "",
+        "stdout": "PASS",
+        "validator": "assets/houdini/hfx_master_pipeline_seal/global_seal_validator.py"
+      }
+    }
+  ],
+  "master_checks": {
+    "client_delivery_allowed": true,
+    "final_pixel_gate_claim_policy": true,
+    "final_pixels_authorized": true,
+    "maximum_allowed_state": true,
+    "output": true,
+    "real_exr_required": true,
+    "system_state": true
+  },
+  "maximum_allowed_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+  "output": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+  "references": [
+    {
+      "authoritative": true,
+      "final_pixels_authorized": false,
+      "label": "Core 12 factory global seal",
+      "pass": true,
+      "path": "assets/houdini/hfx_factory_core12/500_HFX_FACTORY/HFX_FACTORY_FINAL_GLOBAL_SEAL/02_validation/HFX_FACTORY_FINAL_GLOBAL_SEAL_VALIDATION.json",
+      "present": true,
+      "status": "HFX_FACTORY_FINAL_GLOBAL_SEAL_PASS",
+      "validated": true
+    },
+    {
+      "authoritative": true,
+      "final_pixels_authorized": false,
+      "label": "Shot Binding Layer global seal",
+      "pass": true,
+      "path": "assets/houdini/hfx_shot_binding_layer/validation/HFX_SHOT_BINDING_LAYER_GLOBAL_SEAL.json",
+      "present": true,
+      "status": "HFX_SHOT_BINDING_LAYER_GLOBAL_SEAL_PASS",
+      "validated": true
+    }
+  ],
+  "status": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS_PASS",
+  "system_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS"
+}

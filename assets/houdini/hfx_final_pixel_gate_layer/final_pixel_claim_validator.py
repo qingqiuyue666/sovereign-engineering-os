@@ -20,22 +20,17 @@ def validate(payload=None, context=None):
     context = context or {}
     exr_paths = payload.get("exr_paths") or []
     verified_real_exrs = bool(payload.get("verified_real_exrs"))
-    if not exr_paths or not verified_real_exrs:
-        return {
-            "ok": False,
-            "status": "FINAL_PIXEL_CLAIM_BLOCKED",
-            "system_state": SYSTEM_STATE,
-            "reason": "Fail-closed: no verified real EXR evidence was supplied.",
-            "layer": LAYER_NAME,
-            "validator": VALIDATOR_NAME,
-        }
     return {
         "ok": False,
         "status": "FINAL_PIXEL_CLAIM_BLOCKED",
         "system_state": SYSTEM_STATE,
-        "reason": "Fail-closed scaffold: EXR metadata alone cannot authorize final pixels.",
+        "reason": "Fail-closed scaffold: final-pixel authorization is blocked even when metadata is supplied.",
         "layer": LAYER_NAME,
         "validator": VALIDATOR_NAME,
+        "exr_paths_supplied": bool(exr_paths),
+        "verified_real_exrs_supplied": verified_real_exrs,
+        "final_pixels_authorized": False,
+        "metadata_only_authorized": False,
     }
 
 

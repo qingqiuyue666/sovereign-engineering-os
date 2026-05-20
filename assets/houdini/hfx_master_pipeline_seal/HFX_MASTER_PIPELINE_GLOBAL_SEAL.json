@@ -1,4 +1,5 @@
 {
+  "client_delivery_allowed": false,
   "delivery_policy": {
     "client_delivery_allowed": false,
     "reason": "Client delivery is blocked until final pixel claims pass real production validation."
@@ -10,6 +11,7 @@
     "real_exr_required": true,
     "reason": "The scaffold contains contracts and validators only; no real EXRs or production pixels exist."
   },
+  "final_pixels_authorized": false,
   "houdini_root": "assets/houdini",
   "layers": [
     {
@@ -29,6 +31,8 @@
         "parameter_interface_validator.py",
         "hda_readiness_validator.py",
         "global_seal_validator.py",
+        "fixtures/pass_minimal_no_final_pixels.json",
+        "fixtures/fail_forbidden_final_pixel_claim.json",
         "layer_manifest.json"
       ],
       "status": "CONTRACT_SCAFFOLDED",
@@ -48,6 +52,8 @@
         "GLOBAL_SEAL.json",
         "GLOBAL_SEAL.contract.md",
         "global_seal_validator.py",
+        "fixtures/pass_minimal_no_final_pixels.json",
+        "fixtures/fail_forbidden_final_pixel_claim.json",
         "layer_manifest.json"
       ],
       "status": "CONTRACT_SCAFFOLDED",
@@ -70,6 +76,8 @@
         "GLOBAL_SEAL.json",
         "GLOBAL_SEAL.contract.md",
         "global_seal_validator.py",
+        "fixtures/pass_minimal_no_final_pixels.json",
+        "fixtures/fail_forbidden_final_pixel_claim.json",
         "layer_manifest.json"
       ],
       "status": "CONTRACT_SCAFFOLDED",
@@ -89,6 +97,8 @@
         "GLOBAL_SEAL.json",
         "GLOBAL_SEAL.contract.md",
         "global_seal_validator.py",
+        "fixtures/pass_minimal_no_final_pixels.json",
+        "fixtures/fail_forbidden_final_pixel_claim.json",
         "layer_manifest.json"
       ],
       "status": "CONTRACT_SCAFFOLDED",
@@ -108,6 +118,8 @@
         "GLOBAL_SEAL.json",
         "GLOBAL_SEAL.contract.md",
         "global_seal_validator.py",
+        "fixtures/pass_minimal_no_final_pixels.json",
+        "fixtures/fail_forbidden_final_pixel_claim.json",
         "layer_manifest.json"
       ],
       "status": "CONTRACT_SCAFFOLDED",
@@ -130,6 +142,8 @@
         "GLOBAL_SEAL.json",
         "GLOBAL_SEAL.contract.md",
         "global_seal_validator.py",
+        "fixtures/pass_minimal_no_final_pixels.json",
+        "fixtures/fail_forbidden_final_pixel_claim.json",
         "layer_manifest.json"
       ],
       "status": "CONTRACT_SCAFFOLDED",
@@ -152,6 +166,8 @@
         "GLOBAL_SEAL.json",
         "GLOBAL_SEAL.contract.md",
         "global_seal_validator.py",
+        "fixtures/pass_minimal_no_final_pixels.json",
+        "fixtures/fail_forbidden_final_pixel_claim.json",
         "layer_manifest.json"
       ],
       "status": "CONTRACT_SCAFFOLDED",
@@ -171,6 +187,8 @@
         "GLOBAL_SEAL.json",
         "GLOBAL_SEAL.contract.md",
         "global_seal_validator.py",
+        "fixtures/pass_minimal_no_final_pixels.json",
+        "fixtures/fail_forbidden_final_pixel_claim.json",
         "layer_manifest.json"
       ],
       "status": "CONTRACT_SCAFFOLDED",
@@ -193,6 +211,8 @@
         "GLOBAL_SEAL.json",
         "GLOBAL_SEAL.contract.md",
         "global_seal_validator.py",
+        "fixtures/pass_minimal_no_final_pixels.json",
+        "fixtures/fail_forbidden_final_pixel_claim.json",
         "layer_manifest.json"
       ],
       "status": "CONTRACT_SCAFFOLDED",
@@ -213,6 +233,8 @@
         "GLOBAL_SEAL.json",
         "GLOBAL_SEAL.contract.md",
         "global_seal_validator.py",
+        "fixtures/pass_minimal_no_final_pixels.json",
+        "fixtures/fail_forbidden_final_pixel_claim.json",
         "layer_manifest.json"
       ],
       "status": "BLOCKED_NO_FINAL_PIXELS",
@@ -232,6 +254,8 @@
         "GLOBAL_SEAL.json",
         "GLOBAL_SEAL.contract.md",
         "global_seal_validator.py",
+        "fixtures/pass_minimal_no_final_pixels.json",
+        "fixtures/fail_forbidden_final_pixel_claim.json",
         "layer_manifest.json"
       ],
       "status": "CONTRACT_SCAFFOLDED",
@@ -246,9 +270,13 @@
         "HFX_MASTER_PIPELINE_GLOBAL_SEAL.json",
         "master_pipeline_seal.contract.md",
         "master_pipeline_seal_validator.py",
+        "hfx_master_pipeline_validate.py",
+        "README_HFX_MASTER_PIPELINE_SEAL.md",
         "GLOBAL_SEAL.json",
         "GLOBAL_SEAL.contract.md",
         "global_seal_validator.py",
+        "fixtures/pass_minimal_no_final_pixels.json",
+        "fixtures/fail_forbidden_final_pixel_claim.json",
         "layer_manifest.json"
       ],
       "status": "CONTRACT_SCAFFOLDED",
