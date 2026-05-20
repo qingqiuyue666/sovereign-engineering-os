@@ -17,6 +17,10 @@ from pathlib import Path
 from typing import Mapping, Sequence
 
 DEFAULT_CRASH_DIR = Path.home() / ".sovereign_engineering_os" / "artifacts" / "crashes"
+MAX_RUNTIME_SECONDS = 86_400
+MAX_MEMORY_LIMIT_MB = 262_144
+MAX_STREAM_LIMIT_BYTES = 128 * 1024 * 1024
+RETRY_POLICY_MAX_ATTEMPTS = 1
 
 
 @dataclass(frozen=True, slots=True)
@@ -26,6 +30,22 @@ class ProcessLimits:
     stdout_limit_bytes: int = 8 * 1024 * 1024
     stderr_limit_bytes: int = 8 * 1024 * 1024
     kill_grace_seconds: float = 1.0
+
+    def __post_init__(self) -> None:
+        if self.max_runtime_seconds <= 0:
+            raise ProcessSupervisorError("max_runtime_seconds must be positive")
+        if self.max_runtime_seconds > MAX_RUNTIME_SECONDS:
+            raise ProcessSupervisorError("max_runtime_seconds exceeds bounded policy")
+        if self.memory_limit_mb <= 0:
+            raise ProcessSupervisorError("memory_limit_mb must be positive")
+        if self.memory_limit_mb > MAX_MEMORY_LIMIT_MB:
+            raise ProcessSupervisorError("memory_limit_mb exceeds bounded policy")
+        if self.stdout_limit_bytes <= 0 or self.stderr_limit_bytes <= 0:
+            raise ProcessSupervisorError("stdout/stderr limits must be positive")
+        if self.stdout_limit_bytes > MAX_STREAM_LIMIT_BYTES or self.stderr_limit_bytes > MAX_STREAM_LIMIT_BYTES:
+            raise ProcessSupervisorError("stdout/stderr limits exceed bounded policy")
+        if self.kill_grace_seconds <= 0:
+            raise ProcessSupervisorError("kill_grace_seconds must be positive")
 
 
 @dataclass(frozen=True, slots=True)
@@ -42,6 +62,8 @@ class ProcessResult:
     stderr_overflow: bool
     quarantined: bool
     diagnostic_path: Path | None
+    termination_reason: str
+    partial_outputs_policy: str
 
     @property
     def ok(self) -> bool:
@@ -72,6 +94,8 @@ class ProcessSupervisor:
     ) -> ProcessResult:
         if not command:
             raise ProcessSupervisorError("command cannot be empty")
+        if RETRY_POLICY_MAX_ATTEMPTS != 1:
+            raise ProcessSupervisorError("watchdog retry policy must remain single-attempt")
         command_tuple = tuple(str(part) for part in command)
         child_env = os.environ.copy()
         if env:
@@ -95,16 +119,16 @@ class ProcessSupervisor:
         stderr_overflow = False
         timed_out = False
         memory_exceeded = False
-        killed_reason: str | None = None
+        termination_reason: str | None = None
         max_rss_mb = 0.0
         kill_lock = asyncio.Lock()
 
         async def request_kill(reason: str) -> None:
-            nonlocal killed_reason
+            nonlocal termination_reason
             async with kill_lock:
-                if killed_reason is not None:
+                if termination_reason is not None:
                     return
-                killed_reason = reason
+                termination_reason = reason
                 await self._kill_process(process)
 
         async def read_stream(
@@ -156,13 +180,17 @@ class ProcessSupervisor:
         stdout_overflow, stderr_overflow = await asyncio.gather(stdout_task, stderr_task)
         duration = time.monotonic() - start
         max_rss_mb = max(max_rss_mb, _children_ru_maxrss_mb())
-        quarantined = killed_reason is not None
+        if termination_reason is None and returncode not in {0, None}:
+            termination_reason = f"process exited nonzero: {returncode}"
+        if termination_reason is None:
+            termination_reason = "completed"
+        quarantined = timed_out or memory_exceeded or stdout_overflow or stderr_overflow
         diagnostic_path: Path | None = None
-        if quarantined:
+        if quarantined or returncode not in {0, None}:
             diagnostic_path = await self._write_diagnostics(
                 command=command_tuple,
                 returncode=returncode,
-                reason=killed_reason or "quarantined",
+                reason=termination_reason,
                 cwd=working_dir,
                 duration_seconds=duration,
                 max_rss_mb=max_rss_mb,
@@ -182,6 +210,8 @@ class ProcessSupervisor:
             stderr_overflow=stderr_overflow,
             quarantined=quarantined,
             diagnostic_path=diagnostic_path,
+            termination_reason=termination_reason,
+            partial_outputs_policy="preserve_in_crash_bundle_when_available" if diagnostic_path else "no_partial_outputs",
         )
 
     async def _kill_process(self, process: asyncio.subprocess.Process) -> None:

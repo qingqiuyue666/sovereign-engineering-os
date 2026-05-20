@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import re
 import tempfile
 import uuid
 from dataclasses import dataclass, field
@@ -28,6 +29,18 @@ class InvalidJobTransitionError(JobQueueError):
     """Raised when the queue is asked to violate the finite-state machine."""
 
 
+class JobValidationError(JobQueueError):
+    """Raised when a job record or payload fails closed."""
+
+
+SECRET_KEY_PATTERN = re.compile(r"(?i)(api[_-]?key|auth|authorization|env|password|secret|token)")
+SECRET_VALUE_PATTERNS = (
+    re.compile(r"AKIA[0-9A-Z]{16}"),
+    re.compile(r"(?i)bearer\s+[a-z0-9._~+/=-]{16,}"),
+    re.compile(r"(?s)-----BEGIN [A-Z ]*PRIVATE KEY-----.*?-----END [A-Z ]*PRIVATE KEY-----"),
+)
+
+
 class JobStatus(StrEnum):
     CREATED = "created"
     ADMITTED = "admitted"
@@ -36,20 +49,38 @@ class JobStatus(StrEnum):
     SUCCEEDED = "succeeded"
     FAILED = "failed"
     QUARANTINED = "quarantined"
+    CANCELLED = "cancelled"
+    REQUIRES_HUMAN_REVIEW = "requires_human_review"
 
     @property
     def terminal(self) -> bool:
-        return self in {self.SUCCEEDED, self.FAILED, self.QUARANTINED}
+        return self in {
+            self.SUCCEEDED,
+            self.FAILED,
+            self.QUARANTINED,
+            self.CANCELLED,
+            self.REQUIRES_HUMAN_REVIEW,
+        }
 
 
 FSM_TRANSITIONS: dict[JobStatus, frozenset[JobStatus]] = {
-    JobStatus.CREATED: frozenset({JobStatus.ADMITTED}),
-    JobStatus.ADMITTED: frozenset({JobStatus.PENDING}),
-    JobStatus.PENDING: frozenset({JobStatus.RUNNING}),
-    JobStatus.RUNNING: frozenset({JobStatus.SUCCEEDED, JobStatus.FAILED, JobStatus.QUARANTINED}),
+    JobStatus.CREATED: frozenset({JobStatus.ADMITTED, JobStatus.CANCELLED}),
+    JobStatus.ADMITTED: frozenset({JobStatus.PENDING, JobStatus.CANCELLED, JobStatus.REQUIRES_HUMAN_REVIEW}),
+    JobStatus.PENDING: frozenset({JobStatus.RUNNING, JobStatus.CANCELLED, JobStatus.REQUIRES_HUMAN_REVIEW}),
+    JobStatus.RUNNING: frozenset(
+        {
+            JobStatus.SUCCEEDED,
+            JobStatus.FAILED,
+            JobStatus.QUARANTINED,
+            JobStatus.CANCELLED,
+            JobStatus.REQUIRES_HUMAN_REVIEW,
+        }
+    ),
     JobStatus.SUCCEEDED: frozenset(),
     JobStatus.FAILED: frozenset(),
     JobStatus.QUARANTINED: frozenset(),
+    JobStatus.CANCELLED: frozenset(),
+    JobStatus.REQUIRES_HUMAN_REVIEW: frozenset(),
 }
 
 
@@ -66,6 +97,9 @@ class Job:
     error: str | None = None
     metadata: dict[str, JsonValue] = field(default_factory=dict)
 
+    def __post_init__(self) -> None:
+        self.validate()
+
     @classmethod
     def create(
         cls,
@@ -75,6 +109,7 @@ class Job:
         max_runtime: float,
         memory_limit_mb: int,
     ) -> "Job":
+        validate_job_inputs(inputs)
         now = datetime.now(UTC)
         return cls(
             id=f"job_{uuid.uuid4().hex}",
@@ -87,15 +122,46 @@ class Job:
             memory_limit_mb=memory_limit_mb,
         )
 
-    def transition_to(self, target: JobStatus) -> None:
+    @property
+    def input_manifest(self) -> dict[str, JsonValue]:
+        return self.inputs
+
+    @property
+    def human_review_required(self) -> bool:
+        return bool(self.metadata.get("human_review_required", False))
+
+    def transition_to(
+        self,
+        target: JobStatus,
+        *,
+        reason: str | None = None,
+        completion_record: dict[str, JsonValue] | None = None,
+        artifact_refs: list[JsonValue] | None = None,
+    ) -> None:
         allowed = FSM_TRANSITIONS[self.status]
         if target not in allowed:
             raise InvalidJobTransitionError(f"invalid transition {self.status.value} -> {target.value}")
-        self.status = target
-        self.updated_at = datetime.now(UTC)
+        previous_status = self.status
+        previous_metadata = dict(self.metadata)
+        previous_updated_at = self.updated_at
+        try:
+            self._apply_terminal_metadata(
+                target,
+                reason=reason,
+                completion_record=completion_record,
+                artifact_refs=artifact_refs,
+            )
+            self.status = target
+            self.updated_at = datetime.now(UTC)
+            self.validate()
+        except Exception:
+            self.status = previous_status
+            self.metadata = previous_metadata
+            self.updated_at = previous_updated_at
+            raise
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        payload = {
             "id": self.id,
             "type": self.type,
             "status": self.status.value,
@@ -107,9 +173,81 @@ class Job:
             "error": self.error,
             "metadata": self.metadata,
         }
+        return dict(sorted(payload.items()))
+
+    def to_json(self) -> str:
+        return json.dumps(self.to_dict(), sort_keys=True, separators=(",", ":"))
+
+    def validate(self) -> None:
+        if not self.id or not isinstance(self.id, str):
+            raise JobValidationError("job_id is required")
+        if not self.type or not isinstance(self.type, str):
+            raise JobValidationError("job_type is required")
+        if not isinstance(self.inputs, dict):
+            raise JobValidationError("input_manifest is required")
+        if self.max_runtime <= 0:
+            raise JobValidationError("max_runtime must be positive")
+        if self.memory_limit_mb <= 0:
+            raise JobValidationError("memory_limit_mb must be positive")
+        validate_job_inputs(self.inputs)
+        validate_job_inputs(self.metadata)
+        if self.inputs.get("produces_artifacts") is True and not (
+            self.inputs.get("output_dir") or self.inputs.get("artifact_paths")
+        ):
+            raise JobValidationError("output_dir is required when execution produces artifacts")
+        if self.inputs.get("dry_run") is True and self.metadata.get("physical_proof") is True:
+            raise JobValidationError("dry_run jobs cannot be marked as physical proof")
+        if self.status == JobStatus.FAILED and not self.metadata.get("failure_reason"):
+            raise JobValidationError("failed jobs require failure_reason")
+        if self.status == JobStatus.QUARANTINED and not self.metadata.get("quarantine_reason"):
+            raise JobValidationError("quarantined jobs require quarantine_reason")
+        if self.status == JobStatus.SUCCEEDED and not (
+            self.metadata.get("completion_record") or self.metadata.get("artifact_refs")
+        ):
+            raise JobValidationError("succeeded jobs require completion_record or artifact reference")
+        if self.status == JobStatus.CANCELLED and not self.metadata.get("cancellation_reason"):
+            raise JobValidationError("cancelled jobs require cancellation_reason")
+        if self.status == JobStatus.REQUIRES_HUMAN_REVIEW and self.metadata.get("human_review_required") is not True:
+            raise JobValidationError("human_review_required must be preserved for review jobs")
+
+    def _apply_terminal_metadata(
+        self,
+        target: JobStatus,
+        *,
+        reason: str | None,
+        completion_record: dict[str, JsonValue] | None,
+        artifact_refs: list[JsonValue] | None,
+    ) -> None:
+        if target == JobStatus.SUCCEEDED:
+            if completion_record is not None:
+                self.metadata["completion_record"] = completion_record
+            if artifact_refs is not None:
+                self.metadata["artifact_refs"] = artifact_refs
+        elif target == JobStatus.FAILED and reason:
+            self.metadata["failure_reason"] = reason
+        elif target == JobStatus.QUARANTINED and reason:
+            self.metadata["quarantine_reason"] = reason
+        elif target == JobStatus.CANCELLED and reason:
+            self.metadata["cancellation_reason"] = reason
+        elif target == JobStatus.REQUIRES_HUMAN_REVIEW:
+            self.metadata["human_review_required"] = True
+            if reason:
+                self.metadata["review_reason"] = reason
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> "Job":
+        required = {
+            "id",
+            "type",
+            "status",
+            "inputs",
+            "created_at",
+            "max_runtime",
+            "memory_limit_mb",
+        }
+        missing = sorted(required.difference(payload))
+        if missing:
+            raise JobValidationError(f"malformed job payload missing required fields: {', '.join(missing)}")
         return cls(
             id=str(payload["id"]),
             type=str(payload["type"]),
@@ -173,6 +311,9 @@ class WorkerAdapterLike(Protocol):
         ...
 
     async def collect_artifacts(self, job: Job, result: object, context: object) -> object:
+        ...
+
+    async def validate_outputs(self, job: Job, result: object, context: object) -> None:
         ...
 
     async def cleanup(self, job: Job, result: object | None, context: object) -> None:
@@ -261,7 +402,7 @@ class JsonFileJobStore:
     def _write_snapshot(self) -> None:
         assert self._jobs is not None
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        payload = [job.to_dict() for job in self._jobs.values()]
+        payload = [self._jobs[job_id].to_dict() for job_id in sorted(self._jobs)]
         encoded = json.dumps(payload, indent=2, sort_keys=True)
         with tempfile.NamedTemporaryFile(
             "w",
@@ -351,6 +492,13 @@ class JobQueueManager:
             await self.pending.put(job.id)
             return Job.from_dict(job.to_dict())
 
+    async def cancel(self, job_id: str, *, reason: str) -> Job:
+        job = await self.store.load_job(job_id)
+        if job is None:
+            raise JobValidationError(f"cannot cancel unrecorded job: {job_id}")
+        await self._transition(job, JobStatus.CANCELLED, reason)
+        return Job.from_dict(job.to_dict())
+
     async def list_jobs(self) -> list[Job]:
         return await self.store.list_jobs()
 
@@ -384,6 +532,7 @@ class JobQueueManager:
             quarantined = bool(getattr(result, "quarantined", False))
             succeeded = bool(getattr(result, "succeeded", False))
             if succeeded and not quarantined:
+                await adapter.validate_outputs(job, result, self.context)
                 await adapter.collect_artifacts(job, result, self.context)
                 await self._transition(job, JobStatus.SUCCEEDED, "worker completed successfully")
             elif quarantined:
@@ -401,7 +550,13 @@ class JobQueueManager:
 
     async def _transition(self, job: Job, target: JobStatus, message: str) -> None:
         previous = job.status
-        job.transition_to(target)
+        completion_record: dict[str, JsonValue] | None = None
+        if target == JobStatus.SUCCEEDED:
+            completion_record = {
+                "message": message,
+                "completed_at": datetime.now(UTC).isoformat(timespec="seconds"),
+            }
+        job.transition_to(target, reason=message, completion_record=completion_record)
         await self.store.save_job(job)
         event = JobEvent(
             job_id=job.id,
@@ -411,3 +566,24 @@ class JobQueueManager:
         )
         await self.store.append_event(event)
         await self.events.put(event)
+
+
+def validate_job_inputs(payload: dict[str, JsonValue]) -> None:
+    if not isinstance(payload, dict):
+        raise JobValidationError("job payload must be a JSON object")
+    _reject_secret_material(payload)
+
+
+def _reject_secret_material(value: JsonValue, *, key_path: str = "") -> None:
+    if isinstance(value, dict):
+        for key, nested in value.items():
+            if SECRET_KEY_PATTERN.search(str(key)):
+                raise JobValidationError(f"secret/env material is not accepted in job payloads: {key_path}{key}")
+            _reject_secret_material(nested, key_path=f"{key_path}{key}.")
+    elif isinstance(value, list):
+        for index, nested in enumerate(value):
+            _reject_secret_material(nested, key_path=f"{key_path}{index}.")
+    elif isinstance(value, str):
+        for pattern in SECRET_VALUE_PATTERNS:
+            if pattern.search(value):
+                raise JobValidationError("secret-like value is not accepted in job payloads")

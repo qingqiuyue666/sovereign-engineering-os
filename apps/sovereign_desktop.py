@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 import json
-import os
 import platform
 import resource
 import sys
@@ -49,10 +48,11 @@ try:
 except Exception as _qt_import_error:  # pragma: no cover - exercised on GUI hosts.
     PYSIDE6_AVAILABLE = False
     qasync = None  # type: ignore[assignment]
+    _QT_IMPORT_EXCEPTION = _qt_import_error
 
     class _MissingQtType:
         def __init__(self, *_args: object, **_kwargs: object) -> None:
-            raise RuntimeError("PySide6 and qasync are required to start the desktop GUI") from _qt_import_error
+            raise RuntimeError("PySide6 and qasync are required to start the desktop GUI") from _QT_IMPORT_EXCEPTION
 
     class _SignalShim:
         def __init__(self, *_args: object, **_kwargs: object) -> None:
@@ -69,10 +69,12 @@ except Exception as _qt_import_error:  # pragma: no cover - exercised on GUI hos
         AlignVCenter = 0
         ItemIsEnabled = 0
         ItemIsSelectable = 0
+        TextSelectableByMouse = 0
 
     class _QtShim:
         AlignmentFlag = _QtFlagShim
         ItemFlag = _QtFlagShim
+        TextInteractionFlag = _QtFlagShim
 
     def Slot(*_args: object, **_kwargs: object) -> object:
         def decorator(function: object) -> object:
@@ -148,7 +150,7 @@ def _table_item(text: object, *, align_right: bool = False) -> QTableWidgetItem:
 
 
 class QueueTab(QWidget):
-    """Thin queue submission surface; no subprocesses are started here."""
+    """Thin queue submission surface; worker processes are never started here."""
 
     submit_requested = Signal(str, str, int, int)
 

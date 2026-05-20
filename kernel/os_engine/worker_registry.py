@@ -4,18 +4,44 @@ from __future__ import annotations
 
 import shlex
 import sys
-from dataclasses import dataclass, field
+import json
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Protocol, Sequence, runtime_checkable
 
 from kernel.os_engine.artifact_store import ArtifactRecord, ArtifactStore
 from kernel.os_engine.context_router import ContextRouter
-from kernel.os_engine.job_queue import Job, JsonValue, UnknownJobTypeError
+from kernel.os_engine.job_queue import Job, JobValidationError, JsonValue, UnknownJobTypeError
 from kernel.os_engine.memory_watchdog import ProcessLimits, ProcessResult, ProcessSupervisor
 
 
 class WorkerAdmissionError(RuntimeError):
     """Raised when a worker refuses a job before queue admission."""
+
+
+SUPPORTED_CAPABILITIES = frozenset(
+    {
+        "artifact_collection",
+        "context_pack",
+        "git_read",
+        "houdini_single_frame_proof",
+        "houdini_topology_audit",
+        "subprocess",
+        "test_execution",
+    }
+)
+
+
+@dataclass(frozen=True, slots=True)
+class WorkerCapabilityReport:
+    name: str
+    capabilities: tuple[str, ...]
+    safety_boundary: str
+    can_create_large_artifacts: bool
+    human_review_required: bool
+
+    def to_json(self) -> str:
+        return json.dumps(asdict(self), sort_keys=True, separators=(",", ":"))
 
 
 @dataclass(frozen=True, slots=True)
@@ -54,13 +80,21 @@ class WorkerRunResult:
             stderr=process.stderr,
             artifact_paths=tuple(artifact_paths),
             diagnostic_path=process.diagnostic_path,
-            metadata=metadata or {},
+            metadata=metadata
+            or {
+                "termination_reason": process.termination_reason,
+                "partial_outputs_policy": process.partial_outputs_policy,
+            },
         )
 
 
 @runtime_checkable
 class WorkerAdapter(Protocol):
     name: str
+    capabilities: frozenset[str]
+    safety_boundary: str
+    can_create_large_artifacts: bool
+    human_review_required: bool
 
     async def preflight(self, job: Job, context: WorkerContext) -> None:
         ...
@@ -79,6 +113,15 @@ class WorkerAdapter(Protocol):
     ) -> list[ArtifactRecord]:
         ...
 
+    async def validate_outputs(self, job: Job, result: WorkerRunResult, context: WorkerContext) -> None:
+        ...
+
+    async def quarantine_failure(self, job: Job, exc: Exception, context: WorkerContext) -> WorkerRunResult:
+        ...
+
+    def summarize(self) -> WorkerCapabilityReport:
+        ...
+
     async def cleanup(self, job: Job, result: WorkerRunResult | None, context: WorkerContext) -> None:
         ...
 
@@ -91,6 +134,7 @@ class WorkerRegistry:
         normalized = self._normalize(job_type)
         if normalized in self._adapters:
             raise ValueError(f"worker type already registered: {job_type}")
+        self._validate_adapter(adapter)
         self._adapters[normalized] = adapter
 
     def has_type(self, job_type: str) -> bool:
@@ -106,16 +150,65 @@ class WorkerRegistry:
     def registered_types(self) -> list[str]:
         return sorted(self._adapters)
 
+    def capability_report(self) -> list[dict[str, object]]:
+        return [
+            asdict(self._adapters[job_type].summarize())
+            for job_type in sorted(self._adapters)
+        ]
+
+    def capability_report_json(self) -> str:
+        return json.dumps(self.capability_report(), sort_keys=True, separators=(",", ":"))
+
     @staticmethod
     def _normalize(job_type: str) -> str:
-        return job_type.strip()
+        normalized = job_type.strip()
+        if not normalized:
+            raise WorkerAdmissionError("worker type is required")
+        return normalized
+
+    @staticmethod
+    def _validate_adapter(adapter: WorkerAdapter) -> None:
+        for attribute in (
+            "name",
+            "capabilities",
+            "safety_boundary",
+            "can_create_large_artifacts",
+            "human_review_required",
+        ):
+            if not hasattr(adapter, attribute):
+                raise WorkerAdmissionError(f"worker must declare {attribute}")
+        if not str(adapter.name).strip():
+            raise WorkerAdmissionError("worker must declare name")
+        unknown = set(adapter.capabilities).difference(SUPPORTED_CAPABILITIES)
+        if unknown:
+            raise WorkerAdmissionError(f"unsupported worker capabilities: {', '.join(sorted(unknown))}")
+        for method in (
+            "preflight",
+            "admit",
+            "run",
+            "collect_artifacts",
+            "validate_outputs",
+            "quarantine_failure",
+            "summarize",
+        ):
+            if not callable(getattr(adapter, method, None)):
+                raise WorkerAdmissionError(f"worker must implement {method}()")
 
 
 class BaseWorker:
     name = "BaseWorker"
+    capabilities: frozenset[str] = frozenset()
+    safety_boundary = "fail_closed_local_only"
+    can_create_large_artifacts = False
+    human_review_required = False
+
+    async def preflight(self, job: Job, context: WorkerContext) -> None:
+        _validate_job_identity(job)
+        _ = context
 
     async def admit(self, job: Job, context: WorkerContext) -> None:
-        _ = (job, context)
+        _validate_job_identity(job)
+        _ = context
 
     async def cleanup(self, job: Job, result: WorkerRunResult | None, context: WorkerContext) -> None:
         _ = (job, result, context)
@@ -134,14 +227,48 @@ class BaseWorker:
             records.append(record)
         return records
 
+    async def validate_outputs(self, job: Job, result: WorkerRunResult, context: WorkerContext) -> None:
+        _validate_job_identity(job)
+        _ = context
+        if result.succeeded and result.quarantined:
+            raise WorkerAdmissionError("worker result cannot be both succeeded and quarantined")
+        if result.succeeded and result.exit_code not in {0, None}:
+            raise WorkerAdmissionError("worker cannot claim success with nonzero exit code")
+        for artifact_path in result.artifact_paths:
+            if not artifact_path.exists():
+                raise WorkerAdmissionError(f"claimed artifact does not exist: {artifact_path}")
+
+    async def quarantine_failure(self, job: Job, exc: Exception, context: WorkerContext) -> WorkerRunResult:
+        _validate_job_identity(job)
+        _ = context
+        return WorkerRunResult(
+            succeeded=False,
+            quarantined=True,
+            exit_code=None,
+            stderr=str(exc),
+            metadata={"quarantine_reason": str(exc)},
+        )
+
+    def summarize(self) -> WorkerCapabilityReport:
+        return WorkerCapabilityReport(
+            name=self.name,
+            capabilities=tuple(sorted(self.capabilities)),
+            safety_boundary=self.safety_boundary,
+            can_create_large_artifacts=bool(self.can_create_large_artifacts),
+            human_review_required=bool(self.human_review_required),
+        )
+
 
 class CommandWorker(BaseWorker):
     allowed_programs: frozenset[str] = frozenset()
     default_command: tuple[str, ...] | None = None
     stdout_limit_bytes = 8 * 1024 * 1024
     stderr_limit_bytes = 8 * 1024 * 1024
+    capabilities = frozenset({"subprocess"})
+    safety_boundary = "allowlisted_subprocess_shell_false_watchdog"
 
     async def preflight(self, job: Job, context: WorkerContext) -> None:
+        await super().preflight(job, context)
         command = self._command(job)
         if not command:
             raise WorkerAdmissionError(f"{self.name} requires a command")
@@ -183,6 +310,8 @@ class CommandWorker(BaseWorker):
 
 class GitWorker(CommandWorker):
     name = "GitWorker"
+    capabilities = frozenset({"git_read", "subprocess"})
+    safety_boundary = "read_only_git_subprocess"
     allowed_programs = frozenset({"git"})
     default_command = ("git", "status", "--short")
     _allowed_subcommands = frozenset(
@@ -208,6 +337,8 @@ class GitWorker(CommandWorker):
 
 class TestWorker(CommandWorker):
     name = "TestWorker"
+    capabilities = frozenset({"test_execution", "subprocess"})
+    safety_boundary = "local_test_subprocess"
     allowed_programs = frozenset({Path(sys.executable).name, "python", "python3", "pytest"})
     default_command = (sys.executable, "-m", "unittest", "discover", "-s", "tests", "-v")
     stdout_limit_bytes = 16 * 1024 * 1024
@@ -227,9 +358,11 @@ class TestWorker(CommandWorker):
 
 class ContextPackWorker(BaseWorker):
     name = "ContextPackWorker"
+    capabilities = frozenset({"context_pack", "artifact_collection"})
+    safety_boundary = "sanitized_git_context_no_network"
 
     async def preflight(self, job: Job, context: WorkerContext) -> None:
-        _ = job
+        await super().preflight(job, context)
         if not context.repo_root.exists():
             raise WorkerAdmissionError(f"repo root does not exist: {context.repo_root}")
 
@@ -252,6 +385,10 @@ class ContextPackWorker(BaseWorker):
 
 class HoudiniTopologyAuditWorker(CommandWorker):
     name = "HoudiniTopologyAuditWorker"
+    capabilities = frozenset({"houdini_topology_audit", "subprocess", "artifact_collection"})
+    safety_boundary = "allowlisted_houdini_audit_subprocess"
+    can_create_large_artifacts = True
+    human_review_required = True
     allowed_programs = frozenset({"hython", "hbatch", "python", "python3", Path(sys.executable).name})
     stdout_limit_bytes = 32 * 1024 * 1024
     stderr_limit_bytes = 32 * 1024 * 1024
@@ -263,6 +400,10 @@ class HoudiniTopologyAuditWorker(CommandWorker):
 
 class HoudiniSingleFrameProofWorker(CommandWorker):
     name = "HoudiniSingleFrameProofWorker"
+    capabilities = frozenset({"houdini_single_frame_proof", "subprocess", "artifact_collection"})
+    safety_boundary = "allowlisted_houdini_single_frame_subprocess"
+    can_create_large_artifacts = True
+    human_review_required = True
     allowed_programs = frozenset(
         {"hython", "hbatch", "houdini", "python", "python3", Path(sys.executable).name}
     )
@@ -308,6 +449,11 @@ def _artifact_paths_from_inputs(job: Job, context: WorkerContext) -> list[Path]:
 
 def _validate_artifact_paths(job: Job, context: WorkerContext) -> None:
     _artifact_paths_from_inputs(job, context)
+
+
+def _validate_job_identity(job: Job) -> None:
+    if not getattr(job, "id", None):
+        raise JobValidationError("worker cannot run without job_id")
 
 
 async def _register_artifact_async(
