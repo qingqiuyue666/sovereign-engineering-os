@@ -248,6 +248,10 @@ def _post_json(url: str, payload: dict[str, Any], timeout_seconds: float) -> dic
         raise VfxSubmissionError(f"ComfyUI HTTP {exc.code}: {raw_error}") from exc
     except URLError as exc:
         raise VfxSubmissionError(f"ComfyUI endpoint unavailable: {exc.reason}") from exc
+    except TimeoutError as exc:
+        raise VfxSubmissionError("ComfyUI endpoint timed out") from exc
+    except OSError as exc:
+        raise VfxSubmissionError(f"ComfyUI transport failed: {exc}") from exc
     if len(raw) > _MAX_HTTP_RESPONSE_BYTES:
         raise VfxSubmissionError("ComfyUI response exceeded maximum size")
     try:

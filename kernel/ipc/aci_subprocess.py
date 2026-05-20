@@ -1,4 +1,4 @@
-"""Whitelisted subprocess proxy for the desktop Code Audit surface."""
+"""Fail-closed subprocess proxy for the desktop Code Audit surface."""
 
 from __future__ import annotations
 
@@ -12,17 +12,29 @@ import subprocess
 import time
 
 __all__ = [
+    "ALLOWED_COMMANDS",
     "CommandRejected",
     "CommandResult",
     "parse_command_line",
     "run_whitelisted_command",
 ]
 
-_MAX_ARGS: Final[int] = 64
-_MAX_ARG_LENGTH: Final[int] = 4096
+_MAX_ARGS: Final[int] = 16
+_MAX_ARG_LENGTH: Final[int] = 256
 _MAX_OUTPUT_CHARS: Final[int] = 120_000
-_DEFAULT_TIMEOUT_SECONDS: Final[float] = 180.0
-
+_DEFAULT_TIMEOUT_SECONDS: Final[float] = 900.0
+_SHELL_METACHARS: Final[tuple[str, ...]] = (
+    "&&",
+    "||",
+    "|",
+    ">",
+    "<",
+    ";",
+    "&",
+    "`",
+    "$",
+    "\\",
+)
 _SECRET_ENV_MARKERS: Final[tuple[str, ...]] = (
     "AUTH",
     "BEARER",
@@ -47,99 +59,47 @@ _BASE_ENV_ALLOWLIST: Final[frozenset[str]] = frozenset(
     }
 )
 
-_PYTEST_FLAGS: Final[frozenset[str]] = frozenset(
+ALLOWED_COMMANDS: Final[frozenset[tuple[str, ...]]] = frozenset(
     {
-        "-q",
-        "-s",
-        "-v",
-        "-x",
-        "--collect-only",
-        "--disable-warnings",
-        "--failed-first",
-        "--last-failed",
-        "--strict-config",
-        "--strict-markers",
+        (
+            "python3",
+            "-m",
+            "unittest",
+            "discover",
+            "-s",
+            "tests/tracer_bullet",
+            "-v",
+        ),
+        (
+            "python3",
+            "-m",
+            "unittest",
+            "discover",
+            "-s",
+            "tests/schemas",
+            "-v",
+        ),
+        (
+            "python3",
+            "-m",
+            "unittest",
+            "discover",
+            "-s",
+            "validation/tests/acceptance",
+            "-v",
+        ),
+        ("make", "ci"),
     }
 )
-_PYTEST_VALUE_OPTIONS: Final[frozenset[str]] = frozenset(
-    {
-        "-k",
-        "-m",
-        "--color",
-        "--durations",
-        "--maxfail",
-        "--tb",
-    }
-)
-_PYTEST_VALUE_PREFIXES: Final[tuple[str, ...]] = tuple(f"{option}=" for option in _PYTEST_VALUE_OPTIONS)
-_PYTEST_ALLOWED_TB: Final[frozenset[str]] = frozenset({"auto", "long", "short", "line", "native", "no"})
-_PYTEST_ALLOWED_COLOR: Final[frozenset[str]] = frozenset({"yes", "no", "auto"})
-
-_RUFF_FLAGS: Final[frozenset[str]] = frozenset({"--quiet", "--statistics", "--preview"})
-_RUFF_VALUE_OPTIONS: Final[frozenset[str]] = frozenset(
-    {
-        "--config",
-        "--exclude",
-        "--extend-exclude",
-        "--extend-ignore",
-        "--extend-select",
-        "--ignore",
-        "--output-format",
-        "--select",
-        "--target-version",
-    }
-)
-_RUFF_VALUE_PREFIXES: Final[tuple[str, ...]] = tuple(f"{option}=" for option in _RUFF_VALUE_OPTIONS)
-
-_MYPY_FLAGS: Final[frozenset[str]] = frozenset(
-    {
-        "--check-untyped-defs",
-        "--disallow-untyped-defs",
-        "--ignore-missing-imports",
-        "--no-error-summary",
-        "--pretty",
-        "--show-column-numbers",
-        "--strict",
-        "--warn-redundant-casts",
-        "--warn-unused-ignores",
-    }
-)
-_MYPY_VALUE_OPTIONS: Final[frozenset[str]] = frozenset({"--config-file", "--python-version"})
-_MYPY_VALUE_PREFIXES: Final[tuple[str, ...]] = tuple(f"{option}=" for option in _MYPY_VALUE_OPTIONS)
-
-_GIT_READONLY_SUBCOMMANDS: Final[frozenset[str]] = frozenset(
-    {
-        "branch",
-        "diff",
-        "log",
-        "rev-parse",
-        "show",
-        "status",
-    }
-)
-_GIT_SAFE_FLAGS: Final[frozenset[str]] = frozenset(
-    {
-        "--branch",
-        "--check",
-        "--name-only",
-        "--oneline",
-        "--porcelain",
-        "--short",
-        "--stat",
-        "-sb",
-    }
-)
-_GIT_VALUE_OPTIONS: Final[frozenset[str]] = frozenset({"--max-count"})
-_GIT_VALUE_PREFIXES: Final[tuple[str, ...]] = tuple(f"{option}=" for option in _GIT_VALUE_OPTIONS)
 
 
 class CommandRejected(ValueError):
-    """Raised when a GUI command does not pass the subprocess allowlist."""
+    """Raised when a GUI command does not exactly match the subprocess allowlist."""
 
 
 @dataclass(frozen=True, slots=True)
 class CommandResult:
-    """Result payload returned to the GUI after a whitelisted command exits."""
+    """Bounded result payload returned to the GUI after a whitelisted command exits."""
 
     argv: tuple[str, ...]
     cwd: Path
@@ -159,7 +119,7 @@ class CommandResult:
 
     @property
     def combined_output(self) -> str:
-        chunks = []
+        chunks: list[str] = []
         if self.stdout:
             chunks.append(self.stdout)
         if self.stderr:
@@ -181,10 +141,13 @@ class CommandResult:
 
 
 def parse_command_line(command_line: str | Sequence[str]) -> tuple[str, ...]:
-    """Parse a GUI command into argv without invoking a shell."""
+    """Parse argv without a shell and reject shell control syntax fail-closed."""
 
     if isinstance(command_line, str):
-        argv = tuple(shlex.split(command_line, comments=False, posix=True))
+        try:
+            argv = tuple(shlex.split(command_line, comments=False, posix=True))
+        except ValueError as exc:
+            raise CommandRejected(f"command could not be parsed: {exc}") from exc
     else:
         argv = tuple(str(part) for part in command_line)
     _validate_argv_shape(argv)
@@ -198,13 +161,13 @@ def run_whitelisted_command(
     timeout_seconds: float = _DEFAULT_TIMEOUT_SECONDS,
     extra_env: Mapping[str, str] | None = None,
 ) -> CommandResult:
-    """Run a safe audit command and return bounded stdout/stderr for the GUI."""
+    """Run one exact allowlisted validation command with no shell expansion."""
 
     argv = parse_command_line(command_line)
+    _validate_allowed_command(argv)
     working_directory = Path(cwd).resolve()
     if not working_directory.exists() or not working_directory.is_dir():
         raise CommandRejected(f"working directory does not exist: {working_directory}")
-    _validate_allowed_command(argv, working_directory)
     if timeout_seconds <= 0:
         raise CommandRejected("timeout_seconds must be positive")
 
@@ -253,211 +216,14 @@ def _validate_argv_shape(argv: tuple[str, ...]) -> None:
             raise CommandRejected("command argument is too long")
         if "\x00" in token or any(ord(character) < 32 for character in token):
             raise CommandRejected("control characters are not allowed in command arguments")
+        if any(marker in token for marker in _SHELL_METACHARS):
+            raise CommandRejected(f"shell metacharacter rejected in argument: {token}")
 
 
-def _validate_allowed_command(argv: tuple[str, ...], cwd: Path) -> None:
-    executable = Path(argv[0]).name
-    args = argv[1:]
-    if executable == "pytest":
-        _validate_pytest_args(args, cwd)
-        return
-    if executable in {"python", "python3"} and len(args) >= 2 and args[0] == "-m" and args[1] == "pytest":
-        _validate_pytest_args(args[2:], cwd)
-        return
-    if executable == "ruff":
-        _validate_ruff_args(args, cwd)
-        return
-    if executable == "mypy":
-        _validate_mypy_args(args, cwd)
-        return
-    if executable == "git":
-        _validate_git_args(args, cwd)
-        return
-    raise CommandRejected(f"command is not allowlisted: {executable}")
-
-
-def _validate_pytest_args(args: Sequence[str], cwd: Path) -> None:
-    index = 0
-    while index < len(args):
-        token = args[index]
-        if token in _PYTEST_FLAGS:
-            index += 1
-            continue
-        if token in _PYTEST_VALUE_OPTIONS:
-            value = _require_option_value(token, args, index)
-            _validate_pytest_option_value(token, value)
-            index += 2
-            continue
-        if token.startswith(_PYTEST_VALUE_PREFIXES):
-            option, value = token.split("=", 1)
-            _validate_pytest_option_value(option, value)
-            index += 1
-            continue
-        if token.startswith("-"):
-            raise CommandRejected(f"pytest option is not allowlisted: {token}")
-        _validate_repo_path_token(token, cwd)
-        index += 1
-
-
-def _validate_ruff_args(args: Sequence[str], cwd: Path) -> None:
-    if not args or args[0] != "check":
-        raise CommandRejected("only 'ruff check' is allowlisted")
-    index = 1
-    while index < len(args):
-        token = args[index]
-        if token in _RUFF_FLAGS:
-            index += 1
-            continue
-        if token in _RUFF_VALUE_OPTIONS:
-            value = _require_option_value(token, args, index)
-            if token == "--config":
-                _validate_repo_path_token(value, cwd)
-            else:
-                _validate_plain_value(value)
-            index += 2
-            continue
-        if token.startswith(_RUFF_VALUE_PREFIXES):
-            option, value = token.split("=", 1)
-            if option == "--config":
-                _validate_repo_path_token(value, cwd)
-            else:
-                _validate_plain_value(value)
-            index += 1
-            continue
-        if token.startswith("-"):
-            raise CommandRejected(f"ruff option is not allowlisted: {token}")
-        _validate_repo_path_token(token, cwd)
-        index += 1
-
-
-def _validate_mypy_args(args: Sequence[str], cwd: Path) -> None:
-    if not args:
-        raise CommandRejected("mypy requires at least one target path")
-    index = 0
-    saw_target = False
-    while index < len(args):
-        token = args[index]
-        if token in _MYPY_FLAGS:
-            index += 1
-            continue
-        if token in _MYPY_VALUE_OPTIONS:
-            value = _require_option_value(token, args, index)
-            if token == "--config-file":
-                _validate_repo_path_token(value, cwd)
-            else:
-                _validate_plain_value(value)
-            index += 2
-            continue
-        if token.startswith(_MYPY_VALUE_PREFIXES):
-            option, value = token.split("=", 1)
-            if option == "--config-file":
-                _validate_repo_path_token(value, cwd)
-            else:
-                _validate_plain_value(value)
-            index += 1
-            continue
-        if token.startswith("-"):
-            raise CommandRejected(f"mypy option is not allowlisted: {token}")
-        _validate_repo_path_token(token, cwd)
-        saw_target = True
-        index += 1
-    if not saw_target:
-        raise CommandRejected("mypy requires at least one target path")
-
-
-def _validate_git_args(args: Sequence[str], cwd: Path) -> None:
-    if not args:
-        raise CommandRejected("git requires a readonly subcommand")
-    subcommand = args[0]
-    if subcommand not in _GIT_READONLY_SUBCOMMANDS:
-        raise CommandRejected(f"git subcommand is not readonly allowlisted: {subcommand}")
-    index = 1
-    while index < len(args):
-        token = args[index]
-        if token == "--":
-            for path_token in args[index + 1 :]:
-                _validate_repo_path_token(path_token, cwd)
-            return
-        if token in _GIT_SAFE_FLAGS:
-            index += 1
-            continue
-        if token in _GIT_VALUE_OPTIONS:
-            _validate_int_value(_require_option_value(token, args, index), token)
-            index += 2
-            continue
-        if token.startswith(_GIT_VALUE_PREFIXES):
-            option, value = token.split("=", 1)
-            _validate_int_value(value, option)
-            index += 1
-            continue
-        if token.startswith("-"):
-            raise CommandRejected(f"git option is not allowlisted: {token}")
-        if subcommand in {"log", "rev-parse", "show"}:
-            _validate_git_ref(token)
-        else:
-            _validate_repo_path_token(token, cwd)
-        index += 1
-
-
-def _require_option_value(option: str, args: Sequence[str], index: int) -> str:
-    next_index = index + 1
-    if next_index >= len(args):
-        raise CommandRejected(f"{option} requires a value")
-    value = args[next_index]
-    if value.startswith("-"):
-        raise CommandRejected(f"{option} value is missing")
-    return value
-
-
-def _validate_pytest_option_value(option: str, value: str) -> None:
-    if option == "--maxfail":
-        _validate_int_value(value, option)
-    elif option == "--durations":
-        _validate_int_value(value, option)
-    elif option == "--tb" and value not in _PYTEST_ALLOWED_TB:
-        raise CommandRejected(f"pytest --tb value is not allowlisted: {value}")
-    elif option == "--color" and value not in _PYTEST_ALLOWED_COLOR:
-        raise CommandRejected(f"pytest --color value is not allowlisted: {value}")
-    else:
-        _validate_plain_value(value)
-
-
-def _validate_int_value(value: str, option: str) -> None:
-    try:
-        parsed = int(value)
-    except ValueError as exc:
-        raise CommandRejected(f"{option} requires an integer") from exc
-    if parsed < 0 or parsed > 10_000:
-        raise CommandRejected(f"{option} integer value is out of range")
-
-
-def _validate_plain_value(value: str) -> None:
-    if not value or len(value) > 512:
-        raise CommandRejected("option value is empty or too long")
-    if "\x00" in value or any(ord(character) < 32 for character in value):
-        raise CommandRejected("option values may not contain control characters")
-
-
-def _validate_git_ref(value: str) -> None:
-    _validate_plain_value(value)
-    forbidden = ("..", "~", "^", ":", "\\", " ")
-    if any(marker in value for marker in forbidden):
-        raise CommandRejected(f"git ref is not allowlisted: {value}")
-
-
-def _validate_repo_path_token(token: str, cwd: Path) -> None:
-    path_part = token.split("::", 1)[0]
-    if not path_part:
-        raise CommandRejected("path token is empty")
-    raw_path = Path(path_part)
-    if raw_path.is_absolute():
-        candidate = raw_path.resolve()
-    else:
-        candidate = (cwd / raw_path).resolve()
-    try:
-        candidate.relative_to(cwd)
-    except ValueError as exc:
-        raise CommandRejected(f"path escapes repository root: {token}") from exc
+def _validate_allowed_command(argv: tuple[str, ...]) -> None:
+    if argv not in ALLOWED_COMMANDS:
+        allowed = "; ".join(shlex.join(command) for command in sorted(ALLOWED_COMMANDS))
+        raise CommandRejected(f"command is not allowlisted; allowed commands: {allowed}")
 
 
 def _build_child_env(extra_env: Mapping[str, str] | None) -> dict[str, str]:

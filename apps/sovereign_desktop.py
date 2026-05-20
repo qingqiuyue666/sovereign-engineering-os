@@ -11,32 +11,94 @@ import platform
 import resource
 import sys
 
-from PySide6.QtCore import QObject, Qt, QThread, QTimer, Signal, Slot
-from PySide6.QtGui import QColor, QFont, QPalette
-from PySide6.QtWidgets import (
-    QApplication,
-    QAbstractItemView,
-    QComboBox,
-    QDoubleSpinBox,
-    QFrame,
-    QFormLayout,
-    QGridLayout,
-    QGroupBox,
-    QHBoxLayout,
-    QHeaderView,
-    QLabel,
-    QLineEdit,
-    QMainWindow,
-    QPlainTextEdit,
-    QPushButton,
-    QSpinBox,
-    QStatusBar,
-    QTabWidget,
-    QTableWidget,
-    QTableWidgetItem,
-    QVBoxLayout,
-    QWidget,
-)
+try:
+    from PySide6.QtCore import QObject, Qt, QThread, QTimer, Signal, Slot
+    from PySide6.QtGui import QColor, QFont, QPalette
+    from PySide6.QtWidgets import (
+        QApplication,
+        QAbstractItemView,
+        QComboBox,
+        QDoubleSpinBox,
+        QFrame,
+        QFormLayout,
+        QGridLayout,
+        QGroupBox,
+        QHBoxLayout,
+        QHeaderView,
+        QLabel,
+        QLineEdit,
+        QMainWindow,
+        QPlainTextEdit,
+        QPushButton,
+        QSpinBox,
+        QStatusBar,
+        QTabWidget,
+        QTableWidget,
+        QTableWidgetItem,
+        QVBoxLayout,
+        QWidget,
+    )
+
+    PYSIDE6_AVAILABLE = True
+except ImportError as _qt_import_error:
+    PYSIDE6_AVAILABLE = False
+
+    class _QtMissingType:
+        def __init__(self, *_args: object, **_kwargs: object) -> None:
+            raise RuntimeError("PySide6 is required to start the desktop GUI") from _qt_import_error
+
+    class _SignalShim:
+        def __init__(self, *_args: object, **_kwargs: object) -> None:
+            pass
+
+        def connect(self, *_args: object, **_kwargs: object) -> None:
+            pass
+
+        def emit(self, *_args: object, **_kwargs: object) -> None:
+            pass
+
+    class _QtAlignmentFlag:
+        AlignRight = 0
+
+    class _QtShim:
+        AlignmentFlag = _QtAlignmentFlag
+
+    def Slot(*_args: object, **_kwargs: object) -> object:
+        def decorator(function: object) -> object:
+            return function
+
+        return decorator
+
+    QObject = _QtMissingType
+    Qt = _QtShim
+    QThread = _QtMissingType
+    QTimer = _QtMissingType
+    Signal = _SignalShim
+    QColor = _QtMissingType
+    QFont = _QtMissingType
+    QPalette = _QtMissingType
+    QApplication = _QtMissingType
+    QAbstractItemView = _QtMissingType
+    QComboBox = _QtMissingType
+    QDoubleSpinBox = _QtMissingType
+    QFrame = _QtMissingType
+    QFormLayout = _QtMissingType
+    QGridLayout = _QtMissingType
+    QGroupBox = _QtMissingType
+    QHBoxLayout = _QtMissingType
+    QHeaderView = _QtMissingType
+    QLabel = _QtMissingType
+    QLineEdit = _QtMissingType
+    QMainWindow = _QtMissingType
+    QPlainTextEdit = _QtMissingType
+    QPushButton = _QtMissingType
+    QSpinBox = _QtMissingType
+    QStatusBar = _QtMissingType
+    QTabWidget = _QtMissingType
+    QTableWidget = _QtMissingType
+    QTableWidgetItem = _QtMissingType
+    QVBoxLayout = _QtMissingType
+    QWidget = _QtMissingType
 
 from kernel.ipc.aci_subprocess import CommandResult, run_whitelisted_command
 from kernel.ipc.radar_zmq import DEFAULT_RADAR_ENDPOINT, RadarZmqSubscriber
@@ -47,7 +109,7 @@ from kernel.ipc.vfx_localhost import (
     submit_prompt,
 )
 
-__all__ = ["main", "SovereignDesktopWindow"]
+__all__ = ["PYSIDE6_AVAILABLE", "main", "SovereignDesktopWindow"]
 
 _APP_TITLE = "Sovereign Engineering OS - God-Node Control Plane"
 _RAM_BUDGET_MB = 150.0
@@ -116,12 +178,10 @@ class CodeAuditTab(QWidget):
         self._command.setEditable(True)
         self._command.addItems(
             [
-                "pytest -q",
-                "pytest -q tests/tracer_bullet/test_code_audit_workbench.py",
-                "pytest -q tests/tracer_bullet/test_comfyui_workflow_spec.py",
-                "ruff check apps kernel tests",
-                "git status --short --branch",
-                "git diff --stat",
+                "python3 -m unittest discover -s tests/tracer_bullet -v",
+                "python3 -m unittest discover -s tests/schemas -v",
+                "python3 -m unittest discover -s validation/tests/acceptance -v",
+                "make ci",
             ]
         )
         self._run_button = QPushButton("Run", self)
@@ -758,6 +818,8 @@ QStatusBar {
 
 
 def main(argv: list[str] | None = None) -> int:
+    if not PYSIDE6_AVAILABLE:
+        raise RuntimeError("PySide6 is required to start the desktop GUI") from _qt_import_error
     app = QApplication(sys.argv if argv is None else argv)
     app.setApplicationName("Sovereign Engineering OS")
     app.setApplicationDisplayName("Sovereign Engineering OS")

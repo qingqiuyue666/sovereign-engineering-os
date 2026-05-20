@@ -9,10 +9,36 @@ import json
 import threading
 import time
 
-from PySide6.QtCore import QObject, Signal, Slot
+try:
+    from PySide6.QtCore import QObject, Signal, Slot
+
+    PYSIDE6_AVAILABLE = True
+except ImportError:
+    PYSIDE6_AVAILABLE = False
+
+    class QObject:
+        def __init__(self, *_args: object, **_kwargs: object) -> None:
+            pass
+
+    class Signal:
+        def __init__(self, *_args: object, **_kwargs: object) -> None:
+            pass
+
+        def connect(self, *_args: object, **_kwargs: object) -> None:
+            pass
+
+        def emit(self, *_args: object, **_kwargs: object) -> None:
+            pass
+
+    def Slot(*_args: object, **_kwargs: object) -> object:
+        def decorator(function: object) -> object:
+            return function
+
+        return decorator
 
 __all__ = [
     "DEFAULT_RADAR_ENDPOINT",
+    "PYSIDE6_AVAILABLE",
     "RadarEndpointRejected",
     "RadarEvent",
     "RadarZmqSubscriber",
@@ -98,8 +124,12 @@ class RadarZmqSubscriber(QObject):
                 events = dict(poller.poll(_POLL_TIMEOUT_MS))
                 if socket not in events:
                     continue
-                topic, payload = _receive_payload(socket)
-                event = parse_radar_event(payload, topic=topic)
+                try:
+                    topic, payload = _receive_payload(socket)
+                    event = parse_radar_event(payload, topic=topic)
+                except ValueError as exc:
+                    self.error_occurred.emit(f"radar payload rejected: {exc}")
+                    continue
                 event_payload = event.as_dict()
                 self.message_received.emit(event_payload)
                 if event.is_strong_signal:
@@ -140,12 +170,11 @@ def parse_radar_event(payload: bytes | str, *, topic: str = "") -> RadarEvent:
     decoded: dict[str, Any]
     try:
         material = json.loads(text)
-    except json.JSONDecodeError:
-        material = {"message": text}
-    if isinstance(material, dict):
-        decoded = dict(material)
-    else:
-        decoded = {"message": material}
+    except json.JSONDecodeError as exc:
+        raise ValueError("radar payload must be valid JSON") from exc
+    if not isinstance(material, dict):
+        raise ValueError("radar payload JSON must be an object")
+    decoded = dict(material)
 
     event_type = _string_field(decoded, "event_type") or _string_field(decoded, "signal") or _infer_event_type(text)
     symbol = _string_field(decoded, "symbol") or _string_field(decoded, "asset") or "UNKNOWN"
