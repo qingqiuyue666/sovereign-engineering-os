@@ -8,6 +8,8 @@ try:  # pragma: no cover - exercised on developer machines with Qt installed.
     from PySide6.QtWidgets import (
         QApplication,
         QAbstractItemView,
+        QCheckBox,
+        QComboBox,
         QFrame,
         QFormLayout,
         QGridLayout,
@@ -22,6 +24,7 @@ try:  # pragma: no cover - exercised on developer machines with Qt installed.
         QStyle,
         QStyledItemDelegate,
         QTableView,
+        QTextEdit,
         QToolButton,
         QVBoxLayout,
         QWidget,
@@ -105,6 +108,26 @@ except Exception as _qt_import_error:  # pragma: no cover - depends on host imag
         class PenStyle:
             NoPen = 0
 
+    class _AbstractItemViewShim(_QtObjectShim):
+        class SelectionBehavior:
+            SelectRows = 1
+
+        class SelectionMode:
+            SingleSelection = 1
+
+        class EditTrigger:
+            NoEditTriggers = 0
+
+    class _HeaderViewShim(_QtObjectShim):
+        class ResizeMode:
+            Stretch = 1
+            ResizeToContents = 2
+
+    class _SizePolicyShim(_QtObjectShim):
+        class Policy:
+            Expanding = 1
+            Preferred = 2
+
     def Slot(*_args: object, **_kwargs: object) -> object:
         def decorator(function: object) -> object:
             return function
@@ -112,14 +135,16 @@ except Exception as _qt_import_error:  # pragma: no cover - depends on host imag
         return decorator
 
     QApplication = _MissingApplication
-    QAbstractItemView = _QtObjectShim
+    QAbstractItemView = _AbstractItemViewShim
     QAbstractTableModel = _QtObjectShim
     QColor = _QtObjectShim
+    QCheckBox = _QtObjectShim
+    QComboBox = _QtObjectShim
     QFrame = _QtObjectShim
     QFormLayout = _QtObjectShim
     QGridLayout = _QtObjectShim
     QHBoxLayout = _QtObjectShim
-    QHeaderView = _QtObjectShim
+    QHeaderView = _HeaderViewShim
     QLabel = _QtObjectShim
     QMainWindow = _QtObjectShim
     QModelIndex = _QtObjectShim
@@ -131,11 +156,12 @@ except Exception as _qt_import_error:  # pragma: no cover - depends on host imag
     QPushButton = _QtObjectShim
     QRect = _QtObjectShim
     QSize = _QtObjectShim
-    QSizePolicy = _QtObjectShim
+    QSizePolicy = _SizePolicyShim
     QStackedWidget = _QtObjectShim
     QStyle = _QtObjectShim
     QStyledItemDelegate = _QtObjectShim
     QTableView = _QtObjectShim
+    QTextEdit = _QtObjectShim
     QTimer = _QtObjectShim
     QToolButton = _QtObjectShim
     QVBoxLayout = _QtObjectShim

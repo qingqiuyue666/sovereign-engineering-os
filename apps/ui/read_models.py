@@ -66,6 +66,37 @@ class EventRow:
 
 
 @dataclass(frozen=True, slots=True)
+class ArtifactRow:
+    artifact_id: str
+    artifact_type: str
+    job_id: str
+    sha256: str
+    size_bytes: int
+    review_status: str
+    quarantine_status: str
+    local_only: bool
+    safe_to_publish: bool
+    updated_at: str
+
+    def metadata(self) -> dict[str, object]:
+        return {
+            "artifact_id": self.artifact_id,
+            "artifact_type": self.artifact_type,
+            "job_id": self.job_id,
+            "sha256": self.sha256,
+            "size_bytes": self.size_bytes,
+            "review_status": self.review_status,
+            "quarantine_status": self.quarantine_status,
+            "local_only": self.local_only,
+            "safe_to_publish": self.safe_to_publish,
+            "updated_at": self.updated_at,
+        }
+
+    def sha256_short(self, *, length: int = 12) -> str:
+        return self.sha256[: max(6, int(length))]
+
+
+@dataclass(frozen=True, slots=True)
 class RuntimeSnapshot:
     captured_at_ms: int
     runtime_status: str
@@ -80,6 +111,7 @@ class RuntimeSnapshot:
     database_available: bool
     latest_jobs: tuple[JobRow, ...] = field(default_factory=tuple)
     latest_events: tuple[EventRow, ...] = field(default_factory=tuple)
+    latest_artifacts: tuple[ArtifactRow, ...] = field(default_factory=tuple)
     latest_artifacts_count: int = 0
     active_jobs: int = 0
     failed_jobs: int = 0
@@ -110,13 +142,15 @@ class ReadModelProvider:
         runtime_root: Path,
         job_limit: int = JOB_LIMIT_DEFAULT,
         event_limit: int = EVENT_LIMIT_DEFAULT,
+        artifact_limit: int = ARTIFACT_LIMIT_DEFAULT,
     ) -> None:
-        if job_limit <= 0 or event_limit <= 0:
+        if job_limit <= 0 or event_limit <= 0 or artifact_limit <= 0:
             raise ValueError("read model limits must be positive")
         self.runtime_root = runtime_root.expanduser().resolve()
         self.db_path = self.runtime_root / "os_engine.sqlite3"
         self.job_limit = int(job_limit)
         self.event_limit = int(event_limit)
+        self.artifact_limit = int(artifact_limit)
 
     def snapshot_runtime_status(self) -> RuntimeSnapshot:
         captured_at_ms = _now_ms()
@@ -127,6 +161,7 @@ class ReadModelProvider:
                 wal_status = _read_wal_status(connection)
                 jobs = self._latest_jobs(connection, limit=self.job_limit)
                 events = self._latest_events(connection, limit=self.event_limit)
+                artifacts = self._latest_artifacts(connection, limit=self.artifact_limit)
                 queue_depth = _bounded_status_count(
                     connection,
                     statuses=("admitted", "pending", "running", "requires_human_review"),
@@ -155,6 +190,7 @@ class ReadModelProvider:
                 database_available=True,
                 latest_jobs=tuple(jobs),
                 latest_events=tuple(events),
+                latest_artifacts=tuple(artifacts),
                 latest_artifacts_count=latest_artifacts_count,
                 active_jobs=active_jobs,
                 failed_jobs=failed_jobs,
@@ -264,6 +300,19 @@ class ReadModelProvider:
         ).fetchall()
         return [_event_row_from_sql(row) for row in rows]
 
+    def _latest_artifacts(self, connection: sqlite3.Connection, *, limit: int) -> list[ArtifactRow]:
+        rows = connection.execute(
+            """
+            SELECT artifact_id, job_id, artifact_type, sha256, size_bytes,
+                   review_status, quarantine_status, local_only, safe_to_publish, updated_at
+            FROM artifacts
+            ORDER BY updated_at DESC
+            LIMIT ?
+            """,
+            (int(limit),),
+        ).fetchall()
+        return [_artifact_row_from_sql(row) for row in rows]
+
     def _events_for_job(self, connection: sqlite3.Connection, *, job_id: str, limit: int) -> list[EventRow]:
         rows = connection.execute(
             """
@@ -317,6 +366,32 @@ def fake_phase1_snapshot(*, stale: bool = False) -> RuntimeSnapshot:
         EventRow("evt_demo_008", "job_review_stop", 5, "ReviewRejected", "2026-05-20T09:08:00+00:00"),
         EventRow("evt_demo_009", "job_quarantine", 4, "JobQuarantined", "2026-05-20T09:09:00+00:00"),
     )
+    artifacts = (
+        ArtifactRow(
+            artifact_id="artifact_hfx_008_topology_audit",
+            artifact_type="audit_json",
+            job_id="job_hfx_008_landing",
+            sha256="4a7f8a0b6c1d2e3f4a7f8a0b6c1d2e3f4a7f8a0b6c1d2e3f4a7f8a0b6c1d2e3f",
+            size_bytes=18432,
+            review_status="needs_review",
+            quarantine_status="clean",
+            local_only=True,
+            safe_to_publish=False,
+            updated_at="2026-05-20T09:01:10+00:00",
+        ),
+        ArtifactRow(
+            artifact_id="artifact_context_pack_review",
+            artifact_type="context_packet",
+            job_id="job_context_pack_review",
+            sha256="9b1d6c4a2f3e9b1d6c4a2f3e9b1d6c4a2f3e9b1d6c4a2f3e9b1d6c4a2f3e",
+            size_bytes=9728,
+            review_status="needs_review",
+            quarantine_status="clean",
+            local_only=True,
+            safe_to_publish=False,
+            updated_at="2026-05-20T09:05:00+00:00",
+        ),
+    )
     return RuntimeSnapshot(
         captured_at_ms=captured_at_ms,
         runtime_status="Available",
@@ -331,6 +406,7 @@ def fake_phase1_snapshot(*, stale: bool = False) -> RuntimeSnapshot:
         database_available=not stale,
         latest_jobs=jobs,
         latest_events=events,
+        latest_artifacts=artifacts,
         latest_artifacts_count=3,
         active_jobs=0,
         failed_jobs=0,
@@ -346,6 +422,21 @@ def _event_row_from_sql(row: sqlite3.Row) -> EventRow:
         event_type=str(row["event_type"]),
         occurred_at=str(row["occurred_at"]),
         reason=str(row["reason"] or ""),
+    )
+
+
+def _artifact_row_from_sql(row: sqlite3.Row) -> ArtifactRow:
+    return ArtifactRow(
+        artifact_id=str(row["artifact_id"]),
+        job_id=str(row["job_id"]),
+        artifact_type=str(row["artifact_type"]),
+        sha256=str(row["sha256"]),
+        size_bytes=int(row["size_bytes"]),
+        review_status=str(row["review_status"]),
+        quarantine_status=str(row["quarantine_status"]),
+        local_only=bool(row["local_only"]),
+        safe_to_publish=bool(row["safe_to_publish"]),
+        updated_at=str(row["updated_at"]),
     )
 
 

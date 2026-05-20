@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from apps.ui import QFrame, QHBoxLayout, QLabel, QSizePolicy, Qt
+from apps.ui.motion import resolve_sync_state
 from apps.ui.read_models import RuntimeSnapshot
 
 
@@ -16,6 +17,7 @@ class SystemPulseBar(QFrame):
         ("workers", "Workers"),
         ("memory_pressure", "Memory"),
         ("warning_count", "Warnings"),
+        ("sync_health", "Sync"),
         ("next_required_action", "Next Required Action"),
     )
 
@@ -44,6 +46,7 @@ class SystemPulseBar(QFrame):
             "workers": snapshot.workers,
             "memory_pressure": snapshot.memory_pressure,
             "warning_count": snapshot.warning_count,
+            "sync_health": resolve_sync_state(snapshot).value,
             "next_required_action": snapshot.next_required_action,
         }
         for key, value in values.items():

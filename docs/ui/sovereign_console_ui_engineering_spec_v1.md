@@ -4,11 +4,15 @@
 
 Sovereign Console, also called Sovereign C2, is the native desktop command-and-observe surface for the local Sovereign Engineering OS runtime. It is a living production console: quiet enough for repeated operational use, strict enough for governed execution, and always clear about what is observed, what is queued, and what still requires a human.
 
-The console is not a chatbot, web frontend, node graph, or final production surface. Phase 1 is the first usable desktop app shell for reading runtime projections and issuing future commands through the OS Runtime Facade.
+The console is not a chatbot, web frontend, node graph, or final production surface. Phase 1 delivered the first usable desktop app shell for reading runtime projections. Phase 2 upgrades that shell into the Apple-Native Procedural Console: a PySide6 macOS-oriented production console with localized labels, stronger page coverage, and tightly bounded procedural energy feedback in state surfaces only.
 
 ## Design Direction
 
-The visual direction is Light-Dark Hybrid Living Production Console.
+The visual direction is Apple Native Discipline plus Houdini Procedural Energy. Apple provides the structure: sidebar, toolbar-like pulse, dense tables, right inspector, and compact professional hierarchy. Procedural energy is local and state driven: status glow, connector line, pulse boiler, review seal, quarantine stripe, and sync blackout.
+
+The visual system name is Apple-Native Procedural Console.
+
+It inherits the Phase 1 Light-Dark Hybrid Living Production Console tokens and tightens them into a more Apple-native desktop layout.
 
 Design tokens:
 
@@ -38,7 +42,9 @@ The GUI is a read-model and command-issuer only. It never owns execution. Real w
 
 `GUI -> OS Runtime Facade -> SQLite Job Queue -> Worker Registry -> Worker -> Artifact Store -> Event Log -> Human Review Gate -> GUI Status Projection`
 
-Phase 1 command controls are disabled or explicitly deferred. The GUI must not directly mutate SQLite, start processes, launch creative tools, delete or overwrite assets, scan heavy file trees, read environment files, or use network calls by default.
+Phase 2 command controls are still disabled unless routed through the OS Runtime Facade. The GUI must not directly mutate SQLite, start processes, launch creative tools, delete or overwrite assets, scan heavy file trees, read environment files, or use network calls by default.
+
+Localization covers display labels only. Language options are Auto, English, and Chinese. Auto follows the host language when safely detectable and otherwise falls back to English. Canonical status strings, event_type values, internal enums, audit payloads, and human-entered review reasons remain unchanged.
 
 ## System Pulse Bar
 
@@ -63,15 +69,15 @@ The left navigation rail is approximately 200px wide and grouped as:
 - Govern: Human Review, Failure Quarantine, Artifact Store, Asset Library
 - Settings: Settings
 
-Only Dashboard and Job Queue are implemented in Phase 1. Every other page must clearly show `Placeholder: Phase 2` and must not imply delivered capability.
+Phase 2 implements Dashboard, System Health, Job Queue, HFX Factory, HFX_008 Landing Chain, Context Packs, Human Review, Failure Quarantine, Artifact Store, and Settings / Boundaries. Asset Library remains out of the Phase 2 navigation.
 
 ## Workspace Stack
 
-The center workspace uses `QStackedWidget`. Phase 1 pages are Dashboard and Job Queue. Deferred sections remain placeholders until their phase arrives.
+The center workspace uses `QStackedWidget`. Phase 2 pages are concrete read-only projection widgets. They may show placeholder previews for artifacts or packet outputs, but they do not imply materialized files or completed real-world work.
 
 ## Dashboard
 
-Dashboard is read-only in Phase 1. It shows OS runtime status, SQLite WAL status, queue depth, active jobs, failed jobs, quarantined jobs, latest artifact count, HFX_008 landing summary, desktop smoke summary, ResourceWarning status, memory pressure, and next required action. Values come from fake-safe snapshots or bounded read models.
+Dashboard is read-only. It shows runtime health, SQLite WAL status, queue depth, active jobs, failed jobs, quarantined jobs, latest artifact count, HFX_008 landing summary, desktop smoke summary, ResourceWarning status, memory pressure, next required action, local-only status, and sync health. Values come from fake-safe snapshots or bounded read models.
 
 ## Job Queue
 
@@ -90,7 +96,55 @@ Fields:
 - human_review_required
 - failure_reason
 
-Selecting a job updates the Right Inspector. Cancel/retry are Phase 2 controls and remain disabled in Phase 1.
+Selecting a job updates the Right Inspector. Cancel/retry intent buttons remain disabled unless a safe facade route is introduced.
+
+## Artifact Store
+
+Artifact Store uses a compact `QTableView` / `QAbstractTableModel` projection of artifact metadata:
+
+- type
+- artifact_id
+- job_id
+- sha256 truncated for display
+- size
+- review_status
+- quarantine_status
+- local_only
+- safe_to_publish
+
+The preview area is a placeholder and does not open, mutate, delete, overwrite, upload, or publish files. Open-folder controls are disabled unless routed through the OS Runtime Facade.
+
+## HFX Factory
+
+HFX Factory summarizes Core12, HFX_008, topology audit status, proof artifact status, validation status, human review status, resource package status, `final_claim_allowed`, next action, and blocked reason. It does not make final HFX claims; it reports gate state only.
+
+## HFX_008 Landing Chain
+
+HFX_008 Landing Chain is a fixed linear widget:
+
+Topology Audit -> Proof Artifact -> Artifact Validation -> Human Review -> Materialization Summary -> Final Claim Gate
+
+The view uses fixed node cards and connector lines. Running connectors may be blue, succeeded connectors green, and failed or blocked connectors red or muted. Downstream nodes are greyed by status when upstream state is blocked. It is not a node editor, has no drag/drop, and does not use `QGraphicsView`.
+
+## Human Review
+
+Human Review shows pending reviews, preview placeholder, metadata, approve intent, reject intent, reject reason, quarantine intent, and final-claim warning. Approve and quarantine controls are disabled unless routed safely. Reject intent is additionally gated by a minimum reason length of five characters. Human-entered reasons are not translated.
+
+## Failure Quarantine
+
+Failure Quarantine shows failed jobs, failed worker, failure reason, traceback excerpt in a dark technical panel, event trail, quarantine path, retry allowed/blocked state, recommended fix, and disabled export failure bundle intent.
+
+## Context Packs
+
+Context Packs lists Gemini packet, Codex task packet, Claude review packet, HFX-only packet, desktop-only packet, tests-only packet, and branch diff packet options. It shows token/size budget and generated-packet artifact placeholders. Copy/open controls are disabled unless routed safely.
+
+## System Health
+
+System Health shows memory usage, worker count, active process count, DB connection state, SQLite WAL state, artifact store size, last smoke result, last CI result, warning list, next maintenance task, and sync health. The System Pulse Boiler escalates visual severity for memory pressure and WAL state without creating business-state changes.
+
+## Settings / Boundaries
+
+Settings / Boundaries shows Language: Auto / English / Chinese, Motion Intensity: Minimal / Standard / High Energy, local-only mode, external network disabled, asset root paths, artifact root path, allowed workers, dangerous action gates, human review gates, publish policy, and GitHub summary-only policy. Phase 2 settings can be read-only or in-memory only unless persistence is explicitly added through safe runtime paths.
 
 ## Status Chips
 
@@ -131,11 +185,33 @@ Selected job metadata includes job_id, job_type, status, worker, event_count, ar
 
 The bottom Live Event Stream uses `QPlainTextEdit` in Phase 1. It is read-only, dark, monospace, and capped with a maximum block count such as 1000. It may display read-model or fake-safe event names including JobCreated, WorkerSelected, ArtifactRecorded, HumanReviewRequested, JobSucceeded, JobQuarantined, MaterializationBlocked, ReviewApproved, and ReviewRejected.
 
-Phase 2 may replace this with `QListView` plus `QAbstractListModel`.
+Phase 2 keeps the stream read-only and canonical. Event names are not translated because `event_type` is audit data.
 
 ## Sync Lost Overlay
 
-The Sync Lost Overlay appears when snapshot age exceeds 2000ms, the read-model reports stale, runtime is unavailable, or database sync is unavailable. It visually shows `SYSTEM SYNC LOST`, locks submit/action controls, allows safe read-only navigation, and clears when a fresh snapshot returns.
+Sync has three display states:
+
+- Healthy: actions may be shown according to their own gate state.
+- Degraded: warning is shown, risky actions are disabled, and read-only navigation remains available.
+- Lost: the overlay shows `SYSTEM SYNC LOST — ACTIONS LOCKED` and `Runtime projection is stale. Read-only navigation remains available.`
+
+The Chinese Lost display is `系统同步丢失 — 操作已锁定` and `运行时投影已过期。只读导航仍可使用。`
+
+Lost state locks action buttons. Read-only navigation may remain.
+
+## Motion And Procedural Energy
+
+Motion intensity options are Minimal, Standard, and High Energy. Default is Standard. Under high memory pressure or lost sync, effective motion degrades to Minimal. Tests assert enums, color/state mapping, and fallback rules; they do not depend on animation timing.
+
+Phase 2 motion components:
+
+- Input energy foundation: heatline-ready static widget surface.
+- HFX Energy Pipeline: status-driven connector rendering.
+- System Pulse Boiler: memory/WAL severity indicator.
+- Review Seal and Quarantine Stripe: visual markers only.
+- Sync Lost Blackout: Healthy/Degraded/Lost display.
+
+Motion must be subtle, local, and state driven. It must never block reading or change business state.
 
 ## Threading And Polling
 
@@ -170,13 +246,19 @@ Phase 1:
 
 Phase 2:
 
-- command palette
-- richer human review UI
-- artifact store UI
-- failure quarantine UI
-- HFX factory UI
-- event stream model upgrade
-- richer action issuance through the OS Runtime Facade
+- i18n foundation
+- Apple-native visual refinement
+- Artifact Store UI
+- HFX Factory UI
+- HFX_008 Landing Chain HFX chain custom view
+- Human Review UI
+- Failure Quarantine UI
+- Context Packs UI
+- System Health UI
+- Settings / Boundaries UI
+- sync state refinement
+- motion safety foundation
+- disabled or facade-routed action intents
 
 Phase 3:
 
@@ -184,7 +266,7 @@ Phase 3:
 - Application Support path policy
 - logs path policy
 - crash report path policy
-- HFX chain custom view
+- full command palette
 - distribution hardening
 
-macOS packaging, Application Support layout, logs location, crash report location, Command Palette, and HFX chain custom view are deferred.
+macOS `.app` packaging, Application Support layout, logs location, crash report location, and full Command Palette remain deferred.

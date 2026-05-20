@@ -59,6 +59,18 @@ def application_stylesheet() -> str:
         border: 1px solid #D1D1D6;
         border-radius: 8px;
     }
+    QLabel#DashboardWarningStrip, QLabel#JobQueueFilterStrip {
+        background: #FFF4E5;
+        color: #6E6E73;
+        border: 1px solid #FF9500;
+        border-radius: 6px;
+        padding: 7px 10px;
+    }
+    QFrame#ArtifactPreview {
+        background: #FFFFFF;
+        border: 1px solid #00A6A6;
+        border-radius: 8px;
+    }
     QFrame#Inspector {
         background: #FFFFFF;
         border-left: 1px solid #D1D1D6;
@@ -100,12 +112,47 @@ def application_stylesheet() -> str:
         font-size: 11px;
         selection-background-color: #0066CC;
     }
+    QPlainTextEdit#TracebackExcerptPanel {
+        background: #0D0D0D;
+        color: #F5F5F7;
+        border: 1px solid #1E1E1E;
+        font-family: "SF Mono", Menlo, Consolas, monospace;
+        font-size: 11px;
+    }
+    QFrame#SystemPulseBoiler {
+        background: #FFFFFF;
+        border: 1px solid #D1D1D6;
+        border-radius: 8px;
+    }
+    QFrame#SystemPulseBoiler[severity="warning"] {
+        border-color: #FF9500;
+    }
+    QFrame#SystemPulseBoiler[severity="fatal"] {
+        border-color: #FF3B30;
+    }
+    QFrame#ReviewSeal {
+        background: #EAF8EE;
+        border: 1px solid #34C759;
+        border-radius: 8px;
+    }
+    QFrame#QuarantineStripe {
+        background: #FFF4E5;
+        border-left: 4px solid #FF9500;
+        border-radius: 8px;
+    }
     QFrame#SyncLostOverlay {
         background: rgba(13, 13, 13, 215);
         border: 1px solid #FF3B30;
     }
+    QFrame#SyncLostOverlay[syncState="Degraded"] {
+        background: rgba(255, 244, 229, 235);
+        border: 1px solid #FF9500;
+    }
     QFrame#SyncLostOverlay QLabel {
         background: transparent;
         color: #FFFFFF;
+    }
+    QFrame#SyncLostOverlay[syncState="Degraded"] QLabel {
+        color: #1D1D1F;
     }
     """

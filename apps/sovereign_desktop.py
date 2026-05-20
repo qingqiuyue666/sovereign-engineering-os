@@ -1,4 +1,4 @@
-"""Native Sovereign Console Phase 1 entrypoint.
+"""Native Sovereign Console Phase 2 entrypoint.
 
 Importing this module is intentionally passive: it does not create a
 QApplication, open the local database, submit work, or contact external tools.
@@ -43,7 +43,7 @@ class DesktopOsEngineFacade:
         self.read_models = ReadModelProvider(runtime_root=self.runtime_root)
 
     def initialize(self) -> None:
-        """Kept for compatibility; Phase 1 desktop startup performs no writes."""
+        """Kept for compatibility; desktop startup performs no writes."""
 
     def snapshot(self) -> RuntimeSnapshot:
         return self.read_models.snapshot_runtime_status()
@@ -56,7 +56,7 @@ class DesktopOsEngineFacade:
 
 
 class SovereignDesktopWindow(SovereignConsoleMainWindow):
-    """Backward-compatible name for the Phase 1 console shell."""
+    """Backward-compatible name for the native console shell."""
 
     def __init__(self, repo_root: Path | None = None, parent: object | None = None) -> None:
         resolved_repo = (repo_root or repo_root_from_here()).resolve()
