@@ -47,9 +47,12 @@ class SovereignDesktopOsEngineBoundaryTests(unittest.TestCase):
         else:
             self.assertTrue(hasattr(desktop, "SovereignDesktopWindow"))
 
-    def test_gui_actions_submit_through_job_queue_boundary(self) -> None:
+    def test_phase1_gui_actions_are_read_only_and_facade_backed(self) -> None:
         source = DESKTOP_PATH.read_text(encoding="utf-8")
-        self.assertIn("await self.queue.submit(", source)
+        self.assertIn("DesktopOsEngineFacade", source)
+        self.assertIn("ReadModelProvider", source)
+        self.assertNotIn(".create_job(", source)
+        self.assertNotIn(".enqueue_job(", source)
         self.assertNotIn("run_whitelisted_command", source)
         self.assertNotIn("submit_prompt", source)
         self.assertNotIn("create_subprocess_exec", source)
