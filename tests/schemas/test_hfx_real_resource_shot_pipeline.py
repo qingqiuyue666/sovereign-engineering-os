@@ -291,12 +291,13 @@ class HFXRealResourceShotPipelineTests(unittest.TestCase):
         self.assertEqual(result["blocker"]["status"], "CLIENT_PUBLIC_DELIVERY_BLOCKED")
 
     def test_46_master_pipeline_seal_binding_all_12_layer_seals(self):
-        master = hfx.materialize_all(REPO_ROOT)
+        temp_repo = self.tmp_path / "repo"
+        master = hfx.materialize_all(temp_repo)
         self.assertEqual(master["bound_layer_count"], 12)
         self.assertEqual(len(master["layer_seals"]), 12)
         self.assertFalse(master["final_pixels_authorized"])
         for seal in master["layer_seals"]:
-            self.assertTrue((REPO_ROOT / seal["seal_path"]).is_file())
+            self.assertTrue((temp_repo / seal["seal_path"]).is_file())
 
     def test_no_core12_release_hip_files_modified_by_branch(self):
         changed = os_changed_files()
