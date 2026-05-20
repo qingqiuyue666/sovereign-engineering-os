@@ -7,14 +7,17 @@ import json
 import platform
 import resource
 import sys
+import uuid
 from collections import Counter
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from kernel.os_engine.artifact_store import ArtifactRecord, ArtifactStore
-from kernel.os_engine.job_queue import Job, JobQueueManager, JsonFileJobStore
-from kernel.os_engine.worker_registry import WorkerContext, build_default_worker_registry
+from kernel.os_engine.database import OSDatabase
+from kernel.os_engine.job_projection import ProjectedJobState
+from kernel.os_engine.sqlite_artifact_store import SQLiteArtifactRecord, SQLiteArtifactStore
+from kernel.os_engine.sqlite_job_queue import SQLiteJobQueue
+from kernel.os_engine.worker_registry import build_default_worker_registry
 
 try:
     from PySide6.QtCore import Qt, Signal, Slot
@@ -182,7 +185,7 @@ class QueueTab(QWidget):
 
         self.table = QTableWidget(0, 7, self)
         self.table.setHorizontalHeaderLabels(
-            ["Created", "Job ID", "Type", "Status", "Runtime", "Memory", "Error"]
+            ["Job ID", "Status", "Worker", "Artifacts", "Review", "Final Claim", "Events"]
         )
         self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
@@ -224,17 +227,17 @@ class QueueTab(QWidget):
     def append_log(self, message: str) -> None:
         self.log.appendPlainText(f"{_utc_stamp()} {message}")
 
-    def render_jobs(self, jobs: list[Job]) -> None:
-        visible = sorted(jobs, key=lambda job: job.created_at, reverse=True)[:MAX_TABLE_ROWS]
+    def render_jobs(self, jobs: list[ProjectedJobState]) -> None:
+        visible = sorted(jobs, key=lambda job: job.job_id, reverse=True)[:MAX_TABLE_ROWS]
         self.table.setRowCount(len(visible))
         for row, job in enumerate(visible):
-            self.table.setItem(row, 0, _table_item(job.created_at.isoformat(timespec="seconds")))
-            self.table.setItem(row, 1, _table_item(job.id))
-            self.table.setItem(row, 2, _table_item(job.type))
-            self.table.setItem(row, 3, _table_item(job.status.value))
-            self.table.setItem(row, 4, _table_item(f"{job.max_runtime:.0f}s", align_right=True))
-            self.table.setItem(row, 5, _table_item(f"{job.memory_limit_mb} MB", align_right=True))
-            self.table.setItem(row, 6, _table_item(job.error or ""))
+            self.table.setItem(row, 0, _table_item(job.job_id))
+            self.table.setItem(row, 1, _table_item(job.current_status))
+            self.table.setItem(row, 2, _table_item(job.worker_name or ""))
+            self.table.setItem(row, 3, _table_item(len(job.artifact_ids), align_right=True))
+            self.table.setItem(row, 4, _table_item("required" if job.human_review_required else "not required"))
+            self.table.setItem(row, 5, _table_item("allowed" if job.final_claim_allowed else "blocked"))
+            self.table.setItem(row, 6, _table_item(job.event_count, align_right=True))
 
     @Slot()
     def _emit_submit(self) -> None:
@@ -279,7 +282,7 @@ class ArtifactTab(QWidget):
         self.refresh.clicked.connect(self.refresh_requested.emit)
         self.search.textChanged.connect(self._apply_filter)
 
-    def render_artifacts(self, artifacts: list[ArtifactRecord]) -> None:
+    def render_artifacts(self, artifacts: list[SQLiteArtifactRecord]) -> None:
         visible = sorted(artifacts, key=lambda artifact: artifact.created_at, reverse=True)[:MAX_TABLE_ROWS]
         self.table.setRowCount(len(visible))
         for row, artifact in enumerate(visible):
@@ -347,8 +350,8 @@ class ResourceTab(QWidget):
         layout.addWidget(group)
         layout.addStretch(1)
 
-    def render(self, *, jobs: list[Job], artifact_store: ArtifactStore) -> None:
-        counts = Counter(job.status.value for job in jobs)
+    def render(self, *, jobs: list[ProjectedJobState], artifact_store: SQLiteArtifactStore) -> None:
+        counts = Counter(job.current_status for job in jobs)
         active = counts.get("running", 0)
         queued = counts.get("pending", 0) + counts.get("admitted", 0)
         terminal = counts.get("succeeded", 0) + counts.get("failed", 0) + counts.get("quarantined", 0)
@@ -359,21 +362,97 @@ class ResourceTab(QWidget):
         self.active_jobs.setText(str(active))
         self.terminal_jobs.setText(str(terminal))
         self.artifact_root.setText(str(artifact_store.artifact_root))
-        self.db_path.setText(str(artifact_store.db_path))
+        self.db_path.setText(str(artifact_store.database.db_path))
+
+
+class DesktopOsEngineFacade:
+    """Passive desktop-facing facade over the event-sourced OS engine core."""
+
+    def __init__(self, *, repo_root: Path, runtime_root: Path) -> None:
+        self.repo_root = repo_root.resolve()
+        self.runtime_root = runtime_root.expanduser().resolve()
+        self.database = OSDatabase(root=self.runtime_root, db_path=self.runtime_root / "os_engine.sqlite3")
+        self.queue = SQLiteJobQueue(self.database)
+        self.artifact_store = SQLiteArtifactStore(
+            database=self.database,
+            artifact_root=self.runtime_root / "artifacts",
+        )
+        self.registry = build_default_worker_registry()
+
+    def initialize(self) -> None:
+        self.database.initialize()
+        self.artifact_store.initialize()
+
+    def registered_job_types(self) -> list[str]:
+        return self.registry.registered_types()
+
+    async def submit(
+        self,
+        *,
+        job_type: str,
+        inputs: dict[str, Any],
+        max_runtime: int,
+        memory_limit: int,
+    ) -> ProjectedJobState:
+        return await asyncio.to_thread(
+            self.submit_job_request,
+            job_type=job_type,
+            inputs=inputs,
+            max_runtime=max_runtime,
+            memory_limit=memory_limit,
+        )
+
+    def submit_job_request(
+        self,
+        *,
+        job_type: str,
+        inputs: dict[str, Any],
+        max_runtime: int,
+        memory_limit: int,
+    ) -> ProjectedJobState:
+        if not self.registry.has_type(job_type):
+            raise ValueError(f"unregistered job type blocked: {job_type}")
+        adapter = self.registry.get(job_type)
+        job_id = f"gui_job_{uuid.uuid4().hex}"
+        manifest = {
+            "inputs": inputs,
+            "max_runtime_seconds": int(max_runtime),
+            "memory_limit_mb": int(memory_limit),
+            "request_source": "desktop_control_plane",
+        }
+        self.queue.create_job(
+            job_id=job_id,
+            job_type=job_type,
+            input_manifest=manifest,
+            output_dir=str(inputs.get("output_dir", "")),
+            human_review_required=bool(getattr(adapter, "human_review_required", False))
+            or bool(inputs.get("human_review_required", False)),
+            dry_run=bool(inputs.get("dry_run", False)),
+            local_only=True,
+        )
+        self.queue.admit_job(job_id)
+        self.queue.select_worker(job_id, worker_name=str(getattr(adapter, "name", job_type)))
+        self.queue.enqueue_job(job_id)
+        return self.queue.get_job_state(job_id)
+
+    def list_job_states(self) -> list[ProjectedJobState]:
+        return self.queue.list_jobs()
+
+    def list_artifact_records(self) -> list[SQLiteArtifactRecord]:
+        return self.artifact_store.list_artifacts()
 
 
 class SovereignDesktopWindow(QMainWindow):
-    """Native control plane backed by the brokerless local queue."""
+    """Native control plane backed by the passive event-sourced queue facade."""
 
     def __init__(self, repo_root: Path | None = None, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.repo_root = (repo_root or _repo_root_from_here()).resolve()
         self.runtime_root = _runtime_root()
-        self.artifact_store = ArtifactStore.default(repo_root=self.repo_root)
-        self.registry = build_default_worker_registry()
-        self.job_store = JsonFileJobStore(self.runtime_root / "jobs" / "desktop_jobs.json")
-        self.queue: JobQueueManager | None = None
-        self._event_task: asyncio.Task[None] | None = None
+        self.os_engine = DesktopOsEngineFacade(repo_root=self.repo_root, runtime_root=self.runtime_root)
+        self.queue = self.os_engine
+        self.artifact_store = self.os_engine.artifact_store
+        self.registry = self.os_engine.registry
         self._refresh_task: asyncio.Task[None] | None = None
         self._shutting_down = False
 
@@ -393,40 +472,24 @@ class SovereignDesktopWindow(QMainWindow):
         self.statusBar().showMessage("Booting local-first control plane")
         self._apply_theme()
 
-        self.queue_tab.set_job_types(self.registry.registered_types())
+        self.queue_tab.set_job_types(self.os_engine.registered_job_types())
         self.queue_tab.submit_requested.connect(self._submit_job)
         self.queue_tab.refresh.clicked.connect(self._refresh_now)
         self.artifact_tab.refresh_requested.connect(self._refresh_now)
 
     async def boot(self) -> None:
-        await asyncio.to_thread(self.artifact_store.initialize)
-        context = WorkerContext(
-            repo_root=self.repo_root,
-            artifact_root=self.artifact_store.artifact_root,
-            crash_dir=self.artifact_store.artifact_root / "crashes",
-            artifact_store=self.artifact_store,
-        )
-        self.queue = JobQueueManager(
-            registry=self.registry,
-            context=context,
-            store=self.job_store,
-            max_concurrent=1,
-        )
-        await self.queue.start()
-        self._event_task = asyncio.create_task(self._drain_queue_events(), name="desktop-event-drain")
+        await asyncio.to_thread(self.os_engine.initialize)
         self._refresh_task = asyncio.create_task(self._refresh_loop(), name="desktop-refresh-loop")
-        self.statusBar().showMessage("Ready - brokerless local queue online")
+        self.statusBar().showMessage("Ready - passive event-sourced control plane online")
         await self._refresh_all()
 
     async def shutdown(self) -> None:
         if self._shutting_down:
             return
         self._shutting_down = True
-        for task in (self._event_task, self._refresh_task):
+        for task in (self._refresh_task,):
             if task is not None:
                 task.cancel()
-        if self.queue is not None:
-            await self.queue.stop()
 
     @asyncSlot(str, str, int, int)
     async def _submit_job(
@@ -436,9 +499,6 @@ class SovereignDesktopWindow(QMainWindow):
         max_runtime: int,
         memory_limit: int,
     ) -> None:
-        if self.queue is None:
-            self.queue_tab.append_log("Queue is not initialized")
-            return
         try:
             decoded = json.loads(raw_inputs or "{}")
             if not isinstance(decoded, dict):
@@ -447,30 +507,20 @@ class SovereignDesktopWindow(QMainWindow):
             job = await self.queue.submit(
                 job_type=job_type,
                 inputs=inputs,
-                max_runtime=float(max_runtime),
-                memory_limit_mb=int(memory_limit),
+                max_runtime=int(max_runtime),
+                memory_limit=int(memory_limit),
             )
         except Exception as exc:
             self.queue_tab.append_log(f"admission rejected: {exc}")
             self.statusBar().showMessage(f"Admission rejected: {exc}")
             return
-        self.queue_tab.append_log(f"submitted {job.id} as {job.type}")
-        self.statusBar().showMessage(f"Submitted {job.id}")
+        self.queue_tab.append_log(f"submitted {job.job_id} for durable materialization")
+        self.statusBar().showMessage(f"Submitted {job.job_id}")
         await self._refresh_all()
 
     @asyncSlot()
     async def _refresh_now(self) -> None:
         await self._refresh_all()
-
-    async def _drain_queue_events(self) -> None:
-        if self.queue is None:
-            return
-        while True:
-            event = await self.queue.events.get()
-            self.queue_tab.append_log(
-                f"{event.job_id} {event.previous_status or '-'} -> {event.new_status}: {event.message}"
-            )
-            await self._refresh_all()
 
     async def _refresh_loop(self) -> None:
         while True:
@@ -478,16 +528,14 @@ class SovereignDesktopWindow(QMainWindow):
             await asyncio.sleep(REFRESH_SECONDS)
 
     async def _refresh_all(self) -> None:
-        if self.queue is None:
-            return
-        jobs = await self.queue.list_jobs()
-        artifacts = await asyncio.to_thread(self.artifact_store.list_artifacts)
+        jobs = await asyncio.to_thread(self.os_engine.list_job_states)
+        artifacts = await asyncio.to_thread(self.os_engine.list_artifact_records)
         self.queue_tab.render_jobs(jobs)
         self.artifact_tab.render_artifacts(artifacts)
         self.resource_tab.render(jobs=jobs, artifact_store=self.artifact_store)
 
     def closeEvent(self, event: QCloseEvent) -> None:  # noqa: N802 - Qt API.
-        if self.queue is not None and not self._shutting_down:
+        if not self._shutting_down:
             asyncio.create_task(self.shutdown())
         event.accept()
 
