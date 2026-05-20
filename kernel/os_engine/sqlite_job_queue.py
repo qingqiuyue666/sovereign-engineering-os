@@ -21,6 +21,23 @@ class SQLiteJobQueue:
     def __init__(self, database: OSDatabase) -> None:
         self.database = database
         self.event_log = EventLog(database)
+        self._closed = False
+
+    def __enter__(self) -> "SQLiteJobQueue":
+        self._ensure_open()
+        return self
+
+    def __exit__(self, exc_type: object, exc: object, traceback: object) -> None:
+        _ = (exc_type, exc, traceback)
+        self.close()
+
+    @property
+    def closed(self) -> bool:
+        return self._closed
+
+    def close(self) -> None:
+        self.event_log.close()
+        self._closed = True
 
     def create_job(
         self,
@@ -34,6 +51,7 @@ class SQLiteJobQueue:
         source_git_commit: str = "",
         local_only: bool = True,
     ) -> JobEventRecord:
+        self._ensure_open()
         manifest = dict(input_manifest or {})
         validate_no_secret_like(manifest)
         payload = {
@@ -188,16 +206,20 @@ class SQLiteJobQueue:
         return self._append(job_id, JobEventType.JOB_CANCELLED, {"cancelled": True}, reason=reason)
 
     def get_job_state(self, job_id: str) -> ProjectedJobState:
+        self._ensure_open()
         events = self.event_log.get_events(job_id)
         return project_job_state(events)
 
     def list_jobs(self) -> list[ProjectedJobState]:
+        self._ensure_open()
         return list(self.replay_jobs().values())
 
     def replay_jobs(self) -> dict[str, ProjectedJobState]:
+        self._ensure_open()
         return project_all_jobs(self.event_log.get_all_events())
 
     def deterministic_snapshot_hash(self) -> str:
+        self._ensure_open()
         snapshot = {job_id: state.to_dict() for job_id, state in self.replay_jobs().items()}
         return stable_content_hash(snapshot)
 
@@ -209,17 +231,23 @@ class SQLiteJobQueue:
         *,
         reason: str | None,
     ) -> JobEventRecord:
+        self._ensure_open()
         try:
             return self.event_log.append_event(job_id=job_id, event_type=event_type, payload=payload, reason=reason)
         except EventLogError as exc:
             raise SQLiteJobQueueError(str(exc)) from exc
 
     def _job_is_dry_run(self, job_id: str) -> bool:
+        self._ensure_open()
         with self.database.connect() as connection:
             row = connection.execute("SELECT dry_run FROM jobs WHERE job_id = ?", (job_id,)).fetchone()
         if row is None:
             raise SQLiteJobQueueError(f"job is not recorded: {job_id}")
         return bool(row["dry_run"])
+
+    def _ensure_open(self) -> None:
+        if self._closed:
+            raise SQLiteJobQueueError("sqlite job queue is closed")
 
 
 def projected_jobs_to_json(states: list[ProjectedJobState]) -> str:

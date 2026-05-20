@@ -6,11 +6,12 @@ import hashlib
 import json
 import re
 import sqlite3
+from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from enum import StrEnum
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, Iterator
 
 CHUNK_SIZE = 4 * 1024 * 1024
 DEFAULT_STORAGE_ROOT = Path.home() / ".sovereign_engineering_os" / "artifacts"
@@ -373,10 +374,15 @@ class ArtifactStore:
                 (value, now, artifact_id),
             )
 
-    def _connect(self) -> sqlite3.Connection:
+    @contextmanager
+    def _connect(self) -> Iterator[sqlite3.Connection]:
         connection = sqlite3.connect(str(self.db_path))
         connection.row_factory = sqlite3.Row
-        return connection
+        try:
+            with connection:
+                yield connection
+        finally:
+            connection.close()
 
     @staticmethod
     def _ensure_schema_columns(connection: sqlite3.Connection) -> None:

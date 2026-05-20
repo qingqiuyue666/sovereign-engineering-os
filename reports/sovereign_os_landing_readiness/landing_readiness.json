@@ -1,0 +1,78 @@
+{
+  "artifact_store_status": {
+    "backend": "sqlite",
+    "large_binary_vendoring": false,
+    "metadata_only": true
+  },
+  "built_in_worker_status": {
+    "minimum_workers_present": true,
+    "registered_workers": [
+      "artifact_review",
+      "context_pack",
+      "git_status",
+      "hfx_008_materialization_dry_run"
+    ]
+  },
+  "current_git_commit": "0b40bcc9dbc3178c16f3c2db9a2fde6e7c0569d5",
+  "desktop_smoke_status": {
+    "gui_opened_by_tests": false,
+    "headless_entrypoint": "apps/desktop_local_smoke.py"
+  },
+  "final_claim_allowed": false,
+  "hfx_008_dry_run_landing_status": {
+    "chain_file": "kernel/os_engine/hfx_008_landing_chain.py",
+    "dry_run_only": true,
+    "human_review_required": true,
+    "physical_proof_created": false
+  },
+  "hfx_pipeline_scaffolding_status": {
+    "audit_file": "docs/research/hfx_pipeline_scaffolding_branch_audit_v1.md",
+    "decision": "defer",
+    "merged_now": false
+  },
+  "human_review_gate_status": {
+    "approval_required_for_final_claim": true,
+    "hard_gate": true
+  },
+  "local_runtime_status": {
+    "executed_jobs_on_init": 0,
+    "runtime_file": "kernel/os_engine/local_os_runtime.py",
+    "schema_version": 3,
+    "worker_count": 4
+  },
+  "next_real_run_command_list": [
+    "python3 -m kernel.vfx.hfx_topology_auditor --repo-root . --asset HFX_008 --write-audit",
+    "hython kernel/vfx/hfx_single_frame_prover.py --asset HFX_008 --operator-run",
+    "python3 tools/generate_sovereign_os_landing_readiness_report.py"
+  ],
+  "os_core_v2_v3_status": {
+    "artifact_store": "landed",
+    "event_sourced_projection": "landed",
+    "local_job_queue": "landed",
+    "sqlite_wal_brain": "landed",
+    "worker_registry": "landed"
+  },
+  "real_files_referenced": [
+    "kernel/os_engine/local_os_runtime.py",
+    "kernel/os_engine/builtin_workers.py",
+    "kernel/os_engine/local_job_runner.py",
+    "apps/desktop_local_smoke.py",
+    "kernel/os_engine/hfx_008_landing_chain.py",
+    "docs/operator/sovereign_os_local_landing_runbook_v1.md",
+    "docs/research/hfx_pipeline_scaffolding_branch_audit_v1.md"
+  ],
+  "remaining_blockers": [
+    "real HFX_008 visual proof artifact missing",
+    "human approval missing for final physical proof",
+    "external DCC proof must be run manually by an operator later"
+  ],
+  "resource_warning_status": {
+    "global_suppression": false,
+    "warning_as_error_tests": "tests/tracer_bullet/test_os_engine_sqlite_resource_cleanup.py"
+  },
+  "sqlite_wal_status": {
+    "db_path_runtime_owned": true,
+    "journal_mode": "wal",
+    "schema_version": 3
+  }
+}

@@ -378,6 +378,23 @@ class DesktopOsEngineFacade:
             artifact_root=self.runtime_root / "artifacts",
         )
         self.registry = build_default_worker_registry()
+        self._closed = False
+
+    def __enter__(self) -> "DesktopOsEngineFacade":
+        self.initialize()
+        return self
+
+    def __exit__(self, exc_type: object, exc: object, traceback: object) -> None:
+        _ = (exc_type, exc, traceback)
+        self.close()
+
+    def close(self) -> None:
+        if self._closed:
+            return
+        self.queue.close()
+        self.artifact_store.close()
+        self.database.close()
+        self._closed = True
 
     def initialize(self) -> None:
         self.database.initialize()

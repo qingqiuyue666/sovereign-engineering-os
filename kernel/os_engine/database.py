@@ -71,8 +71,33 @@ class OSDatabase:
         if busy_timeout_ms <= 0:
             raise DatabaseError("busy_timeout_ms must be positive")
         self.busy_timeout_ms = busy_timeout_ms
+        self._closed = False
+
+    def __enter__(self) -> "OSDatabase":
+        self._ensure_open()
+        self.initialize()
+        return self
+
+    def __exit__(self, exc_type: object, exc: object, traceback: object) -> None:
+        _ = (exc_type, exc, traceback)
+        self.close()
+
+    @property
+    def closed(self) -> bool:
+        return self._closed
+
+    def close(self) -> None:
+        """Close the database wrapper.
+
+        OSDatabase owns connections only inside connect() scopes. close() marks the
+        wrapper closed so higher-level bootstrap/runtime objects have a deterministic
+        release hook without relying on garbage collection.
+        """
+
+        self._closed = True
 
     def initialize(self) -> DatabaseSummary:
+        self._ensure_open()
         self.root.mkdir(parents=True, exist_ok=True)
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         with self.connect() as connection:
@@ -108,6 +133,7 @@ class OSDatabase:
 
     @contextlib.contextmanager
     def connect(self) -> Iterator[sqlite3.Connection]:
+        self._ensure_open()
         connection = sqlite3.connect(str(self.db_path))
         try:
             connection.row_factory = sqlite3.Row
@@ -134,6 +160,10 @@ class OSDatabase:
                     "SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name"
                 ).fetchall()
             )
+
+    def _ensure_open(self) -> None:
+        if self._closed:
+            raise DatabaseError("database wrapper is closed")
 
 
 def initialize_database(*, root: Path, db_path: Path, busy_timeout_ms: int = 5000) -> DatabaseSummary:

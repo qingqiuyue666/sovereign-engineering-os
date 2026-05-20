@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-import gc
 import sqlite3
 import tempfile
 import unittest
 import warnings
+from contextlib import closing
 from pathlib import Path
 
 from kernel.os_engine.database import DatabasePathError, OSDatabase, UnsafePayloadError, canonical_json, stable_content_hash
@@ -31,7 +31,7 @@ class OSEngineDatabaseWalTests(unittest.TestCase):
         self.assertTrue(summary.foreign_keys)
         for table in {"schema_version", "jobs", "job_events", "artifacts", "materializations", "human_reviews"}:
             self.assertIn(table, summary.tables)
-        with sqlite3.connect(self.db_path) as connection:
+        with closing(sqlite3.connect(self.db_path)) as connection:
             self.assertEqual(connection.execute("SELECT content_hash FROM schema_version").fetchone()[0], SCHEMA_CONTENT_HASH)
 
     def test_repeated_initialization_is_idempotent_and_preserves_data(self) -> None:
@@ -78,9 +78,6 @@ class OSEngineDatabaseWalTests(unittest.TestCase):
 
     def test_connection_cleanup_does_not_emit_resourcewarning(self) -> None:
         db = self._db()
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", ResourceWarning)
-            gc.collect()
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter("always", ResourceWarning)
             for _ in range(5):

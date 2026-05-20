@@ -46,7 +46,23 @@ class EventLog:
 
     def __init__(self, database: OSDatabase) -> None:
         self.database = database
+        self._closed = False
         self.database.initialize()
+
+    def __enter__(self) -> "EventLog":
+        self._ensure_open()
+        return self
+
+    def __exit__(self, exc_type: object, exc: object, traceback: object) -> None:
+        _ = (exc_type, exc, traceback)
+        self.close()
+
+    @property
+    def closed(self) -> bool:
+        return self._closed
+
+    def close(self) -> None:
+        self._closed = True
 
     def append_event(
         self,
@@ -56,6 +72,7 @@ class EventLog:
         payload: dict[str, Any] | None = None,
         reason: str | None = None,
     ) -> JobEventRecord:
+        self._ensure_open()
         event_type_value = _normalize_event_type(event_type)
         if not job_id or not isinstance(job_id, str):
             raise EventPayloadError("job_id is required")
@@ -137,6 +154,7 @@ class EventLog:
             return candidate
 
     def get_events(self, job_id: str) -> list[JobEventRecord]:
+        self._ensure_open()
         self.database.initialize()
         with self.database.connect() as connection:
             rows = connection.execute(
@@ -146,6 +164,7 @@ class EventLog:
         return [_record_from_row(row) for row in rows]
 
     def get_all_events(self) -> list[JobEventRecord]:
+        self._ensure_open()
         self.database.initialize()
         with self.database.connect() as connection:
             rows = connection.execute(
@@ -239,6 +258,10 @@ class EventLog:
         input_manifest = payload.get("input_manifest", payload)
         if not isinstance(input_manifest, dict):
             raise EventPayloadError("JobCreated input_manifest must be a JSON object")
+
+    def _ensure_open(self) -> None:
+        if self._closed:
+            raise EventLogError("event log is closed")
 
 
 def _normalize_event_type(event_type: str | JobEventType) -> str:
