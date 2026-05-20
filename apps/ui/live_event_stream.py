@@ -18,9 +18,14 @@ class LiveEventStream(QPlainTextEdit):
 
     def render_snapshot(self, snapshot: RuntimeSnapshot) -> None:
         self.setPlainText("\n".join(event.line() for event in snapshot.latest_events))
+        self.setToolTip(f"{len(snapshot.latest_events)} canonical event records")
 
     def append_event(self, event: EventRow) -> None:
         self.appendPlainText(event.line())
 
     def capped_blocks(self) -> int:
         return MAX_EVENT_BLOCKS
+
+    def rendered_lines(self) -> tuple[str, ...]:
+        text = self.toPlainText() if hasattr(self, "toPlainText") else ""
+        return tuple(line for line in text.splitlines() if line)

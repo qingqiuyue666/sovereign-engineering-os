@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from apps.ui import QColor, PYSIDE6_AVAILABLE, QPainter, QPen, QRect, QStyledItemDelegate, Qt
+from apps.ui.i18n import localize_status
 
 ALLOWED_STATUS_LABELS: tuple[str, ...] = (
     "Not Started",
@@ -75,12 +76,21 @@ def status_chip_colors(value: object) -> tuple[str, str]:
 class StatusChipDelegate(QStyledItemDelegate):
     """Compact QStyledItemDelegate that paints strict status labels as chips."""
 
+    def __init__(self, parent: object | None = None, *, language: str = "en") -> None:
+        super().__init__(parent)
+        self.language = language
+
+    def set_language(self, language: str) -> None:
+        self.language = language
+
     def paint(self, painter: QPainter, option: object, index: object) -> None:  # type: ignore[override]
         if not PYSIDE6_AVAILABLE:
             return
-        raw = index.data(Qt.ItemDataRole.DisplayRole)  # type: ignore[attr-defined]
+        job = index.data(Qt.ItemDataRole.UserRole)  # type: ignore[attr-defined]
+        raw = getattr(job, "status", None) or index.data(Qt.ItemDataRole.DisplayRole)  # type: ignore[attr-defined]
         label = normalize_status_label(raw)
         foreground, background = status_chip_colors(label)
+        display = localize_status(label, self.language)
         painter.save()
         rect = option.rect.adjusted(8, 5, -8, -5)  # type: ignore[attr-defined]
         chip = QRect(rect.left(), rect.top(), min(rect.width(), 230), rect.height())
@@ -89,7 +99,7 @@ class StatusChipDelegate(QStyledItemDelegate):
         painter.setBrush(QColor(background))
         painter.drawRoundedRect(chip, 6, 6)
         painter.setPen(QColor(foreground))
-        painter.drawText(chip, Qt.AlignmentFlag.AlignCenter, label)
+        painter.drawText(chip, Qt.AlignmentFlag.AlignCenter, display)
         painter.restore()
 
     def displayText(self, value: object, _locale: object) -> str:  # noqa: N802 - Qt API.
