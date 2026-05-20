@@ -1,0 +1,7 @@
+{
+  "alpha": "premultiply",
+  "contact_shadow": "multiply",
+  "emission": "plus",
+  "lightwrap": "screen_edge",
+  "zdepth": "depth_merge"
+}

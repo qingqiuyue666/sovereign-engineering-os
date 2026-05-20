@@ -1,0 +1,16 @@
+{
+  "renderers": [
+    "MaterialX",
+    "Karma",
+    "Redshift"
+  ],
+  "slots": [
+    "base_color",
+    "roughness",
+    "metallic",
+    "normal",
+    "displacement",
+    "opacity",
+    "emission"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "comp_working_space": "ACEScg",
+  "delivery_transform": "Rec709",
+  "input_plate_color_space": "ACEScg",
+  "lut_entries": [
+    "show_lut.cube"
+  ],
+  "lut_required": true,
+  "render_working_space": "ACEScg"
+}

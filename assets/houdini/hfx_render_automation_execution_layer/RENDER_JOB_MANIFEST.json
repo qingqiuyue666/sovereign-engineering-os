@@ -1,0 +1,21 @@
+{
+  "aovs": [
+    "Beauty",
+    "Emission",
+    "Alpha",
+    "ZDepth",
+    "MotionVector",
+    "Normal",
+    "Position",
+    "Cryptomatte"
+  ],
+  "frames": [
+    1001,
+    1002,
+    1003
+  ],
+  "job_id": "HFX_RENDER_JOB_001",
+  "output_dir": "/Users/qqy/Documents/Codex/2026-05-20/system-override-hfx-render-automation-hardening/sovereign-engineering-os/assets/houdini/hfx_render_automation_execution_layer/exr",
+  "renderer": "hython_dry_run",
+  "system_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS"
+}

@@ -1,0 +1,14 @@
+{
+  "artifacts": [
+    "PLATE_CAMERA_BINDING.json",
+    "PLATE_MANIFEST.json"
+  ],
+  "blockers": [],
+  "client_delivery_allowed": false,
+  "final_pixels_authorized": false,
+  "layer_id": "HFX_PLATE_CAMERA_IMPLEMENTATION_LAYER",
+  "seal_sha256": "866ef84b1135af105e3b95c5dbf40f176b3621d023a72e04b07ebaa1b63e658f",
+  "status": "PASS",
+  "system_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+  "validation_policy": "fail_closed"
+}

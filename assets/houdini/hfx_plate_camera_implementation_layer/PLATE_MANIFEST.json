@@ -1,0 +1,12 @@
+{
+  "actor_plate": "plates/actor_plate.mov",
+  "background_plate": "plates/background_plate.mov",
+  "clean_plate": "plates/clean_plate.mov",
+  "color_space": "ACEScg",
+  "frame_rate": 24,
+  "resolution": [
+    1920,
+    1080
+  ],
+  "shutter": "180deg"
+}

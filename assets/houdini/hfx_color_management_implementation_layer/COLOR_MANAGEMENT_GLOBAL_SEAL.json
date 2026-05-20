@@ -1,0 +1,14 @@
+{
+  "artifacts": [
+    "COLOR_MANAGEMENT_CONFIG.json",
+    "OCIO_ACES_MANIFEST.json"
+  ],
+  "blockers": [],
+  "client_delivery_allowed": false,
+  "final_pixels_authorized": false,
+  "layer_id": "HFX_COLOR_MANAGEMENT_IMPLEMENTATION_LAYER",
+  "seal_sha256": "718282d677ccd6b7ea6afd5a6a559b51328ab302a8811730a9e5b701aba2ab80",
+  "status": "PASS",
+  "system_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+  "validation_policy": "fail_closed"
+}

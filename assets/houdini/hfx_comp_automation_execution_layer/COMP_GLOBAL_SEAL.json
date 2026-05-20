@@ -1,0 +1,16 @@
+{
+  "artifacts": [
+    "AE_COMP_PROJECT_SKELETON.json",
+    "NUKE_COMP_TEMPLATE.nk"
+  ],
+  "blockers": [
+    "FINAL_COMP_BLOCKED"
+  ],
+  "client_delivery_allowed": false,
+  "final_pixels_authorized": false,
+  "layer_id": "HFX_COMP_AUTOMATION_EXECUTION_LAYER",
+  "seal_sha256": "da24a0822829be44e92c263a997574d082b914d57ea6f1bb0299340476b81c6c",
+  "status": "PASS",
+  "system_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+  "validation_policy": "fail_closed"
+}

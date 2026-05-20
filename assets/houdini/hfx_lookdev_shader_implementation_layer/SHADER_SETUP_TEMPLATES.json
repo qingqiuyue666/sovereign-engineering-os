@@ -1,0 +1,28 @@
+{
+  "shader_setups": {
+    "cloth": {
+      "approved_for_final_render": false,
+      "requires_lookdev_approval": true
+    },
+    "emission": {
+      "approved_for_final_render": false,
+      "requires_lookdev_approval": true
+    },
+    "glass": {
+      "approved_for_final_render": false,
+      "requires_lookdev_approval": true
+    },
+    "metal": {
+      "approved_for_final_render": false,
+      "requires_lookdev_approval": true
+    },
+    "rock": {
+      "approved_for_final_render": false,
+      "requires_lookdev_approval": true
+    },
+    "volume": {
+      "approved_for_final_render": false,
+      "requires_lookdev_approval": true
+    }
+  }
+}

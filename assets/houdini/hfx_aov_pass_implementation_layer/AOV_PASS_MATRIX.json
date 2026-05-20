@@ -1,0 +1,170 @@
+{
+  "assets": [
+    {
+      "asset_id": "HFX_008_ENERGY_SHOCKWAVE",
+      "required_aovs": [
+        "Beauty",
+        "Emission",
+        "Alpha",
+        "ZDepth",
+        "MotionVector",
+        "Normal",
+        "Position",
+        "Cryptomatte"
+      ]
+    },
+    {
+      "asset_id": "HFX_015_PORTAL_RING",
+      "required_aovs": [
+        "Beauty",
+        "Emission",
+        "Alpha",
+        "ZDepth",
+        "MotionVector",
+        "Normal",
+        "Position",
+        "Cryptomatte"
+      ]
+    },
+    {
+      "asset_id": "HFX_016_HEAT_DISTORTION",
+      "required_aovs": [
+        "Beauty",
+        "Emission",
+        "Alpha",
+        "ZDepth",
+        "MotionVector",
+        "Normal",
+        "Position",
+        "Cryptomatte"
+      ]
+    },
+    {
+      "asset_id": "HFX_021_ADVANCED_PYRO_EXPLOSION",
+      "required_aovs": [
+        "Beauty",
+        "Emission",
+        "Alpha",
+        "ZDepth",
+        "MotionVector",
+        "Normal",
+        "Position",
+        "Cryptomatte"
+      ]
+    },
+    {
+      "asset_id": "HFX_025_CHARACTER_ENERGY_FIELD",
+      "required_aovs": [
+        "Beauty",
+        "Emission",
+        "Alpha",
+        "ZDepth",
+        "MotionVector",
+        "Normal",
+        "Position",
+        "Cryptomatte"
+      ]
+    },
+    {
+      "asset_id": "HFX_027_SUMMONING_PORTAL_GATE",
+      "required_aovs": [
+        "Beauty",
+        "Emission",
+        "Alpha",
+        "ZDepth",
+        "MotionVector",
+        "Normal",
+        "Position",
+        "Cryptomatte"
+      ]
+    },
+    {
+      "asset_id": "HFX_028_SPACE_RIFT_TEAR",
+      "required_aovs": [
+        "Beauty",
+        "Emission",
+        "Alpha",
+        "ZDepth",
+        "MotionVector",
+        "Normal",
+        "Position",
+        "Cryptomatte"
+      ]
+    },
+    {
+      "asset_id": "HFX_029_BLACK_HOLE_ACCRETION_DISK",
+      "required_aovs": [
+        "Beauty",
+        "Emission",
+        "Alpha",
+        "ZDepth",
+        "MotionVector",
+        "Normal",
+        "Position",
+        "Cryptomatte"
+      ]
+    },
+    {
+      "asset_id": "HFX_033_GLOW_EMISSION_PASS",
+      "required_aovs": [
+        "Beauty",
+        "Emission",
+        "Alpha",
+        "ZDepth",
+        "MotionVector",
+        "Normal",
+        "Position",
+        "Cryptomatte"
+      ]
+    },
+    {
+      "asset_id": "HFX_036_ALPHA_HOLDOUT_MATTE",
+      "required_aovs": [
+        "Beauty",
+        "Emission",
+        "Alpha",
+        "ZDepth",
+        "MotionVector",
+        "Normal",
+        "Position",
+        "Cryptomatte"
+      ]
+    },
+    {
+      "asset_id": "HFX_037_LIGHTWRAP_RIM_INTERACTION",
+      "required_aovs": [
+        "Beauty",
+        "Emission",
+        "Alpha",
+        "ZDepth",
+        "MotionVector",
+        "Normal",
+        "Position",
+        "Cryptomatte"
+      ]
+    },
+    {
+      "asset_id": "HFX_038_CONTACTSHADOW_GROUND_INTEGRATION",
+      "required_aovs": [
+        "Beauty",
+        "Emission",
+        "Alpha",
+        "ZDepth",
+        "MotionVector",
+        "Normal",
+        "Position",
+        "Cryptomatte"
+      ]
+    }
+  ],
+  "required_aovs": [
+    "Beauty",
+    "Emission",
+    "Alpha",
+    "ZDepth",
+    "MotionVector",
+    "Normal",
+    "Position",
+    "Cryptomatte"
+  ]
+}

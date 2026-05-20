@@ -1,0 +1,140 @@
+{
+  "inbox_path": "/Users/qqy/Documents/Codex/2026-05-20/system-override-hfx-render-automation-hardening/sovereign-engineering-os/assets/houdini/hfx_resource_ingest_implementation_layer/fixtures/sample_inbox",
+  "manifest_id": "HFX_RESOURCE_MANIFEST",
+  "resource_count": 12,
+  "resources": [
+    {
+      "extension": ".abc",
+      "license": "internal_show_license_v001",
+      "metadata_path": "/Users/qqy/Documents/Codex/2026-05-20/system-override-hfx-render-automation-hardening/sovereign-engineering-os/assets/houdini/hfx_resource_ingest_implementation_layer/fixtures/sample_inbox/cache/creature.abc.metadata.json",
+      "path": "/Users/qqy/Documents/Codex/2026-05-20/system-override-hfx-render-automation-hardening/sovereign-engineering-os/assets/houdini/hfx_resource_ingest_implementation_layer/fixtures/sample_inbox/cache/creature.abc",
+      "relative_path": "cache/creature.abc",
+      "resource_id": "5e7f906bec4fcc2d",
+      "resource_type": "ABC",
+      "sha256": "070777954c0703689725e36dba0c911207bf67598c9c6cac64d03adce284e205",
+      "source": "deterministic_test_fixture"
+    },
+    {
+      "extension": ".hdr",
+      "license": "internal_show_license_v001",
+      "metadata_path": "/Users/qqy/Documents/Codex/2026-05-20/system-override-hfx-render-automation-hardening/sovereign-engineering-os/assets/houdini/hfx_resource_ingest_implementation_layer/fixtures/sample_inbox/lighting/studio.hdr.metadata.json",
+      "path": "/Users/qqy/Documents/Codex/2026-05-20/system-override-hfx-render-automation-hardening/sovereign-engineering-os/assets/houdini/hfx_resource_ingest_implementation_layer/fixtures/sample_inbox/lighting/studio.hdr",
+      "relative_path": "lighting/studio.hdr",
+      "resource_id": "79be0264450f11c8",
+      "resource_type": "HDRI",
+      "sha256": "0d5fbdbb8315062bf3f4f6182c3ad27a044b00851bcf8fdda14b03125f914dd3",
+      "source": "deterministic_test_fixture"
+    },
+    {
+      "extension": ".cube",
+      "license": "internal_show_license_v001",
+      "metadata_path": "/Users/qqy/Documents/Codex/2026-05-20/system-override-hfx-render-automation-hardening/sovereign-engineering-os/assets/houdini/hfx_resource_ingest_implementation_layer/fixtures/sample_inbox/color/show_lut.cube.metadata.json",
+      "path": "/Users/qqy/Documents/Codex/2026-05-20/system-override-hfx-render-automation-hardening/sovereign-engineering-os/assets/houdini/hfx_resource_ingest_implementation_layer/fixtures/sample_inbox/color/show_lut.cube",
+      "relative_path": "color/show_lut.cube",
+      "resource_id": "c0983038c2d662f1",
+      "resource_type": "LUT",
+      "sha256": "f9d723d3e2fb59c8e45ad7ca833c4dc77f09008b026815c0a3bc718f013eaf4b",
+      "source": "deterministic_test_fixture"
+    },
+    {
+      "extension": ".ocio",
+      "license": "internal_show_license_v001",
+      "metadata_path": "/Users/qqy/Documents/Codex/2026-05-20/system-override-hfx-render-automation-hardening/sovereign-engineering-os/assets/houdini/hfx_resource_ingest_implementation_layer/fixtures/sample_inbox/color/show_config.ocio.metadata.json",
+      "path": "/Users/qqy/Documents/Codex/2026-05-20/system-override-hfx-render-automation-hardening/sovereign-engineering-os/assets/houdini/hfx_resource_ingest_implementation_layer/fixtures/sample_inbox/color/show_config.ocio",
+      "relative_path": "color/show_config.ocio",
+      "resource_id": "28a4ac906d50f8ad",
+      "resource_type": "OCIO",
+      "sha256": "015deed3f7e92ed853993b295555138c7ed7e54654353d1a8258c894a30f1b4b",
+      "source": "deterministic_test_fixture"
+    },
+    {
+      "extension": ".png",
+      "license": "internal_show_license_v001",
+      "metadata_path": "/Users/qqy/Documents/Codex/2026-05-20/system-override-hfx-render-automation-hardening/sovereign-engineering-os/assets/houdini/hfx_resource_ingest_implementation_layer/fixtures/sample_inbox/pbr/hero_albedo.png.metadata.json",
+      "path": "/Users/qqy/Documents/Codex/2026-05-20/system-override-hfx-render-automation-hardening/sovereign-engineering-os/assets/houdini/hfx_resource_ingest_implementation_layer/fixtures/sample_inbox/pbr/hero_albedo.png",
+      "relative_path": "pbr/hero_albedo.png",
+      "resource_id": "c65951b5286daa3d",
+      "resource_type": "PBR",
+      "sha256": "32d7cf660c6805169c98b1f78c8402f9ef11a8cd82ec770fcce2196ced898891",
+      "source": "deterministic_test_fixture"
+    },
+    {
+      "extension": ".usd",
+      "license": "internal_show_license_v001",
+      "metadata_path": "/Users/qqy/Documents/Codex/2026-05-20/system-override-hfx-render-automation-hardening/sovereign-engineering-os/assets/houdini/hfx_resource_ingest_implementation_layer/fixtures/sample_inbox/cache/env.usd.metadata.json",
+      "path": "/Users/qqy/Documents/Codex/2026-05-20/system-override-hfx-render-automation-hardening/sovereign-engineering-os/assets/houdini/hfx_resource_ingest_implementation_layer/fixtures/sample_inbox/cache/env.usd",
+      "relative_path": "cache/env.usd",
+      "resource_id": "a37b18ac6f5611e5",
+      "resource_type": "USD",
+      "sha256": "2aed837dac0b27fb232952256580c84fdc7eae9e3afee0d0a935644080655fd3",
+      "source": "deterministic_test_fixture"
+    },
+    {
+      "extension": ".vdb",
+      "license": "internal_show_license_v001",
+      "metadata_path": "/Users/qqy/Documents/Codex/2026-05-20/system-override-hfx-render-automation-hardening/sovereign-engineering-os/assets/houdini/hfx_resource_ingest_implementation_layer/fixtures/sample_inbox/fx/smoke.vdb.metadata.json",
+      "path": "/Users/qqy/Documents/Codex/2026-05-20/system-override-hfx-render-automation-hardening/sovereign-engineering-os/assets/houdini/hfx_resource_ingest_implementation_layer/fixtures/sample_inbox/fx/smoke.vdb",
+      "relative_path": "fx/smoke.vdb",
+      "resource_id": "f5b3b25c6d8b65f4",
+      "resource_type": "VDB",
+      "sha256": "425cd271694f4756f6bebdaa721b97b879ce5ba5ad509f7b3ac320928e6879fe",
+      "source": "deterministic_test_fixture"
+    },
+    {
+      "extension": ".json",
+      "license": "internal_show_license_v001",
+      "metadata_path": "/Users/qqy/Documents/Codex/2026-05-20/system-override-hfx-render-automation-hardening/sovereign-engineering-os/assets/houdini/hfx_resource_ingest_implementation_layer/fixtures/sample_inbox/camera/shot_camera.camera.json.metadata.json",
+      "path": "/Users/qqy/Documents/Codex/2026-05-20/system-override-hfx-render-automation-hardening/sovereign-engineering-os/assets/houdini/hfx_resource_ingest_implementation_layer/fixtures/sample_inbox/camera/shot_camera.camera.json",
+      "relative_path": "camera/shot_camera.camera.json",
+      "resource_id": "318ad29f1556fe92",
+      "resource_type": "camera",
+      "sha256": "0d07267bb12b8eba8e5682f9c3000268fbae6430d6229263a731484ec88a0187",
+      "source": "deterministic_test_fixture"
+    },
+    {
+      "extension": ".json",
+      "license": "internal_show_license_v001",
+      "metadata_path": "/Users/qqy/Documents/Codex/2026-05-20/system-override-hfx-render-automation-hardening/sovereign-engineering-os/assets/houdini/hfx_resource_ingest_implementation_layer/fixtures/sample_inbox/lens/shot_lens.lens.json.metadata.json",
+      "path": "/Users/qqy/Documents/Codex/2026-05-20/system-override-hfx-render-automation-hardening/sovereign-engineering-os/assets/houdini/hfx_resource_ingest_implementation_layer/fixtures/sample_inbox/lens/shot_lens.lens.json",
+      "relative_path": "lens/shot_lens.lens.json",
+      "resource_id": "bf9087c0c845c84e",
+      "resource_type": "lens",
+      "sha256": "f5c6d6d74b1acae8cdebab54b797a084eecee6fbf24583d76c23cef31fc9d967",
+      "source": "deterministic_test_fixture"
+    },
+    {
+      "extension": ".obj",
+      "license": "internal_show_license_v001",
+      "metadata_path": "/Users/qqy/Documents/Codex/2026-05-20/system-override-hfx-render-automation-hardening/sovereign-engineering-os/assets/houdini/hfx_resource_ingest_implementation_layer/fixtures/sample_inbox/model/hero_model.obj.metadata.json",
+      "path": "/Users/qqy/Documents/Codex/2026-05-20/system-override-hfx-render-automation-hardening/sovereign-engineering-os/assets/houdini/hfx_resource_ingest_implementation_layer/fixtures/sample_inbox/model/hero_model.obj",
+      "relative_path": "model/hero_model.obj",
+      "resource_id": "271eb68c04d8509a",
+      "resource_type": "model",
+      "sha256": "159f75428ed49be4be5e82dd96513f7f866d89db44f10a4e8aea6d01754eba2d",
+      "source": "deterministic_test_fixture"
+    },
+    {
+      "extension": ".mov",
+      "license": "internal_show_license_v001",
+      "metadata_path": "/Users/qqy/Documents/Codex/2026-05-20/system-override-hfx-render-automation-hardening/sovereign-engineering-os/assets/houdini/hfx_resource_ingest_implementation_layer/fixtures/sample_inbox/plates/shot_actor_plate.mov.metadata.json",
+      "path": "/Users/qqy/Documents/Codex/2026-05-20/system-override-hfx-render-automation-hardening/sovereign-engineering-os/assets/houdini/hfx_resource_ingest_implementation_layer/fixtures/sample_inbox/plates/shot_actor_plate.mov",
+      "relative_path": "plates/shot_actor_plate.mov",
+      "resource_id": "6ada6387e6845179",
+      "resource_type": "plate",
+      "sha256": "9dab9c42718fbdacd282e9c58779d3ea9d0f7d17badee384a2094cbf7bde2637",
+      "source": "deterministic_test_fixture"
+    },
+    {
+      "extension": ".mtlx",
+      "license": "internal_show_license_v001",
+      "metadata_path": "/Users/qqy/Documents/Codex/2026-05-20/system-override-hfx-render-automation-hardening/sovereign-engineering-os/assets/houdini/hfx_resource_ingest_implementation_layer/fixtures/sample_inbox/shader/hero_material.mtlx.metadata.json",
+      "path": "/Users/qqy/Documents/Codex/2026-05-20/system-override-hfx-render-automation-hardening/sovereign-engineering-os/assets/houdini/hfx_resource_ingest_implementation_layer/fixtures/sample_inbox/shader/hero_material.mtlx",
+      "relative_path": "shader/hero_material.mtlx",
+      "resource_id": "55746015687ede62",
+      "resource_type": "shader",
+      "sha256": "e8a1410873fd8131f67cfb25d7ad6940bcd174b2bc1d4a5bcd80185593b8ab0d",
+      "source": "deterministic_test_fixture"
+    }
+  ],
+  "system_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS"
+}

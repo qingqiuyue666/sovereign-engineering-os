@@ -1,0 +1,12 @@
+{
+  "client_delivery_allowed": false,
+  "contract_id": "HFX_RESOURCE_INGEST_IMPLEMENTATION_LAYER_CONTRACT",
+  "final_pixels_authorized": false,
+  "rules": [
+    "fail_closed",
+    "deterministic_outputs",
+    "no_final_pixel_claim_without_evidence"
+  ],
+  "system_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+  "validation_policy": "fail_closed"
+}

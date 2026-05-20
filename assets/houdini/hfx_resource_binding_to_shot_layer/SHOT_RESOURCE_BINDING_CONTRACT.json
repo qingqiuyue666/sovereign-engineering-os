@@ -1,0 +1,16 @@
+{
+  "client_delivery_allowed": false,
+  "contract_id": "SHOT_RESOURCE_BINDING_CONTRACT",
+  "final_pixels_authorized": false,
+  "rules": [
+    "PBR->shader",
+    "HDRI->lighting",
+    "VDB->FX",
+    "ABC/USD->geometry",
+    "plate->comp",
+    "camera/lens->shot_camera",
+    "LUT/OCIO->color"
+  ],
+  "system_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+  "validation_policy": "fail_closed"
+}

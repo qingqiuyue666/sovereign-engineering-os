@@ -1,0 +1,5 @@
+{
+  "approved": false,
+  "reason": "Lookdev approval is absent in deterministic implementation output.",
+  "status": "LOOKDEV_APPROVAL_BLOCKED"
+}

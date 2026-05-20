@@ -1,0 +1,12 @@
+{
+  "client_delivery_allowed": false,
+  "contract_id": "DELIVERY_PACKAGE_CONTRACT",
+  "final_pixels_authorized": false,
+  "rules": [
+    "final_pixel_approval_required",
+    "checksums_required",
+    "license_evidence_required"
+  ],
+  "system_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+  "validation_policy": "fail_closed"
+}

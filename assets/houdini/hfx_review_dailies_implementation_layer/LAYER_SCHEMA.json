@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "system_state": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "system_state"
+  ],
+  "title": "hfx_review_dailies_implementation_layer",
+  "type": "object"
+}

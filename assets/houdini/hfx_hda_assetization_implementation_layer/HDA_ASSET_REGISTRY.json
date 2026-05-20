@@ -1,0 +1,210 @@
+{
+  "asset_count": 12,
+  "assets": [
+    {
+      "asset_id": "HFX_008_ENERGY_SHOCKWAVE",
+      "changelog_entry": "Registered HFX_008_ENERGY_SHOCKWAVE for deterministic HDA assetization.",
+      "hda_otl_path": "assets/houdini/hfx_factory_core12/300_PRODUCTION_UPGRADE/HFX_008_ENERGY_SHOCKWAVE/10_release/release_package/source/hfx_008_energy_shockwave_v001.hda",
+      "locked_parameters": [
+        "asset_id",
+        "version",
+        "publish_root",
+        "internal_solver_controls"
+      ],
+      "parameter_interface_contract": "HFX_008_ENERGY_SHOCKWAVE_PARAMETER_INTERFACE",
+      "readiness_status": "READY",
+      "release_immutable": true,
+      "rollback_target": "previous_published_version",
+      "version": "v001",
+      "write_policy": "read_only_manifest_enforced"
+    },
+    {
+      "asset_id": "HFX_015_PORTAL_RING",
+      "changelog_entry": "Registered HFX_015_PORTAL_RING for deterministic HDA assetization.",
+      "hda_otl_path": "assets/houdini/hfx_factory_core12/300_PRODUCTION_UPGRADE/HFX_015_PORTAL_RING/10_release/release_package/source/hfx_015_portal_ring_v002.hda",
+      "locked_parameters": [
+        "asset_id",
+        "version",
+        "publish_root",
+        "internal_solver_controls"
+      ],
+      "parameter_interface_contract": "HFX_015_PORTAL_RING_PARAMETER_INTERFACE",
+      "readiness_status": "READY",
+      "release_immutable": true,
+      "rollback_target": "previous_published_version",
+      "version": "v002",
+      "write_policy": "read_only_manifest_enforced"
+    },
+    {
+      "asset_id": "HFX_016_HEAT_DISTORTION",
+      "changelog_entry": "Registered HFX_016_HEAT_DISTORTION for deterministic HDA assetization.",
+      "hda_otl_path": "assets/houdini/hfx_factory_core12/300_PRODUCTION_UPGRADE/HFX_016_HEAT_DISTORTION/10_release/release_package/source/hfx_016_heat_distortion_v003.hda",
+      "locked_parameters": [
+        "asset_id",
+        "version",
+        "publish_root",
+        "internal_solver_controls"
+      ],
+      "parameter_interface_contract": "HFX_016_HEAT_DISTORTION_PARAMETER_INTERFACE",
+      "readiness_status": "READY",
+      "release_immutable": true,
+      "rollback_target": "previous_published_version",
+      "version": "v003",
+      "write_policy": "read_only_manifest_enforced"
+    },
+    {
+      "asset_id": "HFX_021_ADVANCED_PYRO_EXPLOSION",
+      "changelog_entry": "Registered HFX_021_ADVANCED_PYRO_EXPLOSION for deterministic HDA assetization.",
+      "hda_otl_path": "assets/houdini/hfx_factory_core12/300_PRODUCTION_UPGRADE/HFX_021_ADVANCED_PYRO_EXPLOSION/10_release/release_package/source/hfx_021_advanced_pyro_explosion_v004.hda",
+      "locked_parameters": [
+        "asset_id",
+        "version",
+        "publish_root",
+        "internal_solver_controls"
+      ],
+      "parameter_interface_contract": "HFX_021_ADVANCED_PYRO_EXPLOSION_PARAMETER_INTERFACE",
+      "readiness_status": "READY",
+      "release_immutable": true,
+      "rollback_target": "previous_published_version",
+      "version": "v004",
+      "write_policy": "read_only_manifest_enforced"
+    },
+    {
+      "asset_id": "HFX_025_CHARACTER_ENERGY_FIELD",
+      "changelog_entry": "Registered HFX_025_CHARACTER_ENERGY_FIELD for deterministic HDA assetization.",
+      "hda_otl_path": "assets/houdini/hfx_factory_core12/300_PRODUCTION_UPGRADE/HFX_025_CHARACTER_ENERGY_FIELD/10_release/release_package/source/hfx_025_character_energy_field_v005.hda",
+      "locked_parameters": [
+        "asset_id",
+        "version",
+        "publish_root",
+        "internal_solver_controls"
+      ],
+      "parameter_interface_contract": "HFX_025_CHARACTER_ENERGY_FIELD_PARAMETER_INTERFACE",
+      "readiness_status": "READY",
+      "release_immutable": true,
+      "rollback_target": "previous_published_version",
+      "version": "v005",
+      "write_policy": "read_only_manifest_enforced"
+    },
+    {
+      "asset_id": "HFX_027_SUMMONING_PORTAL_GATE",
+      "changelog_entry": "Registered HFX_027_SUMMONING_PORTAL_GATE for deterministic HDA assetization.",
+      "hda_otl_path": "assets/houdini/hfx_factory_core12/300_PRODUCTION_UPGRADE/HFX_027_SUMMONING_PORTAL_GATE/10_release/release_package/source/hfx_027_summoning_portal_gate_v006.hda",
+      "locked_parameters": [
+        "asset_id",
+        "version",
+        "publish_root",
+        "internal_solver_controls"
+      ],
+      "parameter_interface_contract": "HFX_027_SUMMONING_PORTAL_GATE_PARAMETER_INTERFACE",
+      "readiness_status": "READY",
+      "release_immutable": true,
+      "rollback_target": "previous_published_version",
+      "version": "v006",
+      "write_policy": "read_only_manifest_enforced"
+    },
+    {
+      "asset_id": "HFX_028_SPACE_RIFT_TEAR",
+      "changelog_entry": "Registered HFX_028_SPACE_RIFT_TEAR for deterministic HDA assetization.",
+      "hda_otl_path": "assets/houdini/hfx_factory_core12/300_PRODUCTION_UPGRADE/HFX_028_SPACE_RIFT_TEAR/10_release/release_package/source/hfx_028_space_rift_tear_v007.hda",
+      "locked_parameters": [
+        "asset_id",
+        "version",
+        "publish_root",
+        "internal_solver_controls"
+      ],
+      "parameter_interface_contract": "HFX_028_SPACE_RIFT_TEAR_PARAMETER_INTERFACE",
+      "readiness_status": "READY",
+      "release_immutable": true,
+      "rollback_target": "previous_published_version",
+      "version": "v007",
+      "write_policy": "read_only_manifest_enforced"
+    },
+    {
+      "asset_id": "HFX_029_BLACK_HOLE_ACCRETION_DISK",
+      "changelog_entry": "Registered HFX_029_BLACK_HOLE_ACCRETION_DISK for deterministic HDA assetization.",
+      "hda_otl_path": "assets/houdini/hfx_factory_core12/300_PRODUCTION_UPGRADE/HFX_029_BLACK_HOLE_ACCRETION_DISK/10_release/release_package/source/hfx_029_black_hole_accretion_disk_v008.hda",
+      "locked_parameters": [
+        "asset_id",
+        "version",
+        "publish_root",
+        "internal_solver_controls"
+      ],
+      "parameter_interface_contract": "HFX_029_BLACK_HOLE_ACCRETION_DISK_PARAMETER_INTERFACE",
+      "readiness_status": "READY",
+      "release_immutable": true,
+      "rollback_target": "previous_published_version",
+      "version": "v008",
+      "write_policy": "read_only_manifest_enforced"
+    },
+    {
+      "asset_id": "HFX_033_GLOW_EMISSION_PASS",
+      "changelog_entry": "Registered HFX_033_GLOW_EMISSION_PASS for deterministic HDA assetization.",
+      "hda_otl_path": "assets/houdini/hfx_factory_core12/300_PRODUCTION_UPGRADE/HFX_033_GLOW_EMISSION_PASS/10_release/release_package/source/hfx_033_glow_emission_pass_v009.hda",
+      "locked_parameters": [
+        "asset_id",
+        "version",
+        "publish_root",
+        "internal_solver_controls"
+      ],
+      "parameter_interface_contract": "HFX_033_GLOW_EMISSION_PASS_PARAMETER_INTERFACE",
+      "readiness_status": "READY",
+      "release_immutable": true,
+      "rollback_target": "previous_published_version",
+      "version": "v009",
+      "write_policy": "read_only_manifest_enforced"
+    },
+    {
+      "asset_id": "HFX_036_ALPHA_HOLDOUT_MATTE",
+      "changelog_entry": "Registered HFX_036_ALPHA_HOLDOUT_MATTE for deterministic HDA assetization.",
+      "hda_otl_path": "assets/houdini/hfx_factory_core12/300_PRODUCTION_UPGRADE/HFX_036_ALPHA_HOLDOUT_MATTE/10_release/release_package/source/hfx_036_alpha_holdout_matte_v010.hda",
+      "locked_parameters": [
+        "asset_id",
+        "version",
+        "publish_root",
+        "internal_solver_controls"
+      ],
+      "parameter_interface_contract": "HFX_036_ALPHA_HOLDOUT_MATTE_PARAMETER_INTERFACE",
+      "readiness_status": "READY",
+      "release_immutable": true,
+      "rollback_target": "previous_published_version",
+      "version": "v010",
+      "write_policy": "read_only_manifest_enforced"
+    },
+    {
+      "asset_id": "HFX_037_LIGHTWRAP_RIM_INTERACTION",
+      "changelog_entry": "Registered HFX_037_LIGHTWRAP_RIM_INTERACTION for deterministic HDA assetization.",
+      "hda_otl_path": "assets/houdini/hfx_factory_core12/300_PRODUCTION_UPGRADE/HFX_037_LIGHTWRAP_RIM_INTERACTION/10_release/release_package/source/hfx_037_lightwrap_rim_interaction_v011.hda",
+      "locked_parameters": [
+        "asset_id",
+        "version",
+        "publish_root",
+        "internal_solver_controls"
+      ],
+      "parameter_interface_contract": "HFX_037_LIGHTWRAP_RIM_INTERACTION_PARAMETER_INTERFACE",
+      "readiness_status": "READY",
+      "release_immutable": true,
+      "rollback_target": "previous_published_version",
+      "version": "v011",
+      "write_policy": "read_only_manifest_enforced"
+    },
+    {
+      "asset_id": "HFX_038_CONTACTSHADOW_GROUND_INTEGRATION",
+      "changelog_entry": "Registered HFX_038_CONTACTSHADOW_GROUND_INTEGRATION for deterministic HDA assetization.",
+      "hda_otl_path": "assets/houdini/hfx_factory_core12/300_PRODUCTION_UPGRADE/HFX_038_CONTACTSHADOW_GROUND_INTEGRATION/10_release/release_package/source/hfx_038_contactshadow_ground_integration_v012.hda",
+      "locked_parameters": [
+        "asset_id",
+        "version",
+        "publish_root",
+        "internal_solver_controls"
+      ],
+      "parameter_interface_contract": "HFX_038_CONTACTSHADOW_GROUND_INTEGRATION_PARAMETER_INTERFACE",
+      "readiness_status": "READY",
+      "release_immutable": true,
+      "rollback_target": "previous_published_version",
+      "version": "v012",
+      "write_policy": "read_only_manifest_enforced"
+    }
+  ],
+  "system_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS"
+}

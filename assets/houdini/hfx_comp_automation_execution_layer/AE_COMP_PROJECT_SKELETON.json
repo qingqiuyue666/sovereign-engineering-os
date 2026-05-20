@@ -1,0 +1,13 @@
+{
+  "layers": [
+    "Beauty",
+    "Emission",
+    "Alpha",
+    "ZDepth",
+    "MotionVector",
+    "Normal",
+    "Position",
+    "Cryptomatte"
+  ],
+  "project": "AE_COMP_PROJECT_SKELETON"
+}

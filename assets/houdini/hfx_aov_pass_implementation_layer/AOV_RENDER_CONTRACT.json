@@ -1,0 +1,15 @@
+{
+  "aov_matrix": "AOV_PASS_MATRIX.json",
+  "contract_id": "AOV_RENDER_CONTRACT",
+  "prohibit_beauty_only": true,
+  "required_aovs": [
+    "Beauty",
+    "Emission",
+    "Alpha",
+    "ZDepth",
+    "MotionVector",
+    "Normal",
+    "Position",
+    "Cryptomatte"
+  ]
+}

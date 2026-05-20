@@ -1,0 +1,12 @@
+{
+  "checksums": [
+    {
+      "path": "HFX_MASTER_PIPELINE_FILE_MANIFEST.json",
+      "sha256": "be859fa10a6c79e3f219af7ea7833f1d5da366fa5c036152529988ba57c9602c"
+    },
+    {
+      "path": "HFX_MASTER_PIPELINE_GLOBAL_SEAL.json",
+      "sha256": "b130b33adffb842ccf61c1f46952c831e7f3cda6e14a69ad9586117fdb35613a"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "node_tree": "DAVINCI_NODE_TREE_SKELETON",
+  "nodes": [
+    "input",
+    "grade",
+    "output"
+  ]
+}

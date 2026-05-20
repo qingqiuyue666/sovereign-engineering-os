@@ -1,0 +1,10 @@
+# HFX generated Nuke comp dry-run template
+Root { name HFX_COMP_TEMPLATE }
+Read { name Read_Beauty file {Beauty.exr} }
+Read { name Read_Emission file {Emission.exr} }
+Read { name Read_Alpha file {Alpha.exr} }
+Read { name Read_ZDepth file {ZDepth.exr} }
+Read { name Read_MotionVector file {MotionVector.exr} }
+Read { name Read_Normal file {Normal.exr} }
+Read { name Read_Position file {Position.exr} }
+Read { name Read_Cryptomatte file {Cryptomatte.exr} }

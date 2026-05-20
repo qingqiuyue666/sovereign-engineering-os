@@ -1,0 +1,16 @@
+{
+  "artifacts": [
+    "MATERIAL_BINDING_CONTRACT.json",
+    "SHADER_SLOT_REGISTRY.json"
+  ],
+  "blockers": [
+    "LOOKDEV_APPROVAL_BLOCKED"
+  ],
+  "client_delivery_allowed": false,
+  "final_pixels_authorized": false,
+  "layer_id": "HFX_LOOKDEV_SHADER_IMPLEMENTATION_LAYER",
+  "seal_sha256": "ba42e3662ad73868c608d584c3ad2e9ccc28be9ffb80c9e6e1cf69d526ed84b6",
+  "status": "PASS",
+  "system_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+  "validation_policy": "fail_closed"
+}

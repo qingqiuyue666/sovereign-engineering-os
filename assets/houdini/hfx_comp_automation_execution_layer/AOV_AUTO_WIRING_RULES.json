@@ -1,0 +1,22 @@
+{
+  "aov_inputs": [
+    "Beauty",
+    "Emission",
+    "Alpha",
+    "ZDepth",
+    "MotionVector",
+    "Normal",
+    "Position",
+    "Cryptomatte"
+  ],
+  "rules": {
+    "Alpha": "wire_Alpha",
+    "Beauty": "wire_Beauty",
+    "Cryptomatte": "wire_Cryptomatte",
+    "Emission": "wire_Emission",
+    "MotionVector": "wire_MotionVector",
+    "Normal": "wire_Normal",
+    "Position": "wire_Position",
+    "ZDepth": "wire_ZDepth"
+  }
+}

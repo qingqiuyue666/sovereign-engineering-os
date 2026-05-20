@@ -1,0 +1,16 @@
+{
+  "artifacts": [
+    "DAILIES_REPORT.json",
+    "VISUAL_QC_CHECKLIST.json"
+  ],
+  "blockers": [
+    "REVIEW_APPROVAL_BLOCKED"
+  ],
+  "client_delivery_allowed": false,
+  "final_pixels_authorized": false,
+  "layer_id": "HFX_REVIEW_DAILIES_IMPLEMENTATION_LAYER",
+  "seal_sha256": "5da6daba8ab203d56026d33d58d7f574846b905dad877857b197bf88de5fda55",
+  "status": "PASS",
+  "system_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+  "validation_policy": "fail_closed"
+}

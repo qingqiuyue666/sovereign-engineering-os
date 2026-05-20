@@ -1,0 +1,16 @@
+{
+  "artifacts": [
+    "RENDER_JOB_MANIFEST.json",
+    "RENDER_QUEUE.json"
+  ],
+  "blockers": [
+    "BLOCKED_FAIL_CLOSED"
+  ],
+  "client_delivery_allowed": false,
+  "final_pixels_authorized": false,
+  "layer_id": "HFX_RENDER_AUTOMATION_EXECUTION_LAYER",
+  "seal_sha256": "d00ff0915d586ecf23400a6a506728c1a8dc8ea1b2478c0c19d417ec6f02b8b3",
+  "status": "PASS",
+  "system_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+  "validation_policy": "fail_closed"
+}

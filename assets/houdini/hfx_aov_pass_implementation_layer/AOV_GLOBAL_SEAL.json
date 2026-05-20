@@ -1,0 +1,14 @@
+{
+  "artifacts": [
+    "AOV_PASS_MATRIX.json",
+    "AOV_RENDER_CONTRACT.json"
+  ],
+  "blockers": [],
+  "client_delivery_allowed": false,
+  "final_pixels_authorized": false,
+  "layer_id": "HFX_AOV_PASS_IMPLEMENTATION_LAYER",
+  "seal_sha256": "9cc683244336bc439f8026449c58fab835d1d389a8664aa3dec508a49adfc347",
+  "status": "PASS",
+  "system_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+  "validation_policy": "fail_closed"
+}

@@ -1,0 +1,13 @@
+{
+  "delivery_id": "HFX_DELIVERY_PACKAGE",
+  "required_contents": [
+    "EXR",
+    "comp",
+    "review_movie",
+    "logs",
+    "license",
+    "checksum",
+    "changelog",
+    "approval_report"
+  ]
+}

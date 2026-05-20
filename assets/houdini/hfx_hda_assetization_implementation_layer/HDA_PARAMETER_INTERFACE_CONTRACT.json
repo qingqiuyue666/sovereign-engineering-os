@@ -1,0 +1,114 @@
+{
+  "all_interfaces_locked": true,
+  "assets": [
+    {
+      "asset_id": "HFX_008_ENERGY_SHOCKWAVE",
+      "locked_parameters": [
+        "asset_id",
+        "version",
+        "publish_root",
+        "internal_solver_controls"
+      ]
+    },
+    {
+      "asset_id": "HFX_015_PORTAL_RING",
+      "locked_parameters": [
+        "asset_id",
+        "version",
+        "publish_root",
+        "internal_solver_controls"
+      ]
+    },
+    {
+      "asset_id": "HFX_016_HEAT_DISTORTION",
+      "locked_parameters": [
+        "asset_id",
+        "version",
+        "publish_root",
+        "internal_solver_controls"
+      ]
+    },
+    {
+      "asset_id": "HFX_021_ADVANCED_PYRO_EXPLOSION",
+      "locked_parameters": [
+        "asset_id",
+        "version",
+        "publish_root",
+        "internal_solver_controls"
+      ]
+    },
+    {
+      "asset_id": "HFX_025_CHARACTER_ENERGY_FIELD",
+      "locked_parameters": [
+        "asset_id",
+        "version",
+        "publish_root",
+        "internal_solver_controls"
+      ]
+    },
+    {
+      "asset_id": "HFX_027_SUMMONING_PORTAL_GATE",
+      "locked_parameters": [
+        "asset_id",
+        "version",
+        "publish_root",
+        "internal_solver_controls"
+      ]
+    },
+    {
+      "asset_id": "HFX_028_SPACE_RIFT_TEAR",
+      "locked_parameters": [
+        "asset_id",
+        "version",
+        "publish_root",
+        "internal_solver_controls"
+      ]
+    },
+    {
+      "asset_id": "HFX_029_BLACK_HOLE_ACCRETION_DISK",
+      "locked_parameters": [
+        "asset_id",
+        "version",
+        "publish_root",
+        "internal_solver_controls"
+      ]
+    },
+    {
+      "asset_id": "HFX_033_GLOW_EMISSION_PASS",
+      "locked_parameters": [
+        "asset_id",
+        "version",
+        "publish_root",
+        "internal_solver_controls"
+      ]
+    },
+    {
+      "asset_id": "HFX_036_ALPHA_HOLDOUT_MATTE",
+      "locked_parameters": [
+        "asset_id",
+        "version",
+        "publish_root",
+        "internal_solver_controls"
+      ]
+    },
+    {
+      "asset_id": "HFX_037_LIGHTWRAP_RIM_INTERACTION",
+      "locked_parameters": [
+        "asset_id",
+        "version",
+        "publish_root",
+        "internal_solver_controls"
+      ]
+    },
+    {
+      "asset_id": "HFX_038_CONTACTSHADOW_GROUND_INTEGRATION",
+      "locked_parameters": [
+        "asset_id",
+        "version",
+        "publish_root",
+        "internal_solver_controls"
+      ]
+    }
+  ],
+  "contract_id": "HDA_PARAMETER_INTERFACE_CONTRACT"
+}

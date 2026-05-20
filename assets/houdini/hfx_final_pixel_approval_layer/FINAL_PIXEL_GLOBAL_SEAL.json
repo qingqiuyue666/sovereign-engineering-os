@@ -1,0 +1,20 @@
+{
+  "artifacts": [
+    "FINAL_PIXEL_APPROVAL_REPORT.json"
+  ],
+  "blockers": [
+    "aov_completeness",
+    "color_management",
+    "comp_output",
+    "exr_outputs",
+    "resource_license",
+    "review_approval"
+  ],
+  "client_delivery_allowed": false,
+  "final_pixels_authorized": false,
+  "layer_id": "HFX_FINAL_PIXEL_APPROVAL_LAYER",
+  "seal_sha256": "b43be9bf285e2d6a82000f8b5d32f135b40c8062d8e423d70d007884d64018b2",
+  "status": "BLOCKED_FAIL_CLOSED",
+  "system_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+  "validation_policy": "fail_closed"
+}

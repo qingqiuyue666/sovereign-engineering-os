@@ -1,0 +1,11 @@
+{
+  "blockers": [
+    "aov_completeness",
+    "color_management",
+    "comp_output",
+    "exr_outputs",
+    "resource_license",
+    "review_approval"
+  ],
+  "status": "BLOCKED"
+}

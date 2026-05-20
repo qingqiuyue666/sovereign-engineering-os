@@ -1,0 +1,21 @@
+{
+  "blockers": [
+    "aov_completeness",
+    "color_management",
+    "comp_output",
+    "exr_outputs",
+    "resource_license",
+    "review_approval"
+  ],
+  "checks": {
+    "aov_completeness": false,
+    "color_management": false,
+    "comp_output": false,
+    "exr_outputs": false,
+    "resource_license": false,
+    "review_approval": false
+  },
+  "final_pixels_authorized": false,
+  "status": "FINAL_PIXEL_APPROVAL_BLOCKED",
+  "system_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS"
+}

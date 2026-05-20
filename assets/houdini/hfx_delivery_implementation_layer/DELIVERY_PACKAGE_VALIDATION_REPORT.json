@@ -1,0 +1,10 @@
+{
+  "missing": [
+    "final_pixel_approval",
+    "checksum",
+    "license_evidence",
+    "approval_report",
+    "delivery_package_complete"
+  ],
+  "status": "DELIVERY_BLOCKED"
+}

@@ -1,0 +1,25 @@
+{
+  "base_color": [
+    "albedo",
+    "basecolor"
+  ],
+  "displacement": [
+    "displacement"
+  ],
+  "emission": [
+    "emission"
+  ],
+  "metallic": [
+    "metallic"
+  ],
+  "normal": [
+    "normal"
+  ],
+  "opacity": [
+    "opacity",
+    "alpha"
+  ],
+  "roughness": [
+    "roughness"
+  ]
+}

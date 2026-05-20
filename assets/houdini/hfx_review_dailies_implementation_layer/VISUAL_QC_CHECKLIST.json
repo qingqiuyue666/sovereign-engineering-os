@@ -1,0 +1,10 @@
+{
+  "checks": [
+    "alpha",
+    "zdepth",
+    "emission",
+    "lightwrap",
+    "contact_shadow"
+  ],
+  "status": "PENDING_REVIEW"
+}

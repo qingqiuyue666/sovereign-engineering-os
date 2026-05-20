@@ -1,0 +1,7 @@
+{
+  "files": [
+    "HFX_MASTER_PIPELINE_FILE_MANIFEST.json",
+    "HFX_MASTER_PIPELINE_GLOBAL_SEAL.json"
+  ],
+  "system_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS"
+}

@@ -1,0 +1,17 @@
+{
+  "missing_frames": [
+    {
+      "frame": 1001,
+      "path": "/Users/qqy/Documents/Codex/2026-05-20/system-override-hfx-render-automation-hardening/sovereign-engineering-os/assets/houdini/hfx_render_automation_execution_layer/exr/HFX_RENDER_JOB_001.1001.exr"
+    },
+    {
+      "frame": 1002,
+      "path": "/Users/qqy/Documents/Codex/2026-05-20/system-override-hfx-render-automation-hardening/sovereign-engineering-os/assets/houdini/hfx_render_automation_execution_layer/exr/HFX_RENDER_JOB_001.1002.exr"
+    },
+    {
+      "frame": 1003,
+      "path": "/Users/qqy/Documents/Codex/2026-05-20/system-override-hfx-render-automation-hardening/sovereign-engineering-os/assets/houdini/hfx_render_automation_execution_layer/exr/HFX_RENDER_JOB_001.1003.exr"
+    }
+  ],
+  "status": "BLOCKED_MISSING_FRAMES"
+}

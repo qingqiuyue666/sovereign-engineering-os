@@ -1,0 +1,5 @@
+{
+  "dry_run": true,
+  "message": "No external renderer invoked; validation is filesystem/checksum based.",
+  "status": "BLOCKED_FAIL_CLOSED"
+}

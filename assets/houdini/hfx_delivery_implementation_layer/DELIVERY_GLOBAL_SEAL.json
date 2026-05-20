@@ -1,0 +1,19 @@
+{
+  "artifacts": [
+    "DELIVERY_MANIFEST.json"
+  ],
+  "blockers": [
+    "approval_report",
+    "checksum",
+    "delivery_package_complete",
+    "final_pixel_approval",
+    "license_evidence"
+  ],
+  "client_delivery_allowed": false,
+  "final_pixels_authorized": false,
+  "layer_id": "HFX_DELIVERY_IMPLEMENTATION_LAYER",
+  "seal_sha256": "5a87fa976eecda767e1467128af65a5caa56461768db599b7dffd616d7e6ec26",
+  "status": "BLOCKED_FAIL_CLOSED",
+  "system_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+  "validation_policy": "fail_closed"
+}

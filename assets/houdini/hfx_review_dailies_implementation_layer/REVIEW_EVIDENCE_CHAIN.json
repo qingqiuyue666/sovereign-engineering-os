@@ -1,0 +1,8 @@
+{
+  "chain": [
+    {
+      "event": "review_package_created",
+      "sha256": "488d19def3ddac3a139ed742ce285ffe3e4cee1f78b6ea33674a6684a9f68bdf"
+    }
+  ]
+}

@@ -1,0 +1,139 @@
+{
+  "bindings": [
+    {
+      "allowed_resource_types": [
+        "LUT",
+        "OCIO"
+      ],
+      "evidence": [
+        {
+          "resource_id": "c0983038c2d662f1",
+          "resource_type": "LUT",
+          "sha256": "f9d723d3e2fb59c8e45ad7ca833c4dc77f09008b026815c0a3bc718f013eaf4b"
+        },
+        {
+          "resource_id": "28a4ac906d50f8ad",
+          "resource_type": "OCIO",
+          "sha256": "015deed3f7e92ed853993b295555138c7ed7e54654353d1a8258c894a30f1b4b"
+        }
+      ],
+      "resource_ids": [
+        "c0983038c2d662f1",
+        "28a4ac906d50f8ad"
+      ],
+      "slot": "color_pipeline_slot"
+    },
+    {
+      "allowed_resource_types": [
+        "plate"
+      ],
+      "evidence": [
+        {
+          "resource_id": "6ada6387e6845179",
+          "resource_type": "plate",
+          "sha256": "9dab9c42718fbdacd282e9c58779d3ea9d0f7d17badee384a2094cbf7bde2637"
+        }
+      ],
+      "resource_ids": [
+        "6ada6387e6845179"
+      ],
+      "slot": "comp_plate_slot"
+    },
+    {
+      "allowed_resource_types": [
+        "VDB"
+      ],
+      "evidence": [
+        {
+          "resource_id": "f5b3b25c6d8b65f4",
+          "resource_type": "VDB",
+          "sha256": "425cd271694f4756f6bebdaa721b97b879ce5ba5ad509f7b3ac320928e6879fe"
+        }
+      ],
+      "resource_ids": [
+        "f5b3b25c6d8b65f4"
+      ],
+      "slot": "fx_volume_slot"
+    },
+    {
+      "allowed_resource_types": [
+        "ABC",
+        "USD"
+      ],
+      "evidence": [
+        {
+          "resource_id": "5e7f906bec4fcc2d",
+          "resource_type": "ABC",
+          "sha256": "070777954c0703689725e36dba0c911207bf67598c9c6cac64d03adce284e205"
+        },
+        {
+          "resource_id": "a37b18ac6f5611e5",
+          "resource_type": "USD",
+          "sha256": "2aed837dac0b27fb232952256580c84fdc7eae9e3afee0d0a935644080655fd3"
+        }
+      ],
+      "resource_ids": [
+        "5e7f906bec4fcc2d",
+        "a37b18ac6f5611e5"
+      ],
+      "slot": "geometry_cache_slot"
+    },
+    {
+      "allowed_resource_types": [
+        "HDRI"
+      ],
+      "evidence": [
+        {
+          "resource_id": "79be0264450f11c8",
+          "resource_type": "HDRI",
+          "sha256": "0d5fbdbb8315062bf3f4f6182c3ad27a044b00851bcf8fdda14b03125f914dd3"
+        }
+      ],
+      "resource_ids": [
+        "79be0264450f11c8"
+      ],
+      "slot": "lighting_slot"
+    },
+    {
+      "allowed_resource_types": [
+        "PBR"
+      ],
+      "evidence": [
+        {
+          "resource_id": "c65951b5286daa3d",
+          "resource_type": "PBR",
+          "sha256": "32d7cf660c6805169c98b1f78c8402f9ef11a8cd82ec770fcce2196ced898891"
+        }
+      ],
+      "resource_ids": [
+        "c65951b5286daa3d"
+      ],
+      "slot": "shader_slot"
+    },
+    {
+      "allowed_resource_types": [
+        "camera",
+        "lens"
+      ],
+      "evidence": [
+        {
+          "resource_id": "318ad29f1556fe92",
+          "resource_type": "camera",
+          "sha256": "0d07267bb12b8eba8e5682f9c3000268fbae6430d6229263a731484ec88a0187"
+        },
+        {
+          "resource_id": "bf9087c0c845c84e",
+          "resource_type": "lens",
+          "sha256": "f5c6d6d74b1acae8cdebab54b797a084eecee6fbf24583d76c23cef31fc9d967"
+        }
+      ],
+      "resource_ids": [
+        "318ad29f1556fe92",
+        "bf9087c0c845c84e"
+      ],
+      "slot": "shot_camera_slot"
+    }
+  ],
+  "shot_id": "SHOT_001",
+  "system_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS"
+}

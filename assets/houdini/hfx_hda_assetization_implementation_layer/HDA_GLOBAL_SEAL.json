@@ -1,0 +1,14 @@
+{
+  "artifacts": [
+    "HDA_ASSET_REGISTRY.json",
+    "HDA_RELEASE_MANIFEST.json"
+  ],
+  "blockers": [],
+  "client_delivery_allowed": false,
+  "final_pixels_authorized": false,
+  "layer_id": "HFX_HDA_ASSETIZATION_IMPLEMENTATION_LAYER",
+  "seal_sha256": "a1cd300fd4c07668a0db32206259ea1f88cf0a6971c97f36bd7f340a196c6ac2",
+  "status": "PASS",
+  "system_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+  "validation_policy": "fail_closed"
+}

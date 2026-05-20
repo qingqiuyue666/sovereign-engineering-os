@@ -1,0 +1,53 @@
+{
+  "changelog_id": "HDA_CHANGELOG",
+  "entries": [
+    {
+      "asset_id": "HFX_008_ENERGY_SHOCKWAVE",
+      "entry": "Registered HFX_008_ENERGY_SHOCKWAVE for deterministic HDA assetization."
+    },
+    {
+      "asset_id": "HFX_015_PORTAL_RING",
+      "entry": "Registered HFX_015_PORTAL_RING for deterministic HDA assetization."
+    },
+    {
+      "asset_id": "HFX_016_HEAT_DISTORTION",
+      "entry": "Registered HFX_016_HEAT_DISTORTION for deterministic HDA assetization."
+    },
+    {
+      "asset_id": "HFX_021_ADVANCED_PYRO_EXPLOSION",
+      "entry": "Registered HFX_021_ADVANCED_PYRO_EXPLOSION for deterministic HDA assetization."
+    },
+    {
+      "asset_id": "HFX_025_CHARACTER_ENERGY_FIELD",
+      "entry": "Registered HFX_025_CHARACTER_ENERGY_FIELD for deterministic HDA assetization."
+    },
+    {
+      "asset_id": "HFX_027_SUMMONING_PORTAL_GATE",
+      "entry": "Registered HFX_027_SUMMONING_PORTAL_GATE for deterministic HDA assetization."
+    },
+    {
+      "asset_id": "HFX_028_SPACE_RIFT_TEAR",
+      "entry": "Registered HFX_028_SPACE_RIFT_TEAR for deterministic HDA assetization."
+    },
+    {
+      "asset_id": "HFX_029_BLACK_HOLE_ACCRETION_DISK",
+      "entry": "Registered HFX_029_BLACK_HOLE_ACCRETION_DISK for deterministic HDA assetization."
+    },
+    {
+      "asset_id": "HFX_033_GLOW_EMISSION_PASS",
+      "entry": "Registered HFX_033_GLOW_EMISSION_PASS for deterministic HDA assetization."
+    },
+    {
+      "asset_id": "HFX_036_ALPHA_HOLDOUT_MATTE",
+      "entry": "Registered HFX_036_ALPHA_HOLDOUT_MATTE for deterministic HDA assetization."
+    },
+    {
+      "asset_id": "HFX_037_LIGHTWRAP_RIM_INTERACTION",
+      "entry": "Registered HFX_037_LIGHTWRAP_RIM_INTERACTION for deterministic HDA assetization."
+    },
+    {
+      "asset_id": "HFX_038_CONTACTSHADOW_GROUND_INTEGRATION",
+      "entry": "Registered HFX_038_CONTACTSHADOW_GROUND_INTEGRATION for deterministic HDA assetization."
+    }
+  ]
+}

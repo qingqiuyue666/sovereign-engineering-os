@@ -1,0 +1,5 @@
+{
+  "camera_solve": "camera/shot_camera.abc",
+  "hdri_onsite_lighting": "lighting/onsite.hdr",
+  "lens_profile": "lens/profile.json"
+}

@@ -1,0 +1,15 @@
+{
+  "client_delivery_allowed": false,
+  "contract_id": "FINAL_PIXEL_APPROVAL_CONTRACT",
+  "final_pixels_authorized": false,
+  "rules": [
+    "exr_outputs",
+    "aov_completeness",
+    "comp_output",
+    "color_management",
+    "resource_license",
+    "review_approval"
+  ],
+  "system_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+  "validation_policy": "fail_closed"
+}

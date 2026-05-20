@@ -1,0 +1,52 @@
+{
+  "materials": [
+    {
+      "material_id": "emission",
+      "renderer_targets": [
+        "MaterialX",
+        "Karma",
+        "Redshift"
+      ]
+    },
+    {
+      "material_id": "volume",
+      "renderer_targets": [
+        "MaterialX",
+        "Karma",
+        "Redshift"
+      ]
+    },
+    {
+      "material_id": "glass",
+      "renderer_targets": [
+        "MaterialX",
+        "Karma",
+        "Redshift"
+      ]
+    },
+    {
+      "material_id": "metal",
+      "renderer_targets": [
+        "MaterialX",
+        "Karma",
+        "Redshift"
+      ]
+    },
+    {
+      "material_id": "cloth",
+      "renderer_targets": [
+        "MaterialX",
+        "Karma",
+        "Redshift"
+      ]
+    },
+    {
+      "material_id": "rock",
+      "renderer_targets": [
+        "MaterialX",
+        "Karma",
+        "Redshift"
+      ]
+    }
+  ]
+}

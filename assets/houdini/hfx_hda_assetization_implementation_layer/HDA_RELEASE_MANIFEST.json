@@ -1,0 +1,66 @@
+{
+  "assets": [
+    {
+      "asset_id": "HFX_008_ENERGY_SHOCKWAVE",
+      "immutable": true,
+      "version": "v001"
+    },
+    {
+      "asset_id": "HFX_015_PORTAL_RING",
+      "immutable": true,
+      "version": "v002"
+    },
+    {
+      "asset_id": "HFX_016_HEAT_DISTORTION",
+      "immutable": true,
+      "version": "v003"
+    },
+    {
+      "asset_id": "HFX_021_ADVANCED_PYRO_EXPLOSION",
+      "immutable": true,
+      "version": "v004"
+    },
+    {
+      "asset_id": "HFX_025_CHARACTER_ENERGY_FIELD",
+      "immutable": true,
+      "version": "v005"
+    },
+    {
+      "asset_id": "HFX_027_SUMMONING_PORTAL_GATE",
+      "immutable": true,
+      "version": "v006"
+    },
+    {
+      "asset_id": "HFX_028_SPACE_RIFT_TEAR",
+      "immutable": true,
+      "version": "v007"
+    },
+    {
+      "asset_id": "HFX_029_BLACK_HOLE_ACCRETION_DISK",
+      "immutable": true,
+      "version": "v008"
+    },
+    {
+      "asset_id": "HFX_033_GLOW_EMISSION_PASS",
+      "immutable": true,
+      "version": "v009"
+    },
+    {
+      "asset_id": "HFX_036_ALPHA_HOLDOUT_MATTE",
+      "immutable": true,
+      "version": "v010"
+    },
+    {
+      "asset_id": "HFX_037_LIGHTWRAP_RIM_INTERACTION",
+      "immutable": true,
+      "version": "v011"
+    },
+    {
+      "asset_id": "HFX_038_CONTACTSHADOW_GROUND_INTEGRATION",
+      "immutable": true,
+      "version": "v012"
+    }
+  ],
+  "manifest_id": "HDA_RELEASE_MANIFEST",
+  "read_only_release_enforced": true
+}
