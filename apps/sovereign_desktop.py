@@ -1,25 +1,29 @@
-"""Native PySide6 desktop control plane for Sovereign Engineering OS."""
+"""qasync-driven native desktop control plane for Sovereign Engineering OS."""
 
 from __future__ import annotations
 
-from datetime import datetime
-from pathlib import Path
-from typing import Any
 import asyncio
 import json
+import os
 import platform
 import resource
 import sys
+from collections import Counter
+from datetime import UTC, datetime
+from pathlib import Path
+from typing import Any
+
+from kernel.os_engine.artifact_store import ArtifactRecord, ArtifactStore
+from kernel.os_engine.job_queue import Job, JobQueueManager, JsonFileJobStore
+from kernel.os_engine.worker_registry import WorkerContext, build_default_worker_registry
 
 try:
-    from PySide6.QtCore import QObject, Qt, QThread, QTimer, Signal, Slot
-    from PySide6.QtGui import QColor, QFont, QPalette
+    from PySide6.QtCore import Qt, Signal, Slot
+    from PySide6.QtGui import QCloseEvent, QFont
     from PySide6.QtWidgets import (
         QApplication,
         QAbstractItemView,
         QComboBox,
-        QDoubleSpinBox,
-        QFrame,
         QFormLayout,
         QGridLayout,
         QGroupBox,
@@ -38,14 +42,17 @@ try:
         QVBoxLayout,
         QWidget,
     )
+    import qasync
+    from qasync import asyncSlot
 
     PYSIDE6_AVAILABLE = True
-except ImportError as _qt_import_error:
+except Exception as _qt_import_error:  # pragma: no cover - exercised on GUI hosts.
     PYSIDE6_AVAILABLE = False
+    qasync = None  # type: ignore[assignment]
 
-    class _QtMissingType:
+    class _MissingQtType:
         def __init__(self, *_args: object, **_kwargs: object) -> None:
-            raise RuntimeError("PySide6 is required to start the desktop GUI") from _qt_import_error
+            raise RuntimeError("PySide6 and qasync are required to start the desktop GUI") from _qt_import_error
 
     class _SignalShim:
         def __init__(self, *_args: object, **_kwargs: object) -> None:
@@ -57,11 +64,15 @@ except ImportError as _qt_import_error:
         def emit(self, *_args: object, **_kwargs: object) -> None:
             pass
 
-    class _QtAlignmentFlag:
+    class _QtFlagShim:
         AlignRight = 0
+        AlignVCenter = 0
+        ItemIsEnabled = 0
+        ItemIsSelectable = 0
 
     class _QtShim:
-        AlignmentFlag = _QtAlignmentFlag
+        AlignmentFlag = _QtFlagShim
+        ItemFlag = _QtFlagShim
 
     def Slot(*_args: object, **_kwargs: object) -> object:
         def decorator(function: object) -> object:
@@ -69,766 +80,507 @@ except ImportError as _qt_import_error:
 
         return decorator
 
-    QObject = _QtMissingType
+    def asyncSlot(*_args: object, **_kwargs: object) -> object:
+        def decorator(function: object) -> object:
+            return function
+
+        return decorator
+
     Qt = _QtShim
-    QThread = _QtMissingType
-    QTimer = _QtMissingType
     Signal = _SignalShim
-    QColor = _QtMissingType
-    QFont = _QtMissingType
-    QPalette = _QtMissingType
-    QApplication = _QtMissingType
-    QAbstractItemView = _QtMissingType
-    QComboBox = _QtMissingType
-    QDoubleSpinBox = _QtMissingType
-    QFrame = _QtMissingType
-    QFormLayout = _QtMissingType
-    QGridLayout = _QtMissingType
-    QGroupBox = _QtMissingType
-    QHBoxLayout = _QtMissingType
-    QHeaderView = _QtMissingType
-    QLabel = _QtMissingType
-    QLineEdit = _QtMissingType
-    QMainWindow = _QtMissingType
-    QPlainTextEdit = _QtMissingType
-    QPushButton = _QtMissingType
-    QSpinBox = _QtMissingType
-    QStatusBar = _QtMissingType
-    QTabWidget = _QtMissingType
-    QTableWidget = _QtMissingType
-    QTableWidgetItem = _QtMissingType
-    QVBoxLayout = _QtMissingType
-    QWidget = _QtMissingType
-
-from kernel.ipc.aci_subprocess import CommandResult, run_whitelisted_command
-from kernel.ipc.radar_zmq import DEFAULT_RADAR_ENDPOINT, RadarZmqSubscriber
-from kernel.ipc.vfx_localhost import (
-    DEFAULT_COMFYUI_BASE_URL,
-    VfxPromptRequest,
-    build_text_to_image_dag,
-    submit_prompt,
-)
-
-__all__ = ["PYSIDE6_AVAILABLE", "main", "SovereignDesktopWindow"]
-
-_APP_TITLE = "Sovereign Engineering OS - God-Node Control Plane"
-_RAM_BUDGET_MB = 150.0
-_MAX_RADAR_ROWS = 200
-
-
-class AciCommandWorker(QObject):
-    succeeded = Signal(object)
-    failed = Signal(str)
-
-    def __init__(self, command_line: str, repo_root: Path, parent: QObject | None = None) -> None:
-        super().__init__(parent)
-        self._command_line = command_line
-        self._repo_root = repo_root
-
-    @Slot()
-    def run(self) -> None:
-        try:
-            result = run_whitelisted_command(
-                self._command_line,
-                cwd=self._repo_root,
-                timeout_seconds=180.0,
-            )
-        except Exception as exc:
-            self.failed.emit(str(exc))
-            return
-        self.succeeded.emit(result)
-
-
-class VfxSubmitWorker(QObject):
-    succeeded = Signal(object)
-    failed = Signal(str)
-
-    def __init__(
-        self,
-        request: VfxPromptRequest,
-        endpoint: str,
-        parent: QObject | None = None,
-    ) -> None:
-        super().__init__(parent)
-        self._request = request
-        self._endpoint = endpoint
-
-    @Slot()
-    def run(self) -> None:
-        try:
-            result = asyncio.run(
-                submit_prompt(
-                    self._request,
-                    base_url=self._endpoint,
-                    timeout_seconds=12.0,
-                )
-            )
-        except Exception as exc:
-            self.failed.emit(str(exc))
-            return
-        self.succeeded.emit(result)
-
-
-class CodeAuditTab(QWidget):
-    command_requested = Signal(str)
-
-    def __init__(self, parent: QWidget | None = None) -> None:
-        super().__init__(parent)
-        self._command = QComboBox(self)
-        self._command.setEditable(True)
-        self._command.addItems(
-            [
-                "python3 -m unittest discover -s tests/tracer_bullet -v",
-                "python3 -m unittest discover -s tests/schemas -v",
-                "python3 -m unittest discover -s validation/tests/acceptance -v",
-                "make ci",
-            ]
-        )
-        self._run_button = QPushButton("Run", self)
-        self._run_button.setObjectName("PrimaryButton")
-        self._clear_button = QPushButton("Clear", self)
-        self._output = QPlainTextEdit(self)
-        self._output.setReadOnly(True)
-        self._output.setMaximumBlockCount(5000)
-        self._output.setObjectName("Console")
-
-        command_row = QHBoxLayout()
-        command_row.addWidget(QLabel("Command", self))
-        command_row.addWidget(self._command, stretch=1)
-        command_row.addWidget(self._run_button)
-        command_row.addWidget(self._clear_button)
-
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(18, 18, 18, 18)
-        layout.setSpacing(12)
-        layout.addLayout(command_row)
-        layout.addWidget(self._output, stretch=1)
-
-        self._run_button.clicked.connect(self._emit_command)
-        self._clear_button.clicked.connect(self._output.clear)
-
-    def set_running(self, running: bool) -> None:
-        self._run_button.setEnabled(not running)
-        self._command.setEnabled(not running)
-        self._run_button.setText("Running" if running else "Run")
-
-    def append_line(self, line: str) -> None:
-        self._output.appendPlainText(line)
-
-    def show_result(self, result: CommandResult) -> None:
-        status = "OK" if result.ok else "FAILED"
-        header = (
-            f"$ {result.command_line}\n"
-            f"[{status}] rc={result.returncode} "
-            f"elapsed={result.duration_seconds:.2f}s timeout={result.timed_out}\n"
-        )
-        body = result.combined_output or "<no output>"
-        self._output.appendPlainText(f"{header}{body}\n")
-
-    @Slot()
-    def _emit_command(self) -> None:
-        command = self._command.currentText().strip()
-        if command:
-            self.command_requested.emit(command)
-
-
-class VfxFactoryTab(QWidget):
-    submit_requested = Signal(object, str)
-
-    def __init__(self, parent: QWidget | None = None) -> None:
-        super().__init__(parent)
-        self._endpoint = QLineEdit(DEFAULT_COMFYUI_BASE_URL, self)
-        self._prompt = QPlainTextEdit(self)
-        self._prompt.setPlaceholderText("cinematic industrial machine room, volumetric light, high detail")
-        self._prompt.setMaximumHeight(92)
-        self._negative = QPlainTextEdit(self)
-        self._negative.setPlainText(
-            "low quality, blurry, text artifacts, watermark, malformed geometry, overexposed highlights"
-        )
-        self._negative.setMaximumHeight(70)
-        self._checkpoint = QLineEdit("sd_xl_base_1.0.safetensors", self)
-        self._prefix = QLineEdit("sovereign_vfx", self)
-
-        self._width = _spinbox(64, 4096, 1024, step=64)
-        self._height = _spinbox(64, 4096, 1024, step=64)
-        self._steps = _spinbox(1, 150, 28)
-        self._seed = _spinbox(0, 2_147_483_647, 1337)
-        self._cfg = _double_spinbox(0.0, 30.0, 7.0, step=0.25, decimals=2)
-        self._denoise = _double_spinbox(0.01, 1.0, 1.0, step=0.05, decimals=2)
-        self._sampler = QComboBox(self)
-        self._sampler.addItems(["dpmpp_2m", "dpmpp_2m_sde", "euler", "euler_ancestral"])
-        self._scheduler = QComboBox(self)
-        self._scheduler.addItems(["karras", "normal", "simple", "exponential"])
-        self._submit_button = QPushButton("Submit DAG", self)
-        self._submit_button.setObjectName("PrimaryButton")
-        self._preview_button = QPushButton("Preview JSON", self)
-        self._output = QPlainTextEdit(self)
-        self._output.setReadOnly(True)
-        self._output.setMaximumBlockCount(5000)
-        self._output.setObjectName("Console")
-
-        form = QFormLayout()
-        form.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
-        form.addRow("Endpoint", self._endpoint)
-        form.addRow("Prompt", self._prompt)
-        form.addRow("Negative", self._negative)
-        form.addRow("Checkpoint", self._checkpoint)
-        form.addRow("Prefix", self._prefix)
-
-        grid = QGridLayout()
-        grid.addWidget(QLabel("Width", self), 0, 0)
-        grid.addWidget(self._width, 0, 1)
-        grid.addWidget(QLabel("Height", self), 0, 2)
-        grid.addWidget(self._height, 0, 3)
-        grid.addWidget(QLabel("Steps", self), 1, 0)
-        grid.addWidget(self._steps, 1, 1)
-        grid.addWidget(QLabel("Seed", self), 1, 2)
-        grid.addWidget(self._seed, 1, 3)
-        grid.addWidget(QLabel("CFG", self), 2, 0)
-        grid.addWidget(self._cfg, 2, 1)
-        grid.addWidget(QLabel("Denoise", self), 2, 2)
-        grid.addWidget(self._denoise, 2, 3)
-        grid.addWidget(QLabel("Sampler", self), 3, 0)
-        grid.addWidget(self._sampler, 3, 1)
-        grid.addWidget(QLabel("Scheduler", self), 3, 2)
-        grid.addWidget(self._scheduler, 3, 3)
-
-        controls = QGroupBox("DAG Controls", self)
-        controls.setLayout(grid)
-
-        button_row = QHBoxLayout()
-        button_row.addStretch(1)
-        button_row.addWidget(self._preview_button)
-        button_row.addWidget(self._submit_button)
-
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(18, 18, 18, 18)
-        layout.setSpacing(12)
-        layout.addLayout(form)
-        layout.addWidget(controls)
-        layout.addLayout(button_row)
-        layout.addWidget(self._output, stretch=1)
-
-        self._preview_button.clicked.connect(self._preview_json)
-        self._submit_button.clicked.connect(self._emit_submit)
-
-    def set_running(self, running: bool) -> None:
-        self._submit_button.setEnabled(not running)
-        self._preview_button.setEnabled(not running)
-        self._submit_button.setText("Submitting" if running else "Submit DAG")
-
-    def show_json(self, payload: dict[str, Any]) -> None:
-        self._output.setPlainText(json.dumps(payload, indent=2, sort_keys=True))
-
-    def append_line(self, line: str) -> None:
-        self._output.appendPlainText(line)
-
-    def _make_request(self) -> VfxPromptRequest:
-        return VfxPromptRequest(
-            positive_prompt=self._prompt.toPlainText().strip(),
-            negative_prompt=self._negative.toPlainText().strip(),
-            checkpoint_name=self._checkpoint.text().strip(),
-            width=self._width.value(),
-            height=self._height.value(),
-            seed=self._seed.value(),
-            steps=self._steps.value(),
-            cfg=self._cfg.value(),
-            sampler_name=self._sampler.currentText(),
-            scheduler=self._scheduler.currentText(),
-            denoise=self._denoise.value(),
-            filename_prefix=self._prefix.text().strip(),
-        ).validated()
-
-    @Slot()
-    def _preview_json(self) -> None:
-        try:
-            request = self._make_request()
-            self.show_json({"client_id": request.client_id, "prompt": build_text_to_image_dag(request)})
-        except Exception as exc:
-            self._output.setPlainText(f"Request rejected: {exc}")
-
-    @Slot()
-    def _emit_submit(self) -> None:
-        try:
-            request = self._make_request()
-        except Exception as exc:
-            self._output.setPlainText(f"Request rejected: {exc}")
-            return
-        self.submit_requested.emit(request, self._endpoint.text().strip())
-
-
-class MacroRadarTab(QWidget):
-    start_requested = Signal(str)
-    stop_requested = Signal()
-
-    def __init__(self, parent: QWidget | None = None) -> None:
-        super().__init__(parent)
-        self._endpoint = QLineEdit(DEFAULT_RADAR_ENDPOINT, self)
-        self._start_button = QPushButton("Start", self)
-        self._start_button.setObjectName("PrimaryButton")
-        self._stop_button = QPushButton("Stop", self)
-        self._stop_button.setEnabled(False)
-        self._status = QLabel("SUB idle", self)
-        self._status.setObjectName("StatusChip")
-        self._table = QTableWidget(0, 5, self)
-        self._table.setHorizontalHeaderLabels(["Time", "Topic", "Symbol", "Strength", "Event"])
-        self._table.verticalHeader().setVisible(False)
-        self._table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
-        self._table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
-        self._table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-
-        control_row = QHBoxLayout()
-        control_row.addWidget(QLabel("Endpoint", self))
-        control_row.addWidget(self._endpoint, stretch=1)
-        control_row.addWidget(self._status)
-        control_row.addWidget(self._start_button)
-        control_row.addWidget(self._stop_button)
-
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(18, 18, 18, 18)
-        layout.setSpacing(12)
-        layout.addLayout(control_row)
-        layout.addWidget(self._table, stretch=1)
-
-        self._start_button.clicked.connect(self._emit_start)
-        self._stop_button.clicked.connect(self.stop_requested.emit)
-
-    def set_running(self, running: bool) -> None:
-        self._start_button.setEnabled(not running)
-        self._stop_button.setEnabled(running)
-        self._endpoint.setEnabled(not running)
-
-    @Slot(str)
-    def update_status(self, status: str) -> None:
-        self._status.setText(status)
-
-    @Slot(dict)
-    def add_event(self, event: dict[str, Any]) -> None:
-        while self._table.rowCount() >= _MAX_RADAR_ROWS:
-            self._table.removeRow(0)
-        row = self._table.rowCount()
-        self._table.insertRow(row)
-        timestamp = datetime.fromtimestamp(float(event.get("received_at", 0.0))).strftime("%H:%M:%S")
-        strength = event.get("strength")
-        cells = [
-            timestamp,
-            str(event.get("topic", "")),
-            str(event.get("symbol", "")),
-            "" if strength is None else f"{float(strength):.2f}",
-            str(event.get("event_type", "")),
-        ]
-        for column, value in enumerate(cells):
-            item = QTableWidgetItem(value)
-            if bool(event.get("is_strong_signal")):
-                item.setForeground(QColor("#f5c542"))
-            self._table.setItem(row, column, item)
-        self._table.scrollToBottom()
-
-    @Slot()
-    def _emit_start(self) -> None:
-        endpoint = self._endpoint.text().strip()
-        if endpoint:
-            self.start_requested.emit(endpoint)
-
-
-class SovereignDesktopWindow(QMainWindow):
-    def __init__(self, repo_root: Path, parent: QWidget | None = None) -> None:
-        super().__init__(parent)
-        self._repo_root = repo_root.resolve()
-        self._aci_thread: QThread | None = None
-        self._aci_worker: AciCommandWorker | None = None
-        self._vfx_thread: QThread | None = None
-        self._vfx_worker: VfxSubmitWorker | None = None
-        self._radar_thread: QThread | None = None
-        self._radar_worker: RadarZmqSubscriber | None = None
-
-        self.setWindowTitle(_APP_TITLE)
-        self.resize(1320, 860)
-        self.setMinimumSize(1040, 680)
-
-        self._code_tab = CodeAuditTab(self)
-        self._vfx_tab = VfxFactoryTab(self)
-        self._radar_tab = MacroRadarTab(self)
-        self._tabs = QTabWidget(self)
-        self._tabs.addTab(self._code_tab, "Code Audit")
-        self._tabs.addTab(self._vfx_tab, "VFX Factory")
-        self._tabs.addTab(self._radar_tab, "Macro Radar")
-
-        central = QWidget(self)
-        header = self._build_header()
-        central_layout = QVBoxLayout(central)
-        central_layout.setContentsMargins(0, 0, 0, 0)
-        central_layout.setSpacing(0)
-        central_layout.addWidget(header)
-        central_layout.addWidget(self._tabs, stretch=1)
-        self.setCentralWidget(central)
-
-        self._ram_label = QLabel("RSS -- MB", self)
-        self._status = QStatusBar(self)
-        self._status.addPermanentWidget(self._ram_label)
-        self.setStatusBar(self._status)
-
-        self._memory_timer = QTimer(self)
-        self._memory_timer.setInterval(2000)
-        self._memory_timer.timeout.connect(self._update_memory_label)
-        self._memory_timer.start()
-        self._update_memory_label()
-
-        self._code_tab.command_requested.connect(self._run_aci_command)
-        self._vfx_tab.submit_requested.connect(self._submit_vfx_request)
-        self._radar_tab.start_requested.connect(self._start_radar)
-        self._radar_tab.stop_requested.connect(self._stop_radar)
-
-    def closeEvent(self, event: Any) -> None:
-        self._stop_radar()
-        for thread in (self._aci_thread, self._vfx_thread, self._radar_thread):
-            if thread is not None and thread.isRunning():
-                thread.quit()
-                thread.wait(1500)
-        event.accept()
-
-    def _build_header(self) -> QFrame:
-        header = QFrame(self)
-        header.setObjectName("Header")
-        title = QLabel("Sovereign Engineering OS", header)
-        title.setObjectName("HeaderTitle")
-        subtitle = QLabel("Localhost IPC Control Plane", header)
-        subtitle.setObjectName("HeaderSubtitle")
-        repo_label = QLabel(self._repo_root.as_posix(), header)
-        repo_label.setObjectName("RepoPath")
-
-        left = QVBoxLayout()
-        left.addWidget(title)
-        left.addWidget(subtitle)
-
-        layout = QHBoxLayout(header)
-        layout.setContentsMargins(18, 14, 18, 14)
-        layout.addLayout(left)
-        layout.addStretch(1)
-        layout.addWidget(repo_label)
-        return header
-
-    @Slot(str)
-    def _run_aci_command(self, command_line: str) -> None:
-        if self._aci_thread is not None and self._aci_thread.isRunning():
-            self._code_tab.append_line("ACI proxy is already running a command.")
-            return
-        self._code_tab.set_running(True)
-        self._code_tab.append_line(f"$ {command_line}")
-        thread = QThread(self)
-        worker = AciCommandWorker(command_line, self._repo_root)
-        worker.moveToThread(thread)
-        thread.started.connect(worker.run)
-        worker.succeeded.connect(self._handle_aci_success)
-        worker.failed.connect(self._handle_aci_failure)
-        worker.succeeded.connect(lambda _result: thread.quit())
-        worker.failed.connect(lambda _message: thread.quit())
-        thread.finished.connect(worker.deleteLater)
-        thread.finished.connect(thread.deleteLater)
-        thread.finished.connect(self._clear_aci_thread)
-        self._aci_thread = thread
-        self._aci_worker = worker
-        thread.start()
-
-    @Slot(object)
-    def _handle_aci_success(self, result: CommandResult) -> None:
-        self._code_tab.show_result(result)
-        self._code_tab.set_running(False)
-        self._status.showMessage("Code Audit command completed", 4000)
-
-    @Slot(str)
-    def _handle_aci_failure(self, message: str) -> None:
-        self._code_tab.append_line(f"Command rejected: {message}")
-        self._code_tab.set_running(False)
-        self._status.showMessage("Code Audit command rejected", 4000)
-
-    @Slot()
-    def _clear_aci_thread(self) -> None:
-        self._aci_thread = None
-        self._aci_worker = None
-
-    @Slot(object, str)
-    def _submit_vfx_request(self, request: VfxPromptRequest, endpoint: str) -> None:
-        if self._vfx_thread is not None and self._vfx_thread.isRunning():
-            self._vfx_tab.append_line("VFX bridge is already submitting a DAG.")
-            return
-        self._vfx_tab.set_running(True)
-        thread = QThread(self)
-        worker = VfxSubmitWorker(request, endpoint)
-        worker.moveToThread(thread)
-        thread.started.connect(worker.run)
-        worker.succeeded.connect(self._handle_vfx_success)
-        worker.failed.connect(self._handle_vfx_failure)
-        worker.succeeded.connect(lambda _result: thread.quit())
-        worker.failed.connect(lambda _message: thread.quit())
-        thread.finished.connect(worker.deleteLater)
-        thread.finished.connect(thread.deleteLater)
-        thread.finished.connect(self._clear_vfx_thread)
-        self._vfx_thread = thread
-        self._vfx_worker = worker
-        thread.start()
-
-    @Slot(object)
-    def _handle_vfx_success(self, result: Any) -> None:
-        self._vfx_tab.show_json(result.as_dict())
-        self._vfx_tab.set_running(False)
-        self._status.showMessage("ComfyUI DAG submitted", 4000)
-
-    @Slot(str)
-    def _handle_vfx_failure(self, message: str) -> None:
-        self._vfx_tab.append_line(f"Submit failed: {message}")
-        self._vfx_tab.set_running(False)
-        self._status.showMessage("ComfyUI submit failed", 4000)
-
-    @Slot()
-    def _clear_vfx_thread(self) -> None:
-        self._vfx_thread = None
-        self._vfx_worker = None
-
-    @Slot(str)
-    def _start_radar(self, endpoint: str) -> None:
-        if self._radar_thread is not None and self._radar_thread.isRunning():
-            self._radar_tab.update_status("SUB already running")
-            return
-        try:
-            worker = RadarZmqSubscriber(endpoint)
-        except Exception as exc:
-            self._radar_tab.update_status(f"Rejected: {exc}")
-            return
-        thread = QThread(self)
-        worker.moveToThread(thread)
-        thread.started.connect(worker.run)
-        worker.status_changed.connect(self._radar_tab.update_status)
-        worker.message_received.connect(self._radar_tab.add_event)
-        worker.strong_signal_detected.connect(self._handle_strong_signal)
-        worker.error_occurred.connect(self._handle_radar_error)
-        worker.finished.connect(thread.quit)
-        thread.finished.connect(worker.deleteLater)
-        thread.finished.connect(thread.deleteLater)
-        thread.finished.connect(self._clear_radar_thread)
-        self._radar_thread = thread
-        self._radar_worker = worker
-        self._radar_tab.set_running(True)
-        thread.start()
-
-    @Slot()
-    def _stop_radar(self) -> None:
-        if self._radar_worker is not None:
-            self._radar_worker.stop()
-
-    @Slot(dict)
-    def _handle_strong_signal(self, event: dict[str, Any]) -> None:
-        symbol = event.get("symbol", "UNKNOWN")
-        strength = event.get("strength")
-        label = f"STRONG_SIGNAL {symbol}"
-        if strength is not None:
-            label = f"{label} {float(strength):.2f}"
-        self._status.showMessage(label, 6000)
-
-    @Slot(str)
-    def _handle_radar_error(self, message: str) -> None:
-        self._radar_tab.update_status(message)
-        self._status.showMessage(message, 6000)
-
-    @Slot()
-    def _clear_radar_thread(self) -> None:
-        self._radar_tab.set_running(False)
-        self._radar_thread = None
-        self._radar_worker = None
-
-    @Slot()
-    def _update_memory_label(self) -> None:
-        rss_mb = _resident_set_mb()
-        self._ram_label.setText(f"RSS {rss_mb:.1f} MB / {_RAM_BUDGET_MB:.0f} MB")
-        if rss_mb > _RAM_BUDGET_MB:
-            self._ram_label.setStyleSheet("color: #ff6b6b; font-weight: 700;")
-        else:
-            self._ram_label.setStyleSheet("color: #9bd88f; font-weight: 700;")
-
-
-def _spinbox(minimum: int, maximum: int, value: int, *, step: int = 1) -> QSpinBox:
-    spinbox = QSpinBox()
-    spinbox.setRange(minimum, maximum)
-    spinbox.setSingleStep(step)
-    spinbox.setValue(value)
-    return spinbox
-
-
-def _double_spinbox(
-    minimum: float,
-    maximum: float,
-    value: float,
-    *,
-    step: float,
-    decimals: int,
-) -> QDoubleSpinBox:
-    spinbox = QDoubleSpinBox()
-    spinbox.setRange(minimum, maximum)
-    spinbox.setSingleStep(step)
-    spinbox.setDecimals(decimals)
-    spinbox.setValue(value)
-    return spinbox
-
-
-def _repo_root() -> Path:
+    QCloseEvent = _MissingQtType
+    QFont = _MissingQtType
+    QApplication = _MissingQtType
+    QAbstractItemView = _MissingQtType
+    QComboBox = _MissingQtType
+    QFormLayout = _MissingQtType
+    QGridLayout = _MissingQtType
+    QGroupBox = _MissingQtType
+    QHBoxLayout = _MissingQtType
+    QHeaderView = _MissingQtType
+    QLabel = _MissingQtType
+    QLineEdit = _MissingQtType
+    QMainWindow = _MissingQtType
+    QPlainTextEdit = _MissingQtType
+    QPushButton = _MissingQtType
+    QSpinBox = _MissingQtType
+    QStatusBar = _MissingQtType
+    QTabWidget = _MissingQtType
+    QTableWidget = _MissingQtType
+    QTableWidgetItem = _MissingQtType
+    QVBoxLayout = _MissingQtType
+    QWidget = _MissingQtType
+
+
+__all__ = ["PYSIDE6_AVAILABLE", "SovereignDesktopWindow", "main"]
+
+APP_TITLE = "Sovereign Engineering OS - Native Control Plane"
+UI_MEMORY_BUDGET_MB = 150
+MAX_TABLE_ROWS = 300
+REFRESH_SECONDS = 2.0
+
+
+def _runtime_root() -> Path:
+    return Path.home() / ".sovereign_engineering_os"
+
+
+def _repo_root_from_here() -> Path:
     return Path(__file__).resolve().parents[1]
 
 
-def _resident_set_mb() -> float:
-    rss = float(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+def _utc_stamp() -> str:
+    return datetime.now(UTC).isoformat(timespec="seconds")
+
+
+def _current_rss_mb() -> float:
+    usage = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     if platform.system() == "Darwin":
-        return rss / (1024.0 * 1024.0)
-    return rss / 1024.0
+        return float(usage) / (1024 * 1024)
+    return float(usage) / 1024
 
 
-def _apply_dark_palette(app: QApplication) -> None:
-    palette = QPalette()
-    palette.setColor(QPalette.ColorRole.Window, QColor("#17191c"))
-    palette.setColor(QPalette.ColorRole.WindowText, QColor("#d5d7db"))
-    palette.setColor(QPalette.ColorRole.Base, QColor("#101214"))
-    palette.setColor(QPalette.ColorRole.AlternateBase, QColor("#20242a"))
-    palette.setColor(QPalette.ColorRole.ToolTipBase, QColor("#252a31"))
-    palette.setColor(QPalette.ColorRole.ToolTipText, QColor("#f0f2f4"))
-    palette.setColor(QPalette.ColorRole.Text, QColor("#d5d7db"))
-    palette.setColor(QPalette.ColorRole.Button, QColor("#252a31"))
-    palette.setColor(QPalette.ColorRole.ButtonText, QColor("#e8eaed"))
-    palette.setColor(QPalette.ColorRole.Highlight, QColor("#4c9f70"))
-    palette.setColor(QPalette.ColorRole.HighlightedText, QColor("#0f1113"))
-    app.setPalette(palette)
-    app.setStyleSheet(_STYLESHEET)
+def _table_item(text: object, *, align_right: bool = False) -> QTableWidgetItem:
+    item = QTableWidgetItem(str(text))
+    item.setFlags(Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEnabled)
+    if align_right:
+        item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+    return item
 
 
-_STYLESHEET = """
-QWidget {
-    background: #17191c;
-    color: #d5d7db;
-    font-family: "SF Pro Text", "Inter", "Helvetica Neue", Arial, sans-serif;
-    font-size: 13px;
-}
-QFrame#Header {
-    background: #101214;
-    border-bottom: 1px solid #303640;
-}
-QLabel#HeaderTitle {
-    color: #f0f2f4;
-    font-size: 20px;
-    font-weight: 700;
-}
-QLabel#HeaderSubtitle {
-    color: #8d96a0;
-    font-size: 12px;
-}
-QLabel#RepoPath,
-QLabel#StatusChip {
-    color: #aab2bd;
-    background: #20242a;
-    border: 1px solid #343b45;
-    border-radius: 6px;
-    padding: 6px 10px;
-}
-QTabWidget::pane {
-    border: 0;
-}
-QTabBar::tab {
-    background: #20242a;
-    color: #aab2bd;
-    border: 1px solid #303640;
-    border-bottom: 0;
-    padding: 10px 18px;
-    min-width: 120px;
-}
-QTabBar::tab:selected {
-    background: #17191c;
-    color: #f0f2f4;
-    border-top: 2px solid #4c9f70;
-}
-QLineEdit,
-QComboBox,
-QSpinBox,
-QDoubleSpinBox,
-QPlainTextEdit,
-QTableWidget {
-    background: #101214;
-    border: 1px solid #343b45;
-    border-radius: 6px;
-    color: #e8eaed;
-    selection-background-color: #4c9f70;
-    selection-color: #0f1113;
-}
-QLineEdit,
-QComboBox,
-QSpinBox,
-QDoubleSpinBox {
-    min-height: 30px;
-    padding-left: 8px;
-}
-QPlainTextEdit#Console {
-    font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-    font-size: 12px;
-    line-height: 1.35;
-}
-QPushButton {
-    background: #282e36;
-    border: 1px solid #3a424d;
-    border-radius: 6px;
-    color: #e8eaed;
-    min-height: 30px;
-    padding: 0 14px;
-}
-QPushButton:hover {
-    background: #303843;
-}
-QPushButton:disabled {
-    color: #69727d;
-    background: #20242a;
-}
-QPushButton#PrimaryButton {
-    background: #3d7b58;
-    border-color: #5aa577;
-    color: #f5fff8;
-    font-weight: 700;
-}
-QGroupBox {
-    border: 1px solid #303640;
-    border-radius: 6px;
-    margin-top: 18px;
-    padding: 14px 10px 10px 10px;
-}
-QGroupBox::title {
-    color: #aab2bd;
-    subcontrol-origin: margin;
-    left: 10px;
-    padding: 0 4px;
-}
-QHeaderView::section {
-    background: #20242a;
-    border: 0;
-    border-right: 1px solid #303640;
-    color: #aab2bd;
-    padding: 7px;
-}
-QTableWidget {
-    gridline-color: #2d333b;
-}
-QStatusBar {
-    background: #101214;
-    border-top: 1px solid #303640;
-}
-"""
+class QueueTab(QWidget):
+    """Thin queue submission surface; no subprocesses are started here."""
+
+    submit_requested = Signal(str, str, int, int)
+
+    def __init__(self, parent: QWidget | None = None) -> None:
+        super().__init__(parent)
+        self.job_type = QComboBox(self)
+        self.job_type.setEditable(False)
+        self.max_runtime = QSpinBox(self)
+        self.max_runtime.setRange(5, 86_400)
+        self.max_runtime.setValue(600)
+        self.max_runtime.setSuffix(" s")
+        self.memory_limit = QSpinBox(self)
+        self.memory_limit.setRange(64, 262_144)
+        self.memory_limit.setValue(4096)
+        self.memory_limit.setSuffix(" MB")
+
+        self.inputs = QPlainTextEdit(self)
+        self.inputs.setObjectName("JsonEditor")
+        self.inputs.setMaximumHeight(132)
+        self.inputs.setPlainText('{\n  "command": ["git", "status", "--short"]\n}')
+
+        self.submit = QPushButton("Submit Job", self)
+        self.submit.setObjectName("PrimaryButton")
+        self.refresh = QPushButton("Refresh", self)
+        self.log = QPlainTextEdit(self)
+        self.log.setReadOnly(True)
+        self.log.setMaximumBlockCount(900)
+        self.log.setObjectName("Console")
+
+        self.table = QTableWidget(0, 7, self)
+        self.table.setHorizontalHeaderLabels(
+            ["Created", "Job ID", "Type", "Status", "Runtime", "Memory", "Error"]
+        )
+        self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.table.verticalHeader().setVisible(False)
+        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+        self.table.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
+
+        form = QFormLayout()
+        form.addRow("Worker", self.job_type)
+        form.addRow("Max Runtime", self.max_runtime)
+        form.addRow("Memory Limit", self.memory_limit)
+
+        controls = QGroupBox("Admission", self)
+        controls.setLayout(form)
+
+        buttons = QHBoxLayout()
+        buttons.addStretch(1)
+        buttons.addWidget(self.refresh)
+        buttons.addWidget(self.submit)
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(18, 18, 18, 18)
+        layout.setSpacing(12)
+        layout.addWidget(controls)
+        layout.addWidget(QLabel("Inputs JSON", self))
+        layout.addWidget(self.inputs)
+        layout.addLayout(buttons)
+        layout.addWidget(self.table, stretch=1)
+        layout.addWidget(QLabel("Queue Events", self))
+        layout.addWidget(self.log)
+
+        self.submit.clicked.connect(self._emit_submit)
+
+    def set_job_types(self, job_types: list[str]) -> None:
+        self.job_type.clear()
+        self.job_type.addItems(job_types)
+
+    def append_log(self, message: str) -> None:
+        self.log.appendPlainText(f"{_utc_stamp()} {message}")
+
+    def render_jobs(self, jobs: list[Job]) -> None:
+        visible = sorted(jobs, key=lambda job: job.created_at, reverse=True)[:MAX_TABLE_ROWS]
+        self.table.setRowCount(len(visible))
+        for row, job in enumerate(visible):
+            self.table.setItem(row, 0, _table_item(job.created_at.isoformat(timespec="seconds")))
+            self.table.setItem(row, 1, _table_item(job.id))
+            self.table.setItem(row, 2, _table_item(job.type))
+            self.table.setItem(row, 3, _table_item(job.status.value))
+            self.table.setItem(row, 4, _table_item(f"{job.max_runtime:.0f}s", align_right=True))
+            self.table.setItem(row, 5, _table_item(f"{job.memory_limit_mb} MB", align_right=True))
+            self.table.setItem(row, 6, _table_item(job.error or ""))
+
+    @Slot()
+    def _emit_submit(self) -> None:
+        self.submit_requested.emit(
+            self.job_type.currentText(),
+            self.inputs.toPlainText(),
+            int(self.max_runtime.value()),
+            int(self.memory_limit.value()),
+        )
+
+
+class ArtifactTab(QWidget):
+    refresh_requested = Signal()
+
+    def __init__(self, parent: QWidget | None = None) -> None:
+        super().__init__(parent)
+        self.search = QLineEdit(self)
+        self.search.setPlaceholderText("Filter artifacts")
+        self.refresh = QPushButton("Refresh", self)
+        self.table = QTableWidget(0, 7, self)
+        self.table.setHorizontalHeaderLabels(
+            ["Artifact ID", "Job ID", "Review", "Quarantine", "Size", "SHA-256", "Local Path"]
+        )
+        self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.table.verticalHeader().setVisible(False)
+        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
+        self.table.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
+        self.table.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeMode.ResizeToContents)
+
+        top = QHBoxLayout()
+        top.addWidget(self.search, stretch=1)
+        top.addWidget(self.refresh)
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(18, 18, 18, 18)
+        layout.setSpacing(12)
+        layout.addLayout(top)
+        layout.addWidget(self.table, stretch=1)
+
+        self.refresh.clicked.connect(self.refresh_requested.emit)
+        self.search.textChanged.connect(self._apply_filter)
+
+    def render_artifacts(self, artifacts: list[ArtifactRecord]) -> None:
+        visible = sorted(artifacts, key=lambda artifact: artifact.created_at, reverse=True)[:MAX_TABLE_ROWS]
+        self.table.setRowCount(len(visible))
+        for row, artifact in enumerate(visible):
+            self.table.setItem(row, 0, _table_item(artifact.artifact_id))
+            self.table.setItem(row, 1, _table_item(artifact.job_id))
+            self.table.setItem(row, 2, _table_item(artifact.review_status))
+            self.table.setItem(row, 3, _table_item(artifact.quarantine_status))
+            self.table.setItem(row, 4, _table_item(artifact.size_bytes, align_right=True))
+            self.table.setItem(row, 5, _table_item(artifact.sha256))
+            self.table.setItem(row, 6, _table_item(str(artifact.local_path)))
+        self._apply_filter(self.search.text())
+
+    @Slot(str)
+    def _apply_filter(self, text: str) -> None:
+        needle = text.strip().lower()
+        for row in range(self.table.rowCount()):
+            row_text = " ".join(
+                self.table.item(row, column).text().lower()
+                for column in range(self.table.columnCount())
+                if self.table.item(row, column) is not None
+            )
+            self.table.setRowHidden(row, bool(needle) and needle not in row_text)
+
+
+class ResourceTab(QWidget):
+    def __init__(self, parent: QWidget | None = None) -> None:
+        super().__init__(parent)
+        self.rss = QLabel("0 MB", self)
+        self.budget = QLabel(f"{UI_MEMORY_BUDGET_MB} MB", self)
+        self.queue_depth = QLabel("0", self)
+        self.active_jobs = QLabel("0", self)
+        self.terminal_jobs = QLabel("0", self)
+        self.artifact_root = QLabel("", self)
+        self.db_path = QLabel("", self)
+        self.python = QLabel(sys.version.split()[0], self)
+        self.platform = QLabel(platform.platform(), self)
+        for label in (
+            self.rss,
+            self.budget,
+            self.queue_depth,
+            self.active_jobs,
+            self.terminal_jobs,
+            self.artifact_root,
+            self.db_path,
+            self.python,
+            self.platform,
+        ):
+            label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+
+        form = QFormLayout()
+        form.addRow("UI Max RSS", self.rss)
+        form.addRow("UI Budget", self.budget)
+        form.addRow("Queued Jobs", self.queue_depth)
+        form.addRow("Active Jobs", self.active_jobs)
+        form.addRow("Terminal Jobs", self.terminal_jobs)
+        form.addRow("Artifact Root", self.artifact_root)
+        form.addRow("Catalog DB", self.db_path)
+        form.addRow("Python", self.python)
+        form.addRow("Host", self.platform)
+
+        group = QGroupBox("Local Resource Envelope", self)
+        group.setLayout(form)
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(18, 18, 18, 18)
+        layout.addWidget(group)
+        layout.addStretch(1)
+
+    def render(self, *, jobs: list[Job], artifact_store: ArtifactStore) -> None:
+        counts = Counter(job.status.value for job in jobs)
+        active = counts.get("running", 0)
+        queued = counts.get("pending", 0) + counts.get("admitted", 0)
+        terminal = counts.get("succeeded", 0) + counts.get("failed", 0) + counts.get("quarantined", 0)
+        rss_mb = _current_rss_mb()
+        self.rss.setText(f"{rss_mb:.1f} MB")
+        self.rss.setObjectName("DangerText" if rss_mb > UI_MEMORY_BUDGET_MB else "OkText")
+        self.queue_depth.setText(str(queued))
+        self.active_jobs.setText(str(active))
+        self.terminal_jobs.setText(str(terminal))
+        self.artifact_root.setText(str(artifact_store.artifact_root))
+        self.db_path.setText(str(artifact_store.db_path))
+
+
+class SovereignDesktopWindow(QMainWindow):
+    """Native control plane backed by the brokerless local queue."""
+
+    def __init__(self, repo_root: Path | None = None, parent: QWidget | None = None) -> None:
+        super().__init__(parent)
+        self.repo_root = (repo_root or _repo_root_from_here()).resolve()
+        self.runtime_root = _runtime_root()
+        self.artifact_store = ArtifactStore.default(repo_root=self.repo_root)
+        self.registry = build_default_worker_registry()
+        self.job_store = JsonFileJobStore(self.runtime_root / "jobs" / "desktop_jobs.json")
+        self.queue: JobQueueManager | None = None
+        self._event_task: asyncio.Task[None] | None = None
+        self._refresh_task: asyncio.Task[None] | None = None
+        self._shutting_down = False
+
+        self.setWindowTitle(APP_TITLE)
+        self.resize(1260, 820)
+        self.setFont(QFont("Inter", 11))
+
+        self.tabs = QTabWidget(self)
+        self.queue_tab = QueueTab(self)
+        self.artifact_tab = ArtifactTab(self)
+        self.resource_tab = ResourceTab(self)
+        self.tabs.addTab(self.queue_tab, "Job Orchestration Queue")
+        self.tabs.addTab(self.artifact_tab, "Local Artifact Explorer")
+        self.tabs.addTab(self.resource_tab, "System Resource Monitor")
+        self.setCentralWidget(self.tabs)
+        self.setStatusBar(QStatusBar(self))
+        self.statusBar().showMessage("Booting local-first control plane")
+        self._apply_theme()
+
+        self.queue_tab.set_job_types(self.registry.registered_types())
+        self.queue_tab.submit_requested.connect(self._submit_job)
+        self.queue_tab.refresh.clicked.connect(self._refresh_now)
+        self.artifact_tab.refresh_requested.connect(self._refresh_now)
+
+    async def boot(self) -> None:
+        await asyncio.to_thread(self.artifact_store.initialize)
+        context = WorkerContext(
+            repo_root=self.repo_root,
+            artifact_root=self.artifact_store.artifact_root,
+            crash_dir=self.artifact_store.artifact_root / "crashes",
+            artifact_store=self.artifact_store,
+        )
+        self.queue = JobQueueManager(
+            registry=self.registry,
+            context=context,
+            store=self.job_store,
+            max_concurrent=1,
+        )
+        await self.queue.start()
+        self._event_task = asyncio.create_task(self._drain_queue_events(), name="desktop-event-drain")
+        self._refresh_task = asyncio.create_task(self._refresh_loop(), name="desktop-refresh-loop")
+        self.statusBar().showMessage("Ready - brokerless local queue online")
+        await self._refresh_all()
+
+    async def shutdown(self) -> None:
+        if self._shutting_down:
+            return
+        self._shutting_down = True
+        for task in (self._event_task, self._refresh_task):
+            if task is not None:
+                task.cancel()
+        if self.queue is not None:
+            await self.queue.stop()
+
+    @asyncSlot(str, str, int, int)
+    async def _submit_job(
+        self,
+        job_type: str,
+        raw_inputs: str,
+        max_runtime: int,
+        memory_limit: int,
+    ) -> None:
+        if self.queue is None:
+            self.queue_tab.append_log("Queue is not initialized")
+            return
+        try:
+            decoded = json.loads(raw_inputs or "{}")
+            if not isinstance(decoded, dict):
+                raise ValueError("inputs JSON must decode to an object")
+            inputs: dict[str, Any] = decoded
+            job = await self.queue.submit(
+                job_type=job_type,
+                inputs=inputs,
+                max_runtime=float(max_runtime),
+                memory_limit_mb=int(memory_limit),
+            )
+        except Exception as exc:
+            self.queue_tab.append_log(f"admission rejected: {exc}")
+            self.statusBar().showMessage(f"Admission rejected: {exc}")
+            return
+        self.queue_tab.append_log(f"submitted {job.id} as {job.type}")
+        self.statusBar().showMessage(f"Submitted {job.id}")
+        await self._refresh_all()
+
+    @asyncSlot()
+    async def _refresh_now(self) -> None:
+        await self._refresh_all()
+
+    async def _drain_queue_events(self) -> None:
+        if self.queue is None:
+            return
+        while True:
+            event = await self.queue.events.get()
+            self.queue_tab.append_log(
+                f"{event.job_id} {event.previous_status or '-'} -> {event.new_status}: {event.message}"
+            )
+            await self._refresh_all()
+
+    async def _refresh_loop(self) -> None:
+        while True:
+            await self._refresh_all()
+            await asyncio.sleep(REFRESH_SECONDS)
+
+    async def _refresh_all(self) -> None:
+        if self.queue is None:
+            return
+        jobs = await self.queue.list_jobs()
+        artifacts = await asyncio.to_thread(self.artifact_store.list_artifacts)
+        self.queue_tab.render_jobs(jobs)
+        self.artifact_tab.render_artifacts(artifacts)
+        self.resource_tab.render(jobs=jobs, artifact_store=self.artifact_store)
+
+    def closeEvent(self, event: QCloseEvent) -> None:  # noqa: N802 - Qt API.
+        if self.queue is not None and not self._shutting_down:
+            asyncio.create_task(self.shutdown())
+        event.accept()
+
+    def _apply_theme(self) -> None:
+        self.setStyleSheet(
+            """
+            QWidget {
+                background: #111418;
+                color: #d9e2ec;
+                font-size: 13px;
+            }
+            QGroupBox {
+                border: 1px solid #2a323c;
+                border-radius: 6px;
+                margin-top: 16px;
+                padding: 14px;
+                color: #aebdcb;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 12px;
+                padding: 0 4px;
+            }
+            QLineEdit, QPlainTextEdit, QComboBox, QSpinBox {
+                background: #171c22;
+                border: 1px solid #2d3742;
+                border-radius: 5px;
+                padding: 7px;
+                selection-background-color: #2d6cdf;
+            }
+            QPlainTextEdit#Console, QPlainTextEdit#JsonEditor {
+                font-family: "SF Mono", Menlo, monospace;
+                font-size: 12px;
+            }
+            QTableWidget {
+                background: #151a20;
+                alternate-background-color: #101419;
+                border: 1px solid #29313b;
+                gridline-color: #26303a;
+            }
+            QHeaderView::section {
+                background: #1b222b;
+                color: #9fb1c2;
+                border: 0;
+                border-right: 1px solid #29313b;
+                padding: 7px;
+            }
+            QPushButton {
+                background: #232c36;
+                border: 1px solid #34414f;
+                border-radius: 5px;
+                padding: 8px 13px;
+            }
+            QPushButton:hover {
+                background: #2d3945;
+            }
+            QPushButton#PrimaryButton {
+                background: #2d6cdf;
+                border-color: #3f7ff0;
+                color: #f8fbff;
+            }
+            QTabBar::tab {
+                background: #171c22;
+                border: 1px solid #29313b;
+                padding: 10px 18px;
+            }
+            QTabBar::tab:selected {
+                background: #232c36;
+                color: #ffffff;
+            }
+            QLabel#DangerText {
+                color: #ff7a7a;
+            }
+            QLabel#OkText {
+                color: #67d39b;
+            }
+            """
+        )
 
 
 def main(argv: list[str] | None = None) -> int:
-    if not PYSIDE6_AVAILABLE:
-        raise RuntimeError("PySide6 is required to start the desktop GUI") from _qt_import_error
-    app = QApplication(sys.argv if argv is None else argv)
-    app.setApplicationName("Sovereign Engineering OS")
-    app.setApplicationDisplayName("Sovereign Engineering OS")
-    app.setStyle("Fusion")
-    app.setFont(QFont("SF Pro Text", 13))
-    _apply_dark_palette(app)
-    window = SovereignDesktopWindow(_repo_root())
+    if not PYSIDE6_AVAILABLE or qasync is None:
+        raise RuntimeError("PySide6 and qasync are required to run apps.sovereign_desktop")
+    app = QApplication(argv or sys.argv)
+    app.setApplicationName(APP_TITLE)
+    loop = qasync.QEventLoop(app)
+    asyncio.set_event_loop(loop)
+
+    window = SovereignDesktopWindow()
     window.show()
-    return app.exec()
+    loop.create_task(window.boot())
+    app.aboutToQuit.connect(lambda: loop.create_task(window.shutdown()))
+    with loop:
+        loop.run_forever()
+    return 0
 
 
 if __name__ == "__main__":
