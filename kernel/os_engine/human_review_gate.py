@@ -36,9 +36,26 @@ class HumanReviewGate:
 
     def __init__(self, database: OSDatabase) -> None:
         self.database = database
+        self._closed = False
         self.database.initialize()
 
+    def __enter__(self) -> "HumanReviewGate":
+        self._ensure_open()
+        return self
+
+    def __exit__(self, exc_type: object, exc: object, traceback: object) -> None:
+        _ = (exc_type, exc, traceback)
+        self.close()
+
+    @property
+    def closed(self) -> bool:
+        return self._closed
+
+    def close(self) -> None:
+        self._closed = True
+
     def request_review(self, *, job_id: str, artifact_id: str, reason: str) -> HumanReviewRecord:
+        self._ensure_open()
         if not job_id or not artifact_id:
             raise HumanReviewGateError("job_id and artifact_id are required")
         if not reason:
@@ -91,6 +108,7 @@ class HumanReviewGate:
         return record
 
     def approve_review(self, *, review_id: str, reviewer: str, reason: str = "approved") -> HumanReviewRecord:
+        self._ensure_open()
         if not reviewer:
             raise HumanReviewGateError("approval requires reviewer")
         if not reason:
@@ -98,6 +116,7 @@ class HumanReviewGate:
         return self._decide(review_id=review_id, decision="approved", reviewer=reviewer, reason=reason)
 
     def reject_review(self, *, review_id: str, reviewer: str, reason: str) -> HumanReviewRecord:
+        self._ensure_open()
         if not reviewer:
             raise HumanReviewGateError("rejection requires reviewer")
         if not reason:
@@ -105,12 +124,14 @@ class HumanReviewGate:
         return self._decide(review_id=review_id, decision="rejected", reviewer=reviewer, reason=reason)
 
     def get_review(self, review_id: str) -> HumanReviewRecord | None:
+        self._ensure_open()
         self.database.initialize()
         with self.database.connect() as connection:
             row = connection.execute("SELECT * FROM human_reviews WHERE review_id = ?", (review_id,)).fetchone()
         return _record_from_row(row) if row is not None else None
 
     def list_reviews(self, *, job_id: str | None = None, artifact_id: str | None = None) -> list[HumanReviewRecord]:
+        self._ensure_open()
         self.database.initialize()
         query = "SELECT * FROM human_reviews"
         clauses: list[str] = []
@@ -129,12 +150,14 @@ class HumanReviewGate:
         return [_record_from_row(row) for row in rows]
 
     def final_claim_allowed(self, *, job_id: str, artifact_id: str) -> bool:
+        self._ensure_open()
         reviews = self.list_reviews(job_id=job_id, artifact_id=artifact_id)
         if not reviews:
             return False
         return any(review.decision == "approved" for review in reviews)
 
     def require_approval(self, *, job_id: str, artifact_id: str) -> None:
+        self._ensure_open()
         if not self.final_claim_allowed(job_id=job_id, artifact_id=artifact_id):
             raise HumanReviewGateError("required human review approval is missing")
 
@@ -176,6 +199,10 @@ class HumanReviewGate:
         if updated is None:
             raise HumanReviewGateError("review update failed")
         return updated
+
+    def _ensure_open(self) -> None:
+        if self._closed:
+            raise HumanReviewGateError("human review gate is closed")
 
 
 def stable_review_id(*, job_id: str, artifact_id: str, reason: str) -> str:

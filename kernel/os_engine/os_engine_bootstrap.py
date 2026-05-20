@@ -40,6 +40,18 @@ class OSEngineStateSummary:
     def to_json(self) -> str:
         return json.dumps(self.to_dict(), sort_keys=True, separators=(",", ":"))
 
+    def close(self) -> None:
+        """Compatibility hook for callers that treat bootstrap summaries as owned resources."""
+
+        return None
+
+    def __enter__(self) -> "OSEngineStateSummary":
+        return self
+
+    def __exit__(self, exc_type: object, exc: object, traceback: object) -> None:
+        _ = (exc_type, exc, traceback)
+        self.close()
+
 
 def bootstrap_os_engine(*, root: Path, db_name: str = "os_engine.sqlite3") -> OSEngineStateSummary:
     if not db_name or "/" in db_name or "\\" in db_name:

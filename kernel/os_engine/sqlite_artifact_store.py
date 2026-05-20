@@ -133,9 +133,27 @@ class SQLiteArtifactStore:
         if chunk_size <= 0:
             raise ArtifactValidationError("chunk_size must be positive")
         self.chunk_size = chunk_size
+        self._closed = False
         self.database.initialize()
 
+    def __enter__(self) -> "SQLiteArtifactStore":
+        self._ensure_open()
+        self.initialize()
+        return self
+
+    def __exit__(self, exc_type: object, exc: object, traceback: object) -> None:
+        _ = (exc_type, exc, traceback)
+        self.close()
+
+    @property
+    def closed(self) -> bool:
+        return self._closed
+
+    def close(self) -> None:
+        self._closed = True
+
     def initialize(self) -> None:
+        self._ensure_open()
         self.artifact_root.mkdir(parents=True, exist_ok=True)
         self.database.initialize()
 
@@ -152,6 +170,7 @@ class SQLiteArtifactStore:
         safe_to_publish: bool | None = None,
         artifact_id: str | None = None,
     ) -> SQLiteArtifactRecord:
+        self._ensure_open()
         self.initialize()
         if not job_id:
             raise ArtifactValidationError("job_id is required")
@@ -248,12 +267,14 @@ class SQLiteArtifactStore:
         return record
 
     def get_artifact(self, artifact_id: str) -> SQLiteArtifactRecord | None:
+        self._ensure_open()
         self.initialize()
         with self.database.connect() as connection:
             row = connection.execute("SELECT * FROM artifacts WHERE artifact_id = ?", (artifact_id,)).fetchone()
         return _record_from_row(row) if row is not None else None
 
     def list_artifacts(self, *, job_id: str | None = None) -> list[SQLiteArtifactRecord]:
+        self._ensure_open()
         self.initialize()
         query = "SELECT * FROM artifacts"
         args: list[str] = []
@@ -266,6 +287,7 @@ class SQLiteArtifactStore:
         return [_record_from_row(row) for row in rows]
 
     def quarantine_artifact(self, artifact_id: str, *, reason: str) -> SQLiteArtifactRecord:
+        self._ensure_open()
         if not reason:
             raise ArtifactValidationError("quarantine requires reason")
         validate_no_secret_like({"reason": reason})
@@ -280,6 +302,7 @@ class SQLiteArtifactStore:
         )
 
     def review_artifact(self, artifact_id: str, *, review_status: str | ReviewStatus) -> SQLiteArtifactRecord:
+        self._ensure_open()
         status_value = _review_status_value(review_status)
         record = self.get_artifact(artifact_id)
         if record is None:
@@ -289,6 +312,7 @@ class SQLiteArtifactStore:
         return self._update_record(record, review_status=status_value)
 
     def validate_artifact_file(self, local_path: Path, *, expected_sha256: str | None = None) -> ArtifactFileValidation:
+        self._ensure_open()
         path = self._validate_artifact_path(local_path)
         if not path.is_file():
             raise SQLiteArtifactStoreError(f"artifact file is missing: {path}")
@@ -367,6 +391,10 @@ class SQLiteArtifactStore:
         if ".git" in path.parts:
             raise ArtifactPathError("artifact path cannot enter .git")
         return path
+
+    def _ensure_open(self) -> None:
+        if self._closed:
+            raise SQLiteArtifactStoreError("sqlite artifact store is closed")
 
 
 def sha256_file(path: Path, *, chunk_size: int = CHUNK_SIZE) -> str:
