@@ -188,6 +188,19 @@ Console behavior, real-folder smoke, network access, model API calls, external
 runtime activation, input mutation, file movement, file renaming, duplicate
 deletion, media organizer behavior, or production autonomy.
 
+Task graph execution now also emits `task_graph_artifact_outputs.json` in the
+graph `output_dir` after node execution. This manifest is a graph-level,
+metadata-only, non-authoritative artifact binding surface. It records
+node-produced artifact paths, existence, file sizes, and SHA-256 hashes for
+already-produced artifacts, plus the graph-level execution, replay, and failure
+manifests when present.
+
+`task_graph_artifact_outputs.json` does not copy raw private asset contents,
+does not index raw content, does not mutate inputs, and does not move, rename,
+delete, deduplicate, or organize media files. It does not add UI, desktop app
+behavior, SQLite storage, Operator Console behavior, network access, model API
+calls, browser runtime activation, or external creative runtime activation.
+
 ## Delivery Validation
 
 ```bash
