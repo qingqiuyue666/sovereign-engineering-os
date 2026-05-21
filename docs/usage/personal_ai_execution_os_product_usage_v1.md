@@ -15,6 +15,26 @@ python3 -m kernel.personal_ai.local_mvp_cli launch-office-workflow \
 Performs readonly XLSX inspection and output planning only. Approved output
 writing is a separate approval-gated workflow.
 
+## Local Asset Scan
+
+```bash
+python3 -m kernel.personal_ai.local_mvp_cli launch-local-asset-scan \
+  --input-dir /path/to/assets \
+  --output-dir /path/to/output \
+  --recursive \
+  --project-id demo_project
+```
+
+Performs a read-only local asset scan. By default it does not scan nested
+directories and excludes hidden files; use `--recursive` and `--include-hidden`
+only when those paths should be included.
+
+The scan writes reports only to `output_dir` and fails closed if expected
+output files already exist. It does not move, rename, delete, or reorganize
+input files, and it is not a media organizer. It does not call model APIs, does
+not call the network, and does not launch ComfyUI, Blender, Houdini, After
+Effects, DaVinci, or a browser.
+
 ## Model Workflows
 
 Deterministic mock:

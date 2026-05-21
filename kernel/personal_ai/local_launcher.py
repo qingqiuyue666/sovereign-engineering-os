@@ -3,6 +3,16 @@
 from dataclasses import dataclass
 from pathlib import Path
 
+from kernel.assets.local_asset_runtime import run_local_asset_runtime
+from kernel.assets.local_asset_schema import (
+    ASSET_INDEX_FILE,
+    ASSET_MANIFEST_FILE,
+    AUDIT_LOG_FILE,
+    DUPLICATES_REPORT_FILE,
+    MEDIA_INVENTORY_FILE,
+    QUARANTINE_MANIFEST_FILE,
+    VALIDATION_REPORT_FILE,
+)
 from kernel.personal_ai.adapters.blender_runtime import run_blender_runtime
 from kernel.personal_ai.adapters.blender_runtime_boundary import (
     write_blender_runtime_admission_artifacts,
@@ -47,6 +57,7 @@ __all__ = [
     "run_blender_dry_run_launcher",
     "run_comfyui_dry_run_launcher",
     "run_creative_handoff_launcher",
+    "run_local_asset_scan_launcher",
     "run_local_office_launcher",
     "run_model_fixture_launcher",
     "run_model_provider_dry_run_launcher",
@@ -127,6 +138,99 @@ def run_local_office_launcher(
     )
     return LauncherWorkflowResult(
         workflow="local_office_workflow",
+        output_dir=output_path,
+        complete=True,
+        payload=payload,
+        summary_path=summary_path,
+        required_human_approval=True,
+    )
+
+
+def run_local_asset_scan_launcher(
+    input_dir: Path,
+    output_dir: Path,
+    *,
+    recursive: bool = False,
+    include_hidden: bool = False,
+    project_id: str | None = None,
+) -> LauncherWorkflowResult:
+    output_path = _validate_output_dir(output_dir)
+    summary_path = output_path / _SUMMARY_FILE
+    _require_no_overwrite(summary_path)
+    result = run_local_asset_runtime(
+        Path(input_dir),
+        output_path,
+        recursive=recursive,
+        include_hidden=include_hidden,
+        project_id=project_id,
+    )
+    payload = {
+        "input_dir": result.input_dir.as_posix(),
+        "asset_manifest_path": result.output_paths[ASSET_MANIFEST_FILE].as_posix(),
+        "asset_index_path": result.output_paths[ASSET_INDEX_FILE].as_posix(),
+        "duplicates_report_path": (
+            result.output_paths[DUPLICATES_REPORT_FILE].as_posix()
+        ),
+        "media_inventory_path": result.output_paths[MEDIA_INVENTORY_FILE].as_posix(),
+        "asset_runtime_audit_log_path": (
+            result.output_paths[AUDIT_LOG_FILE].as_posix()
+        ),
+        "asset_runtime_validation_report_path": (
+            result.output_paths[VALIDATION_REPORT_FILE].as_posix()
+        ),
+        "asset_runtime_quarantine_manifest_path": (
+            result.output_paths[QUARANTINE_MANIFEST_FILE].as_posix()
+        ),
+        "asset_runtime_output_paths": {
+            filename: path.as_posix()
+            for filename, path in sorted(result.output_paths.items())
+        },
+        "files_scanned": result.files_scanned,
+        "bytes_scanned": result.bytes_scanned,
+        "duplicate_groups": result.duplicate_groups,
+        "quarantined_paths": result.quarantined_paths,
+        "recursive": result.recursive,
+        "include_hidden": result.include_hidden,
+        "project_id": result.project_id,
+        "read_only_input": True,
+        "input_mutation_performed": False,
+        "file_move_performed": False,
+        "file_rename_performed": False,
+        "file_delete_performed": False,
+        "media_organizer_behavior_performed": False,
+        "output_overwrite_performed": False,
+        "network_access_performed": False,
+        "model_api_called": False,
+        "desktop_ui_added": False,
+        "browser_runtime_invoked": False,
+        "comfyui_runtime_invoked": False,
+        "blender_runtime_invoked": False,
+        "houdini_runtime_invoked": False,
+        "after_effects_runtime_invoked": False,
+        "davinci_runtime_invoked": False,
+        "external_runtime_invoked": False,
+    }
+    _write_summary(
+        summary_path,
+        title="Local Asset Scan",
+        lines=[
+            "Status: complete",
+            "Runtime: read-only local asset metadata scan",
+            "Files scanned: " + str(result.files_scanned),
+            "Input mutation performed: false",
+            "File movement performed: false",
+            "File renaming performed: false",
+            "File deletion performed: false",
+            "Network access performed: false",
+            "Model API called: false",
+            "External runtime invoked: false",
+            "Media organizer behavior performed: false",
+            "Next action: human review of local asset reports",
+        ],
+        boundary="read-only local asset scan; human review required.",
+    )
+    return LauncherWorkflowResult(
+        workflow="local_asset_scan_workflow",
         output_dir=output_path,
         complete=True,
         payload=payload,
@@ -677,10 +781,16 @@ def _require_no_overwrite(path):
         raise ValueError("launcher output already exists")
 
 
-def _write_summary(summary_path, *, title, lines):
+def _write_summary(
+    summary_path,
+    *,
+    title,
+    lines,
+    boundary="local fixture only; human approval required.",
+):
     _require_no_overwrite(summary_path)
     body = ["# " + title, ""]
     body.extend(lines)
     body.append("")
-    body.append("Boundary: local fixture only; human approval required.")
+    body.append("Boundary: " + boundary)
     write_markdown_atomically(summary_path, "\n".join(body))
