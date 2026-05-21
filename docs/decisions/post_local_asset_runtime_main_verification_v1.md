@@ -21,13 +21,15 @@ d72466d feat: add local asset runtime v1
 
 ## Verification Result
 
-Result: `PASS_WITH_DOCUMENTED_PRE_DOC_BRANCH_SHAPE_RERUN`
+Result: `FINAL_BRANCH_VERIFICATION_GREEN`
 
 The targeted local asset runtime tests passed. The targeted CLI / launcher integration tests passed. Schema discovery and acceptance discovery passed.
 
 The first pre-document run of `python3 -m unittest discover -s tests/tracer_bullet -v` produced one failure because the branch had no changed files yet and `test_external_pattern_assimilation_record.py` asserts that the branch diff is non-empty. This was not a local asset runtime regression. The suite was rerun after adding this verification document and passed.
 
 The pre-commit run of `make ci` exercised the configured suites successfully, then failed at the final clean-worktree gate because this verification document was still uncommitted. This was not a runtime, CLI, launcher, schema, or acceptance regression. The required post-commit `make ci` rerun is the authoritative clean-worktree CI result for this branch.
+
+Final authoritative result: the post-commit branch verification is green. The pre-document tracer failure and pre-commit `make ci` failure are preserved below as branch-state / documentation-timing artifacts only, not runtime, CLI, schema, acceptance, product-health, or local asset integration regressions.
 
 ## Required File Checks
 
@@ -72,6 +74,9 @@ python3 -m unittest discover -s tests/tracer_bullet -v
 make ci
 git diff --check
 git status --short
+make ci
+git diff --check
+git status --short
 ```
 
 ## Exact Results
@@ -98,6 +103,13 @@ git status --short
   - Exact final failure: `test -z "$(git status --short)"`; `make: *** [diff-check] Error 1`.
 - `git diff --check`: passed.
 - `git status --short`: reported only `?? docs/decisions/post_local_asset_runtime_main_verification_v1.md` before commit.
+- Post-commit `make ci`: passed.
+  - Final configured discovery suites passed:
+    `tests/schemas` passed 133 tests, `tests/tracer_bullet` passed 6379 tests with 4 skipped, and `validation/tests/acceptance` passed 156 tests.
+  - Final `make ci` clean-worktree gate passed.
+- Post-commit `git diff --check`: passed.
+- Final `git status --short`: passed; empty / clean output.
+- Final branch verification state: green.
 
 ## Changed Files
 
