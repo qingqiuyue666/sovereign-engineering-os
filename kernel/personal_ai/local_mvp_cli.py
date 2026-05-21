@@ -18,6 +18,7 @@ from kernel.personal_ai.local_launcher import (
     run_blender_dry_run_launcher,
     run_comfyui_dry_run_launcher,
     run_creative_handoff_launcher,
+    run_local_asset_scan_launcher,
     run_local_office_launcher,
     run_model_fixture_launcher,
     run_model_provider_dry_run_launcher,
@@ -93,6 +94,7 @@ _SUBCOMMANDS = {
     "run-browser-fixture",
     "validate-runtime-delivery",
     "run-task-graph-fixture",
+    "launch-local-asset-scan",
     "launch-office-workflow",
     "launch-model-fixture",
     "launch-model-provider-dry-run",
@@ -603,6 +605,16 @@ def _main_subcommand(argv) -> int:
                 }
             )
             return 0 if result.success else 1
+        if args.command == "launch-local-asset-scan":
+            result = run_local_asset_scan_launcher(
+                Path(args.input_dir),
+                Path(args.output_dir),
+                recursive=args.recursive,
+                include_hidden=args.include_hidden,
+                project_id=args.project_id,
+            )
+            _print_command_payload(result.to_cli_payload())
+            return 0 if result.complete else 1
         if args.command == "launch-office-workflow":
             result = run_local_office_launcher(
                 Path(args.input_workbook),
@@ -822,6 +834,13 @@ def _build_subcommand_parser():
     task_graph_parser = subparsers.add_parser("run-task-graph-fixture")
     task_graph_parser.add_argument("--graph-path", required=True)
     task_graph_parser.add_argument("--output-dir", required=True)
+
+    launch_asset_parser = subparsers.add_parser("launch-local-asset-scan")
+    launch_asset_parser.add_argument("--input-dir", required=True)
+    launch_asset_parser.add_argument("--output-dir", required=True)
+    launch_asset_parser.add_argument("--recursive", action="store_true")
+    launch_asset_parser.add_argument("--include-hidden", action="store_true")
+    launch_asset_parser.add_argument("--project-id")
 
     launch_office_parser = subparsers.add_parser("launch-office-workflow")
     launch_office_parser.add_argument("--input-workbook", required=True)
