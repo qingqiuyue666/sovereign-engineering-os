@@ -48,6 +48,10 @@ never as primary navigation:
 - Node-editor treatments for the HFX chain: QGraphicsView surfaces, drag/drop
   graphs, heavy particles, screen shake, and glass-break effects.
 - Scattered menus that force operators to hunt for mission state.
+- Anime skins that replace the professional workspace base.
+- Copyrighted anime character references, anime girl character art, mascot
+  takeover, full-screen speed lines, full-screen effects, Japanese text
+  gimmicks, and cheap anime skin treatments.
 
 ## Required Replacement Direction
 
@@ -58,6 +62,9 @@ Replace every forbidden direction with the contracted pattern:
 - Raycast/Codex-style Command Bar
 - Current Mission Card as the hero object
 - compact HFX_008 Energy Chain
+- visible Coding Activity Panel
+- bounded Test Gate Panel
+- subtle anime-inspired micro FX only during coding and testing states
 - steady Inspector with useful default guidance
 - collapsed structured Black Box
 - light-gray Apple base and white mission cards

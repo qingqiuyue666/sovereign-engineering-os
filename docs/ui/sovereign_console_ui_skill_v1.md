@@ -14,6 +14,11 @@ The UI must feel like a macOS professional desktop control surface inspired by
 Finder, Xcode, Raycast, and Apple Mission Control. It must remain local-first,
 mission-centered, high-density, readable, and calm.
 
+Workspace may use a Claude / GPT / Codex style AI coding workspace pattern:
+mission thread, large command input, visible Coding Activity Panel, Test Gate
+Panel, compact event Black Box, and final report placeholder. This must remain a
+professional native desktop workspace, not a chatbot clone.
+
 ## Required First Pass
 
 For any UI request:
@@ -67,9 +72,34 @@ Use the 8px / 16px / 24px spacing grid.
 ## Component Checklist
 
 Workspace must include the large Raycast/Codex-style Command Bar, degraded
-banner when needed, Current Mission Card, HFX_008 Energy Chain, Recent Runs,
+banner when needed, mission thread / activity stream, Current Mission Card,
+Coding Activity Panel, Test Gate Panel, HFX_008 Energy Chain, Recent Runs,
 Recent Artifacts, Pending Reviews, Quarantine summary, and context packet quick
 actions.
+
+Mission thread cards are User command placeholder, AI planning card, Coding
+activity card, Test gate card, Artifact/review summary card, and Final report
+placeholder card.
+
+Coding Activity Panel states are Idle, Thinking, Reading, Coding, Testing,
+Writing Report, Waiting Review, Failed, and Stage Complete. The panel shows
+state, current action, current file, active worker, short message, safe status,
+diff/code preview, and test gate summary without executing code or writing
+files.
+
+The code preview must be compact monospace with a file pill, diff-like rows,
+green `+` rows, muted red `-` rows, current line highlight, and cursor
+placeholder.
+
+Test Gate Panel gates are Unit Tests, Schemas, Acceptance, and `make ci`. Gate
+states are Pending, Running, OK, Failed, and Skipped. OK stamps are allowed only
+when projected data says OK.
+
+Anime FX / 动漫微特效 are allowed only as tiny local coding/testing
+micro-interactions: AnimeStatusDot, SpeedLineHint, TinySparkle,
+SweatDropMarker, TestGateStamp, and CommandAura. Anime FX Intensity is Off /
+Minimal / Standard / Playful, default Standard, degraded to Minimal on Lost sync
+or high memory pressure unless set to Off.
 
 Current Mission Card must show HFX_008 Energy Shockwave, status chip, next
 action, blocked reason, latest run, latest artifact, review state,
@@ -120,6 +150,12 @@ Reject UI directions that turn Sovereign Console into a mobile app, web app,
 SaaS dashboard, chatbot clone, plugin marketplace, raw Qt form, database admin
 panel, black sci-fi concept screen, cyberpunk console, game HUD, or scattered
 menu collection.
+
+Reject anime directions that introduce copyrighted anime character references,
+anime girl character art, mascot takeover, full-screen speed lines, heavy
+particles, full-screen effects, screen shake, fantasy skin, Japanese text
+gimmicks, cheap anime skin, or any base UI takeover. Anime influence is only
+micro-interaction feedback around coding and testing states.
 
 Reject raw QFormLayout mission dumps, raw QPushButton navigation stacks,
 QGraphicsView node editors, drag/drop node graphs, huge dark regions, debug

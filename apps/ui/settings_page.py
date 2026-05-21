@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from apps.ui import QFrame, QGridLayout, QLabel, QPushButton, QVBoxLayout, QWidget
+from apps.ui.anime_micro_fx import AnimeFxIntensity, normalize_anime_fx_intensity
 from apps.ui.i18n import UiText, language_display_options
 from apps.ui.motion import MotionIntensity, normalize_motion_intensity
 from apps.ui.read_models import RuntimeSnapshot
@@ -30,6 +31,7 @@ SYSTEM_HEALTH_SETTINGS_FIELDS: tuple[str, ...] = (
 SETTINGS_BOUNDARY_FIELDS: tuple[str, ...] = (
     "Language: Auto / English / Chinese",
     "Motion Intensity: Minimal / Standard / High Energy",
+    "Anime FX Intensity: Off / Minimal / Standard / Playful",
     "Runtime",
     "Local-only mode",
     "External network disabled",
@@ -55,6 +57,7 @@ class SettingsPage(QWidget):
         self.text = UiText(language)
         self.language_option = "auto"
         self.motion_intensity = MotionIntensity.STANDARD
+        self.anime_fx_intensity = AnimeFxIntensity.STANDARD
         layout = QVBoxLayout(self)
         layout.setContentsMargins(18, 18, 18, 18)
         layout.setSpacing(10)
@@ -112,6 +115,29 @@ class SettingsPage(QWidget):
             motion_layout.addWidget(button)
         layout.addWidget(self.motion_panel)
 
+        self.anime_fx_panel = QFrame(self)
+        self.anime_fx_panel.setProperty("role", "metricCard")
+        anime_fx_layout = QVBoxLayout(self.anime_fx_panel)
+        anime_fx_layout.setContentsMargins(12, 10, 12, 10)
+        self.anime_fx_label = QLabel(self.text.tr("settings.anime_fx_intensity"), self.anime_fx_panel)
+        self.anime_fx_label.setProperty("role", "eyebrow")
+        anime_fx_layout.addWidget(self.anime_fx_label)
+        self.anime_fx_buttons: dict[AnimeFxIntensity, QPushButton] = {}
+        for intensity, key in (
+            (AnimeFxIntensity.OFF, "motion.off"),
+            (AnimeFxIntensity.MINIMAL, "motion.minimal"),
+            (AnimeFxIntensity.STANDARD, "motion.standard"),
+            (AnimeFxIntensity.PLAYFUL, "motion.playful"),
+        ):
+            button = QPushButton(self.text.tr(key), self.anime_fx_panel)
+            button.setCheckable(True)
+            clicked = getattr(button, "clicked", None)
+            if hasattr(clicked, "connect"):
+                clicked.connect(lambda _checked=False, value=intensity: self.set_anime_fx_intensity(value))
+            self.anime_fx_buttons[intensity] = button
+            anime_fx_layout.addWidget(button)
+        layout.addWidget(self.anime_fx_panel)
+
         grid = QGridLayout()
         grid.setSpacing(10)
         self._boundary_values: dict[str, QLabel] = {}
@@ -142,11 +168,18 @@ class SettingsPage(QWidget):
         self.motion_intensity = normalize_motion_intensity(intensity)
         self._refresh_buttons()
 
+    def set_anime_fx_intensity(self, intensity: str | AnimeFxIntensity) -> None:
+        self.anime_fx_intensity = normalize_anime_fx_intensity(intensity)
+        self._refresh_buttons()
+
     def language_options(self) -> tuple[str, ...]:
         return ("auto", "en", "zh")
 
     def motion_options(self) -> tuple[str, ...]:
         return tuple(intensity.value for intensity in MotionIntensity)
+
+    def anime_fx_options(self) -> tuple[str, ...]:
+        return tuple(intensity.value for intensity in AnimeFxIntensity)
 
     def required_fields(self) -> tuple[str, ...]:
         return SETTINGS_BOUNDARY_FIELDS
@@ -177,6 +210,7 @@ class SettingsPage(QWidget):
         self.title.setText(self.text.tr("page.settings"))
         self.language_label.setText(self.text.tr("settings.language"))
         self.motion_label.setText(self.text.tr("settings.motion_intensity"))
+        self.anime_fx_label.setText(self.text.tr("settings.anime_fx_intensity"))
         for option, button in self.language_buttons.items():
             button.setText(dict(language_display_options(language))[option])
         for intensity, key in (
@@ -185,6 +219,13 @@ class SettingsPage(QWidget):
             (MotionIntensity.HIGH_ENERGY, "motion.high_energy"),
         ):
             self.motion_buttons[intensity].setText(self.text.tr(key))
+        for intensity, key in (
+            (AnimeFxIntensity.OFF, "motion.off"),
+            (AnimeFxIntensity.MINIMAL, "motion.minimal"),
+            (AnimeFxIntensity.STANDARD, "motion.standard"),
+            (AnimeFxIntensity.PLAYFUL, "motion.playful"),
+        ):
+            self.anime_fx_buttons[intensity].setText(self.text.tr(key))
         section_keys = {
             "Runtime": "settings.runtime",
             "Language": "settings.language",
@@ -204,6 +245,8 @@ class SettingsPage(QWidget):
             button.setChecked(option == self.language_option)
         for intensity, button in self.motion_buttons.items():
             button.setChecked(intensity == self.motion_intensity)
+        for intensity, button in self.anime_fx_buttons.items():
+            button.setChecked(intensity == self.anime_fx_intensity)
 
 
 def _panel(title: str, content: QWidget) -> QFrame:

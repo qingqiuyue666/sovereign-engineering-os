@@ -64,6 +64,106 @@ def application_stylesheet() -> str:
         border: 1px solid #D1D1D6;
         border-radius: 8px;
     }
+    QFrame[role="commandBar"] {
+        background: #FFFFFF;
+        border: 1px solid #C9C9CF;
+        border-radius: 8px;
+    }
+    QFrame[role="commandBar"][auraActive="true"] {
+        border: 1px solid #7D5FFF;
+    }
+    QFrame[role="threadCard"] {
+        background: #FFFFFF;
+        border: 1px solid #D1D1D6;
+        border-radius: 8px;
+    }
+    QFrame#MissionThreadPanel {
+        background: transparent;
+        border: 0;
+    }
+    QLabel#WorkspaceCommandBar {
+        color: #1D1D1F;
+        font-size: 15px;
+        font-weight: 500;
+    }
+    QLabel#WorkspaceNextAction {
+        color: #6E6E73;
+        font-size: 11px;
+    }
+    QFrame#CodingActivityPanel {
+        background: #FFFFFF;
+        border: 1px solid #D1D1D6;
+        border-radius: 8px;
+    }
+    QLabel#CodingActivityState, QLabel#CodingActivityFilePill {
+        color: #1D1D1F;
+        background: #F5F5F7;
+        border: 1px solid #D1D1D6;
+        border-radius: 6px;
+        padding: 3px 7px;
+    }
+    QLabel#CodingActivitySafeStatus {
+        color: #2B6F46;
+    }
+    QFrame#CodingCodeBlock {
+        background: #F7F7F8;
+        border: 1px solid #D1D1D6;
+        border-radius: 7px;
+    }
+    QFrame#CodingCodeBlock QLabel {
+        font-family: "SF Mono", Menlo, Consolas, monospace;
+        font-size: 11px;
+    }
+    QFrame#CodingCodeBlock QLabel[diffMarker="+"] {
+        color: #188038;
+    }
+    QFrame#CodingCodeBlock QLabel[diffMarker="-"] {
+        color: #A23A35;
+    }
+    QFrame#CodingCodeBlock QLabel[currentLine="true"] {
+        background: #EAF2FF;
+        border-radius: 4px;
+        padding: 2px 4px;
+    }
+    QLabel#CodingCursorPlaceholder {
+        color: #0066CC;
+    }
+    QFrame#AnimeStatusDot {
+        background: #F5F5F7;
+        border: 1px solid #D1D1D6;
+        border-radius: 9px;
+    }
+    QFrame#AnimeStatusDot[fxState="Passed"] {
+        border-color: #30D158;
+    }
+    QFrame#AnimeStatusDot[fxState="Failed"] {
+        border-color: #FF453A;
+    }
+    QFrame#SpeedLineHint QLabel, QFrame#TinySparkle QLabel {
+        color: #7D5FFF;
+        font-size: 10px;
+    }
+    QFrame#SweatDropMarker QLabel {
+        color: #FF9F0A;
+        font-size: 11px;
+        font-weight: 700;
+    }
+    QFrame#TestGatePanel {
+        background: #F7F7F8;
+        border: 1px solid #D1D1D6;
+        border-radius: 8px;
+    }
+    QFrame#TestGateStamp {
+        background: #FFFFFF;
+        border: 1px solid #D1D1D6;
+        border-radius: 7px;
+    }
+    QFrame#TestGateStamp[gateStatus="OK"] {
+        border-color: #30D158;
+    }
+    QFrame#TestGateStamp[gateStatus="Failed"] {
+        border-color: #FF453A;
+    }
     QLabel#DashboardWarningStrip, QLabel#JobQueueFilterStrip, QLabel#RunsFilterStrip, QLabel#WorkspaceDegradedBanner,
     QLabel#GlobalDegradedBanner {
         background: #FFF4E5;
