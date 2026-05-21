@@ -615,6 +615,9 @@ def _main_subcommand(argv) -> int:
                 recursive=args.recursive,
                 include_hidden=args.include_hidden,
                 project_id=args.project_id,
+                previous_scan_output_dir=_optional_path(
+                    args.previous_scan_output_dir
+                ),
             )
             _print_command_payload(result.to_cli_payload())
             return 0 if result.complete else 1
@@ -844,6 +847,7 @@ def _build_subcommand_parser():
     launch_asset_parser.add_argument("--recursive", action="store_true")
     launch_asset_parser.add_argument("--include-hidden", action="store_true")
     launch_asset_parser.add_argument("--project-id")
+    launch_asset_parser.add_argument("--previous-scan-output-dir")
 
     launch_office_parser = subparsers.add_parser("launch-office-workflow")
     launch_office_parser.add_argument("--input-workbook", required=True)

@@ -21,6 +21,7 @@ writing is a separate approval-gated workflow.
 python3 -m kernel.personal_ai.local_mvp_cli launch-local-asset-scan \
   --input-dir /path/to/assets \
   --output-dir /path/to/output \
+  --previous-scan-output-dir /path/to/previous-output \
   --recursive \
   --project-id demo_project
 ```
@@ -28,6 +29,14 @@ python3 -m kernel.personal_ai.local_mvp_cli launch-local-asset-scan \
 Performs a read-only local asset scan. By default it does not scan nested
 directories and excludes hidden files; use `--recursive` and `--include-hidden`
 only when those paths should be included.
+
+`--previous-scan-output-dir` is optional. When omitted, the launcher writes a
+baseline incremental plan with `plan_mode = baseline_no_previous_scan`; all
+current scanned assets are classified as `new`, with no missing, changed, or
+unchanged assets. When provided, it must point to an existing non-symlink
+previous scan output directory that is separate from the current `output_dir`;
+the launcher writes `plan_mode = compare_previous_scan` and compares only
+generated scan artifacts from the previous output directory.
 
 The scan writes reports only to `output_dir` and fails closed if expected
 output files already exist. It does not move, rename, delete, or reorganize
@@ -38,7 +47,10 @@ Effects, DaVinci, or a browser.
 On success, the launcher also writes `launcher_summary.md`,
 `asset_scan_run_receipt.json`, `local_asset_index.sqlite`,
 `local_asset_sqlite_index_manifest.json`, and
-`local_asset_sqlite_query_summary.md`, then binds the scan outputs into the
+`local_asset_sqlite_query_summary.md`. It then writes the incremental planning
+artifacts `local_asset_incremental_scan_plan.json`,
+`local_asset_incremental_scan_manifest.json`, and
+`local_asset_incremental_scan_summary.md`, then binds the scan outputs into the
 existing artifact index surface by emitting `artifact_index.json` and
 `artifact_index_manifest.json`. The receipt records the completed scan counts,
 quarantine count, retry/replay hint, and explicit no-scope-expansion
@@ -49,6 +61,13 @@ scan's `output_dir`, is a metadata/query index over generated scan artifacts,
 does not copy raw private asset content, and does not attach to the global OS
 engine database. It does not add UI, desktop app behavior, Operator Console
 behavior, external runtime activation, or production autonomy.
+
+The incremental scan plan is also non-authoritative and review-only. It does
+not execute a cache, does not automatically skip hashing or scanning, does not
+mutate inputs, does not move, rename, delete, deduplicate, or organize media
+files, does not write to a global database, does not add UI or Operator
+Console behavior, does not run real-folder smoke, does not activate external
+runtimes, and does not add production autonomy.
 
 On safe failure cases where `output_dir` already exists and is safe to write
 into, the launcher writes `asset_scan_failure_bundle.json` and
@@ -173,6 +192,7 @@ Task graphs can include a controlled local asset scan node:
   "inputs": {
     "input_dir": "/path/to/assets",
     "output_dir": "/path/to/asset-scan-output",
+    "previous_scan_output_dir": "/path/to/previous-asset-scan-output",
     "recursive": true,
     "include_hidden": false,
     "project_id": "demo_project"
@@ -185,8 +205,12 @@ the same operational-control behavior. On success, the node record references
 `asset_scan_run_receipt.json`, `artifact_index.json`,
 `artifact_index_manifest.json`, `local_asset_index.sqlite`,
 `local_asset_sqlite_index_manifest.json`,
-`local_asset_sqlite_query_summary.md`, indexed artifact counts, quarantine
-counts, and replay hints. On failure, the graph is marked failed, writes
+`local_asset_sqlite_query_summary.md`,
+`local_asset_incremental_scan_plan.json`,
+`local_asset_incremental_scan_manifest.json`,
+`local_asset_incremental_scan_summary.md`, the incremental plan mode, indexed
+artifact counts, quarantine counts, and replay hints. On failure, the graph is
+marked failed, writes
 `task_graph_failure_bundle.json`, records the failed `node_id` and
 `failure_stage`, and preserves any safe local asset scan failure bundle in the
 node `output_dir`. Dependent nodes are skipped after a failed dependency.

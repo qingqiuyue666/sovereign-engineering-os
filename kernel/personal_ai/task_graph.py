@@ -638,6 +638,13 @@ def _run_local_asset_scan_node_if_requested(node):
     output_dir = _required_string_input(inputs, "output_dir", "local asset scan")
     recursive = _optional_bool_input(inputs, "recursive", False)
     include_hidden = _optional_bool_input(inputs, "include_hidden", False)
+    previous_scan_output_dir = inputs.get("previous_scan_output_dir")
+    if previous_scan_output_dir is not None and (
+        not isinstance(previous_scan_output_dir, str) or not previous_scan_output_dir
+    ):
+        raise ValueError(
+            "task graph local asset scan previous_scan_output_dir is malformed"
+        )
     project_id = inputs.get("project_id")
     if project_id is not None and (
         not isinstance(project_id, str) or not project_id
@@ -652,12 +659,16 @@ def _run_local_asset_scan_node_if_requested(node):
         recursive=recursive,
         include_hidden=include_hidden,
         project_id=project_id,
+        previous_scan_output_dir=None
+        if previous_scan_output_dir is None
+        else Path(previous_scan_output_dir),
     )
     payload = result.payload
     complete = bool(result.complete)
     return {
         "status": "completed" if complete else "failed",
         "output_dir": result.output_dir.as_posix(),
+        "previous_scan_output_dir": payload.get("previous_scan_output_dir"),
         "local_asset_scan_complete": complete,
         "launcher_summary_path": result.summary_path.as_posix() if complete else None,
         "asset_scan_run_receipt_path": payload.get("asset_scan_run_receipt_path"),
@@ -674,6 +685,20 @@ def _run_local_asset_scan_node_if_requested(node):
         "local_asset_sqlite_query_summary_path": payload.get(
             "local_asset_sqlite_query_summary_path"
         ),
+        "local_asset_incremental_scan_plan_path": payload.get(
+            "local_asset_incremental_scan_plan_path"
+        ),
+        "local_asset_incremental_scan_manifest_path": payload.get(
+            "local_asset_incremental_scan_manifest_path"
+        ),
+        "local_asset_incremental_scan_summary_path": payload.get(
+            "local_asset_incremental_scan_summary_path"
+        ),
+        "local_asset_incremental_plan_mode": payload.get(
+            "local_asset_incremental_plan_mode"
+        ),
+        "incremental_cache_execution_performed": False,
+        "incremental_automatic_skip_performed": False,
         "asset_manifest_path": payload.get("asset_manifest_path"),
         "asset_index_path": payload.get("asset_index_path"),
         "duplicates_report_path": payload.get("duplicates_report_path"),
@@ -759,6 +784,7 @@ def _node_output_refs(executed_nodes):
         if node["adapter_id"] == _LOCAL_ASSET_ADAPTER_ID:
             node_refs["local_asset_scan"] = {
                 "output_dir": node.get("output_dir"),
+                "previous_scan_output_dir": node.get("previous_scan_output_dir"),
                 "asset_scan_run_receipt": _path_ref(
                     node.get("asset_scan_run_receipt_path")
                 ),
@@ -781,6 +807,15 @@ def _node_output_refs(executed_nodes):
                 "local_asset_sqlite_query_summary": _path_ref(
                     node.get("local_asset_sqlite_query_summary_path")
                 ),
+                "local_asset_incremental_scan_plan": _path_ref(
+                    node.get("local_asset_incremental_scan_plan_path")
+                ),
+                "local_asset_incremental_scan_manifest": _path_ref(
+                    node.get("local_asset_incremental_scan_manifest_path")
+                ),
+                "local_asset_incremental_scan_summary": _path_ref(
+                    node.get("local_asset_incremental_scan_summary_path")
+                ),
                 "asset_manifest": _path_ref(node.get("asset_manifest_path")),
                 "asset_index": _path_ref(node.get("asset_index_path")),
                 "duplicates_report": _path_ref(node.get("duplicates_report_path")),
@@ -800,6 +835,15 @@ def _node_output_refs(executed_nodes):
                 ),
                 "indexed_artifacts": node.get("indexed_artifacts"),
                 "quarantined_paths": node.get("quarantined_paths"),
+                "local_asset_incremental_plan_mode": node.get(
+                    "local_asset_incremental_plan_mode"
+                ),
+                "incremental_cache_execution_performed": node.get(
+                    "incremental_cache_execution_performed"
+                ),
+                "incremental_automatic_skip_performed": node.get(
+                    "incremental_automatic_skip_performed"
+                ),
                 "failure_stage": node.get("failure_stage"),
             }
         refs.append(node_refs)

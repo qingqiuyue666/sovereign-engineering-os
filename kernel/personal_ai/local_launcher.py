@@ -3,6 +3,13 @@
 from dataclasses import dataclass
 from pathlib import Path
 
+from kernel.assets.local_asset_incremental_plan import (
+    LOCAL_ASSET_INCREMENTAL_MANIFEST_FILE,
+    LOCAL_ASSET_INCREMENTAL_PLAN_FILE,
+    LOCAL_ASSET_INCREMENTAL_SUMMARY_FILE,
+    build_local_asset_incremental_plan,
+    validate_previous_scan_output_dir,
+)
 from kernel.assets.local_asset_sqlite_index import (
     LOCAL_ASSET_SQLITE_INDEX_FILE,
     LOCAL_ASSET_SQLITE_INDEX_MANIFEST_FILE,
@@ -175,9 +182,13 @@ def run_local_asset_scan_launcher(
     recursive: bool = False,
     include_hidden: bool = False,
     project_id: str | None = None,
+    previous_scan_output_dir: Path | None = None,
 ) -> LauncherWorkflowResult:
     input_path = Path(input_dir)
     output_path = Path(output_dir)
+    previous_scan_path = (
+        None if previous_scan_output_dir is None else Path(previous_scan_output_dir)
+    )
     if not output_path.exists() or not output_path.is_dir() or output_path.is_symlink():
         return _asset_scan_failure_result(
             input_path=input_path,
@@ -185,6 +196,7 @@ def run_local_asset_scan_launcher(
             recursive=recursive,
             include_hidden=include_hidden,
             project_id=project_id,
+            previous_scan_output_dir=previous_scan_path,
             failure_stage="preflight_output_dir_missing",
             error_type="ValueError",
             error_message="output_dir is missing",
@@ -211,6 +223,7 @@ def run_local_asset_scan_launcher(
             recursive=recursive,
             include_hidden=include_hidden,
             project_id=project_id,
+            previous_scan_output_dir=previous_scan_path,
             failure_stage=collision_stage,
             error_type="ValueError",
             error_message=_asset_scan_collision_message(output_path, collision_stage),
@@ -221,6 +234,27 @@ def run_local_asset_scan_launcher(
             output_pollution_detected=True,
         )
 
+    if previous_scan_path is not None:
+        try:
+            validate_previous_scan_output_dir(output_path, previous_scan_path)
+        except ValueError as error:
+            return _asset_scan_failure_result(
+                input_path=input_path,
+                output_path=output_path,
+                recursive=recursive,
+                include_hidden=include_hidden,
+                project_id=project_id,
+                previous_scan_output_dir=previous_scan_path,
+                failure_stage=classify_asset_scan_failure_stage(str(error)),
+                error_type=error.__class__.__name__,
+                error_message=str(error),
+                write_failure_bundle_artifacts=_asset_scan_can_write_failure_artifacts(
+                    output_path,
+                    input_path,
+                ),
+                output_pollution_detected=False,
+            )
+
     if not input_path.exists() or not input_path.is_dir() or input_path.is_symlink():
         return _asset_scan_failure_result(
             input_path=input_path,
@@ -228,6 +262,7 @@ def run_local_asset_scan_launcher(
             recursive=recursive,
             include_hidden=include_hidden,
             project_id=project_id,
+            previous_scan_output_dir=previous_scan_path,
             failure_stage="preflight_input_dir_missing",
             error_type="ValueError",
             error_message="input_dir is missing",
@@ -245,6 +280,7 @@ def run_local_asset_scan_launcher(
             recursive=recursive,
             include_hidden=include_hidden,
             project_id=project_id,
+            previous_scan_output_dir=previous_scan_path,
             failure_stage="runtime_validation_failure",
             error_type="ValueError",
             error_message="output_dir must be outside input_dir",
@@ -267,6 +303,7 @@ def run_local_asset_scan_launcher(
             recursive=recursive,
             include_hidden=include_hidden,
             project_id=project_id,
+            previous_scan_output_dir=previous_scan_path,
             failure_stage=classify_asset_scan_failure_stage(str(error)),
             error_type=error.__class__.__name__,
             error_message=str(error),
@@ -304,7 +341,16 @@ def run_local_asset_scan_launcher(
         "recursive": result.recursive,
         "include_hidden": result.include_hidden,
         "project_id": result.project_id,
+        "previous_scan_output_dir": None
+        if previous_scan_path is None
+        else previous_scan_path.as_posix(),
         "read_only_input": True,
+        "cache_execution_performed": False,
+        "automatic_skip_performed": False,
+        "raw_content_copied": False,
+        "content_indexed": False,
+        "incremental_cache_execution_performed": False,
+        "incremental_automatic_skip_performed": False,
         "input_mutation_performed": False,
         "file_move_performed": False,
         "file_rename_performed": False,
@@ -371,6 +417,7 @@ def run_local_asset_scan_launcher(
             recursive=recursive,
             include_hidden=include_hidden,
             project_id=project_id,
+            previous_scan_output_dir=previous_scan_path,
             failure_stage=classify_asset_scan_failure_stage(str(error)),
             error_type=error.__class__.__name__,
             error_message=str(error),
@@ -395,7 +442,33 @@ def run_local_asset_scan_launcher(
             recursive=recursive,
             include_hidden=include_hidden,
             project_id=project_id,
+            previous_scan_output_dir=previous_scan_path,
             failure_stage="sqlite_index_failure",
+            error_type=error.__class__.__name__,
+            error_message=str(error),
+            write_failure_bundle_artifacts=_asset_scan_can_write_failure_artifacts(
+                output_path,
+                input_path,
+            ),
+        )
+
+    try:
+        incremental_plan = build_local_asset_incremental_plan(
+            output_path,
+            previous_scan_output_dir=previous_scan_path,
+            project_id=result.project_id,
+            recursive=result.recursive,
+            include_hidden=result.include_hidden,
+        )
+    except Exception as error:
+        return _asset_scan_failure_result(
+            input_path=input_path,
+            output_path=output_path,
+            recursive=recursive,
+            include_hidden=include_hidden,
+            project_id=project_id,
+            previous_scan_output_dir=previous_scan_path,
+            failure_stage="incremental_plan_failure",
             error_type=error.__class__.__name__,
             error_message=str(error),
             write_failure_bundle_artifacts=_asset_scan_can_write_failure_artifacts(
@@ -413,6 +486,7 @@ def run_local_asset_scan_launcher(
             recursive=recursive,
             include_hidden=include_hidden,
             project_id=project_id,
+            previous_scan_output_dir=previous_scan_path,
             failure_stage="artifact_index_failure",
             error_type=error.__class__.__name__,
             error_message=str(error),
@@ -439,6 +513,20 @@ def run_local_asset_scan_launcher(
             "local_asset_sqlite_index_scope": "per_scan_output_dir_only",
             "local_asset_sqlite_content_indexed": False,
             "local_asset_sqlite_raw_content_copied": False,
+            "local_asset_incremental_scan_plan_path": (
+                incremental_plan.plan_path.as_posix()
+            ),
+            "local_asset_incremental_scan_manifest_path": (
+                incremental_plan.manifest_path.as_posix()
+            ),
+            "local_asset_incremental_scan_summary_path": (
+                incremental_plan.summary_path.as_posix()
+            ),
+            "local_asset_incremental_plan_written": True,
+            "local_asset_incremental_plan_mode": incremental_plan.plan_mode,
+            "incremental_cache_execution_performed": False,
+            "incremental_automatic_skip_performed": False,
+            "local_asset_incremental_authority": "non_authority",
             "artifact_index_path": (
                 artifact_index.artifact_index_path.as_posix()
             ),
@@ -478,6 +566,7 @@ def _asset_scan_failure_result(
     recursive: bool,
     include_hidden: bool,
     project_id: str | None,
+    previous_scan_output_dir: Path | None = None,
     failure_stage: str,
     error_type: str,
     error_message: str,
@@ -525,6 +614,13 @@ def _asset_scan_failure_result(
             output_pollution_detected=output_pollution_detected,
         )
 
+    payload["previous_scan_output_dir"] = (
+        None
+        if previous_scan_output_dir is None
+        else Path(previous_scan_output_dir).as_posix()
+    )
+    payload["incremental_cache_execution_performed"] = False
+    payload["incremental_automatic_skip_performed"] = False
     return LauncherWorkflowResult(
         workflow="local_asset_scan_workflow",
         output_dir=output_path,
@@ -563,6 +659,14 @@ def _asset_scan_collision_message(output_path: Path, collision_stage: str) -> st
         ):
             if file_name in written:
                 return "local asset sqlite index output already exists: " + file_name
+    if collision_stage == "preflight_incremental_output_collision":
+        for file_name in (
+            LOCAL_ASSET_INCREMENTAL_PLAN_FILE,
+            LOCAL_ASSET_INCREMENTAL_MANIFEST_FILE,
+            LOCAL_ASSET_INCREMENTAL_SUMMARY_FILE,
+        ):
+            if file_name in written:
+                return "local asset incremental output already exists: " + file_name
     for file_name in (
         _SUMMARY_FILE,
         ASSET_SCAN_RUN_RECEIPT_FILE,
