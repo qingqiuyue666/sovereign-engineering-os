@@ -665,6 +665,15 @@ def _run_local_asset_scan_node_if_requested(node):
         "asset_scan_failure_summary_path": payload.get("failure_summary_path"),
         "artifact_index_path": payload.get("artifact_index_path"),
         "artifact_index_manifest_path": payload.get("artifact_index_manifest_path"),
+        "local_asset_sqlite_index_path": payload.get(
+            "local_asset_sqlite_index_path"
+        ),
+        "local_asset_sqlite_index_manifest_path": payload.get(
+            "local_asset_sqlite_index_manifest_path"
+        ),
+        "local_asset_sqlite_query_summary_path": payload.get(
+            "local_asset_sqlite_query_summary_path"
+        ),
         "asset_manifest_path": payload.get("asset_manifest_path"),
         "asset_index_path": payload.get("asset_index_path"),
         "duplicates_report_path": payload.get("duplicates_report_path"),
@@ -762,6 +771,15 @@ def _node_output_refs(executed_nodes):
                 "artifact_index": _path_ref(node.get("artifact_index_path")),
                 "artifact_index_manifest": _path_ref(
                     node.get("artifact_index_manifest_path")
+                ),
+                "local_asset_sqlite_index": _path_ref(
+                    node.get("local_asset_sqlite_index_path")
+                ),
+                "local_asset_sqlite_index_manifest": _path_ref(
+                    node.get("local_asset_sqlite_index_manifest_path")
+                ),
+                "local_asset_sqlite_query_summary": _path_ref(
+                    node.get("local_asset_sqlite_query_summary_path")
                 ),
                 "asset_manifest": _path_ref(node.get("asset_manifest_path")),
                 "asset_index": _path_ref(node.get("asset_index_path")),

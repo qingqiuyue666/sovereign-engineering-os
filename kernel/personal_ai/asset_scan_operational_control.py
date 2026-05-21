@@ -5,6 +5,7 @@ from hashlib import sha256
 from pathlib import Path
 import json
 
+from kernel.assets.local_asset_sqlite_index import LOCAL_ASSET_SQLITE_OUTPUT_FILENAMES
 from kernel.assets.local_asset_schema import OUTPUT_FILENAMES
 
 __all__ = [
@@ -51,6 +52,8 @@ _NO_SCOPE_EXPANSION_FLAGS = {
     "file_rename_performed": False,
     "file_delete_performed": False,
     "media_organizer_behavior_performed": False,
+    "local_asset_sqlite_content_indexed": False,
+    "local_asset_sqlite_raw_content_copied": False,
     "output_overwrite_performed": False,
     "network_access_performed": False,
     "model_api_called": False,
@@ -78,6 +81,7 @@ _CONTROLLED_OUTPUT_FILES = (
     *OUTPUT_FILENAMES,
     _LAUNCHER_SUMMARY_FILE,
     ASSET_SCAN_RUN_RECEIPT_FILE,
+    *LOCAL_ASSET_SQLITE_OUTPUT_FILENAMES,
     _ARTIFACT_INDEX_FILE,
     _ARTIFACT_INDEX_MANIFEST_FILE,
     ASSET_SCAN_FAILURE_BUNDLE_FILE,
@@ -110,6 +114,9 @@ def pre_runtime_collision_stage(output_dir: Path) -> str | None:
         return "preflight_artifact_index_collision"
     if (output_path / _ARTIFACT_INDEX_MANIFEST_FILE).exists():
         return "preflight_artifact_index_collision"
+    for file_name in LOCAL_ASSET_SQLITE_OUTPUT_FILENAMES:
+        if (output_path / file_name).exists():
+            return "preflight_sqlite_index_collision"
     for file_name in (
         _LAUNCHER_SUMMARY_FILE,
         ASSET_SCAN_RUN_RECEIPT_FILE,
@@ -162,6 +169,9 @@ def write_asset_scan_run_receipt(
     launcher_summary_path: Path,
     artifact_index_path: Path,
     artifact_index_manifest_path: Path,
+    local_asset_sqlite_index_path: Path | None = None,
+    local_asset_sqlite_index_manifest_path: Path | None = None,
+    local_asset_sqlite_query_summary_path: Path | None = None,
 ) -> Path:
     output_path = Path(output_dir)
     receipt_path = asset_scan_run_receipt_path(output_path)
@@ -192,6 +202,19 @@ def write_asset_scan_run_receipt(
         "artifact_index_manifest_path": (
             Path(artifact_index_manifest_path).as_posix()
         ),
+        "local_asset_sqlite_index_path": None
+        if local_asset_sqlite_index_path is None
+        else Path(local_asset_sqlite_index_path).as_posix(),
+        "local_asset_sqlite_index_manifest_path": None
+        if local_asset_sqlite_index_manifest_path is None
+        else Path(local_asset_sqlite_index_manifest_path).as_posix(),
+        "local_asset_sqlite_query_summary_path": None
+        if local_asset_sqlite_query_summary_path is None
+        else Path(local_asset_sqlite_query_summary_path).as_posix(),
+        "local_asset_sqlite_index_authority": "non_authority",
+        "local_asset_sqlite_index_scope": "per_scan_output_dir_only",
+        "local_asset_sqlite_content_indexed": False,
+        "local_asset_sqlite_raw_content_copied": False,
         "safe_to_retry": True,
         "replay_hint": _replay_hint("completed"),
         **_NO_SCOPE_EXPANSION_FLAGS,
@@ -294,6 +317,8 @@ def classify_asset_scan_failure_stage(error_message: str) -> str:
         return "preflight_launcher_output_collision"
     if "artifact_index" in message and "already exists" in message:
         return "preflight_artifact_index_collision"
+    if "local asset sqlite index output already exists" in message:
+        return "preflight_sqlite_index_collision"
     if "asset runtime output already exists" in message:
         return "runtime_output_collision"
     if (
@@ -304,6 +329,8 @@ def classify_asset_scan_failure_stage(error_message: str) -> str:
         return "runtime_validation_failure"
     if "artifact index" in message.lower() or "artifact_index" in message:
         return "artifact_index_failure"
+    if "sqlite" in message.lower():
+        return "sqlite_index_failure"
     return "unknown_asset_scan_failure"
 
 
@@ -420,8 +447,10 @@ def _safe_to_retry(failure_stage: str) -> bool:
     return failure_stage in {
         "preflight_launcher_output_collision",
         "preflight_artifact_index_collision",
+        "preflight_sqlite_index_collision",
         "runtime_output_collision",
         "artifact_index_failure",
+        "sqlite_index_failure",
     }
 
 
@@ -447,10 +476,11 @@ def _recommended_next_action(failure_stage: str) -> str:
     if failure_stage in {
         "preflight_launcher_output_collision",
         "preflight_artifact_index_collision",
+        "preflight_sqlite_index_collision",
         "runtime_output_collision",
     }:
         return "human_choose_fresh_output_dir"
-    if failure_stage == "artifact_index_failure":
+    if failure_stage in {"artifact_index_failure", "sqlite_index_failure"}:
         return "human_review_partial_asset_scan_outputs"
     return "human_review_asset_scan_failure_bundle"
 

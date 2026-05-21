@@ -98,6 +98,13 @@ class TaskGraphLocalAssetScanNodeTests(unittest.TestCase):
             self.assertTrue((graph_output / "task_graph_replay_manifest.json").exists())
             self.assertTrue((node_output / "asset_scan_run_receipt.json").exists())
             self.assertTrue((node_output / "artifact_index.json").exists())
+            self.assertTrue((node_output / "local_asset_index.sqlite").exists())
+            self.assertTrue(
+                (node_output / "local_asset_sqlite_index_manifest.json").exists()
+            )
+            self.assertTrue(
+                (node_output / "local_asset_sqlite_query_summary.md").exists()
+            )
             self.assertEqual(node["status"], "completed")
             self.assertTrue(node["local_asset_scan_complete"])
             self.assertEqual(
@@ -107,6 +114,18 @@ class TaskGraphLocalAssetScanNodeTests(unittest.TestCase):
             self.assertEqual(
                 node["artifact_index_path"],
                 (node_output / "artifact_index.json").as_posix(),
+            )
+            self.assertEqual(
+                node["local_asset_sqlite_index_path"],
+                (node_output / "local_asset_index.sqlite").as_posix(),
+            )
+            self.assertEqual(
+                node["local_asset_sqlite_index_manifest_path"],
+                (node_output / "local_asset_sqlite_index_manifest.json").as_posix(),
+            )
+            self.assertEqual(
+                node["local_asset_sqlite_query_summary_path"],
+                (node_output / "local_asset_sqlite_query_summary.md").as_posix(),
             )
             self.assertGreater(node["indexed_artifacts"], 0)
             for field in (

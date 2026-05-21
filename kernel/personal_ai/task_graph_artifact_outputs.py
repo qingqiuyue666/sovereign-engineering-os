@@ -30,6 +30,12 @@ _LOCAL_ASSET_DIRECT_PATH_FIELDS = (
     ("asset_scan_failure_summary", "asset_scan_failure_summary_path"),
     ("artifact_index", "artifact_index_path"),
     ("artifact_index_manifest", "artifact_index_manifest_path"),
+    ("local_asset_sqlite_index", "local_asset_sqlite_index_path"),
+    (
+        "local_asset_sqlite_index_manifest",
+        "local_asset_sqlite_index_manifest_path",
+    ),
+    ("local_asset_sqlite_query_summary", "local_asset_sqlite_query_summary_path"),
     ("asset_manifest", "asset_manifest_path"),
     ("asset_index", "asset_index_path"),
     ("duplicates_report", "duplicates_report_path"),
@@ -65,6 +71,7 @@ _ROLE_ARTIFACT_TYPES = {
     "asset_runtime_audit_log": "jsonl",
     "asset_scan_failure_summary": "markdown",
     "launcher_summary": "markdown",
+    "local_asset_sqlite_query_summary": "markdown",
     "media_inventory": "markdown",
 }
 

@@ -77,8 +77,8 @@ class LocalAssetRuntimeArtifactBindingTests(unittest.TestCase):
             artifact_names = {
                 entry["artifact_name"] for entry in artifact_index["entries"]
             }
-            self.assertEqual(payload["indexed_artifacts"], 9)
-            self.assertEqual(artifact_index["indexed_artifacts"], 9)
+            self.assertEqual(payload["indexed_artifacts"], 12)
+            self.assertEqual(artifact_index["indexed_artifacts"], 12)
             self.assertTrue(
                 {
                     "asset_manifest",
@@ -90,6 +90,9 @@ class LocalAssetRuntimeArtifactBindingTests(unittest.TestCase):
                     "asset_runtime_quarantine_manifest",
                     "launcher_summary",
                     "asset_scan_run_receipt",
+                    "local_asset_index",
+                    "local_asset_sqlite_index_manifest",
+                    "local_asset_sqlite_query_summary",
                 }.issubset(artifact_names)
             )
             self.assertTrue(
@@ -137,6 +140,15 @@ class LocalAssetRuntimeArtifactBindingTests(unittest.TestCase):
             second_payload_hashes.pop("asset_scan_run_receipt")
             first_manifest_hashes.pop("asset_scan_run_receipt")
             second_manifest_hashes.pop("asset_scan_run_receipt")
+            for unstable_artifact in (
+                "local_asset_index",
+                "local_asset_sqlite_index_manifest",
+                "local_asset_sqlite_query_summary",
+            ):
+                first_payload_hashes.pop(unstable_artifact)
+                second_payload_hashes.pop(unstable_artifact)
+                first_manifest_hashes.pop(unstable_artifact)
+                second_manifest_hashes.pop(unstable_artifact)
             self.assertEqual(first_payload_hashes, second_payload_hashes)
             self.assertEqual(first_manifest_hashes, second_manifest_hashes)
 
