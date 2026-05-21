@@ -597,6 +597,9 @@ def _main_subcommand(argv) -> int:
                     "task_graph_replay_manifest_path": None
                     if result.replay_manifest_path is None
                     else result.replay_manifest_path.as_posix(),
+                    "task_graph_artifact_outputs_path": None
+                    if result.artifact_outputs_manifest_path is None
+                    else result.artifact_outputs_manifest_path.as_posix(),
                     "task_graph_failure_bundle_path": None
                     if result.failure_bundle_path is None
                     else result.failure_bundle_path.as_posix(),

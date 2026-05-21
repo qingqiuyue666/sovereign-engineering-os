@@ -12,6 +12,12 @@ from kernel.personal_ai.adapters.adapter_registry import (
 from kernel.personal_ai.hash_utils import sha256_canonical_json, sha256_file
 from kernel.personal_ai.io_utils import write_json_atomically
 from kernel.personal_ai.runtime_delivery_package import validate_runtime_delivery_package
+from kernel.personal_ai.task_graph_artifact_outputs import (
+    TASK_GRAPH_ARTIFACT_OUTPUTS_FILE,
+    build_task_graph_artifact_outputs_manifest,
+    task_graph_artifact_outputs_projection_sha256,
+    write_task_graph_artifact_outputs_manifest,
+)
 
 __all__ = [
     "TaskGraphResult",
@@ -47,6 +53,7 @@ class TaskGraphResult:
     output_dir: Path
     execution_manifest_path: Path | None
     replay_manifest_path: Path | None
+    artifact_outputs_manifest_path: Path | None
     failure_bundle_path: Path | None
     success: bool
     node_order: tuple[str, ...]
@@ -62,9 +69,11 @@ def run_local_task_graph_fixture(
     _validate_output_dir(output_path)
     execution_manifest_path = output_path / _EXECUTION_MANIFEST_FILE
     replay_manifest_path = output_path / _REPLAY_MANIFEST_FILE
+    artifact_outputs_manifest_path = output_path / TASK_GRAPH_ARTIFACT_OUTPUTS_FILE
     failure_bundle_path = output_path / _FAILURE_BUNDLE_FILE
     _require_no_overwrite(execution_manifest_path)
     _require_no_overwrite(replay_manifest_path)
+    _require_no_overwrite(artifact_outputs_manifest_path)
     _require_no_overwrite(failure_bundle_path)
 
     try:
@@ -79,6 +88,7 @@ def run_local_task_graph_fixture(
             output_dir=output_path,
             execution_manifest_path=None,
             replay_manifest_path=None,
+            artifact_outputs_manifest_path=None,
             failure_bundle_path=failure_bundle_path,
             success=False,
             node_order=(),
@@ -87,6 +97,19 @@ def run_local_task_graph_fixture(
 
     graph_hash = sha256_file(graph_file)
     graph_success = _graph_execution_succeeded(executed_nodes)
+    planned_artifact_outputs = build_task_graph_artifact_outputs_manifest(
+        graph_id=graph["graph_id"],
+        graph_path=graph_file,
+        graph_sha256=graph_hash,
+        graph_execution_mode=graph_execution_mode,
+        graph_success=graph_success,
+        node_order=node_order,
+        executed_nodes=executed_nodes,
+        output_dir=output_path,
+        execution_manifest_path=execution_manifest_path,
+        replay_manifest_path=replay_manifest_path,
+        failure_bundle_path=failure_bundle_path if not graph_success else None,
+    )
     execution_manifest = {
         "manifest_type": "personal_ai_execution_os_unified_task_graph_execution_v1",
         "authority": "non_authority",
@@ -118,6 +141,11 @@ def run_local_task_graph_fixture(
             for node in executed_nodes
             if node["runtime_admission_decision"]["decision_path"] is not None
         ],
+        "task_graph_artifact_outputs_path": (
+            artifact_outputs_manifest_path.as_posix()
+        ),
+        "task_graph_artifact_outputs_written": True,
+        "task_graph_artifact_count": planned_artifact_outputs["artifact_count"],
         "runtime_activation_performed": False,
         "real_runtime_activation_allowed": False,
         "task_graph_can_activate_real_runtime_without_admission": False,
@@ -131,6 +159,31 @@ def run_local_task_graph_fixture(
         "required_human_approval": True,
         "next_allowed_action": "human_review_only",
     }
+    write_json_atomically(execution_manifest_path, execution_manifest)
+    if not graph_success:
+        _write_failure_bundle(
+            graph_file,
+            failure_bundle_path,
+            ValueError(_graph_execution_failure_message(executed_nodes)),
+            node_order=node_order,
+            executed_nodes=executed_nodes,
+        )
+    pre_replay_artifact_outputs = build_task_graph_artifact_outputs_manifest(
+        graph_id=graph["graph_id"],
+        graph_path=graph_file,
+        graph_sha256=graph_hash,
+        graph_execution_mode=graph_execution_mode,
+        graph_success=graph_success,
+        node_order=node_order,
+        executed_nodes=executed_nodes,
+        output_dir=output_path,
+        execution_manifest_path=execution_manifest_path,
+        replay_manifest_path=replay_manifest_path,
+        failure_bundle_path=failure_bundle_path if not graph_success else None,
+    )
+    artifact_outputs_projection_sha256 = (
+        task_graph_artifact_outputs_projection_sha256(pre_replay_artifact_outputs)
+    )
     replay_manifest = {
         "manifest_type": "personal_ai_execution_os_unified_task_graph_replay_v1",
         "authority": "non_authority",
@@ -161,24 +214,46 @@ def run_local_task_graph_fixture(
         "local_asset_scan_failure_refs_sha256": sha256_canonical_json(
             _local_asset_scan_failure_refs(executed_nodes)
         ),
+        "task_graph_artifact_outputs_path": (
+            artifact_outputs_manifest_path.as_posix()
+        ),
+        "task_graph_artifact_outputs_sha256": artifact_outputs_projection_sha256,
+        "task_graph_artifact_outputs_sha256_scope": (
+            "canonical_manifest_projection_excluding_task_graph_replay_manifest_"
+            "file_hash"
+        ),
+        "task_graph_artifact_outputs_manifest_bound": True,
+        "task_graph_artifact_outputs_binding_strategy": (
+            "artifact_outputs_hashes_replay_manifest_file; replay_manifest_hashes_"
+            "artifact_outputs_projection_without_replay_file_hash"
+        ),
         "replay_requires_same_graph_sha256": True,
         "required_human_approval": True,
     }
-    write_json_atomically(execution_manifest_path, execution_manifest)
     write_json_atomically(replay_manifest_path, replay_manifest)
-    if not graph_success:
-        _write_failure_bundle(
-            graph_file,
-            failure_bundle_path,
-            ValueError(_graph_execution_failure_message(executed_nodes)),
-            node_order=node_order,
-            executed_nodes=executed_nodes,
-        )
+    artifact_outputs = build_task_graph_artifact_outputs_manifest(
+        graph_id=graph["graph_id"],
+        graph_path=graph_file,
+        graph_sha256=graph_hash,
+        graph_execution_mode=graph_execution_mode,
+        graph_success=graph_success,
+        node_order=node_order,
+        executed_nodes=executed_nodes,
+        output_dir=output_path,
+        execution_manifest_path=execution_manifest_path,
+        replay_manifest_path=replay_manifest_path,
+        failure_bundle_path=failure_bundle_path if not graph_success else None,
+    )
+    write_task_graph_artifact_outputs_manifest(
+        artifact_outputs_manifest_path,
+        artifact_outputs,
+    )
     return TaskGraphResult(
         graph_path=graph_file,
         output_dir=output_path,
         execution_manifest_path=execution_manifest_path,
         replay_manifest_path=replay_manifest_path,
+        artifact_outputs_manifest_path=artifact_outputs_manifest_path,
         failure_bundle_path=None if graph_success else failure_bundle_path,
         success=graph_success,
         node_order=node_order,
@@ -584,11 +659,23 @@ def _run_local_asset_scan_node_if_requested(node):
         "status": "completed" if complete else "failed",
         "output_dir": result.output_dir.as_posix(),
         "local_asset_scan_complete": complete,
+        "launcher_summary_path": result.summary_path.as_posix() if complete else None,
         "asset_scan_run_receipt_path": payload.get("asset_scan_run_receipt_path"),
         "asset_scan_failure_bundle_path": payload.get("failure_bundle_path"),
         "asset_scan_failure_summary_path": payload.get("failure_summary_path"),
         "artifact_index_path": payload.get("artifact_index_path"),
         "artifact_index_manifest_path": payload.get("artifact_index_manifest_path"),
+        "asset_manifest_path": payload.get("asset_manifest_path"),
+        "asset_index_path": payload.get("asset_index_path"),
+        "duplicates_report_path": payload.get("duplicates_report_path"),
+        "media_inventory_path": payload.get("media_inventory_path"),
+        "asset_runtime_audit_log_path": payload.get("asset_runtime_audit_log_path"),
+        "asset_runtime_validation_report_path": (
+            payload.get("asset_runtime_validation_report_path")
+        ),
+        "asset_runtime_quarantine_manifest_path": (
+            payload.get("asset_runtime_quarantine_manifest_path")
+        ),
         "asset_runtime_output_paths": payload.get("asset_runtime_output_paths"),
         "indexed_artifacts": payload.get("indexed_artifacts"),
         "quarantined_paths": payload.get("quarantined_paths"),
@@ -676,6 +763,20 @@ def _node_output_refs(executed_nodes):
                 "artifact_index_manifest": _path_ref(
                     node.get("artifact_index_manifest_path")
                 ),
+                "asset_manifest": _path_ref(node.get("asset_manifest_path")),
+                "asset_index": _path_ref(node.get("asset_index_path")),
+                "duplicates_report": _path_ref(node.get("duplicates_report_path")),
+                "media_inventory": _path_ref(node.get("media_inventory_path")),
+                "asset_runtime_audit_log": _path_ref(
+                    node.get("asset_runtime_audit_log_path")
+                ),
+                "asset_runtime_validation_report": _path_ref(
+                    node.get("asset_runtime_validation_report_path")
+                ),
+                "asset_runtime_quarantine_manifest": _path_ref(
+                    node.get("asset_runtime_quarantine_manifest_path")
+                ),
+                "launcher_summary": _path_ref(node.get("launcher_summary_path")),
                 "asset_runtime_outputs": _path_refs_by_name(
                     node.get("asset_runtime_output_paths")
                 ),
