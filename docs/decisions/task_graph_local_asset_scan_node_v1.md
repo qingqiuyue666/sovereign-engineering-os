@@ -137,9 +137,18 @@ level and binds them through replay hash fields.
 - `python3 -m unittest discover -s tests/schemas -v`: passed, 133 tests.
 - `python3 -m unittest discover -s validation/tests/acceptance -v`: passed, 156 tests.
 - `python3 -m unittest discover -s tests/tracer_bullet -v`: passed, 6401 tests, 4 skipped.
-- `make ci`: test suites passed; final clean-tree gate failed before commit because the intended branch files were still uncommitted.
+- Pre-commit `make ci`: test suites passed; final clean-tree gate failed only because the intended branch files were still uncommitted.
 - `git diff --check`: passed.
 - `git status --short`: showed only intended branch files before commit.
+- Post-commit `make ci`: passed.
+- Post-commit `git diff --check`: passed.
+- Final `git status --short`: empty / clean.
+- Final branch verification state: green.
+
+The pre-commit `make ci` failure note is preserved because it was observed. It
+was the expected clean-tree gate failure from uncommitted branch files, not a
+test or implementation failure. The final authoritative verification state for
+the committed branch is green.
 
 ## Next Recommended Branch
 
