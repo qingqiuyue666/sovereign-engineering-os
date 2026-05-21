@@ -24,6 +24,8 @@ _FAILURE_BUNDLE_FILE = "task_graph_failure_bundle.json"
 _GRAPH_TYPE = "personal_ai_execution_os_unified_task_graph_v1"
 _DELIVERY_ADAPTER_ID = "runtime_delivery_package"
 _DELIVERY_CAPABILITY = "validate_runtime_delivery"
+_LOCAL_ASSET_ADAPTER_ID = "local_asset_runtime"
+_LOCAL_ASSET_CAPABILITY = "launch_local_asset_scan"
 _RUNTIME_ADMISSION_DECISION_TYPE = "personal_ai_runtime_admission_decision_v1"
 _GRAPH_EXECUTION_MODES = ("fixture_execution", "dry_run_plan")
 _NODE_EXECUTION_MODES = ("fixture", "mock", "dry_run", "real_runtime")
@@ -84,10 +86,13 @@ def run_local_task_graph_fixture(
         )
 
     graph_hash = sha256_file(graph_file)
+    graph_success = _graph_execution_succeeded(executed_nodes)
     execution_manifest = {
         "manifest_type": "personal_ai_execution_os_unified_task_graph_execution_v1",
         "authority": "non_authority",
         "execution_capability": "local_task_graph_fixture_only",
+        "success": graph_success,
+        "status": "completed" if graph_success else "failed",
         "graph_path": graph_file.as_posix(),
         "graph_sha256": graph_hash,
         "graph_id": graph["graph_id"],
@@ -147,18 +152,35 @@ def run_local_task_graph_fixture(
         "runtime_admission_decisions_sha256": sha256_canonical_json(
             execution_manifest["runtime_admission_decisions"]
         ),
+        "node_output_refs_sha256": sha256_canonical_json(
+            _node_output_refs(executed_nodes)
+        ),
+        "local_asset_scan_receipts_sha256": sha256_canonical_json(
+            _local_asset_scan_receipt_refs(executed_nodes)
+        ),
+        "local_asset_scan_failure_refs_sha256": sha256_canonical_json(
+            _local_asset_scan_failure_refs(executed_nodes)
+        ),
         "replay_requires_same_graph_sha256": True,
         "required_human_approval": True,
     }
     write_json_atomically(execution_manifest_path, execution_manifest)
     write_json_atomically(replay_manifest_path, replay_manifest)
+    if not graph_success:
+        _write_failure_bundle(
+            graph_file,
+            failure_bundle_path,
+            ValueError(_graph_execution_failure_message(executed_nodes)),
+            node_order=node_order,
+            executed_nodes=executed_nodes,
+        )
     return TaskGraphResult(
         graph_path=graph_file,
         output_dir=output_path,
         execution_manifest_path=execution_manifest_path,
         replay_manifest_path=replay_manifest_path,
-        failure_bundle_path=None,
-        success=True,
+        failure_bundle_path=None if graph_success else failure_bundle_path,
+        success=graph_success,
         node_order=node_order,
         required_human_approval=True,
     )
@@ -423,37 +445,67 @@ def _route_is_safe_dry_run_plan(node, reason_codes, graph_execution_mode):
 
 def _execute_graph_nodes(nodes_by_id, graph_execution_mode):
     executed = []
+    status_by_node_id = {}
     for node_id in _topological_order(nodes_by_id):
         node = nodes_by_id[node_id]
-        delivery_result = (
-            None
-            if graph_execution_mode == "dry_run_plan"
-            else _run_delivery_node_if_requested(node)
-        )
-        executed.append(
-            {
-                "node_id": node["node_id"],
-                "adapter_id": node["adapter_id"],
-                "capability": node["capability"],
-                "depends_on": list(node["depends_on"]),
-                "execution_mode": node["execution_mode"],
-                "runtime_class": node["runtime_class"],
-                "approval_checkpoint_required": True,
-                "approval_checkpoint_id": node["approval_checkpoint_id"],
-                "adapter_route_admitted": True,
-                "adapter_route_policy": "local_delivery_integration"
-                if node["adapter_id"] == _DELIVERY_ADAPTER_ID
-                else _adapter_route_policy(node, graph_execution_mode),
-                "runtime_admission_decision": node["runtime_admission_decision"],
-                "runtime_activation_performed": False,
-                "delivery_validation": delivery_result,
-                "status": "planned"
-                if graph_execution_mode == "dry_run_plan"
-                else "completed",
-                "required_human_approval": True,
-            }
-        )
+        record = _base_node_execution_record(node, graph_execution_mode)
+        blocked_dependencies = [
+            dependency
+            for dependency in sorted(node["depends_on"])
+            if status_by_node_id.get(dependency) in ("failed", "skipped")
+        ]
+        if blocked_dependencies:
+            record.update(_skipped_node_result(blocked_dependencies))
+        elif graph_execution_mode == "dry_run_plan":
+            record["status"] = "planned"
+        else:
+            local_asset_result = _run_local_asset_scan_node_if_requested(node)
+            if local_asset_result is not None:
+                record.update(local_asset_result)
+            else:
+                record["delivery_validation"] = _run_delivery_node_if_requested(node)
+                record["status"] = "completed"
+        status_by_node_id[node_id] = record["status"]
+        executed.append(record)
     return executed
+
+
+def _base_node_execution_record(node, graph_execution_mode):
+    return {
+        "node_id": node["node_id"],
+        "adapter_id": node["adapter_id"],
+        "capability": node["capability"],
+        "depends_on": list(node["depends_on"]),
+        "execution_mode": node["execution_mode"],
+        "runtime_class": node["runtime_class"],
+        "approval_checkpoint_required": True,
+        "approval_checkpoint_id": node["approval_checkpoint_id"],
+        "adapter_route_admitted": True,
+        "adapter_route_policy": "local_delivery_integration"
+        if node["adapter_id"] == _DELIVERY_ADAPTER_ID
+        else _adapter_route_policy(node, graph_execution_mode),
+        "runtime_admission_decision": node["runtime_admission_decision"],
+        "runtime_activation_performed": False,
+        "delivery_validation": None,
+        "status": "planned"
+        if graph_execution_mode == "dry_run_plan"
+        else "completed",
+        "required_human_approval": True,
+    }
+
+
+def _skipped_node_result(blocked_dependencies):
+    return {
+        "status": "skipped",
+        "skipped_due_to_failed_dependencies": True,
+        "blocked_dependencies": list(blocked_dependencies),
+        "failure_stage": "dependency_failed",
+        "safe_to_retry": False,
+        "replay_hint": (
+            "Review and rerun the failed dependency before executing this node."
+        ),
+        "required_human_approval": True,
+    }
 
 
 def _adapter_route_policy(node, graph_execution_mode):
@@ -500,7 +552,206 @@ def _run_delivery_node_if_requested(node):
     }
 
 
-def _write_failure_bundle(graph_file, failure_path, error):
+def _run_local_asset_scan_node_if_requested(node):
+    if node["adapter_id"] != _LOCAL_ASSET_ADAPTER_ID:
+        return None
+    if node["capability"] != _LOCAL_ASSET_CAPABILITY:
+        raise ValueError("task graph local asset scan capability is not registered")
+
+    inputs = node["inputs"]
+    input_dir = _required_string_input(inputs, "input_dir", "local asset scan")
+    output_dir = _required_string_input(inputs, "output_dir", "local asset scan")
+    recursive = _optional_bool_input(inputs, "recursive", False)
+    include_hidden = _optional_bool_input(inputs, "include_hidden", False)
+    project_id = inputs.get("project_id")
+    if project_id is not None and (
+        not isinstance(project_id, str) or not project_id
+    ):
+        raise ValueError("task graph local asset scan project_id is malformed")
+
+    from kernel.personal_ai.local_launcher import run_local_asset_scan_launcher
+
+    result = run_local_asset_scan_launcher(
+        Path(input_dir),
+        Path(output_dir),
+        recursive=recursive,
+        include_hidden=include_hidden,
+        project_id=project_id,
+    )
+    payload = result.payload
+    complete = bool(result.complete)
+    return {
+        "status": "completed" if complete else "failed",
+        "output_dir": result.output_dir.as_posix(),
+        "local_asset_scan_complete": complete,
+        "asset_scan_run_receipt_path": payload.get("asset_scan_run_receipt_path"),
+        "asset_scan_failure_bundle_path": payload.get("failure_bundle_path"),
+        "asset_scan_failure_summary_path": payload.get("failure_summary_path"),
+        "artifact_index_path": payload.get("artifact_index_path"),
+        "artifact_index_manifest_path": payload.get("artifact_index_manifest_path"),
+        "asset_runtime_output_paths": payload.get("asset_runtime_output_paths"),
+        "indexed_artifacts": payload.get("indexed_artifacts"),
+        "quarantined_paths": payload.get("quarantined_paths"),
+        "failure_stage": None if complete else payload.get("failure_stage"),
+        "safe_to_retry": payload.get("safe_to_retry"),
+        "replay_hint": payload.get("replay_hint"),
+        "recommended_next_action": payload.get("recommended_next_action"),
+        "required_human_approval": True,
+        "input_mutation_performed": False,
+        "file_move_performed": False,
+        "file_rename_performed": False,
+        "file_delete_performed": False,
+        "media_organizer_behavior_performed": False,
+        "output_overwrite_performed": False,
+        "network_access_performed": False,
+        "model_api_called": False,
+        "desktop_ui_added": False,
+        "browser_runtime_invoked": False,
+        "comfyui_runtime_invoked": False,
+        "blender_runtime_invoked": False,
+        "houdini_runtime_invoked": False,
+        "after_effects_runtime_invoked": False,
+        "davinci_runtime_invoked": False,
+        "external_runtime_invoked": False,
+    }
+
+
+def _required_string_input(inputs, field_name, node_label):
+    value = inputs.get(field_name)
+    if not isinstance(value, str) or not value:
+        raise ValueError("task graph " + node_label + " " + field_name + " is missing")
+    return value
+
+
+def _optional_bool_input(inputs, field_name, default):
+    value = inputs.get(field_name, default)
+    if not isinstance(value, bool):
+        raise ValueError("task graph local asset scan " + field_name + " is malformed")
+    return value
+
+
+def _graph_execution_succeeded(executed_nodes):
+    return all(node["status"] in ("completed", "planned") for node in executed_nodes)
+
+
+def _graph_execution_failure_message(executed_nodes):
+    failed_nodes = [node for node in executed_nodes if node["status"] == "failed"]
+    if failed_nodes:
+        failed = failed_nodes[0]
+        return "task graph node failed: " + failed["node_id"]
+    skipped_nodes = [node for node in executed_nodes if node["status"] == "skipped"]
+    if skipped_nodes:
+        skipped = skipped_nodes[0]
+        return "task graph node skipped after dependency failure: " + skipped["node_id"]
+    return "task graph execution failed"
+
+
+def _node_output_refs(executed_nodes):
+    refs = []
+    for node in executed_nodes:
+        node_refs = {
+            "node_id": node["node_id"],
+            "adapter_id": node["adapter_id"],
+            "capability": node["capability"],
+            "status": node["status"],
+        }
+        if node.get("delivery_validation") is not None:
+            node_refs["delivery_validation"] = {
+                key: _path_ref(value) if key.endswith("_path") else value
+                for key, value in sorted(node["delivery_validation"].items())
+            }
+        if node["adapter_id"] == _LOCAL_ASSET_ADAPTER_ID:
+            node_refs["local_asset_scan"] = {
+                "output_dir": node.get("output_dir"),
+                "asset_scan_run_receipt": _path_ref(
+                    node.get("asset_scan_run_receipt_path")
+                ),
+                "asset_scan_failure_bundle": _path_ref(
+                    node.get("asset_scan_failure_bundle_path")
+                ),
+                "asset_scan_failure_summary": _path_ref(
+                    node.get("asset_scan_failure_summary_path")
+                ),
+                "artifact_index": _path_ref(node.get("artifact_index_path")),
+                "artifact_index_manifest": _path_ref(
+                    node.get("artifact_index_manifest_path")
+                ),
+                "asset_runtime_outputs": _path_refs_by_name(
+                    node.get("asset_runtime_output_paths")
+                ),
+                "indexed_artifacts": node.get("indexed_artifacts"),
+                "quarantined_paths": node.get("quarantined_paths"),
+                "failure_stage": node.get("failure_stage"),
+            }
+        refs.append(node_refs)
+    return refs
+
+
+def _local_asset_scan_receipt_refs(executed_nodes):
+    return [
+        {
+            "node_id": node["node_id"],
+            "asset_scan_run_receipt": _path_ref(
+                node.get("asset_scan_run_receipt_path")
+            ),
+        }
+        for node in executed_nodes
+        if node["adapter_id"] == _LOCAL_ASSET_ADAPTER_ID
+        and node.get("asset_scan_run_receipt_path") is not None
+    ]
+
+
+def _local_asset_scan_failure_refs(executed_nodes):
+    return [
+        {
+            "node_id": node["node_id"],
+            "failure_stage": node.get("failure_stage"),
+            "asset_scan_failure_bundle": _path_ref(
+                node.get("asset_scan_failure_bundle_path")
+            ),
+            "asset_scan_failure_summary": _path_ref(
+                node.get("asset_scan_failure_summary_path")
+            ),
+        }
+        for node in executed_nodes
+        if node["adapter_id"] == _LOCAL_ASSET_ADAPTER_ID
+        and (
+            node.get("asset_scan_failure_bundle_path") is not None
+            or node.get("asset_scan_failure_summary_path") is not None
+        )
+    ]
+
+
+def _path_refs_by_name(paths_by_name):
+    if not isinstance(paths_by_name, dict):
+        return {}
+    return {
+        name: _path_ref(path)
+        for name, path in sorted(paths_by_name.items())
+        if isinstance(name, str)
+    }
+
+
+def _path_ref(path_value):
+    if not isinstance(path_value, str) or not path_value:
+        return None
+    path = Path(path_value)
+    return {
+        "path": path.as_posix(),
+        "sha256": sha256_file(path)
+        if path.exists() and path.is_file() and not path.is_symlink()
+        else None,
+    }
+
+
+def _write_failure_bundle(
+    graph_file,
+    failure_path,
+    error,
+    *,
+    node_order=(),
+    executed_nodes=(),
+):
     payload = {
         "failure_type": "personal_ai_task_graph_failure_bundle_v1",
         "authority": "non_authority",
@@ -522,4 +773,41 @@ def _write_failure_bundle(graph_file, failure_path, error):
         "required_human_approval": True,
         "next_allowed_action": "human_review_only",
     }
+    if node_order:
+        payload["node_order"] = list(node_order)
+    failed_nodes = _failure_node_summaries(executed_nodes, "failed")
+    skipped_nodes = _failure_node_summaries(executed_nodes, "skipped")
+    if failed_nodes:
+        payload["failed_node_id"] = failed_nodes[0]["node_id"]
+        payload["failure_stage"] = failed_nodes[0].get("failure_stage")
+        payload["failed_nodes"] = failed_nodes
+    if skipped_nodes:
+        payload["skipped_nodes"] = skipped_nodes
     write_json_atomically(failure_path, payload)
+
+
+def _failure_node_summaries(executed_nodes, status):
+    summaries = []
+    for node in executed_nodes:
+        if node.get("status") != status:
+            continue
+        summaries.append(
+            {
+                "node_id": node["node_id"],
+                "adapter_id": node["adapter_id"],
+                "capability": node["capability"],
+                "status": node["status"],
+                "failure_stage": node.get("failure_stage"),
+                "blocked_dependencies": list(node.get("blocked_dependencies", [])),
+                "asset_scan_failure_bundle_path": node.get(
+                    "asset_scan_failure_bundle_path"
+                ),
+                "asset_scan_failure_summary_path": node.get(
+                    "asset_scan_failure_summary_path"
+                ),
+                "safe_to_retry": node.get("safe_to_retry"),
+                "replay_hint": node.get("replay_hint"),
+                "required_human_approval": True,
+            }
+        )
+    return summaries

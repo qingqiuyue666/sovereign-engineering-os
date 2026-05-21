@@ -105,6 +105,29 @@ def build_default_adapter_registry() -> tuple[AdapterRegistryEntry, ...]:
             notes="Local HTML fixture interpretation only; no external URLs.",
         ),
         AdapterRegistryEntry(
+            adapter_id="local_asset_runtime",
+            adapter_name="Local Asset Scan Controlled Launcher",
+            mode=AdapterMode.LOCAL_FIXTURE,
+            risk_class=AdapterRiskClass.LOCAL_READONLY,
+            admission_status=AdapterAdmissionStatus.ADMITTED,
+            capabilities=("launch_local_asset_scan",),
+            required_controls=_REQUIRED_CONTROLS
+            + (
+                "read_only_input",
+                "artifact_index_binding",
+                "operational_receipt",
+                "failure_bundle",
+                "no_external_runtime",
+            ),
+            boundary=_approved_output_boundary(),
+            output_policy=_approved_output_policy(),
+            notes=(
+                "Runs the controlled local asset scan launcher in fixture task "
+                "graphs; writes approved output artifacts only and never mutates "
+                "input assets."
+            ),
+        ),
+        AdapterRegistryEntry(
             adapter_id="real_browser_runtime_boundary",
             adapter_name="Real Browser Runtime Boundary",
             mode=AdapterMode.FUTURE_EXTERNAL,
