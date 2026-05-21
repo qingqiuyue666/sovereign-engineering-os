@@ -14,6 +14,19 @@ from kernel.assets.local_asset_schema import (
     VALIDATION_REPORT_FILE,
 )
 from kernel.personal_ai.artifact_index import build_artifact_index
+from kernel.personal_ai.asset_scan_operational_control import (
+    ASSET_SCAN_FAILURE_BUNDLE_FILE,
+    ASSET_SCAN_FAILURE_SUMMARY_FILE,
+    ASSET_SCAN_RUN_RECEIPT_FILE,
+    asset_scan_failure_artifact_paths,
+    asset_scan_failure_cli_payload,
+    asset_scan_output_status,
+    asset_scan_run_receipt_path,
+    classify_asset_scan_failure_stage,
+    pre_runtime_collision_stage,
+    write_asset_scan_failure_bundle,
+    write_asset_scan_run_receipt,
+)
 from kernel.personal_ai.adapters.blender_runtime import run_blender_runtime
 from kernel.personal_ai.adapters.blender_runtime_boundary import (
     write_blender_runtime_admission_artifacts,
@@ -157,20 +170,99 @@ def run_local_asset_scan_launcher(
     include_hidden: bool = False,
     project_id: str | None = None,
 ) -> LauncherWorkflowResult:
-    output_path = _validate_output_dir(output_dir)
+    input_path = Path(input_dir)
+    output_path = Path(output_dir)
+    if not output_path.exists() or not output_path.is_dir() or output_path.is_symlink():
+        return _asset_scan_failure_result(
+            input_path=input_path,
+            output_path=output_path,
+            recursive=recursive,
+            include_hidden=include_hidden,
+            project_id=project_id,
+            failure_stage="preflight_output_dir_missing",
+            error_type="ValueError",
+            error_message="output_dir is missing",
+            write_failure_bundle_artifacts=False,
+            output_pollution_detected=False,
+        )
+
     summary_path = output_path / _SUMMARY_FILE
     artifact_index_path = output_path / _ARTIFACT_INDEX_FILE
     artifact_index_manifest_path = output_path / _ARTIFACT_INDEX_MANIFEST_FILE
-    _require_no_overwrite(summary_path)
-    _require_no_overwrite(artifact_index_path)
-    _require_no_overwrite(artifact_index_manifest_path)
-    result = run_local_asset_runtime(
-        Path(input_dir),
-        output_path,
-        recursive=recursive,
-        include_hidden=include_hidden,
-        project_id=project_id,
-    )
+    receipt_path = asset_scan_run_receipt_path(output_path)
+    collision_stage = pre_runtime_collision_stage(output_path)
+    if collision_stage is not None:
+        return _asset_scan_failure_result(
+            input_path=input_path,
+            output_path=output_path,
+            recursive=recursive,
+            include_hidden=include_hidden,
+            project_id=project_id,
+            failure_stage=collision_stage,
+            error_type="ValueError",
+            error_message=_asset_scan_collision_message(output_path, collision_stage),
+            write_failure_bundle_artifacts=_asset_scan_can_write_failure_artifacts(
+                output_path,
+                input_path,
+            ),
+            output_pollution_detected=True,
+        )
+
+    if not input_path.exists() or not input_path.is_dir() or input_path.is_symlink():
+        return _asset_scan_failure_result(
+            input_path=input_path,
+            output_path=output_path,
+            recursive=recursive,
+            include_hidden=include_hidden,
+            project_id=project_id,
+            failure_stage="preflight_input_dir_missing",
+            error_type="ValueError",
+            error_message="input_dir is missing",
+            write_failure_bundle_artifacts=_asset_scan_can_write_failure_artifacts(
+                output_path,
+                input_path,
+            ),
+            output_pollution_detected=False,
+        )
+
+    if _path_is_inside(output_path, input_path):
+        return _asset_scan_failure_result(
+            input_path=input_path,
+            output_path=output_path,
+            recursive=recursive,
+            include_hidden=include_hidden,
+            project_id=project_id,
+            failure_stage="runtime_validation_failure",
+            error_type="ValueError",
+            error_message="output_dir must be outside input_dir",
+            write_failure_bundle_artifacts=False,
+            output_pollution_detected=False,
+        )
+
+    try:
+        result = run_local_asset_runtime(
+            input_path,
+            output_path,
+            recursive=recursive,
+            include_hidden=include_hidden,
+            project_id=project_id,
+        )
+    except ValueError as error:
+        return _asset_scan_failure_result(
+            input_path=input_path,
+            output_path=output_path,
+            recursive=recursive,
+            include_hidden=include_hidden,
+            project_id=project_id,
+            failure_stage=classify_asset_scan_failure_stage(str(error)),
+            error_type=error.__class__.__name__,
+            error_message=str(error),
+            write_failure_bundle_artifacts=_asset_scan_can_write_failure_artifacts(
+                output_path,
+                input_path,
+            ),
+        )
+
     payload = {
         "input_dir": result.input_dir.as_posix(),
         "asset_manifest_path": result.output_paths[ASSET_MANIFEST_FILE].as_posix(),
@@ -217,28 +309,78 @@ def run_local_asset_scan_launcher(
         "davinci_runtime_invoked": False,
         "external_runtime_invoked": False,
     }
-    _write_summary(
-        summary_path,
-        title="Local Asset Scan",
-        lines=[
-            "Status: complete",
-            "Runtime: read-only local asset metadata scan",
-            "Files scanned: " + str(result.files_scanned),
-            "Input mutation performed: false",
-            "File movement performed: false",
-            "File renaming performed: false",
-            "File deletion performed: false",
-            "Network access performed: false",
-            "Model API called: false",
-            "External runtime invoked: false",
-            "Media organizer behavior performed: false",
-            "Next action: human review of local asset reports",
-        ],
-        boundary="read-only local asset scan; human review required.",
-    )
-    artifact_index = build_artifact_index(output_path)
+    try:
+        _write_summary(
+            summary_path,
+            title="Local Asset Scan",
+            lines=[
+                "Status: complete",
+                "Runtime: read-only local asset metadata scan",
+                "Files scanned: " + str(result.files_scanned),
+                "Input mutation performed: false",
+                "File movement performed: false",
+                "File renaming performed: false",
+                "File deletion performed: false",
+                "Network access performed: false",
+                "Model API called: false",
+                "External runtime invoked: false",
+                "Media organizer behavior performed: false",
+                "Next action: human review of local asset reports",
+            ],
+            boundary="read-only local asset scan; human review required.",
+        )
+        receipt_path = write_asset_scan_run_receipt(
+            input_dir=result.input_dir,
+            output_dir=output_path,
+            project_id=result.project_id,
+            recursive=result.recursive,
+            include_hidden=result.include_hidden,
+            files_scanned=result.files_scanned,
+            bytes_scanned=result.bytes_scanned,
+            duplicate_groups=result.duplicate_groups,
+            quarantined_paths=result.quarantined_paths,
+            asset_runtime_output_paths=result.output_paths,
+            launcher_summary_path=summary_path,
+            artifact_index_path=artifact_index_path,
+            artifact_index_manifest_path=artifact_index_manifest_path,
+        )
+    except ValueError as error:
+        return _asset_scan_failure_result(
+            input_path=input_path,
+            output_path=output_path,
+            recursive=recursive,
+            include_hidden=include_hidden,
+            project_id=project_id,
+            failure_stage=classify_asset_scan_failure_stage(str(error)),
+            error_type=error.__class__.__name__,
+            error_message=str(error),
+            write_failure_bundle_artifacts=_asset_scan_can_write_failure_artifacts(
+                output_path,
+                input_path,
+            ),
+        )
+
+    try:
+        artifact_index = build_artifact_index(output_path)
+    except ValueError as error:
+        return _asset_scan_failure_result(
+            input_path=input_path,
+            output_path=output_path,
+            recursive=recursive,
+            include_hidden=include_hidden,
+            project_id=project_id,
+            failure_stage="artifact_index_failure",
+            error_type=error.__class__.__name__,
+            error_message=str(error),
+            write_failure_bundle_artifacts=_asset_scan_can_write_failure_artifacts(
+                output_path,
+                input_path,
+            ),
+        )
+
     payload.update(
         {
+            "asset_scan_run_receipt_path": receipt_path.as_posix(),
             "artifact_index_path": (
                 artifact_index.artifact_index_path.as_posix()
             ),
@@ -251,6 +393,14 @@ def run_local_asset_scan_launcher(
             "artifact_ledger_binding_type": "existing_artifact_index",
             "artifact_index_content_indexed": False,
             "artifact_index_runtime_authority": "non_authority",
+            "operational_control_receipt_written": True,
+            "failure_bundle_written": False,
+            "safe_to_retry": True,
+            "replay_hint": (
+                "Rerun launch-local-asset-scan with the same input_dir and "
+                "flags using a new empty output_dir; do not reuse this "
+                "output_dir."
+            ),
         }
     )
     return LauncherWorkflowResult(
@@ -261,6 +411,101 @@ def run_local_asset_scan_launcher(
         summary_path=summary_path,
         required_human_approval=True,
     )
+
+
+def _asset_scan_failure_result(
+    *,
+    input_path: Path,
+    output_path: Path,
+    recursive: bool,
+    include_hidden: bool,
+    project_id: str | None,
+    failure_stage: str,
+    error_type: str,
+    error_message: str,
+    write_failure_bundle_artifacts: bool,
+    output_pollution_detected: bool | None = None,
+) -> LauncherWorkflowResult:
+    failure_summary_path = output_path / ASSET_SCAN_FAILURE_SUMMARY_FILE
+    if write_failure_bundle_artifacts:
+        try:
+            failure_artifacts = write_asset_scan_failure_bundle(
+                input_dir=input_path,
+                output_dir=output_path,
+                project_id=project_id,
+                recursive=recursive,
+                include_hidden=include_hidden,
+                failure_stage=failure_stage,
+                error_type=error_type,
+                error_message=error_message,
+                output_pollution_detected=output_pollution_detected,
+            )
+            payload = failure_artifacts.cli_payload
+            failure_summary_path = failure_artifacts.failure_summary_path
+        except ValueError:
+            payload = asset_scan_failure_cli_payload(
+                input_dir=input_path,
+                output_dir=output_path,
+                project_id=project_id,
+                recursive=recursive,
+                include_hidden=include_hidden,
+                failure_stage=failure_stage,
+                error_type=error_type,
+                error_message=error_message,
+                output_pollution_detected=output_pollution_detected,
+            )
+    else:
+        payload = asset_scan_failure_cli_payload(
+            input_dir=input_path,
+            output_dir=output_path,
+            project_id=project_id,
+            recursive=recursive,
+            include_hidden=include_hidden,
+            failure_stage=failure_stage,
+            error_type=error_type,
+            error_message=error_message,
+            output_pollution_detected=output_pollution_detected,
+        )
+
+    return LauncherWorkflowResult(
+        workflow="local_asset_scan_workflow",
+        output_dir=output_path,
+        complete=False,
+        payload=payload,
+        summary_path=failure_summary_path,
+        required_human_approval=True,
+    )
+
+
+def _asset_scan_can_write_failure_artifacts(output_path: Path, input_path: Path) -> bool:
+    if not output_path.exists() or not output_path.is_dir() or output_path.is_symlink():
+        return False
+    if input_path.exists() and _path_is_inside(output_path, input_path):
+        return False
+    failure_bundle_path, failure_summary_path = asset_scan_failure_artifact_paths(
+        output_path
+    )
+    if failure_bundle_path.exists() or failure_summary_path.exists():
+        return False
+    return True
+
+
+def _asset_scan_collision_message(output_path: Path, collision_stage: str) -> str:
+    status = asset_scan_output_status(output_path)
+    written = status["partial_outputs_written"]
+    if collision_stage == "preflight_artifact_index_collision":
+        for file_name in (_ARTIFACT_INDEX_FILE, _ARTIFACT_INDEX_MANIFEST_FILE):
+            if file_name in written:
+                return "asset scan artifact index output already exists: " + file_name
+    for file_name in (
+        _SUMMARY_FILE,
+        ASSET_SCAN_RUN_RECEIPT_FILE,
+        ASSET_SCAN_FAILURE_BUNDLE_FILE,
+        ASSET_SCAN_FAILURE_SUMMARY_FILE,
+    ):
+        if file_name in written:
+            return "asset scan launcher output already exists: " + file_name
+    return "asset scan launcher output already exists"
 
 
 def run_model_fixture_launcher(
@@ -818,3 +1063,13 @@ def _write_summary(
     body.append("")
     body.append("Boundary: " + boundary)
     write_markdown_atomically(summary_path, "\n".join(body))
+
+
+def _path_is_inside(candidate_path: Path, root_path: Path) -> bool:
+    try:
+        Path(candidate_path).resolve(strict=False).relative_to(
+            Path(root_path).resolve(strict=True)
+        )
+    except (OSError, ValueError):
+        return False
+    return True

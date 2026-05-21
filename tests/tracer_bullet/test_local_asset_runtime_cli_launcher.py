@@ -114,14 +114,21 @@ class LocalAssetRuntimeCLILauncherTests(unittest.TestCase):
 
             self.assertEqual(exit_code, 1)
             self.assertFalse(payload["complete"])
+            self.assertEqual(payload["failure_stage"], "runtime_output_collision")
             self.assertIn("already exists", payload["error_message"])
+            self.assertTrue((output_dir / "asset_scan_failure_bundle.json").exists())
+            self.assertTrue((output_dir / "asset_scan_failure_summary.md").exists())
             self.assertEqual(
                 existing_manifest.read_text(encoding="utf-8"),
                 "existing manifest\n",
             )
             self.assertEqual(
                 sorted(path.name for path in output_dir.iterdir()),
-                ["asset_manifest.json"],
+                [
+                    "asset_manifest.json",
+                    "asset_scan_failure_bundle.json",
+                    "asset_scan_failure_summary.md",
+                ],
             )
 
     def test_hidden_and_recursive_flags_match_runtime_boundaries(self):

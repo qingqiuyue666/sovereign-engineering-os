@@ -35,9 +35,18 @@ input files, and it is not a media organizer. It does not call model APIs, does
 not call the network, and does not launch ComfyUI, Blender, Houdini, After
 Effects, DaVinci, or a browser.
 
-The launcher also writes `launcher_summary.md` and binds the scan outputs into
-the existing artifact index surface by emitting `artifact_index.json` and
-`artifact_index_manifest.json`.
+On success, the launcher also writes `launcher_summary.md` and
+`asset_scan_run_receipt.json`, then binds the scan outputs into the existing
+artifact index surface by emitting `artifact_index.json` and
+`artifact_index_manifest.json`. The receipt records the completed scan counts,
+quarantine count, retry/replay hint, and explicit no-scope-expansion
+boundaries.
+
+On safe failure cases where `output_dir` already exists and is safe to write
+into, the launcher writes `asset_scan_failure_bundle.json` and
+`asset_scan_failure_summary.md`. If `output_dir` is missing, the launcher does
+not create it and returns a structured failure payload without writing a
+failure bundle.
 
 ## Model Workflows
 
