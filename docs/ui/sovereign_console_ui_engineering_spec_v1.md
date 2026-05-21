@@ -13,7 +13,10 @@ considered in-scope for this spec.
 
 Sovereign Console is the native desktop command-and-observe surface for the local Sovereign Engineering OS runtime. The console is a unified production workspace: mission-centered, compact, local-first, and strict about the line between observed state and real execution.
 
-The console is not a chatbot, web frontend, node editor, or menu collection. The product IA has five primary domains:
+The Workspace may follow a Claude / GPT / Codex style AI coding workspace pattern
+with a mission thread, visible coding activity, validation gates, and a final
+report placeholder. The console is not a chatbot, web frontend, node editor, or
+menu collection. The product IA has five primary domains:
 
 - Workspace
 - Runs
@@ -55,7 +58,11 @@ Workspace is the default startup page.
 
 ## Workspace
 
-Workspace is the primary mission surface. It contains the current mission card, command intent placeholder, next required action, compact HFX_008 landing chain, recent runs, recent artifacts, pending review count, quarantine count, local runtime status, degraded sync banner, and context packet quick actions.
+Workspace is the primary mission surface. It contains the current mission card,
+large command intent placeholder, mission thread / activity stream, Coding
+Activity Panel, Test Gate Panel, next required action, compact HFX_008 landing
+chain, recent runs, recent artifacts, pending review count, quarantine count,
+local runtime status, degraded sync banner, and context packet quick actions.
 
 The default mission is `HFX_008 Energy Shockwave`.
 
@@ -78,6 +85,48 @@ The compact HFX_008 chain is:
 `Topology Audit -> Proof Artifact -> Validation -> Human Review -> Summary -> Claim Gate`
 
 Context packet actions live here as disabled or facade-routed intents: Gemini packet, Codex task packet, Claude review packet, HFX dry-run intent, latest artifact inspection, and navigation handoffs.
+
+Workspace mission thread cards:
+
+- User command placeholder
+- AI planning card
+- Coding activity card
+- Test gate card
+- Artifact/review summary card
+- Final report placeholder card
+
+## Coding Activity Panel
+
+`apps/ui/coding_activity_panel.py` owns the visual-only coding activity surface.
+It displays projected state only and does not execute code, write files, mutate
+the repository, or mutate runtime storage.
+
+Supported states:
+
+- Idle
+- Thinking
+- Reading
+- Coding
+- Testing
+- Writing Report
+- Waiting Review
+- Failed
+- Stage Complete
+
+Required fields are state label, current action, current file, active worker,
+short activity message, optional diff/code preview, test gate summary, and safe
+status indicator.
+
+The code preview is a compact monospace block with a file pill, diff-like rows,
+green `+` rows, muted red `-` rows, current line highlight, and cursor
+placeholder.
+
+## Test Gate Panel
+
+The Test Gate Panel supports Unit Tests, Schemas, Acceptance, and `make ci`.
+Each gate supports Pending, Running, OK, Failed, and Skipped. The UI may stamp OK
+only for projected OK data and must not claim a passing gate when the result is
+unknown.
 
 ## Runs
 
@@ -115,7 +164,12 @@ Settings absorbs Settings / Boundaries and System Health. It has sections:
 - Publishing
 - System Health
 
-Settings displays language Auto / English / Chinese, motion intensity Minimal / Standard / High Energy, local-only mode, external network disabled, asset root path, artifact root path, allowed workers, dangerous action gates, human review gates, publish policy, GitHub summary-only policy, memory, WAL state, DB connection state, last smoke result, last CI result, and warnings.
+Settings displays language Auto / English / Chinese, motion intensity Minimal /
+Standard / High Energy, Anime FX Intensity Off / Minimal / Standard / Playful,
+local-only mode, external network disabled, asset root path, artifact root path,
+allowed workers, dangerous action gates, human review gates, publish policy,
+GitHub summary-only policy, memory, WAL state, DB connection state, last smoke
+result, last CI result, and warnings.
 
 ## Sync States
 
@@ -154,3 +208,15 @@ Required IA labels include Workspace / 工作台, Runs / 运行, Artifacts / 产
 ## Motion
 
 Motion remains subtle and state-driven: mission chain line, status chip glow, warning badge pulse, event intent feedback, artifact placeholder glow, review seal, and quarantine stripe. Motion must never block reading or change business state.
+
+Anime micro FX are a separate bounded visual layer for coding and testing state
+feedback. The primitives are AnimeStatusDot, SpeedLineHint, TinySparkle,
+SweatDropMarker, TestGateStamp, and CommandAura. Intensity options are Off,
+Minimal, Standard, and Playful, defaulting to Standard. Lost sync or high memory
+pressure degrades Anime FX to Minimal, while explicit Off stays Off.
+
+Anime FX must remain small, local, and professional: no copyrighted anime
+character references, no anime girl character art, no mascot takeover, no
+full-screen speed lines, no heavy particles, no full-screen effects, no screen
+shake, no cyberpunk or black sci-fi treatment, no fantasy skin, no game HUD
+drift, no Japanese text gimmicks, and no cheap anime skin.

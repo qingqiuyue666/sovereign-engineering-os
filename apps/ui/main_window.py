@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 
 from apps.ui import QFrame, QLabel, QHBoxLayout, QMainWindow, QStackedWidget, QTimer, QVBoxLayout, QWidget, Slot
+from apps.ui.anime_micro_fx import AnimeFxIntensity, effective_anime_fx_intensity
 from apps.ui.artifacts_page import ArtifactsPage
 from apps.ui.i18n import UiText
 from apps.ui.live_event_stream import LiveEventStream
@@ -33,10 +34,12 @@ class SovereignConsoleMainWindow(QMainWindow):
         parent: object | None = None,
         language: str = "auto",
         motion_intensity: MotionIntensity = MotionIntensity.STANDARD,
+        anime_fx_intensity: AnimeFxIntensity = AnimeFxIntensity.STANDARD,
     ) -> None:
         super().__init__(parent)
         self.text = UiText(language)
         self.motion_intensity = motion_intensity
+        self.anime_fx_intensity = anime_fx_intensity
         self.snapshot_provider = snapshot_provider or fake_phase1_snapshot
         self._seen_healthy_projection = False
         self.setWindowTitle(self.text.tr("app.title"))
@@ -118,13 +121,19 @@ class SovereignConsoleMainWindow(QMainWindow):
             memory_pressure=snapshot.memory_pressure,
             sync_state=sync_state,
         )
+        self.anime_fx_intensity = effective_anime_fx_intensity(
+            self.anime_fx_intensity,
+            memory_pressure=snapshot.memory_pressure,
+            sync_state=sync_state,
+        )
         self.pulse_bar.render_snapshot(snapshot, sync_state=sync_state)
         self.navigation.render_badges(snapshot)
-        self.workspace_page.render_snapshot(snapshot, sync_state=sync_state)
+        self.workspace_page.render_snapshot(snapshot, sync_state=sync_state, anime_fx_intensity=self.anime_fx_intensity)
         self.runs_page.render_snapshot(snapshot)
         self.artifacts_page.render_snapshot(snapshot)
         self.reviews_page.render_snapshot(snapshot)
         self.settings_page.render_snapshot(snapshot)
+        self.settings_page.set_anime_fx_intensity(self.anime_fx_intensity)
         self.event_stream.render_snapshot(snapshot)
         self.degraded_banner.setVisible(sync_state is SyncState.DEGRADED)
         self.degraded_banner.setText(self.text.tr("sync.degraded.detail"))

@@ -16,15 +16,24 @@ local-first production OS control surface, and mission-centered operator surface
 It is Apple/Finder/Xcode/Raycast-inspired, high-density but readable, and calm
 under degraded runtime conditions.
 
+The Workspace may use a Claude / GPT / Codex style AI coding workspace pattern:
+a mission thread, large command input, visible coding activity, test gates, and
+final report placeholder. This is an execution-observation surface, not a
+chatbot clone and not a web or mobile app.
+
 Approved visual posture:
 
 - light-gray Apple base
 - white mission cards
 - compact macOS-style sidebar
 - large command bar
+- mission thread / activity stream
+- visible Coding Activity Panel
+- compact Test Gate Panel
 - inspector as a steady detail surface
 - dark compact Black Box only
 - subtle Houdini procedural energy only inside HFX mission chain/status feedback
+- subtle anime-inspired micro FX only around coding and testing state feedback
 
 Rejected product identities:
 
@@ -207,8 +216,11 @@ Must not look like debug labels.
 Workspace is the default page and must include:
 
 - large Raycast/Codex-style Command Bar
+- Claude/GPT/Codex-style mission thread / activity stream
 - degraded banner if runtime unavailable
 - Current Mission Card
+- Coding Activity Panel
+- Test Gate Panel
 - HFX_008 Energy Chain
 - Recent Runs
 - Recent Artifacts
@@ -223,6 +235,130 @@ and display a clear placeholder. It is an intent surface only. It must not
 directly execute work.
 
 Command Bar rule: must not directly execute work.
+
+Command Bar placeholder:
+
+- English: `Ask, generate, inspect, or run a mission...`
+- Chinese: `询问、生成、检查或运行任务…`
+
+The Command Bar may show CommandAura during focus, Thinking, or Coding states.
+The aura is a subtle local border glow only.
+
+### Mission Thread / Activity Stream
+
+The Workspace must read as an AI coding mission thread rather than a static
+dashboard. Required cards:
+
+- User command placeholder
+- AI planning card
+- Coding activity card
+- Test gate card
+- Artifact/review summary card
+- Final report placeholder card
+
+### Coding Activity Panel
+
+Coding Activity / 编码活动 is the required visible coding-work surface. It is
+visualization only and must not write files, execute commands, or mutate the
+repository from the GUI.
+
+Required states:
+
+- Idle / 空闲
+- Thinking / 思考中
+- Reading / 读取中
+- Coding / 写代码中
+- Testing / 测试中
+- Writing Report / 写报告中
+- Waiting Review / 等待审查
+- Failed / 失败
+- Stage Complete / 阶段完成
+
+The panel must show state label, current action, current file when available,
+active worker when available, short activity message, optional diff/code
+preview, test gate summary when testing, and a safe status indicator.
+
+Required activity messages include:
+
+- No active run. The engine is quiet. / 暂无运行任务，引擎安静
+- Planning execution path.
+- Reading repository files.
+- Writing bounded changes / 正在写入受限变更
+- Running validation gates / 正在运行验证门
+- Writing final report.
+- Waiting for human review.
+- Failure isolated. Evidence preserved. / 失败已隔离，证据已保留
+- Stage complete. Awaiting next gate.
+
+Code visualization requirements:
+
+- code block area
+- file pill
+- diff-like rows
+- `+` rows in success green
+- `-` rows in muted red
+- current line highlight
+- blinking cursor indicator or cursor placeholder
+- monospace font
+- compact but readable
+
+### Anime Micro FX
+
+Anime FX / 动漫微特效 are allowed only as small, local, professional
+micro-interactions around coding, testing, command submission, saved, passed,
+warning, and failed states. They must never become the base product identity.
+
+Required micro-FX primitives:
+
+- AnimeStatusDot: tiny status expression dot for Thinking, Coding, Testing,
+  Passed, Failed, and Waiting.
+- SpeedLineHint: subtle local diagonal line hint for Coding only.
+- TinySparkle: one to three tiny marks for saved, test passed, or artifact
+  recorded states.
+- SweatDropMarker: tiny local warning/failure marker near the failed chip.
+- TestGateStamp: gentle OK stamp on validation gate chips.
+- CommandAura: subtle Command Bar border glow for focus, Thinking, or Coding.
+
+Anime micro-FX hard limits:
+
+- no copyrighted anime character references
+- no anime girl character art
+- no mascot takeover
+- no full-screen speed lines
+- no heavy particles
+- no full-screen effects
+- no screen shake
+- no cyberpunk or black sci-fi treatment
+- no fantasy skin
+- no game HUD drift
+- no Japanese text gimmicks
+- no cheap anime skin
+
+Anime FX Intensity / 动漫微特效强度:
+
+- Off / 关闭
+- Minimal / 最小
+- Standard / 标准
+- Playful / 活泼
+
+Default is Standard. Off disables anime micro FX. Minimal allows only the status
+dot and tiny success marker. Standard enables status dot, subtle speed line, tiny
+sparkle, and test stamp. Playful may add slightly more local glyphs while still
+remaining bounded. Lost sync or high memory pressure degrades Anime FX to
+Minimal, except explicit Off remains Off.
+
+### Test Gate Panel
+
+Required validation gates:
+
+- Unit Tests
+- Schemas
+- Acceptance
+- make ci
+
+Each gate supports Pending, Running, OK, Failed, and Skipped. OK may show the
+gentle TestGateStamp. Failed must be clear. The UI must not claim a passing gate
+when the result is unknown.
 
 ### Current Mission Card
 
