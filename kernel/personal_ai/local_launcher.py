@@ -3,6 +3,12 @@
 from dataclasses import dataclass
 from pathlib import Path
 
+from kernel.assets.local_asset_sqlite_index import (
+    LOCAL_ASSET_SQLITE_INDEX_FILE,
+    LOCAL_ASSET_SQLITE_INDEX_MANIFEST_FILE,
+    LOCAL_ASSET_SQLITE_QUERY_SUMMARY_FILE,
+    build_local_asset_sqlite_index,
+)
 from kernel.assets.local_asset_runtime import run_local_asset_runtime
 from kernel.assets.local_asset_schema import (
     ASSET_INDEX_FILE,
@@ -189,6 +195,13 @@ def run_local_asset_scan_launcher(
     summary_path = output_path / _SUMMARY_FILE
     artifact_index_path = output_path / _ARTIFACT_INDEX_FILE
     artifact_index_manifest_path = output_path / _ARTIFACT_INDEX_MANIFEST_FILE
+    local_asset_sqlite_index_path = output_path / LOCAL_ASSET_SQLITE_INDEX_FILE
+    local_asset_sqlite_index_manifest_path = (
+        output_path / LOCAL_ASSET_SQLITE_INDEX_MANIFEST_FILE
+    )
+    local_asset_sqlite_query_summary_path = (
+        output_path / LOCAL_ASSET_SQLITE_QUERY_SUMMARY_FILE
+    )
     receipt_path = asset_scan_run_receipt_path(output_path)
     collision_stage = pre_runtime_collision_stage(output_path)
     if collision_stage is not None:
@@ -343,6 +356,13 @@ def run_local_asset_scan_launcher(
             launcher_summary_path=summary_path,
             artifact_index_path=artifact_index_path,
             artifact_index_manifest_path=artifact_index_manifest_path,
+            local_asset_sqlite_index_path=local_asset_sqlite_index_path,
+            local_asset_sqlite_index_manifest_path=(
+                local_asset_sqlite_index_manifest_path
+            ),
+            local_asset_sqlite_query_summary_path=(
+                local_asset_sqlite_query_summary_path
+            ),
         )
     except ValueError as error:
         return _asset_scan_failure_result(
@@ -352,6 +372,30 @@ def run_local_asset_scan_launcher(
             include_hidden=include_hidden,
             project_id=project_id,
             failure_stage=classify_asset_scan_failure_stage(str(error)),
+            error_type=error.__class__.__name__,
+            error_message=str(error),
+            write_failure_bundle_artifacts=_asset_scan_can_write_failure_artifacts(
+                output_path,
+                input_path,
+            ),
+        )
+
+    try:
+        sqlite_index = build_local_asset_sqlite_index(
+            output_path,
+            input_dir=result.input_dir,
+            project_id=result.project_id,
+            recursive=result.recursive,
+            include_hidden=result.include_hidden,
+        )
+    except Exception as error:
+        return _asset_scan_failure_result(
+            input_path=input_path,
+            output_path=output_path,
+            recursive=recursive,
+            include_hidden=include_hidden,
+            project_id=project_id,
+            failure_stage="sqlite_index_failure",
             error_type=error.__class__.__name__,
             error_message=str(error),
             write_failure_bundle_artifacts=_asset_scan_can_write_failure_artifacts(
@@ -381,6 +425,20 @@ def run_local_asset_scan_launcher(
     payload.update(
         {
             "asset_scan_run_receipt_path": receipt_path.as_posix(),
+            "local_asset_sqlite_index_path": (
+                sqlite_index.database_path.as_posix()
+            ),
+            "local_asset_sqlite_index_manifest_path": (
+                sqlite_index.manifest_path.as_posix()
+            ),
+            "local_asset_sqlite_query_summary_path": (
+                sqlite_index.query_summary_path.as_posix()
+            ),
+            "local_asset_sqlite_index_written": True,
+            "local_asset_sqlite_index_authority": "non_authority",
+            "local_asset_sqlite_index_scope": "per_scan_output_dir_only",
+            "local_asset_sqlite_content_indexed": False,
+            "local_asset_sqlite_raw_content_copied": False,
             "artifact_index_path": (
                 artifact_index.artifact_index_path.as_posix()
             ),
@@ -497,6 +555,14 @@ def _asset_scan_collision_message(output_path: Path, collision_stage: str) -> st
         for file_name in (_ARTIFACT_INDEX_FILE, _ARTIFACT_INDEX_MANIFEST_FILE):
             if file_name in written:
                 return "asset scan artifact index output already exists: " + file_name
+    if collision_stage == "preflight_sqlite_index_collision":
+        for file_name in (
+            LOCAL_ASSET_SQLITE_INDEX_FILE,
+            LOCAL_ASSET_SQLITE_INDEX_MANIFEST_FILE,
+            LOCAL_ASSET_SQLITE_QUERY_SUMMARY_FILE,
+        ):
+            if file_name in written:
+                return "local asset sqlite index output already exists: " + file_name
     for file_name in (
         _SUMMARY_FILE,
         ASSET_SCAN_RUN_RECEIPT_FILE,

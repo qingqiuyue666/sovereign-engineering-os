@@ -54,7 +54,10 @@ class AssetScanOperationalControlTests(unittest.TestCase):
                 entry["artifact_name"] for entry in artifact_index["entries"]
             }
             self.assertIn("asset_scan_run_receipt", artifact_names)
-            self.assertEqual(artifact_index["indexed_artifacts"], 9)
+            self.assertIn("local_asset_index", artifact_names)
+            self.assertIn("local_asset_sqlite_index_manifest", artifact_names)
+            self.assertIn("local_asset_sqlite_query_summary", artifact_names)
+            self.assertEqual(artifact_index["indexed_artifacts"], 12)
             self.assertEqual(
                 payload["asset_scan_run_receipt_path"],
                 (output_dir / "asset_scan_run_receipt.json").as_posix(),
@@ -298,6 +301,13 @@ class AssetScanOperationalControlTests(unittest.TestCase):
             second_hashes = dict(second_payload["artifact_hashes"])
             first_hashes.pop("asset_scan_run_receipt")
             second_hashes.pop("asset_scan_run_receipt")
+            for unstable_artifact in (
+                "local_asset_index",
+                "local_asset_sqlite_index_manifest",
+                "local_asset_sqlite_query_summary",
+            ):
+                first_hashes.pop(unstable_artifact)
+                second_hashes.pop(unstable_artifact)
             self.assertEqual(first_hashes, second_hashes)
 
 

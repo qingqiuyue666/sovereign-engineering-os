@@ -35,12 +35,20 @@ input files, and it is not a media organizer. It does not call model APIs, does
 not call the network, and does not launch ComfyUI, Blender, Houdini, After
 Effects, DaVinci, or a browser.
 
-On success, the launcher also writes `launcher_summary.md` and
-`asset_scan_run_receipt.json`, then binds the scan outputs into the existing
-artifact index surface by emitting `artifact_index.json` and
+On success, the launcher also writes `launcher_summary.md`,
+`asset_scan_run_receipt.json`, `local_asset_index.sqlite`,
+`local_asset_sqlite_index_manifest.json`, and
+`local_asset_sqlite_query_summary.md`, then binds the scan outputs into the
+existing artifact index surface by emitting `artifact_index.json` and
 `artifact_index_manifest.json`. The receipt records the completed scan counts,
 quarantine count, retry/replay hint, and explicit no-scope-expansion
 boundaries.
+
+The SQLite index is a per-scan output artifact only. It stays inside that
+scan's `output_dir`, is a metadata/query index over generated scan artifacts,
+does not copy raw private asset content, and does not attach to the global OS
+engine database. It does not add UI, desktop app behavior, Operator Console
+behavior, external runtime activation, or production autonomy.
 
 On safe failure cases where `output_dir` already exists and is safe to write
 into, the launcher writes `asset_scan_failure_bundle.json` and
@@ -175,18 +183,20 @@ Task graphs can include a controlled local asset scan node:
 The node runs the existing `launch-local-asset-scan` launcher path and keeps
 the same operational-control behavior. On success, the node record references
 `asset_scan_run_receipt.json`, `artifact_index.json`,
-`artifact_index_manifest.json`, indexed artifact counts, quarantine counts,
-and replay hints. On failure, the graph is marked failed, writes
+`artifact_index_manifest.json`, `local_asset_index.sqlite`,
+`local_asset_sqlite_index_manifest.json`,
+`local_asset_sqlite_query_summary.md`, indexed artifact counts, quarantine
+counts, and replay hints. On failure, the graph is marked failed, writes
 `task_graph_failure_bundle.json`, records the failed `node_id` and
 `failure_stage`, and preserves any safe local asset scan failure bundle in the
 node `output_dir`. Dependent nodes are skipped after a failed dependency.
 
 The task graph replay manifest binds node output references by hash and does
 not embed raw file contents or private asset contents. The node still requires
-human approval and does not add UI, desktop behavior, SQLite storage, Operator
-Console behavior, real-folder smoke, network access, model API calls, external
-runtime activation, input mutation, file movement, file renaming, duplicate
-deletion, media organizer behavior, or production autonomy.
+human approval and does not add UI, desktop behavior, global SQLite storage,
+Operator Console behavior, real-folder smoke, network access, model API calls,
+external runtime activation, input mutation, file movement, file renaming,
+duplicate deletion, media organizer behavior, or production autonomy.
 
 Task graph execution now also emits `task_graph_artifact_outputs.json` in the
 graph `output_dir` after node execution. This manifest is a graph-level,
@@ -198,8 +208,9 @@ manifests when present.
 `task_graph_artifact_outputs.json` does not copy raw private asset contents,
 does not index raw content, does not mutate inputs, and does not move, rename,
 delete, deduplicate, or organize media files. It does not add UI, desktop app
-behavior, SQLite storage, Operator Console behavior, network access, model API
-calls, browser runtime activation, or external creative runtime activation.
+behavior, global SQLite storage, Operator Console behavior, network access,
+model API calls, browser runtime activation, or external creative runtime
+activation.
 
 ## Delivery Validation
 
