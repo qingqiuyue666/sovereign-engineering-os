@@ -13,6 +13,7 @@ from kernel.assets.local_asset_schema import (
     QUARANTINE_MANIFEST_FILE,
     VALIDATION_REPORT_FILE,
 )
+from kernel.personal_ai.artifact_index import build_artifact_index
 from kernel.personal_ai.adapters.blender_runtime import run_blender_runtime
 from kernel.personal_ai.adapters.blender_runtime_boundary import (
     write_blender_runtime_admission_artifacts,
@@ -67,6 +68,8 @@ __all__ = [
 ]
 
 _SUMMARY_FILE = "launcher_summary.md"
+_ARTIFACT_INDEX_FILE = "artifact_index.json"
+_ARTIFACT_INDEX_MANIFEST_FILE = "artifact_index_manifest.json"
 _MODEL_REQUEST_FILE = "model_request.json"
 _MODEL_PROVIDER_REQUEST_FILE = "model_provider_request.json"
 _ADMISSION_DIR = "runtime_admission"
@@ -156,7 +159,11 @@ def run_local_asset_scan_launcher(
 ) -> LauncherWorkflowResult:
     output_path = _validate_output_dir(output_dir)
     summary_path = output_path / _SUMMARY_FILE
+    artifact_index_path = output_path / _ARTIFACT_INDEX_FILE
+    artifact_index_manifest_path = output_path / _ARTIFACT_INDEX_MANIFEST_FILE
     _require_no_overwrite(summary_path)
+    _require_no_overwrite(artifact_index_path)
+    _require_no_overwrite(artifact_index_manifest_path)
     result = run_local_asset_runtime(
         Path(input_dir),
         output_path,
@@ -228,6 +235,23 @@ def run_local_asset_scan_launcher(
             "Next action: human review of local asset reports",
         ],
         boundary="read-only local asset scan; human review required.",
+    )
+    artifact_index = build_artifact_index(output_path)
+    payload.update(
+        {
+            "artifact_index_path": (
+                artifact_index.artifact_index_path.as_posix()
+            ),
+            "artifact_index_manifest_path": (
+                artifact_index.artifact_index_manifest_path.as_posix()
+            ),
+            "indexed_artifacts": artifact_index.indexed_artifacts,
+            "artifact_hashes": dict(artifact_index.artifact_hashes),
+            "artifact_ledger_binding_performed": True,
+            "artifact_ledger_binding_type": "existing_artifact_index",
+            "artifact_index_content_indexed": False,
+            "artifact_index_runtime_authority": "non_authority",
+        }
     )
     return LauncherWorkflowResult(
         workflow="local_asset_scan_workflow",
