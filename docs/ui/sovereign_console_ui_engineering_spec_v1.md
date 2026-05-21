@@ -1,5 +1,14 @@
 # Sovereign Console UI Engineering Spec v1
 
+Binding companion documents:
+
+- `docs/ui/sovereign_console_ui_design_system_contract_v1.md`
+- `docs/ui/sovereign_console_ui_skill_v1.md`
+- `docs/ui/sovereign_console_visual_reference_negative_examples_v1.md`
+
+Future UI engineering work must satisfy the design system contract before it is
+considered in-scope for this spec.
+
 ## Product Concept
 
 Sovereign Console is the native desktop command-and-observe surface for the local Sovereign Engineering OS runtime. The console is a unified production workspace: mission-centered, compact, local-first, and strict about the line between observed state and real execution.
