@@ -77,8 +77,8 @@ class LocalAssetRuntimeArtifactBindingTests(unittest.TestCase):
             artifact_names = {
                 entry["artifact_name"] for entry in artifact_index["entries"]
             }
-            self.assertEqual(payload["indexed_artifacts"], 8)
-            self.assertEqual(artifact_index["indexed_artifacts"], 8)
+            self.assertEqual(payload["indexed_artifacts"], 9)
+            self.assertEqual(artifact_index["indexed_artifacts"], 9)
             self.assertTrue(
                 {
                     "asset_manifest",
@@ -89,6 +89,7 @@ class LocalAssetRuntimeArtifactBindingTests(unittest.TestCase):
                     "asset_runtime_validation_report",
                     "asset_runtime_quarantine_manifest",
                     "launcher_summary",
+                    "asset_scan_run_receipt",
                 }.issubset(artifact_names)
             )
             self.assertTrue(
@@ -128,14 +129,16 @@ class LocalAssetRuntimeArtifactBindingTests(unittest.TestCase):
                 first_manifest["artifact_index_sha256"],
                 sha256_file(first_output / "artifact_index.json"),
             )
-            self.assertEqual(
-                first_payload["artifact_hashes"],
-                second_payload["artifact_hashes"],
-            )
-            self.assertEqual(
-                first_manifest["artifact_hashes"],
-                second_manifest["artifact_hashes"],
-            )
+            first_payload_hashes = dict(first_payload["artifact_hashes"])
+            second_payload_hashes = dict(second_payload["artifact_hashes"])
+            first_manifest_hashes = dict(first_manifest["artifact_hashes"])
+            second_manifest_hashes = dict(second_manifest["artifact_hashes"])
+            first_payload_hashes.pop("asset_scan_run_receipt")
+            second_payload_hashes.pop("asset_scan_run_receipt")
+            first_manifest_hashes.pop("asset_scan_run_receipt")
+            second_manifest_hashes.pop("asset_scan_run_receipt")
+            self.assertEqual(first_payload_hashes, second_payload_hashes)
+            self.assertEqual(first_manifest_hashes, second_manifest_hashes)
 
     def test_existing_artifact_index_fails_closed_before_runtime(self):
         with tempfile.TemporaryDirectory() as temp_dir:
