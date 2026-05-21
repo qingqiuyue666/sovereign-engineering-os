@@ -105,6 +105,15 @@ class TaskGraphLocalAssetScanNodeTests(unittest.TestCase):
             self.assertTrue(
                 (node_output / "local_asset_sqlite_query_summary.md").exists()
             )
+            self.assertTrue(
+                (node_output / "local_asset_incremental_scan_plan.json").exists()
+            )
+            self.assertTrue(
+                (node_output / "local_asset_incremental_scan_manifest.json").exists()
+            )
+            self.assertTrue(
+                (node_output / "local_asset_incremental_scan_summary.md").exists()
+            )
             self.assertEqual(node["status"], "completed")
             self.assertTrue(node["local_asset_scan_complete"])
             self.assertEqual(
@@ -127,6 +136,24 @@ class TaskGraphLocalAssetScanNodeTests(unittest.TestCase):
                 node["local_asset_sqlite_query_summary_path"],
                 (node_output / "local_asset_sqlite_query_summary.md").as_posix(),
             )
+            self.assertEqual(
+                node["local_asset_incremental_scan_plan_path"],
+                (node_output / "local_asset_incremental_scan_plan.json").as_posix(),
+            )
+            self.assertEqual(
+                node["local_asset_incremental_scan_manifest_path"],
+                (node_output / "local_asset_incremental_scan_manifest.json").as_posix(),
+            )
+            self.assertEqual(
+                node["local_asset_incremental_scan_summary_path"],
+                (node_output / "local_asset_incremental_scan_summary.md").as_posix(),
+            )
+            self.assertEqual(
+                node["local_asset_incremental_plan_mode"],
+                "baseline_no_previous_scan",
+            )
+            self.assertFalse(node["incremental_cache_execution_performed"])
+            self.assertFalse(node["incremental_automatic_skip_performed"])
             self.assertGreater(node["indexed_artifacts"], 0)
             for field in (
                 "runtime_activation_performed",

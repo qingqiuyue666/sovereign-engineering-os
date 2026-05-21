@@ -5,6 +5,9 @@ from hashlib import sha256
 from pathlib import Path
 import json
 
+from kernel.assets.local_asset_incremental_plan import (
+    LOCAL_ASSET_INCREMENTAL_OUTPUT_FILENAMES,
+)
 from kernel.assets.local_asset_sqlite_index import LOCAL_ASSET_SQLITE_OUTPUT_FILENAMES
 from kernel.assets.local_asset_schema import OUTPUT_FILENAMES
 
@@ -47,6 +50,12 @@ _SENSITIVE_TOKEN_MARKERS = (
 )
 
 _NO_SCOPE_EXPANSION_FLAGS = {
+    "cache_execution_performed": False,
+    "automatic_skip_performed": False,
+    "incremental_cache_execution_performed": False,
+    "incremental_automatic_skip_performed": False,
+    "raw_content_copied": False,
+    "content_indexed": False,
     "input_mutation_performed": False,
     "file_move_performed": False,
     "file_rename_performed": False,
@@ -82,6 +91,7 @@ _CONTROLLED_OUTPUT_FILES = (
     _LAUNCHER_SUMMARY_FILE,
     ASSET_SCAN_RUN_RECEIPT_FILE,
     *LOCAL_ASSET_SQLITE_OUTPUT_FILENAMES,
+    *LOCAL_ASSET_INCREMENTAL_OUTPUT_FILENAMES,
     _ARTIFACT_INDEX_FILE,
     _ARTIFACT_INDEX_MANIFEST_FILE,
     ASSET_SCAN_FAILURE_BUNDLE_FILE,
@@ -117,6 +127,9 @@ def pre_runtime_collision_stage(output_dir: Path) -> str | None:
     for file_name in LOCAL_ASSET_SQLITE_OUTPUT_FILENAMES:
         if (output_path / file_name).exists():
             return "preflight_sqlite_index_collision"
+    for file_name in LOCAL_ASSET_INCREMENTAL_OUTPUT_FILENAMES:
+        if (output_path / file_name).exists():
+            return "preflight_incremental_output_collision"
     for file_name in (
         _LAUNCHER_SUMMARY_FILE,
         ASSET_SCAN_RUN_RECEIPT_FILE,
@@ -309,6 +322,13 @@ def asset_scan_failure_cli_payload(
 
 def classify_asset_scan_failure_stage(error_message: str) -> str:
     message = str(error_message)
+    if "previous_scan_output_dir is missing" in message:
+        return "preflight_previous_scan_missing"
+    if (
+        "previous_scan_output_dir" in message
+        or "previous scan source artifact" in message
+    ):
+        return "preflight_previous_scan_invalid"
     if "input_dir is missing" in message:
         return "preflight_input_dir_missing"
     if "output_dir is missing" in message:
@@ -319,8 +339,12 @@ def classify_asset_scan_failure_stage(error_message: str) -> str:
         return "preflight_artifact_index_collision"
     if "local asset sqlite index output already exists" in message:
         return "preflight_sqlite_index_collision"
+    if "local asset incremental output already exists" in message:
+        return "preflight_incremental_output_collision"
     if "asset runtime output already exists" in message:
         return "runtime_output_collision"
+    if "local asset incremental" in message:
+        return "incremental_plan_failure"
     if (
         "input_dir" in message
         or "output_dir" in message
@@ -448,9 +472,11 @@ def _safe_to_retry(failure_stage: str) -> bool:
         "preflight_launcher_output_collision",
         "preflight_artifact_index_collision",
         "preflight_sqlite_index_collision",
+        "preflight_incremental_output_collision",
         "runtime_output_collision",
         "artifact_index_failure",
         "sqlite_index_failure",
+        "incremental_plan_failure",
     }
 
 
@@ -462,6 +488,11 @@ def _replay_hint(stage: str) -> str:
         )
     if stage == "preflight_input_dir_missing":
         return "Confirm input_dir exists before rerunning the same command."
+    if stage in {"preflight_previous_scan_missing", "preflight_previous_scan_invalid"}:
+        return (
+            "Confirm previous_scan_output_dir points to an existing generated "
+            "local asset scan output directory before rerunning."
+        )
     return (
         "Rerun launch-local-asset-scan with the same input_dir and flags using a "
         "new empty output_dir; do not reuse this output_dir."
@@ -473,14 +504,23 @@ def _recommended_next_action(failure_stage: str) -> str:
         return "human_review_input_dir"
     if failure_stage == "preflight_output_dir_missing":
         return "human_create_empty_output_dir_then_retry"
+    if failure_stage == "preflight_previous_scan_missing":
+        return "human_review_previous_scan_output_dir"
+    if failure_stage == "preflight_previous_scan_invalid":
+        return "human_choose_valid_previous_scan_output_dir"
     if failure_stage in {
         "preflight_launcher_output_collision",
         "preflight_artifact_index_collision",
         "preflight_sqlite_index_collision",
+        "preflight_incremental_output_collision",
         "runtime_output_collision",
     }:
         return "human_choose_fresh_output_dir"
-    if failure_stage in {"artifact_index_failure", "sqlite_index_failure"}:
+    if failure_stage in {
+        "artifact_index_failure",
+        "sqlite_index_failure",
+        "incremental_plan_failure",
+    }:
         return "human_review_partial_asset_scan_outputs"
     return "human_review_asset_scan_failure_bundle"
 

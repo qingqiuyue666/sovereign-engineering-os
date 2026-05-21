@@ -36,6 +36,18 @@ _LOCAL_ASSET_DIRECT_PATH_FIELDS = (
         "local_asset_sqlite_index_manifest_path",
     ),
     ("local_asset_sqlite_query_summary", "local_asset_sqlite_query_summary_path"),
+    (
+        "local_asset_incremental_scan_plan",
+        "local_asset_incremental_scan_plan_path",
+    ),
+    (
+        "local_asset_incremental_scan_manifest",
+        "local_asset_incremental_scan_manifest_path",
+    ),
+    (
+        "local_asset_incremental_scan_summary",
+        "local_asset_incremental_scan_summary_path",
+    ),
     ("asset_manifest", "asset_manifest_path"),
     ("asset_index", "asset_index_path"),
     ("duplicates_report", "duplicates_report_path"),
@@ -71,6 +83,7 @@ _ROLE_ARTIFACT_TYPES = {
     "asset_runtime_audit_log": "jsonl",
     "asset_scan_failure_summary": "markdown",
     "launcher_summary": "markdown",
+    "local_asset_incremental_scan_summary": "markdown",
     "local_asset_sqlite_query_summary": "markdown",
     "media_inventory": "markdown",
 }

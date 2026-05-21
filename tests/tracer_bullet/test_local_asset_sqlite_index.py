@@ -249,6 +249,9 @@ class LocalAssetSQLiteIndexTests(unittest.TestCase):
             self.assertIn("local_asset_index", artifact_names)
             self.assertIn("local_asset_sqlite_index_manifest", artifact_names)
             self.assertIn("local_asset_sqlite_query_summary", artifact_names)
+            self.assertIn("local_asset_incremental_scan_plan", artifact_names)
+            self.assertIn("local_asset_incremental_scan_manifest", artifact_names)
+            self.assertIn("local_asset_incremental_scan_summary", artifact_names)
 
     def test_task_graph_artifact_outputs_include_sqlite_artifacts(self):
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -273,6 +276,9 @@ class LocalAssetSQLiteIndexTests(unittest.TestCase):
             self.assertIn("local_asset_sqlite_index", roles)
             self.assertIn("local_asset_sqlite_index_manifest", roles)
             self.assertIn("local_asset_sqlite_query_summary", roles)
+            self.assertIn("local_asset_incremental_scan_plan", roles)
+            self.assertIn("local_asset_incremental_scan_manifest", roles)
+            self.assertIn("local_asset_incremental_scan_summary", roles)
 
     def test_existing_sqlite_index_files_fail_closed_before_runtime(self):
         for file_name in SQLITE_OUTPUT_FILENAMES:

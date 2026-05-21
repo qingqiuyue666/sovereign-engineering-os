@@ -54,6 +54,21 @@ class LocalAssetRuntimeCLILauncherTests(unittest.TestCase):
             for filename in OUTPUT_FILENAMES:
                 self.assertTrue((output_dir / filename).exists(), filename)
             self.assertTrue((output_dir / "launcher_summary.md").exists())
+            self.assertTrue(
+                (output_dir / "local_asset_incremental_scan_plan.json").exists()
+            )
+            self.assertTrue(
+                (output_dir / "local_asset_incremental_scan_manifest.json").exists()
+            )
+            self.assertTrue(
+                (output_dir / "local_asset_incremental_scan_summary.md").exists()
+            )
+            self.assertEqual(
+                payload["local_asset_incremental_plan_mode"],
+                "baseline_no_previous_scan",
+            )
+            self.assertFalse(payload["incremental_cache_execution_performed"])
+            self.assertFalse(payload["incremental_automatic_skip_performed"])
 
             manifest = read_json(payload["asset_manifest_path"])
             validation = read_json(payload["asset_runtime_validation_report_path"])
