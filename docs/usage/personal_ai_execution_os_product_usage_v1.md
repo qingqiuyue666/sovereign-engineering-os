@@ -152,6 +152,42 @@ python3 -m kernel.personal_ai.local_mvp_cli launch-task-graph \
 Task graphs can run fixture/mock execution or dry-run planning. Real runtime
 activation requires separate admission and remains fail-closed by default.
 
+Task graphs can include a controlled local asset scan node:
+
+```json
+{
+  "node_id": "scan_assets",
+  "adapter_id": "local_asset_runtime",
+  "capability": "launch_local_asset_scan",
+  "execution_mode": "fixture",
+  "depends_on": [],
+  "approval_checkpoint_required": true,
+  "inputs": {
+    "input_dir": "/path/to/assets",
+    "output_dir": "/path/to/asset-scan-output",
+    "recursive": true,
+    "include_hidden": false,
+    "project_id": "demo_project"
+  }
+}
+```
+
+The node runs the existing `launch-local-asset-scan` launcher path and keeps
+the same operational-control behavior. On success, the node record references
+`asset_scan_run_receipt.json`, `artifact_index.json`,
+`artifact_index_manifest.json`, indexed artifact counts, quarantine counts,
+and replay hints. On failure, the graph is marked failed, writes
+`task_graph_failure_bundle.json`, records the failed `node_id` and
+`failure_stage`, and preserves any safe local asset scan failure bundle in the
+node `output_dir`. Dependent nodes are skipped after a failed dependency.
+
+The task graph replay manifest binds node output references by hash and does
+not embed raw file contents or private asset contents. The node still requires
+human approval and does not add UI, desktop behavior, SQLite storage, Operator
+Console behavior, real-folder smoke, network access, model API calls, external
+runtime activation, input mutation, file movement, file renaming, duplicate
+deletion, media organizer behavior, or production autonomy.
+
 ## Delivery Validation
 
 ```bash
