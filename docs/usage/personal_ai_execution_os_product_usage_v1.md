@@ -35,6 +35,10 @@ input files, and it is not a media organizer. It does not call model APIs, does
 not call the network, and does not launch ComfyUI, Blender, Houdini, After
 Effects, DaVinci, or a browser.
 
+The launcher also writes `launcher_summary.md` and binds the scan outputs into
+the existing artifact index surface by emitting `artifact_index.json` and
+`artifact_index_manifest.json`.
+
 ## Model Workflows
 
 Deterministic mock:
