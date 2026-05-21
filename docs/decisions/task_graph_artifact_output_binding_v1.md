@@ -174,9 +174,14 @@ path.
 - Pre-commit `make ci`: test suites passed; final clean-tree gate failed only because intended branch files were still uncommitted.
 - `git diff --check`: passed.
 - `git status --short`: showed only intended branch files before commit.
+- Post-commit `make ci`: passed.
+- Post-commit `git diff --check`: passed.
+- Final `git status --short`: empty / clean.
+- Final branch verification state: green.
 
 The pre-commit `make ci` failure was the expected clean-tree gate result from
-uncommitted branch files, not a test or implementation failure.
+intended uncommitted branch files, not a test or implementation failure. The
+final authoritative verification result after commit is green.
 
 ## Next Recommended Branch
 
