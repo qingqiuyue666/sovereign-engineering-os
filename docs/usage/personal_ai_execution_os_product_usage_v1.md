@@ -219,6 +219,70 @@ behavior, network access, model API calls, external runtime activation,
 browser runtime activation, ComfyUI/Blender/Houdini/After Effects/DaVinci
 activation, HFX changes, or production autonomy.
 
+## Local Asset Smoke Review Packet
+
+```bash
+python3 -m kernel.personal_ai.local_mvp_cli launch-local-asset-smoke-review-packet \
+  --smoke-output-dir /path/to/human-smoke-output-root \
+  --output-dir /path/to/review-packet-output \
+  --project-id demo_project
+```
+
+Required arguments are `--smoke-output-dir` and `--output-dir`.
+`--project-id` is optional. Both directories must already exist, must be real
+directories, and must not be symlinks. The review `output_dir` is not created
+automatically. It must not equal `smoke_output_dir`, must not be inside it,
+and must not contain it. If the generated admission receipt safely exposes a
+`candidate_input_dir`, the review `output_dir` must also not be inside that
+candidate input directory.
+
+This command consumes generated human-approved smoke-run artifacts only. It
+reads the smoke root control artifacts, smoke summary, root artifact index,
+scan artifact index, scan reports, generated SQLite manifest/query summary,
+incremental plan artifacts, and generated failure artifacts when present. It
+may hash generated artifact files. It does not run a scan, does not re-run
+readiness, does not hash candidate files, does not read raw candidate file
+contents, does not copy raw private content, does not mutate inputs, and does
+not mutate the smoke output root.
+
+The command writes these review artifacts into `output_dir`:
+
+- `local_asset_smoke_review_packet.json`
+- `local_asset_smoke_review_packet_manifest.json`
+- `local_asset_smoke_review_summary.md`
+- `local_asset_smoke_human_decision_checklist.md`
+- `artifact_index.json`
+- `artifact_index_manifest.json`
+
+All writes are exclusive and fail closed if any of those files already exist.
+The review packet summarizes approval, admission, readiness, scan counts,
+duplicate groups, quarantine counts and top reasons, generated SQLite manifest
+row counts, incremental plan counts, failure state, warning state, and the
+explicit no-scope-expansion boundaries.
+
+Review packet statuses are:
+
+- `review_ready`
+- `review_ready_with_warnings`
+- `review_blocked_missing_required_artifacts`
+- `review_blocked_failed_smoke_run`
+- `review_blocked_untrusted_artifacts`
+
+Recommended human decisions are:
+
+- `approve_next_bounded_smoke_iteration`
+- `inspect_quarantine_before_next_run`
+- `inspect_duplicates_before_next_run`
+- `inspect_incremental_changes_before_next_run`
+- `reject_and_repair_smoke_run`
+
+The checklist is for human review only. It does not suggest deleting, moving,
+renaming, or deduplicating files, does not grant automatic approval, does not
+enable production scanning, does not add UI, desktop app behavior, Operator
+Console behavior, watcher/daemon behavior, network access, model API calls,
+external creative runtime activation, HFX changes, global database state, or
+production autonomy.
+
 ## Model Workflows
 
 Deterministic mock:
@@ -429,6 +493,32 @@ directories, readiness status and decision, admission status, scan invocation
 status, scan completion, bounded smoke status, and explicit false values for
 production scan, input mutation, network access, model API calls, and external
 runtime invocation.
+
+Task graphs can include a post-smoke-run review packet node:
+
+```json
+{
+  "node_id": "review_human_smoke",
+  "adapter_id": "local_asset_runtime",
+  "capability": "launch_local_asset_smoke_review_packet",
+  "execution_mode": "fixture",
+  "depends_on": [],
+  "approval_checkpoint_required": true,
+  "inputs": {
+    "smoke_output_dir": "/path/to/human-smoke-output-root",
+    "output_dir": "/path/to/review-packet-output",
+    "project_id": "demo_project"
+  }
+}
+```
+
+The node runs `launch-local-asset-smoke-review-packet` and records the packet,
+manifest, summary, decision checklist, artifact index paths, review packet
+status, recommended human decision, and explicit false values for scan
+execution, readiness execution, raw candidate content reads, candidate file
+hashing, smoke output mutation, input mutation, file movement, file renaming,
+file deletion, duplicate deletion, media organizer behavior, network access,
+model API calls, and external runtime invocation.
 
 Task graph execution now also emits `task_graph_artifact_outputs.json` in the
 graph `output_dir` after node execution. This manifest is a graph-level,
