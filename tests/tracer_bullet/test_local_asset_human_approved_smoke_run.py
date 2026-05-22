@@ -196,6 +196,53 @@ class LocalAssetHumanApprovedSmokeRunTests(unittest.TestCase):
             after_files = sorted(path.relative_to(candidate).as_posix() for path in candidate.rglob("*"))
             self.assertEqual(after_files, before_files)
 
+    def test_default_max_smoke_files_allows_small_ready_directory(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            candidate = self.make_candidate(root)
+            readiness_output = root / "readiness"
+            human_output = root / "human-smoke"
+            readiness_output.mkdir()
+            human_output.mkdir()
+            before_files = sorted(
+                path.relative_to(candidate).as_posix()
+                for path in candidate.rglob("*")
+            )
+            readiness_code, readiness_payload = self.run_readiness(
+                candidate,
+                readiness_output,
+            )
+
+            exit_code, payload = self.run_human_smoke(
+                candidate,
+                human_output,
+                readiness_payload["local_asset_smoke_readiness_report_path"],
+                max_smoke_files=None,
+            )
+            admission = read_json(
+                human_output
+                / "control"
+                / "local_asset_human_smoke_admission_receipt.json"
+            )
+            after_files = sorted(
+                path.relative_to(candidate).as_posix()
+                for path in candidate.rglob("*")
+            )
+
+            self.assertEqual(readiness_code, 0)
+            self.assertEqual(exit_code, 0)
+            self.assertTrue(payload["scan_launcher_invoked"])
+            self.assertTrue(payload["scan_complete"])
+            self.assertTrue(payload["bounded_smoke_run_performed"])
+            self.assertFalse(payload["production_scan_performed"])
+            self.assertFalse(payload["input_mutation_performed"])
+            self.assertTrue(admission["scan_launcher_invoked"])
+            self.assertTrue(admission["scan_complete"])
+            self.assertTrue(admission["bounded_smoke_run_performed"])
+            self.assertFalse(admission["production_scan_performed"])
+            self.assertFalse(admission["input_mutation_performed"])
+            self.assertEqual(after_files, before_files)
+
     def test_wrong_approval_phrase_fails_before_scan(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

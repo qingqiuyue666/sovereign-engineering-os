@@ -888,9 +888,6 @@ def _readiness_limit_error(
     max_smoke_bytes: int,
     max_smoke_depth: int,
 ) -> str | None:
-    inspected_file_count = readiness_payload.get("inspected_file_count")
-    if isinstance(inspected_file_count, int) and max_smoke_files > inspected_file_count:
-        return "max_smoke_files exceeds readiness inspected_file_count"
     readiness_max_total_bytes = readiness_payload.get("max_total_bytes")
     if (
         isinstance(readiness_max_total_bytes, int)
