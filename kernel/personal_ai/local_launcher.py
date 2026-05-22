@@ -10,6 +10,12 @@ from kernel.assets.local_asset_incremental_plan import (
     build_local_asset_incremental_plan,
     validate_previous_scan_output_dir,
 )
+from kernel.assets.local_asset_human_smoke import (
+    DEFAULT_MAX_SMOKE_BYTES,
+    DEFAULT_MAX_SMOKE_DEPTH,
+    DEFAULT_MAX_SMOKE_FILES,
+    run_local_asset_human_smoke,
+)
 from kernel.assets.local_asset_sqlite_index import (
     LOCAL_ASSET_SQLITE_INDEX_FILE,
     LOCAL_ASSET_SQLITE_INDEX_MANIFEST_FILE,
@@ -91,6 +97,7 @@ __all__ = [
     "run_blender_dry_run_launcher",
     "run_comfyui_dry_run_launcher",
     "run_creative_handoff_launcher",
+    "run_local_asset_human_smoke_launcher",
     "run_local_asset_scan_launcher",
     "run_local_asset_smoke_readiness_launcher",
     "run_local_office_launcher",
@@ -686,6 +693,47 @@ def run_local_asset_smoke_readiness_launcher(
         summary_path=result.summary_path
         if result.summary_path is not None
         else output_path / LOCAL_ASSET_SMOKE_READINESS_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_local_asset_human_smoke_launcher(
+    candidate_input_dir: Path,
+    output_dir: Path,
+    readiness_report: Path,
+    *,
+    human_approval_id: str,
+    human_approval_phrase: str,
+    recursive: bool = False,
+    include_hidden: bool = False,
+    project_id: str | None = None,
+    max_smoke_files: int = DEFAULT_MAX_SMOKE_FILES,
+    max_smoke_bytes: int = DEFAULT_MAX_SMOKE_BYTES,
+    max_smoke_depth: int = DEFAULT_MAX_SMOKE_DEPTH,
+    previous_scan_output_dir: Path | None = None,
+) -> LauncherWorkflowResult:
+    result = run_local_asset_human_smoke(
+        Path(candidate_input_dir),
+        Path(output_dir),
+        Path(readiness_report),
+        human_approval_id=human_approval_id,
+        human_approval_phrase=human_approval_phrase,
+        recursive=recursive,
+        include_hidden=include_hidden,
+        project_id=project_id,
+        max_smoke_files=max_smoke_files,
+        max_smoke_bytes=max_smoke_bytes,
+        max_smoke_depth=max_smoke_depth,
+        previous_scan_output_dir=previous_scan_output_dir,
+    )
+    return LauncherWorkflowResult(
+        workflow="local_asset_human_smoke_run_workflow",
+        output_dir=result.output_dir,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else result.output_dir / "local_asset_human_smoke_run_summary.md",
         required_human_approval=True,
     )
 
