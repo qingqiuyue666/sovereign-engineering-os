@@ -30,6 +30,10 @@ _LAUNCHER_WORKFLOW_CALLABLES = (
         "local_asset_human_smoke_run_workflow",
         "run_local_asset_human_smoke_launcher",
     ),
+    (
+        "local_asset_smoke_review_packet_workflow",
+        "run_local_asset_smoke_review_packet_launcher",
+    ),
     ("local_office_workflow", "run_local_office_launcher"),
     ("model_fixture_workflow", "run_model_fixture_launcher"),
     ("model_provider_dry_run_workflow", "run_model_provider_dry_run_launcher"),
@@ -49,6 +53,7 @@ _REQUIRED_CLI_SUBCOMMANDS = (
     "launch-local-asset-scan",
     "launch-local-asset-smoke-readiness",
     "launch-local-asset-human-smoke-run",
+    "launch-local-asset-smoke-review-packet",
     "launch-office-workflow",
     "launch-model-fixture",
     "launch-model-provider-dry-run",
