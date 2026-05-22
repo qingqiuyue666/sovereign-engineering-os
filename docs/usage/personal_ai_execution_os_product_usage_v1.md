@@ -283,6 +283,82 @@ Console behavior, watcher/daemon behavior, network access, model API calls,
 external creative runtime activation, HFX changes, global database state, or
 production autonomy.
 
+## Local Asset Smoke Promotion Gate
+
+```bash
+python3 -m kernel.personal_ai.local_mvp_cli launch-local-asset-smoke-promotion-gate \
+  --review-output-dir /path/to/review-packet-output \
+  --output-dir /path/to/promotion-gate-output \
+  --project-id demo_project
+```
+
+Required arguments are `--review-output-dir` and `--output-dir`.
+`--project-id` is optional. Both directories must already exist, must be real
+directories, and must not be symlinks. The promotion `output_dir` is not
+created automatically. It must not equal `review_output_dir`, must not be
+inside it, and must not contain it. If the generated review packet safely
+exposes a `smoke_output_dir` or `candidate_input_dir`, the promotion
+`output_dir` must not be inside either upstream directory.
+
+This command consumes generated review packet artifacts only:
+
+- `local_asset_smoke_review_packet.json`
+- `local_asset_smoke_review_packet_manifest.json`
+- `local_asset_smoke_review_summary.md` when present
+- `local_asset_smoke_human_decision_checklist.md` when present
+- `artifact_index.json`
+- `artifact_index_manifest.json`
+
+It may hash those generated review artifacts. It does not scan, run
+readiness, run human smoke, hash candidate files, read raw candidate file
+contents, copy raw private content, mutate review packet outputs, mutate smoke
+outputs, mutate inputs, move files, rename files, delete files, delete
+duplicates, perform media organizer behavior, use network access, call model
+APIs, invoke external runtimes, or approve production use.
+
+The command writes these promotion gate artifacts into `output_dir`:
+
+- `local_asset_smoke_promotion_decision.json`
+- `local_asset_smoke_promotion_gate_manifest.json`
+- `local_asset_smoke_promotion_summary.md`
+- `local_asset_smoke_promotion_human_signoff_checklist.md`
+- `artifact_index.json`
+- `artifact_index_manifest.json`
+
+All writes are exclusive and fail closed if any of those files already exist.
+If required review artifacts are missing and the promotion output directory is
+safe, the gate writes a blocked decision rather than pretending promotion is
+allowed.
+
+Promotion gate status values are:
+
+- `promotion_candidate`
+- `blocked_missing_review_artifacts`
+- `blocked_untrusted_review_packet`
+- `blocked_failed_smoke_run`
+- `blocked_quarantine`
+- `blocked_duplicates`
+- `blocked_incremental_changes`
+- `blocked_warnings`
+- `blocked_unknown`
+
+Promotion decision values are:
+
+- `allow_next_bounded_smoke_iteration`
+- `block_until_human_inspects_quarantine`
+- `block_until_human_inspects_duplicates`
+- `block_until_human_inspects_incremental_changes`
+- `block_until_smoke_run_repaired`
+- `block_until_review_packet_repaired`
+
+The gate only allows the next bounded smoke iteration when the review packet
+is clean: `review_packet_status=review_ready`, recommended decision is
+`approve_next_bounded_smoke_iteration`, smoke and scan are complete,
+production scan is false, input mutation is false, duplicate deletion is
+false, quarantine count is zero, duplicate group count is zero, suspicious
+incremental changes are zero, and no blocking warnings are present. It never
+grants production promotion and never approves production scanning.
+
 ## Model Workflows
 
 Deterministic mock:
@@ -519,6 +595,32 @@ execution, readiness execution, raw candidate content reads, candidate file
 hashing, smoke output mutation, input mutation, file movement, file renaming,
 file deletion, duplicate deletion, media organizer behavior, network access,
 model API calls, and external runtime invocation.
+
+Task graphs can include a local asset smoke promotion gate node:
+
+```json
+{
+  "node_id": "promote_human_smoke",
+  "adapter_id": "local_asset_runtime",
+  "capability": "launch_local_asset_smoke_promotion_gate",
+  "execution_mode": "fixture",
+  "depends_on": [],
+  "approval_checkpoint_required": true,
+  "inputs": {
+    "review_output_dir": "/path/to/review-packet-output",
+    "output_dir": "/path/to/promotion-gate-output",
+    "project_id": "demo_project"
+  }
+}
+```
+
+The node runs `launch-local-asset-smoke-promotion-gate` and records the
+decision, gate manifest, summary, human signoff checklist, artifact index
+paths, promotion gate status, promotion decision, next bounded smoke
+iteration allowance, blocker list, and explicit false values for scan
+execution, readiness execution, human smoke execution, review packet mutation,
+raw candidate content reads, candidate file hashing, production promotion, and
+production scan approval.
 
 Task graph execution now also emits `task_graph_artifact_outputs.json` in the
 graph `output_dir` after node execution. This manifest is a graph-level,
