@@ -16,6 +16,13 @@ from kernel.assets.local_asset_sqlite_index import (
     LOCAL_ASSET_SQLITE_QUERY_SUMMARY_FILE,
     build_local_asset_sqlite_index,
 )
+from kernel.assets.local_asset_smoke_readiness import (
+    DEFAULT_SMOKE_READINESS_MAX_DEPTH,
+    DEFAULT_SMOKE_READINESS_MAX_ENTRIES,
+    DEFAULT_SMOKE_READINESS_MAX_TOTAL_BYTES,
+    LOCAL_ASSET_SMOKE_READINESS_SUMMARY_FILE,
+    run_local_asset_smoke_readiness,
+)
 from kernel.assets.local_asset_runtime import run_local_asset_runtime
 from kernel.assets.local_asset_schema import (
     ASSET_INDEX_FILE,
@@ -85,6 +92,7 @@ __all__ = [
     "run_comfyui_dry_run_launcher",
     "run_creative_handoff_launcher",
     "run_local_asset_scan_launcher",
+    "run_local_asset_smoke_readiness_launcher",
     "run_local_office_launcher",
     "run_model_fixture_launcher",
     "run_model_provider_dry_run_launcher",
@@ -555,6 +563,129 @@ def run_local_asset_scan_launcher(
         complete=True,
         payload=payload,
         summary_path=summary_path,
+        required_human_approval=True,
+    )
+
+
+def run_local_asset_smoke_readiness_launcher(
+    candidate_input_dir: Path,
+    output_dir: Path,
+    *,
+    recursive: bool = False,
+    include_hidden: bool = False,
+    project_id: str | None = None,
+    max_entries: int = DEFAULT_SMOKE_READINESS_MAX_ENTRIES,
+    max_depth: int = DEFAULT_SMOKE_READINESS_MAX_DEPTH,
+    max_total_bytes: int = DEFAULT_SMOKE_READINESS_MAX_TOTAL_BYTES,
+) -> LauncherWorkflowResult:
+    output_path = Path(output_dir)
+    result = run_local_asset_smoke_readiness(
+        Path(candidate_input_dir),
+        output_path,
+        recursive=recursive,
+        include_hidden=include_hidden,
+        project_id=project_id,
+        max_entries=max_entries,
+        max_depth=max_depth,
+        max_total_bytes=max_total_bytes,
+    )
+    report = result.report
+    artifact_index = result.artifact_index
+    payload = {
+        "local_asset_smoke_readiness_report_path": None
+        if result.report_path is None
+        else result.report_path.as_posix(),
+        "local_asset_smoke_readiness_manifest_path": None
+        if result.manifest_path is None
+        else result.manifest_path.as_posix(),
+        "local_asset_smoke_readiness_summary_path": None
+        if result.summary_path is None
+        else result.summary_path.as_posix(),
+        "artifact_index_path": None
+        if result.artifact_index_path is None
+        else result.artifact_index_path.as_posix(),
+        "artifact_index_manifest_path": None
+        if result.artifact_index_manifest_path is None
+        else result.artifact_index_manifest_path.as_posix(),
+        "readiness_status": result.readiness_status,
+        "readiness_decision": result.readiness_decision,
+        "candidate_input_dir": Path(candidate_input_dir).as_posix(),
+        "output_dir": output_path.as_posix(),
+        "project_id": project_id,
+        "recursive": recursive,
+        "include_hidden": include_hidden,
+        "max_entries": max_entries,
+        "max_depth": max_depth,
+        "max_total_bytes": max_total_bytes,
+        "inspected_entry_count": report.get("inspected_entry_count", 0),
+        "inspected_file_count": report.get("inspected_file_count", 0),
+        "inspected_directory_count": report.get("inspected_directory_count", 0),
+        "estimated_total_size_bytes": report.get("estimated_total_size_bytes", 0),
+        "secret_looking_path_count": report.get("risk_counts", {}).get(
+            "secret_looking_path",
+            0,
+        ),
+        "symlink_count": report.get("risk_counts", {}).get("symlink", 0),
+        "unsafe_directory_count": report.get("risk_counts", {}).get(
+            "unsafe_directory",
+            0,
+        ),
+        "hidden_path_count": report.get("risk_counts", {}).get("hidden_path", 0),
+        "unreadable_entry_count": report.get("risk_counts", {}).get(
+            "unreadable_entry",
+            0,
+        ),
+        "limit_exceeded": report.get("limit_exceeded", False),
+        "artifacts_written": result.artifacts_written,
+        "no_artifacts_written": not result.artifacts_written,
+        "indexed_artifacts": 0
+        if artifact_index is None
+        else artifact_index.indexed_artifacts,
+        "artifact_hashes": {}
+        if artifact_index is None
+        else dict(artifact_index.artifact_hashes),
+        "artifact_ledger_binding_performed": artifact_index is not None,
+        "artifact_ledger_binding_type": "existing_artifact_index"
+        if artifact_index is not None
+        else None,
+        "artifact_index_content_indexed": False,
+        "artifact_index_runtime_authority": "non_authority",
+        "real_scan_performed": False,
+        "file_hashing_performed": False,
+        "raw_content_read": False,
+        "raw_content_copied": False,
+        "thumbnail_generation_performed": False,
+        "preview_generation_performed": False,
+        "input_mutation_performed": False,
+        "file_move_performed": False,
+        "file_rename_performed": False,
+        "file_delete_performed": False,
+        "media_organizer_behavior_performed": False,
+        "output_overwrite_performed": False,
+        "network_access_performed": False,
+        "model_api_called": False,
+        "external_runtime_invoked": False,
+        "required_human_approval": True,
+        "next_allowed_action": "human_review_real_folder_smoke_readiness",
+    }
+    if result.error_type is not None:
+        payload["error_type"] = result.error_type
+    if result.error_message is not None:
+        payload["error_message"] = result.error_message
+        payload["failure_stage"] = "smoke_readiness_preflight_failure"
+        payload["safe_to_retry"] = not result.artifacts_written
+        payload["replay_hint"] = (
+            "Review the readiness preflight failure and rerun with a safe "
+            "candidate_input_dir and a new empty output_dir."
+        )
+    return LauncherWorkflowResult(
+        workflow="local_asset_smoke_readiness_workflow",
+        output_dir=output_path,
+        complete=result.complete,
+        payload=payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else output_path / LOCAL_ASSET_SMOKE_READINESS_SUMMARY_FILE,
         required_human_approval=True,
     )
 

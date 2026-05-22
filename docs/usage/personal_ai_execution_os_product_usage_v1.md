@@ -75,6 +75,69 @@ into, the launcher writes `asset_scan_failure_bundle.json` and
 not create it and returns a structured failure payload without writing a
 failure bundle.
 
+## Local Asset Smoke Readiness
+
+```bash
+python3 -m kernel.personal_ai.local_mvp_cli launch-local-asset-smoke-readiness \
+  --candidate-input-dir /path/to/candidate-assets \
+  --output-dir /path/to/output \
+  --recursive \
+  --include-hidden \
+  --project-id demo_project
+```
+
+Required arguments are `--candidate-input-dir` and `--output-dir`. Optional
+arguments are `--recursive`, `--include-hidden`, `--project-id`,
+`--max-entries`, `--max-depth`, and `--max-total-bytes`.
+
+This command performs metadata-only readiness inspection before any future
+human-approved real-folder smoke run. It inspects path names, path type,
+directory structure, file sizes from filesystem metadata, extensions, hidden
+path status, symlink status, unsafe directory names, and secret-looking path
+names. It does not run a real asset scan, does not hash raw candidate files,
+does not read raw candidate file contents, does not copy private content, and
+does not mutate, move, rename, or delete input files.
+
+The default safety limits are:
+
+- `--max-entries 50000`
+- `--max-depth 20`
+- `--max-total-bytes 500000000000`
+
+`output_dir` must already exist, must not be a symlink, and must not overlap
+with `candidate_input_dir` in either direction. The candidate input directory
+must exist, be a directory, and not be a symlink. If a limit is exceeded, the
+command writes readiness artifacts with
+`readiness_status = blocked_limit_exceeded` and exits successfully because the
+readiness harness safely blocked the future smoke.
+
+The command writes:
+
+- `local_asset_smoke_readiness_report.json`
+- `local_asset_smoke_readiness_manifest.json`
+- `local_asset_smoke_readiness_summary.md`
+- `artifact_index.json`
+- `artifact_index_manifest.json`
+
+All writes are inside `output_dir` and fail closed if any expected output
+already exists. The artifact index remains metadata-only and
+non-authoritative.
+
+Readiness statuses are:
+
+- `ready`
+- `ready_with_warnings`
+- `blocked_safety_risk`
+- `blocked_limit_exceeded`
+- `failed_preflight`
+
+Readiness decisions are `allow_human_review_for_future_smoke` or
+`block_future_smoke_until_review`. Human approval is required before any
+future real-folder smoke. This command does not enable real-folder smoke by
+itself and does not add UI, Operator Console behavior, watcher/daemon behavior,
+network access, model API calls, external runtime activation, global database
+state, or production autonomy.
+
 ## Model Workflows
 
 Deterministic mock:
@@ -221,6 +284,36 @@ human approval and does not add UI, desktop behavior, global SQLite storage,
 Operator Console behavior, real-folder smoke, network access, model API calls,
 external runtime activation, input mutation, file movement, file renaming,
 duplicate deletion, media organizer behavior, or production autonomy.
+
+Task graphs can also include a local asset smoke readiness node:
+
+```json
+{
+  "node_id": "preflight_assets",
+  "adapter_id": "local_asset_runtime",
+  "capability": "launch_local_asset_smoke_readiness",
+  "execution_mode": "fixture",
+  "depends_on": [],
+  "approval_checkpoint_required": true,
+  "inputs": {
+    "candidate_input_dir": "/path/to/candidate-assets",
+    "output_dir": "/path/to/smoke-readiness-output",
+    "recursive": true,
+    "include_hidden": false,
+    "project_id": "demo_project",
+    "max_entries": 50000,
+    "max_depth": 20,
+    "max_total_bytes": 500000000000
+  }
+}
+```
+
+The node runs `launch-local-asset-smoke-readiness` and records the readiness
+report, manifest, summary, artifact index paths, readiness status, readiness
+decision, count estimates, and explicit false values for real scan execution,
+file hashing, raw content reads, input mutation, and external runtime
+activation. It is still review-only and requires human approval before any
+future real-folder smoke.
 
 Task graph execution now also emits `task_graph_artifact_outputs.json` in the
 graph `output_dir` after node execution. This manifest is a graph-level,

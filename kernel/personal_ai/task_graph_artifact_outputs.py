@@ -21,6 +21,7 @@ _GRAPH_ARTIFACT_ADAPTER_ID = "task_graph_fixture"
 _GRAPH_ARTIFACT_CAPABILITY = "write_task_graph_artifact_outputs"
 _LOCAL_ASSET_ADAPTER_ID = "local_asset_runtime"
 _LOCAL_ASSET_CAPABILITY = "launch_local_asset_scan"
+_LOCAL_ASSET_SMOKE_READINESS_CAPABILITY = "launch_local_asset_smoke_readiness"
 _DELIVERY_ADAPTER_ID = "runtime_delivery_package"
 _DELIVERY_CAPABILITY = "validate_runtime_delivery"
 
@@ -68,6 +69,24 @@ _LOCAL_ASSET_OUTPUT_FILE_ROLES = {
     "asset_runtime_quarantine_manifest.json": "asset_runtime_quarantine_manifest",
 }
 
+_LOCAL_ASSET_SMOKE_READINESS_DIRECT_PATH_FIELDS = (
+    (
+        "local_asset_smoke_readiness_report",
+        "local_asset_smoke_readiness_report_path",
+    ),
+    (
+        "local_asset_smoke_readiness_manifest",
+        "local_asset_smoke_readiness_manifest_path",
+    ),
+    (
+        "local_asset_smoke_readiness_summary",
+        "local_asset_smoke_readiness_summary_path",
+    ),
+    ("artifact_index", "artifact_index_path"),
+    ("artifact_index_manifest", "artifact_index_manifest_path"),
+    ("launcher_summary", "launcher_summary_path"),
+)
+
 _DELIVERY_PATH_FIELDS = (
     ("runtime_delivery_manifest", "runtime_delivery_manifest_path"),
     ("runtime_delivery_validation", "runtime_delivery_validation_path"),
@@ -85,6 +104,7 @@ _ROLE_ARTIFACT_TYPES = {
     "launcher_summary": "markdown",
     "local_asset_incremental_scan_summary": "markdown",
     "local_asset_sqlite_query_summary": "markdown",
+    "local_asset_smoke_readiness_summary": "markdown",
     "media_inventory": "markdown",
 }
 
@@ -203,6 +223,11 @@ def _node_artifact_candidates(node, output_dir):
     ):
         return _local_asset_artifact_candidates(node, output_dir)
     if (
+        node["adapter_id"] == _LOCAL_ASSET_ADAPTER_ID
+        and node["capability"] == _LOCAL_ASSET_SMOKE_READINESS_CAPABILITY
+    ):
+        return _local_asset_smoke_readiness_artifact_candidates(node, output_dir)
+    if (
         node["adapter_id"] == _DELIVERY_ADAPTER_ID
         and node["capability"] == _DELIVERY_CAPABILITY
     ):
@@ -223,6 +248,25 @@ def _local_asset_artifact_candidates(node, output_dir):
             role = _LOCAL_ASSET_OUTPUT_FILE_ROLES.get(file_name)
             if role is not None:
                 _add_role_path(role_paths, seen_roles, role, output_paths[file_name])
+    return [
+        _artifact_record(
+            node_id=node["node_id"],
+            adapter_id=node["adapter_id"],
+            capability=node["capability"],
+            node_status=node["status"],
+            artifact_role=role,
+            path_value=path_value,
+            output_dir=output_dir,
+        )
+        for role, path_value in role_paths
+    ]
+
+
+def _local_asset_smoke_readiness_artifact_candidates(node, output_dir):
+    role_paths = []
+    seen_roles = set()
+    for role, field_name in _LOCAL_ASSET_SMOKE_READINESS_DIRECT_PATH_FIELDS:
+        _add_role_path(role_paths, seen_roles, role, node.get(field_name))
     return [
         _artifact_record(
             node_id=node["node_id"],

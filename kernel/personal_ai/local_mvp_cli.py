@@ -19,6 +19,7 @@ from kernel.personal_ai.local_launcher import (
     run_comfyui_dry_run_launcher,
     run_creative_handoff_launcher,
     run_local_asset_scan_launcher,
+    run_local_asset_smoke_readiness_launcher,
     run_local_office_launcher,
     run_model_fixture_launcher,
     run_model_provider_dry_run_launcher,
@@ -95,6 +96,7 @@ _SUBCOMMANDS = {
     "validate-runtime-delivery",
     "run-task-graph-fixture",
     "launch-local-asset-scan",
+    "launch-local-asset-smoke-readiness",
     "launch-office-workflow",
     "launch-model-fixture",
     "launch-model-provider-dry-run",
@@ -621,6 +623,19 @@ def _main_subcommand(argv) -> int:
             )
             _print_command_payload(result.to_cli_payload())
             return 0 if result.complete else 1
+        if args.command == "launch-local-asset-smoke-readiness":
+            result = run_local_asset_smoke_readiness_launcher(
+                Path(args.candidate_input_dir),
+                Path(args.output_dir),
+                recursive=args.recursive,
+                include_hidden=args.include_hidden,
+                project_id=args.project_id,
+                max_entries=args.max_entries,
+                max_depth=args.max_depth,
+                max_total_bytes=args.max_total_bytes,
+            )
+            _print_command_payload(result.to_cli_payload())
+            return 0 if result.complete else 1
         if args.command == "launch-office-workflow":
             result = run_local_office_launcher(
                 Path(args.input_workbook),
@@ -848,6 +863,36 @@ def _build_subcommand_parser():
     launch_asset_parser.add_argument("--include-hidden", action="store_true")
     launch_asset_parser.add_argument("--project-id")
     launch_asset_parser.add_argument("--previous-scan-output-dir")
+
+    launch_smoke_readiness_parser = subparsers.add_parser(
+        "launch-local-asset-smoke-readiness"
+    )
+    launch_smoke_readiness_parser.add_argument(
+        "--candidate-input-dir",
+        required=True,
+    )
+    launch_smoke_readiness_parser.add_argument("--output-dir", required=True)
+    launch_smoke_readiness_parser.add_argument("--recursive", action="store_true")
+    launch_smoke_readiness_parser.add_argument(
+        "--include-hidden",
+        action="store_true",
+    )
+    launch_smoke_readiness_parser.add_argument("--project-id")
+    launch_smoke_readiness_parser.add_argument(
+        "--max-entries",
+        type=int,
+        default=50000,
+    )
+    launch_smoke_readiness_parser.add_argument(
+        "--max-depth",
+        type=int,
+        default=20,
+    )
+    launch_smoke_readiness_parser.add_argument(
+        "--max-total-bytes",
+        type=int,
+        default=500000000000,
+    )
 
     launch_office_parser = subparsers.add_parser("launch-office-workflow")
     launch_office_parser.add_argument("--input-workbook", required=True)

@@ -110,7 +110,10 @@ def build_default_adapter_registry() -> tuple[AdapterRegistryEntry, ...]:
             mode=AdapterMode.LOCAL_FIXTURE,
             risk_class=AdapterRiskClass.LOCAL_READONLY,
             admission_status=AdapterAdmissionStatus.ADMITTED,
-            capabilities=("launch_local_asset_scan",),
+            capabilities=(
+                "launch_local_asset_scan",
+                "launch_local_asset_smoke_readiness",
+            ),
             required_controls=_REQUIRED_CONTROLS
             + (
                 "read_only_input",
@@ -122,9 +125,9 @@ def build_default_adapter_registry() -> tuple[AdapterRegistryEntry, ...]:
             boundary=_approved_output_boundary(),
             output_policy=_approved_output_policy(),
             notes=(
-                "Runs the controlled local asset scan launcher in fixture task "
-                "graphs; writes approved output artifacts only and never mutates "
-                "input assets."
+                "Runs controlled local asset launcher capabilities in fixture "
+                "task graphs; writes approved output artifacts only and never "
+                "mutates input assets."
             ),
         ),
         AdapterRegistryEntry(
