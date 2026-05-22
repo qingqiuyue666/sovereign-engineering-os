@@ -22,6 +22,7 @@ _GRAPH_ARTIFACT_CAPABILITY = "write_task_graph_artifact_outputs"
 _LOCAL_ASSET_ADAPTER_ID = "local_asset_runtime"
 _LOCAL_ASSET_CAPABILITY = "launch_local_asset_scan"
 _LOCAL_ASSET_SMOKE_READINESS_CAPABILITY = "launch_local_asset_smoke_readiness"
+_LOCAL_ASSET_HUMAN_SMOKE_CAPABILITY = "launch_local_asset_human_smoke_run"
 _DELIVERY_ADAPTER_ID = "runtime_delivery_package"
 _DELIVERY_CAPABILITY = "validate_runtime_delivery"
 
@@ -87,6 +88,31 @@ _LOCAL_ASSET_SMOKE_READINESS_DIRECT_PATH_FIELDS = (
     ("launcher_summary", "launcher_summary_path"),
 )
 
+_LOCAL_ASSET_HUMAN_SMOKE_DIRECT_PATH_FIELDS = (
+    (
+        "local_asset_human_smoke_approval",
+        "local_asset_human_smoke_approval_path",
+    ),
+    (
+        "local_asset_human_smoke_admission_receipt",
+        "local_asset_human_smoke_admission_receipt_path",
+    ),
+    (
+        "local_asset_human_smoke_run_summary",
+        "local_asset_human_smoke_run_summary_path",
+    ),
+    (
+        "local_asset_human_smoke_scan_artifact_index",
+        "scan_artifact_index_path",
+    ),
+    (
+        "local_asset_human_smoke_scan_artifact_index_manifest",
+        "scan_artifact_index_manifest_path",
+    ),
+    ("artifact_index", "artifact_index_path"),
+    ("artifact_index_manifest", "artifact_index_manifest_path"),
+)
+
 _DELIVERY_PATH_FIELDS = (
     ("runtime_delivery_manifest", "runtime_delivery_manifest_path"),
     ("runtime_delivery_validation", "runtime_delivery_validation_path"),
@@ -103,6 +129,7 @@ _ROLE_ARTIFACT_TYPES = {
     "asset_scan_failure_summary": "markdown",
     "launcher_summary": "markdown",
     "local_asset_incremental_scan_summary": "markdown",
+    "local_asset_human_smoke_run_summary": "markdown",
     "local_asset_sqlite_query_summary": "markdown",
     "local_asset_smoke_readiness_summary": "markdown",
     "media_inventory": "markdown",
@@ -228,6 +255,11 @@ def _node_artifact_candidates(node, output_dir):
     ):
         return _local_asset_smoke_readiness_artifact_candidates(node, output_dir)
     if (
+        node["adapter_id"] == _LOCAL_ASSET_ADAPTER_ID
+        and node["capability"] == _LOCAL_ASSET_HUMAN_SMOKE_CAPABILITY
+    ):
+        return _local_asset_human_smoke_artifact_candidates(node, output_dir)
+    if (
         node["adapter_id"] == _DELIVERY_ADAPTER_ID
         and node["capability"] == _DELIVERY_CAPABILITY
     ):
@@ -266,6 +298,25 @@ def _local_asset_smoke_readiness_artifact_candidates(node, output_dir):
     role_paths = []
     seen_roles = set()
     for role, field_name in _LOCAL_ASSET_SMOKE_READINESS_DIRECT_PATH_FIELDS:
+        _add_role_path(role_paths, seen_roles, role, node.get(field_name))
+    return [
+        _artifact_record(
+            node_id=node["node_id"],
+            adapter_id=node["adapter_id"],
+            capability=node["capability"],
+            node_status=node["status"],
+            artifact_role=role,
+            path_value=path_value,
+            output_dir=output_dir,
+        )
+        for role, path_value in role_paths
+    ]
+
+
+def _local_asset_human_smoke_artifact_candidates(node, output_dir):
+    role_paths = []
+    seen_roles = set()
+    for role, field_name in _LOCAL_ASSET_HUMAN_SMOKE_DIRECT_PATH_FIELDS:
         _add_role_path(role_paths, seen_roles, role, node.get(field_name))
     return [
         _artifact_record(

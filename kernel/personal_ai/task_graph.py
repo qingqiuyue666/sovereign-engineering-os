@@ -33,6 +33,7 @@ _DELIVERY_CAPABILITY = "validate_runtime_delivery"
 _LOCAL_ASSET_ADAPTER_ID = "local_asset_runtime"
 _LOCAL_ASSET_CAPABILITY = "launch_local_asset_scan"
 _LOCAL_ASSET_SMOKE_READINESS_CAPABILITY = "launch_local_asset_smoke_readiness"
+_LOCAL_ASSET_HUMAN_SMOKE_CAPABILITY = "launch_local_asset_human_smoke_run"
 _RUNTIME_ADMISSION_DECISION_TYPE = "personal_ai_runtime_admission_decision_v1"
 _GRAPH_EXECUTION_MODES = ("fixture_execution", "dry_run_plan")
 _NODE_EXECUTION_MODES = ("fixture", "mock", "dry_run", "real_runtime")
@@ -634,6 +635,8 @@ def _run_local_asset_node_if_requested(node):
     if node["capability"] != _LOCAL_ASSET_CAPABILITY:
         if node["capability"] == _LOCAL_ASSET_SMOKE_READINESS_CAPABILITY:
             return _run_local_asset_smoke_readiness_node(node)
+        if node["capability"] == _LOCAL_ASSET_HUMAN_SMOKE_CAPABILITY:
+            return _run_local_asset_human_smoke_node(node)
         raise ValueError("task graph local asset scan capability is not registered")
     return _run_local_asset_scan_node(node)
 
@@ -857,6 +860,134 @@ def _run_local_asset_smoke_readiness_node(node):
     }
 
 
+def _run_local_asset_human_smoke_node(node):
+    inputs = node["inputs"]
+    candidate_input_dir = _required_string_input(
+        inputs,
+        "candidate_input_dir",
+        "local asset human smoke",
+    )
+    output_dir = _required_string_input(
+        inputs,
+        "output_dir",
+        "local asset human smoke",
+    )
+    readiness_report = _required_string_input(
+        inputs,
+        "readiness_report",
+        "local asset human smoke",
+    )
+    human_approval_id = _required_string_input(
+        inputs,
+        "human_approval_id",
+        "local asset human smoke",
+    )
+    human_approval_phrase = _required_string_input(
+        inputs,
+        "human_approval_phrase",
+        "local asset human smoke",
+    )
+    recursive = _optional_bool_input(inputs, "recursive", False)
+    include_hidden = _optional_bool_input(inputs, "include_hidden", False)
+    project_id = inputs.get("project_id")
+    if project_id is not None and (
+        not isinstance(project_id, str) or not project_id
+    ):
+        raise ValueError("task graph local asset human smoke project_id is malformed")
+    max_smoke_files = _optional_int_input(
+        inputs,
+        "max_smoke_files",
+        100,
+        "local asset human smoke",
+    )
+    max_smoke_bytes = _optional_int_input(
+        inputs,
+        "max_smoke_bytes",
+        2000000000,
+        "local asset human smoke",
+    )
+    max_smoke_depth = _optional_int_input(
+        inputs,
+        "max_smoke_depth",
+        8,
+        "local asset human smoke",
+    )
+    previous_scan_output_dir = inputs.get("previous_scan_output_dir")
+    if previous_scan_output_dir is not None and (
+        not isinstance(previous_scan_output_dir, str) or not previous_scan_output_dir
+    ):
+        raise ValueError(
+            "task graph local asset human smoke previous_scan_output_dir is malformed"
+        )
+
+    from kernel.personal_ai.local_launcher import run_local_asset_human_smoke_launcher
+
+    result = run_local_asset_human_smoke_launcher(
+        Path(candidate_input_dir),
+        Path(output_dir),
+        Path(readiness_report),
+        human_approval_id=human_approval_id,
+        human_approval_phrase=human_approval_phrase,
+        recursive=recursive,
+        include_hidden=include_hidden,
+        project_id=project_id,
+        max_smoke_files=max_smoke_files,
+        max_smoke_bytes=max_smoke_bytes,
+        max_smoke_depth=max_smoke_depth,
+        previous_scan_output_dir=None
+        if previous_scan_output_dir is None
+        else Path(previous_scan_output_dir),
+    )
+    payload = result.payload
+    complete = bool(result.complete)
+    return {
+        "status": "completed" if complete else "failed",
+        "output_dir": result.output_dir.as_posix(),
+        "local_asset_human_smoke_complete": complete,
+        "local_asset_human_smoke_approval_path": payload.get(
+            "local_asset_human_smoke_approval_path"
+        ),
+        "local_asset_human_smoke_admission_receipt_path": payload.get(
+            "local_asset_human_smoke_admission_receipt_path"
+        ),
+        "local_asset_human_smoke_run_summary_path": payload.get(
+            "local_asset_human_smoke_run_summary_path"
+        ),
+        "scan_output_dir": payload.get("scan_output_dir"),
+        "control_output_dir": payload.get("control_output_dir"),
+        "readiness_report_path": payload.get("readiness_report_path"),
+        "readiness_status": payload.get("readiness_status"),
+        "readiness_decision": payload.get("readiness_decision"),
+        "admitted": payload.get("admitted"),
+        "scan_launcher_invoked": payload.get("scan_launcher_invoked"),
+        "scan_complete": payload.get("scan_complete"),
+        "bounded_smoke_run_performed": payload.get(
+            "bounded_smoke_run_performed"
+        ),
+        "production_scan_performed": False,
+        "artifact_index_path": payload.get("artifact_index_path"),
+        "artifact_index_manifest_path": payload.get("artifact_index_manifest_path"),
+        "scan_artifact_index_path": payload.get("scan_artifact_index_path"),
+        "scan_artifact_index_manifest_path": payload.get(
+            "scan_artifact_index_manifest_path"
+        ),
+        "asset_scan_run_receipt_path": payload.get("asset_scan_run_receipt_path"),
+        "failure_stage": None if complete else payload.get("failure_stage"),
+        "safe_to_retry": payload.get("safe_to_retry"),
+        "replay_hint": payload.get("replay_hint"),
+        "required_human_approval": True,
+        "input_mutation_performed": False,
+        "file_move_performed": False,
+        "file_rename_performed": False,
+        "file_delete_performed": False,
+        "media_organizer_behavior_performed": False,
+        "output_overwrite_performed": False,
+        "network_access_performed": False,
+        "model_api_called": False,
+        "external_runtime_invoked": False,
+    }
+
+
 def _required_string_input(inputs, field_name, node_label):
     value = inputs.get(field_name)
     if not isinstance(value, str) or not value:
@@ -1003,6 +1134,46 @@ def _node_output_refs(executed_nodes):
                 "real_scan_performed": node.get("real_scan_performed"),
                 "file_hashing_performed": node.get("file_hashing_performed"),
                 "raw_content_read": node.get("raw_content_read"),
+                "required_human_approval": node.get("required_human_approval"),
+                "failure_stage": node.get("failure_stage"),
+            }
+        if (
+            node["adapter_id"] == _LOCAL_ASSET_ADAPTER_ID
+            and node["capability"] == _LOCAL_ASSET_HUMAN_SMOKE_CAPABILITY
+        ):
+            node_refs["local_asset_human_smoke"] = {
+                "output_dir": node.get("output_dir"),
+                "control_output_dir": node.get("control_output_dir"),
+                "scan_output_dir": node.get("scan_output_dir"),
+                "approval": _path_ref(
+                    node.get("local_asset_human_smoke_approval_path")
+                ),
+                "admission_receipt": _path_ref(
+                    node.get("local_asset_human_smoke_admission_receipt_path")
+                ),
+                "summary": _path_ref(
+                    node.get("local_asset_human_smoke_run_summary_path")
+                ),
+                "artifact_index": _path_ref(node.get("artifact_index_path")),
+                "artifact_index_manifest": _path_ref(
+                    node.get("artifact_index_manifest_path")
+                ),
+                "scan_artifact_index": _path_ref(
+                    node.get("scan_artifact_index_path")
+                ),
+                "scan_artifact_index_manifest": _path_ref(
+                    node.get("scan_artifact_index_manifest_path")
+                ),
+                "readiness_report": _path_ref(node.get("readiness_report_path")),
+                "readiness_status": node.get("readiness_status"),
+                "readiness_decision": node.get("readiness_decision"),
+                "admitted": node.get("admitted"),
+                "scan_launcher_invoked": node.get("scan_launcher_invoked"),
+                "scan_complete": node.get("scan_complete"),
+                "bounded_smoke_run_performed": node.get(
+                    "bounded_smoke_run_performed"
+                ),
+                "production_scan_performed": node.get("production_scan_performed"),
                 "required_human_approval": node.get("required_human_approval"),
                 "failure_stage": node.get("failure_stage"),
             }

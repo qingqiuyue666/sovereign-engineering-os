@@ -138,6 +138,87 @@ itself and does not add UI, Operator Console behavior, watcher/daemon behavior,
 network access, model API calls, external runtime activation, global database
 state, or production autonomy.
 
+## Local Asset Human-Approved Smoke Run
+
+```bash
+python3 -m kernel.personal_ai.local_mvp_cli launch-local-asset-human-smoke-run \
+  --candidate-input-dir /path/to/candidate-assets \
+  --output-dir /path/to/human-smoke-output-root \
+  --readiness-report /path/to/readiness/local_asset_smoke_readiness_report.json \
+  --human-approval-id reviewer-ticket-123 \
+  --human-approval-phrase I_APPROVE_LOCAL_ASSET_SMOKE_RUN \
+  --recursive \
+  --project-id demo_project \
+  --max-smoke-files 25 \
+  --max-smoke-bytes 100000000 \
+  --max-smoke-depth 4
+```
+
+Required arguments are `--candidate-input-dir`, `--output-dir`,
+`--readiness-report`, `--human-approval-id`, and
+`--human-approval-phrase`. The approval phrase must match exactly:
+`I_APPROVE_LOCAL_ASSET_SMOKE_RUN`. The phrase plaintext is never persisted;
+only its SHA-256 hash is written to the approval artifact.
+
+Optional arguments are `--recursive`, `--include-hidden`, `--project-id`,
+`--max-smoke-files`, `--max-smoke-bytes`, `--max-smoke-depth`, and
+`--previous-scan-output-dir`. Default smoke limits are:
+
+- `--max-smoke-files 100`
+- `--max-smoke-bytes 2000000000`
+- `--max-smoke-depth 8`
+
+The command consumes a previous
+`local_asset_smoke_readiness_report.json`. The readiness report must come from
+the metadata-only readiness harness, must require human approval, must have
+`readiness_decision = allow_human_review_for_future_smoke`, and must have
+`readiness_status = ready` or `ready_with_warnings`. It rejects
+`blocked_safety_risk`, `blocked_limit_exceeded`, and `failed_preflight`.
+
+The smoke run root `output_dir` must already exist and must not be a symlink.
+The candidate input directory and readiness report must exist and must not be
+symlinks. Candidate path, `recursive`, and `include_hidden` must match the
+readiness report; `project_id` must match when both are present. The smoke
+root and candidate directory must not overlap in either direction.
+
+This command uses a subdirectory layout:
+
+- `output_dir/control/local_asset_human_smoke_approval.json`
+- `output_dir/control/local_asset_human_smoke_admission_receipt.json`
+- `output_dir/local_asset_human_smoke_run_summary.md`
+- `output_dir/scan/` for the normal `launch-local-asset-scan` output stack
+- `output_dir/artifact_index.json`
+- `output_dir/artifact_index_manifest.json`
+
+Before invoking the existing scan launcher, it performs a metadata-only
+bounded precheck and fails closed if the candidate would exceed
+`max_smoke_files`, `max_smoke_bytes`, or `max_smoke_depth`. It also rejects
+smoke limits that exceed the corresponding readiness report limits where
+available. It does not silently truncate, sample, or partially scan.
+
+The actual scan is delegated to the existing local asset scan launcher using
+the deterministic `output_dir/scan/` subdirectory. The scan remains read-only
+and writes the normal scan artifacts there, including `asset_manifest.json`,
+`asset_index.json`, `duplicates_report.json`, `media_inventory.md`,
+`asset_runtime_audit_log.jsonl`, validation and quarantine reports,
+`launcher_summary.md`, `asset_scan_run_receipt.json`,
+`local_asset_index.sqlite`, SQLite query/index manifests, incremental scan
+plan artifacts, and the scan-level `artifact_index.json` and
+`artifact_index_manifest.json`.
+
+The root artifact index is an explicit control-and-scan reference index. It
+does not recursively crawl private assets, does not copy raw content, and
+includes the approval, admission, smoke summary, scan artifact index, scan
+artifact index manifest, and key scan output paths when present.
+
+This is human-approved bounded smoke only. It does not add automatic approval,
+production scanning, watcher/daemon behavior, UI, desktop app behavior,
+Operator Console behavior, global database state, input mutation, file
+movement, file renaming, file deletion, duplicate deletion, media organizer
+behavior, network access, model API calls, external runtime activation,
+browser runtime activation, ComfyUI/Blender/Houdini/After Effects/DaVinci
+activation, HFX changes, or production autonomy.
+
 ## Model Workflows
 
 Deterministic mock:
@@ -314,6 +395,40 @@ decision, count estimates, and explicit false values for real scan execution,
 file hashing, raw content reads, input mutation, and external runtime
 activation. It is still review-only and requires human approval before any
 future real-folder smoke.
+
+Task graphs can include a human-approved bounded local asset smoke node:
+
+```json
+{
+  "node_id": "human_smoke_assets",
+  "adapter_id": "local_asset_runtime",
+  "capability": "launch_local_asset_human_smoke_run",
+  "execution_mode": "fixture",
+  "depends_on": [],
+  "approval_checkpoint_required": true,
+  "inputs": {
+    "candidate_input_dir": "/path/to/candidate-assets",
+    "output_dir": "/path/to/human-smoke-output-root",
+    "readiness_report": "/path/to/readiness/local_asset_smoke_readiness_report.json",
+    "human_approval_id": "reviewer-ticket-123",
+    "human_approval_phrase": "I_APPROVE_LOCAL_ASSET_SMOKE_RUN",
+    "recursive": true,
+    "include_hidden": false,
+    "project_id": "demo_project",
+    "max_smoke_files": 25,
+    "max_smoke_bytes": 100000000,
+    "max_smoke_depth": 4,
+    "previous_scan_output_dir": "/path/to/previous-scan-output"
+  }
+}
+```
+
+The node runs the same `launch-local-asset-human-smoke-run` launcher path and
+records approval, admission receipt, smoke summary, control and scan output
+directories, readiness status and decision, admission status, scan invocation
+status, scan completion, bounded smoke status, and explicit false values for
+production scan, input mutation, network access, model API calls, and external
+runtime invocation.
 
 Task graph execution now also emits `task_graph_artifact_outputs.json` in the
 graph `output_dir` after node execution. This manifest is a graph-level,
