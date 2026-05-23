@@ -364,6 +364,43 @@ class LocalAssetNextBoundedSmokeIterationRunPromotionGateTests(unittest.TestCase
                         "blocked_untrusted_artifacts",
                     )
 
+    def test_blocks_present_optional_artifact_missing_manifest_hash_binding(self):
+        cases = (
+            ("summary_sha256", "summary"),
+            ("checklist_sha256", "checklist"),
+        )
+        for hash_field, artifact_name in cases:
+            with self.subTest(hash_field=hash_field):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    review, _runner_output, _actual = self.build_ready_review_packet(root)
+                    manifest_path = (
+                        review
+                        / "local_asset_next_bounded_smoke_iteration_run_review_packet_manifest.json"
+                    )
+                    manifest = read_json(manifest_path)
+                    manifest.pop(hash_field, None)
+                    write_json(manifest_path, manifest)
+                    gate_output = root / "gate"
+                    gate_output.mkdir()
+
+                    exit_code, payload = self.run_promotion_gate(
+                        review,
+                        gate_output,
+                    )
+
+                    self.assertEqual(exit_code, 1, artifact_name)
+                    self.assertEqual(
+                        payload["gate_status"],
+                        "blocked_untrusted_artifacts",
+                    )
+                    self.assertFalse(payload["bounded_run_promotion_approved"])
+                    self.assertFalse(payload["cycle_contract_generation_allowed"])
+                    self.assertNotEqual(
+                        payload["gate_status"],
+                        "next_bounded_smoke_iteration_run_promotion_gate_ready",
+                    )
+
     def test_blocks_review_packet_not_ready(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

@@ -657,7 +657,16 @@ def _mark_manifest_hash(
     if record is None or record["exists"] is not True:
         return
     expected_hash = manifest.get(field_name)
-    if optional and expected_hash is None:
+    if optional and (not isinstance(expected_hash, str) or not expected_hash):
+        record["trust_failures"].append(
+            _blocker(
+                "missing_optional_hash_binding",
+                "present optional source artifact is missing manifest hash binding",
+                hash_field=field_name,
+                expected_sha256=expected_hash,
+                actual_sha256=record.get("sha256"),
+            )
+        )
         return
     actual_hash = record.get("sha256")
     if expected_hash != actual_hash:
