@@ -24,6 +24,7 @@ from kernel.personal_ai.local_launcher import (
     run_local_asset_human_smoke_launcher,
     run_local_asset_iteration_promotion_gate_launcher,
     run_local_asset_next_bounded_smoke_iteration_admission_launcher,
+    run_local_asset_next_bounded_smoke_iteration_execution_request_launcher,
     run_local_asset_scan_launcher,
     run_local_asset_smoke_promotion_gate_launcher,
     run_local_asset_smoke_iteration_review_packet_launcher,
@@ -109,6 +110,7 @@ _SUBCOMMANDS = {
     "launch-local-asset-bounded-smoke-cycle-contract",
     "launch-local-asset-bounded-smoke-cycle-human-review",
     "launch-local-asset-next-bounded-smoke-iteration-admission",
+    "launch-local-asset-next-bounded-smoke-iteration-execution-request",
     "launch-local-asset-smoke-promotion-gate",
     "launch-local-asset-iteration-promotion-gate",
     "launch-local-asset-smoke-iteration-review-packet",
@@ -767,6 +769,36 @@ def _main_subcommand(argv) -> int:
             )
             _print_command_payload(result.to_cli_payload())
             return 0 if result.complete else 1
+        if (
+            args.command
+            == "launch-local-asset-next-bounded-smoke-iteration-execution-request"
+        ):
+            result = (
+                run_local_asset_next_bounded_smoke_iteration_execution_request_launcher(
+                    Path(args.next_admission_output_dir),
+                    Path(args.output_dir),
+                    requested_next_iteration_id=args.requested_next_iteration_id,
+                    requested_candidate_input_dir=args.requested_candidate_input_dir,
+                    requested_next_iteration_output_dir=(
+                        args.requested_next_iteration_output_dir
+                    ),
+                    requested_max_files=args.requested_max_files,
+                    requested_max_total_bytes=args.requested_max_total_bytes,
+                    requested_max_depth=args.requested_max_depth,
+                    project_id=args.project_id,
+                    request_id=args.request_id,
+                    operator_id=args.operator_id,
+                    operator_notes=args.operator_notes,
+                    requested_compare_previous_scan_manifest_path=(
+                        args.requested_compare_previous_scan_manifest_path
+                    ),
+                    requested_previous_iteration_artifact_index_path=(
+                        args.requested_previous_iteration_artifact_index_path
+                    ),
+                )
+            )
+            _print_command_payload(result.to_cli_payload())
+            return 0 if result.complete else 1
         if args.command == "launch-office-workflow":
             result = run_local_office_launcher(
                 Path(args.input_workbook),
@@ -1211,6 +1243,55 @@ def _build_subcommand_parser():
         "--requested-next-iteration-id"
     )
     launch_next_iteration_admission_parser.add_argument("--operator-notes")
+
+    launch_next_iteration_execution_request_parser = subparsers.add_parser(
+        "launch-local-asset-next-bounded-smoke-iteration-execution-request"
+    )
+    launch_next_iteration_execution_request_parser.add_argument(
+        "--next-admission-output-dir",
+        required=True,
+    )
+    launch_next_iteration_execution_request_parser.add_argument(
+        "--output-dir",
+        required=True,
+    )
+    launch_next_iteration_execution_request_parser.add_argument(
+        "--requested-next-iteration-id",
+        required=True,
+    )
+    launch_next_iteration_execution_request_parser.add_argument(
+        "--requested-candidate-input-dir",
+        required=True,
+    )
+    launch_next_iteration_execution_request_parser.add_argument(
+        "--requested-next-iteration-output-dir",
+        required=True,
+    )
+    launch_next_iteration_execution_request_parser.add_argument(
+        "--requested-max-files",
+        type=int,
+        required=True,
+    )
+    launch_next_iteration_execution_request_parser.add_argument(
+        "--requested-max-total-bytes",
+        type=int,
+        required=True,
+    )
+    launch_next_iteration_execution_request_parser.add_argument(
+        "--requested-max-depth",
+        type=int,
+        required=True,
+    )
+    launch_next_iteration_execution_request_parser.add_argument("--project-id")
+    launch_next_iteration_execution_request_parser.add_argument("--request-id")
+    launch_next_iteration_execution_request_parser.add_argument("--operator-id")
+    launch_next_iteration_execution_request_parser.add_argument("--operator-notes")
+    launch_next_iteration_execution_request_parser.add_argument(
+        "--requested-compare-previous-scan-manifest-path"
+    )
+    launch_next_iteration_execution_request_parser.add_argument(
+        "--requested-previous-iteration-artifact-index-path"
+    )
 
     launch_office_parser = subparsers.add_parser("launch-office-workflow")
     launch_office_parser.add_argument("--input-workbook", required=True)

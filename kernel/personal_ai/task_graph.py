@@ -58,6 +58,9 @@ _LOCAL_ASSET_BOUNDED_SMOKE_CYCLE_HUMAN_REVIEW_CAPABILITY = (
 _LOCAL_ASSET_NEXT_BOUNDED_SMOKE_ITERATION_ADMISSION_CAPABILITY = (
     "launch_local_asset_next_bounded_smoke_iteration_admission"
 )
+_LOCAL_ASSET_NEXT_BOUNDED_SMOKE_ITERATION_EXECUTION_REQUEST_CAPABILITY = (
+    "launch_local_asset_next_bounded_smoke_iteration_execution_request"
+)
 _RUNTIME_ADMISSION_DECISION_TYPE = "personal_ai_runtime_admission_decision_v1"
 _GRAPH_EXECUTION_MODES = ("fixture_execution", "dry_run_plan")
 _NODE_EXECUTION_MODES = ("fixture", "mock", "dry_run", "real_runtime")
@@ -686,6 +689,13 @@ def _run_local_asset_node_if_requested(node):
             == _LOCAL_ASSET_NEXT_BOUNDED_SMOKE_ITERATION_ADMISSION_CAPABILITY
         ):
             return _run_local_asset_next_bounded_smoke_iteration_admission_node(node)
+        if (
+            node["capability"]
+            == _LOCAL_ASSET_NEXT_BOUNDED_SMOKE_ITERATION_EXECUTION_REQUEST_CAPABILITY
+        ):
+            return _run_local_asset_next_bounded_smoke_iteration_execution_request_node(
+                node
+            )
         raise ValueError("task graph local asset scan capability is not registered")
     return _run_local_asset_scan_node(node)
 
@@ -1944,10 +1954,202 @@ def _run_local_asset_next_bounded_smoke_iteration_admission_node(node):
     }
 
 
+def _run_local_asset_next_bounded_smoke_iteration_execution_request_node(node):
+    inputs = node["inputs"]
+    node_label = "local asset next bounded smoke iteration execution request"
+    next_admission_output_dir = _required_string_input(
+        inputs,
+        "next_admission_output_dir",
+        node_label,
+    )
+    output_dir = _required_string_input(inputs, "output_dir", node_label)
+    requested_next_iteration_id = _required_string_input(
+        inputs,
+        "requested_next_iteration_id",
+        node_label,
+    )
+    requested_candidate_input_dir = _required_string_input(
+        inputs,
+        "requested_candidate_input_dir",
+        node_label,
+    )
+    requested_next_iteration_output_dir = _required_string_input(
+        inputs,
+        "requested_next_iteration_output_dir",
+        node_label,
+    )
+    requested_max_files = _required_int_input(
+        inputs,
+        "requested_max_files",
+        node_label,
+    )
+    requested_max_total_bytes = _required_int_input(
+        inputs,
+        "requested_max_total_bytes",
+        node_label,
+    )
+    requested_max_depth = _required_int_input(
+        inputs,
+        "requested_max_depth",
+        node_label,
+    )
+    project_id = _optional_nonempty_string_input(inputs, "project_id", node_label)
+    request_id = _optional_nonempty_string_input(inputs, "request_id", node_label)
+    operator_id = _optional_nonempty_string_input(inputs, "operator_id", node_label)
+    operator_notes = inputs.get("operator_notes")
+    if operator_notes is not None and not isinstance(operator_notes, str):
+        raise ValueError("task graph " + node_label + " operator_notes is malformed")
+    requested_compare_previous_scan_manifest_path = _optional_nonempty_string_input(
+        inputs,
+        "requested_compare_previous_scan_manifest_path",
+        node_label,
+    )
+    requested_previous_iteration_artifact_index_path = _optional_nonempty_string_input(
+        inputs,
+        "requested_previous_iteration_artifact_index_path",
+        node_label,
+    )
+
+    from kernel.personal_ai.local_launcher import (
+        run_local_asset_next_bounded_smoke_iteration_execution_request_launcher,
+    )
+
+    result = run_local_asset_next_bounded_smoke_iteration_execution_request_launcher(
+        Path(next_admission_output_dir),
+        Path(output_dir),
+        requested_next_iteration_id=requested_next_iteration_id,
+        requested_candidate_input_dir=requested_candidate_input_dir,
+        requested_next_iteration_output_dir=requested_next_iteration_output_dir,
+        requested_max_files=requested_max_files,
+        requested_max_total_bytes=requested_max_total_bytes,
+        requested_max_depth=requested_max_depth,
+        project_id=project_id,
+        request_id=request_id,
+        operator_id=operator_id,
+        operator_notes=operator_notes,
+        requested_compare_previous_scan_manifest_path=(
+            requested_compare_previous_scan_manifest_path
+        ),
+        requested_previous_iteration_artifact_index_path=(
+            requested_previous_iteration_artifact_index_path
+        ),
+    )
+    payload = result.payload
+    complete = bool(result.complete)
+    return {
+        "status": "completed" if complete else "failed",
+        "output_dir": result.output_dir.as_posix(),
+        "next_admission_output_dir": payload.get("next_admission_output_dir"),
+        "project_id": payload.get("project_id"),
+        "request_id": payload.get("request_id"),
+        "operator_id": payload.get("operator_id"),
+        "requested_next_iteration_id": payload.get("requested_next_iteration_id"),
+        "requested_candidate_input_dir": payload.get(
+            "requested_candidate_input_dir"
+        ),
+        "requested_next_iteration_output_dir": payload.get(
+            "requested_next_iteration_output_dir"
+        ),
+        "requested_limits": payload.get("requested_limits"),
+        "local_asset_next_bounded_smoke_iteration_execution_request_complete": (
+            complete
+        ),
+        "local_asset_next_bounded_smoke_iteration_execution_request_path": (
+            payload.get(
+                "local_asset_next_bounded_smoke_iteration_execution_request_path"
+            )
+        ),
+        "local_asset_next_bounded_smoke_iteration_execution_request_manifest_path": (
+            payload.get(
+                "local_asset_next_bounded_smoke_iteration_execution_request_manifest_path"
+            )
+        ),
+        "local_asset_next_bounded_smoke_iteration_execution_request_summary_path": (
+            payload.get(
+                "local_asset_next_bounded_smoke_iteration_execution_request_summary_path"
+            )
+        ),
+        "local_asset_next_bounded_smoke_iteration_execution_request_checklist_path": (
+            payload.get(
+                "local_asset_next_bounded_smoke_iteration_execution_request_checklist_path"
+            )
+        ),
+        "artifact_index_path": payload.get("artifact_index_path"),
+        "artifact_index_manifest_path": payload.get("artifact_index_manifest_path"),
+        "request_status": payload.get("request_status"),
+        "request_decision": payload.get("request_decision"),
+        "next_allowed_action": payload.get("next_allowed_action"),
+        "future_execution_request_created": payload.get(
+            "future_execution_request_created"
+        ),
+        "next_bounded_smoke_iteration_execute_allowed": False,
+        "next_bounded_smoke_iteration_executed": False,
+        "next_iteration_output_dir_created": False,
+        "requested_next_iteration_output_dir_created": False,
+        "candidate_input_path_checked": False,
+        "candidate_input_path_listed": False,
+        "candidate_input_file_read": False,
+        "candidate_input_file_hashing_performed": False,
+        "failure_stage": None if complete else payload.get("failure_stage"),
+        "required_human_approval": True,
+        "required_human_review": True,
+        "scan_performed": False,
+        "readiness_run_performed": False,
+        "human_smoke_run_performed": False,
+        "smoke_review_packet_run_performed": False,
+        "smoke_promotion_gate_run_performed": False,
+        "bounded_smoke_iteration_performed_by_request": False,
+        "iteration_review_packet_run_performed": False,
+        "iteration_promotion_gate_run_performed": False,
+        "cycle_contract_run_performed": False,
+        "cycle_human_review_run_performed": False,
+        "next_admission_run_performed": False,
+        "raw_candidate_content_read": False,
+        "candidate_file_hashing_performed": False,
+        "candidate_path_validation_performed": False,
+        "candidate_path_listing_performed": False,
+        "input_mutation_performed": False,
+        "upstream_output_mutation_performed": False,
+        "file_move_performed": False,
+        "file_rename_performed": False,
+        "file_delete_performed": False,
+        "duplicate_deletion_performed": False,
+        "media_organizer_behavior_performed": False,
+        "output_overwrite_performed": False,
+        "network_access_performed": False,
+        "model_api_called": False,
+        "external_runtime_invoked": False,
+        "production_scan_performed": False,
+        "production_scan_recommended": False,
+        "production_scan_approved": False,
+        "production_promotion_granted": False,
+        "automatic_approval_performed": False,
+        "autonomous_execution_performed": False,
+    }
+
+
 def _required_string_input(inputs, field_name, node_label):
     value = inputs.get(field_name)
     if not isinstance(value, str) or not value:
         raise ValueError("task graph " + node_label + " " + field_name + " is missing")
+    return value
+
+
+def _required_int_input(inputs, field_name, node_label):
+    value = inputs.get(field_name)
+    if not isinstance(value, int) or isinstance(value, bool):
+        raise ValueError("task graph " + node_label + " " + field_name + " is missing")
+    return value
+
+
+def _optional_nonempty_string_input(inputs, field_name, node_label):
+    value = inputs.get(field_name)
+    if value is None:
+        return None
+    if not isinstance(value, str) or not value:
+        raise ValueError(
+            "task graph " + node_label + " " + field_name + " is malformed"
+        )
     return value
 
 
