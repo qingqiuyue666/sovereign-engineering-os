@@ -68,6 +68,10 @@ _LOCAL_ASSET_NEXT_BOUNDED_SMOKE_CYCLE_CONTRACT_FROM_RUN_PROMOTION_GATE_CAPABILIT
 _LOCAL_ASSET_NEXT_BOUNDED_SMOKE_CYCLE_CONTRACT_HUMAN_REVIEW_FROM_RUN_PROMOTION_GATE_CAPABILITY = (
     "launch_local_asset_next_bounded_smoke_cycle_contract_human_review_from_run_promotion_gate"
 )
+_GITHUB_CAPABILITY_ADAPTER_ID = "github_capability_intake_packet"
+_GITHUB_CAPABILITY_INTAKE_PACKET_CAPABILITY = (
+    "launch_github_capability_intake_packet"
+)
 _DELIVERY_ADAPTER_ID = "runtime_delivery_package"
 _DELIVERY_CAPABILITY = "validate_runtime_delivery"
 
@@ -481,6 +485,27 @@ _LOCAL_ASSET_NEXT_BOUNDED_SMOKE_CYCLE_CONTRACT_HUMAN_REVIEW_FROM_RUN_PROMOTION_G
     ("artifact_index_manifest", "artifact_index_manifest_path"),
 )
 
+_GITHUB_CAPABILITY_INTAKE_PACKET_DIRECT_PATH_FIELDS = (
+    (
+        "github_capability_intake_packet",
+        "github_capability_intake_packet_path",
+    ),
+    (
+        "github_capability_intake_packet_manifest",
+        "github_capability_intake_packet_manifest_path",
+    ),
+    (
+        "github_capability_intake_packet_summary",
+        "github_capability_intake_packet_summary_path",
+    ),
+    (
+        "github_capability_intake_packet_checklist",
+        "github_capability_intake_packet_checklist_path",
+    ),
+    ("artifact_index", "artifact_index_path"),
+    ("artifact_index_manifest", "artifact_index_manifest_path"),
+)
+
 _DELIVERY_PATH_FIELDS = (
     ("runtime_delivery_manifest", "runtime_delivery_manifest_path"),
     ("runtime_delivery_validation", "runtime_delivery_validation_path"),
@@ -524,6 +549,8 @@ _ROLE_ARTIFACT_TYPES = {
     "local_asset_next_bounded_smoke_cycle_contract_from_run_promotion_gate_checklist": "markdown",
     "local_asset_next_bounded_smoke_cycle_contract_human_review_from_run_promotion_gate_summary": "markdown",
     "local_asset_next_bounded_smoke_cycle_contract_human_review_from_run_promotion_gate_checklist": "markdown",
+    "github_capability_intake_packet_summary": "markdown",
+    "github_capability_intake_packet_checklist": "markdown",
     "local_asset_smoke_human_decision_checklist": "markdown",
     "local_asset_sqlite_query_summary": "markdown",
     "local_asset_smoke_readiness_summary": "markdown",
@@ -789,6 +816,14 @@ def _node_artifact_candidates(node, output_dir):
             output_dir,
         )
     if (
+        node["adapter_id"] == _GITHUB_CAPABILITY_ADAPTER_ID
+        and node["capability"] == _GITHUB_CAPABILITY_INTAKE_PACKET_CAPABILITY
+    ):
+        return _github_capability_intake_packet_artifact_candidates(
+            node,
+            output_dir,
+        )
+    if (
         node["adapter_id"] == _DELIVERY_ADAPTER_ID
         and node["capability"] == _DELIVERY_CAPABILITY
     ):
@@ -846,6 +881,25 @@ def _local_asset_human_smoke_artifact_candidates(node, output_dir):
     role_paths = []
     seen_roles = set()
     for role, field_name in _LOCAL_ASSET_HUMAN_SMOKE_DIRECT_PATH_FIELDS:
+        _add_role_path(role_paths, seen_roles, role, node.get(field_name))
+    return [
+        _artifact_record(
+            node_id=node["node_id"],
+            adapter_id=node["adapter_id"],
+            capability=node["capability"],
+            node_status=node["status"],
+            artifact_role=role,
+            path_value=path_value,
+            output_dir=output_dir,
+        )
+        for role, path_value in role_paths
+    ]
+
+
+def _github_capability_intake_packet_artifact_candidates(node, output_dir):
+    role_paths = []
+    seen_roles = set()
+    for role, field_name in _GITHUB_CAPABILITY_INTAKE_PACKET_DIRECT_PATH_FIELDS:
         _add_role_path(role_paths, seen_roles, role, node.get(field_name))
     return [
         _artifact_record(

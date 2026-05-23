@@ -18,6 +18,7 @@ from kernel.personal_ai.local_launcher import (
     run_blender_dry_run_launcher,
     run_comfyui_dry_run_launcher,
     run_creative_handoff_launcher,
+    run_github_capability_intake_packet_launcher,
     run_local_asset_bounded_smoke_iteration_launcher,
     run_local_asset_bounded_smoke_cycle_contract_launcher,
     run_local_asset_bounded_smoke_cycle_human_review_launcher,
@@ -123,6 +124,7 @@ _SUBCOMMANDS = {
     "launch-local-asset-next-bounded-smoke-iteration-run-promotion-gate",
     "launch-local-asset-next-bounded-smoke-cycle-contract-from-run-promotion-gate",
     "launch-local-asset-next-bounded-smoke-cycle-contract-human-review-from-run-promotion-gate",
+    "launch-github-capability-intake-packet",
     "launch-local-asset-smoke-promotion-gate",
     "launch-local-asset-iteration-promotion-gate",
     "launch-local-asset-smoke-iteration-review-packet",
@@ -923,6 +925,18 @@ def _main_subcommand(argv) -> int:
             )
             _print_command_payload(result.to_cli_payload())
             return 0 if result.complete else 1
+        if args.command == "launch-github-capability-intake-packet":
+            result = run_github_capability_intake_packet_launcher(
+                Path(args.candidate_manifest),
+                Path(args.output_dir),
+                args.intake_id,
+                candidate_repo_dir=_optional_path(args.candidate_repo_dir),
+                project_id=args.project_id,
+                reviewer_id=args.reviewer_id,
+                operator_notes=args.operator_notes,
+            )
+            _print_command_payload(result.to_cli_payload())
+            return 0 if result.complete else 1
         if args.command == "launch-office-workflow":
             result = run_local_office_launcher(
                 Path(args.input_workbook),
@@ -1588,6 +1602,17 @@ def _build_subcommand_parser():
     launch_next_cycle_contract_review_from_run_gate_parser.add_argument(
         "--operator-notes"
     )
+
+    github_intake_parser = subparsers.add_parser(
+        "launch-github-capability-intake-packet"
+    )
+    github_intake_parser.add_argument("--candidate-manifest", required=True)
+    github_intake_parser.add_argument("--output-dir", required=True)
+    github_intake_parser.add_argument("--intake-id", required=True)
+    github_intake_parser.add_argument("--candidate-repo-dir")
+    github_intake_parser.add_argument("--project-id")
+    github_intake_parser.add_argument("--reviewer-id")
+    github_intake_parser.add_argument("--operator-notes")
 
     launch_office_parser = subparsers.add_parser("launch-office-workflow")
     launch_office_parser.add_argument("--input-workbook", required=True)

@@ -102,6 +102,10 @@ from kernel.assets.local_asset_schema import (
     QUARANTINE_MANIFEST_FILE,
     VALIDATION_REPORT_FILE,
 )
+from kernel.capabilities.github_capability_intake_packet import (
+    GITHUB_CAPABILITY_INTAKE_PACKET_SUMMARY_FILE,
+    build_github_capability_intake_packet,
+)
 from kernel.personal_ai.artifact_index import build_artifact_index
 from kernel.personal_ai.asset_scan_operational_control import (
     ASSET_SCAN_FAILURE_BUNDLE_FILE,
@@ -178,6 +182,7 @@ __all__ = [
     "run_local_asset_next_bounded_smoke_iteration_run_promotion_gate_launcher",
     "run_local_asset_next_bounded_smoke_cycle_contract_from_run_promotion_gate_launcher",
     "run_local_asset_next_bounded_smoke_cycle_contract_human_review_from_run_promotion_gate_launcher",
+    "run_github_capability_intake_packet_launcher",
     "run_local_office_launcher",
     "run_model_fixture_launcher",
     "run_model_provider_dry_run_launcher",
@@ -1898,6 +1903,40 @@ def run_task_graph_launcher(
         complete=result.success,
         payload=payload,
         summary_path=summary_path,
+        required_human_approval=True,
+    )
+
+
+def run_github_capability_intake_packet_launcher(
+    candidate_manifest: Path,
+    output_dir: Path,
+    intake_id: str,
+    *,
+    candidate_repo_dir: Path | None = None,
+    project_id: str | None = None,
+    reviewer_id: str | None = None,
+    operator_notes: str | None = None,
+) -> LauncherWorkflowResult:
+    output_path = Path(output_dir)
+    result = build_github_capability_intake_packet(
+        Path(candidate_manifest),
+        output_path,
+        intake_id,
+        candidate_repo_dir=None
+        if candidate_repo_dir is None
+        else Path(candidate_repo_dir),
+        project_id=project_id,
+        reviewer_id=reviewer_id,
+        operator_notes=operator_notes,
+    )
+    return LauncherWorkflowResult(
+        workflow="github_capability_intake_packet_workflow",
+        output_dir=output_path,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else output_path / GITHUB_CAPABILITY_INTAKE_PACKET_SUMMARY_FILE,
         required_human_approval=True,
     )
 

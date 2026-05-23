@@ -79,6 +79,10 @@ _LOCAL_ASSET_NEXT_BOUNDED_SMOKE_CYCLE_CONTRACT_FROM_RUN_PROMOTION_GATE_CAPABILIT
 _LOCAL_ASSET_NEXT_BOUNDED_SMOKE_CYCLE_CONTRACT_HUMAN_REVIEW_FROM_RUN_PROMOTION_GATE_CAPABILITY = (
     "launch_local_asset_next_bounded_smoke_cycle_contract_human_review_from_run_promotion_gate"
 )
+_GITHUB_CAPABILITY_ADAPTER_ID = "github_capability_intake_packet"
+_GITHUB_CAPABILITY_INTAKE_PACKET_CAPABILITY = (
+    "launch_github_capability_intake_packet"
+)
 _RUNTIME_ADMISSION_DECISION_TYPE = "personal_ai_runtime_admission_decision_v1"
 _GRAPH_EXECUTION_MODES = ("fixture_execution", "dry_run_plan")
 _NODE_EXECUTION_MODES = ("fixture", "mock", "dry_run", "real_runtime")
@@ -581,12 +585,18 @@ def _execute_graph_nodes(nodes_by_id, graph_execution_mode):
         elif graph_execution_mode == "dry_run_plan":
             record["status"] = "planned"
         else:
-            local_asset_result = _run_local_asset_node_if_requested(node)
-            if local_asset_result is not None:
-                record.update(local_asset_result)
+            github_intake_result = _run_github_capability_intake_node_if_requested(
+                node
+            )
+            if github_intake_result is not None:
+                record.update(github_intake_result)
             else:
-                record["delivery_validation"] = _run_delivery_node_if_requested(node)
-                record["status"] = "completed"
+                local_asset_result = _run_local_asset_node_if_requested(node)
+                if local_asset_result is not None:
+                    record.update(local_asset_result)
+                else:
+                    record["delivery_validation"] = _run_delivery_node_if_requested(node)
+                    record["status"] = "completed"
         status_by_node_id[node_id] = record["status"]
         executed.append(record)
     return executed
@@ -671,6 +681,133 @@ def _run_delivery_node_if_requested(node):
         ),
         "packaged_artifacts": list(result.packaged_artifacts),
         "raw_value_leakage_detected": result.raw_value_leakage_detected,
+    }
+
+
+def _run_github_capability_intake_node_if_requested(node):
+    if node["adapter_id"] != _GITHUB_CAPABILITY_ADAPTER_ID:
+        return None
+    if node["capability"] != _GITHUB_CAPABILITY_INTAKE_PACKET_CAPABILITY:
+        raise ValueError("task graph github capability intake capability is not registered")
+    inputs = node["inputs"]
+    candidate_manifest = _required_string_input(
+        inputs,
+        "candidate_manifest",
+        "github capability intake packet",
+    )
+    output_dir = _required_string_input(
+        inputs,
+        "output_dir",
+        "github capability intake packet",
+    )
+    intake_id = _required_string_input(
+        inputs,
+        "intake_id",
+        "github capability intake packet",
+    )
+    candidate_repo_dir = _optional_nonempty_string_input(
+        inputs,
+        "candidate_repo_dir",
+        "github capability intake packet",
+    )
+    project_id = _optional_nonempty_string_input(
+        inputs,
+        "project_id",
+        "github capability intake packet",
+    )
+    reviewer_id = _optional_nonempty_string_input(
+        inputs,
+        "reviewer_id",
+        "github capability intake packet",
+    )
+    operator_notes = _optional_nonempty_string_input(
+        inputs,
+        "operator_notes",
+        "github capability intake packet",
+    )
+
+    from kernel.capabilities.github_capability_intake_packet import (
+        NO_SCOPE_FALSE_FIELDS,
+    )
+    from kernel.personal_ai.local_launcher import (
+        run_github_capability_intake_packet_launcher,
+    )
+
+    result = run_github_capability_intake_packet_launcher(
+        Path(candidate_manifest),
+        Path(output_dir),
+        intake_id,
+        candidate_repo_dir=None
+        if candidate_repo_dir is None
+        else Path(candidate_repo_dir),
+        project_id=project_id,
+        reviewer_id=reviewer_id,
+        operator_notes=operator_notes,
+    )
+    payload = result.payload
+    complete = bool(result.complete)
+    return {
+        "status": "completed" if complete else "failed",
+        "output_dir": result.output_dir.as_posix(),
+        "github_capability_intake_packet_complete": complete,
+        "github_capability_intake_packet_path": payload.get(
+            "github_capability_intake_packet_path"
+        ),
+        "github_capability_intake_packet_manifest_path": payload.get(
+            "github_capability_intake_packet_manifest_path"
+        ),
+        "github_capability_intake_packet_summary_path": payload.get(
+            "github_capability_intake_packet_summary_path"
+        ),
+        "github_capability_intake_packet_checklist_path": payload.get(
+            "github_capability_intake_packet_checklist_path"
+        ),
+        "artifact_index_path": payload.get("artifact_index_path"),
+        "artifact_index_manifest_path": payload.get("artifact_index_manifest_path"),
+        "intake_id": payload.get("intake_id"),
+        "project_id": payload.get("project_id"),
+        "reviewer_id": payload.get("reviewer_id"),
+        "candidate_manifest_path": payload.get("candidate_manifest_path"),
+        "candidate_manifest_sha256": payload.get("candidate_manifest_sha256"),
+        "candidate_repo_dir": payload.get("candidate_repo_dir"),
+        "candidate_repo_dir_provided": payload.get("candidate_repo_dir_provided"),
+        "candidate_id": payload.get("candidate_id"),
+        "candidate_name": payload.get("candidate_name"),
+        "repo_full_name": payload.get("repo_full_name"),
+        "intended_use": payload.get("intended_use"),
+        "capability_domains": payload.get("capability_domains"),
+        "local_repo_evidence_file_count": payload.get(
+            "local_repo_evidence_file_count"
+        ),
+        "local_repo_evidence_total_bytes": payload.get(
+            "local_repo_evidence_total_bytes"
+        ),
+        "local_repo_symlink_evidence_detected": payload.get(
+            "local_repo_symlink_evidence_detected"
+        ),
+        "declared_network_risk": payload.get("declared_network_risk"),
+        "declared_secret_risk": payload.get("declared_secret_risk"),
+        "declared_filesystem_risk": payload.get("declared_filesystem_risk"),
+        "declared_execution_risk": payload.get("declared_execution_risk"),
+        "declared_installation_risk": payload.get("declared_installation_risk"),
+        "declared_license_risk": payload.get("declared_license_risk"),
+        "license_review_required": payload.get("license_review_required"),
+        "security_review_required": payload.get("security_review_required"),
+        "sandbox_review_required": payload.get("sandbox_review_required"),
+        "adapter_generation_allowed": payload.get("adapter_generation_allowed"),
+        "auto_adoption_allowed": payload.get("auto_adoption_allowed"),
+        "intake_status": payload.get("intake_status"),
+        "intake_decision": payload.get("intake_decision"),
+        "next_allowed_action": payload.get("next_allowed_action"),
+        "failure_stage": None if complete else payload.get("failure_stage"),
+        "error_message": None if complete else payload.get("error_message"),
+        "safe_to_retry": not complete,
+        "replay_hint": "Fix intake preflight inputs and rerun the same node."
+        if not complete
+        else "Review packet before selecting a bounded sandbox smoke.",
+        "required_human_approval": True,
+        "required_human_review": True,
+        **dict(NO_SCOPE_FALSE_FIELDS),
     }
 
 
@@ -3216,6 +3353,31 @@ def _node_output_refs(executed_nodes):
             node_refs["delivery_validation"] = {
                 key: _path_ref(value) if key.endswith("_path") else value
                 for key, value in sorted(node["delivery_validation"].items())
+            }
+        if (
+            node["adapter_id"] == _GITHUB_CAPABILITY_ADAPTER_ID
+            and node["capability"] == _GITHUB_CAPABILITY_INTAKE_PACKET_CAPABILITY
+        ):
+            node_refs["github_capability_intake_packet"] = {
+                "packet": _path_ref(
+                    node.get("github_capability_intake_packet_path")
+                ),
+                "packet_manifest": _path_ref(
+                    node.get("github_capability_intake_packet_manifest_path")
+                ),
+                "summary": _path_ref(
+                    node.get("github_capability_intake_packet_summary_path")
+                ),
+                "checklist": _path_ref(
+                    node.get("github_capability_intake_packet_checklist_path")
+                ),
+                "artifact_index": _path_ref(node.get("artifact_index_path")),
+                "artifact_index_manifest": _path_ref(
+                    node.get("artifact_index_manifest_path")
+                ),
+                "intake_status": node.get("intake_status"),
+                "intake_decision": node.get("intake_decision"),
+                "next_allowed_action": node.get("next_allowed_action"),
             }
         if (
             node["adapter_id"] == _LOCAL_ASSET_ADAPTER_ID
