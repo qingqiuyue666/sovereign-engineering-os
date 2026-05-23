@@ -1818,8 +1818,8 @@ next_bounded_smoke_iteration_run_promotion_gate_ready`, `gate_decision =
 approve_next_bounded_smoke_iteration_run_for_cycle_contract`, and
 `next_allowed_action = create_next_bounded_smoke_cycle_contract_from_run`.
 This is bounded-run promotion only. It allows a later separate
-cycle-contract-generation branch to consume the gate, but it does not generate
-the cycle contract.
+cycle-contract-generation command to consume the gate, but it does not
+generate the cycle contract.
 
 The command emits:
 
@@ -1874,6 +1874,113 @@ human approval/review requirements, and explicit false flags for candidate
 access by gate, runner re-execution, production scan approval, production
 promotion, mutation/deletion, media organizer behavior, network, model, and
 external runtime use.
+
+## Next Bounded Smoke Cycle Contract From Run Promotion Gate
+
+```bash
+python3 -m kernel.personal_ai.local_mvp_cli launch-local-asset-next-bounded-smoke-cycle-contract-from-run-promotion-gate \
+  --run-promotion-gate-output-dir /path/to/run-promotion-gate-output \
+  --output-dir /path/to/next-cycle-contract-output \
+  --cycle-contract-id next-cycle-contract-002 \
+  --project-id demo_project \
+  --reviewer-id reviewer-001 \
+  --operator-notes "optional notes"
+```
+
+Required arguments are `--run-promotion-gate-output-dir`, `--output-dir`, and
+`--cycle-contract-id`. Optional arguments are `--project-id`, `--reviewer-id`,
+and `--operator-notes`. The output directory must already exist, must not be
+the source run promotion gate directory, must not be inside it, and must not
+contain it. Expected output files are written exclusively and existing files
+or symlink collisions fail closed.
+
+This command consumes generated output from the next bounded smoke iteration
+run promotion gate only. Required source artifacts are:
+
+- `local_asset_next_bounded_smoke_iteration_run_promotion_gate.json`
+- `local_asset_next_bounded_smoke_iteration_run_promotion_gate_manifest.json`
+- `artifact_index.json`
+- `artifact_index_manifest.json`
+
+Optional source artifacts are the generated promotion gate summary and
+checklist markdown files. The contract verifies generated type fields, the
+promotion gate manifest's gate, summary, and checklist hashes when those
+artifacts are present, and the source artifact index manifest's artifact
+index hash. Missing required source artifacts, malformed JSON, source
+artifact symlinks, type mismatches, and hash mismatches block the contract.
+
+The contract is ready only when the source gate has `gate_status =
+next_bounded_smoke_iteration_run_promotion_gate_ready`, `gate_decision =
+approve_next_bounded_smoke_iteration_run_for_cycle_contract`, and
+`next_allowed_action = create_next_bounded_smoke_cycle_contract_from_run`;
+bounded run promotion and cycle contract generation are allowed; the source
+gate has no blockers, missing required artifacts, or untrusted artifacts; all
+required source boundary booleans are present, type-correct, and still false;
+human approval/review and deterministic ordering remain true; and inherited
+run facts are valid metadata-only records.
+
+When ready, the contract emits `contract_status =
+next_bounded_smoke_cycle_contract_ready`, `contract_decision =
+create_bounded_smoke_cycle_contract_from_approved_run`, and
+`next_allowed_action =
+submit_next_bounded_smoke_cycle_contract_for_human_review`. This is still not
+production approval. It only packages the approved bounded run into the next
+cycle-contract artifact so a later human review/admission step can decide
+whether the next bounded cycle may proceed.
+
+The command emits:
+
+- `local_asset_next_bounded_smoke_cycle_contract_from_run_promotion_gate.json`
+- `local_asset_next_bounded_smoke_cycle_contract_from_run_promotion_gate_manifest.json`
+- `local_asset_next_bounded_smoke_cycle_contract_from_run_promotion_gate_summary.md`
+- `local_asset_next_bounded_smoke_cycle_contract_from_run_promotion_gate_checklist.md`
+- `artifact_index.json`
+- `artifact_index_manifest.json`
+
+The artifact index binds only the four cycle-contract artifacts. It does not
+recursively index the run promotion gate output, run review packet output,
+runner output, actual iteration output, or candidate input files.
+
+This contract does not access live candidate paths. It does not validate
+candidate paths, list candidate directories, read candidate file contents, or
+hash candidate input files. It does not execute the runner, regenerate the run
+review packet, re-run the run promotion gate, create a production gate, run a
+production scan, grant production promotion, mutate upstream outputs,
+move/rename/delete files, deduplicate files, add media organizer behavior,
+copy raw private content, add UI, add Operator Console behavior, add
+watcher/daemon behavior, use network access, call model APIs, invoke external
+runtimes, perform automatic approval, or grant autonomy.
+
+Task graphs can include a next bounded smoke cycle contract-from-run-gate
+node:
+
+```json
+{
+  "node_id": "create_next_cycle_contract",
+  "adapter_id": "local_asset_runtime",
+  "capability": "launch_local_asset_next_bounded_smoke_cycle_contract_from_run_promotion_gate",
+  "execution_mode": "fixture",
+  "depends_on": [],
+  "approval_checkpoint_required": true,
+  "inputs": {
+    "run_promotion_gate_output_dir": "/path/to/run-promotion-gate-output",
+    "output_dir": "/path/to/next-cycle-contract-output",
+    "cycle_contract_id": "next-cycle-contract-002",
+    "project_id": "demo_project",
+    "reviewer_id": "reviewer-001",
+    "operator_notes": "optional notes"
+  }
+}
+```
+
+The node records the cycle contract, manifest, summary, checklist, artifact
+index paths, contract status, contract decision, next allowed action, source
+gate readiness metadata, inherited review/runner/request metadata, human
+approval/review requirements, and explicit false flags for runner execution by
+contract, review packet generation by contract, run promotion gate
+re-execution, candidate access by contract, production scan approval,
+production promotion, mutation/deletion, media organizer behavior, network,
+model, and external runtime use.
 
 Task graph execution now also emits `task_graph_artifact_outputs.json` in the
 graph `output_dir` after node execution. This manifest is a graph-level,
