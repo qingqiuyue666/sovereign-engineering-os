@@ -52,6 +52,9 @@ _LOCAL_ASSET_ITERATION_PROMOTION_GATE_CAPABILITY = (
 _LOCAL_ASSET_BOUNDED_SMOKE_CYCLE_CONTRACT_CAPABILITY = (
     "launch_local_asset_bounded_smoke_cycle_contract"
 )
+_LOCAL_ASSET_BOUNDED_SMOKE_CYCLE_HUMAN_REVIEW_CAPABILITY = (
+    "launch_local_asset_bounded_smoke_cycle_human_review"
+)
 _RUNTIME_ADMISSION_DECISION_TYPE = "personal_ai_runtime_admission_decision_v1"
 _GRAPH_EXECUTION_MODES = ("fixture_execution", "dry_run_plan")
 _NODE_EXECUTION_MODES = ("fixture", "mock", "dry_run", "real_runtime")
@@ -670,6 +673,11 @@ def _run_local_asset_node_if_requested(node):
             return _run_local_asset_iteration_promotion_gate_node(node)
         if node["capability"] == _LOCAL_ASSET_BOUNDED_SMOKE_CYCLE_CONTRACT_CAPABILITY:
             return _run_local_asset_bounded_smoke_cycle_contract_node(node)
+        if (
+            node["capability"]
+            == _LOCAL_ASSET_BOUNDED_SMOKE_CYCLE_HUMAN_REVIEW_CAPABILITY
+        ):
+            return _run_local_asset_bounded_smoke_cycle_human_review_node(node)
         raise ValueError("task graph local asset scan capability is not registered")
     return _run_local_asset_scan_node(node)
 
@@ -1676,6 +1684,134 @@ def _run_local_asset_bounded_smoke_cycle_contract_node(node):
     }
 
 
+def _run_local_asset_bounded_smoke_cycle_human_review_node(node):
+    inputs = node["inputs"]
+    cycle_contract_output_dir = _required_string_input(
+        inputs,
+        "cycle_contract_output_dir",
+        "local asset bounded smoke cycle human review",
+    )
+    output_dir = _required_string_input(
+        inputs,
+        "output_dir",
+        "local asset bounded smoke cycle human review",
+    )
+    human_review_id = _required_string_input(
+        inputs,
+        "human_review_id",
+        "local asset bounded smoke cycle human review",
+    )
+    human_reviewer_id = _required_string_input(
+        inputs,
+        "human_reviewer_id",
+        "local asset bounded smoke cycle human review",
+    )
+    human_decision = _required_string_input(
+        inputs,
+        "human_decision",
+        "local asset bounded smoke cycle human review",
+    )
+    human_signoff_phrase = _required_string_input(
+        inputs,
+        "human_signoff_phrase",
+        "local asset bounded smoke cycle human review",
+    )
+    project_id = inputs.get("project_id")
+    if project_id is not None and (
+        not isinstance(project_id, str) or not project_id
+    ):
+        raise ValueError(
+            "task graph local asset bounded smoke cycle human review "
+            "project_id is malformed"
+        )
+    human_review_notes = inputs.get("human_review_notes")
+    if human_review_notes is not None and not isinstance(human_review_notes, str):
+        raise ValueError(
+            "task graph local asset bounded smoke cycle human review "
+            "human_review_notes is malformed"
+        )
+
+    from kernel.personal_ai.local_launcher import (
+        run_local_asset_bounded_smoke_cycle_human_review_launcher,
+    )
+
+    result = run_local_asset_bounded_smoke_cycle_human_review_launcher(
+        Path(cycle_contract_output_dir),
+        Path(output_dir),
+        human_review_id=human_review_id,
+        human_reviewer_id=human_reviewer_id,
+        human_decision=human_decision,
+        human_signoff_phrase=human_signoff_phrase,
+        project_id=project_id,
+        human_review_notes=human_review_notes,
+    )
+    payload = result.payload
+    complete = bool(result.complete)
+    return {
+        "status": "completed" if complete else "failed",
+        "output_dir": result.output_dir.as_posix(),
+        "cycle_contract_output_dir": payload.get("cycle_contract_output_dir"),
+        "project_id": payload.get("project_id"),
+        "human_review_id": payload.get("human_review_id"),
+        "human_reviewer_id": payload.get("human_reviewer_id"),
+        "human_decision": payload.get("human_decision"),
+        "local_asset_bounded_smoke_cycle_human_review_complete": complete,
+        "local_asset_bounded_smoke_cycle_human_review_decision_path": payload.get(
+            "local_asset_bounded_smoke_cycle_human_review_decision_path"
+        ),
+        "local_asset_bounded_smoke_cycle_human_review_manifest_path": payload.get(
+            "local_asset_bounded_smoke_cycle_human_review_manifest_path"
+        ),
+        "local_asset_bounded_smoke_cycle_human_review_summary_path": payload.get(
+            "local_asset_bounded_smoke_cycle_human_review_summary_path"
+        ),
+        "local_asset_bounded_smoke_cycle_human_review_checklist_path": payload.get(
+            "local_asset_bounded_smoke_cycle_human_review_checklist_path"
+        ),
+        "artifact_index_path": payload.get("artifact_index_path"),
+        "artifact_index_manifest_path": payload.get("artifact_index_manifest_path"),
+        "human_review_status": payload.get("human_review_status"),
+        "human_review_decision": payload.get("human_review_decision"),
+        "next_bounded_smoke_iteration_prepare_allowed": payload.get(
+            "next_bounded_smoke_iteration_prepare_allowed"
+        ),
+        "next_bounded_smoke_iteration_execute_allowed": False,
+        "next_allowed_action": payload.get("next_allowed_action"),
+        "disallowed_actions": payload.get("disallowed_actions"),
+        "failure_stage": None if complete else payload.get("failure_stage"),
+        "required_human_approval": True,
+        "required_human_review": True,
+        "scan_performed": False,
+        "readiness_run_performed": False,
+        "human_smoke_run_performed": False,
+        "smoke_review_packet_run_performed": False,
+        "smoke_promotion_gate_run_performed": False,
+        "bounded_smoke_iteration_performed_by_review": False,
+        "iteration_review_packet_run_performed": False,
+        "iteration_promotion_gate_run_performed": False,
+        "cycle_contract_run_performed": False,
+        "raw_candidate_content_read": False,
+        "candidate_file_hashing_performed": False,
+        "input_mutation_performed": False,
+        "upstream_output_mutation_performed": False,
+        "file_move_performed": False,
+        "file_rename_performed": False,
+        "file_delete_performed": False,
+        "duplicate_deletion_performed": False,
+        "media_organizer_behavior_performed": False,
+        "output_overwrite_performed": False,
+        "network_access_performed": False,
+        "model_api_called": False,
+        "external_runtime_invoked": False,
+        "production_promotion_granted": False,
+        "production_scan_approved": False,
+        "production_scan_performed": False,
+        "production_scan_recommended": False,
+        "automatic_approval_performed": False,
+        "autonomous_execution_performed": False,
+    }
+
+
 def _required_string_input(inputs, field_name, node_label):
     value = inputs.get(field_name)
     if not isinstance(value, str) or not value:
@@ -2197,6 +2333,66 @@ def _node_output_refs(executed_nodes):
                 ),
                 "iteration_promotion_gate_run_performed": node.get(
                     "iteration_promotion_gate_run_performed"
+                ),
+                "raw_candidate_content_read": node.get(
+                    "raw_candidate_content_read"
+                ),
+                "candidate_file_hashing_performed": node.get(
+                    "candidate_file_hashing_performed"
+                ),
+                "required_human_approval": node.get("required_human_approval"),
+                "required_human_review": node.get("required_human_review"),
+                "failure_stage": node.get("failure_stage"),
+            }
+        if (
+            node["adapter_id"] == _LOCAL_ASSET_ADAPTER_ID
+            and node["capability"]
+            == _LOCAL_ASSET_BOUNDED_SMOKE_CYCLE_HUMAN_REVIEW_CAPABILITY
+        ):
+            node_refs["local_asset_bounded_smoke_cycle_human_review"] = {
+                "output_dir": node.get("output_dir"),
+                "cycle_contract_output_dir": node.get(
+                    "cycle_contract_output_dir"
+                ),
+                "decision": _path_ref(
+                    node.get(
+                        "local_asset_bounded_smoke_cycle_human_review_decision_path"
+                    )
+                ),
+                "manifest": _path_ref(
+                    node.get(
+                        "local_asset_bounded_smoke_cycle_human_review_manifest_path"
+                    )
+                ),
+                "summary": _path_ref(
+                    node.get(
+                        "local_asset_bounded_smoke_cycle_human_review_summary_path"
+                    )
+                ),
+                "human_review_checklist": _path_ref(
+                    node.get(
+                        "local_asset_bounded_smoke_cycle_human_review_checklist_path"
+                    )
+                ),
+                "artifact_index": _path_ref(node.get("artifact_index_path")),
+                "artifact_index_manifest": _path_ref(
+                    node.get("artifact_index_manifest_path")
+                ),
+                "human_review_status": node.get("human_review_status"),
+                "human_review_decision": node.get("human_review_decision"),
+                "next_allowed_action": node.get("next_allowed_action"),
+                "next_bounded_smoke_iteration_prepare_allowed": node.get(
+                    "next_bounded_smoke_iteration_prepare_allowed"
+                ),
+                "next_bounded_smoke_iteration_execute_allowed": node.get(
+                    "next_bounded_smoke_iteration_execute_allowed"
+                ),
+                "scan_performed": node.get("scan_performed"),
+                "cycle_contract_run_performed": node.get(
+                    "cycle_contract_run_performed"
+                ),
+                "bounded_smoke_iteration_performed_by_review": node.get(
+                    "bounded_smoke_iteration_performed_by_review"
                 ),
                 "raw_candidate_content_read": node.get(
                     "raw_candidate_content_read"

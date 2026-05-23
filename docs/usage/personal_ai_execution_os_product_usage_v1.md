@@ -664,6 +664,97 @@ add UI or Operator Console behavior, start watcher/daemon behavior, use
 network access, call model APIs, invoke external runtimes, or modify HFX.
 Human review and human approval remain required.
 
+## Local Asset Bounded Smoke Cycle Human Review
+
+```bash
+python3 -m kernel.personal_ai.local_mvp_cli launch-local-asset-bounded-smoke-cycle-human-review \
+  --cycle-contract-output-dir /path/to/cycle-contract-output \
+  --output-dir /path/to/cycle-human-review-output \
+  --human-review-id review-001 \
+  --human-reviewer-id reviewer-001 \
+  --human-decision approve_cycle_contract_for_next_bounded_smoke_iteration \
+  --human-signoff-phrase I_REVIEWED_LOCAL_ASSET_BOUNDED_SMOKE_CYCLE_CONTRACT \
+  --project-id demo_project \
+  --human-review-notes "optional notes"
+```
+
+`--cycle-contract-output-dir` and `--output-dir` must already exist, must be
+real directories, and must not be symlinks. The review output directory is not
+created automatically. It must be separate from the cycle contract output
+directory, must not be inside it, and must not contain it.
+
+The required human signoff phrase is:
+`I_REVIEWED_LOCAL_ASSET_BOUNDED_SMOKE_CYCLE_CONTRACT`. The phrase is validated
+exactly, but only its SHA-256 hash is stored. The plaintext phrase is never
+persisted in the decision, manifest, summary, checklist, or artifact index.
+
+Allowed human decisions are:
+
+- `approve_cycle_contract_for_next_bounded_smoke_iteration`
+- `stop_cycle`
+- `repair_artifacts`
+- `repair_cycle`
+- `inspect_quarantine`
+- `inspect_duplicates`
+- `inspect_incremental_changes`
+- `reject_boundary_violation`
+
+The command reads and binds only generated cycle contract artifacts:
+
+- `local_asset_bounded_smoke_cycle_contract.json`
+- `local_asset_bounded_smoke_cycle_contract_manifest.json`
+- `artifact_index.json`
+- `artifact_index_manifest.json`
+- optional cycle summary and human review checklist markdown files when present
+
+It does not recursively index the cycle contract output directory, upstream
+output directories, or candidate input files. It does not read raw private
+content or hash candidate input files.
+
+The command writes:
+
+- `local_asset_bounded_smoke_cycle_human_review_decision.json`
+- `local_asset_bounded_smoke_cycle_human_review_manifest.json`
+- `local_asset_bounded_smoke_cycle_human_review_summary.md`
+- `local_asset_bounded_smoke_cycle_human_review_checklist.md`
+- `artifact_index.json`
+- `artifact_index_manifest.json`
+
+Human review status values include:
+
+- `human_review_approved_next_bounded_smoke_iteration`
+- `human_review_stopped_cycle`
+- `human_review_requires_artifact_repair`
+- `human_review_requires_cycle_repair`
+- `human_review_requires_quarantine_inspection`
+- `human_review_requires_duplicate_inspection`
+- `human_review_requires_incremental_inspection`
+- `human_review_rejected_boundary_violation`
+- `blocked_invalid_human_signoff`
+- `blocked_invalid_human_decision`
+- `blocked_missing_required_artifacts`
+- `blocked_untrusted_artifacts`
+- `blocked_cycle_contract_not_ready`
+- `blocked_cycle_contract_boundary_violation`
+- `blocked_unknown`
+
+The approval path is prepare-only. A valid approval over a trusted
+`cycle_contract_ready` contract emits
+`next_allowed_action: prepare_next_bounded_smoke_iteration_admission` and
+`next_bounded_smoke_iteration_prepare_allowed: true`, while
+`next_bounded_smoke_iteration_execute_allowed` remains false. This command
+never executes the next bounded smoke iteration and never creates a next
+iteration output directory.
+
+This command does not run scan, readiness, human smoke, smoke review packet
+generation, smoke promotion gate, bounded smoke iteration, iteration review
+packet generation, iteration promotion gate, or cycle contract generation. It
+does not approve production scan, grant production promotion, add automatic
+approval or autonomy, mutate upstream outputs, mutate candidate inputs, move,
+rename, delete, or deduplicate files, add media organizer behavior, add UI or
+Operator Console behavior, start watcher/daemon behavior, use network access,
+call model APIs, invoke external runtimes, or modify HFX.
+
 ## Model Workflows
 
 Deterministic mock:
@@ -1054,6 +1145,36 @@ the contract, manifest, summary, human review checklist, artifact index paths,
 cycle contract status, cycle contract decision, next allowed action, blocker
 count, human review flags, and explicit false boundary flags. It remains a
 metadata-only synthesis node and does not execute any upstream runtime stage.
+
+Task graphs can include a bounded smoke cycle human review node:
+
+```json
+{
+  "node_id": "review_cycle_contract",
+  "adapter_id": "local_asset_runtime",
+  "capability": "launch_local_asset_bounded_smoke_cycle_human_review",
+  "execution_mode": "fixture",
+  "depends_on": [],
+  "approval_checkpoint_required": true,
+  "inputs": {
+    "cycle_contract_output_dir": "/path/to/cycle-contract-output",
+    "output_dir": "/path/to/cycle-human-review-output",
+    "human_review_id": "review-001",
+    "human_reviewer_id": "reviewer-001",
+    "human_decision": "approve_cycle_contract_for_next_bounded_smoke_iteration",
+    "human_signoff_phrase": "I_REVIEWED_LOCAL_ASSET_BOUNDED_SMOKE_CYCLE_CONTRACT",
+    "project_id": "demo_project",
+    "human_review_notes": "optional notes"
+  }
+}
+```
+
+The node runs `launch-local-asset-bounded-smoke-cycle-human-review` and
+records the human review decision, manifest, summary, checklist, artifact
+index paths, human review status, human review decision, next allowed action,
+prepare allowance, execute denial, human review flags, and explicit false
+boundary flags. It records review metadata only and does not execute cycle
+contract generation or the next bounded smoke iteration.
 
 Task graph execution now also emits `task_graph_artifact_outputs.json` in the
 graph `output_dir` after node execution. This manifest is a graph-level,

@@ -20,6 +20,7 @@ from kernel.personal_ai.local_launcher import (
     run_creative_handoff_launcher,
     run_local_asset_bounded_smoke_iteration_launcher,
     run_local_asset_bounded_smoke_cycle_contract_launcher,
+    run_local_asset_bounded_smoke_cycle_human_review_launcher,
     run_local_asset_human_smoke_launcher,
     run_local_asset_iteration_promotion_gate_launcher,
     run_local_asset_scan_launcher,
@@ -105,6 +106,7 @@ _SUBCOMMANDS = {
     "launch-local-asset-human-smoke-run",
     "launch-local-asset-bounded-smoke-iteration",
     "launch-local-asset-bounded-smoke-cycle-contract",
+    "launch-local-asset-bounded-smoke-cycle-human-review",
     "launch-local-asset-smoke-promotion-gate",
     "launch-local-asset-iteration-promotion-gate",
     "launch-local-asset-smoke-iteration-review-packet",
@@ -735,6 +737,19 @@ def _main_subcommand(argv) -> int:
             )
             _print_command_payload(result.to_cli_payload())
             return 0 if result.complete else 1
+        if args.command == "launch-local-asset-bounded-smoke-cycle-human-review":
+            result = run_local_asset_bounded_smoke_cycle_human_review_launcher(
+                Path(args.cycle_contract_output_dir),
+                Path(args.output_dir),
+                human_review_id=args.human_review_id,
+                human_reviewer_id=args.human_reviewer_id,
+                human_decision=args.human_decision,
+                human_signoff_phrase=args.human_signoff_phrase,
+                project_id=args.project_id,
+                human_review_notes=args.human_review_notes,
+            )
+            _print_command_payload(result.to_cli_payload())
+            return 0 if result.complete else 1
         if args.command == "launch-office-workflow":
             result = run_local_office_launcher(
                 Path(args.input_workbook),
@@ -1135,6 +1150,33 @@ def _build_subcommand_parser():
     )
     launch_cycle_contract_parser.add_argument("--output-dir", required=True)
     launch_cycle_contract_parser.add_argument("--project-id")
+
+    launch_cycle_human_review_parser = subparsers.add_parser(
+        "launch-local-asset-bounded-smoke-cycle-human-review"
+    )
+    launch_cycle_human_review_parser.add_argument(
+        "--cycle-contract-output-dir",
+        required=True,
+    )
+    launch_cycle_human_review_parser.add_argument("--output-dir", required=True)
+    launch_cycle_human_review_parser.add_argument(
+        "--human-review-id",
+        required=True,
+    )
+    launch_cycle_human_review_parser.add_argument(
+        "--human-reviewer-id",
+        required=True,
+    )
+    launch_cycle_human_review_parser.add_argument(
+        "--human-decision",
+        required=True,
+    )
+    launch_cycle_human_review_parser.add_argument(
+        "--human-signoff-phrase",
+        required=True,
+    )
+    launch_cycle_human_review_parser.add_argument("--project-id")
+    launch_cycle_human_review_parser.add_argument("--human-review-notes")
 
     launch_office_parser = subparsers.add_parser("launch-office-workflow")
     launch_office_parser.add_argument("--input-workbook", required=True)

@@ -56,6 +56,10 @@ from kernel.assets.local_asset_bounded_smoke_cycle_contract import (
     LOCAL_ASSET_BOUNDED_SMOKE_CYCLE_SUMMARY_FILE,
     build_local_asset_bounded_smoke_cycle_contract,
 )
+from kernel.assets.local_asset_bounded_smoke_cycle_human_review import (
+    LOCAL_ASSET_BOUNDED_SMOKE_CYCLE_HUMAN_REVIEW_SUMMARY_FILE,
+    build_local_asset_bounded_smoke_cycle_human_review,
+)
 from kernel.assets.local_asset_runtime import run_local_asset_runtime
 from kernel.assets.local_asset_schema import (
     ASSET_INDEX_FILE,
@@ -133,6 +137,7 @@ __all__ = [
     "run_local_asset_smoke_iteration_review_packet_launcher",
     "run_local_asset_iteration_promotion_gate_launcher",
     "run_local_asset_bounded_smoke_cycle_contract_launcher",
+    "run_local_asset_bounded_smoke_cycle_human_review_launcher",
     "run_local_office_launcher",
     "run_model_fixture_launcher",
     "run_model_provider_dry_run_launcher",
@@ -937,6 +942,40 @@ def run_local_asset_bounded_smoke_cycle_contract_launcher(
         summary_path=result.summary_path
         if result.summary_path is not None
         else result.output_dir / LOCAL_ASSET_BOUNDED_SMOKE_CYCLE_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_local_asset_bounded_smoke_cycle_human_review_launcher(
+    cycle_contract_output_dir: Path,
+    output_dir: Path,
+    *,
+    human_review_id: str,
+    human_reviewer_id: str,
+    human_decision: str,
+    human_signoff_phrase: str,
+    project_id: str | None = None,
+    human_review_notes: str | None = None,
+) -> LauncherWorkflowResult:
+    result = build_local_asset_bounded_smoke_cycle_human_review(
+        Path(cycle_contract_output_dir),
+        Path(output_dir),
+        human_review_id,
+        human_reviewer_id,
+        human_decision,
+        human_signoff_phrase,
+        project_id=project_id,
+        human_review_notes=human_review_notes,
+    )
+    return LauncherWorkflowResult(
+        workflow="local_asset_bounded_smoke_cycle_human_review_workflow",
+        output_dir=result.output_dir,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else result.output_dir
+        / LOCAL_ASSET_BOUNDED_SMOKE_CYCLE_HUMAN_REVIEW_SUMMARY_FILE,
         required_human_approval=True,
     )
 
