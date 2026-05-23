@@ -48,6 +48,10 @@ from kernel.assets.local_asset_smoke_iteration_review_packet import (
     LOCAL_ASSET_SMOKE_ITERATION_REVIEW_SUMMARY_FILE,
     build_local_asset_smoke_iteration_review_packet,
 )
+from kernel.assets.local_asset_iteration_promotion_gate import (
+    LOCAL_ASSET_ITERATION_PROMOTION_SUMMARY_FILE,
+    build_local_asset_iteration_promotion_gate,
+)
 from kernel.assets.local_asset_runtime import run_local_asset_runtime
 from kernel.assets.local_asset_schema import (
     ASSET_INDEX_FILE,
@@ -123,6 +127,7 @@ __all__ = [
     "run_local_asset_smoke_promotion_gate_launcher",
     "run_local_asset_smoke_review_packet_launcher",
     "run_local_asset_smoke_iteration_review_packet_launcher",
+    "run_local_asset_iteration_promotion_gate_launcher",
     "run_local_office_launcher",
     "run_model_fixture_launcher",
     "run_model_provider_dry_run_launcher",
@@ -869,6 +874,29 @@ def run_local_asset_smoke_promotion_gate_launcher(
         summary_path=result.summary_path
         if result.summary_path is not None
         else result.output_dir / LOCAL_ASSET_SMOKE_PROMOTION_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_local_asset_iteration_promotion_gate_launcher(
+    iteration_review_output_dir: Path,
+    output_dir: Path,
+    *,
+    project_id: str | None = None,
+) -> LauncherWorkflowResult:
+    result = build_local_asset_iteration_promotion_gate(
+        Path(iteration_review_output_dir),
+        Path(output_dir),
+        project_id=project_id,
+    )
+    return LauncherWorkflowResult(
+        workflow="local_asset_iteration_promotion_gate_workflow",
+        output_dir=result.output_dir,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else result.output_dir / LOCAL_ASSET_ITERATION_PROMOTION_SUMMARY_FILE,
         required_human_approval=True,
     )
 

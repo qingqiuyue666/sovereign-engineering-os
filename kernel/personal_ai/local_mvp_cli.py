@@ -20,6 +20,7 @@ from kernel.personal_ai.local_launcher import (
     run_creative_handoff_launcher,
     run_local_asset_bounded_smoke_iteration_launcher,
     run_local_asset_human_smoke_launcher,
+    run_local_asset_iteration_promotion_gate_launcher,
     run_local_asset_scan_launcher,
     run_local_asset_smoke_promotion_gate_launcher,
     run_local_asset_smoke_iteration_review_packet_launcher,
@@ -103,6 +104,7 @@ _SUBCOMMANDS = {
     "launch-local-asset-human-smoke-run",
     "launch-local-asset-bounded-smoke-iteration",
     "launch-local-asset-smoke-promotion-gate",
+    "launch-local-asset-iteration-promotion-gate",
     "launch-local-asset-smoke-iteration-review-packet",
     "launch-local-asset-smoke-review-packet",
     "launch-local-asset-scan",
@@ -709,6 +711,14 @@ def _main_subcommand(argv) -> int:
             )
             _print_command_payload(result.to_cli_payload())
             return 0 if result.complete else 1
+        if args.command == "launch-local-asset-iteration-promotion-gate":
+            result = run_local_asset_iteration_promotion_gate_launcher(
+                Path(args.iteration_review_output_dir),
+                Path(args.output_dir),
+                project_id=args.project_id,
+            )
+            _print_command_payload(result.to_cli_payload())
+            return 0 if result.complete else 1
         if args.command == "launch-office-workflow":
             result = run_local_office_launcher(
                 Path(args.input_workbook),
@@ -1068,6 +1078,16 @@ def _build_subcommand_parser():
     launch_smoke_promotion_parser.add_argument("--review-output-dir", required=True)
     launch_smoke_promotion_parser.add_argument("--output-dir", required=True)
     launch_smoke_promotion_parser.add_argument("--project-id")
+
+    launch_iteration_promotion_parser = subparsers.add_parser(
+        "launch-local-asset-iteration-promotion-gate"
+    )
+    launch_iteration_promotion_parser.add_argument(
+        "--iteration-review-output-dir",
+        required=True,
+    )
+    launch_iteration_promotion_parser.add_argument("--output-dir", required=True)
+    launch_iteration_promotion_parser.add_argument("--project-id")
 
     launch_office_parser = subparsers.add_parser("launch-office-workflow")
     launch_office_parser.add_argument("--input-workbook", required=True)
