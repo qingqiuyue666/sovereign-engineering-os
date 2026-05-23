@@ -16,6 +16,13 @@ from kernel.assets.local_asset_human_smoke import (
     DEFAULT_MAX_SMOKE_FILES,
     run_local_asset_human_smoke,
 )
+from kernel.assets.local_asset_bounded_smoke_iteration import (
+    DEFAULT_ITERATION_MAX_SMOKE_BYTES,
+    DEFAULT_ITERATION_MAX_SMOKE_DEPTH,
+    DEFAULT_ITERATION_MAX_SMOKE_FILES,
+    LOCAL_ASSET_BOUNDED_SMOKE_ITERATION_SUMMARY_FILE,
+    run_local_asset_bounded_smoke_iteration,
+)
 from kernel.assets.local_asset_sqlite_index import (
     LOCAL_ASSET_SQLITE_INDEX_FILE,
     LOCAL_ASSET_SQLITE_INDEX_MANIFEST_FILE,
@@ -106,6 +113,7 @@ __all__ = [
     "run_comfyui_dry_run_launcher",
     "run_creative_handoff_launcher",
     "run_local_asset_human_smoke_launcher",
+    "run_local_asset_bounded_smoke_iteration_launcher",
     "run_local_asset_scan_launcher",
     "run_local_asset_smoke_readiness_launcher",
     "run_local_asset_smoke_promotion_gate_launcher",
@@ -744,6 +752,49 @@ def run_local_asset_human_smoke_launcher(
         summary_path=result.summary_path
         if result.summary_path is not None
         else result.output_dir / "local_asset_human_smoke_run_summary.md",
+        required_human_approval=True,
+    )
+
+
+def run_local_asset_bounded_smoke_iteration_launcher(
+    promotion_output_dir: Path,
+    candidate_input_dir: Path,
+    readiness_report: Path,
+    output_dir: Path,
+    *,
+    human_signoff_id: str,
+    human_signoff_phrase: str,
+    recursive: bool = False,
+    include_hidden: bool = False,
+    project_id: str | None = None,
+    max_smoke_files: int = DEFAULT_ITERATION_MAX_SMOKE_FILES,
+    max_smoke_bytes: int = DEFAULT_ITERATION_MAX_SMOKE_BYTES,
+    max_smoke_depth: int = DEFAULT_ITERATION_MAX_SMOKE_DEPTH,
+    previous_scan_output_dir: Path | None = None,
+) -> LauncherWorkflowResult:
+    result = run_local_asset_bounded_smoke_iteration(
+        Path(promotion_output_dir),
+        Path(candidate_input_dir),
+        Path(readiness_report),
+        Path(output_dir),
+        human_signoff_id=human_signoff_id,
+        human_signoff_phrase=human_signoff_phrase,
+        recursive=recursive,
+        include_hidden=include_hidden,
+        project_id=project_id,
+        max_smoke_files=max_smoke_files,
+        max_smoke_bytes=max_smoke_bytes,
+        max_smoke_depth=max_smoke_depth,
+        previous_scan_output_dir=previous_scan_output_dir,
+    )
+    return LauncherWorkflowResult(
+        workflow="local_asset_bounded_smoke_iteration_workflow",
+        output_dir=result.output_dir,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else result.output_dir / LOCAL_ASSET_BOUNDED_SMOKE_ITERATION_SUMMARY_FILE,
         required_human_approval=True,
     )
 
