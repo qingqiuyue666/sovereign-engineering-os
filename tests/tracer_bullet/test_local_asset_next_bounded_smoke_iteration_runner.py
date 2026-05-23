@@ -261,6 +261,17 @@ class LocalAssetNextBoundedSmokeIterationRunnerTests(unittest.TestCase):
         manifest["admission_sha256"] = sha256_file(admission_path)
         write_json(manifest_path, manifest)
 
+    def mutate_runner_admission(self, runner_admission_output, mutator):
+        admission_path = (
+            Path(runner_admission_output)
+            / "local_asset_next_bounded_smoke_iteration_runner_admission.json"
+        )
+        admission = read_json(admission_path)
+        mutator(admission)
+        write_json(admission_path, admission)
+        self.rewrite_runner_admission_manifest_hash(runner_admission_output)
+        return admission
+
     def write_graph(self, graph_path, nodes, *, graph_id="runner-graph"):
         write_json_atomically(
             graph_path,
@@ -514,6 +525,92 @@ class LocalAssetNextBoundedSmokeIterationRunnerTests(unittest.TestCase):
             self.assertEqual(exit_code, 1)
             self.assertEqual(runner["runner_status"], "blocked_untrusted_artifacts")
             self.assertFalse(payload["candidate_input_path_checked"])
+
+    def test_blocks_missing_required_source_boundary_booleans(self):
+        cases = (
+            "runner_execution_allowed",
+            "next_bounded_smoke_iteration_execute_allowed",
+            "candidate_input_path_checked",
+            "production_scan_approved",
+            "required_human_approval",
+        )
+        for field_name in cases:
+            with self.subTest(field_name=field_name):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    runner_admission = self.build_ready_runner_admission(root)
+                    actual = self.make_actual_output(runner_admission)
+                    self.mutate_runner_admission(
+                        runner_admission,
+                        lambda admission, field=field_name: admission.pop(
+                            field,
+                            None,
+                        ),
+                    )
+                    runner_output = root / "runner"
+                    runner_output.mkdir()
+
+                    exit_code, payload = self.run_runner(
+                        runner_admission,
+                        runner_output,
+                        actual,
+                    )
+                    runner = read_json(
+                        runner_output
+                        / "local_asset_next_bounded_smoke_iteration_runner.json"
+                    )
+
+                    self.assertEqual(exit_code, 1)
+                    self.assertEqual(
+                        runner["runner_status"],
+                        "blocked_invalid_runner_admission_record",
+                    )
+                    self.assertFalse(payload["candidate_input_path_checked"])
+                    self.assertFalse(runner["candidate_input_path_checked"])
+                    self.assert_no_actual_iteration_artifacts(actual)
+
+    def test_blocks_non_boolean_required_source_boundary_fields(self):
+        cases = (
+            ("runner_execution_allowed", "false"),
+            ("candidate_input_path_checked", "false"),
+            ("production_scan_approved", "false"),
+            ("required_human_review", "true"),
+        )
+        for field_name, field_value in cases:
+            with self.subTest(field_name=field_name):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    runner_admission = self.build_ready_runner_admission(root)
+                    actual = self.make_actual_output(runner_admission)
+
+                    def set_field(admission, field=field_name, value=field_value):
+                        admission[field] = value
+
+                    self.mutate_runner_admission(
+                        runner_admission,
+                        set_field,
+                    )
+                    runner_output = root / "runner"
+                    runner_output.mkdir()
+
+                    exit_code, payload = self.run_runner(
+                        runner_admission,
+                        runner_output,
+                        actual,
+                    )
+                    runner = read_json(
+                        runner_output
+                        / "local_asset_next_bounded_smoke_iteration_runner.json"
+                    )
+
+                    self.assertEqual(exit_code, 1)
+                    self.assertEqual(
+                        runner["runner_status"],
+                        "blocked_invalid_runner_admission_record",
+                    )
+                    self.assertFalse(payload["candidate_input_path_checked"])
+                    self.assertFalse(runner["candidate_input_path_checked"])
+                    self.assert_no_actual_iteration_artifacts(actual)
 
     def test_blocks_if_runner_admission_not_ready(self):
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -885,7 +982,36 @@ class LocalAssetNextBoundedSmokeIterationRunnerTests(unittest.TestCase):
                     )
                     for other_filename in RUNNER_OUTPUTS:
                         if other_filename != filename:
-                            self.assertFalse((runner_output / other_filename).exists())
+                            self.assertFalse(
+                                (runner_output / other_filename).exists()
+                            )
+
+    def test_fail_closed_on_symlink_runner_output_collision(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            runner_admission = self.build_ready_runner_admission(root)
+            runner_output = root / "runner"
+            runner_output.mkdir()
+            collision = (
+                runner_output / "local_asset_next_bounded_smoke_iteration_runner.json"
+            )
+            collision.symlink_to(root / "missing-runner-target.json")
+
+            exit_code, payload = self.run_runner(
+                runner_admission,
+                runner_output,
+                root / "actual",
+            )
+
+            self.assertEqual(exit_code, 1)
+            self.assertFalse(payload["artifacts_written"])
+            self.assertTrue(collision.is_symlink())
+            for filename in RUNNER_OUTPUTS:
+                path = runner_output / filename
+                if path == collision:
+                    continue
+                self.assertFalse(path.exists(), filename)
+                self.assertFalse(path.is_symlink(), filename)
 
     def test_fail_closed_on_existing_actual_iteration_outputs(self):
         for filename in ITERATION_OUTPUTS:
@@ -916,6 +1042,36 @@ class LocalAssetNextBoundedSmokeIterationRunnerTests(unittest.TestCase):
                         preexisting.read_text(encoding="utf-8"),
                         "preexisting\n",
                     )
+
+    def test_fail_closed_on_symlink_actual_iteration_output_collision(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            runner_admission = self.build_ready_runner_admission(root)
+            self.make_future_candidate(runner_admission)
+            actual = self.make_actual_output(runner_admission)
+            collision = actual / "local_asset_next_bounded_smoke_iteration_run.json"
+            collision.symlink_to(root / "missing-actual-target.json")
+            runner_output = root / "runner"
+            runner_output.mkdir()
+
+            exit_code, _payload = self.run_runner(
+                runner_admission,
+                runner_output,
+                actual,
+            )
+            runner = read_json(
+                runner_output / "local_asset_next_bounded_smoke_iteration_runner.json"
+            )
+
+            self.assertEqual(exit_code, 1)
+            self.assertEqual(runner["runner_status"], "blocked_output_collision")
+            self.assertTrue(collision.is_symlink())
+            for filename in ITERATION_OUTPUTS:
+                path = actual / filename
+                if path == collision:
+                    continue
+                self.assertFalse(path.exists(), filename)
+                self.assertFalse(path.is_symlink(), filename)
 
     def test_missing_runner_output_dir_structured_failure(self):
         with tempfile.TemporaryDirectory() as temp_dir:

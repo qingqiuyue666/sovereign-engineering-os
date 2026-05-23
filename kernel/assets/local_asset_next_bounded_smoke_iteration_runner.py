@@ -297,6 +297,13 @@ _SOURCE_PRODUCTION_FIELDS = (
     "autonomous_execution_performed",
 )
 
+_SOURCE_TRUE_FIELDS = (
+    "required_human_approval",
+    "required_human_review",
+)
+
+_SOURCE_REQUIRED_BOOLEAN_FIELDS = _SOURCE_FALSE_FIELDS + _SOURCE_TRUE_FIELDS
+
 
 @dataclass(frozen=True)
 class LocalAssetNextBoundedSmokeIterationRunnerResult:
@@ -1705,6 +1712,36 @@ def _invalid_runner_admission_record(
                 field="admitted_limits",
             )
         )
+    for field_name in _SOURCE_REQUIRED_BOOLEAN_FIELDS:
+        if field_name not in admission:
+            invalid.append(
+                _blocker(
+                    "invalid_runner_admission_record",
+                    "runner admission required boolean field is missing",
+                    field=field_name,
+                )
+            )
+            continue
+        value = admission[field_name]
+        if not isinstance(value, bool):
+            invalid.append(
+                _blocker(
+                    "invalid_runner_admission_record",
+                    "runner admission required boundary field must be boolean",
+                    field=field_name,
+                    actual_value=value,
+                )
+            )
+            continue
+        if field_name in _SOURCE_TRUE_FIELDS and value is not True:
+            invalid.append(
+                _blocker(
+                    "invalid_runner_admission_record",
+                    "runner admission required human gate field must be true",
+                    field=field_name,
+                    actual_value=value,
+                )
+            )
     return sorted(invalid, key=lambda item: str(item.get("field")))
 
 
@@ -1748,7 +1785,7 @@ def _real_existing_dir_error(path_value: object, label: str) -> str | None:
 
 def _existing_output_collision(paths: dict[str, Path]) -> str | None:
     for file_name in sorted(paths):
-        if paths[file_name].exists():
+        if paths[file_name].exists() or paths[file_name].is_symlink():
             return file_name
     return None
 
