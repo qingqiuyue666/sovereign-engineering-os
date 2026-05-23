@@ -34,6 +34,9 @@ _LOCAL_ASSET_ADAPTER_ID = "local_asset_runtime"
 _LOCAL_ASSET_CAPABILITY = "launch_local_asset_scan"
 _LOCAL_ASSET_SMOKE_READINESS_CAPABILITY = "launch_local_asset_smoke_readiness"
 _LOCAL_ASSET_HUMAN_SMOKE_CAPABILITY = "launch_local_asset_human_smoke_run"
+_LOCAL_ASSET_BOUNDED_SMOKE_ITERATION_CAPABILITY = (
+    "launch_local_asset_bounded_smoke_iteration"
+)
 _LOCAL_ASSET_SMOKE_REVIEW_PACKET_CAPABILITY = (
     "launch_local_asset_smoke_review_packet"
 )
@@ -643,6 +646,8 @@ def _run_local_asset_node_if_requested(node):
             return _run_local_asset_smoke_readiness_node(node)
         if node["capability"] == _LOCAL_ASSET_HUMAN_SMOKE_CAPABILITY:
             return _run_local_asset_human_smoke_node(node)
+        if node["capability"] == _LOCAL_ASSET_BOUNDED_SMOKE_ITERATION_CAPABILITY:
+            return _run_local_asset_bounded_smoke_iteration_node(node)
         if node["capability"] == _LOCAL_ASSET_SMOKE_REVIEW_PACKET_CAPABILITY:
             return _run_local_asset_smoke_review_packet_node(node)
         if node["capability"] == _LOCAL_ASSET_SMOKE_PROMOTION_GATE_CAPABILITY:
@@ -995,6 +1000,166 @@ def _run_local_asset_human_smoke_node(node):
         "network_access_performed": False,
         "model_api_called": False,
         "external_runtime_invoked": False,
+    }
+
+
+def _run_local_asset_bounded_smoke_iteration_node(node):
+    inputs = node["inputs"]
+    promotion_output_dir = _required_string_input(
+        inputs,
+        "promotion_output_dir",
+        "local asset bounded smoke iteration",
+    )
+    candidate_input_dir = _required_string_input(
+        inputs,
+        "candidate_input_dir",
+        "local asset bounded smoke iteration",
+    )
+    readiness_report = _required_string_input(
+        inputs,
+        "readiness_report",
+        "local asset bounded smoke iteration",
+    )
+    output_dir = _required_string_input(
+        inputs,
+        "output_dir",
+        "local asset bounded smoke iteration",
+    )
+    human_signoff_id = _required_string_input(
+        inputs,
+        "human_signoff_id",
+        "local asset bounded smoke iteration",
+    )
+    human_signoff_phrase = _required_string_input(
+        inputs,
+        "human_signoff_phrase",
+        "local asset bounded smoke iteration",
+    )
+    recursive = _optional_bool_input(inputs, "recursive", False)
+    include_hidden = _optional_bool_input(inputs, "include_hidden", False)
+    project_id = inputs.get("project_id")
+    if project_id is not None and (
+        not isinstance(project_id, str) or not project_id
+    ):
+        raise ValueError(
+            "task graph local asset bounded smoke iteration project_id is malformed"
+        )
+    max_smoke_files = _optional_int_input(
+        inputs,
+        "max_smoke_files",
+        100,
+        "local asset bounded smoke iteration",
+    )
+    max_smoke_bytes = _optional_int_input(
+        inputs,
+        "max_smoke_bytes",
+        1073741824,
+        "local asset bounded smoke iteration",
+    )
+    max_smoke_depth = _optional_int_input(
+        inputs,
+        "max_smoke_depth",
+        12,
+        "local asset bounded smoke iteration",
+    )
+    previous_scan_output_dir = inputs.get("previous_scan_output_dir")
+    if previous_scan_output_dir is not None and (
+        not isinstance(previous_scan_output_dir, str) or not previous_scan_output_dir
+    ):
+        raise ValueError(
+            "task graph local asset bounded smoke iteration "
+            "previous_scan_output_dir is malformed"
+        )
+
+    from kernel.personal_ai.local_launcher import (
+        run_local_asset_bounded_smoke_iteration_launcher,
+    )
+
+    result = run_local_asset_bounded_smoke_iteration_launcher(
+        Path(promotion_output_dir),
+        Path(candidate_input_dir),
+        Path(readiness_report),
+        Path(output_dir),
+        human_signoff_id=human_signoff_id,
+        human_signoff_phrase=human_signoff_phrase,
+        recursive=recursive,
+        include_hidden=include_hidden,
+        project_id=project_id,
+        max_smoke_files=max_smoke_files,
+        max_smoke_bytes=max_smoke_bytes,
+        max_smoke_depth=max_smoke_depth,
+        previous_scan_output_dir=None
+        if previous_scan_output_dir is None
+        else Path(previous_scan_output_dir),
+    )
+    payload = result.payload
+    complete = bool(result.complete)
+    return {
+        "status": "completed" if complete else "failed",
+        "output_dir": result.output_dir.as_posix(),
+        "promotion_output_dir": payload.get("promotion_output_dir"),
+        "candidate_input_dir": payload.get("candidate_input_dir"),
+        "readiness_report": payload.get("readiness_report"),
+        "project_id": payload.get("project_id"),
+        "local_asset_bounded_smoke_iteration_complete": complete,
+        "local_asset_bounded_smoke_iteration_result_path": payload.get(
+            "local_asset_bounded_smoke_iteration_result_path"
+        ),
+        "local_asset_bounded_smoke_iteration_manifest_path": payload.get(
+            "local_asset_bounded_smoke_iteration_manifest_path"
+        ),
+        "local_asset_bounded_smoke_iteration_summary_path": payload.get(
+            "local_asset_bounded_smoke_iteration_summary_path"
+        ),
+        "local_asset_bounded_smoke_iteration_human_review_checklist_path": (
+            payload.get(
+                "local_asset_bounded_smoke_iteration_human_review_checklist_path"
+            )
+        ),
+        "local_asset_bounded_smoke_iteration_signoff_path": payload.get(
+            "local_asset_bounded_smoke_iteration_signoff_path"
+        ),
+        "local_asset_bounded_smoke_iteration_admission_path": payload.get(
+            "local_asset_bounded_smoke_iteration_admission_path"
+        ),
+        "artifact_index_path": payload.get("artifact_index_path"),
+        "artifact_index_manifest_path": payload.get("artifact_index_manifest_path"),
+        "iteration_status": payload.get("iteration_status"),
+        "iteration_decision": payload.get("iteration_decision"),
+        "bounded_smoke_iteration_performed": payload.get(
+            "bounded_smoke_iteration_performed"
+        ),
+        "bounded_smoke_iteration_allowed": payload.get(
+            "bounded_smoke_iteration_allowed"
+        ),
+        "promotion_gate_status": payload.get("promotion_gate_status"),
+        "promotion_decision": payload.get("promotion_decision"),
+        "human_signoff_valid": payload.get("human_signoff_valid"),
+        "smoke_launcher_invoked": payload.get("smoke_launcher_invoked"),
+        "smoke_run_complete": payload.get("smoke_run_complete"),
+        "scan_complete": payload.get("scan_complete"),
+        "production_promotion_granted": False,
+        "production_scan_approved": False,
+        "production_scan_performed": False,
+        "automatic_approval_performed": False,
+        "watcher_daemon_started": False,
+        "raw_candidate_content_read_outside_scan_runtime": False,
+        "candidate_file_hashing_outside_scan_runtime": False,
+        "input_mutation_performed": False,
+        "promotion_output_mutation_performed": False,
+        "review_output_mutation_performed": False,
+        "smoke_output_mutation_performed": False,
+        "file_move_performed": False,
+        "file_rename_performed": False,
+        "file_delete_performed": False,
+        "duplicate_deletion_performed": False,
+        "media_organizer_behavior_performed": False,
+        "output_overwrite_performed": False,
+        "network_access_performed": False,
+        "model_api_called": False,
+        "external_runtime_invoked": False,
+        "required_human_approval": True,
+        "failure_stage": None if complete else payload.get("failure_stage"),
     }
 
 
@@ -1356,6 +1521,65 @@ def _node_output_refs(executed_nodes):
                 ),
                 "production_scan_performed": node.get("production_scan_performed"),
                 "required_human_approval": node.get("required_human_approval"),
+                "failure_stage": node.get("failure_stage"),
+            }
+        if (
+            node["adapter_id"] == _LOCAL_ASSET_ADAPTER_ID
+            and node["capability"] == _LOCAL_ASSET_BOUNDED_SMOKE_ITERATION_CAPABILITY
+        ):
+            node_refs["local_asset_bounded_smoke_iteration"] = {
+                "output_dir": node.get("output_dir"),
+                "promotion_output_dir": node.get("promotion_output_dir"),
+                "candidate_input_dir": node.get("candidate_input_dir"),
+                "readiness_report": _path_ref(node.get("readiness_report")),
+                "result": _path_ref(
+                    node.get("local_asset_bounded_smoke_iteration_result_path")
+                ),
+                "manifest": _path_ref(
+                    node.get("local_asset_bounded_smoke_iteration_manifest_path")
+                ),
+                "summary": _path_ref(
+                    node.get("local_asset_bounded_smoke_iteration_summary_path")
+                ),
+                "human_review_checklist": _path_ref(
+                    node.get(
+                        "local_asset_bounded_smoke_iteration_human_review_checklist_path"
+                    )
+                ),
+                "signoff": _path_ref(
+                    node.get("local_asset_bounded_smoke_iteration_signoff_path")
+                ),
+                "admission": _path_ref(
+                    node.get("local_asset_bounded_smoke_iteration_admission_path")
+                ),
+                "artifact_index": _path_ref(node.get("artifact_index_path")),
+                "artifact_index_manifest": _path_ref(
+                    node.get("artifact_index_manifest_path")
+                ),
+                "iteration_status": node.get("iteration_status"),
+                "iteration_decision": node.get("iteration_decision"),
+                "bounded_smoke_iteration_performed": node.get(
+                    "bounded_smoke_iteration_performed"
+                ),
+                "production_promotion_granted": node.get(
+                    "production_promotion_granted"
+                ),
+                "production_scan_approved": node.get("production_scan_approved"),
+                "production_scan_performed": node.get("production_scan_performed"),
+                "required_human_approval": node.get("required_human_approval"),
+                "input_mutation_performed": node.get("input_mutation_performed"),
+                "file_move_performed": node.get("file_move_performed"),
+                "file_rename_performed": node.get("file_rename_performed"),
+                "file_delete_performed": node.get("file_delete_performed"),
+                "duplicate_deletion_performed": node.get(
+                    "duplicate_deletion_performed"
+                ),
+                "media_organizer_behavior_performed": node.get(
+                    "media_organizer_behavior_performed"
+                ),
+                "network_access_performed": node.get("network_access_performed"),
+                "model_api_called": node.get("model_api_called"),
+                "external_runtime_invoked": node.get("external_runtime_invoked"),
                 "failure_stage": node.get("failure_stage"),
             }
         if (

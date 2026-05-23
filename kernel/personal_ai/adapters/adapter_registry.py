@@ -112,6 +112,7 @@ def build_default_adapter_registry() -> tuple[AdapterRegistryEntry, ...]:
             admission_status=AdapterAdmissionStatus.ADMITTED,
             capabilities=(
                 "launch_local_asset_scan",
+                "launch_local_asset_bounded_smoke_iteration",
                 "launch_local_asset_human_smoke_run",
                 "launch_local_asset_smoke_promotion_gate",
                 "launch_local_asset_smoke_review_packet",

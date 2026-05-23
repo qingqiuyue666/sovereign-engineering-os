@@ -359,6 +359,93 @@ false, quarantine count is zero, duplicate group count is zero, suspicious
 incremental changes are zero, and no blocking warnings are present. It never
 grants production promotion and never approves production scanning.
 
+## Local Asset Bounded Smoke Iteration
+
+```bash
+python3 -m kernel.personal_ai.local_mvp_cli launch-local-asset-bounded-smoke-iteration \
+  --promotion-output-dir /path/to/promotion-gate-output \
+  --candidate-input-dir /path/to/candidate-assets \
+  --readiness-report /path/to/readiness/local_asset_smoke_readiness_report.json \
+  --output-dir /path/to/iteration-output \
+  --human-signoff-id reviewer-ticket-456 \
+  --human-signoff-phrase I_APPROVE_NEXT_BOUNDED_SMOKE_ITERATION \
+  --recursive \
+  --project-id demo_project \
+  --max-smoke-files 100 \
+  --max-smoke-bytes 1073741824 \
+  --max-smoke-depth 12
+```
+
+Required arguments are `--promotion-output-dir`, `--candidate-input-dir`,
+`--readiness-report`, `--output-dir`, `--human-signoff-id`, and
+`--human-signoff-phrase`. The required signoff phrase is exactly
+`I_APPROVE_NEXT_BOUNDED_SMOKE_ITERATION`; the provided phrase plaintext is not
+persisted. Optional arguments are `--project-id`,
+`--previous-scan-output-dir`, `--recursive`, `--include-hidden`,
+`--max-smoke-files`, `--max-smoke-bytes`, and `--max-smoke-depth`.
+
+Default bounded iteration limits are:
+
+- `--max-smoke-files 100`
+- `--max-smoke-bytes 1073741824`
+- `--max-smoke-depth 12`
+
+The command consumes generated promotion gate artifacts only:
+
+- `local_asset_smoke_promotion_decision.json`
+- `local_asset_smoke_promotion_gate_manifest.json`
+- `artifact_index.json`
+- `artifact_index_manifest.json`
+
+It admits the next bounded smoke iteration only when the promotion decision is
+`promotion_gate_status=promotion_candidate`,
+`promotion_decision=allow_next_bounded_smoke_iteration`,
+`next_bounded_smoke_iteration_allowed=true`,
+`production_promotion_granted=false`, `production_scan_approved=false`, and
+the review recommendation was `approve_next_bounded_smoke_iteration` with no
+promotion blockers. It also verifies promotion manifest hashes and the
+promotion artifact index manifest hash.
+
+`output_dir` must already exist, must be a real directory, must not be a
+symlink, and is never created automatically. It must not equal or overlap
+`promotion_output_dir` or `candidate_input_dir` in either direction, and must
+not be inside the review, smoke, or previous candidate directories when those
+paths are discoverable from the promotion decision.
+
+On valid promotion gate review and valid explicit human signoff, this command
+creates only `output_dir/control/` and `output_dir/smoke/`, then delegates to
+the existing `launch-local-asset-human-smoke-run` controls in the `smoke/`
+subdirectory. The delegated smoke run still requires readiness, uses the
+existing human-approved smoke launcher path, preserves bounded max files,
+bytes, and depth, and writes the normal human smoke output stack under
+`output_dir/smoke/`.
+
+The iteration writes:
+
+- `control/local_asset_bounded_smoke_iteration_signoff.json`
+- `control/local_asset_bounded_smoke_iteration_admission.json`
+- `local_asset_bounded_smoke_iteration_result.json`
+- `local_asset_bounded_smoke_iteration_manifest.json`
+- `local_asset_bounded_smoke_iteration_summary.md`
+- `local_asset_bounded_smoke_iteration_human_review_checklist.md`
+- `artifact_index.json`
+- `artifact_index_manifest.json`
+- `smoke/` delegated human smoke outputs when admitted
+
+All writes are exclusive and fail closed if expected iteration outputs already
+exist. If the promotion gate is blocked or the signoff phrase is invalid, the
+command writes blocked iteration artifacts when the output directory is safe,
+does not create `smoke/`, and does not invoke the smoke launcher.
+
+This command only enables another bounded smoke iteration after promotion-gate
+review and explicit human signoff. It does not approve production scan, does
+not grant production promotion, does not add automatic approval, does not add
+watcher/daemon behavior, does not add UI or Operator Console behavior, does
+not mutate inputs or upstream outputs, does not move, rename, delete, or
+deduplicate files, does not perform media organizer behavior, does not use
+network access, does not call model APIs, and does not invoke external
+creative runtimes.
+
 ## Model Workflows
 
 Deterministic mock:
@@ -621,6 +708,43 @@ iteration allowance, blocker list, and explicit false values for scan
 execution, readiness execution, human smoke execution, review packet mutation,
 raw candidate content reads, candidate file hashing, production promotion, and
 production scan approval.
+
+Task graphs can include a bounded smoke iteration node:
+
+```json
+{
+  "node_id": "iterate_human_smoke",
+  "adapter_id": "local_asset_runtime",
+  "capability": "launch_local_asset_bounded_smoke_iteration",
+  "execution_mode": "fixture",
+  "depends_on": [],
+  "approval_checkpoint_required": true,
+  "inputs": {
+    "promotion_output_dir": "/path/to/promotion-gate-output",
+    "candidate_input_dir": "/path/to/candidate-assets",
+    "readiness_report": "/path/to/readiness/local_asset_smoke_readiness_report.json",
+    "output_dir": "/path/to/iteration-output",
+    "human_signoff_id": "reviewer-ticket-456",
+    "human_signoff_phrase": "I_APPROVE_NEXT_BOUNDED_SMOKE_ITERATION",
+    "recursive": true,
+    "include_hidden": false,
+    "project_id": "demo_project",
+    "max_smoke_files": 100,
+    "max_smoke_bytes": 1073741824,
+    "max_smoke_depth": 12,
+    "previous_scan_output_dir": "/path/to/previous-scan-output"
+  }
+}
+```
+
+The node runs `launch-local-asset-bounded-smoke-iteration` and records the
+iteration result, manifest, summary, human review checklist, signoff,
+admission, artifact index paths, iteration status and decision, bounded smoke
+iteration status, and explicit false values for production promotion,
+production scan approval, production scan execution, automatic approval,
+watcher/daemon behavior, input mutation, file movement, file renaming, file
+deletion, duplicate deletion, media organizer behavior, network access, model
+API calls, and external runtime invocation.
 
 Task graph execution now also emits `task_graph_artifact_outputs.json` in the
 graph `output_dir` after node execution. This manifest is a graph-level,

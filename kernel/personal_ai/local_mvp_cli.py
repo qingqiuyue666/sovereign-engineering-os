@@ -18,6 +18,7 @@ from kernel.personal_ai.local_launcher import (
     run_blender_dry_run_launcher,
     run_comfyui_dry_run_launcher,
     run_creative_handoff_launcher,
+    run_local_asset_bounded_smoke_iteration_launcher,
     run_local_asset_human_smoke_launcher,
     run_local_asset_scan_launcher,
     run_local_asset_smoke_promotion_gate_launcher,
@@ -99,6 +100,7 @@ _SUBCOMMANDS = {
     "validate-runtime-delivery",
     "run-task-graph-fixture",
     "launch-local-asset-human-smoke-run",
+    "launch-local-asset-bounded-smoke-iteration",
     "launch-local-asset-smoke-promotion-gate",
     "launch-local-asset-smoke-review-packet",
     "launch-local-asset-scan",
@@ -661,6 +663,26 @@ def _main_subcommand(argv) -> int:
             )
             _print_command_payload(result.to_cli_payload())
             return 0 if result.complete else 1
+        if args.command == "launch-local-asset-bounded-smoke-iteration":
+            result = run_local_asset_bounded_smoke_iteration_launcher(
+                Path(args.promotion_output_dir),
+                Path(args.candidate_input_dir),
+                Path(args.readiness_report),
+                Path(args.output_dir),
+                human_signoff_id=args.human_signoff_id,
+                human_signoff_phrase=args.human_signoff_phrase,
+                recursive=args.recursive,
+                include_hidden=args.include_hidden,
+                project_id=args.project_id,
+                max_smoke_files=args.max_smoke_files,
+                max_smoke_bytes=args.max_smoke_bytes,
+                max_smoke_depth=args.max_smoke_depth,
+                previous_scan_output_dir=_optional_path(
+                    args.previous_scan_output_dir
+                ),
+            )
+            _print_command_payload(result.to_cli_payload())
+            return 0 if result.complete else 1
         if args.command == "launch-local-asset-smoke-review-packet":
             result = run_local_asset_smoke_review_packet_launcher(
                 Path(args.smoke_output_dir),
@@ -968,6 +990,50 @@ def _build_subcommand_parser():
         default=8,
     )
     launch_human_smoke_parser.add_argument("--previous-scan-output-dir")
+
+    launch_bounded_iteration_parser = subparsers.add_parser(
+        "launch-local-asset-bounded-smoke-iteration"
+    )
+    launch_bounded_iteration_parser.add_argument(
+        "--promotion-output-dir",
+        required=True,
+    )
+    launch_bounded_iteration_parser.add_argument(
+        "--candidate-input-dir",
+        required=True,
+    )
+    launch_bounded_iteration_parser.add_argument(
+        "--readiness-report",
+        required=True,
+    )
+    launch_bounded_iteration_parser.add_argument("--output-dir", required=True)
+    launch_bounded_iteration_parser.add_argument("--human-signoff-id", required=True)
+    launch_bounded_iteration_parser.add_argument(
+        "--human-signoff-phrase",
+        required=True,
+    )
+    launch_bounded_iteration_parser.add_argument("--project-id")
+    launch_bounded_iteration_parser.add_argument("--previous-scan-output-dir")
+    launch_bounded_iteration_parser.add_argument("--recursive", action="store_true")
+    launch_bounded_iteration_parser.add_argument(
+        "--include-hidden",
+        action="store_true",
+    )
+    launch_bounded_iteration_parser.add_argument(
+        "--max-smoke-files",
+        type=int,
+        default=100,
+    )
+    launch_bounded_iteration_parser.add_argument(
+        "--max-smoke-bytes",
+        type=int,
+        default=1073741824,
+    )
+    launch_bounded_iteration_parser.add_argument(
+        "--max-smoke-depth",
+        type=int,
+        default=12,
+    )
 
     launch_smoke_review_parser = subparsers.add_parser(
         "launch-local-asset-smoke-review-packet"
