@@ -41,6 +41,9 @@ _LOCAL_ASSET_ITERATION_PROMOTION_GATE_CAPABILITY = (
 _LOCAL_ASSET_BOUNDED_SMOKE_CYCLE_CONTRACT_CAPABILITY = (
     "launch_local_asset_bounded_smoke_cycle_contract"
 )
+_LOCAL_ASSET_BOUNDED_SMOKE_CYCLE_HUMAN_REVIEW_CAPABILITY = (
+    "launch_local_asset_bounded_smoke_cycle_human_review"
+)
 _DELIVERY_ADAPTER_ID = "runtime_delivery_package"
 _DELIVERY_CAPABILITY = "validate_runtime_delivery"
 
@@ -265,6 +268,27 @@ _LOCAL_ASSET_BOUNDED_SMOKE_CYCLE_CONTRACT_DIRECT_PATH_FIELDS = (
     ("artifact_index_manifest", "artifact_index_manifest_path"),
 )
 
+_LOCAL_ASSET_BOUNDED_SMOKE_CYCLE_HUMAN_REVIEW_DIRECT_PATH_FIELDS = (
+    (
+        "local_asset_bounded_smoke_cycle_human_review_decision",
+        "local_asset_bounded_smoke_cycle_human_review_decision_path",
+    ),
+    (
+        "local_asset_bounded_smoke_cycle_human_review_manifest",
+        "local_asset_bounded_smoke_cycle_human_review_manifest_path",
+    ),
+    (
+        "local_asset_bounded_smoke_cycle_human_review_summary",
+        "local_asset_bounded_smoke_cycle_human_review_summary_path",
+    ),
+    (
+        "local_asset_bounded_smoke_cycle_human_review_checklist",
+        "local_asset_bounded_smoke_cycle_human_review_checklist_path",
+    ),
+    ("artifact_index", "artifact_index_path"),
+    ("artifact_index_manifest", "artifact_index_manifest_path"),
+)
+
 _DELIVERY_PATH_FIELDS = (
     ("runtime_delivery_manifest", "runtime_delivery_manifest_path"),
     ("runtime_delivery_validation", "runtime_delivery_validation_path"),
@@ -289,6 +313,8 @@ _ROLE_ARTIFACT_TYPES = {
     "local_asset_iteration_promotion_human_signoff_checklist": "markdown",
     "local_asset_iteration_promotion_summary": "markdown",
     "local_asset_bounded_smoke_cycle_summary": "markdown",
+    "local_asset_bounded_smoke_cycle_human_review_checklist": "markdown",
+    "local_asset_bounded_smoke_cycle_human_review_summary": "markdown",
     "local_asset_bounded_smoke_cycle_human_review_checklist": "markdown",
     "local_asset_smoke_human_decision_checklist": "markdown",
     "local_asset_sqlite_query_summary": "markdown",
@@ -474,6 +500,15 @@ def _node_artifact_candidates(node, output_dir):
             output_dir,
         )
     if (
+        node["adapter_id"] == _LOCAL_ASSET_ADAPTER_ID
+        and node["capability"]
+        == _LOCAL_ASSET_BOUNDED_SMOKE_CYCLE_HUMAN_REVIEW_CAPABILITY
+    ):
+        return _local_asset_bounded_smoke_cycle_human_review_artifact_candidates(
+            node,
+            output_dir,
+        )
+    if (
         node["adapter_id"] == _DELIVERY_ADAPTER_ID
         and node["capability"] == _DELIVERY_CAPABILITY
     ):
@@ -650,6 +685,30 @@ def _local_asset_bounded_smoke_cycle_contract_artifact_candidates(node, output_d
     seen_roles = set()
     for role, field_name in (
         _LOCAL_ASSET_BOUNDED_SMOKE_CYCLE_CONTRACT_DIRECT_PATH_FIELDS
+    ):
+        _add_role_path(role_paths, seen_roles, role, node.get(field_name))
+    return [
+        _artifact_record(
+            node_id=node["node_id"],
+            adapter_id=node["adapter_id"],
+            capability=node["capability"],
+            node_status=node["status"],
+            artifact_role=role,
+            path_value=path_value,
+            output_dir=output_dir,
+        )
+        for role, path_value in role_paths
+    ]
+
+
+def _local_asset_bounded_smoke_cycle_human_review_artifact_candidates(
+    node,
+    output_dir,
+):
+    role_paths = []
+    seen_roles = set()
+    for role, field_name in (
+        _LOCAL_ASSET_BOUNDED_SMOKE_CYCLE_HUMAN_REVIEW_DIRECT_PATH_FIELDS
     ):
         _add_role_path(role_paths, seen_roles, role, node.get(field_name))
     return [
