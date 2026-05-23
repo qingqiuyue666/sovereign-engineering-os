@@ -473,6 +473,7 @@ class LocalAssetNextBoundedSmokeIterationRunPromotionGateTests(unittest.TestCase
             ("candidate_symlinks_detected", ["link"]),
             ("candidate_file_count", "2"),
             ("bounded_file_records_unsorted", True),
+            ("bounded_file_records_malformed_record", True),
             ("bounded_file_records_raw_content", True),
         )
         for field_name, value in cases:
@@ -489,6 +490,8 @@ class LocalAssetNextBoundedSmokeIterationRunPromotionGateTests(unittest.TestCase
                         packet["bounded_file_records"] = list(
                             reversed(packet["bounded_file_records"])
                         )
+                    elif field_name == "bounded_file_records_malformed_record":
+                        packet["bounded_file_records"] = ["not-a-record"]
                     elif field_name == "bounded_file_records_raw_content":
                         packet["bounded_file_records"][0]["raw_content"] = "private"
                     else:

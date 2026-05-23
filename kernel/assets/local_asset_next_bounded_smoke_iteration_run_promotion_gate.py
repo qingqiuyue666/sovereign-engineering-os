@@ -1068,16 +1068,10 @@ def _reviewed_run_fact_blockers(
             )
         )
     else:
-        if records != sorted(records, key=lambda record: str(record.get("relative_path"))):
-            blockers.append(
-                _blocker(
-                    "bounded_file_records_not_deterministic",
-                    "bounded_file_records must be sorted by relative_path",
-                    field="bounded_file_records",
-                )
-            )
+        malformed_record_found = False
         for index, record in enumerate(records):
             if not isinstance(record, dict):
+                malformed_record_found = True
                 blockers.append(
                     _blocker(
                         "bounded_file_record_malformed",
@@ -1094,6 +1088,17 @@ def _reviewed_run_fact_blockers(
                         record_index=index,
                     )
                 )
+        if not malformed_record_found and records != sorted(
+            records,
+            key=lambda record: str(record.get("relative_path")),
+        ):
+            blockers.append(
+                _blocker(
+                    "bounded_file_records_not_deterministic",
+                    "bounded_file_records must be sorted by relative_path",
+                    field="bounded_file_records",
+                )
+            )
     return sorted(blockers, key=lambda item: str(item.get("field", item["reason"])))
 
 
