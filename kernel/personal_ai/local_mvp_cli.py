@@ -26,6 +26,7 @@ from kernel.personal_ai.local_launcher import (
     run_local_asset_next_bounded_smoke_iteration_admission_launcher,
     run_local_asset_next_bounded_smoke_iteration_execution_request_launcher,
     run_local_asset_next_bounded_smoke_iteration_runner_admission_launcher,
+    run_local_asset_next_bounded_smoke_iteration_runner_launcher,
     run_local_asset_scan_launcher,
     run_local_asset_smoke_promotion_gate_launcher,
     run_local_asset_smoke_iteration_review_packet_launcher,
@@ -113,6 +114,7 @@ _SUBCOMMANDS = {
     "launch-local-asset-next-bounded-smoke-iteration-admission",
     "launch-local-asset-next-bounded-smoke-iteration-execution-request",
     "launch-local-asset-next-bounded-smoke-iteration-runner-admission",
+    "launch-local-asset-next-bounded-smoke-iteration-runner",
     "launch-local-asset-smoke-promotion-gate",
     "launch-local-asset-iteration-promotion-gate",
     "launch-local-asset-smoke-iteration-review-packet",
@@ -826,6 +828,26 @@ def _main_subcommand(argv) -> int:
             )
             _print_command_payload(result.to_cli_payload())
             return 0 if result.complete else 1
+        if (
+            args.command
+            == "launch-local-asset-next-bounded-smoke-iteration-runner"
+        ):
+            result = (
+                run_local_asset_next_bounded_smoke_iteration_runner_launcher(
+                    Path(args.runner_admission_output_dir),
+                    Path(args.runner_output_dir),
+                    Path(args.actual_next_iteration_output_dir),
+                    runner_execution_id=args.runner_execution_id,
+                    runner_operator_id=args.runner_operator_id,
+                    runner_execution_acknowledgement_phrase=(
+                        args.runner_execution_acknowledgement_phrase
+                    ),
+                    project_id=args.project_id,
+                    operator_notes=args.operator_notes,
+                )
+            )
+            _print_command_payload(result.to_cli_payload())
+            return 0 if result.complete else 1
         if args.command == "launch-office-workflow":
             result = run_local_office_launcher(
                 Path(args.input_workbook),
@@ -1371,6 +1393,36 @@ def _build_subcommand_parser():
     launch_next_iteration_runner_admission_parser.add_argument(
         "--runner-environment-label"
     )
+
+    launch_next_iteration_runner_parser = subparsers.add_parser(
+        "launch-local-asset-next-bounded-smoke-iteration-runner"
+    )
+    launch_next_iteration_runner_parser.add_argument(
+        "--runner-admission-output-dir",
+        required=True,
+    )
+    launch_next_iteration_runner_parser.add_argument(
+        "--runner-output-dir",
+        required=True,
+    )
+    launch_next_iteration_runner_parser.add_argument(
+        "--actual-next-iteration-output-dir",
+        required=True,
+    )
+    launch_next_iteration_runner_parser.add_argument(
+        "--runner-execution-id",
+        required=True,
+    )
+    launch_next_iteration_runner_parser.add_argument(
+        "--runner-operator-id",
+        required=True,
+    )
+    launch_next_iteration_runner_parser.add_argument(
+        "--runner-execution-acknowledgement-phrase",
+        required=True,
+    )
+    launch_next_iteration_runner_parser.add_argument("--project-id")
+    launch_next_iteration_runner_parser.add_argument("--operator-notes")
 
     launch_office_parser = subparsers.add_parser("launch-office-workflow")
     launch_office_parser.add_argument("--input-workbook", required=True)

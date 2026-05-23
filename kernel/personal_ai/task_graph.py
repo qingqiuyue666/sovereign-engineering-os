@@ -64,6 +64,9 @@ _LOCAL_ASSET_NEXT_BOUNDED_SMOKE_ITERATION_EXECUTION_REQUEST_CAPABILITY = (
 _LOCAL_ASSET_NEXT_BOUNDED_SMOKE_ITERATION_RUNNER_ADMISSION_CAPABILITY = (
     "launch_local_asset_next_bounded_smoke_iteration_runner_admission"
 )
+_LOCAL_ASSET_NEXT_BOUNDED_SMOKE_ITERATION_RUNNER_CAPABILITY = (
+    "launch_local_asset_next_bounded_smoke_iteration_runner"
+)
 _RUNTIME_ADMISSION_DECISION_TYPE = "personal_ai_runtime_admission_decision_v1"
 _GRAPH_EXECUTION_MODES = ("fixture_execution", "dry_run_plan")
 _NODE_EXECUTION_MODES = ("fixture", "mock", "dry_run", "real_runtime")
@@ -706,6 +709,11 @@ def _run_local_asset_node_if_requested(node):
             return _run_local_asset_next_bounded_smoke_iteration_runner_admission_node(
                 node
             )
+        if (
+            node["capability"]
+            == _LOCAL_ASSET_NEXT_BOUNDED_SMOKE_ITERATION_RUNNER_CAPABILITY
+        ):
+            return _run_local_asset_next_bounded_smoke_iteration_runner_node(node)
         raise ValueError("task graph local asset scan capability is not registered")
     return _run_local_asset_scan_node(node)
 
@@ -2302,6 +2310,172 @@ def _run_local_asset_next_bounded_smoke_iteration_runner_admission_node(node):
         "candidate_file_hashing_performed": False,
         "candidate_path_validation_performed": False,
         "candidate_path_listing_performed": False,
+        "input_mutation_performed": False,
+        "upstream_output_mutation_performed": False,
+        "file_move_performed": False,
+        "file_rename_performed": False,
+        "file_delete_performed": False,
+        "duplicate_deletion_performed": False,
+        "media_organizer_behavior_performed": False,
+        "output_overwrite_performed": False,
+        "network_access_performed": False,
+        "model_api_called": False,
+        "external_runtime_invoked": False,
+        "production_scan_performed": False,
+        "production_scan_recommended": False,
+        "production_scan_approved": False,
+        "production_promotion_granted": False,
+        "automatic_approval_performed": False,
+        "autonomous_execution_performed": False,
+    }
+
+
+def _run_local_asset_next_bounded_smoke_iteration_runner_node(node):
+    inputs = node["inputs"]
+    node_label = "local asset next bounded smoke iteration runner"
+    runner_admission_output_dir = _required_string_input(
+        inputs,
+        "runner_admission_output_dir",
+        node_label,
+    )
+    runner_output_dir = _required_string_input(
+        inputs,
+        "runner_output_dir",
+        node_label,
+    )
+    actual_next_iteration_output_dir = _required_string_input(
+        inputs,
+        "actual_next_iteration_output_dir",
+        node_label,
+    )
+    runner_execution_id = _required_string_input(
+        inputs,
+        "runner_execution_id",
+        node_label,
+    )
+    runner_operator_id = _required_string_input(
+        inputs,
+        "runner_operator_id",
+        node_label,
+    )
+    runner_execution_acknowledgement_phrase = _required_string_input(
+        inputs,
+        "runner_execution_acknowledgement_phrase",
+        node_label,
+    )
+    project_id = _optional_nonempty_string_input(inputs, "project_id", node_label)
+    operator_notes = inputs.get("operator_notes")
+    if operator_notes is not None and not isinstance(operator_notes, str):
+        raise ValueError("task graph " + node_label + " operator_notes is malformed")
+
+    from kernel.personal_ai.local_launcher import (
+        run_local_asset_next_bounded_smoke_iteration_runner_launcher,
+    )
+
+    result = run_local_asset_next_bounded_smoke_iteration_runner_launcher(
+        Path(runner_admission_output_dir),
+        Path(runner_output_dir),
+        Path(actual_next_iteration_output_dir),
+        runner_execution_id=runner_execution_id,
+        runner_operator_id=runner_operator_id,
+        runner_execution_acknowledgement_phrase=(
+            runner_execution_acknowledgement_phrase
+        ),
+        project_id=project_id,
+        operator_notes=operator_notes,
+    )
+    payload = result.payload
+    complete = bool(result.complete)
+    return {
+        "status": "completed" if complete else "failed",
+        "output_dir": result.output_dir.as_posix(),
+        "runner_admission_output_dir": payload.get(
+            "runner_admission_output_dir"
+        ),
+        "runner_output_dir": payload.get("runner_output_dir"),
+        "actual_next_iteration_output_dir": payload.get(
+            "actual_next_iteration_output_dir"
+        ),
+        "project_id": payload.get("project_id"),
+        "runner_execution_id": payload.get("runner_execution_id"),
+        "runner_operator_id": payload.get("runner_operator_id"),
+        "runner_admission_id": payload.get("runner_admission_id"),
+        "admitted_runner_id": payload.get("admitted_runner_id"),
+        "admitted_runner_version": payload.get("admitted_runner_version"),
+        "requested_next_iteration_id": payload.get(
+            "requested_next_iteration_id"
+        ),
+        "requested_candidate_input_dir": payload.get(
+            "requested_candidate_input_dir"
+        ),
+        "requested_next_iteration_output_dir": payload.get(
+            "requested_next_iteration_output_dir"
+        ),
+        "requested_limits": payload.get("requested_limits"),
+        "admitted_limits": payload.get("admitted_limits"),
+        "local_asset_next_bounded_smoke_iteration_runner_complete": complete,
+        "local_asset_next_bounded_smoke_iteration_runner_path": payload.get(
+            "local_asset_next_bounded_smoke_iteration_runner_path"
+        ),
+        "local_asset_next_bounded_smoke_iteration_runner_manifest_path": (
+            payload.get(
+                "local_asset_next_bounded_smoke_iteration_runner_manifest_path"
+            )
+        ),
+        "local_asset_next_bounded_smoke_iteration_runner_summary_path": (
+            payload.get(
+                "local_asset_next_bounded_smoke_iteration_runner_summary_path"
+            )
+        ),
+        "local_asset_next_bounded_smoke_iteration_runner_checklist_path": (
+            payload.get(
+                "local_asset_next_bounded_smoke_iteration_runner_checklist_path"
+            )
+        ),
+        "artifact_index_path": payload.get("artifact_index_path"),
+        "artifact_index_manifest_path": payload.get("artifact_index_manifest_path"),
+        "actual_iteration_artifacts": payload.get("actual_iteration_artifacts"),
+        "runner_status": payload.get("runner_status"),
+        "runner_decision": payload.get("runner_decision"),
+        "next_allowed_action": payload.get("next_allowed_action"),
+        "runner_execution_performed": payload.get("runner_execution_performed"),
+        "next_bounded_smoke_iteration_executed": payload.get(
+            "next_bounded_smoke_iteration_executed"
+        ),
+        "next_iteration_output_dir_created": False,
+        "actual_next_iteration_output_dir_created": False,
+        "candidate_input_path_checked": payload.get(
+            "candidate_input_path_checked"
+        ),
+        "candidate_input_path_listed": payload.get(
+            "candidate_input_path_listed"
+        ),
+        "candidate_input_file_read": payload.get("candidate_input_file_read"),
+        "candidate_input_file_hashing_performed": payload.get(
+            "candidate_input_file_hashing_performed"
+        ),
+        "candidate_file_count": payload.get("candidate_file_count"),
+        "candidate_total_bytes": payload.get("candidate_total_bytes"),
+        "candidate_limit_enforced": payload.get("candidate_limit_enforced"),
+        "failure_stage": None if complete else payload.get("failure_stage"),
+        "required_human_approval": True,
+        "required_human_review": True,
+        "scan_performed": False,
+        "readiness_run_performed": False,
+        "human_smoke_run_performed": False,
+        "smoke_review_packet_run_performed": False,
+        "smoke_promotion_gate_run_performed": False,
+        "bounded_smoke_iteration_performed_by_runner": payload.get(
+            "bounded_smoke_iteration_performed_by_runner"
+        ),
+        "iteration_review_packet_run_performed": False,
+        "iteration_promotion_gate_run_performed": False,
+        "cycle_contract_run_performed": False,
+        "cycle_human_review_run_performed": False,
+        "next_admission_run_performed": False,
+        "execution_request_run_performed": False,
+        "runner_admission_run_performed": False,
+        "raw_candidate_content_copied": False,
         "input_mutation_performed": False,
         "upstream_output_mutation_performed": False,
         "file_move_performed": False,
