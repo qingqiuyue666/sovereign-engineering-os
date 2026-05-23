@@ -165,7 +165,7 @@ _REVIEW_ACCESS_FALSE_FLAGS = {
     "candidate_input_file_hashing_performed_by_review": False,
 }
 
-_SOURCE_BOUNDARY_FIELDS = (
+_SOURCE_FALSE_BOUNDARY_FIELDS = (
     "input_mutation_performed",
     "upstream_output_mutation_performed",
     "file_move_performed",
@@ -183,6 +183,11 @@ _SOURCE_BOUNDARY_FIELDS = (
     "production_promotion_granted",
     "automatic_approval_performed",
     "autonomous_execution_performed",
+)
+
+_SOURCE_TRUE_BOUNDARY_FIELDS = (
+    "required_human_approval",
+    "required_human_review",
 )
 
 _RUNNER_SOURCE_ARTIFACTS = (
@@ -1194,8 +1199,30 @@ def _source_boundary_blockers(
 ) -> list[dict[str, object]]:
     blockers = []
     for source_name, payload in (("runner", runner), ("actual_run", run)):
-        for field_name in _SOURCE_BOUNDARY_FIELDS:
-            if payload.get(field_name) is True:
+        for field_name in _SOURCE_FALSE_BOUNDARY_FIELDS:
+            if field_name not in payload:
+                blockers.append(
+                    _blocker(
+                        "source_boundary_field_missing",
+                        "source artifact required false boundary field is missing",
+                        source=source_name,
+                        field=field_name,
+                    )
+                )
+                continue
+            value = payload[field_name]
+            if not isinstance(value, bool):
+                blockers.append(
+                    _blocker(
+                        "source_boundary_field_not_boolean",
+                        "source artifact required false boundary field is not boolean",
+                        source=source_name,
+                        field=field_name,
+                        actual_value=value,
+                    )
+                )
+                continue
+            if value is not False:
                 blockers.append(
                     _blocker(
                         "source_boundary_flag_true",
@@ -1204,7 +1231,42 @@ def _source_boundary_blockers(
                         field=field_name,
                     )
                 )
-    return sorted(blockers, key=lambda item: (str(item.get("source")), str(item.get("field"))))
+        for field_name in _SOURCE_TRUE_BOUNDARY_FIELDS:
+            if field_name not in payload:
+                blockers.append(
+                    _blocker(
+                        "source_boundary_field_missing",
+                        "source artifact required true boundary field is missing",
+                        source=source_name,
+                        field=field_name,
+                    )
+                )
+                continue
+            value = payload[field_name]
+            if not isinstance(value, bool):
+                blockers.append(
+                    _blocker(
+                        "source_boundary_field_not_boolean",
+                        "source artifact required true boundary field is not boolean",
+                        source=source_name,
+                        field=field_name,
+                        actual_value=value,
+                    )
+                )
+                continue
+            if value is not True:
+                blockers.append(
+                    _blocker(
+                        "source_boundary_required_flag_false",
+                        "source artifact required true boundary field is false",
+                        source=source_name,
+                        field=field_name,
+                    )
+                )
+    return sorted(
+        blockers,
+        key=lambda item: (str(item.get("source")), str(item.get("field"))),
+    )
 
 
 def _cross_artifact_checks(

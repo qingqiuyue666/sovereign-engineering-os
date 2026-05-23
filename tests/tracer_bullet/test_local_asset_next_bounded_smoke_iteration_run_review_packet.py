@@ -623,6 +623,156 @@ class LocalAssetNextBoundedSmokeIterationRunReviewPacketTests(unittest.TestCase)
                         "blocked_source_boundary_violation",
                     )
 
+    def test_blocks_missing_runner_boundary_booleans(self):
+        fields = (
+            "production_scan_approved",
+            "file_delete_performed",
+            "network_access_performed",
+            "required_human_approval",
+        )
+        for field_name in fields:
+            with self.subTest(field_name=field_name):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    runner_output, actual = self.build_ready_runner(root)
+                    runner_path = (
+                        runner_output
+                        / "local_asset_next_bounded_smoke_iteration_runner.json"
+                    )
+                    runner = read_json(runner_path)
+                    runner.pop(field_name, None)
+                    write_json(runner_path, runner)
+                    self.rewrite_runner_manifest_hash(runner_output)
+                    review = root / "review"
+                    review.mkdir()
+
+                    exit_code, payload = self.run_review_packet(
+                        runner_output,
+                        actual,
+                        review,
+                    )
+
+                    self.assertEqual(exit_code, 1)
+                    self.assertEqual(
+                        payload["review_status"],
+                        "blocked_source_boundary_violation",
+                    )
+                    self.assertTrue(payload["review_packet_created"])
+                    self.assertFalse(payload["candidate_input_path_checked_by_review"])
+                    self.assertFalse(payload["runner_reexecution_performed"])
+
+    def test_blocks_non_boolean_runner_boundary_booleans(self):
+        cases = (
+            ("production_scan_approved", "false"),
+            ("file_delete_performed", "false"),
+            ("model_api_called", "false"),
+            ("required_human_review", "true"),
+        )
+        for field_name, value in cases:
+            with self.subTest(field_name=field_name):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    runner_output, actual = self.build_ready_runner(root)
+                    runner_path = (
+                        runner_output
+                        / "local_asset_next_bounded_smoke_iteration_runner.json"
+                    )
+                    runner = read_json(runner_path)
+                    runner[field_name] = value
+                    write_json(runner_path, runner)
+                    self.rewrite_runner_manifest_hash(runner_output)
+                    review = root / "review"
+                    review.mkdir()
+
+                    exit_code, payload = self.run_review_packet(
+                        runner_output,
+                        actual,
+                        review,
+                    )
+
+                    self.assertEqual(exit_code, 1)
+                    self.assertEqual(
+                        payload["review_status"],
+                        "blocked_source_boundary_violation",
+                    )
+                    self.assertTrue(payload["review_packet_created"])
+                    self.assertFalse(payload["candidate_input_file_read_by_review"])
+                    self.assertFalse(payload["runner_reexecution_performed"])
+
+    def test_blocks_missing_actual_run_boundary_booleans(self):
+        fields = (
+            "production_promotion_granted",
+            "file_move_performed",
+            "external_runtime_invoked",
+            "required_human_approval",
+        )
+        for field_name in fields:
+            with self.subTest(field_name=field_name):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    runner_output, actual = self.build_ready_runner(root)
+                    run_path = actual / "local_asset_next_bounded_smoke_iteration_run.json"
+                    run = read_json(run_path)
+                    run.pop(field_name, None)
+                    write_json(run_path, run)
+                    self.rewrite_run_manifest_hashes(actual)
+                    review = root / "review"
+                    review.mkdir()
+
+                    exit_code, payload = self.run_review_packet(
+                        runner_output,
+                        actual,
+                        review,
+                    )
+
+                    self.assertEqual(exit_code, 1)
+                    self.assertEqual(
+                        payload["review_status"],
+                        "blocked_source_boundary_violation",
+                    )
+                    self.assertTrue(payload["review_packet_created"])
+                    self.assertFalse(payload["candidate_input_path_listed_by_review"])
+                    self.assertFalse(payload["runner_reexecution_performed"])
+
+    def test_blocks_non_boolean_actual_run_boundary_booleans(self):
+        cases = (
+            ("production_promotion_granted", "false"),
+            ("file_move_performed", "false"),
+            ("external_runtime_invoked", "false"),
+            ("required_human_review", "true"),
+        )
+        for field_name, value in cases:
+            with self.subTest(field_name=field_name):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    runner_output, actual = self.build_ready_runner(root)
+                    run_path = actual / "local_asset_next_bounded_smoke_iteration_run.json"
+                    run = read_json(run_path)
+                    run[field_name] = value
+                    write_json(run_path, run)
+                    self.rewrite_run_manifest_hashes(actual)
+                    review = root / "review"
+                    review.mkdir()
+
+                    exit_code, payload = self.run_review_packet(
+                        runner_output,
+                        actual,
+                        review,
+                    )
+
+                    self.assertEqual(exit_code, 1)
+                    self.assertEqual(
+                        payload["review_status"],
+                        "blocked_source_boundary_violation",
+                    )
+                    self.assertTrue(payload["review_packet_created"])
+                    self.assertFalse(
+                        payload[
+                            "candidate_input_file_hashing_performed_by_review"
+                        ]
+                    )
+                    self.assertFalse(payload["runner_reexecution_performed"])
+
     def test_blocks_invalid_review_packet_metadata(self):
         cases = (
             {"review_packet_id": ""},
