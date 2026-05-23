@@ -818,6 +818,90 @@ This admits only creation of a future execution request. It never executes the
 next bounded smoke iteration, never creates a next iteration output directory,
 never approves production scanning, and never grants production promotion.
 
+## Local Asset Next Bounded Smoke Iteration Execution Request
+
+```bash
+python3 -m kernel.personal_ai.local_mvp_cli launch-local-asset-next-bounded-smoke-iteration-execution-request \
+  --next-admission-output-dir /path/to/next-admission-output \
+  --output-dir /path/to/execution-request-output \
+  --requested-next-iteration-id iteration-002 \
+  --requested-candidate-input-dir /path/to/future-candidate-input \
+  --requested-next-iteration-output-dir /path/to/future-iteration-output \
+  --requested-max-files 25 \
+  --requested-max-total-bytes 104857600 \
+  --requested-max-depth 4 \
+  --project-id demo_project \
+  --request-id request-002 \
+  --operator-id operator-001 \
+  --operator-notes "optional notes" \
+  --requested-compare-previous-scan-manifest-path /path/to/previous/asset_manifest.json \
+  --requested-previous-iteration-artifact-index-path /path/to/previous/artifact_index.json
+```
+
+`--next-admission-output-dir` and `--output-dir` must already exist, must be
+real directories, and must not be symlinks. The execution request output
+directory is not created automatically. It must be separate from the next
+admission output directory, must not be inside it, and must not contain it.
+All request output writes are exclusive and fail closed on existing files.
+
+The requested candidate input path, requested next iteration output path,
+optional previous scan manifest path, and optional previous iteration artifact
+index path are metadata only. This command does not create those paths, check
+whether they exist, resolve them strictly, list candidate directories, read
+candidate file contents, hash candidate input files, or validate candidate
+content.
+
+The command reads and binds only generated next admission artifacts:
+
+- `local_asset_next_bounded_smoke_iteration_admission.json`
+- `local_asset_next_bounded_smoke_iteration_admission_manifest.json`
+- `artifact_index.json`
+- `artifact_index_manifest.json`
+- optional next admission summary and checklist markdown files when present
+
+It does not recursively index the next admission output directory, cycle
+human review output directory, cycle contract output directory, upstream
+output directories, or candidate input files.
+
+The command writes:
+
+- `local_asset_next_bounded_smoke_iteration_execution_request.json`
+- `local_asset_next_bounded_smoke_iteration_execution_request_manifest.json`
+- `local_asset_next_bounded_smoke_iteration_execution_request_summary.md`
+- `local_asset_next_bounded_smoke_iteration_execution_request_checklist.md`
+- `artifact_index.json`
+- `artifact_index_manifest.json`
+
+The execution request is ready only when the generated next admission JSON,
+manifest, artifact index, and artifact index manifest exist and are trusted;
+manifest hashes match; admission status is
+`next_bounded_smoke_iteration_admission_ready`; admission decision is
+`admit_prepare_next_bounded_smoke_iteration`; admission next action is
+`create_next_bounded_smoke_iteration_execution_request`; prepare is admitted;
+source execute permission is false; source next iteration execution and output
+creation are false; production scan, production promotion, automatic
+approval, and autonomous execution flags are false; requested metadata is
+present; and requested limits are within bounds.
+
+When ready, the request record emits
+`request_status: next_bounded_smoke_iteration_execution_request_ready`,
+`request_decision: create_future_bounded_smoke_iteration_execution_request`,
+and `next_allowed_action: await_separate_bounded_smoke_iteration_runner`.
+It creates only a durable request artifact for a later separate bounded smoke
+iteration runner.
+
+This command does not run scan, readiness, human smoke, review packet
+generation, promotion gates, bounded smoke iteration, iteration review,
+iteration promotion, cycle contract generation, cycle human review generation,
+or next admission generation. It does not execute the next bounded smoke
+iteration, create a next iteration output directory, create the requested next
+iteration output directory, approve production scan, grant production
+promotion, add automatic approval or autonomy, mutate upstream outputs, mutate
+candidate input, move, rename, delete, or deduplicate files, add media
+organizer behavior, add UI or Operator Console behavior, start watcher/daemon
+behavior, use network access, call model APIs, invoke external runtimes, or
+modify HFX.
+
 Blocked statuses repair artifacts, repair human review, or reject boundary
 violations. Missing required artifacts and untrusted artifacts repair
 artifacts. Non-approved human review records and prepare denial repair human
@@ -1283,6 +1367,45 @@ admission status, admission decision, next allowed action, prepare admission,
 execute denial, human review requirements, and explicit false boundary flags.
 It records prepare-only permission metadata and does not execute the next
 bounded smoke iteration or create the next iteration output directory.
+
+Task graphs can include a next bounded smoke iteration execution request node:
+
+```json
+{
+  "node_id": "request_next_iteration_execution",
+  "adapter_id": "local_asset_runtime",
+  "capability": "launch_local_asset_next_bounded_smoke_iteration_execution_request",
+  "execution_mode": "fixture",
+  "depends_on": [],
+  "approval_checkpoint_required": true,
+  "inputs": {
+    "next_admission_output_dir": "/path/to/next-admission-output",
+    "output_dir": "/path/to/execution-request-output",
+    "project_id": "demo_project",
+    "request_id": "request-002",
+    "operator_id": "operator-001",
+    "operator_notes": "optional notes",
+    "requested_next_iteration_id": "iteration-002",
+    "requested_candidate_input_dir": "/path/to/future-candidate-input",
+    "requested_next_iteration_output_dir": "/path/to/future-iteration-output",
+    "requested_max_files": 25,
+    "requested_max_total_bytes": 104857600,
+    "requested_max_depth": 4,
+    "requested_compare_previous_scan_manifest_path": "/path/to/previous/asset_manifest.json",
+    "requested_previous_iteration_artifact_index_path": "/path/to/previous/artifact_index.json"
+  }
+}
+```
+
+The node runs
+`launch-local-asset-next-bounded-smoke-iteration-execution-request` and records
+the request, manifest, summary, checklist, artifact index paths, request
+status, request decision, next allowed action, requested metadata and limits,
+future request creation flag, execute denial, next-iteration execution/output
+denial, candidate access denial, human approval/review requirements, and
+explicit false boundary flags. It records request metadata only and does not
+execute the next bounded smoke iteration or create the requested next
+iteration output directory.
 
 Task graph execution now also emits `task_graph_artifact_outputs.json` in the
 graph `output_dir` after node execution. This manifest is a graph-level,
