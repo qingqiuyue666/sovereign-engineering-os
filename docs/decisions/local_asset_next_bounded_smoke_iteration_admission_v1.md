@@ -311,8 +311,9 @@ deterministic across equivalent runs.
 - Final `git diff --check` result: PASS.
 - Final `git status --short` result: clean after commit.
 - Final branch verification state: branch
-  `feat/local-asset-next-bounded-smoke-iteration-admission-v1` created from
-  up-to-date `main`, committed locally, and ready for push.
+  `feat/local-asset-next-bounded-smoke-iteration-admission-v1` pushed, draft
+  PR #410 opened against main, post-commit validation passed, final
+  `git diff --check` passed, and final `git status --short` was clean.
 
 ## Next Recommended Branch
 
