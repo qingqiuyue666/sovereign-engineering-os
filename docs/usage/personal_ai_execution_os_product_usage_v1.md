@@ -446,6 +446,71 @@ deduplicate files, does not perform media organizer behavior, does not use
 network access, does not call model APIs, and does not invoke external
 creative runtimes.
 
+## Local Asset Smoke Iteration Review Packet
+
+```bash
+python3 -m kernel.personal_ai.local_mvp_cli launch-local-asset-smoke-iteration-review-packet \
+  --iteration-output-dir /path/to/iteration-output \
+  --output-dir /path/to/iteration-review-output \
+  --project-id demo_project
+```
+
+Required arguments are `--iteration-output-dir` and `--output-dir`.
+`--project-id` is optional. Both directories must already exist, must be real
+directories, and must not be symlinks. The review `output_dir` is not created
+automatically. It must not equal `iteration_output_dir`, must not be inside
+it, and must not contain it. If generated iteration artifacts safely expose
+the candidate input directory, promotion output directory, or delegated smoke
+output directory, the review `output_dir` must not be inside any of them.
+
+This command consumes generated bounded smoke iteration artifacts only,
+including the iteration result, manifest, root artifact index, signoff,
+admission, delegated smoke artifacts under `smoke/`, and delegated scan
+artifacts under `smoke/scan/`. It may hash generated artifact files. It does
+not run a scan, run readiness, run human smoke, run bounded smoke iteration,
+run promotion gate, hash candidate files, read raw candidate file contents,
+copy raw private content, mutate inputs, mutate iteration outputs, mutate
+smoke outputs, approve production scanning, or grant production promotion.
+
+The command writes these review artifacts into `output_dir`:
+
+- `local_asset_smoke_iteration_review_packet.json`
+- `local_asset_smoke_iteration_review_packet_manifest.json`
+- `local_asset_smoke_iteration_review_summary.md`
+- `local_asset_smoke_iteration_human_decision_checklist.md`
+- `artifact_index.json`
+- `artifact_index_manifest.json`
+
+All writes are exclusive and fail closed if any of those files already exist.
+The review packet summarizes outer iteration signoff, admission, promotion
+gate validation, delegated human smoke state, delegated scan state,
+quarantine, duplicates, generated SQLite manifest/query summary, incremental
+plan counts, failure state, warning state, and explicit boundaries.
+
+Iteration review status values are:
+
+- `review_ready`
+- `review_ready_with_warnings`
+- `review_blocked_missing_required_artifacts`
+- `review_blocked_failed_iteration`
+- `review_blocked_untrusted_artifacts`
+
+Recommended human decision values are:
+
+- `generate_promotion_gate_for_iteration`
+- `inspect_iteration_quarantine_before_promotion`
+- `inspect_iteration_duplicates_before_promotion`
+- `inspect_iteration_incremental_changes_before_promotion`
+- `reject_and_repair_iteration`
+
+A clean review can recommend generating a promotion gate for the iteration.
+It never recommends production scan. The checklist is for human review only:
+it does not suggest deleting, moving, renaming, or deduplicating files, does
+not grant automatic approval, and does not add UI, desktop app behavior,
+Operator Console behavior, watcher/daemon behavior, network access, model API
+calls, external creative runtime activation, HFX changes, global database
+state, or production autonomy.
+
 ## Model Workflows
 
 Deterministic mock:
@@ -745,6 +810,37 @@ production scan approval, production scan execution, automatic approval,
 watcher/daemon behavior, input mutation, file movement, file renaming, file
 deletion, duplicate deletion, media organizer behavior, network access, model
 API calls, and external runtime invocation.
+
+Task graphs can include a bounded smoke iteration review packet node:
+
+```json
+{
+  "node_id": "review_iteration",
+  "adapter_id": "local_asset_runtime",
+  "capability": "launch_local_asset_smoke_iteration_review_packet",
+  "execution_mode": "fixture",
+  "depends_on": [],
+  "approval_checkpoint_required": true,
+  "inputs": {
+    "iteration_output_dir": "/path/to/iteration-output",
+    "output_dir": "/path/to/iteration-review-output",
+    "project_id": "demo_project"
+  }
+}
+```
+
+The node runs `launch-local-asset-smoke-iteration-review-packet` and records
+the packet, manifest, summary, decision checklist, artifact index paths,
+iteration review status, recommended human decision, iteration status,
+bounded smoke iteration status, smoke completion, scan completion, and
+explicit false values for production promotion, production scan approval,
+production scan execution, scan execution by the review packet, readiness
+execution, human smoke execution, bounded iteration execution by the review
+packet, promotion gate execution, raw candidate content reads, candidate file
+hashing, input mutation, iteration output mutation, smoke output mutation,
+file movement, file renaming, file deletion, duplicate deletion, media
+organizer behavior, network access, model API calls, and external runtime
+invocation.
 
 Task graph execution now also emits `task_graph_artifact_outputs.json` in the
 graph `output_dir` after node execution. This manifest is a graph-level,
