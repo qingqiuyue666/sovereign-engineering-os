@@ -66,6 +66,10 @@ _LAUNCHER_WORKFLOW_CALLABLES = (
         "local_asset_next_bounded_smoke_iteration_execution_request_workflow",
         "run_local_asset_next_bounded_smoke_iteration_execution_request_launcher",
     ),
+    (
+        "local_asset_next_bounded_smoke_iteration_runner_admission_workflow",
+        "run_local_asset_next_bounded_smoke_iteration_runner_admission_launcher",
+    ),
     ("local_office_workflow", "run_local_office_launcher"),
     ("model_fixture_workflow", "run_model_fixture_launcher"),
     ("model_provider_dry_run_workflow", "run_model_provider_dry_run_launcher"),

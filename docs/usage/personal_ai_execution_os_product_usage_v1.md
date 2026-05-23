@@ -919,6 +919,98 @@ add media organizer behavior, add UI or Operator Console behavior, start
 watcher/daemon behavior, use network access, call model APIs, invoke external
 runtimes, or modify HFX.
 
+## Local Asset Next Bounded Smoke Iteration Runner Admission
+
+```bash
+python3 -m kernel.personal_ai.local_mvp_cli launch-local-asset-next-bounded-smoke-iteration-runner-admission \
+  --execution-request-output-dir /path/to/execution-request-output \
+  --output-dir /path/to/runner-admission-output \
+  --runner-admission-id runner-admission-002 \
+  --runner-operator-id operator-001 \
+  --runner-operator-acknowledgement-phrase I_ACKNOWLEDGE_LOCAL_ASSET_BOUNDED_SMOKE_RUNNER_ADMISSION_ONLY \
+  --admitted-runner-id bounded-smoke-runner \
+  --admitted-runner-version 1.0.0 \
+  --admitted-max-files 25 \
+  --admitted-max-total-bytes 104857600 \
+  --admitted-max-depth 4 \
+  --project-id demo_project \
+  --operator-notes "optional notes" \
+  --runner-environment-label local-fixture
+```
+
+`--execution-request-output-dir` and `--output-dir` must already exist, must
+be real directories, and must not be symlinks. The runner admission output
+directory is not created automatically. It must be separate from the execution
+request output directory, must not be inside it, and must not contain it. All
+runner admission output writes are exclusive and fail closed on existing files.
+
+The required acknowledgement phrase is
+`I_ACKNOWLEDGE_LOCAL_ASSET_BOUNDED_SMOKE_RUNNER_ADMISSION_ONLY`. The command
+validates that phrase exactly and stores only its SHA-256 hash. The plaintext
+acknowledgement phrase is never persisted in the runner admission artifact,
+manifest, summary, checklist, or artifact index. Invalid acknowledgement writes
+a blocked runner admission artifact when the output directory is safe.
+
+The command reads and binds only generated execution request artifacts:
+
+- `local_asset_next_bounded_smoke_iteration_execution_request.json`
+- `local_asset_next_bounded_smoke_iteration_execution_request_manifest.json`
+- `artifact_index.json`
+- `artifact_index_manifest.json`
+- optional execution request summary and checklist markdown files when present
+
+It does not recursively index the execution request output directory, next
+admission output directory, cycle human review output directory, cycle
+contract output directory, upstream output directories, or candidate input
+files. Requested candidate input path, requested next iteration output path,
+previous scan manifest path, and previous iteration artifact index path are
+copied only as inherited metadata from the trusted execution request artifact.
+They are not created, resolved strictly, statted, listed, read, hashed, or
+path-validated.
+
+The command writes:
+
+- `local_asset_next_bounded_smoke_iteration_runner_admission.json`
+- `local_asset_next_bounded_smoke_iteration_runner_admission_manifest.json`
+- `local_asset_next_bounded_smoke_iteration_runner_admission_summary.md`
+- `local_asset_next_bounded_smoke_iteration_runner_admission_checklist.md`
+- `artifact_index.json`
+- `artifact_index_manifest.json`
+
+Runner admission is ready only when the generated execution request JSON,
+manifest, artifact index, and artifact index manifest exist and are trusted;
+manifest hashes match; request status is
+`next_bounded_smoke_iteration_execution_request_ready`; request decision is
+`create_future_bounded_smoke_iteration_execution_request`; request next action
+is `await_separate_bounded_smoke_iteration_runner`; the future execution
+request was created; source execute permission, next iteration execution,
+future output creation, requested future output creation, candidate
+validation/list/read/hash flags, production approval, production promotion,
+automatic approval, and autonomous execution are all false; runner admission
+metadata is non-empty; admitted limits are valid; and admitted limits do not
+exceed the requested execution request limits.
+
+When ready, the runner admission record emits
+`admission_status: next_bounded_smoke_iteration_runner_admission_ready`,
+`admission_decision: admit_runner_to_consume_future_execution_request`, and
+`next_allowed_action: await_separate_bounded_smoke_iteration_runner_execution`.
+This admits only that a later separate bounded smoke iteration runner branch
+may consume the request. It sets `runner_execution_allowed: false` and
+`next_bounded_smoke_iteration_execute_allowed: false`.
+
+This command is runner-admission-only. It does not run scan, readiness, human
+smoke, smoke review packet generation, smoke promotion gate, bounded smoke
+iteration, iteration review packet generation, iteration promotion gate, cycle
+contract generation, cycle human review generation, next admission generation,
+or execution request generation. It does not execute the runner, execute the
+next bounded smoke iteration, create a next iteration output directory,
+validate/stat/list candidate paths, read raw candidate content, hash candidate
+input files, mutate upstream outputs, mutate candidate input, move, rename,
+delete, or deduplicate files, add media organizer behavior, approve production
+scan, grant production promotion, add automatic approval or autonomous
+execution, add UI or Operator Console behavior, start watcher/daemon behavior,
+use network access, call model APIs, invoke external runtimes, or modify HFX.
+
 ## Model Workflows
 
 Deterministic mock:
@@ -1406,6 +1498,45 @@ denial, candidate access denial, human approval/review requirements, and
 explicit false boundary flags. It records request metadata only and does not
 execute the next bounded smoke iteration or create the requested next
 iteration output directory.
+
+Task graphs can include a next bounded smoke iteration runner admission node:
+
+```json
+{
+  "node_id": "admit_next_iteration_runner",
+  "adapter_id": "local_asset_runtime",
+  "capability": "launch_local_asset_next_bounded_smoke_iteration_runner_admission",
+  "execution_mode": "fixture",
+  "depends_on": [],
+  "approval_checkpoint_required": true,
+  "inputs": {
+    "execution_request_output_dir": "/path/to/execution-request-output",
+    "output_dir": "/path/to/runner-admission-output",
+    "project_id": "demo_project",
+    "runner_admission_id": "runner-admission-002",
+    "runner_operator_id": "operator-001",
+    "runner_operator_acknowledgement_phrase": "I_ACKNOWLEDGE_LOCAL_ASSET_BOUNDED_SMOKE_RUNNER_ADMISSION_ONLY",
+    "admitted_runner_id": "bounded-smoke-runner",
+    "admitted_runner_version": "1.0.0",
+    "admitted_max_files": 25,
+    "admitted_max_total_bytes": 104857600,
+    "admitted_max_depth": 4,
+    "operator_notes": "optional notes",
+    "runner_environment_label": "local-fixture"
+  }
+}
+```
+
+The node runs
+`launch-local-asset-next-bounded-smoke-iteration-runner-admission` and records
+the runner admission, manifest, summary, checklist, artifact index paths,
+admission status, admission decision, next allowed action, runner consume
+admission, runner execution denial, next-iteration execution/output denial,
+candidate access denial, human approval/review requirements, and explicit
+false boundary flags. It stores only the runner acknowledgement hash and does
+not execute the runner, execute the next bounded smoke iteration, create the
+next iteration output directory, approve production scanning, or access
+candidate paths.
 
 Task graph execution now also emits `task_graph_artifact_outputs.json` in the
 graph `output_dir` after node execution. This manifest is a graph-level,

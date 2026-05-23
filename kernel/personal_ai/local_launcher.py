@@ -68,6 +68,10 @@ from kernel.assets.local_asset_next_bounded_smoke_iteration_execution_request im
     LOCAL_ASSET_NEXT_BOUNDED_SMOKE_ITERATION_EXECUTION_REQUEST_SUMMARY_FILE,
     build_local_asset_next_bounded_smoke_iteration_execution_request,
 )
+from kernel.assets.local_asset_next_bounded_smoke_iteration_runner_admission import (
+    LOCAL_ASSET_NEXT_BOUNDED_SMOKE_ITERATION_RUNNER_ADMISSION_SUMMARY_FILE,
+    build_local_asset_next_bounded_smoke_iteration_runner_admission,
+)
 from kernel.assets.local_asset_runtime import run_local_asset_runtime
 from kernel.assets.local_asset_schema import (
     ASSET_INDEX_FILE,
@@ -148,6 +152,7 @@ __all__ = [
     "run_local_asset_bounded_smoke_cycle_human_review_launcher",
     "run_local_asset_next_bounded_smoke_iteration_admission_launcher",
     "run_local_asset_next_bounded_smoke_iteration_execution_request_launcher",
+    "run_local_asset_next_bounded_smoke_iteration_runner_admission_launcher",
     "run_local_office_launcher",
     "run_model_fixture_launcher",
     "run_model_provider_dry_run_launcher",
@@ -1064,6 +1069,52 @@ def run_local_asset_next_bounded_smoke_iteration_execution_request_launcher(
         if result.summary_path is not None
         else result.output_dir
         / LOCAL_ASSET_NEXT_BOUNDED_SMOKE_ITERATION_EXECUTION_REQUEST_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_local_asset_next_bounded_smoke_iteration_runner_admission_launcher(
+    execution_request_output_dir: Path,
+    output_dir: Path,
+    *,
+    runner_admission_id: str,
+    runner_operator_id: str,
+    runner_operator_acknowledgement_phrase: str,
+    admitted_runner_id: str,
+    admitted_runner_version: str,
+    admitted_max_files: int,
+    admitted_max_total_bytes: int,
+    admitted_max_depth: int,
+    project_id: str | None = None,
+    operator_notes: str | None = None,
+    runner_environment_label: str | None = None,
+) -> LauncherWorkflowResult:
+    result = build_local_asset_next_bounded_smoke_iteration_runner_admission(
+        Path(execution_request_output_dir),
+        Path(output_dir),
+        runner_admission_id=runner_admission_id,
+        runner_operator_id=runner_operator_id,
+        runner_operator_acknowledgement_phrase=(
+            runner_operator_acknowledgement_phrase
+        ),
+        admitted_runner_id=admitted_runner_id,
+        admitted_runner_version=admitted_runner_version,
+        admitted_max_files=admitted_max_files,
+        admitted_max_total_bytes=admitted_max_total_bytes,
+        admitted_max_depth=admitted_max_depth,
+        project_id=project_id,
+        operator_notes=operator_notes,
+        runner_environment_label=runner_environment_label,
+    )
+    return LauncherWorkflowResult(
+        workflow="local_asset_next_bounded_smoke_iteration_runner_admission_workflow",
+        output_dir=result.output_dir,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else result.output_dir
+        / LOCAL_ASSET_NEXT_BOUNDED_SMOKE_ITERATION_RUNNER_ADMISSION_SUMMARY_FILE,
         required_human_approval=True,
     )
 
