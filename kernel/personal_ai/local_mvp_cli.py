@@ -26,6 +26,7 @@ from kernel.personal_ai.local_launcher import (
     run_local_asset_next_bounded_smoke_iteration_admission_launcher,
     run_local_asset_next_bounded_smoke_iteration_execution_request_launcher,
     run_local_asset_next_bounded_smoke_cycle_contract_from_run_promotion_gate_launcher,
+    run_local_asset_next_bounded_smoke_cycle_contract_human_review_from_run_promotion_gate_launcher,
     run_local_asset_next_bounded_smoke_iteration_run_promotion_gate_launcher,
     run_local_asset_next_bounded_smoke_iteration_run_review_packet_launcher,
     run_local_asset_next_bounded_smoke_iteration_runner_admission_launcher,
@@ -121,6 +122,7 @@ _SUBCOMMANDS = {
     "launch-local-asset-next-bounded-smoke-iteration-run-review-packet",
     "launch-local-asset-next-bounded-smoke-iteration-run-promotion-gate",
     "launch-local-asset-next-bounded-smoke-cycle-contract-from-run-promotion-gate",
+    "launch-local-asset-next-bounded-smoke-cycle-contract-human-review-from-run-promotion-gate",
     "launch-local-asset-smoke-promotion-gate",
     "launch-local-asset-iteration-promotion-gate",
     "launch-local-asset-smoke-iteration-review-packet",
@@ -903,6 +905,22 @@ def _main_subcommand(argv) -> int:
             )
             _print_command_payload(result.to_cli_payload())
             return 0 if result.complete else 1
+        if (
+            args.command
+            == "launch-local-asset-next-bounded-smoke-cycle-contract-human-review-from-run-promotion-gate"
+        ):
+            result = (
+                run_local_asset_next_bounded_smoke_cycle_contract_human_review_from_run_promotion_gate_launcher(
+                    Path(args.cycle_contract_output_dir),
+                    Path(args.output_dir),
+                    human_review_id=args.human_review_id,
+                    project_id=args.project_id,
+                    reviewer_id=args.reviewer_id,
+                    operator_notes=args.operator_notes,
+                )
+            )
+            _print_command_payload(result.to_cli_payload())
+            return 0 if result.complete else 1
         if args.command == "launch-office-workflow":
             result = run_local_office_launcher(
                 Path(args.input_workbook),
@@ -1539,6 +1557,27 @@ def _build_subcommand_parser():
     launch_next_cycle_contract_from_run_gate_parser.add_argument("--project-id")
     launch_next_cycle_contract_from_run_gate_parser.add_argument("--reviewer-id")
     launch_next_cycle_contract_from_run_gate_parser.add_argument("--operator-notes")
+
+    launch_next_cycle_contract_review_from_run_gate_parser = subparsers.add_parser(
+        "launch-local-asset-next-bounded-smoke-cycle-contract-human-review-from-run-promotion-gate"
+    )
+    launch_next_cycle_contract_review_from_run_gate_parser.add_argument(
+        "--cycle-contract-output-dir",
+        required=True,
+    )
+    launch_next_cycle_contract_review_from_run_gate_parser.add_argument(
+        "--output-dir",
+        required=True,
+    )
+    launch_next_cycle_contract_review_from_run_gate_parser.add_argument(
+        "--human-review-id",
+        required=True,
+    )
+    launch_next_cycle_contract_review_from_run_gate_parser.add_argument("--project-id")
+    launch_next_cycle_contract_review_from_run_gate_parser.add_argument("--reviewer-id")
+    launch_next_cycle_contract_review_from_run_gate_parser.add_argument(
+        "--operator-notes"
+    )
 
     launch_office_parser = subparsers.add_parser("launch-office-workflow")
     launch_office_parser.add_argument("--input-workbook", required=True)
