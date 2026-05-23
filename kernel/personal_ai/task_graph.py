@@ -67,6 +67,9 @@ _LOCAL_ASSET_NEXT_BOUNDED_SMOKE_ITERATION_RUNNER_ADMISSION_CAPABILITY = (
 _LOCAL_ASSET_NEXT_BOUNDED_SMOKE_ITERATION_RUNNER_CAPABILITY = (
     "launch_local_asset_next_bounded_smoke_iteration_runner"
 )
+_LOCAL_ASSET_NEXT_BOUNDED_SMOKE_ITERATION_RUN_REVIEW_PACKET_CAPABILITY = (
+    "launch_local_asset_next_bounded_smoke_iteration_run_review_packet"
+)
 _RUNTIME_ADMISSION_DECISION_TYPE = "personal_ai_runtime_admission_decision_v1"
 _GRAPH_EXECUTION_MODES = ("fixture_execution", "dry_run_plan")
 _NODE_EXECUTION_MODES = ("fixture", "mock", "dry_run", "real_runtime")
@@ -714,6 +717,15 @@ def _run_local_asset_node_if_requested(node):
             == _LOCAL_ASSET_NEXT_BOUNDED_SMOKE_ITERATION_RUNNER_CAPABILITY
         ):
             return _run_local_asset_next_bounded_smoke_iteration_runner_node(node)
+        if (
+            node["capability"]
+            == _LOCAL_ASSET_NEXT_BOUNDED_SMOKE_ITERATION_RUN_REVIEW_PACKET_CAPABILITY
+        ):
+            return (
+                _run_local_asset_next_bounded_smoke_iteration_run_review_packet_node(
+                    node
+                )
+            )
         raise ValueError("task graph local asset scan capability is not registered")
     return _run_local_asset_scan_node(node)
 
@@ -2493,6 +2505,145 @@ def _run_local_asset_next_bounded_smoke_iteration_runner_node(node):
         "production_promotion_granted": False,
         "automatic_approval_performed": False,
         "autonomous_execution_performed": False,
+    }
+
+
+def _run_local_asset_next_bounded_smoke_iteration_run_review_packet_node(node):
+    inputs = node["inputs"]
+    node_label = "local asset next bounded smoke iteration run review packet"
+    runner_output_dir = _required_string_input(
+        inputs,
+        "runner_output_dir",
+        node_label,
+    )
+    actual_next_iteration_output_dir = _required_string_input(
+        inputs,
+        "actual_next_iteration_output_dir",
+        node_label,
+    )
+    output_dir = _required_string_input(inputs, "output_dir", node_label)
+    review_packet_id = _required_string_input(
+        inputs,
+        "review_packet_id",
+        node_label,
+    )
+    project_id = _optional_nonempty_string_input(inputs, "project_id", node_label)
+    reviewer_id = _optional_nonempty_string_input(inputs, "reviewer_id", node_label)
+    operator_notes = inputs.get("operator_notes")
+    if operator_notes is not None and not isinstance(operator_notes, str):
+        raise ValueError("task graph " + node_label + " operator_notes is malformed")
+
+    from kernel.personal_ai.local_launcher import (
+        run_local_asset_next_bounded_smoke_iteration_run_review_packet_launcher,
+    )
+
+    result = run_local_asset_next_bounded_smoke_iteration_run_review_packet_launcher(
+        Path(runner_output_dir),
+        Path(actual_next_iteration_output_dir),
+        Path(output_dir),
+        review_packet_id=review_packet_id,
+        project_id=project_id,
+        reviewer_id=reviewer_id,
+        operator_notes=operator_notes,
+    )
+    payload = result.payload
+    complete = bool(result.complete)
+    return {
+        "status": "completed" if complete else "failed",
+        "output_dir": result.output_dir.as_posix(),
+        "runner_output_dir": payload.get("runner_output_dir"),
+        "actual_next_iteration_output_dir": payload.get(
+            "actual_next_iteration_output_dir"
+        ),
+        "project_id": payload.get("project_id"),
+        "review_packet_id": payload.get("review_packet_id"),
+        "reviewer_id": payload.get("reviewer_id"),
+        "runner_execution_id": payload.get("runner_execution_id"),
+        "runner_operator_id": payload.get("runner_operator_id"),
+        "runner_admission_id": payload.get("runner_admission_id"),
+        "requested_next_iteration_id": payload.get(
+            "requested_next_iteration_id"
+        ),
+        "requested_candidate_input_dir": payload.get(
+            "requested_candidate_input_dir"
+        ),
+        "requested_next_iteration_output_dir": payload.get(
+            "requested_next_iteration_output_dir"
+        ),
+        "requested_limits": payload.get("requested_limits"),
+        "admitted_limits": payload.get("admitted_limits"),
+        "local_asset_next_bounded_smoke_iteration_run_review_packet_complete": (
+            complete
+        ),
+        "local_asset_next_bounded_smoke_iteration_run_review_packet_path": (
+            payload.get(
+                "local_asset_next_bounded_smoke_iteration_run_review_packet_path"
+            )
+        ),
+        "local_asset_next_bounded_smoke_iteration_run_review_packet_manifest_path": (
+            payload.get(
+                "local_asset_next_bounded_smoke_iteration_run_review_packet_manifest_path"
+            )
+        ),
+        "local_asset_next_bounded_smoke_iteration_run_review_packet_summary_path": (
+            payload.get(
+                "local_asset_next_bounded_smoke_iteration_run_review_packet_summary_path"
+            )
+        ),
+        "local_asset_next_bounded_smoke_iteration_run_review_packet_checklist_path": (
+            payload.get(
+                "local_asset_next_bounded_smoke_iteration_run_review_packet_checklist_path"
+            )
+        ),
+        "artifact_index_path": payload.get("artifact_index_path"),
+        "artifact_index_manifest_path": payload.get("artifact_index_manifest_path"),
+        "review_status": payload.get("review_status"),
+        "review_decision": payload.get("review_decision"),
+        "next_allowed_action": payload.get("next_allowed_action"),
+        "review_packet_created": payload.get("review_packet_created"),
+        "promotion_approved": False,
+        "production_scan_approved": False,
+        "production_promotion_granted": False,
+        "automatic_approval_performed": False,
+        "autonomous_execution_performed": False,
+        "runner_reexecution_performed": False,
+        "candidate_input_path_checked_by_review": False,
+        "candidate_input_path_listed_by_review": False,
+        "candidate_input_file_read_by_review": False,
+        "candidate_input_file_hashing_performed_by_review": False,
+        "failure_stage": None if complete else payload.get("failure_stage"),
+        "required_human_approval": True,
+        "required_human_review": True,
+        "readiness_run_performed": False,
+        "human_smoke_run_performed": False,
+        "smoke_review_packet_run_performed": False,
+        "smoke_promotion_gate_run_performed": False,
+        "bounded_smoke_iteration_performed_by_review_packet": False,
+        "iteration_review_packet_run_performed": False,
+        "iteration_promotion_gate_run_performed": False,
+        "cycle_contract_run_performed": False,
+        "cycle_human_review_run_performed": False,
+        "next_admission_run_performed": False,
+        "execution_request_run_performed": False,
+        "runner_admission_run_performed": False,
+        "runner_execution_run_performed_by_review_packet": False,
+        "raw_candidate_content_read_by_review": False,
+        "candidate_file_hashing_performed_by_review": False,
+        "candidate_path_validation_performed_by_review": False,
+        "candidate_path_listing_performed_by_review": False,
+        "input_mutation_performed": False,
+        "upstream_output_mutation_performed": False,
+        "file_move_performed": False,
+        "file_rename_performed": False,
+        "file_delete_performed": False,
+        "duplicate_deletion_performed": False,
+        "media_organizer_behavior_performed": False,
+        "output_overwrite_performed": False,
+        "network_access_performed": False,
+        "model_api_called": False,
+        "external_runtime_invoked": False,
+        "production_scan_performed": False,
+        "production_scan_recommended": False,
     }
 
 
