@@ -147,6 +147,31 @@ def build_default_adapter_registry() -> tuple[AdapterRegistryEntry, ...]:
             ),
         ),
         AdapterRegistryEntry(
+            adapter_id="github_capability_intake_packet",
+            adapter_name="GitHub Capability Intake Packet Builder",
+            mode=AdapterMode.LOCAL_FIXTURE,
+            risk_class=AdapterRiskClass.LOCAL_READONLY,
+            admission_status=AdapterAdmissionStatus.ADMITTED,
+            capabilities=("launch_github_capability_intake_packet",),
+            required_controls=_REQUIRED_CONTROLS
+            + (
+                "local_manifest_only",
+                "bounded_allowlist_evidence",
+                "artifact_index_binding",
+                "no_network",
+                "no_git_clone",
+                "no_third_party_execution",
+                "human_review_required",
+            ),
+            boundary=_approved_output_boundary(),
+            output_policy=_approved_output_policy(),
+            notes=(
+                "Builds local-first GitHub capability intake packets for human "
+                "review; no network search, clone, dependency install, code "
+                "import, or adapter generation."
+            ),
+        ),
+        AdapterRegistryEntry(
             adapter_id="real_browser_runtime_boundary",
             adapter_name="Real Browser Runtime Boundary",
             mode=AdapterMode.FUTURE_EXTERNAL,

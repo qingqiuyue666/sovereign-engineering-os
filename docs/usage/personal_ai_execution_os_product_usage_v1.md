@@ -2086,6 +2086,83 @@ by human review, cycle contract re-execution, candidate access by human
 review, production scan approval, production promotion, mutation/deletion,
 media organizer behavior, network, model, and external runtime use.
 
+## GitHub Capability Intake Packet
+
+```bash
+python3 -m kernel.personal_ai.local_mvp_cli launch-github-capability-intake-packet \
+  --candidate-manifest /path/to/github_candidate_manifest.json \
+  --output-dir /path/to/intake-output \
+  --intake-id github-intake-001 \
+  --candidate-repo-dir /path/to/optional/local/checkout \
+  --project-id demo_project \
+  --reviewer-id reviewer-001
+```
+
+Required arguments are `--candidate-manifest`, `--output-dir`, and
+`--intake-id`. Optional arguments are `--candidate-repo-dir`, `--project-id`,
+`--reviewer-id`, and `--operator-notes`.
+
+The candidate manifest is user-provided JSON with
+`candidate_type = github_capability_candidate_v1`. It declares repository
+identity, intended use, capability domains, license string, runtime language
+claims, external services, install/run/network/secret/filesystem requirements,
+risks, user value hypothesis, and integration hypothesis. The builder
+validates the manifest locally and hash-binds it into the output manifest.
+
+This is an intake packet only. It does not search GitHub, use the network,
+clone repositories, run git, install dependencies, execute third-party code,
+import candidate code, call model APIs, generate adapters, register adapters,
+or grant adoption/production authority.
+
+When `--candidate-repo-dir` is provided, it must already exist, be a real
+directory, and not overlap with `output_dir`. The builder reads only bounded
+allowlist evidence files from the repo root plus `.github/workflows/*.yml` and
+`.github/workflows/*.yaml`. It does not recursively scan arbitrary repository
+files, does not follow symlinks, reads at most 20 evidence files, reads at most
+262144 bytes per evidence file, and caps total evidence reads at 1048576 bytes.
+Oversized and unreadable evidence files are recorded as skipped rather than
+crashing. Evidence file symlinks block the packet.
+
+The command writes:
+
+- `github_capability_intake_packet.json`
+- `github_capability_intake_packet_manifest.json`
+- `github_capability_intake_packet_summary.md`
+- `github_capability_intake_packet_checklist.md`
+- `artifact_index.json`
+- `artifact_index_manifest.json`
+
+All writes are exclusive and fail closed if any expected output file already
+exists, including symlink collisions. Malformed manifests and failed preflights
+return structured failure payloads and write no artifacts.
+
+Task graphs can include a GitHub capability intake node:
+
+```json
+{
+  "node_id": "github_intake",
+  "adapter_id": "github_capability_intake_packet",
+  "capability": "launch_github_capability_intake_packet",
+  "execution_mode": "fixture",
+  "depends_on": [],
+  "approval_checkpoint_required": true,
+  "inputs": {
+    "candidate_manifest": "/path/to/github_candidate_manifest.json",
+    "output_dir": "/path/to/intake-output",
+    "intake_id": "github-intake-001",
+    "candidate_repo_dir": "/path/to/optional/local/checkout",
+    "project_id": "demo_project",
+    "reviewer_id": "reviewer-001",
+    "operator_notes": "optional notes"
+  }
+}
+```
+
+The node writes the packet artifacts, records deterministic risk
+classifications, binds artifact outputs into `task_graph_artifact_outputs.json`,
+and keeps all network/search/clone/git/install/execution/import/adapter/adoption
+boundary fields false.
+
 Task graph execution now also emits `task_graph_artifact_outputs.json` in the
 graph `output_dir` after node execution. This manifest is a graph-level,
 metadata-only, non-authoritative artifact binding surface. It records
