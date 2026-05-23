@@ -1982,6 +1982,110 @@ re-execution, candidate access by contract, production scan approval,
 production promotion, mutation/deletion, media organizer behavior, network,
 model, and external runtime use.
 
+## Next Bounded Smoke Cycle Contract Human Review From Run Promotion Gate
+
+```bash
+python3 -m kernel.personal_ai.local_mvp_cli launch-local-asset-next-bounded-smoke-cycle-contract-human-review-from-run-promotion-gate \
+  --cycle-contract-output-dir /path/to/next-cycle-contract-output \
+  --output-dir /path/to/next-cycle-contract-human-review-output \
+  --human-review-id next-cycle-contract-review-002 \
+  --human-decision approve_next_bounded_smoke_cycle_contract_for_bounded_admission \
+  --human-signoff-phrase I_REVIEWED_LOCAL_ASSET_NEXT_BOUNDED_SMOKE_CYCLE_CONTRACT_FROM_RUN_PROMOTION_GATE \
+  --project-id demo_project \
+  --reviewer-id reviewer-001 \
+  --operator-notes "optional notes"
+```
+
+Required arguments are `--cycle-contract-output-dir`, `--output-dir`, and
+`--human-review-id`, `--human-decision`, and `--human-signoff-phrase`.
+Optional arguments are `--project-id`, `--reviewer-id`, and
+`--operator-notes`. The canonical signoff phrase is exactly
+`I_REVIEWED_LOCAL_ASSET_NEXT_BOUNDED_SMOKE_CYCLE_CONTRACT_FROM_RUN_PROMOTION_GATE`.
+The output directory must already exist, must not be the source cycle
+contract directory, must not be inside it, and must not contain it. Expected
+output files are written exclusively and existing files or symlink collisions
+fail closed.
+
+This command consumes generated output from
+`launch-local-asset-next-bounded-smoke-cycle-contract-from-run-promotion-gate`
+only. Required source artifacts are the cycle contract JSON, its manifest, the
+source `artifact_index.json`, and the source `artifact_index_manifest.json`.
+Optional source summary/checklist markdown files must be hash-bound by the
+source manifest when present.
+
+Allowed bounded `--human-decision` values are:
+
+- `approve_next_bounded_smoke_cycle_contract_for_bounded_admission`
+- `stop_cycle`
+- `repair_artifacts`
+- `repair_cycle_contract`
+- `reject_boundary_violation`
+
+When the source contract is ready, the human decision is exactly
+`approve_next_bounded_smoke_cycle_contract_for_bounded_admission`, and the
+signoff phrase exactly matches the canonical phrase, it emits
+`human_review_status =
+next_bounded_smoke_cycle_contract_human_review_ready`,
+`human_review_decision =
+approve_next_bounded_smoke_cycle_contract_for_bounded_admission`, and
+`next_allowed_action =
+admit_next_bounded_smoke_cycle_contract_for_later_execution_request`.
+This is bounded-admission-only. It does not execute the next cycle and it is
+not production approval.
+
+Missing or invalid human decisions, missing or wrong signoff phrases, and
+non-approve bounded decisions do not allow bounded admission. The review
+stores `human_signoff_phrase_sha256` and
+`human_signoff_phrase_persisted=false`; it does not persist the plaintext
+signoff phrase.
+
+The command emits:
+
+- `local_asset_next_bounded_smoke_cycle_contract_human_review_from_run_promotion_gate.json`
+- `local_asset_next_bounded_smoke_cycle_contract_human_review_from_run_promotion_gate_manifest.json`
+- `local_asset_next_bounded_smoke_cycle_contract_human_review_from_run_promotion_gate_summary.md`
+- `local_asset_next_bounded_smoke_cycle_contract_human_review_from_run_promotion_gate_checklist.md`
+- `artifact_index.json`
+- `artifact_index_manifest.json`
+
+The artifact index binds only the four human-review artifacts. The command
+does not recursively index the source cycle contract output or candidate input
+files, does not read live candidate paths, does not regenerate the cycle
+contract, does not execute a runner, does not create a production gate, does
+not approve production scanning, and does not grant production promotion.
+
+Task graphs can include a next bounded smoke cycle contract human-review node:
+
+```json
+{
+  "node_id": "review_next_cycle_contract",
+  "adapter_id": "local_asset_runtime",
+  "capability": "launch_local_asset_next_bounded_smoke_cycle_contract_human_review_from_run_promotion_gate",
+  "execution_mode": "fixture",
+  "depends_on": [],
+  "approval_checkpoint_required": true,
+  "inputs": {
+    "cycle_contract_output_dir": "/path/to/next-cycle-contract-output",
+    "output_dir": "/path/to/next-cycle-contract-human-review-output",
+    "human_review_id": "next-cycle-contract-review-002",
+    "human_decision": "approve_next_bounded_smoke_cycle_contract_for_bounded_admission",
+    "human_signoff_phrase": "I_REVIEWED_LOCAL_ASSET_NEXT_BOUNDED_SMOKE_CYCLE_CONTRACT_FROM_RUN_PROMOTION_GATE",
+    "project_id": "demo_project",
+    "reviewer_id": "reviewer-001",
+    "operator_notes": "optional notes"
+  }
+}
+```
+
+The node records the human review, manifest, summary, checklist, artifact
+index paths, explicit `human_decision`, signoff hash/persistence metadata,
+source contract status/decision/action, inherited
+review/runner/request metadata, bounded-cycle admission allowance, human
+approval/review requirements, and explicit false flags for runner execution
+by human review, cycle contract re-execution, candidate access by human
+review, production scan approval, production promotion, mutation/deletion,
+media organizer behavior, network, model, and external runtime use.
+
 Task graph execution now also emits `task_graph_artifact_outputs.json` in the
 graph `output_dir` after node execution. This manifest is a graph-level,
 metadata-only, non-authoritative artifact binding surface. It records

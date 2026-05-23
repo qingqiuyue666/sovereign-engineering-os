@@ -124,6 +124,7 @@ def build_default_adapter_registry() -> tuple[AdapterRegistryEntry, ...]:
                 "launch_local_asset_next_bounded_smoke_iteration_run_review_packet",
                 "launch_local_asset_next_bounded_smoke_iteration_run_promotion_gate",
                 "launch_local_asset_next_bounded_smoke_cycle_contract_from_run_promotion_gate",
+                "launch_local_asset_next_bounded_smoke_cycle_contract_human_review_from_run_promotion_gate",
                 "launch_local_asset_smoke_iteration_review_packet",
                 "launch_local_asset_smoke_promotion_gate",
                 "launch_local_asset_smoke_review_packet",

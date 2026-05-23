@@ -88,6 +88,10 @@ from kernel.assets.local_asset_next_bounded_smoke_cycle_contract_from_run_promot
     LOCAL_ASSET_NEXT_BOUNDED_SMOKE_CYCLE_CONTRACT_FROM_RUN_PROMOTION_GATE_SUMMARY_FILE,
     build_local_asset_next_bounded_smoke_cycle_contract_from_run_promotion_gate,
 )
+from kernel.assets.local_asset_next_bounded_smoke_cycle_contract_human_review_from_run_promotion_gate import (
+    LOCAL_ASSET_NEXT_BOUNDED_SMOKE_CYCLE_CONTRACT_HUMAN_REVIEW_FROM_RUN_PROMOTION_GATE_SUMMARY_FILE,
+    build_local_asset_next_bounded_smoke_cycle_contract_human_review_from_run_promotion_gate,
+)
 from kernel.assets.local_asset_runtime import run_local_asset_runtime
 from kernel.assets.local_asset_schema import (
     ASSET_INDEX_FILE,
@@ -173,6 +177,7 @@ __all__ = [
     "run_local_asset_next_bounded_smoke_iteration_run_review_packet_launcher",
     "run_local_asset_next_bounded_smoke_iteration_run_promotion_gate_launcher",
     "run_local_asset_next_bounded_smoke_cycle_contract_from_run_promotion_gate_launcher",
+    "run_local_asset_next_bounded_smoke_cycle_contract_human_review_from_run_promotion_gate_launcher",
     "run_local_office_launcher",
     "run_model_fixture_launcher",
     "run_model_provider_dry_run_launcher",
@@ -1269,6 +1274,44 @@ def run_local_asset_next_bounded_smoke_cycle_contract_from_run_promotion_gate_la
         if result.cycle_contract_summary_path is not None
         else result.output_dir
         / LOCAL_ASSET_NEXT_BOUNDED_SMOKE_CYCLE_CONTRACT_FROM_RUN_PROMOTION_GATE_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_local_asset_next_bounded_smoke_cycle_contract_human_review_from_run_promotion_gate_launcher(
+    cycle_contract_output_dir: Path,
+    output_dir: Path,
+    *,
+    human_review_id: str,
+    human_decision: str,
+    human_signoff_phrase: str,
+    project_id: str | None = None,
+    reviewer_id: str | None = None,
+    operator_notes: str | None = None,
+) -> LauncherWorkflowResult:
+    result = (
+        build_local_asset_next_bounded_smoke_cycle_contract_human_review_from_run_promotion_gate(
+            Path(cycle_contract_output_dir),
+            Path(output_dir),
+            human_review_id=human_review_id,
+            human_decision=human_decision,
+            human_signoff_phrase=human_signoff_phrase,
+            project_id=project_id,
+            reviewer_id=reviewer_id,
+            operator_notes=operator_notes,
+        )
+    )
+    return LauncherWorkflowResult(
+        workflow=(
+            "local_asset_next_bounded_smoke_cycle_contract_human_review_from_run_promotion_gate_workflow"
+        ),
+        output_dir=result.output_dir,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.human_review_summary_path
+        if result.human_review_summary_path is not None
+        else result.output_dir
+        / LOCAL_ASSET_NEXT_BOUNDED_SMOKE_CYCLE_CONTRACT_HUMAN_REVIEW_FROM_RUN_PROMOTION_GATE_SUMMARY_FILE,
         required_human_approval=True,
     )
 
