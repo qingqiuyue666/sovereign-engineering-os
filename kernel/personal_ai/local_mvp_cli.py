@@ -19,6 +19,7 @@ from kernel.personal_ai.local_launcher import (
     run_comfyui_dry_run_launcher,
     run_creative_handoff_launcher,
     run_local_asset_bounded_smoke_iteration_launcher,
+    run_local_asset_bounded_smoke_cycle_contract_launcher,
     run_local_asset_human_smoke_launcher,
     run_local_asset_iteration_promotion_gate_launcher,
     run_local_asset_scan_launcher,
@@ -103,6 +104,7 @@ _SUBCOMMANDS = {
     "run-task-graph-fixture",
     "launch-local-asset-human-smoke-run",
     "launch-local-asset-bounded-smoke-iteration",
+    "launch-local-asset-bounded-smoke-cycle-contract",
     "launch-local-asset-smoke-promotion-gate",
     "launch-local-asset-iteration-promotion-gate",
     "launch-local-asset-smoke-iteration-review-packet",
@@ -719,6 +721,20 @@ def _main_subcommand(argv) -> int:
             )
             _print_command_payload(result.to_cli_payload())
             return 0 if result.complete else 1
+        if args.command == "launch-local-asset-bounded-smoke-cycle-contract":
+            result = run_local_asset_bounded_smoke_cycle_contract_launcher(
+                Path(args.readiness_output_dir),
+                Path(args.smoke_output_dir),
+                Path(args.smoke_review_output_dir),
+                Path(args.smoke_promotion_output_dir),
+                Path(args.iteration_output_dir),
+                Path(args.iteration_review_output_dir),
+                Path(args.iteration_promotion_output_dir),
+                Path(args.output_dir),
+                project_id=args.project_id,
+            )
+            _print_command_payload(result.to_cli_payload())
+            return 0 if result.complete else 1
         if args.command == "launch-office-workflow":
             result = run_local_office_launcher(
                 Path(args.input_workbook),
@@ -1088,6 +1104,37 @@ def _build_subcommand_parser():
     )
     launch_iteration_promotion_parser.add_argument("--output-dir", required=True)
     launch_iteration_promotion_parser.add_argument("--project-id")
+
+    launch_cycle_contract_parser = subparsers.add_parser(
+        "launch-local-asset-bounded-smoke-cycle-contract"
+    )
+    launch_cycle_contract_parser.add_argument(
+        "--readiness-output-dir",
+        required=True,
+    )
+    launch_cycle_contract_parser.add_argument("--smoke-output-dir", required=True)
+    launch_cycle_contract_parser.add_argument(
+        "--smoke-review-output-dir",
+        required=True,
+    )
+    launch_cycle_contract_parser.add_argument(
+        "--smoke-promotion-output-dir",
+        required=True,
+    )
+    launch_cycle_contract_parser.add_argument(
+        "--iteration-output-dir",
+        required=True,
+    )
+    launch_cycle_contract_parser.add_argument(
+        "--iteration-review-output-dir",
+        required=True,
+    )
+    launch_cycle_contract_parser.add_argument(
+        "--iteration-promotion-output-dir",
+        required=True,
+    )
+    launch_cycle_contract_parser.add_argument("--output-dir", required=True)
+    launch_cycle_contract_parser.add_argument("--project-id")
 
     launch_office_parser = subparsers.add_parser("launch-office-workflow")
     launch_office_parser.add_argument("--input-workbook", required=True)

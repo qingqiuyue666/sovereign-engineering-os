@@ -50,6 +50,10 @@ _LAUNCHER_WORKFLOW_CALLABLES = (
         "local_asset_iteration_promotion_gate_workflow",
         "run_local_asset_iteration_promotion_gate_launcher",
     ),
+    (
+        "local_asset_bounded_smoke_cycle_contract_workflow",
+        "run_local_asset_bounded_smoke_cycle_contract_launcher",
+    ),
     ("local_office_workflow", "run_local_office_launcher"),
     ("model_fixture_workflow", "run_model_fixture_launcher"),
     ("model_provider_dry_run_workflow", "run_model_provider_dry_run_launcher"),
@@ -74,6 +78,7 @@ _REQUIRED_CLI_SUBCOMMANDS = (
     "launch-local-asset-smoke-iteration-review-packet",
     "launch-local-asset-smoke-promotion-gate",
     "launch-local-asset-iteration-promotion-gate",
+    "launch-local-asset-bounded-smoke-cycle-contract",
     "launch-office-workflow",
     "launch-model-fixture",
     "launch-model-provider-dry-run",
