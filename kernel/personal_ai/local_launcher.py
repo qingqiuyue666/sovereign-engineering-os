@@ -60,6 +60,10 @@ from kernel.assets.local_asset_bounded_smoke_cycle_human_review import (
     LOCAL_ASSET_BOUNDED_SMOKE_CYCLE_HUMAN_REVIEW_SUMMARY_FILE,
     build_local_asset_bounded_smoke_cycle_human_review,
 )
+from kernel.assets.local_asset_next_bounded_smoke_iteration_admission import (
+    LOCAL_ASSET_NEXT_BOUNDED_SMOKE_ITERATION_ADMISSION_SUMMARY_FILE,
+    build_local_asset_next_bounded_smoke_iteration_admission,
+)
 from kernel.assets.local_asset_runtime import run_local_asset_runtime
 from kernel.assets.local_asset_schema import (
     ASSET_INDEX_FILE,
@@ -138,6 +142,7 @@ __all__ = [
     "run_local_asset_iteration_promotion_gate_launcher",
     "run_local_asset_bounded_smoke_cycle_contract_launcher",
     "run_local_asset_bounded_smoke_cycle_human_review_launcher",
+    "run_local_asset_next_bounded_smoke_iteration_admission_launcher",
     "run_local_office_launcher",
     "run_model_fixture_launcher",
     "run_model_provider_dry_run_launcher",
@@ -976,6 +981,34 @@ def run_local_asset_bounded_smoke_cycle_human_review_launcher(
         if result.summary_path is not None
         else result.output_dir
         / LOCAL_ASSET_BOUNDED_SMOKE_CYCLE_HUMAN_REVIEW_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_local_asset_next_bounded_smoke_iteration_admission_launcher(
+    cycle_human_review_output_dir: Path,
+    output_dir: Path,
+    *,
+    project_id: str | None = None,
+    requested_next_iteration_id: str | None = None,
+    operator_notes: str | None = None,
+) -> LauncherWorkflowResult:
+    result = build_local_asset_next_bounded_smoke_iteration_admission(
+        Path(cycle_human_review_output_dir),
+        Path(output_dir),
+        project_id=project_id,
+        requested_next_iteration_id=requested_next_iteration_id,
+        operator_notes=operator_notes,
+    )
+    return LauncherWorkflowResult(
+        workflow="local_asset_next_bounded_smoke_iteration_admission_workflow",
+        output_dir=result.output_dir,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else result.output_dir
+        / LOCAL_ASSET_NEXT_BOUNDED_SMOKE_ITERATION_ADMISSION_SUMMARY_FILE,
         required_human_approval=True,
     )
 
