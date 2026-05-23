@@ -1661,6 +1661,111 @@ admitted/requested limits, human approval/review requirements, and explicit
 false production, autonomy, mutation, media organizer, network, model, and
 external runtime flags.
 
+## Next Bounded Smoke Iteration Run Review Packet
+
+```bash
+python3 -m kernel.personal_ai.local_mvp_cli launch-local-asset-next-bounded-smoke-iteration-run-review-packet \
+  --runner-output-dir /path/to/runner-output \
+  --actual-next-iteration-output-dir /path/to/actual-next-iteration-output \
+  --output-dir /path/to/run-review-packet-output \
+  --review-packet-id run-review-002 \
+  --project-id demo_project \
+  --reviewer-id reviewer-001 \
+  --operator-notes "optional notes"
+```
+
+The run review packet is a generated-artifacts-only, non-executing review
+layer after the next bounded smoke iteration runner. It consumes only the
+runner output directory and the actual next iteration output directory. The
+output directory must already exist, and all review packet writes are
+exclusive and fail closed on existing files.
+
+Required source artifacts from the runner output directory are:
+
+- `local_asset_next_bounded_smoke_iteration_runner.json`
+- `local_asset_next_bounded_smoke_iteration_runner_manifest.json`
+- `artifact_index.json`
+- `artifact_index_manifest.json`
+
+Optional runner source artifacts are the runner summary and checklist
+markdown files. Required source artifacts from the actual next iteration
+output directory are:
+
+- `local_asset_next_bounded_smoke_iteration_run.json`
+- `local_asset_next_bounded_smoke_iteration_run_manifest.json`
+- `local_asset_next_bounded_smoke_iteration_candidate_manifest.json`
+- `artifact_index.json`
+- `artifact_index_manifest.json`
+
+Optional actual iteration source artifacts are the iteration summary and
+checklist markdown files. The review packet verifies generated type fields,
+manifest hashes, artifact index hashes, runner/run/candidate consistency,
+candidate counts, byte totals, max depth, admitted limits, requested paths,
+bounded file records, and the runner manifest's actual-iteration artifact
+bindings.
+
+The review packet is ready only when the runner and actual run record show
+`next_bounded_smoke_iteration_runner_completed`,
+`executed_bounded_smoke_iteration_under_admitted_limits`, and
+`review_next_bounded_smoke_iteration_run`; the runner execution and next
+iteration execution flags are true; output directory creation flags are
+false; candidate limits were enforced; candidate symlinks are empty; bounded
+file records are deterministic metadata-only records; source artifacts are
+trusted; and there are no missing artifacts, untrusted artifacts, source
+boundary violations, or cross-artifact inconsistencies.
+
+The command emits:
+
+- `local_asset_next_bounded_smoke_iteration_run_review_packet.json`
+- `local_asset_next_bounded_smoke_iteration_run_review_packet_manifest.json`
+- `local_asset_next_bounded_smoke_iteration_run_review_packet_summary.md`
+- `local_asset_next_bounded_smoke_iteration_run_review_packet_checklist.md`
+- `artifact_index.json`
+- `artifact_index_manifest.json`
+
+The artifact index binds only the four review packet artifacts and does not
+recursively index runner output, actual iteration output, upstream cycle
+outputs, or candidate input files.
+
+This review layer does not re-run the runner, run candidate discovery,
+validate live candidate paths, list candidate directories, read raw candidate
+contents, hash live candidate files, create source output directories, mutate
+upstream outputs, move/rename/delete files, deduplicate files, add media
+organizer behavior, approve promotion, approve production scanning, grant
+production promotion, use network access, call model APIs, invoke external
+runtimes, add UI, add Operator Console behavior, add watcher behavior, or
+grant autonomy. A ready packet only routes to the later separate promotion
+gate action `run_next_bounded_smoke_iteration_run_promotion_gate`.
+
+Task graphs can include a next bounded smoke iteration run review packet node:
+
+```json
+{
+  "node_id": "review_next_iteration_run",
+  "adapter_id": "local_asset_runtime",
+  "capability": "launch_local_asset_next_bounded_smoke_iteration_run_review_packet",
+  "execution_mode": "fixture",
+  "depends_on": [],
+  "approval_checkpoint_required": true,
+  "inputs": {
+    "runner_output_dir": "/path/to/runner-output",
+    "actual_next_iteration_output_dir": "/path/to/actual-next-iteration-output",
+    "output_dir": "/path/to/run-review-packet-output",
+    "review_packet_id": "run-review-002",
+    "project_id": "demo_project",
+    "reviewer_id": "reviewer-001",
+    "operator_notes": "optional notes"
+  }
+}
+```
+
+The node records the review packet, manifest, summary, checklist, artifact
+index paths, review status, review decision, next allowed action, inherited
+runner and request metadata, human approval/review requirements, and explicit
+false flags for runner re-execution, candidate access by review, production
+approval, mutation/deletion, media organizer behavior, network, model, and
+external runtime use.
+
 Task graph execution now also emits `task_graph_artifact_outputs.json` in the
 graph `output_dir` after node execution. This manifest is a graph-level,
 metadata-only, non-authoritative artifact binding surface. It records
