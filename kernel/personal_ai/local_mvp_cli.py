@@ -25,6 +25,7 @@ from kernel.personal_ai.local_launcher import (
     run_local_asset_iteration_promotion_gate_launcher,
     run_local_asset_next_bounded_smoke_iteration_admission_launcher,
     run_local_asset_next_bounded_smoke_iteration_execution_request_launcher,
+    run_local_asset_next_bounded_smoke_iteration_run_promotion_gate_launcher,
     run_local_asset_next_bounded_smoke_iteration_run_review_packet_launcher,
     run_local_asset_next_bounded_smoke_iteration_runner_admission_launcher,
     run_local_asset_next_bounded_smoke_iteration_runner_launcher,
@@ -117,6 +118,7 @@ _SUBCOMMANDS = {
     "launch-local-asset-next-bounded-smoke-iteration-runner-admission",
     "launch-local-asset-next-bounded-smoke-iteration-runner",
     "launch-local-asset-next-bounded-smoke-iteration-run-review-packet",
+    "launch-local-asset-next-bounded-smoke-iteration-run-promotion-gate",
     "launch-local-asset-smoke-promotion-gate",
     "launch-local-asset-iteration-promotion-gate",
     "launch-local-asset-smoke-iteration-review-packet",
@@ -867,6 +869,22 @@ def _main_subcommand(argv) -> int:
             )
             _print_command_payload(result.to_cli_payload())
             return 0 if result.complete else 1
+        if (
+            args.command
+            == "launch-local-asset-next-bounded-smoke-iteration-run-promotion-gate"
+        ):
+            result = (
+                run_local_asset_next_bounded_smoke_iteration_run_promotion_gate_launcher(
+                    Path(args.run_review_packet_output_dir),
+                    Path(args.output_dir),
+                    promotion_gate_id=args.promotion_gate_id,
+                    project_id=args.project_id,
+                    reviewer_id=args.reviewer_id,
+                    operator_notes=args.operator_notes,
+                )
+            )
+            _print_command_payload(result.to_cli_payload())
+            return 0 if result.complete else 1
         if args.command == "launch-office-workflow":
             result = run_local_office_launcher(
                 Path(args.input_workbook),
@@ -1465,6 +1483,25 @@ def _build_subcommand_parser():
     launch_next_iteration_run_review_packet_parser.add_argument("--project-id")
     launch_next_iteration_run_review_packet_parser.add_argument("--reviewer-id")
     launch_next_iteration_run_review_packet_parser.add_argument("--operator-notes")
+
+    launch_next_iteration_run_promotion_gate_parser = subparsers.add_parser(
+        "launch-local-asset-next-bounded-smoke-iteration-run-promotion-gate"
+    )
+    launch_next_iteration_run_promotion_gate_parser.add_argument(
+        "--run-review-packet-output-dir",
+        required=True,
+    )
+    launch_next_iteration_run_promotion_gate_parser.add_argument(
+        "--output-dir",
+        required=True,
+    )
+    launch_next_iteration_run_promotion_gate_parser.add_argument(
+        "--promotion-gate-id",
+        required=True,
+    )
+    launch_next_iteration_run_promotion_gate_parser.add_argument("--project-id")
+    launch_next_iteration_run_promotion_gate_parser.add_argument("--reviewer-id")
+    launch_next_iteration_run_promotion_gate_parser.add_argument("--operator-notes")
 
     launch_office_parser = subparsers.add_parser("launch-office-workflow")
     launch_office_parser.add_argument("--input-workbook", required=True)

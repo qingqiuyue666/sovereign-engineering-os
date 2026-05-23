@@ -1766,6 +1766,115 @@ false flags for runner re-execution, candidate access by review, production
 approval, mutation/deletion, media organizer behavior, network, model, and
 external runtime use.
 
+## Next Bounded Smoke Iteration Run Promotion Gate
+
+```bash
+python3 -m kernel.personal_ai.local_mvp_cli launch-local-asset-next-bounded-smoke-iteration-run-promotion-gate \
+  --run-review-packet-output-dir /path/to/run-review-packet-output \
+  --output-dir /path/to/run-promotion-gate-output \
+  --promotion-gate-id run-promotion-gate-002 \
+  --project-id demo_project \
+  --reviewer-id reviewer-001 \
+  --operator-notes "optional notes"
+```
+
+Required arguments are `--run-review-packet-output-dir`, `--output-dir`, and
+`--promotion-gate-id`. Optional arguments are `--project-id`, `--reviewer-id`,
+and `--operator-notes`. The output directory must already exist and must not
+be the source review packet directory, inside it, or contain it. All writes
+are exclusive and fail closed on existing files or symlink collisions.
+
+The gate consumes generated run review packet artifacts only. Required source
+artifacts are:
+
+- `local_asset_next_bounded_smoke_iteration_run_review_packet.json`
+- `local_asset_next_bounded_smoke_iteration_run_review_packet_manifest.json`
+- `artifact_index.json`
+- `artifact_index_manifest.json`
+
+Optional source artifacts are the generated run review packet summary and
+checklist markdown files. The gate verifies generated type fields, the review
+packet manifest's packet, summary, and checklist hashes, and the source
+artifact index manifest's artifact index hash. Malformed JSON, symlink source
+artifacts, missing required type fields, and hash mismatches are untrusted.
+
+The promotion gate is ready only when the source review packet has
+`review_status =
+next_bounded_smoke_iteration_run_review_packet_ready`,
+`review_decision =
+package_next_bounded_smoke_iteration_run_for_promotion_gate_review`, and
+`next_allowed_action =
+run_next_bounded_smoke_iteration_run_promotion_gate`; all cross-artifact
+checks passed; review blockers, missing required artifacts, and untrusted
+artifacts are empty; deterministic ordering is true; source boundary booleans
+are present and type-correct; runner execution and next bounded smoke
+iteration execution are already true in the reviewed run facts; candidate
+limits were enforced; candidate symlink metadata is empty; candidate counts,
+total bytes, and max depth are non-negative integers; and bounded file records
+are sorted metadata-only records.
+
+When ready, the gate emits `gate_status =
+next_bounded_smoke_iteration_run_promotion_gate_ready`, `gate_decision =
+approve_next_bounded_smoke_iteration_run_for_cycle_contract`, and
+`next_allowed_action = create_next_bounded_smoke_cycle_contract_from_run`.
+This is bounded-run promotion only. It allows a later separate
+cycle-contract-generation branch to consume the gate, but it does not generate
+the cycle contract.
+
+The command emits:
+
+- `local_asset_next_bounded_smoke_iteration_run_promotion_gate.json`
+- `local_asset_next_bounded_smoke_iteration_run_promotion_gate_manifest.json`
+- `local_asset_next_bounded_smoke_iteration_run_promotion_gate_summary.md`
+- `local_asset_next_bounded_smoke_iteration_run_promotion_gate_checklist.md`
+- `artifact_index.json`
+- `artifact_index_manifest.json`
+
+The artifact index binds only the four promotion gate artifacts. It does not
+recursively index the review packet output, runner output, actual iteration
+output, upstream cycle outputs, or candidate input files.
+
+This gate does not access live candidate paths. It does not validate candidate
+paths, list candidate directories, read candidate file contents, or hash
+candidate input files. It does not re-run the runner, regenerate the review
+packet, run readiness, run human smoke, run smoke review, run smoke promotion,
+run bounded smoke iteration, run iteration review, run iteration promotion,
+generate cycle contracts, mutate upstream outputs, move/rename/delete files,
+deduplicate files, copy raw private content, add media organizer behavior, use
+network access, call model APIs, invoke external runtimes, approve production
+scanning, grant production promotion, add UI, add Operator Console behavior,
+add watcher/daemon behavior, perform automatic approval, or grant autonomy.
+
+Task graphs can include a next bounded smoke iteration run promotion gate node:
+
+```json
+{
+  "node_id": "promote_next_iteration_run",
+  "adapter_id": "local_asset_runtime",
+  "capability": "launch_local_asset_next_bounded_smoke_iteration_run_promotion_gate",
+  "execution_mode": "fixture",
+  "depends_on": [],
+  "approval_checkpoint_required": true,
+  "inputs": {
+    "run_review_packet_output_dir": "/path/to/run-review-packet-output",
+    "output_dir": "/path/to/run-promotion-gate-output",
+    "promotion_gate_id": "run-promotion-gate-002",
+    "project_id": "demo_project",
+    "reviewer_id": "reviewer-001",
+    "operator_notes": "optional notes"
+  }
+}
+```
+
+The node records the promotion gate, manifest, summary, checklist, artifact
+index paths, gate status, gate decision, next allowed action, inherited
+review/runner/request metadata, bounded-run promotion approval,
+cycle-contract-generation allowance with `cycle_contract_generated=false`,
+human approval/review requirements, and explicit false flags for candidate
+access by gate, runner re-execution, production scan approval, production
+promotion, mutation/deletion, media organizer behavior, network, model, and
+external runtime use.
+
 Task graph execution now also emits `task_graph_artifact_outputs.json` in the
 graph `output_dir` after node execution. This manifest is a graph-level,
 metadata-only, non-authoritative artifact binding surface. It records
