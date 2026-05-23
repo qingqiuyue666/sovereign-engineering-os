@@ -25,6 +25,7 @@ from kernel.personal_ai.local_launcher import (
     run_local_asset_iteration_promotion_gate_launcher,
     run_local_asset_next_bounded_smoke_iteration_admission_launcher,
     run_local_asset_next_bounded_smoke_iteration_execution_request_launcher,
+    run_local_asset_next_bounded_smoke_iteration_runner_admission_launcher,
     run_local_asset_scan_launcher,
     run_local_asset_smoke_promotion_gate_launcher,
     run_local_asset_smoke_iteration_review_packet_launcher,
@@ -111,6 +112,7 @@ _SUBCOMMANDS = {
     "launch-local-asset-bounded-smoke-cycle-human-review",
     "launch-local-asset-next-bounded-smoke-iteration-admission",
     "launch-local-asset-next-bounded-smoke-iteration-execution-request",
+    "launch-local-asset-next-bounded-smoke-iteration-runner-admission",
     "launch-local-asset-smoke-promotion-gate",
     "launch-local-asset-iteration-promotion-gate",
     "launch-local-asset-smoke-iteration-review-packet",
@@ -799,6 +801,31 @@ def _main_subcommand(argv) -> int:
             )
             _print_command_payload(result.to_cli_payload())
             return 0 if result.complete else 1
+        if (
+            args.command
+            == "launch-local-asset-next-bounded-smoke-iteration-runner-admission"
+        ):
+            result = (
+                run_local_asset_next_bounded_smoke_iteration_runner_admission_launcher(
+                    Path(args.execution_request_output_dir),
+                    Path(args.output_dir),
+                    runner_admission_id=args.runner_admission_id,
+                    runner_operator_id=args.runner_operator_id,
+                    runner_operator_acknowledgement_phrase=(
+                        args.runner_operator_acknowledgement_phrase
+                    ),
+                    admitted_runner_id=args.admitted_runner_id,
+                    admitted_runner_version=args.admitted_runner_version,
+                    admitted_max_files=args.admitted_max_files,
+                    admitted_max_total_bytes=args.admitted_max_total_bytes,
+                    admitted_max_depth=args.admitted_max_depth,
+                    project_id=args.project_id,
+                    operator_notes=args.operator_notes,
+                    runner_environment_label=args.runner_environment_label,
+                )
+            )
+            _print_command_payload(result.to_cli_payload())
+            return 0 if result.complete else 1
         if args.command == "launch-office-workflow":
             result = run_local_office_launcher(
                 Path(args.input_workbook),
@@ -1291,6 +1318,58 @@ def _build_subcommand_parser():
     )
     launch_next_iteration_execution_request_parser.add_argument(
         "--requested-previous-iteration-artifact-index-path"
+    )
+
+    launch_next_iteration_runner_admission_parser = subparsers.add_parser(
+        "launch-local-asset-next-bounded-smoke-iteration-runner-admission"
+    )
+    launch_next_iteration_runner_admission_parser.add_argument(
+        "--execution-request-output-dir",
+        required=True,
+    )
+    launch_next_iteration_runner_admission_parser.add_argument(
+        "--output-dir",
+        required=True,
+    )
+    launch_next_iteration_runner_admission_parser.add_argument(
+        "--runner-admission-id",
+        required=True,
+    )
+    launch_next_iteration_runner_admission_parser.add_argument(
+        "--runner-operator-id",
+        required=True,
+    )
+    launch_next_iteration_runner_admission_parser.add_argument(
+        "--runner-operator-acknowledgement-phrase",
+        required=True,
+    )
+    launch_next_iteration_runner_admission_parser.add_argument(
+        "--admitted-runner-id",
+        required=True,
+    )
+    launch_next_iteration_runner_admission_parser.add_argument(
+        "--admitted-runner-version",
+        required=True,
+    )
+    launch_next_iteration_runner_admission_parser.add_argument(
+        "--admitted-max-files",
+        type=int,
+        required=True,
+    )
+    launch_next_iteration_runner_admission_parser.add_argument(
+        "--admitted-max-total-bytes",
+        type=int,
+        required=True,
+    )
+    launch_next_iteration_runner_admission_parser.add_argument(
+        "--admitted-max-depth",
+        type=int,
+        required=True,
+    )
+    launch_next_iteration_runner_admission_parser.add_argument("--project-id")
+    launch_next_iteration_runner_admission_parser.add_argument("--operator-notes")
+    launch_next_iteration_runner_admission_parser.add_argument(
+        "--runner-environment-label"
     )
 
     launch_office_parser = subparsers.add_parser("launch-office-workflow")
