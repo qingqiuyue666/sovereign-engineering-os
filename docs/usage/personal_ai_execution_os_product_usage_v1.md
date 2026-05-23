@@ -511,6 +511,81 @@ Operator Console behavior, watcher/daemon behavior, network access, model API
 calls, external creative runtime activation, HFX changes, global database
 state, or production autonomy.
 
+## Local Asset Iteration Promotion Gate
+
+```bash
+python3 -m kernel.personal_ai.local_mvp_cli launch-local-asset-iteration-promotion-gate \
+  --iteration-review-output-dir /path/to/iteration-review-output \
+  --output-dir /path/to/iteration-promotion-output \
+  --project-id demo_project
+```
+
+Required arguments are `--iteration-review-output-dir` and `--output-dir`.
+`--project-id` is optional. Both directories must already exist, must be real
+directories, and must not be symlinks. The promotion `output_dir` is not
+created automatically. It must not equal the iteration review output
+directory, must not be inside it, and must not contain it. If generated
+iteration review artifacts safely expose the iteration output directory,
+candidate input directory, delegated smoke output directory, or prior smoke
+promotion output directory, the promotion `output_dir` must not be inside any
+of them.
+
+This command consumes generated smoke iteration review packet artifacts only:
+
+- `local_asset_smoke_iteration_review_packet.json`
+- `local_asset_smoke_iteration_review_packet_manifest.json`
+- `artifact_index.json`
+- `artifact_index_manifest.json`
+
+It may also read the generated optional iteration review summary and human
+decision checklist. It may hash generated iteration review packet artifacts.
+It does not run a scan, run readiness, run human smoke, run bounded smoke
+iteration, run smoke promotion gate, run iteration review packet generation,
+hash candidate files, read raw candidate file contents, copy raw private
+content, mutate inputs, mutate iteration review outputs, mutate iteration
+outputs, mutate delegated smoke outputs, approve production scanning, grant
+production promotion, or recommend production scan.
+
+The command writes these promotion artifacts into `output_dir`:
+
+- `local_asset_iteration_promotion_decision.json`
+- `local_asset_iteration_promotion_gate_manifest.json`
+- `local_asset_iteration_promotion_summary.md`
+- `local_asset_iteration_promotion_human_signoff_checklist.md`
+- `artifact_index.json`
+- `artifact_index_manifest.json`
+
+Iteration promotion gate status values are:
+
+- `iteration_promotion_candidate`
+- `blocked_missing_iteration_review_artifacts`
+- `blocked_untrusted_iteration_review_packet`
+- `blocked_failed_iteration`
+- `blocked_quarantine`
+- `blocked_duplicates`
+- `blocked_incremental_changes`
+- `blocked_warnings`
+- `blocked_unknown`
+
+Iteration promotion decision values are:
+
+- `allow_next_bounded_smoke_iteration`
+- `block_until_human_inspects_iteration_quarantine`
+- `block_until_human_inspects_iteration_duplicates`
+- `block_until_human_inspects_iteration_incremental_changes`
+- `block_until_iteration_repaired`
+- `block_until_iteration_review_packet_repaired`
+
+The gate only allows the next bounded smoke iteration when the iteration
+review packet is trusted, its manifest and artifact index manifest hashes
+match, the review status is `review_ready`, the recommended decision is
+`generate_promotion_gate_for_iteration`, the iteration is complete, bounded
+smoke iteration was performed, smoke and scan completion are true, production
+promotion and production scan flags are false, input mutation and duplicate
+deletion are false, quarantine count is zero, duplicate group count is zero,
+suspicious incremental changes count is zero, and no blocking warning is
+present. The decision is non-authoritative and always requires human signoff.
+
 ## Model Workflows
 
 Deterministic mock:
@@ -841,6 +916,36 @@ hashing, input mutation, iteration output mutation, smoke output mutation,
 file movement, file renaming, file deletion, duplicate deletion, media
 organizer behavior, network access, model API calls, and external runtime
 invocation.
+
+Task graphs can include a local asset iteration promotion gate node:
+
+```json
+{
+  "node_id": "promote_iteration",
+  "adapter_id": "local_asset_runtime",
+  "capability": "launch_local_asset_iteration_promotion_gate",
+  "execution_mode": "fixture",
+  "depends_on": [],
+  "approval_checkpoint_required": true,
+  "inputs": {
+    "iteration_review_output_dir": "/path/to/iteration-review-output",
+    "output_dir": "/path/to/iteration-promotion-output",
+    "project_id": "demo_project"
+  }
+}
+```
+
+The node runs `launch-local-asset-iteration-promotion-gate` and records the
+decision, gate manifest, summary, human signoff checklist, artifact index
+paths, iteration promotion gate status, iteration promotion decision, next
+bounded smoke iteration allowance, blocker list, and explicit false values
+for production promotion, production scan approval, production scan execution,
+scan execution by the gate, readiness execution, human smoke execution,
+bounded smoke iteration execution by the gate, iteration review packet
+execution by the gate, iteration review output mutation, raw candidate content
+reads, candidate file hashing, input mutation, file movement, file renaming,
+file deletion, duplicate deletion, media organizer behavior, network access,
+model API calls, and external runtime invocation.
 
 Task graph execution now also emits `task_graph_artifact_outputs.json` in the
 graph `output_dir` after node execution. This manifest is a graph-level,
