@@ -40,6 +40,9 @@ _LOCAL_ASSET_BOUNDED_SMOKE_ITERATION_CAPABILITY = (
 _LOCAL_ASSET_SMOKE_REVIEW_PACKET_CAPABILITY = (
     "launch_local_asset_smoke_review_packet"
 )
+_LOCAL_ASSET_SMOKE_ITERATION_REVIEW_PACKET_CAPABILITY = (
+    "launch_local_asset_smoke_iteration_review_packet"
+)
 _LOCAL_ASSET_SMOKE_PROMOTION_GATE_CAPABILITY = (
     "launch_local_asset_smoke_promotion_gate"
 )
@@ -650,6 +653,11 @@ def _run_local_asset_node_if_requested(node):
             return _run_local_asset_bounded_smoke_iteration_node(node)
         if node["capability"] == _LOCAL_ASSET_SMOKE_REVIEW_PACKET_CAPABILITY:
             return _run_local_asset_smoke_review_packet_node(node)
+        if (
+            node["capability"]
+            == _LOCAL_ASSET_SMOKE_ITERATION_REVIEW_PACKET_CAPABILITY
+        ):
+            return _run_local_asset_smoke_iteration_review_packet_node(node)
         if node["capability"] == _LOCAL_ASSET_SMOKE_PROMOTION_GATE_CAPABILITY:
             return _run_local_asset_smoke_promotion_gate_node(node)
         raise ValueError("task graph local asset scan capability is not registered")
@@ -1248,6 +1256,93 @@ def _run_local_asset_smoke_review_packet_node(node):
     }
 
 
+def _run_local_asset_smoke_iteration_review_packet_node(node):
+    inputs = node["inputs"]
+    iteration_output_dir = _required_string_input(
+        inputs,
+        "iteration_output_dir",
+        "local asset smoke iteration review packet",
+    )
+    output_dir = _required_string_input(
+        inputs,
+        "output_dir",
+        "local asset smoke iteration review packet",
+    )
+    project_id = inputs.get("project_id")
+    if project_id is not None and (
+        not isinstance(project_id, str) or not project_id
+    ):
+        raise ValueError(
+            "task graph local asset smoke iteration review packet "
+            "project_id is malformed"
+        )
+
+    from kernel.personal_ai.local_launcher import (
+        run_local_asset_smoke_iteration_review_packet_launcher,
+    )
+
+    result = run_local_asset_smoke_iteration_review_packet_launcher(
+        Path(iteration_output_dir),
+        Path(output_dir),
+        project_id=project_id,
+    )
+    payload = result.payload
+    complete = bool(result.complete)
+    return {
+        "status": "completed" if complete else "failed",
+        "output_dir": result.output_dir.as_posix(),
+        "iteration_output_dir": payload.get("iteration_output_dir"),
+        "project_id": payload.get("project_id"),
+        "local_asset_smoke_iteration_review_packet_complete": complete,
+        "local_asset_smoke_iteration_review_packet_path": payload.get(
+            "local_asset_smoke_iteration_review_packet_path"
+        ),
+        "local_asset_smoke_iteration_review_packet_manifest_path": payload.get(
+            "local_asset_smoke_iteration_review_packet_manifest_path"
+        ),
+        "local_asset_smoke_iteration_review_summary_path": payload.get(
+            "local_asset_smoke_iteration_review_summary_path"
+        ),
+        "local_asset_smoke_iteration_human_decision_checklist_path": payload.get(
+            "local_asset_smoke_iteration_human_decision_checklist_path"
+        ),
+        "artifact_index_path": payload.get("artifact_index_path"),
+        "artifact_index_manifest_path": payload.get("artifact_index_manifest_path"),
+        "iteration_review_status": payload.get("iteration_review_status"),
+        "recommended_human_decision": payload.get("recommended_human_decision"),
+        "iteration_status": payload.get("iteration_status"),
+        "bounded_smoke_iteration_performed": payload.get(
+            "bounded_smoke_iteration_performed"
+        ),
+        "smoke_run_complete": payload.get("smoke_run_complete"),
+        "scan_complete": payload.get("scan_complete"),
+        "production_promotion_granted": False,
+        "production_scan_approved": False,
+        "production_scan_performed": False,
+        "raw_candidate_content_read": False,
+        "candidate_file_hashing_performed": False,
+        "scan_performed": False,
+        "readiness_run_performed": False,
+        "human_smoke_run_performed": False,
+        "bounded_smoke_iteration_performed_by_review_packet": False,
+        "promotion_gate_run_performed": False,
+        "input_mutation_performed": False,
+        "iteration_output_mutation_performed": False,
+        "smoke_output_mutation_performed": False,
+        "file_move_performed": False,
+        "file_rename_performed": False,
+        "file_delete_performed": False,
+        "duplicate_deletion_performed": False,
+        "media_organizer_behavior_performed": False,
+        "output_overwrite_performed": False,
+        "network_access_performed": False,
+        "model_api_called": False,
+        "external_runtime_invoked": False,
+        "required_human_approval": True,
+        "failure_stage": None if complete else payload.get("failure_stage"),
+    }
+
+
 def _run_local_asset_smoke_promotion_gate_node(node):
     inputs = node["inputs"]
     review_output_dir = _required_string_input(
@@ -1611,6 +1706,60 @@ def _node_output_refs(executed_nodes):
                 ),
                 "scan_performed": node.get("scan_performed"),
                 "readiness_run_performed": node.get("readiness_run_performed"),
+                "raw_candidate_content_read": node.get(
+                    "raw_candidate_content_read"
+                ),
+                "candidate_file_hashing_performed": node.get(
+                    "candidate_file_hashing_performed"
+                ),
+                "required_human_approval": node.get("required_human_approval"),
+                "failure_stage": node.get("failure_stage"),
+            }
+        if (
+            node["adapter_id"] == _LOCAL_ASSET_ADAPTER_ID
+            and node["capability"]
+            == _LOCAL_ASSET_SMOKE_ITERATION_REVIEW_PACKET_CAPABILITY
+        ):
+            node_refs["local_asset_smoke_iteration_review_packet"] = {
+                "output_dir": node.get("output_dir"),
+                "iteration_output_dir": node.get("iteration_output_dir"),
+                "packet": _path_ref(
+                    node.get("local_asset_smoke_iteration_review_packet_path")
+                ),
+                "packet_manifest": _path_ref(
+                    node.get(
+                        "local_asset_smoke_iteration_review_packet_manifest_path"
+                    )
+                ),
+                "summary": _path_ref(
+                    node.get("local_asset_smoke_iteration_review_summary_path")
+                ),
+                "decision_checklist": _path_ref(
+                    node.get(
+                        "local_asset_smoke_iteration_human_decision_checklist_path"
+                    )
+                ),
+                "artifact_index": _path_ref(node.get("artifact_index_path")),
+                "artifact_index_manifest": _path_ref(
+                    node.get("artifact_index_manifest_path")
+                ),
+                "iteration_review_status": node.get("iteration_review_status"),
+                "recommended_human_decision": node.get(
+                    "recommended_human_decision"
+                ),
+                "iteration_status": node.get("iteration_status"),
+                "bounded_smoke_iteration_performed": node.get(
+                    "bounded_smoke_iteration_performed"
+                ),
+                "scan_performed": node.get("scan_performed"),
+                "readiness_run_performed": node.get("readiness_run_performed"),
+                "human_smoke_run_performed": node.get("human_smoke_run_performed"),
+                "bounded_smoke_iteration_performed_by_review_packet": node.get(
+                    "bounded_smoke_iteration_performed_by_review_packet"
+                ),
+                "promotion_gate_run_performed": node.get(
+                    "promotion_gate_run_performed"
+                ),
                 "raw_candidate_content_read": node.get(
                     "raw_candidate_content_read"
                 ),
