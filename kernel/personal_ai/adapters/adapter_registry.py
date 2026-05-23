@@ -113,6 +113,7 @@ def build_default_adapter_registry() -> tuple[AdapterRegistryEntry, ...]:
             capabilities=(
                 "launch_local_asset_scan",
                 "launch_local_asset_bounded_smoke_iteration",
+                "launch_local_asset_bounded_smoke_cycle_contract",
                 "launch_local_asset_human_smoke_run",
                 "launch_local_asset_iteration_promotion_gate",
                 "launch_local_asset_smoke_iteration_review_packet",
