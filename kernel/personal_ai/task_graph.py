@@ -2996,6 +2996,16 @@ def _run_local_asset_next_bounded_smoke_cycle_contract_human_review_from_run_pro
         "human_review_id",
         node_label,
     )
+    human_decision = _required_string_input(
+        inputs,
+        "human_decision",
+        node_label,
+    )
+    human_signoff_phrase = _required_string_input(
+        inputs,
+        "human_signoff_phrase",
+        node_label,
+    )
     project_id = _optional_nonempty_string_input(inputs, "project_id", node_label)
     reviewer_id = _optional_nonempty_string_input(inputs, "reviewer_id", node_label)
     operator_notes = inputs.get("operator_notes")
@@ -3011,6 +3021,8 @@ def _run_local_asset_next_bounded_smoke_cycle_contract_human_review_from_run_pro
             Path(cycle_contract_output_dir),
             Path(output_dir),
             human_review_id=human_review_id,
+            human_decision=human_decision,
+            human_signoff_phrase=human_signoff_phrase,
             project_id=project_id,
             reviewer_id=reviewer_id,
             operator_notes=operator_notes,
@@ -3024,6 +3036,12 @@ def _run_local_asset_next_bounded_smoke_cycle_contract_human_review_from_run_pro
         "cycle_contract_output_dir": payload.get("cycle_contract_output_dir"),
         "project_id": payload.get("project_id"),
         "human_review_id": payload.get("human_review_id"),
+        "human_decision": payload.get("human_decision"),
+        "human_signoff_phrase_sha256": payload.get("human_signoff_phrase_sha256"),
+        "human_signoff_phrase_persisted": payload.get(
+            "human_signoff_phrase_persisted",
+            False,
+        ),
         "reviewer_id": payload.get("reviewer_id"),
         "cycle_contract_id": payload.get("cycle_contract_id"),
         "review_packet_id": payload.get("review_packet_id"),

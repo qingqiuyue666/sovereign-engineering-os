@@ -1,4 +1,5 @@
 import contextlib
+import hashlib
 import io
 import json
 import os
@@ -8,6 +9,7 @@ import unittest
 from pathlib import Path
 
 from kernel.assets.local_asset_next_bounded_smoke_cycle_contract_human_review_from_run_promotion_gate import (
+    LOCAL_ASSET_NEXT_BOUNDED_SMOKE_CYCLE_CONTRACT_HUMAN_REVIEW_FROM_RUN_PROMOTION_GATE_SIGNOFF_PHRASE,
     build_local_asset_next_bounded_smoke_cycle_contract_human_review_from_run_promotion_gate,
 )
 from kernel.personal_ai.hash_utils import sha256_file
@@ -115,6 +117,12 @@ class LocalAssetNextBoundedSmokeCycleContractHumanReviewFromRunPromotionGateTest
         output_dir,
         *,
         human_review_id="next-cycle-contract-review-1",
+        human_decision=(
+            "approve_next_bounded_smoke_cycle_contract_for_bounded_admission"
+        ),
+        human_signoff_phrase=(
+            LOCAL_ASSET_NEXT_BOUNDED_SMOKE_CYCLE_CONTRACT_HUMAN_REVIEW_FROM_RUN_PROMOTION_GATE_SIGNOFF_PHRASE
+        ),
         project_id="cycle-test",
         reviewer_id="reviewer-1",
         operator_notes="approve bounded admission for later step",
@@ -127,6 +135,10 @@ class LocalAssetNextBoundedSmokeCycleContractHumanReviewFromRunPromotionGateTest
             Path(output_dir).as_posix(),
             "--human-review-id",
             human_review_id,
+            "--human-decision",
+            human_decision,
+            "--human-signoff-phrase",
+            human_signoff_phrase,
         ]
         if project_id is not None:
             args.extend(["--project-id", project_id])
@@ -181,6 +193,12 @@ class LocalAssetNextBoundedSmokeCycleContractHumanReviewFromRunPromotionGateTest
                 ).as_posix(),
                 "output_dir": Path(output_dir).as_posix(),
                 "human_review_id": "graph-next-cycle-contract-review-1",
+                "human_decision": (
+                    "approve_next_bounded_smoke_cycle_contract_for_bounded_admission"
+                ),
+                "human_signoff_phrase": (
+                    LOCAL_ASSET_NEXT_BOUNDED_SMOKE_CYCLE_CONTRACT_HUMAN_REVIEW_FROM_RUN_PROMOTION_GATE_SIGNOFF_PHRASE
+                ),
                 "project_id": "cycle-test",
                 "reviewer_id": "reviewer-graph",
                 "operator_notes": "graph bounded review",
@@ -194,6 +212,13 @@ class LocalAssetNextBoundedSmokeCycleContractHumanReviewFromRunPromotionGateTest
     def assert_no_scope_false(self, payload_like):
         for field_name in NO_SCOPE_FIELDS:
             self.assertFalse(payload_like[field_name], field_name)
+
+    def expected_signoff_hash(self, phrase=None):
+        if phrase is None:
+            phrase = (
+                LOCAL_ASSET_NEXT_BOUNDED_SMOKE_CYCLE_CONTRACT_HUMAN_REVIEW_FROM_RUN_PROMOTION_GATE_SIGNOFF_PHRASE
+            )
+        return hashlib.sha256(phrase.encode("utf-8")).hexdigest()
 
     def test_full_chain_from_previous_helpers_creates_human_review_artifacts(self):
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -257,6 +282,16 @@ class LocalAssetNextBoundedSmokeCycleContractHumanReviewFromRunPromotionGateTest
                 "approve_next_bounded_smoke_cycle_contract_for_bounded_admission",
             )
             self.assertEqual(
+                review["human_decision"],
+                "approve_next_bounded_smoke_cycle_contract_for_bounded_admission",
+            )
+            self.assertEqual(
+                review["human_signoff_phrase_sha256"],
+                self.expected_signoff_hash(),
+            )
+            self.assertFalse(review["human_signoff_phrase_persisted"])
+            self.assertNotIn("human_signoff_phrase", review)
+            self.assertEqual(
                 review["next_allowed_action"],
                 "admit_next_bounded_smoke_cycle_contract_for_later_execution_request",
             )
@@ -272,6 +307,153 @@ class LocalAssetNextBoundedSmokeCycleContractHumanReviewFromRunPromotionGateTest
                 index_manifest["artifact_index_sha256"],
                 sha256_file(review_output / "artifact_index.json"),
             )
+
+    def test_missing_human_decision_blocks(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            cycle_contract_output, _gate_output = (
+                self.build_ready_source_cycle_contract(root)
+            )
+            review_output = root / "next-cycle-contract-human-review"
+            review_output.mkdir()
+
+            exit_code, payload = self.run_human_review(
+                cycle_contract_output,
+                review_output,
+                human_decision="",
+            )
+            review = read_json(review_output / REVIEW_OUTPUTS[0])
+
+            self.assertEqual(exit_code, 1)
+            self.assertEqual(payload["human_review_status"], "blocked_invalid_human_decision")
+            self.assertEqual(review["human_review_status"], "blocked_invalid_human_decision")
+            self.assertFalse(payload["bounded_cycle_contract_human_review_created"])
+            self.assertFalse(payload["bounded_cycle_admission_allowed"])
+
+    def test_invalid_human_decision_blocks(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            cycle_contract_output, _gate_output = (
+                self.build_ready_source_cycle_contract(root)
+            )
+            review_output = root / "next-cycle-contract-human-review"
+            review_output.mkdir()
+
+            exit_code, payload = self.run_human_review(
+                cycle_contract_output,
+                review_output,
+                human_decision="approve_production",
+            )
+            review = read_json(review_output / REVIEW_OUTPUTS[0])
+
+            self.assertEqual(exit_code, 1)
+            self.assertEqual(payload["human_review_status"], "blocked_invalid_human_decision")
+            self.assertEqual(review["human_review_decision"], "reject_and_repair_human_review")
+            self.assertFalse(review["bounded_cycle_contract_human_review_created"])
+            self.assertFalse(review["bounded_cycle_admission_allowed"])
+
+    def test_non_approve_human_decision_keeps_bounded_admission_false(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            cycle_contract_output, _gate_output = (
+                self.build_ready_source_cycle_contract(root)
+            )
+            review_output = root / "next-cycle-contract-human-review"
+            review_output.mkdir()
+
+            exit_code, payload = self.run_human_review(
+                cycle_contract_output,
+                review_output,
+                human_decision="stop_cycle",
+            )
+            review = read_json(review_output / REVIEW_OUTPUTS[0])
+
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(payload["human_review_status"], "human_review_stopped_cycle")
+            self.assertEqual(review["human_review_decision"], "stop_cycle")
+            self.assertEqual(review["next_allowed_action"], "stop_cycle")
+            self.assertFalse(payload["bounded_cycle_contract_human_review_created"])
+            self.assertFalse(payload["bounded_cycle_admission_allowed"])
+            self.assertFalse(review["bounded_cycle_contract_human_review_created"])
+            self.assertFalse(review["bounded_cycle_admission_allowed"])
+
+    def test_missing_human_signoff_phrase_blocks(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            cycle_contract_output, _gate_output = (
+                self.build_ready_source_cycle_contract(root)
+            )
+            review_output = root / "next-cycle-contract-human-review"
+            review_output.mkdir()
+
+            exit_code, payload = self.run_human_review(
+                cycle_contract_output,
+                review_output,
+                human_signoff_phrase="",
+            )
+            review = read_json(review_output / REVIEW_OUTPUTS[0])
+
+            self.assertEqual(exit_code, 1)
+            self.assertEqual(payload["human_review_status"], "blocked_invalid_human_signoff")
+            self.assertEqual(review["human_review_status"], "blocked_invalid_human_signoff")
+            self.assertFalse(review["bounded_cycle_contract_human_review_created"])
+            self.assertFalse(review["bounded_cycle_admission_allowed"])
+
+    def test_wrong_human_signoff_phrase_blocks(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            cycle_contract_output, _gate_output = (
+                self.build_ready_source_cycle_contract(root)
+            )
+            review_output = root / "next-cycle-contract-human-review"
+            review_output.mkdir()
+
+            exit_code, payload = self.run_human_review(
+                cycle_contract_output,
+                review_output,
+                human_signoff_phrase="WRONG",
+            )
+            review = read_json(review_output / REVIEW_OUTPUTS[0])
+
+            self.assertEqual(exit_code, 1)
+            self.assertEqual(payload["human_review_status"], "blocked_invalid_human_signoff")
+            self.assertEqual(
+                review["human_signoff_phrase_sha256"],
+                self.expected_signoff_hash("WRONG"),
+            )
+            self.assertFalse(review["human_signoff_phrase_persisted"])
+            self.assertFalse(review["bounded_cycle_admission_allowed"])
+
+    def test_correct_approve_decision_and_exact_signoff_admits(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            cycle_contract_output, _gate_output = (
+                self.build_ready_source_cycle_contract(root)
+            )
+            review_output = root / "next-cycle-contract-human-review"
+            review_output.mkdir()
+
+            exit_code, payload = self.run_human_review(
+                cycle_contract_output,
+                review_output,
+                human_decision=(
+                    "approve_next_bounded_smoke_cycle_contract_for_bounded_admission"
+                ),
+                human_signoff_phrase=(
+                    LOCAL_ASSET_NEXT_BOUNDED_SMOKE_CYCLE_CONTRACT_HUMAN_REVIEW_FROM_RUN_PROMOTION_GATE_SIGNOFF_PHRASE
+                ),
+            )
+            review = read_json(review_output / REVIEW_OUTPUTS[0])
+
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(
+                review["human_review_status"],
+                "next_bounded_smoke_cycle_contract_human_review_ready",
+            )
+            self.assertTrue(review["bounded_cycle_contract_human_review_created"])
+            self.assertTrue(review["bounded_cycle_admission_allowed"])
+            self.assertTrue(payload["bounded_cycle_contract_human_review_created"])
+            self.assertTrue(payload["bounded_cycle_admission_allowed"])
 
     def test_human_review_is_bounded_admission_only_not_production_approval(self):
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -866,6 +1048,69 @@ class LocalAssetNextBoundedSmokeCycleContractHumanReviewFromRunPromotionGateTest
             for role in REVIEW_ROLES:
                 self.assertIn(role, roles)
 
+    def test_task_graph_node_requires_and_provides_human_decision_and_signoff(self):
+        for missing_field in ("human_decision", "human_signoff_phrase"):
+            with self.subTest(missing_field=missing_field):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    cycle_contract_output, _gate_output = (
+                        self.build_ready_source_cycle_contract(root)
+                    )
+                    review_output = root / "next-cycle-contract-human-review"
+                    graph_output = root / "graph-output"
+                    review_output.mkdir()
+                    graph_output.mkdir()
+                    graph_path = root / "graph.json"
+                    node = self.human_review_node(
+                        node_id="review_next_cycle_contract",
+                        cycle_contract_output=cycle_contract_output,
+                        output_dir=review_output,
+                    )
+                    node["inputs"].pop(missing_field)
+                    self.write_graph(graph_path, [node])
+
+                    result = run_local_task_graph_fixture(graph_path, graph_output)
+                    failure = read_json(result.failure_bundle_path)
+
+                    self.assertFalse(result.success)
+                    self.assertIn(missing_field, failure["error_message"])
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            cycle_contract_output, _gate_output = (
+                self.build_ready_source_cycle_contract(root)
+            )
+            review_output = root / "next-cycle-contract-human-review"
+            graph_output = root / "graph-output"
+            review_output.mkdir()
+            graph_output.mkdir()
+            graph_path = root / "graph.json"
+            self.write_graph(
+                graph_path,
+                [
+                    self.human_review_node(
+                        node_id="review_next_cycle_contract",
+                        cycle_contract_output=cycle_contract_output,
+                        output_dir=review_output,
+                    )
+                ],
+            )
+
+            result = run_local_task_graph_fixture(graph_path, graph_output)
+            node = read_json(result.execution_manifest_path)["nodes"][0]
+
+            self.assertTrue(result.success)
+            self.assertEqual(
+                node["human_decision"],
+                "approve_next_bounded_smoke_cycle_contract_for_bounded_admission",
+            )
+            self.assertEqual(
+                node["human_signoff_phrase_sha256"],
+                self.expected_signoff_hash(),
+            )
+            self.assertFalse(node["human_signoff_phrase_persisted"])
+            self.assertNotIn("human_signoff_phrase", node)
+
     def test_no_scope_boundary_fields_remain_false(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
@@ -957,6 +1202,12 @@ class LocalAssetNextBoundedSmokeCycleContractHumanReviewFromRunPromotionGateTest
                 cycle_contract_output,
                 review_output,
                 human_review_id="builder-human-review-1",
+                human_decision=(
+                    "approve_next_bounded_smoke_cycle_contract_for_bounded_admission"
+                ),
+                human_signoff_phrase=(
+                    LOCAL_ASSET_NEXT_BOUNDED_SMOKE_CYCLE_CONTRACT_HUMAN_REVIEW_FROM_RUN_PROMOTION_GATE_SIGNOFF_PHRASE
+                ),
             )
 
             self.assertFalse(result.complete)

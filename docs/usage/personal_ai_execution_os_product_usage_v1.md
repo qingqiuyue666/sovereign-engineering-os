@@ -1989,17 +1989,22 @@ python3 -m kernel.personal_ai.local_mvp_cli launch-local-asset-next-bounded-smok
   --cycle-contract-output-dir /path/to/next-cycle-contract-output \
   --output-dir /path/to/next-cycle-contract-human-review-output \
   --human-review-id next-cycle-contract-review-002 \
+  --human-decision approve_next_bounded_smoke_cycle_contract_for_bounded_admission \
+  --human-signoff-phrase I_REVIEWED_LOCAL_ASSET_NEXT_BOUNDED_SMOKE_CYCLE_CONTRACT_FROM_RUN_PROMOTION_GATE \
   --project-id demo_project \
   --reviewer-id reviewer-001 \
   --operator-notes "optional notes"
 ```
 
 Required arguments are `--cycle-contract-output-dir`, `--output-dir`, and
-`--human-review-id`. Optional arguments are `--project-id`, `--reviewer-id`,
-and `--operator-notes`. The output directory must already exist, must not be
-the source cycle contract directory, must not be inside it, and must not
-contain it. Expected output files are written exclusively and existing files
-or symlink collisions fail closed.
+`--human-review-id`, `--human-decision`, and `--human-signoff-phrase`.
+Optional arguments are `--project-id`, `--reviewer-id`, and
+`--operator-notes`. The canonical signoff phrase is exactly
+`I_REVIEWED_LOCAL_ASSET_NEXT_BOUNDED_SMOKE_CYCLE_CONTRACT_FROM_RUN_PROMOTION_GATE`.
+The output directory must already exist, must not be the source cycle
+contract directory, must not be inside it, and must not contain it. Expected
+output files are written exclusively and existing files or symlink collisions
+fail closed.
 
 This command consumes generated output from
 `launch-local-asset-next-bounded-smoke-cycle-contract-from-run-promotion-gate`
@@ -2008,7 +2013,18 @@ source `artifact_index.json`, and the source `artifact_index_manifest.json`.
 Optional source summary/checklist markdown files must be hash-bound by the
 source manifest when present.
 
-When ready, it emits `human_review_status =
+Allowed bounded `--human-decision` values are:
+
+- `approve_next_bounded_smoke_cycle_contract_for_bounded_admission`
+- `stop_cycle`
+- `repair_artifacts`
+- `repair_cycle_contract`
+- `reject_boundary_violation`
+
+When the source contract is ready, the human decision is exactly
+`approve_next_bounded_smoke_cycle_contract_for_bounded_admission`, and the
+signoff phrase exactly matches the canonical phrase, it emits
+`human_review_status =
 next_bounded_smoke_cycle_contract_human_review_ready`,
 `human_review_decision =
 approve_next_bounded_smoke_cycle_contract_for_bounded_admission`, and
@@ -2016,6 +2032,12 @@ approve_next_bounded_smoke_cycle_contract_for_bounded_admission`, and
 admit_next_bounded_smoke_cycle_contract_for_later_execution_request`.
 This is bounded-admission-only. It does not execute the next cycle and it is
 not production approval.
+
+Missing or invalid human decisions, missing or wrong signoff phrases, and
+non-approve bounded decisions do not allow bounded admission. The review
+stores `human_signoff_phrase_sha256` and
+`human_signoff_phrase_persisted=false`; it does not persist the plaintext
+signoff phrase.
 
 The command emits:
 
@@ -2046,6 +2068,8 @@ Task graphs can include a next bounded smoke cycle contract human-review node:
     "cycle_contract_output_dir": "/path/to/next-cycle-contract-output",
     "output_dir": "/path/to/next-cycle-contract-human-review-output",
     "human_review_id": "next-cycle-contract-review-002",
+    "human_decision": "approve_next_bounded_smoke_cycle_contract_for_bounded_admission",
+    "human_signoff_phrase": "I_REVIEWED_LOCAL_ASSET_NEXT_BOUNDED_SMOKE_CYCLE_CONTRACT_FROM_RUN_PROMOTION_GATE",
     "project_id": "demo_project",
     "reviewer_id": "reviewer-001",
     "operator_notes": "optional notes"
@@ -2054,7 +2078,8 @@ Task graphs can include a next bounded smoke cycle contract human-review node:
 ```
 
 The node records the human review, manifest, summary, checklist, artifact
-index paths, source contract status/decision/action, inherited
+index paths, explicit `human_decision`, signoff hash/persistence metadata,
+source contract status/decision/action, inherited
 review/runner/request metadata, bounded-cycle admission allowance, human
 approval/review requirements, and explicit false flags for runner execution
 by human review, cycle contract re-execution, candidate access by human

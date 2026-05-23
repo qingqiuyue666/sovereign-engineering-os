@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+import hashlib
 import json
 import os
 
@@ -14,6 +15,7 @@ __all__ = [
     "LOCAL_ASSET_NEXT_BOUNDED_SMOKE_CYCLE_CONTRACT_HUMAN_REVIEW_FROM_RUN_PROMOTION_GATE_MANIFEST_FILE",
     "LOCAL_ASSET_NEXT_BOUNDED_SMOKE_CYCLE_CONTRACT_HUMAN_REVIEW_FROM_RUN_PROMOTION_GATE_SUMMARY_FILE",
     "LOCAL_ASSET_NEXT_BOUNDED_SMOKE_CYCLE_CONTRACT_HUMAN_REVIEW_FROM_RUN_PROMOTION_GATE_CHECKLIST_FILE",
+    "LOCAL_ASSET_NEXT_BOUNDED_SMOKE_CYCLE_CONTRACT_HUMAN_REVIEW_FROM_RUN_PROMOTION_GATE_SIGNOFF_PHRASE",
     "LocalAssetNextBoundedSmokeCycleContractHumanReviewFromRunPromotionGateResult",
     "build_local_asset_next_bounded_smoke_cycle_contract_human_review_from_run_promotion_gate",
 ]
@@ -30,6 +32,9 @@ LOCAL_ASSET_NEXT_BOUNDED_SMOKE_CYCLE_CONTRACT_HUMAN_REVIEW_FROM_RUN_PROMOTION_GA
 )
 LOCAL_ASSET_NEXT_BOUNDED_SMOKE_CYCLE_CONTRACT_HUMAN_REVIEW_FROM_RUN_PROMOTION_GATE_CHECKLIST_FILE = (
     "local_asset_next_bounded_smoke_cycle_contract_human_review_from_run_promotion_gate_checklist.md"
+)
+LOCAL_ASSET_NEXT_BOUNDED_SMOKE_CYCLE_CONTRACT_HUMAN_REVIEW_FROM_RUN_PROMOTION_GATE_SIGNOFF_PHRASE = (
+    "I_REVIEWED_LOCAL_ASSET_NEXT_BOUNDED_SMOKE_CYCLE_CONTRACT_FROM_RUN_PROMOTION_GATE"
 )
 
 _ARTIFACT_INDEX_FILE = "artifact_index.json"
@@ -94,6 +99,14 @@ _READY_HUMAN_REVIEW_DECISION = (
 _READY_NEXT_ACTION = (
     "admit_next_bounded_smoke_cycle_contract_for_later_execution_request"
 )
+_VALID_HUMAN_DECISIONS = (
+    _READY_HUMAN_REVIEW_DECISION,
+    "stop_cycle",
+    "repair_artifacts",
+    "repair_cycle_contract",
+    "reject_boundary_violation",
+)
+_REVIEW_DECISION_OPTIONS = _VALID_HUMAN_DECISIONS
 
 _OUTPUT_FILES = (
     LOCAL_ASSET_NEXT_BOUNDED_SMOKE_CYCLE_CONTRACT_HUMAN_REVIEW_FROM_RUN_PROMOTION_GATE_FILE,
@@ -308,11 +321,13 @@ def build_local_asset_next_bounded_smoke_cycle_contract_human_review_from_run_pr
     output_dir: Path,
     *,
     human_review_id: str,
+    human_decision: str,
+    human_signoff_phrase: str,
     project_id: str | None = None,
     reviewer_id: str | None = None,
     operator_notes: str | None = None,
 ) -> LocalAssetNextBoundedSmokeCycleContractHumanReviewFromRunPromotionGateResult:
-    """Approve a ready next cycle contract for later bounded admission only."""
+    """Record a bounded human review over a ready next-cycle contract."""
 
     roots = {
         "cycle_contract_output_dir": Path(cycle_contract_output_dir),
@@ -320,6 +335,8 @@ def build_local_asset_next_bounded_smoke_cycle_contract_human_review_from_run_pr
     }
     inputs = {
         "human_review_id": human_review_id,
+        "human_decision": human_decision,
+        "human_signoff_phrase": human_signoff_phrase,
         "project_id": project_id,
         "reviewer_id": reviewer_id,
         "operator_notes": operator_notes,
@@ -419,7 +436,7 @@ def build_local_asset_next_bounded_smoke_cycle_contract_human_review_from_run_pr
     )
     _write_json_exclusive(paths[_ARTIFACT_INDEX_MANIFEST_FILE], artifact_index_manifest)
 
-    complete = human_review["human_review_status"] == _READY_HUMAN_REVIEW_STATUS
+    complete = not str(human_review["human_review_status"]).startswith("blocked_")
     payload = _launcher_payload_from_human_review(
         human_review,
         paths,
@@ -746,6 +763,13 @@ def _human_review_payload(
         source_payloads,
         "local_asset_next_bounded_smoke_cycle_contract_from_run_promotion_gate",
     )
+    human_decision = inputs.get("human_decision")
+    human_signoff_phrase = inputs.get("human_signoff_phrase")
+    invalid_decision = human_decision not in _VALID_HUMAN_DECISIONS
+    signoff_valid = (
+        human_signoff_phrase
+        == LOCAL_ASSET_NEXT_BOUNDED_SMOKE_CYCLE_CONTRACT_HUMAN_REVIEW_FROM_RUN_PROMOTION_GATE_SIGNOFF_PHRASE
+    )
     missing_required = _missing_required_artifacts(source_artifacts)
     untrusted = _untrusted_artifacts(source_artifacts)
     invalid_safety, boundary_violations = _source_safety_blockers(source_contract)
@@ -753,6 +777,9 @@ def _human_review_payload(
     inherited_fact_blockers = _inherited_run_fact_blockers(source_contract)
     source_blockers = _source_contract_contains_blockers(source_contract)
     human_review_status = _human_review_status(
+        human_decision=human_decision,
+        invalid_decision=invalid_decision,
+        signoff_valid=signoff_valid,
         missing_required=missing_required,
         untrusted=untrusted,
         invalid_safety=invalid_safety,
@@ -769,6 +796,8 @@ def _human_review_payload(
     ready = human_review_status == _READY_HUMAN_REVIEW_STATUS
     human_review_blockers = _human_review_blockers_for_status(
         human_review_status=human_review_status,
+        human_decision=human_decision,
+        signoff_valid=signoff_valid,
         missing_required=missing_required,
         untrusted=untrusted,
         invalid_safety=invalid_safety,
@@ -786,6 +815,9 @@ def _human_review_payload(
         "authority": _AUTHORITY,
         "execution_capability": _EXECUTION_CAPABILITY,
         "human_review_id": inputs.get("human_review_id"),
+        "human_decision": human_decision,
+        "human_signoff_phrase_sha256": _sha256_text_or_none(human_signoff_phrase),
+        "human_signoff_phrase_persisted": False,
         "project_id": project_id,
         "reviewer_id": inputs.get("reviewer_id"),
         "operator_notes_present": inputs["operator_notes_present"],
@@ -841,6 +873,12 @@ def _human_review_payload(
         "missing_required_artifacts": missing_required,
         "untrusted_artifacts": untrusted,
         "human_review_blockers": human_review_blockers,
+        "human_review_checklist": {
+            "items": _checklist_items(),
+            "decision_options": list(_REVIEW_DECISION_OPTIONS),
+            "canonical_signoff_phrase_required": True,
+            "human_signoff_phrase_persisted": False,
+        },
         "disallowed_actions": list(_DISALLOWED_ACTIONS),
         "deterministic_ordering": True,
         "required_human_approval": True,
@@ -1081,6 +1119,9 @@ def _source_contract_contains_blockers(
 
 def _human_review_status(
     *,
+    human_decision: object,
+    invalid_decision: bool,
+    signoff_valid: bool,
     missing_required: list[dict[str, object]],
     untrusted: list[dict[str, object]],
     invalid_safety: list[dict[str, object]],
@@ -1091,6 +1132,10 @@ def _human_review_status(
     source_contract: dict[str, object],
     source_root_error: str | None,
 ) -> str:
+    if invalid_decision:
+        return "blocked_invalid_human_decision"
+    if not signoff_valid:
+        return "blocked_invalid_human_signoff"
     if missing_required:
         return "blocked_missing_required_artifacts"
     if untrusted:
@@ -1111,12 +1156,16 @@ def _human_review_status(
         or source_contract.get("next_allowed_action") != _READY_SOURCE_NEXT_ACTION
     ):
         return "blocked_source_cycle_contract_not_ready"
+    if human_decision != _READY_HUMAN_REVIEW_DECISION:
+        return _non_approval_status(human_decision)
     return _READY_HUMAN_REVIEW_STATUS
 
 
 def _human_review_blockers_for_status(
     *,
     human_review_status: str,
+    human_decision: object,
+    signoff_valid: bool,
     missing_required: list[dict[str, object]],
     untrusted: list[dict[str, object]],
     invalid_safety: list[dict[str, object]],
@@ -1125,6 +1174,25 @@ def _human_review_blockers_for_status(
     inherited_fact_blockers: list[dict[str, object]],
     source_blockers: list[dict[str, object]],
 ) -> list[dict[str, object]]:
+    if human_review_status == "blocked_invalid_human_decision":
+        return [
+            _blocker(
+                "invalid_human_decision",
+                "human_decision must be one of the bounded review decisions",
+                field="human_decision",
+                actual_value=human_decision,
+                decision_options=list(_REVIEW_DECISION_OPTIONS),
+            )
+        ]
+    if human_review_status == "blocked_invalid_human_signoff":
+        return [
+            _blocker(
+                "invalid_human_signoff",
+                "human_signoff_phrase must exactly match the canonical phrase",
+                field="human_signoff_phrase",
+                signoff_valid=signoff_valid,
+            )
+        ]
     if human_review_status == "blocked_missing_required_artifacts":
         return missing_required
     if human_review_status == "blocked_untrusted_artifacts":
@@ -1147,9 +1215,23 @@ def _human_review_blockers_for_status(
     return []
 
 
+def _non_approval_status(human_decision: object) -> str:
+    mapping = {
+        "stop_cycle": "human_review_stopped_cycle",
+        "repair_artifacts": "human_review_requires_artifact_repair",
+        "repair_cycle_contract": "human_review_requires_cycle_contract_repair",
+        "reject_boundary_violation": "human_review_rejected_boundary_violation",
+    }
+    return mapping[str(human_decision)]
+
+
 def _decision_and_next_action(status: str) -> tuple[str, str]:
     if status == _READY_HUMAN_REVIEW_STATUS:
         return (_READY_HUMAN_REVIEW_DECISION, _READY_NEXT_ACTION)
+    if status == "blocked_invalid_human_decision":
+        return ("reject_and_repair_human_review", "repair_human_review")
+    if status == "blocked_invalid_human_signoff":
+        return ("reject_and_repair_human_review", "repair_human_review")
     if status in ("blocked_missing_required_artifacts", "blocked_untrusted_artifacts"):
         return ("reject_and_repair_artifacts", "repair_artifacts")
     if status == "blocked_source_boundary_violation":
@@ -1162,6 +1244,14 @@ def _decision_and_next_action(status: str) -> tuple[str, str]:
         "blocked_source_cycle_contract_contains_blockers",
     ):
         return ("reject_and_repair_cycle_contract", "repair_cycle_contract")
+    if status == "human_review_stopped_cycle":
+        return ("stop_cycle", "stop_cycle")
+    if status == "human_review_requires_artifact_repair":
+        return ("repair_artifacts", "repair_artifacts")
+    if status == "human_review_requires_cycle_contract_repair":
+        return ("repair_cycle_contract", "repair_cycle_contract")
+    if status == "human_review_rejected_boundary_violation":
+        return ("reject_boundary_violation", "reject_boundary_violation")
     return ("reject_and_repair_human_review", "repair_human_review")
 
 
@@ -1250,7 +1340,9 @@ def _manifest_payload(
             _public_source_artifact_ref(artifact) for artifact in source_artifacts
         ],
         "human_review_status": human_review["human_review_status"],
+        "human_decision": human_review["human_decision"],
         "human_review_decision": human_review["human_review_decision"],
+        "human_signoff_phrase_persisted": False,
         "next_allowed_action": human_review["next_allowed_action"],
         "bounded_cycle_contract_human_review_created": human_review[
             "bounded_cycle_contract_human_review_created"
@@ -1341,7 +1433,11 @@ def _summary_markdown(human_review: dict[str, object]) -> str:
         "# Local Asset Next Bounded Smoke Cycle Contract Human Review From Run Promotion Gate",
         "",
         "- Human review status: " + str(human_review["human_review_status"]),
+        "- Human decision: " + str(human_review["human_decision"]),
         "- Human review decision: " + str(human_review["human_review_decision"]),
+        "- Human signoff hash present: "
+        + str(bool(human_review["human_signoff_phrase_sha256"])).lower(),
+        "- Human signoff phrase persisted: false",
         "- Next allowed action: " + str(human_review["next_allowed_action"]),
         "- Human review id: " + str(human_review["human_review_id"]),
         "- Reviewer id: " + str(human_review["reviewer_id"]),
@@ -1403,7 +1499,20 @@ def _checklist_markdown(human_review: dict[str, object]) -> str:
     lines.extend(
         [
             "",
+            "Allowed human decisions:",
+            "",
+        ]
+    )
+    for decision in _REVIEW_DECISION_OPTIONS:
+        marker = "x" if decision == human_review["human_decision"] else " "
+        lines.append("- [" + marker + "] " + decision)
+    lines.extend(
+        [
+            "",
+            "Canonical signoff phrase required: true",
+            "Human signoff phrase persisted: false",
             "Human review status: " + str(human_review["human_review_status"]),
+            "Human decision: " + str(human_review["human_decision"]),
             "Human review decision: " + str(human_review["human_review_decision"]),
         ]
     )
@@ -1419,6 +1528,8 @@ def _checklist_items() -> list[str]:
         "verify source manifest hash-binds the contract artifact",
         "verify source artifact index manifest hash-binds the source index",
         "verify optional source summary/checklist hash bindings when present",
+        "verify human_decision is explicit and bounded",
+        "verify human_signoff_phrase exactly matches the canonical phrase",
         "verify source boundary booleans are present, type-correct, and false",
         "verify inherited run facts are metadata-only",
         "verify live candidate path was not checked, listed, read, or hashed",
@@ -1462,6 +1573,11 @@ def _launcher_payload_from_human_review(
         "output_dir": human_review["output_dir"],
         "project_id": human_review["project_id"],
         "human_review_id": human_review["human_review_id"],
+        "human_decision": human_review["human_decision"],
+        "human_signoff_phrase_sha256": human_review[
+            "human_signoff_phrase_sha256"
+        ],
+        "human_signoff_phrase_persisted": False,
         "reviewer_id": human_review["reviewer_id"],
         "cycle_contract_id": human_review["cycle_contract_id"],
         "review_packet_id": human_review["review_packet_id"],
@@ -1535,6 +1651,11 @@ def _structured_failure_result(
         "output_dir": roots["output_dir"].as_posix(),
         "project_id": inputs.get("project_id"),
         "human_review_id": inputs.get("human_review_id"),
+        "human_decision": inputs.get("human_decision"),
+        "human_signoff_phrase_sha256": _sha256_text_or_none(
+            inputs.get("human_signoff_phrase")
+        ),
+        "human_signoff_phrase_persisted": False,
         "reviewer_id": inputs.get("reviewer_id"),
         "human_review_status": human_review_status,
         "human_review_decision": human_review_decision,
@@ -1601,6 +1722,12 @@ def _first_text(*values: object) -> str | None:
         if isinstance(value, str) and value:
             return value
     return None
+
+
+def _sha256_text_or_none(value: object) -> str | None:
+    if not isinstance(value, str):
+        return None
+    return hashlib.sha256(value.encode("utf-8")).hexdigest()
 
 
 def _record_has_forbidden_content_fields(record: object) -> bool:

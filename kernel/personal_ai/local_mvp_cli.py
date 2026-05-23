@@ -914,6 +914,8 @@ def _main_subcommand(argv) -> int:
                     Path(args.cycle_contract_output_dir),
                     Path(args.output_dir),
                     human_review_id=args.human_review_id,
+                    human_decision=args.human_decision,
+                    human_signoff_phrase=args.human_signoff_phrase,
                     project_id=args.project_id,
                     reviewer_id=args.reviewer_id,
                     operator_notes=args.operator_notes,
@@ -1571,6 +1573,14 @@ def _build_subcommand_parser():
     )
     launch_next_cycle_contract_review_from_run_gate_parser.add_argument(
         "--human-review-id",
+        required=True,
+    )
+    launch_next_cycle_contract_review_from_run_gate_parser.add_argument(
+        "--human-decision",
+        required=True,
+    )
+    launch_next_cycle_contract_review_from_run_gate_parser.add_argument(
+        "--human-signoff-phrase",
         required=True,
     )
     launch_next_cycle_contract_review_from_run_gate_parser.add_argument("--project-id")
