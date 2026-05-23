@@ -80,6 +80,10 @@ from kernel.assets.local_asset_next_bounded_smoke_iteration_run_review_packet im
     LOCAL_ASSET_NEXT_BOUNDED_SMOKE_ITERATION_RUN_REVIEW_PACKET_SUMMARY_FILE,
     build_local_asset_next_bounded_smoke_iteration_run_review_packet,
 )
+from kernel.assets.local_asset_next_bounded_smoke_iteration_run_promotion_gate import (
+    LOCAL_ASSET_NEXT_BOUNDED_SMOKE_ITERATION_RUN_PROMOTION_GATE_SUMMARY_FILE,
+    build_local_asset_next_bounded_smoke_iteration_run_promotion_gate,
+)
 from kernel.assets.local_asset_runtime import run_local_asset_runtime
 from kernel.assets.local_asset_schema import (
     ASSET_INDEX_FILE,
@@ -163,6 +167,7 @@ __all__ = [
     "run_local_asset_next_bounded_smoke_iteration_runner_admission_launcher",
     "run_local_asset_next_bounded_smoke_iteration_runner_launcher",
     "run_local_asset_next_bounded_smoke_iteration_run_review_packet_launcher",
+    "run_local_asset_next_bounded_smoke_iteration_run_promotion_gate_launcher",
     "run_local_office_launcher",
     "run_model_fixture_launcher",
     "run_model_provider_dry_run_launcher",
@@ -1195,6 +1200,38 @@ def run_local_asset_next_bounded_smoke_iteration_run_review_packet_launcher(
         if result.review_packet_summary_path is not None
         else result.output_dir
         / LOCAL_ASSET_NEXT_BOUNDED_SMOKE_ITERATION_RUN_REVIEW_PACKET_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_local_asset_next_bounded_smoke_iteration_run_promotion_gate_launcher(
+    run_review_packet_output_dir: Path,
+    output_dir: Path,
+    *,
+    promotion_gate_id: str,
+    project_id: str | None = None,
+    reviewer_id: str | None = None,
+    operator_notes: str | None = None,
+) -> LauncherWorkflowResult:
+    result = build_local_asset_next_bounded_smoke_iteration_run_promotion_gate(
+        Path(run_review_packet_output_dir),
+        Path(output_dir),
+        promotion_gate_id=promotion_gate_id,
+        project_id=project_id,
+        reviewer_id=reviewer_id,
+        operator_notes=operator_notes,
+    )
+    return LauncherWorkflowResult(
+        workflow=(
+            "local_asset_next_bounded_smoke_iteration_run_promotion_gate_workflow"
+        ),
+        output_dir=result.output_dir,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.promotion_gate_summary_path
+        if result.promotion_gate_summary_path is not None
+        else result.output_dir
+        / LOCAL_ASSET_NEXT_BOUNDED_SMOKE_ITERATION_RUN_PROMOTION_GATE_SUMMARY_FILE,
         required_human_approval=True,
     )
 
