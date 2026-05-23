@@ -755,6 +755,86 @@ rename, delete, or deduplicate files, add media organizer behavior, add UI or
 Operator Console behavior, start watcher/daemon behavior, use network access,
 call model APIs, invoke external runtimes, or modify HFX.
 
+## Local Asset Next Bounded Smoke Iteration Admission
+
+```bash
+python3 -m kernel.personal_ai.local_mvp_cli launch-local-asset-next-bounded-smoke-iteration-admission \
+  --cycle-human-review-output-dir /path/to/cycle-human-review-output \
+  --output-dir /path/to/next-admission-output \
+  --project-id demo_project \
+  --requested-next-iteration-id iteration-002 \
+  --operator-notes "optional notes"
+```
+
+`--cycle-human-review-output-dir` and `--output-dir` must already exist, must
+be real directories, and must not be symlinks. The admission output directory
+is not created automatically. It must be separate from the cycle human review
+output directory, must not be inside it, and must not contain it.
+
+This command consumes the already-recorded bounded smoke cycle human review
+decision. It accepts no human signoff phrase and handles no plaintext approval
+phrase. `--requested-next-iteration-id` is optional metadata only, and
+`--operator-notes` is stored only when supplied.
+
+The command reads and binds only generated cycle human review artifacts:
+
+- `local_asset_bounded_smoke_cycle_human_review_decision.json`
+- `local_asset_bounded_smoke_cycle_human_review_manifest.json`
+- `artifact_index.json`
+- `artifact_index_manifest.json`
+- optional human review summary and checklist markdown files when present
+
+It does not recursively index the cycle human review output directory, the
+cycle contract output directory, upstream output directories, or candidate
+input files. It does not read raw private content or hash candidate input
+files.
+
+The command writes:
+
+- `local_asset_next_bounded_smoke_iteration_admission.json`
+- `local_asset_next_bounded_smoke_iteration_admission_manifest.json`
+- `local_asset_next_bounded_smoke_iteration_admission_summary.md`
+- `local_asset_next_bounded_smoke_iteration_admission_checklist.md`
+- `artifact_index.json`
+- `artifact_index_manifest.json`
+
+Admission is ready only when the generated human review decision, human review
+manifest, human review artifact index, and artifact index manifest exist and
+are trusted; manifest hashes match; the human review status is
+`human_review_approved_next_bounded_smoke_iteration`; the human review decision
+is `allow_prepare_next_bounded_smoke_iteration`; the human decision is
+`approve_cycle_contract_for_next_bounded_smoke_iteration`; the signoff phrase
+was not persisted; prepare is allowed; execute remains denied; the human
+review next action is `prepare_next_bounded_smoke_iteration_admission`; the
+cycle contract status and decision are ready/bind-only values; and production,
+mutation, automatic approval, autonomous execution, and next-iteration
+execution remain disallowed.
+
+When ready, the admission record emits
+`admission_status: next_bounded_smoke_iteration_admission_ready`,
+`admission_decision: admit_prepare_next_bounded_smoke_iteration`, and
+`next_allowed_action: create_next_bounded_smoke_iteration_execution_request`.
+This admits only creation of a future execution request. It never executes the
+next bounded smoke iteration, never creates a next iteration output directory,
+never approves production scanning, and never grants production promotion.
+
+Blocked statuses repair artifacts, repair human review, or reject boundary
+violations. Missing required artifacts and untrusted artifacts repair
+artifacts. Non-approved human review records and prepare denial repair human
+review. Existing execute permission, production flags, mutation flags, malformed
+records, or missing disallowed production/autonomy actions reject or repair
+according to the recorded blocker.
+
+This command does not run scan, readiness, human smoke, smoke review packet
+generation, smoke promotion gate, bounded smoke iteration, iteration review
+packet generation, iteration promotion gate, cycle contract generation, or
+cycle human review generation. It does not approve production scan, grant
+production promotion, add automatic approval or autonomy, mutate upstream
+outputs, mutate candidate inputs, move, rename, delete, or deduplicate files,
+add media organizer behavior, add UI or Operator Console behavior, start
+watcher/daemon behavior, use network access, call model APIs, invoke external
+runtimes, or modify HFX.
+
 ## Model Workflows
 
 Deterministic mock:
@@ -1175,6 +1255,34 @@ index paths, human review status, human review decision, next allowed action,
 prepare allowance, execute denial, human review flags, and explicit false
 boundary flags. It records review metadata only and does not execute cycle
 contract generation or the next bounded smoke iteration.
+
+Task graphs can include a next bounded smoke iteration admission node:
+
+```json
+{
+  "node_id": "admit_next_iteration_prepare",
+  "adapter_id": "local_asset_runtime",
+  "capability": "launch_local_asset_next_bounded_smoke_iteration_admission",
+  "execution_mode": "fixture",
+  "depends_on": [],
+  "approval_checkpoint_required": true,
+  "inputs": {
+    "cycle_human_review_output_dir": "/path/to/cycle-human-review-output",
+    "output_dir": "/path/to/next-admission-output",
+    "project_id": "demo_project",
+    "requested_next_iteration_id": "iteration-002",
+    "operator_notes": "optional notes"
+  }
+}
+```
+
+The node runs
+`launch-local-asset-next-bounded-smoke-iteration-admission` and records the
+admission receipt, manifest, summary, checklist, artifact index paths,
+admission status, admission decision, next allowed action, prepare admission,
+execute denial, human review requirements, and explicit false boundary flags.
+It records prepare-only permission metadata and does not execute the next
+bounded smoke iteration or create the next iteration output directory.
 
 Task graph execution now also emits `task_graph_artifact_outputs.json` in the
 graph `output_dir` after node execution. This manifest is a graph-level,
