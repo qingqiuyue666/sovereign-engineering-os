@@ -2340,6 +2340,88 @@ The registry marks this adapter draft as a candidate, not admitted production
 runtime. The task graph route is fixture-only and exists solely to bind wrapper
 and embedded smoke artifact outputs for human review.
 
+## Operator-Provided Playwright Execution Receipt
+
+This command records evidence that an operator explicitly supplied a local
+Node-compatible executable and a local fixture runner, then delegates execution
+to the bounded Playwright worker adapter draft with its embedded local fixture
+smoke enabled. It is a receipt layer around the adapter draft only.
+
+Plan-only mode is available for preflight receipt planning:
+
+```bash
+python3 -m kernel.personal_ai.local_mvp_cli launch-operator-provided-playwright-execution-receipt \
+  --selection-matrix docs/capability_candidates/github_real_candidates_v1/candidate_selection_matrix.json \
+  --playwright-candidate-manifest docs/capability_candidates/github_real_candidates_v1/microsoft_playwright_candidate_manifest.json \
+  --output-dir /path/to/receipt-output \
+  --receipt-id operator-provided-playwright-receipt-001 \
+  --node-command /absolute/path/to/node \
+  --runner-script tools/playwright/local_fixture_smoke_runner.js \
+  --operator-attestation I_UNDERSTAND_THIS_RUN_IS_LOCAL_FIXTURE_ONLY_NO_LIVE_WEBSITES_NO_ACCOUNTS_NO_SCRAPING_NO_BYPASS \
+  --plan-only
+```
+
+Execution mode omits `--plan-only`. The command always invokes the bounded
+adapter draft with `execute_local_fixture_smoke = true` and writes the adapter
+draft run under `output_dir/adapter_draft_run/`.
+
+The operator attestation must match exactly:
+
+`I_UNDERSTAND_THIS_RUN_IS_LOCAL_FIXTURE_ONLY_NO_LIVE_WEBSITES_NO_ACCOUNTS_NO_SCRAPING_NO_BYPASS`
+
+The receipt output directory must already exist, must not be a symlink, must
+not contain expected receipt output files, and must not already contain
+`adapter_draft_run/`. The supplied executable and runner script must exist, be
+regular non-symlink files, and are recorded by path, size, and SHA-256 hash.
+They are not copied.
+
+Plan-only writes:
+
+- `operator_provided_playwright_execution_receipt_plan.json`
+- `operator_provided_playwright_execution_receipt_manifest.json`
+- `operator_provided_playwright_execution_receipt_summary.md`
+- `operator_provided_playwright_execution_receipt_checklist.md`
+- `artifact_index.json`
+- `artifact_index_manifest.json`
+
+Execution also writes:
+
+- `operator_provided_playwright_execution_receipt_result.json`
+- `adapter_draft_run/` containing the bounded adapter draft outputs
+- `adapter_draft_run/embedded_smoke/` containing the embedded local fixture smoke outputs
+
+This receipt does not accept target URLs, does not access live websites, does
+not run account/login/registration workflows, does not scrape, does not bypass
+or handle captcha workflows, does not read secrets or cookies, does not install
+packages, does not download browsers, does not call package runner commands,
+does not access or execute candidate repository code, and does not register or
+promote a production adapter.
+
+Task graphs can include the receipt node:
+
+```json
+{
+  "node_id": "operator_playwright_receipt",
+  "adapter_id": "operator_provided_playwright_execution_receipt",
+  "capability": "launch_operator_provided_playwright_execution_receipt",
+  "execution_mode": "fixture",
+  "depends_on": [],
+  "approval_checkpoint_required": true,
+  "inputs": {
+    "selection_matrix": "docs/capability_candidates/github_real_candidates_v1/candidate_selection_matrix.json",
+    "playwright_candidate_manifest": "docs/capability_candidates/github_real_candidates_v1/microsoft_playwright_candidate_manifest.json",
+    "output_dir": "/path/to/receipt-output",
+    "receipt_id": "operator-provided-playwright-receipt-001",
+    "node_command": "/absolute/path/to/node",
+    "runner_script": "tools/playwright/local_fixture_smoke_runner.js",
+    "operator_attestation": "I_UNDERSTAND_THIS_RUN_IS_LOCAL_FIXTURE_ONLY_NO_LIVE_WEBSITES_NO_ACCOUNTS_NO_SCRAPING_NO_BYPASS"
+  }
+}
+```
+
+The registry marks this receipt generator as candidate-only, non-production,
+local-fixture-only, and review-required.
+
 Task graph execution now also emits `task_graph_artifact_outputs.json` in the
 graph `output_dir` after node execution. This manifest is a graph-level,
 metadata-only, non-authoritative artifact binding surface. It records

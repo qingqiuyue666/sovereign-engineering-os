@@ -89,6 +89,12 @@ _BOUNDED_PLAYWRIGHT_ADAPTER_DRAFT_ID = "bounded_playwright_worker_adapter_draft"
 _BOUNDED_PLAYWRIGHT_ADAPTER_DRAFT_CAPABILITY = (
     "launch_bounded_playwright_worker_adapter_draft"
 )
+_OPERATOR_PLAYWRIGHT_RECEIPT_ADAPTER_ID = (
+    "operator_provided_playwright_execution_receipt"
+)
+_OPERATOR_PLAYWRIGHT_RECEIPT_CAPABILITY = (
+    "launch_operator_provided_playwright_execution_receipt"
+)
 _RUNTIME_ADMISSION_DECISION_TYPE = "personal_ai_runtime_admission_decision_v1"
 _GRAPH_EXECUTION_MODES = ("fixture_execution", "dry_run_plan")
 _NODE_EXECUTION_MODES = ("fixture", "mock", "dry_run", "real_runtime")
@@ -567,6 +573,11 @@ def _validate_adapter_routes(node_records, graph_execution_mode):
                 decision.reason_codes,
                 graph_execution_mode,
             )
+            and not _route_is_safe_operator_playwright_receipt_fixture(
+                node,
+                decision.reason_codes,
+                graph_execution_mode,
+            )
         ):
             raise ValueError(
                 "task graph adapter route is not admitted: "
@@ -593,6 +604,20 @@ def _route_is_safe_adapter_draft_fixture(node, reason_codes, graph_execution_mod
     )
 
 
+def _route_is_safe_operator_playwright_receipt_fixture(
+    node,
+    reason_codes,
+    graph_execution_mode,
+):
+    return (
+        graph_execution_mode == "fixture_execution"
+        and node["execution_mode"] == "fixture"
+        and node["adapter_id"] == _OPERATOR_PLAYWRIGHT_RECEIPT_ADAPTER_ID
+        and node["capability"] == _OPERATOR_PLAYWRIGHT_RECEIPT_CAPABILITY
+        and tuple(reason_codes) == ("adapter_not_admitted",)
+    )
+
+
 def _execute_graph_nodes(nodes_by_id, graph_execution_mode):
     executed = []
     status_by_node_id = {}
@@ -609,32 +634,38 @@ def _execute_graph_nodes(nodes_by_id, graph_execution_mode):
         elif graph_execution_mode == "dry_run_plan":
             record["status"] = "planned"
         else:
-            bounded_playwright_draft_result = (
-                _run_bounded_playwright_adapter_draft_node_if_requested(node)
+            operator_playwright_receipt_result = (
+                _run_operator_playwright_receipt_node_if_requested(node)
             )
-            if bounded_playwright_draft_result is not None:
-                record.update(bounded_playwright_draft_result)
+            if operator_playwright_receipt_result is not None:
+                record.update(operator_playwright_receipt_result)
             else:
-                playwright_smoke_result = _run_playwright_smoke_node_if_requested(
-                    node
+                bounded_playwright_draft_result = (
+                    _run_bounded_playwright_adapter_draft_node_if_requested(node)
                 )
-                if playwright_smoke_result is not None:
-                    record.update(playwright_smoke_result)
+                if bounded_playwright_draft_result is not None:
+                    record.update(bounded_playwright_draft_result)
                 else:
-                    github_intake_result = _run_github_capability_intake_node_if_requested(
+                    playwright_smoke_result = _run_playwright_smoke_node_if_requested(
                         node
                     )
-                    if github_intake_result is not None:
-                        record.update(github_intake_result)
+                    if playwright_smoke_result is not None:
+                        record.update(playwright_smoke_result)
                     else:
-                        local_asset_result = _run_local_asset_node_if_requested(node)
-                        if local_asset_result is not None:
-                            record.update(local_asset_result)
+                        github_intake_result = _run_github_capability_intake_node_if_requested(
+                            node
+                        )
+                        if github_intake_result is not None:
+                            record.update(github_intake_result)
                         else:
-                            record["delivery_validation"] = (
-                                _run_delivery_node_if_requested(node)
-                            )
-                            record["status"] = "completed"
+                            local_asset_result = _run_local_asset_node_if_requested(node)
+                            if local_asset_result is not None:
+                                record.update(local_asset_result)
+                            else:
+                                record["delivery_validation"] = (
+                                    _run_delivery_node_if_requested(node)
+                                )
+                                record["status"] = "completed"
         status_by_node_id[node_id] = record["status"]
         executed.append(record)
     return executed
@@ -651,7 +682,10 @@ def _base_node_execution_record(node, graph_execution_mode):
         "approval_checkpoint_required": True,
         "approval_checkpoint_id": node["approval_checkpoint_id"],
         "adapter_route_admitted": node["adapter_id"]
-        != _BOUNDED_PLAYWRIGHT_ADAPTER_DRAFT_ID,
+        not in (
+            _BOUNDED_PLAYWRIGHT_ADAPTER_DRAFT_ID,
+            _OPERATOR_PLAYWRIGHT_RECEIPT_ADAPTER_ID,
+        ),
         "adapter_route_policy": "local_delivery_integration"
         if node["adapter_id"] == _DELIVERY_ADAPTER_ID
         else _adapter_route_policy(node, graph_execution_mode),
@@ -677,6 +711,14 @@ def _base_node_execution_record(node, graph_execution_mode):
         record.update(
             dict(BOUNDED_PLAYWRIGHT_WORKER_ADAPTER_DRAFT_BOUNDARY_FALSE_FIELDS)
         )
+    if node["adapter_id"] == _OPERATOR_PLAYWRIGHT_RECEIPT_ADAPTER_ID:
+        from kernel.capabilities.operator_provided_playwright_execution_receipt import (
+            OPERATOR_PROVIDED_PLAYWRIGHT_EXECUTION_RECEIPT_BOUNDARY_FALSE_FIELDS,
+        )
+
+        record.update(
+            dict(OPERATOR_PROVIDED_PLAYWRIGHT_EXECUTION_RECEIPT_BOUNDARY_FALSE_FIELDS)
+        )
     return record
 
 
@@ -695,6 +737,8 @@ def _skipped_node_result(blocked_dependencies):
 
 
 def _adapter_route_policy(node, graph_execution_mode):
+    if node["adapter_id"] == _OPERATOR_PLAYWRIGHT_RECEIPT_ADAPTER_ID:
+        return "operator_provided_local_fixture_receipt_only_not_production_admitted"
     if node["adapter_id"] == _BOUNDED_PLAYWRIGHT_ADAPTER_DRAFT_ID:
         return "adapter_draft_local_fixture_only_not_production_admitted"
     if (
@@ -864,6 +908,188 @@ def _run_github_capability_intake_node_if_requested(node):
         "required_human_approval": True,
         "required_human_review": True,
         **dict(NO_SCOPE_FALSE_FIELDS),
+    }
+
+
+def _run_operator_playwright_receipt_node_if_requested(node):
+    if node["adapter_id"] != _OPERATOR_PLAYWRIGHT_RECEIPT_ADAPTER_ID:
+        return None
+    if node["capability"] != _OPERATOR_PLAYWRIGHT_RECEIPT_CAPABILITY:
+        raise ValueError(
+            "task graph operator-provided Playwright receipt capability is not registered"
+        )
+    inputs = node["inputs"]
+    selection_matrix = _required_string_input(
+        inputs,
+        "selection_matrix",
+        "operator-provided Playwright execution receipt",
+    )
+    candidate_manifest = _required_string_input(
+        inputs,
+        "playwright_candidate_manifest",
+        "operator-provided Playwright execution receipt",
+    )
+    output_dir = _required_string_input(
+        inputs,
+        "output_dir",
+        "operator-provided Playwright execution receipt",
+    )
+    receipt_id = _required_string_input(
+        inputs,
+        "receipt_id",
+        "operator-provided Playwright execution receipt",
+    )
+    node_command = _required_string_input(
+        inputs,
+        "node_command",
+        "operator-provided Playwright execution receipt",
+    )
+    runner_script = _required_string_input(
+        inputs,
+        "runner_script",
+        "operator-provided Playwright execution receipt",
+    )
+    operator_attestation = _required_string_input(
+        inputs,
+        "operator_attestation",
+        "operator-provided Playwright execution receipt",
+    )
+    project_id = _optional_nonempty_string_input(
+        inputs,
+        "project_id",
+        "operator-provided Playwright execution receipt",
+    )
+    reviewer_id = _optional_nonempty_string_input(
+        inputs,
+        "reviewer_id",
+        "operator-provided Playwright execution receipt",
+    )
+    operator_notes = _optional_nonempty_string_input(
+        inputs,
+        "operator_notes",
+        "operator-provided Playwright execution receipt",
+    )
+    expected_node_version = _optional_nonempty_string_input(
+        inputs,
+        "expected_node_version",
+        "operator-provided Playwright execution receipt",
+    )
+    expected_playwright_source = _optional_nonempty_string_input(
+        inputs,
+        "expected_playwright_source",
+        "operator-provided Playwright execution receipt",
+    )
+    plan_only = _optional_bool_input(inputs, "plan_only", False)
+
+    from kernel.capabilities.operator_provided_playwright_execution_receipt import (
+        OPERATOR_PROVIDED_PLAYWRIGHT_EXECUTION_RECEIPT_BOUNDARY_FALSE_FIELDS,
+    )
+    from kernel.personal_ai.local_launcher import (
+        run_operator_provided_playwright_execution_receipt_launcher,
+    )
+
+    result = run_operator_provided_playwright_execution_receipt_launcher(
+        Path(selection_matrix),
+        Path(candidate_manifest),
+        Path(output_dir),
+        receipt_id,
+        node_command=Path(node_command),
+        runner_script=Path(runner_script),
+        operator_attestation=operator_attestation,
+        project_id=project_id,
+        reviewer_id=reviewer_id,
+        operator_notes=operator_notes,
+        expected_node_version=expected_node_version,
+        expected_playwright_source=expected_playwright_source,
+        plan_only=plan_only,
+    )
+    payload = result.payload
+    complete = bool(result.complete)
+    return {
+        "status": "completed" if complete else "failed",
+        "output_dir": result.output_dir.as_posix(),
+        "operator_provided_playwright_execution_receipt_complete": complete,
+        "operator_provided_playwright_execution_receipt_plan_path": payload.get(
+            "operator_provided_playwright_execution_receipt_plan_path"
+        ),
+        "operator_provided_playwright_execution_receipt_manifest_path": payload.get(
+            "operator_provided_playwright_execution_receipt_manifest_path"
+        ),
+        "operator_provided_playwright_execution_receipt_summary_path": payload.get(
+            "operator_provided_playwright_execution_receipt_summary_path"
+        ),
+        "operator_provided_playwright_execution_receipt_checklist_path": payload.get(
+            "operator_provided_playwright_execution_receipt_checklist_path"
+        ),
+        "operator_provided_playwright_execution_receipt_result_path": payload.get(
+            "operator_provided_playwright_execution_receipt_result_path"
+        ),
+        "artifact_index_path": payload.get("artifact_index_path"),
+        "artifact_index_manifest_path": payload.get("artifact_index_manifest_path"),
+        "adapter_draft_run_dir": payload.get("adapter_draft_run_dir"),
+        "adapter_draft_plan_path": payload.get("adapter_draft_plan_path"),
+        "adapter_draft_manifest_path": payload.get("adapter_draft_manifest_path"),
+        "adapter_draft_summary_path": payload.get("adapter_draft_summary_path"),
+        "adapter_draft_checklist_path": payload.get("adapter_draft_checklist_path"),
+        "adapter_draft_result_path": payload.get("adapter_draft_result_path"),
+        "embedded_smoke_plan_path": payload.get("embedded_smoke_plan_path"),
+        "embedded_smoke_manifest_path": payload.get("embedded_smoke_manifest_path"),
+        "embedded_smoke_summary_path": payload.get("embedded_smoke_summary_path"),
+        "embedded_smoke_checklist_path": payload.get("embedded_smoke_checklist_path"),
+        "embedded_smoke_result_path": payload.get("embedded_smoke_result_path"),
+        "embedded_smoke_runner_output_path": payload.get(
+            "embedded_smoke_runner_output_path"
+        ),
+        "embedded_smoke_screenshot_path": payload.get("embedded_smoke_screenshot_path"),
+        "embedded_fixture_url": payload.get("embedded_fixture_url"),
+        "embedded_fixture_index_path": payload.get("embedded_fixture_index_path"),
+        "embedded_fixture_app_js_path": payload.get("embedded_fixture_app_js_path"),
+        "embedded_fixture_style_css_path": payload.get(
+            "embedded_fixture_style_css_path"
+        ),
+        "embedded_fixture_url_scheme": payload.get("embedded_fixture_url_scheme"),
+        "receipt_id": payload.get("receipt_id"),
+        "adapter_draft_id": payload.get("adapter_draft_id"),
+        "candidate_id": payload.get("candidate_id"),
+        "repo_full_name": payload.get("repo_full_name"),
+        "executed": payload.get("executed"),
+        "success": payload.get("success"),
+        "receipt_status": payload.get("receipt_status"),
+        "receipt_decision": payload.get("receipt_decision"),
+        "next_allowed_action": payload.get("next_allowed_action"),
+        "node_command_path": payload.get("node_command_path"),
+        "node_command_sha256": payload.get("node_command_sha256"),
+        "runner_script_path": payload.get("runner_script_path"),
+        "runner_script_sha256": payload.get("runner_script_sha256"),
+        "operator_provided_local_executable_supplied": payload.get(
+            "operator_provided_local_executable_supplied"
+        ),
+        "operator_provided_local_runner_supplied": payload.get(
+            "operator_provided_local_runner_supplied"
+        ),
+        "owned_local_smoke_runner_executed": payload.get(
+            "owned_local_smoke_runner_executed"
+        ),
+        "embedded_playwright_local_fixture_smoke_executed": payload.get(
+            "embedded_playwright_local_fixture_smoke_executed"
+        ),
+        "bounded_adapter_draft_wrapper_executed": payload.get(
+            "bounded_adapter_draft_wrapper_executed"
+        ),
+        "operator_provided_receipt_generated": payload.get(
+            "operator_provided_receipt_generated"
+        ),
+        "failure_stage": None if complete else payload.get("failure_stage"),
+        "error_message": None if complete else payload.get("error_message"),
+        "safe_to_retry": not complete,
+        "replay_hint": (
+            "Fix operator-provided local fixture receipt inputs or embedded smoke result and rerun this node."
+        )
+        if not complete
+        else "Review the operator-provided execution receipt before any local-only gate.",
+        "required_human_approval": True,
+        "required_human_review": True,
+        **dict(OPERATOR_PROVIDED_PLAYWRIGHT_EXECUTION_RECEIPT_BOUNDARY_FALSE_FIELDS),
     }
 
 

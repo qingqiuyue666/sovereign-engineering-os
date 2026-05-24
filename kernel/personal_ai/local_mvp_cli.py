@@ -41,6 +41,7 @@ from kernel.personal_ai.local_launcher import (
     run_model_fixture_launcher,
     run_model_provider_dry_run_launcher,
     run_bounded_playwright_worker_adapter_draft_launcher,
+    run_operator_provided_playwright_execution_receipt_launcher,
     run_playwright_local_fixture_sandbox_smoke_launcher,
     run_product_health_check_launcher,
     run_runtime_delivery_validation_launcher,
@@ -129,6 +130,7 @@ _SUBCOMMANDS = {
     "launch-github-capability-intake-packet",
     "launch-playwright-local-fixture-sandbox-smoke",
     "launch-bounded-playwright-worker-adapter-draft",
+    "launch-operator-provided-playwright-execution-receipt",
     "launch-local-asset-smoke-promotion-gate",
     "launch-local-asset-iteration-promotion-gate",
     "launch-local-asset-smoke-iteration-review-packet",
@@ -971,6 +973,24 @@ def _main_subcommand(argv) -> int:
             )
             _print_command_payload(result.to_cli_payload())
             return 0 if result.complete else 1
+        if args.command == "launch-operator-provided-playwright-execution-receipt":
+            result = run_operator_provided_playwright_execution_receipt_launcher(
+                Path(args.selection_matrix),
+                Path(args.playwright_candidate_manifest),
+                Path(args.output_dir),
+                args.receipt_id,
+                node_command=_optional_path(args.node_command),
+                runner_script=_optional_path(args.runner_script),
+                operator_attestation=args.operator_attestation,
+                project_id=args.project_id,
+                reviewer_id=args.reviewer_id,
+                operator_notes=args.operator_notes,
+                expected_node_version=args.expected_node_version,
+                expected_playwright_source=args.expected_playwright_source,
+                plan_only=args.plan_only,
+            )
+            _print_command_payload(result.to_cli_payload())
+            return 0 if result.complete else 1
         if args.command == "launch-office-workflow":
             result = run_local_office_launcher(
                 Path(args.input_workbook),
@@ -1691,6 +1711,29 @@ def _build_subcommand_parser():
     bounded_playwright_adapter_parser.add_argument("--runner-script")
     bounded_playwright_adapter_parser.add_argument(
         "--execute-local-fixture-smoke",
+        action="store_true",
+    )
+
+    operator_receipt_parser = subparsers.add_parser(
+        "launch-operator-provided-playwright-execution-receipt"
+    )
+    operator_receipt_parser.add_argument("--selection-matrix", required=True)
+    operator_receipt_parser.add_argument(
+        "--playwright-candidate-manifest",
+        required=True,
+    )
+    operator_receipt_parser.add_argument("--output-dir", required=True)
+    operator_receipt_parser.add_argument("--receipt-id", required=True)
+    operator_receipt_parser.add_argument("--node-command", required=True)
+    operator_receipt_parser.add_argument("--runner-script", required=True)
+    operator_receipt_parser.add_argument("--operator-attestation", required=True)
+    operator_receipt_parser.add_argument("--project-id")
+    operator_receipt_parser.add_argument("--reviewer-id")
+    operator_receipt_parser.add_argument("--operator-notes")
+    operator_receipt_parser.add_argument("--expected-node-version")
+    operator_receipt_parser.add_argument("--expected-playwright-source")
+    operator_receipt_parser.add_argument(
+        "--plan-only",
         action="store_true",
     )
 

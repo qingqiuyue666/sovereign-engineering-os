@@ -114,6 +114,10 @@ from kernel.capabilities.bounded_playwright_worker_adapter_draft import (
     BOUNDED_PLAYWRIGHT_WORKER_ADAPTER_DRAFT_SUMMARY_FILE,
     run_bounded_playwright_worker_adapter_draft,
 )
+from kernel.capabilities.operator_provided_playwright_execution_receipt import (
+    OPERATOR_PROVIDED_PLAYWRIGHT_EXECUTION_RECEIPT_SUMMARY_FILE,
+    run_operator_provided_playwright_execution_receipt_launcher as run_operator_provided_playwright_execution_receipt_capability,
+)
 from kernel.personal_ai.artifact_index import build_artifact_index
 from kernel.personal_ai.asset_scan_operational_control import (
     ASSET_SCAN_FAILURE_BUNDLE_FILE,
@@ -193,6 +197,7 @@ __all__ = [
     "run_github_capability_intake_packet_launcher",
     "run_playwright_local_fixture_sandbox_smoke_launcher",
     "run_bounded_playwright_worker_adapter_draft_launcher",
+    "run_operator_provided_playwright_execution_receipt_launcher",
     "run_local_office_launcher",
     "run_model_fixture_launcher",
     "run_model_provider_dry_run_launcher",
@@ -2023,6 +2028,50 @@ def run_bounded_playwright_worker_adapter_draft_launcher(
         summary_path=result.summary_path
         if result.summary_path is not None
         else output_path / BOUNDED_PLAYWRIGHT_WORKER_ADAPTER_DRAFT_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_operator_provided_playwright_execution_receipt_launcher(
+    selection_matrix: Path,
+    playwright_candidate_manifest: Path,
+    output_dir: Path,
+    receipt_id: str,
+    *,
+    node_command: Path | None = None,
+    runner_script: Path | None = None,
+    operator_attestation: str | None = None,
+    project_id: str | None = None,
+    reviewer_id: str | None = None,
+    operator_notes: str | None = None,
+    expected_node_version: str | None = None,
+    expected_playwright_source: str | None = None,
+    plan_only: bool = False,
+) -> LauncherWorkflowResult:
+    output_path = Path(output_dir)
+    result = run_operator_provided_playwright_execution_receipt_capability(
+        Path(selection_matrix),
+        Path(playwright_candidate_manifest),
+        output_path,
+        receipt_id,
+        node_command=None if node_command is None else Path(node_command),
+        runner_script=None if runner_script is None else Path(runner_script),
+        operator_attestation=operator_attestation,
+        project_id=project_id,
+        reviewer_id=reviewer_id,
+        operator_notes=operator_notes,
+        expected_node_version=expected_node_version,
+        expected_playwright_source=expected_playwright_source,
+        plan_only=plan_only,
+    )
+    return LauncherWorkflowResult(
+        workflow="operator_provided_playwright_execution_receipt_workflow",
+        output_dir=output_path,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else output_path / OPERATOR_PROVIDED_PLAYWRIGHT_EXECUTION_RECEIPT_SUMMARY_FILE,
         required_human_approval=True,
     )
 
