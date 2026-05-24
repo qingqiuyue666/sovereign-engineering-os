@@ -102,6 +102,10 @@ _LAUNCHER_WORKFLOW_CALLABLES = (
         "bounded_playwright_worker_adapter_draft_workflow",
         "run_bounded_playwright_worker_adapter_draft_launcher",
     ),
+    (
+        "operator_provided_playwright_execution_receipt_workflow",
+        "run_operator_provided_playwright_execution_receipt_launcher",
+    ),
     ("local_office_workflow", "run_local_office_launcher"),
     ("model_fixture_workflow", "run_model_fixture_launcher"),
     ("model_provider_dry_run_workflow", "run_model_provider_dry_run_launcher"),
@@ -139,6 +143,7 @@ _REQUIRED_CLI_SUBCOMMANDS = (
     "launch-github-capability-intake-packet",
     "launch-playwright-local-fixture-sandbox-smoke",
     "launch-bounded-playwright-worker-adapter-draft",
+    "launch-operator-provided-playwright-execution-receipt",
     "launch-office-workflow",
     "launch-model-fixture",
     "launch-model-provider-dry-run",

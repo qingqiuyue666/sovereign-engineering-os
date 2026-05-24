@@ -244,6 +244,49 @@ def build_default_adapter_registry() -> tuple[AdapterRegistryEntry, ...]:
             ),
         ),
         AdapterRegistryEntry(
+            adapter_id="operator_provided_playwright_execution_receipt",
+            adapter_name="Operator-Provided Playwright Execution Receipt",
+            mode=AdapterMode.LOCAL_FIXTURE,
+            risk_class=AdapterRiskClass.LOCAL_BROWSER_FIXTURE,
+            admission_status=AdapterAdmissionStatus.CANDIDATE,
+            capabilities=("launch_operator_provided_playwright_execution_receipt",),
+            required_controls=_REQUIRED_CONTROLS
+            + (
+                "receipt_generator_only",
+                "operator_provided_runtime_only",
+                "local_fixture_only",
+                "generated_fixture_only",
+                "embedded_adapter_draft_wrapper_only",
+                "artifact_index_binding",
+                "exact_operator_attestation",
+                "no_live_websites",
+                "no_user_supplied_url",
+                "no_accounts",
+                "no_scraping",
+                "no_bypass",
+                "no_captcha",
+                "no_secrets",
+                "no_cookies",
+                "no_external_network",
+                "no_dependency_install",
+                "no_npm_npx",
+                "no_candidate_repo_access",
+                "no_candidate_code_execution",
+                "not_production_admitted",
+                "human_review_required",
+            ),
+            boundary=_approved_output_boundary(),
+            output_policy=_approved_output_policy(),
+            notes=(
+                "Receipt generator only and not production admitted. It records "
+                "operator-provided local executable and runner evidence, then "
+                "delegates to the bounded adapter draft for generated file fixture "
+                "execution only; no live websites, arbitrary URLs, accounts, "
+                "scraping, bypass, candidate code execution, adapter registration, "
+                "or production promotion."
+            ),
+        ),
+        AdapterRegistryEntry(
             adapter_id="real_browser_runtime_boundary",
             adapter_name="Real Browser Runtime Boundary",
             mode=AdapterMode.FUTURE_EXTERNAL,

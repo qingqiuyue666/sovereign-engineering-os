@@ -78,6 +78,12 @@ _BOUNDED_PLAYWRIGHT_ADAPTER_DRAFT_ID = "bounded_playwright_worker_adapter_draft"
 _BOUNDED_PLAYWRIGHT_ADAPTER_DRAFT_CAPABILITY = (
     "launch_bounded_playwright_worker_adapter_draft"
 )
+_OPERATOR_PLAYWRIGHT_RECEIPT_ADAPTER_ID = (
+    "operator_provided_playwright_execution_receipt"
+)
+_OPERATOR_PLAYWRIGHT_RECEIPT_CAPABILITY = (
+    "launch_operator_provided_playwright_execution_receipt"
+)
 _DELIVERY_ADAPTER_ID = "runtime_delivery_package"
 _DELIVERY_CAPABILITY = "validate_runtime_delivery"
 
@@ -604,6 +610,73 @@ _BOUNDED_PLAYWRIGHT_ADAPTER_DRAFT_DIRECT_PATH_FIELDS = (
     ("artifact_index_manifest", "artifact_index_manifest_path"),
 )
 
+_OPERATOR_PLAYWRIGHT_RECEIPT_DIRECT_PATH_FIELDS = (
+    (
+        "operator_provided_playwright_execution_receipt_plan",
+        "operator_provided_playwright_execution_receipt_plan_path",
+    ),
+    (
+        "operator_provided_playwright_execution_receipt_manifest",
+        "operator_provided_playwright_execution_receipt_manifest_path",
+    ),
+    (
+        "operator_provided_playwright_execution_receipt_summary",
+        "operator_provided_playwright_execution_receipt_summary_path",
+    ),
+    (
+        "operator_provided_playwright_execution_receipt_checklist",
+        "operator_provided_playwright_execution_receipt_checklist_path",
+    ),
+    (
+        "operator_provided_playwright_execution_receipt_result",
+        "operator_provided_playwright_execution_receipt_result_path",
+    ),
+    ("bounded_playwright_worker_adapter_draft_plan", "adapter_draft_plan_path"),
+    (
+        "bounded_playwright_worker_adapter_draft_manifest",
+        "adapter_draft_manifest_path",
+    ),
+    ("bounded_playwright_worker_adapter_draft_summary", "adapter_draft_summary_path"),
+    (
+        "bounded_playwright_worker_adapter_draft_checklist",
+        "adapter_draft_checklist_path",
+    ),
+    ("bounded_playwright_worker_adapter_draft_result", "adapter_draft_result_path"),
+    (
+        "embedded_playwright_local_fixture_sandbox_smoke_plan",
+        "embedded_smoke_plan_path",
+    ),
+    (
+        "embedded_playwright_local_fixture_sandbox_smoke_manifest",
+        "embedded_smoke_manifest_path",
+    ),
+    (
+        "embedded_playwright_local_fixture_sandbox_smoke_summary",
+        "embedded_smoke_summary_path",
+    ),
+    (
+        "embedded_playwright_local_fixture_sandbox_smoke_checklist",
+        "embedded_smoke_checklist_path",
+    ),
+    (
+        "embedded_playwright_local_fixture_sandbox_smoke_result",
+        "embedded_smoke_result_path",
+    ),
+    (
+        "embedded_playwright_local_fixture_sandbox_smoke_runner_output",
+        "embedded_smoke_runner_output_path",
+    ),
+    (
+        "embedded_playwright_local_fixture_sandbox_smoke_screenshot",
+        "embedded_smoke_screenshot_path",
+    ),
+    ("embedded_fixture_index_html", "embedded_fixture_index_path"),
+    ("embedded_fixture_app_js", "embedded_fixture_app_js_path"),
+    ("embedded_fixture_style_css", "embedded_fixture_style_css_path"),
+    ("artifact_index", "artifact_index_path"),
+    ("artifact_index_manifest", "artifact_index_manifest_path"),
+)
+
 _DELIVERY_PATH_FIELDS = (
     ("runtime_delivery_manifest", "runtime_delivery_manifest_path"),
     ("runtime_delivery_validation", "runtime_delivery_validation_path"),
@@ -657,6 +730,8 @@ _ROLE_ARTIFACT_TYPES = {
     "playwright_local_fixture_style_css": "css",
     "bounded_playwright_worker_adapter_draft_summary": "markdown",
     "bounded_playwright_worker_adapter_draft_checklist": "markdown",
+    "operator_provided_playwright_execution_receipt_summary": "markdown",
+    "operator_provided_playwright_execution_receipt_checklist": "markdown",
     "embedded_playwright_local_fixture_sandbox_smoke_summary": "markdown",
     "embedded_playwright_local_fixture_sandbox_smoke_checklist": "markdown",
     "embedded_playwright_local_fixture_sandbox_smoke_screenshot": "png",
@@ -949,6 +1024,11 @@ def _node_artifact_candidates(node, output_dir):
             output_dir,
         )
     if (
+        node["adapter_id"] == _OPERATOR_PLAYWRIGHT_RECEIPT_ADAPTER_ID
+        and node["capability"] == _OPERATOR_PLAYWRIGHT_RECEIPT_CAPABILITY
+    ):
+        return _operator_playwright_receipt_artifact_candidates(node, output_dir)
+    if (
         node["adapter_id"] == _DELIVERY_ADAPTER_ID
         and node["capability"] == _DELIVERY_CAPABILITY
     ):
@@ -1063,6 +1143,25 @@ def _bounded_playwright_adapter_draft_artifact_candidates(node, output_dir):
     role_paths = []
     seen_roles = set()
     for role, field_name in _BOUNDED_PLAYWRIGHT_ADAPTER_DRAFT_DIRECT_PATH_FIELDS:
+        _add_role_path(role_paths, seen_roles, role, node.get(field_name))
+    return [
+        _artifact_record(
+            node_id=node["node_id"],
+            adapter_id=node["adapter_id"],
+            capability=node["capability"],
+            node_status=node["status"],
+            artifact_role=role,
+            path_value=path_value,
+            output_dir=output_dir,
+        )
+        for role, path_value in role_paths
+    ]
+
+
+def _operator_playwright_receipt_artifact_candidates(node, output_dir):
+    role_paths = []
+    seen_roles = set()
+    for role, field_name in _OPERATOR_PLAYWRIGHT_RECEIPT_DIRECT_PATH_FIELDS:
         _add_role_path(role_paths, seen_roles, role, node.get(field_name))
     return [
         _artifact_record(
