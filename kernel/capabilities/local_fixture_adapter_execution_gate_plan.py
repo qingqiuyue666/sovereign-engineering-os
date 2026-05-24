@@ -612,19 +612,22 @@ def _allowed_fixture_root(
     source_path: Path,
     payload: dict[str, object],
 ) -> tuple[Path, list[str]]:
+    canonical_root = source_path.parent
     reasons: list[str] = []
-    usage_receipt_path = payload.get("usage_receipt_path")
-    allowed_root_value = payload.get("local_fixture_allowed_root")
-    if _non_empty_text(usage_receipt_path):
-        derived_root = Path(str(usage_receipt_path)).parent
-        if _non_empty_text(allowed_root_value) and Path(
+    if "usage_receipt_path" in payload:
+        usage_receipt_path = payload.get("usage_receipt_path")
+        if not _non_empty_text(usage_receipt_path) or not _path_is_inside(
+            _path_from_value(str(usage_receipt_path), canonical_root),
+            canonical_root,
+        ):
+            reasons.append("dry_run_plan_usage_receipt_path_mismatch")
+    if "local_fixture_allowed_root" in payload:
+        allowed_root_value = payload.get("local_fixture_allowed_root")
+        if not _non_empty_text(allowed_root_value) or Path(
             str(allowed_root_value)
-        ).resolve(strict=False) != derived_root.resolve(strict=False):
-            reasons.append("local_fixture_path_outside_allowed_root")
-        return derived_root, reasons
-    if _non_empty_text(allowed_root_value):
-        return Path(str(allowed_root_value)), reasons
-    return source_path.parent, reasons
+        ).resolve(strict=False) != canonical_root.resolve(strict=False):
+            reasons.append("dry_run_plan_local_fixture_allowed_root_mismatch")
+    return canonical_root, reasons
 
 
 def _review_attestation_rejection_reasons(value: str | None) -> list[str]:
