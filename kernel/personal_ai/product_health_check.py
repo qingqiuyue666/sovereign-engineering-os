@@ -98,6 +98,10 @@ _LAUNCHER_WORKFLOW_CALLABLES = (
         "playwright_local_fixture_sandbox_smoke_workflow",
         "run_playwright_local_fixture_sandbox_smoke_launcher",
     ),
+    (
+        "bounded_playwright_worker_adapter_draft_workflow",
+        "run_bounded_playwright_worker_adapter_draft_launcher",
+    ),
     ("local_office_workflow", "run_local_office_launcher"),
     ("model_fixture_workflow", "run_model_fixture_launcher"),
     ("model_provider_dry_run_workflow", "run_model_provider_dry_run_launcher"),
@@ -134,6 +138,7 @@ _REQUIRED_CLI_SUBCOMMANDS = (
     "launch-local-asset-next-bounded-smoke-cycle-contract-human-review-from-run-promotion-gate",
     "launch-github-capability-intake-packet",
     "launch-playwright-local-fixture-sandbox-smoke",
+    "launch-bounded-playwright-worker-adapter-draft",
     "launch-office-workflow",
     "launch-model-fixture",
     "launch-model-provider-dry-run",
