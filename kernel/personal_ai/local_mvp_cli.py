@@ -1006,6 +1006,9 @@ def _main_subcommand(argv) -> int:
                 project_id=args.project_id,
                 reviewer_id=args.reviewer_id,
                 operator_notes=args.operator_notes,
+                aggregation_result=_optional_path(args.aggregation_result),
+                require_aggregation_evidence=args.require_aggregation_evidence,
+                require_regression_evidence=args.require_regression_evidence,
                 plan_only=args.plan_only,
             )
             _print_command_payload(result.to_cli_payload())
@@ -1802,6 +1805,15 @@ def _build_subcommand_parser():
     admission_gate_parser.add_argument("--project-id")
     admission_gate_parser.add_argument("--reviewer-id")
     admission_gate_parser.add_argument("--operator-notes")
+    admission_gate_parser.add_argument("--aggregation-result")
+    admission_gate_parser.add_argument(
+        "--require-aggregation-evidence",
+        action="store_true",
+    )
+    admission_gate_parser.add_argument(
+        "--require-regression-evidence",
+        action="store_true",
+    )
     admission_gate_parser.add_argument(
         "--plan-only",
         action="store_true",
