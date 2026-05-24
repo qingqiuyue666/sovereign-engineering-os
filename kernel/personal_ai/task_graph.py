@@ -1434,6 +1434,21 @@ def _run_local_fixture_playwright_admission_gate_node_if_requested(node):
         "operator_notes",
         "local-fixture Playwright adapter admission gate",
     )
+    aggregation_result = _optional_nonempty_string_input(
+        inputs,
+        "aggregation_result",
+        "local-fixture Playwright adapter admission gate",
+    )
+    require_aggregation_evidence = _optional_bool_input(
+        inputs,
+        "require_aggregation_evidence",
+        False,
+    )
+    require_regression_evidence = _optional_bool_input(
+        inputs,
+        "require_regression_evidence",
+        False,
+    )
     plan_only = _optional_bool_input(inputs, "plan_only", False)
 
     from kernel.capabilities.local_fixture_playwright_adapter_admission_gate import (
@@ -1452,6 +1467,11 @@ def _run_local_fixture_playwright_admission_gate_node_if_requested(node):
         project_id=project_id,
         reviewer_id=reviewer_id,
         operator_notes=operator_notes,
+        aggregation_result=None
+        if aggregation_result is None
+        else Path(aggregation_result),
+        require_aggregation_evidence=require_aggregation_evidence,
+        require_regression_evidence=require_regression_evidence,
         plan_only=plan_only,
     )
     payload = result.payload
@@ -1519,6 +1539,53 @@ def _run_local_fixture_playwright_admission_gate_node_if_requested(node):
             "embedded_non_local_request_count"
         ),
         "artifact_hashes_verified": payload.get("artifact_hashes_verified"),
+        "aggregation_evidence_supplied": payload.get("aggregation_evidence_supplied"),
+        "aggregation_evidence_required": payload.get("aggregation_evidence_required"),
+        "aggregation_result_path": payload.get("aggregation_result_path"),
+        "aggregation_result_sha256": payload.get("aggregation_result_sha256"),
+        "aggregation_result_type": payload.get("aggregation_result_type"),
+        "aggregation_result_valid": payload.get("aggregation_result_valid"),
+        "aggregation_result_rejection_reasons": payload.get(
+            "aggregation_result_rejection_reasons"
+        ),
+        "aggregation_suite_run_count_evaluated": payload.get(
+            "aggregation_suite_run_count_evaluated"
+        ),
+        "aggregation_suite_run_count_passed": payload.get(
+            "aggregation_suite_run_count_passed"
+        ),
+        "aggregation_suite_run_count_failed": payload.get(
+            "aggregation_suite_run_count_failed"
+        ),
+        "aggregation_suite_run_count_rejected": payload.get(
+            "aggregation_suite_run_count_rejected"
+        ),
+        "aggregation_pass_rate_bps": payload.get("aggregation_pass_rate_bps"),
+        "aggregation_flaky_rate_bps": payload.get("aggregation_flaky_rate_bps"),
+        "aggregation_regression_detected": payload.get(
+            "aggregation_regression_detected"
+        ),
+        "aggregation_stale_evidence_detected": payload.get(
+            "aggregation_stale_evidence_detected"
+        ),
+        "aggregation_missing_coverage_detected": payload.get(
+            "aggregation_missing_coverage_detected"
+        ),
+        "aggregation_hashes_verified_all": payload.get(
+            "aggregation_hashes_verified_all"
+        ),
+        "aggregation_boundaries_false_all": payload.get(
+            "aggregation_boundaries_false_all"
+        ),
+        "regression_evidence_required": payload.get("regression_evidence_required"),
+        "regression_evidence_present": payload.get("regression_evidence_present"),
+        "regression_scenario_coverage_complete": payload.get(
+            "regression_scenario_coverage_complete"
+        ),
+        "local_fixture_aggregation_bound_to_admission_gate": payload.get(
+            "local_fixture_aggregation_bound_to_admission_gate"
+        ),
+        "admission_gate_result": payload.get("admission_gate_result"),
         "failure_stage": None if complete else payload.get("failure_stage"),
         "error_message": None if complete else payload.get("error_message"),
         "safe_to_retry": not complete,

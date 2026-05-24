@@ -105,6 +105,52 @@ _RECEIPT_TYPE = "operator_provided_local_playwright_execution_receipt_v1"
 _RECEIPT_RESULT_TYPE = "operator_provided_local_playwright_execution_receipt_result_v1"
 _ADAPTER_DRAFT_TYPE = "bounded_playwright_worker_adapter_draft_v1"
 _SMOKE_TYPE = "playwright_local_fixture_bounded_sandbox_smoke_v1"
+_AGGREGATION_RESULT_TYPE = "playwright_local_admission_receipt_aggregation_result_v1"
+_AGGREGATION_MANIFEST_FILE = "playwright_local_admission_receipt_aggregation_manifest.json"
+_AGGREGATION_ARTIFACT_INDEX_FILE = "artifact_index.json"
+_AGGREGATION_ARTIFACT_INDEX_MANIFEST_FILE = "artifact_index_manifest.json"
+_CORE_SCENARIO_IDS = (
+    "static_click_marker",
+    "repeated_local_fixture_execution_a",
+    "repeated_local_fixture_execution_b",
+)
+_REGRESSION_SCENARIO_IDS = (
+    "static_click_marker",
+    "repeated_local_fixture_execution_a",
+    "repeated_local_fixture_execution_b",
+    "output_integrity_scenario",
+    "boundary_false_scenario",
+    "delayed_render_marker",
+    "dom_mutation_click_state",
+    "local_form_like_interaction_no_account",
+    "screenshot_required",
+    "blocked_external_request_claim_rejection",
+    "deterministic_runner_schema",
+)
+_AGGREGATION_OUTPUT_FIELD_NAMES = (
+    "aggregation_evidence_supplied",
+    "aggregation_evidence_required",
+    "aggregation_result_path",
+    "aggregation_result_sha256",
+    "aggregation_result_type",
+    "aggregation_result_valid",
+    "aggregation_result_rejection_reasons",
+    "aggregation_suite_run_count_evaluated",
+    "aggregation_suite_run_count_passed",
+    "aggregation_suite_run_count_failed",
+    "aggregation_suite_run_count_rejected",
+    "aggregation_pass_rate_bps",
+    "aggregation_flaky_rate_bps",
+    "aggregation_regression_detected",
+    "aggregation_stale_evidence_detected",
+    "aggregation_missing_coverage_detected",
+    "aggregation_hashes_verified_all",
+    "aggregation_boundaries_false_all",
+    "regression_evidence_required",
+    "regression_evidence_present",
+    "regression_scenario_coverage_complete",
+    "local_fixture_aggregation_bound_to_admission_gate",
+)
 
 _PLAN_READY_STATUS = "local_fixture_playwright_adapter_admission_gate_plan_ready"
 _ADMITTED_STATUS = "local_fixture_playwright_adapter_admission_gate_admitted"
@@ -272,6 +318,9 @@ def build_local_fixture_playwright_adapter_admission_gate_plan(
     project_id: str | None = None,
     reviewer_id: str | None = None,
     operator_notes: str | None = None,
+    aggregation_result: Path | None = None,
+    require_aggregation_evidence: bool = False,
+    require_regression_evidence: bool = False,
 ) -> LocalFixturePlaywrightAdapterAdmissionGateResult:
     """Create a non-evaluating admission gate plan."""
 
@@ -283,6 +332,9 @@ def build_local_fixture_playwright_adapter_admission_gate_plan(
         project_id=project_id,
         reviewer_id=reviewer_id,
         operator_notes=operator_notes,
+        aggregation_result=aggregation_result,
+        require_aggregation_evidence=require_aggregation_evidence,
+        require_regression_evidence=require_regression_evidence,
         evaluate=False,
     )
 
@@ -296,6 +348,9 @@ def run_local_fixture_playwright_adapter_admission_gate_launcher(
     project_id: str | None = None,
     reviewer_id: str | None = None,
     operator_notes: str | None = None,
+    aggregation_result: Path | None = None,
+    require_aggregation_evidence: bool = False,
+    require_regression_evidence: bool = False,
     plan_only: bool = False,
 ) -> LocalFixturePlaywrightAdapterAdmissionGateResult:
     """Launcher-oriented wrapper for plan or evidence-gate evaluation."""
@@ -309,6 +364,9 @@ def run_local_fixture_playwright_adapter_admission_gate_launcher(
             project_id=project_id,
             reviewer_id=reviewer_id,
             operator_notes=operator_notes,
+            aggregation_result=aggregation_result,
+            require_aggregation_evidence=require_aggregation_evidence,
+            require_regression_evidence=require_regression_evidence,
         )
     return run_local_fixture_playwright_adapter_admission_gate(
         receipt_dir,
@@ -318,6 +376,9 @@ def run_local_fixture_playwright_adapter_admission_gate_launcher(
         project_id=project_id,
         reviewer_id=reviewer_id,
         operator_notes=operator_notes,
+        aggregation_result=aggregation_result,
+        require_aggregation_evidence=require_aggregation_evidence,
+        require_regression_evidence=require_regression_evidence,
     )
 
 
@@ -330,6 +391,9 @@ def run_local_fixture_playwright_adapter_admission_gate(
     project_id: str | None = None,
     reviewer_id: str | None = None,
     operator_notes: str | None = None,
+    aggregation_result: Path | None = None,
+    require_aggregation_evidence: bool = False,
+    require_regression_evidence: bool = False,
 ) -> LocalFixturePlaywrightAdapterAdmissionGateResult:
     """Evaluate #422 receipt evidence and write an admission or rejection."""
 
@@ -341,6 +405,9 @@ def run_local_fixture_playwright_adapter_admission_gate(
         project_id=project_id,
         reviewer_id=reviewer_id,
         operator_notes=operator_notes,
+        aggregation_result=aggregation_result,
+        require_aggregation_evidence=require_aggregation_evidence,
+        require_regression_evidence=require_regression_evidence,
         evaluate=True,
     )
 
@@ -354,10 +421,16 @@ def _build_or_run_gate(
     project_id: str | None,
     reviewer_id: str | None,
     operator_notes: str | None,
+    aggregation_result: Path | None,
+    require_aggregation_evidence: bool,
+    require_regression_evidence: bool,
     evaluate: bool,
 ) -> LocalFixturePlaywrightAdapterAdmissionGateResult:
     receipt_path = Path(receipt_dir)
     output_path = Path(output_dir)
+    aggregation_result_path = (
+        None if aggregation_result is None else Path(aggregation_result)
+    )
     paths = _output_paths(output_path)
     output_files = _RUN_OUTPUT_FILES if evaluate else _PLAN_OUTPUT_FILES
 
@@ -390,6 +463,9 @@ def _build_or_run_gate(
             reviewer_id=reviewer_id,
             operator_notes=operator_notes,
             review_attestation=review_attestation or "",
+            aggregation_result_path=aggregation_result_path,
+            require_aggregation_evidence=require_aggregation_evidence,
+            require_regression_evidence=require_regression_evidence,
             gate_status=_PLAN_READY_STATUS,
             gate_decision=_PLAN_READY_DECISION,
             next_allowed_action=_PLAN_NEXT_ACTION,
@@ -478,7 +554,12 @@ def _build_or_run_gate(
         )
 
     evidence = _load_evidence(receipt_path)
-    check_results, metrics = _evaluate_admission_checks(evidence)
+    aggregation_metrics = _aggregation_evidence_metrics(
+        aggregation_result_path=aggregation_result_path,
+        require_aggregation_evidence=require_aggregation_evidence,
+        require_regression_evidence=require_regression_evidence,
+    )
+    check_results, metrics = _evaluate_admission_checks(evidence, aggregation_metrics)
     failed_checks = [check for check in check_results if not check["passed"]]
     admitted = not failed_checks
     gate_status = _ADMITTED_STATUS if admitted else _REJECTED_STATUS
@@ -493,6 +574,9 @@ def _build_or_run_gate(
         reviewer_id=reviewer_id,
         operator_notes=operator_notes,
         review_attestation=review_attestation or "",
+        aggregation_result_path=aggregation_result_path,
+        require_aggregation_evidence=require_aggregation_evidence,
+        require_regression_evidence=require_regression_evidence,
         gate_status=gate_status,
         gate_decision=gate_decision,
         next_allowed_action=next_allowed_action,
@@ -663,6 +747,9 @@ def _plan_payload(
     reviewer_id: str | None,
     operator_notes: str | None,
     review_attestation: str,
+    aggregation_result_path: Path | None,
+    require_aggregation_evidence: bool,
+    require_regression_evidence: bool,
     gate_status: str,
     gate_decision: str,
     next_allowed_action: str,
@@ -670,6 +757,11 @@ def _plan_payload(
 ) -> dict[str, object]:
     receipt_paths = _receipt_paths(receipt_dir)
     disabled_fields = _admission_false_fields(local_fixture_admission_granted)
+    aggregation_fields = _aggregation_output_defaults(
+        aggregation_result_path=aggregation_result_path,
+        require_aggregation_evidence=require_aggregation_evidence,
+        require_regression_evidence=require_regression_evidence,
+    )
     return {
         "gate_type": _GATE_TYPE,
         "authority": _AUTHORITY,
@@ -728,6 +820,10 @@ def _plan_payload(
         "security_review_required": True,
         "sandbox_review_required": True,
         "production_review_required": True,
+        **aggregation_fields,
+        "admission_gate_result": (
+            "pass" if local_fixture_admission_granted else "rejected"
+        ),
         **disabled_fields,
         **dict(LOCAL_FIXTURE_PLAYWRIGHT_ADAPTER_ADMISSION_PERFORMED_FALSE_FIELDS),
     }
@@ -804,6 +900,7 @@ def _load_evidence(receipt_dir: Path) -> dict[str, object]:
 
 def _evaluate_admission_checks(
     evidence: dict[str, object],
+    aggregation_metrics: dict[str, object],
 ) -> tuple[list[dict[str, object]], dict[str, object]]:
     paths = evidence["paths"]  # type: ignore[assignment]
     payloads = evidence["payloads"]  # type: ignore[assignment]
@@ -811,6 +908,7 @@ def _evaluate_admission_checks(
     receipt_dir = Path(evidence["receipt_dir"])  # type: ignore[arg-type]
 
     metrics = _evidence_metrics(receipt_dir, paths, payloads)
+    metrics.update(aggregation_metrics)
     checks: list[dict[str, object]] = []
 
     def add(check_id: str, passed: bool, message: str, path_key: str | None = None) -> None:
@@ -1188,6 +1286,18 @@ def _evaluate_admission_checks(
         "operator-provided runtime metadata is present as evidence only",
         "receipt_result",
     )
+    for reason in metrics["aggregation_result_rejection_reasons"]:
+        add(str(reason), False, str(reason), None)
+    if (
+        metrics["aggregation_evidence_supplied"]
+        and not metrics["aggregation_result_rejection_reasons"]
+    ):
+        add(
+            "aggregation_evidence_valid",
+            True,
+            "aggregation evidence is valid local-fixture-only evidence",
+            None,
+        )
     return checks, metrics
 
 
@@ -1338,6 +1448,296 @@ def _evidence_metrics(
     }
 
 
+def _aggregation_output_defaults(
+    *,
+    aggregation_result_path: Path | None,
+    require_aggregation_evidence: bool,
+    require_regression_evidence: bool,
+) -> dict[str, object]:
+    return {
+        "aggregation_evidence_supplied": aggregation_result_path is not None,
+        "aggregation_evidence_required": require_aggregation_evidence,
+        "aggregation_result_path": (
+            None if aggregation_result_path is None else aggregation_result_path.as_posix()
+        ),
+        "aggregation_result_sha256": None,
+        "aggregation_result_type": None,
+        "aggregation_result_valid": False,
+        "aggregation_result_rejection_reasons": [],
+        "aggregation_suite_run_count_evaluated": 0,
+        "aggregation_suite_run_count_passed": 0,
+        "aggregation_suite_run_count_failed": 0,
+        "aggregation_suite_run_count_rejected": 0,
+        "aggregation_pass_rate_bps": 0,
+        "aggregation_flaky_rate_bps": 0,
+        "aggregation_regression_detected": False,
+        "aggregation_stale_evidence_detected": False,
+        "aggregation_missing_coverage_detected": False,
+        "aggregation_hashes_verified_all": False,
+        "aggregation_boundaries_false_all": False,
+        "regression_evidence_required": require_regression_evidence,
+        "regression_evidence_present": False,
+        "regression_scenario_coverage_complete": False,
+        "local_fixture_aggregation_bound_to_admission_gate": False,
+    }
+
+
+def _aggregation_output_fields(source: dict[str, object]) -> dict[str, object]:
+    return {field_name: source.get(field_name) for field_name in _AGGREGATION_OUTPUT_FIELD_NAMES}
+
+
+def _aggregation_evidence_metrics(
+    *,
+    aggregation_result_path: Path | None,
+    require_aggregation_evidence: bool,
+    require_regression_evidence: bool,
+) -> dict[str, object]:
+    metrics = _aggregation_output_defaults(
+        aggregation_result_path=aggregation_result_path,
+        require_aggregation_evidence=require_aggregation_evidence,
+        require_regression_evidence=require_regression_evidence,
+    )
+    reasons: list[str] = []
+    if aggregation_result_path is None:
+        if require_aggregation_evidence:
+            reasons.append("aggregation_evidence_required_but_missing")
+        if require_regression_evidence:
+            reasons.append("regression_evidence_required_but_missing")
+            reasons.append("regression_scenario_coverage_missing")
+        metrics["aggregation_result_rejection_reasons"] = reasons
+        return metrics
+
+    if _candidate_repo_marker_in_path(aggregation_result_path):
+        reasons.append("aggregation_candidate_artifacts_present")
+    if aggregation_result_path.is_symlink():
+        reasons.append("aggregation_result_path_is_symlink")
+        metrics["aggregation_result_rejection_reasons"] = _dedupe_strings(reasons)
+        return metrics
+    if not aggregation_result_path.exists() or not aggregation_result_path.is_file():
+        reasons.append("aggregation_result_path_missing")
+        metrics["aggregation_result_rejection_reasons"] = _dedupe_strings(reasons)
+        return metrics
+
+    metrics["aggregation_result_sha256"] = sha256_file(aggregation_result_path)
+    payload, read_error = _read_json_object(
+        aggregation_result_path,
+        "aggregation result",
+    )
+    if read_error is not None:
+        reasons.append("aggregation_result_not_json_object")
+        metrics["aggregation_result_rejection_reasons"] = _dedupe_strings(reasons)
+        return metrics
+
+    metrics.update(_aggregation_payload_metrics(payload, aggregation_result_path))
+    if payload.get("result_type") != _AGGREGATION_RESULT_TYPE:
+        reasons.append("aggregation_result_type_mismatch")
+    if payload.get("aggregate_success") is not True:
+        reasons.append("aggregation_result_not_successful")
+    if payload.get("local_fixture_aggregation_passed") is not True:
+        reasons.append("local_fixture_aggregation_not_passed")
+    if (
+        payload.get("minimum_suite_runs_satisfied") is False
+        or _int_or_none(payload.get("suite_run_count_evaluated")) is None
+        or int(metrics["aggregation_suite_run_count_evaluated"]) < 1
+    ):
+        reasons.append("aggregation_suite_run_threshold_not_satisfied")
+    if int(metrics["aggregation_suite_run_count_rejected"]) != 0:
+        reasons.append("aggregation_rejected_suite_runs_present")
+    if int(metrics["aggregation_suite_run_count_failed"]) != 0:
+        reasons.append("aggregation_failed_suite_runs_present")
+    pass_rate = _int_or_none(payload.get("pass_rate_bps"))
+    if payload.get("minimum_pass_rate_satisfied") is False or (
+        pass_rate is not None and pass_rate < 10000
+    ):
+        reasons.append("aggregation_pass_rate_below_threshold")
+    flaky_ids = payload.get("flaky_scenario_ids")
+    if (
+        not isinstance(flaky_ids, list)
+        or any(not isinstance(item, str) for item in flaky_ids)
+        or len(flaky_ids) > 0
+        or metrics["aggregation_flaky_rate_bps"] != 0
+    ):
+        reasons.append("aggregation_flaky_scenarios_present")
+    if metrics["aggregation_regression_detected"]:
+        reasons.append("aggregation_regression_detected")
+    if metrics["aggregation_stale_evidence_detected"]:
+        reasons.append("aggregation_stale_evidence_detected")
+    if metrics["aggregation_missing_coverage_detected"]:
+        reasons.append("aggregation_missing_coverage_detected")
+    if not metrics["aggregation_hashes_verified_all"]:
+        reasons.append("aggregation_hashes_not_verified")
+    if not metrics["aggregation_boundaries_false_all"]:
+        reasons.append("aggregation_boundaries_not_false")
+    if (
+        payload.get("candidate_repo_files_indexed_any") is True
+        or payload.get("external_candidate_artifacts_indexed_any") is True
+    ):
+        reasons.append("aggregation_candidate_artifacts_present")
+    if payload.get("production_admission_granted") is True:
+        reasons.append("aggregation_production_admission_claimed")
+    if payload.get("live_website_admission_granted") is True:
+        reasons.append("aggregation_live_website_admission_claimed")
+    if payload.get("general_browser_automation_admission_granted") is True:
+        reasons.append("aggregation_general_browser_admission_claimed")
+
+    suite_reasons, regression_present, regression_complete = (
+        _aggregation_suite_run_rejection_reasons(payload)
+    )
+    reasons.extend(suite_reasons)
+    metrics["regression_evidence_present"] = regression_present
+    metrics["regression_scenario_coverage_complete"] = regression_complete
+    if require_regression_evidence and not regression_present:
+        reasons.append("regression_evidence_required_but_missing")
+    if require_regression_evidence and not regression_complete:
+        reasons.append("regression_scenario_coverage_missing")
+
+    reasons = _dedupe_strings(reasons)
+    metrics["aggregation_result_rejection_reasons"] = reasons
+    metrics["aggregation_result_valid"] = not reasons
+    metrics["local_fixture_aggregation_bound_to_admission_gate"] = (
+        (require_aggregation_evidence or metrics["aggregation_evidence_supplied"])
+        and not reasons
+    )
+    return metrics
+
+
+def _aggregation_payload_metrics(
+    payload: dict[str, object],
+    aggregation_result_path: Path,
+) -> dict[str, object]:
+    hashes_verified = payload.get("hashes_verified_all") is True
+    if not _aggregation_discoverable_hashes_verified(aggregation_result_path):
+        hashes_verified = False
+    return {
+        "aggregation_result_type": payload.get("result_type"),
+        "aggregation_suite_run_count_evaluated": _int_or_zero(
+            payload.get("suite_run_count_evaluated")
+        ),
+        "aggregation_suite_run_count_passed": _int_or_zero(
+            payload.get("suite_run_count_passed")
+        ),
+        "aggregation_suite_run_count_failed": _int_or_zero(
+            payload.get("suite_run_count_failed")
+        ),
+        "aggregation_suite_run_count_rejected": _int_or_zero(
+            payload.get("suite_run_count_rejected")
+        ),
+        "aggregation_pass_rate_bps": _int_or_zero(payload.get("pass_rate_bps")),
+        "aggregation_flaky_rate_bps": _int_or_zero(payload.get("flaky_rate_bps")),
+        "aggregation_regression_detected": payload.get("regression_detected") is True,
+        "aggregation_stale_evidence_detected": (
+            payload.get("stale_evidence_detected") is True
+        ),
+        "aggregation_missing_coverage_detected": (
+            payload.get("missing_coverage_detected") is True
+        ),
+        "aggregation_hashes_verified_all": hashes_verified,
+        "aggregation_boundaries_false_all": (
+            payload.get("boundaries_false_all") is True
+        ),
+    }
+
+
+def _aggregation_discoverable_hashes_verified(aggregation_result_path: Path) -> bool:
+    root = aggregation_result_path.parent
+    ok = True
+    manifest_path = root / _AGGREGATION_MANIFEST_FILE
+    if manifest_path.exists() or manifest_path.is_symlink():
+        manifest, error = _read_json_object(manifest_path, "aggregation manifest")
+        ok = ok and error is None and _verify_manifest_hashes(manifest, root)
+    index_path = root / _AGGREGATION_ARTIFACT_INDEX_FILE
+    if index_path.exists() or index_path.is_symlink():
+        index_payload, error = _read_json_object(index_path, "aggregation artifact index")
+        verification = _verify_index_payload(
+            index_payload,
+            root,
+            allowed_root_only=False,
+        )
+        ok = ok and error is None
+        ok = ok and bool(verification["paths_under_receipt_dir"])
+        ok = ok and bool(verification["no_symlink_paths"])
+        ok = ok and bool(verification["all_hashes_match"])
+        ok = ok and not bool(verification["candidate_repo_files_indexed"])
+        ok = ok and not bool(verification["external_candidate_artifacts_indexed"])
+    index_manifest_path = root / _AGGREGATION_ARTIFACT_INDEX_MANIFEST_FILE
+    if index_manifest_path.exists() or index_manifest_path.is_symlink():
+        index_manifest, error = _read_json_object(
+            index_manifest_path,
+            "aggregation artifact index manifest",
+        )
+        ok = ok and error is None
+        ok = ok and _verify_aggregation_index_manifest(index_manifest, index_path, root)
+    return ok
+
+
+def _verify_aggregation_index_manifest(
+    index_manifest: dict[str, object],
+    artifact_index_path: Path,
+    root: Path,
+) -> bool:
+    path_value = index_manifest.get("artifact_index_path")
+    recorded_hash = index_manifest.get("artifact_index_sha256")
+    if not isinstance(path_value, str) or not isinstance(recorded_hash, str):
+        return False
+    path = Path(path_value)
+    if path.resolve(strict=False) != artifact_index_path.resolve(strict=False):
+        return False
+    if not _path_is_inside(path, root):
+        return False
+    if path.is_symlink() or not path.exists() or not path.is_file():
+        return False
+    return sha256_file(path) == recorded_hash
+
+
+def _aggregation_suite_run_rejection_reasons(
+    payload: dict[str, object],
+) -> tuple[list[str], bool, bool]:
+    reasons: list[str] = []
+    suite_runs = payload.get("suite_run_results")
+    if not isinstance(suite_runs, list):
+        return ["aggregation_suite_run_threshold_not_satisfied"], False, False
+    required_core = set(_CORE_SCENARIO_IDS)
+    required_regression = set(_REGRESSION_SCENARIO_IDS)
+    regression_present = False
+    regression_complete = False
+    for run_result in suite_runs:
+        if not isinstance(run_result, dict):
+            reasons.append("aggregation_suite_run_rejected")
+            continue
+        rejection_reasons = run_result.get("rejection_reasons")
+        if run_result.get("rejected") is True or rejection_reasons not in ([], None):
+            reasons.append("aggregation_suite_run_rejected")
+        if run_result.get("suite_success") is not True:
+            reasons.append("aggregation_suite_run_not_successful")
+        if run_result.get("hashes_verified") is not True:
+            reasons.append("aggregation_suite_run_hashes_not_verified")
+        if run_result.get("boundaries_false") is not True:
+            reasons.append("aggregation_suite_run_boundaries_not_false")
+        if run_result.get("artifact_index_under_suite_dir") is not True:
+            reasons.append("aggregation_suite_run_artifact_index_outside_suite_dir")
+        if (
+            run_result.get("candidate_repo_files_indexed") is True
+            or run_result.get("external_candidate_artifacts_indexed") is True
+        ):
+            reasons.append("aggregation_suite_run_candidate_artifacts_present")
+        if run_result.get("stale_evidence") is True:
+            reasons.append("aggregation_stale_evidence_detected")
+        scenario_ids = {
+            item
+            for item in run_result.get("scenario_ids") or []
+            if isinstance(item, str)
+        }
+        if not required_core.issubset(scenario_ids):
+            reasons.append("aggregation_core_coverage_missing")
+        run_regression_complete = required_regression.issubset(scenario_ids)
+        if run_result.get("scenario_set") == "regression":
+            regression_present = True
+            regression_complete = regression_complete or run_regression_complete
+        elif run_regression_complete:
+            reasons.append("regression_scenario_coverage_missing")
+    return _dedupe_strings(reasons), regression_present, regression_complete
+
+
 def _verify_index_payload(
     index_payload: dict[str, object],
     receipt_dir: Path,
@@ -1402,12 +1802,16 @@ def _verify_index_payload(
                 receipt_hashes = False
             continue
         recorded_hash = entry.get("sha256")
-        if isinstance(recorded_hash, str) and recorded_hash:
-            actual_hash = sha256_file(path)
-            if actual_hash != recorded_hash:
-                all_hashes = False
-                if _is_root_receipt_artifact(path, receipt_dir):
-                    receipt_hashes = False
+        if not isinstance(recorded_hash, str) or not recorded_hash:
+            all_hashes = False
+            if _is_root_receipt_artifact(path, receipt_dir):
+                receipt_hashes = False
+            continue
+        actual_hash = sha256_file(path)
+        if actual_hash != recorded_hash:
+            all_hashes = False
+            if _is_root_receipt_artifact(path, receipt_dir):
+                receipt_hashes = False
         if _is_root_receipt_artifact(path, receipt_dir):
             saw_receipt_entry = True
     if not saw_receipt_entry and allowed_root_only:
@@ -1494,6 +1898,7 @@ def _decision_payload(
         "live_website_scope": "denied",
         "gate_status": gate_status,
         "gate_decision": gate_decision,
+        "admission_gate_result": "pass" if admitted else "rejected",
         "next_allowed_action": next_allowed_action,
         "admission_checks_total": len(check_results),
         "admission_checks_passed": len(check_results) - len(failed),
@@ -1523,6 +1928,7 @@ def _decision_payload(
         "security_review_required": True,
         "sandbox_review_required": True,
         "production_review_required": True,
+        **_aggregation_output_fields(metrics),
         **disabled_fields,
         **dict(LOCAL_FIXTURE_PLAYWRIGHT_ADAPTER_ADMISSION_PERFORMED_FALSE_FIELDS),
     }
@@ -1591,6 +1997,8 @@ def _manifest_payload(
         "security_review_required": True,
         "sandbox_review_required": True,
         "production_review_required": True,
+        **_aggregation_output_fields(decision or plan),
+        "admission_gate_result": "pass" if admitted else "rejected",
         **_admission_false_fields(admitted),
         **dict(LOCAL_FIXTURE_PLAYWRIGHT_ADAPTER_ADMISSION_PERFORMED_FALSE_FIELDS),
     }
@@ -1793,12 +2201,14 @@ def _launcher_payload(
         "source_adapter_capability": _ADAPTER_CAPABILITY,
         "gate_status": plan["gate_status"],
         "gate_decision": plan["gate_decision"],
+        "admission_gate_result": "pass" if admitted else "rejected",
         "next_allowed_action": plan["next_allowed_action"],
         "required_human_review": True,
         "required_human_approval": True,
         "security_review_required": True,
         "sandbox_review_required": True,
         "production_review_required": True,
+        **_aggregation_output_fields(decision or plan),
         **_admission_false_fields(admitted),
         **dict(LOCAL_FIXTURE_PLAYWRIGHT_ADAPTER_ADMISSION_PERFORMED_FALSE_FIELDS),
     }
@@ -1853,6 +2263,7 @@ def _structured_failure_result(
         "output_dir": output_dir.as_posix(),
         "gate_status": _FAILED_STATUS,
         "gate_decision": _FIX_DECISION,
+        "admission_gate_result": "rejected",
         "next_allowed_action": _REJECTED_NEXT_ACTION,
         "failure_stage": failure_stage,
         "error_type": "ValueError",
@@ -1870,6 +2281,11 @@ def _structured_failure_result(
         "security_review_required": True,
         "sandbox_review_required": True,
         "production_review_required": True,
+        **_aggregation_output_defaults(
+            aggregation_result_path=None,
+            require_aggregation_evidence=False,
+            require_regression_evidence=False,
+        ),
         **_admission_false_fields(False),
         **dict(LOCAL_FIXTURE_PLAYWRIGHT_ADAPTER_ADMISSION_PERFORMED_FALSE_FIELDS),
     }
@@ -2065,6 +2481,21 @@ def _int_or_none(value: object) -> int | None:
     if isinstance(value, int) and not isinstance(value, bool):
         return value
     return None
+
+
+def _int_or_zero(value: object) -> int:
+    return value if isinstance(value, int) and not isinstance(value, bool) else 0
+
+
+def _dedupe_strings(values: list[str]) -> list[str]:
+    deduped: list[str] = []
+    seen: set[str] = set()
+    for value in values:
+        if value in seen:
+            continue
+        seen.add(value)
+        deduped.append(value)
+    return deduped
 
 
 def _scheme_from_reference(value: str) -> str:

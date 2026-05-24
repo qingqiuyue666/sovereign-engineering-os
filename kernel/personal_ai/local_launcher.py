@@ -2100,6 +2100,9 @@ def run_local_fixture_playwright_adapter_admission_gate_launcher(
     project_id: str | None = None,
     reviewer_id: str | None = None,
     operator_notes: str | None = None,
+    aggregation_result: Path | None = None,
+    require_aggregation_evidence: bool = False,
+    require_regression_evidence: bool = False,
     plan_only: bool = False,
 ) -> LauncherWorkflowResult:
     output_path = Path(output_dir)
@@ -2111,6 +2114,11 @@ def run_local_fixture_playwright_adapter_admission_gate_launcher(
         project_id=project_id,
         reviewer_id=reviewer_id,
         operator_notes=operator_notes,
+        aggregation_result=None
+        if aggregation_result is None
+        else Path(aggregation_result),
+        require_aggregation_evidence=require_aggregation_evidence,
+        require_regression_evidence=require_regression_evidence,
         plan_only=plan_only,
     )
     return LauncherWorkflowResult(
