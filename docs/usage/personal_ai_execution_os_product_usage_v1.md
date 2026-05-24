@@ -2527,8 +2527,9 @@ python3 -m kernel.personal_ai.local_mvp_cli launch-local-only-playwright-fixture
   --plan-only
 ```
 
-Run mode omits `--plan-only`. `--scenario-set` may be `core` or `extended`;
-the default is `core`. The operator attestation must match exactly:
+Run mode omits `--plan-only`. `--scenario-set` may be `core`, `extended`, or
+`regression`; the default is `core`. The operator attestation must match
+exactly:
 
 `I_UNDERSTAND_THIS_RUN_IS_LOCAL_FIXTURE_ONLY_NO_LIVE_WEBSITES_NO_ACCOUNTS_NO_SCRAPING_NO_BYPASS`
 
@@ -2562,6 +2563,16 @@ succeed; a `file` fixture scheme; zero non-local requests; marker, click, and
 status evidence where applicable; false boundary fields; artifact indexes under
 the scenario directory; no symlink indexed paths; no candidate repo or external
 candidate artifacts indexed; and matching recorded hashes.
+
+The `regression` scenario set includes all `core` and `extended` scenarios plus
+`delayed_render_marker`, `dom_mutation_click_state`,
+`local_form_like_interaction_no_account`, `screenshot_required`,
+`blocked_external_request_claim_rejection`, and
+`deterministic_runner_schema`. These scenarios add evidence checks over the
+same local-only #422 receipt artifacts. They remain file fixture only and do
+not enable live websites, arbitrary URLs, account/login/registration flows,
+scraping, bypass/captcha workflows, secrets/cookies, npm/npx/install/browser
+download workflows, or candidate repository code execution.
 
 Task graphs can include the scenario suite node:
 

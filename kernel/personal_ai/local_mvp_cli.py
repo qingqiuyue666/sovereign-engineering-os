@@ -1827,7 +1827,7 @@ def _build_subcommand_parser():
     scenario_suite_parser.add_argument("--expected-playwright-source")
     scenario_suite_parser.add_argument(
         "--scenario-set",
-        choices=("core", "extended"),
+        choices=("core", "extended", "regression"),
         default="core",
     )
     scenario_suite_parser.add_argument(
