@@ -130,6 +130,10 @@ from kernel.capabilities.playwright_local_admission_receipt_aggregation import (
     PLAYWRIGHT_LOCAL_ADMISSION_RECEIPT_AGGREGATION_SUMMARY_FILE,
     run_playwright_local_admission_receipt_aggregation_launcher as run_playwright_local_admission_receipt_aggregation_capability,
 )
+from kernel.capabilities.admission_gated_local_adapter_registry_promotion import (
+    ADMISSION_GATED_LOCAL_ADAPTER_REGISTRY_PROMOTION_SUMMARY_FILE,
+    run_admission_gated_local_adapter_registry_promotion_launcher as run_admission_gated_local_adapter_registry_promotion_capability,
+)
 from kernel.personal_ai.artifact_index import build_artifact_index
 from kernel.personal_ai.asset_scan_operational_control import (
     ASSET_SCAN_FAILURE_BUNDLE_FILE,
@@ -213,6 +217,7 @@ __all__ = [
     "run_local_fixture_playwright_adapter_admission_gate_launcher",
     "run_local_only_playwright_fixture_scenario_suite_launcher",
     "run_playwright_local_admission_receipt_aggregation_launcher",
+    "run_admission_gated_local_adapter_registry_promotion_launcher",
     "run_local_office_launcher",
     "run_model_fixture_launcher",
     "run_model_provider_dry_run_launcher",
@@ -2217,6 +2222,41 @@ def run_playwright_local_admission_receipt_aggregation_launcher(
         summary_path=result.summary_path
         if result.summary_path is not None
         else output_path / PLAYWRIGHT_LOCAL_ADMISSION_RECEIPT_AGGREGATION_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_admission_gated_local_adapter_registry_promotion_launcher(
+    admission_gate_decision: Path,
+    output_dir: Path,
+    promotion_id: str,
+    *,
+    review_attestation: str | None = None,
+    project_id: str | None = None,
+    reviewer_id: str | None = None,
+    operator_notes: str | None = None,
+    registry_output: Path | None = None,
+) -> LauncherWorkflowResult:
+    output_path = Path(output_dir)
+    result = run_admission_gated_local_adapter_registry_promotion_capability(
+        Path(admission_gate_decision),
+        output_path,
+        promotion_id,
+        review_attestation=review_attestation,
+        project_id=project_id,
+        reviewer_id=reviewer_id,
+        operator_notes=operator_notes,
+        registry_output=None if registry_output is None else Path(registry_output),
+    )
+    return LauncherWorkflowResult(
+        workflow="admission_gated_local_adapter_registry_promotion_workflow",
+        output_dir=output_path,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else output_path
+        / ADMISSION_GATED_LOCAL_ADAPTER_REGISTRY_PROMOTION_SUMMARY_FILE,
         required_human_approval=True,
     )
 

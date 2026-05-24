@@ -113,6 +113,12 @@ _PLAYWRIGHT_LOCAL_ADMISSION_RECEIPT_AGGREGATION_ADAPTER_ID = (
 _PLAYWRIGHT_LOCAL_ADMISSION_RECEIPT_AGGREGATION_CAPABILITY = (
     "launch_playwright_local_admission_receipt_aggregation"
 )
+_ADMISSION_GATED_LOCAL_ADAPTER_REGISTRY_PROMOTION_ADAPTER_ID = (
+    "admission_gated_local_adapter_registry_promotion"
+)
+_ADMISSION_GATED_LOCAL_ADAPTER_REGISTRY_PROMOTION_CAPABILITY = (
+    "launch_admission_gated_local_adapter_registry_promotion"
+)
 _RUNTIME_ADMISSION_DECISION_TYPE = "personal_ai_runtime_admission_decision_v1"
 _GRAPH_EXECUTION_MODES = ("fixture_execution", "dry_run_plan")
 _NODE_EXECUTION_MODES = ("fixture", "mock", "dry_run", "real_runtime")
@@ -611,6 +617,11 @@ def _validate_adapter_routes(node_records, graph_execution_mode):
                 decision.reason_codes,
                 graph_execution_mode,
             )
+            and not _route_is_safe_admission_gated_local_adapter_registry_promotion_fixture(
+                node,
+                decision.reason_codes,
+                graph_execution_mode,
+            )
         ):
             raise ValueError(
                 "task graph adapter route is not admitted: "
@@ -695,6 +706,22 @@ def _route_is_safe_playwright_local_admission_receipt_aggregation_fixture(
     )
 
 
+def _route_is_safe_admission_gated_local_adapter_registry_promotion_fixture(
+    node,
+    reason_codes,
+    graph_execution_mode,
+):
+    return (
+        graph_execution_mode == "fixture_execution"
+        and node["execution_mode"] == "fixture"
+        and node["adapter_id"]
+        == _ADMISSION_GATED_LOCAL_ADAPTER_REGISTRY_PROMOTION_ADAPTER_ID
+        and node["capability"]
+        == _ADMISSION_GATED_LOCAL_ADAPTER_REGISTRY_PROMOTION_CAPABILITY
+        and tuple(reason_codes) == ("adapter_not_admitted",)
+    )
+
+
 def _execute_graph_nodes(nodes_by_id, graph_execution_mode):
     executed = []
     status_by_node_id = {}
@@ -771,6 +798,17 @@ def _execute_graph_nodes(nodes_by_id, graph_execution_mode):
                                                 _run_delivery_node_if_requested(node)
                                             )
                                             record["status"] = "completed"
+        if (
+            not blocked_dependencies
+            and graph_execution_mode != "dry_run_plan"
+        ):
+            registry_promotion_result = (
+                _run_admission_gated_local_adapter_registry_promotion_node_if_requested(
+                    node
+                )
+            )
+            if registry_promotion_result is not None:
+                record.update(registry_promotion_result)
         status_by_node_id[node_id] = record["status"]
         executed.append(record)
     return executed
@@ -793,6 +831,7 @@ def _base_node_execution_record(node, graph_execution_mode):
             _OPERATOR_PLAYWRIGHT_RECEIPT_ADAPTER_ID,
             _LOCAL_ONLY_PLAYWRIGHT_FIXTURE_SCENARIO_SUITE_ADAPTER_ID,
             _PLAYWRIGHT_LOCAL_ADMISSION_RECEIPT_AGGREGATION_ADAPTER_ID,
+            _ADMISSION_GATED_LOCAL_ADAPTER_REGISTRY_PROMOTION_ADAPTER_ID,
         ),
         "adapter_route_policy": "local_delivery_integration"
         if node["adapter_id"] == _DELIVERY_ADAPTER_ID
@@ -861,6 +900,19 @@ def _base_node_execution_record(node, graph_execution_mode):
         record.update(
             dict(PLAYWRIGHT_LOCAL_ADMISSION_RECEIPT_AGGREGATION_PERFORMED_FALSE_FIELDS)
         )
+    if (
+        node["adapter_id"]
+        == _ADMISSION_GATED_LOCAL_ADAPTER_REGISTRY_PROMOTION_ADAPTER_ID
+    ):
+        from kernel.capabilities.admission_gated_local_adapter_registry_promotion import (
+            LOCAL_FIXTURE_PLAYWRIGHT_ADAPTER_ADMISSION_FALSE_FIELDS,
+            LOCAL_FIXTURE_PLAYWRIGHT_ADAPTER_ADMISSION_PERFORMED_FALSE_FIELDS,
+        )
+
+        record.update(dict(LOCAL_FIXTURE_PLAYWRIGHT_ADAPTER_ADMISSION_FALSE_FIELDS))
+        record.update(
+            dict(LOCAL_FIXTURE_PLAYWRIGHT_ADAPTER_ADMISSION_PERFORMED_FALSE_FIELDS)
+        )
     return record
 
 
@@ -885,6 +937,11 @@ def _adapter_route_policy(node, graph_execution_mode):
         return "local_only_playwright_fixture_scenario_suite_not_production_admitted"
     if node["adapter_id"] == _PLAYWRIGHT_LOCAL_ADMISSION_RECEIPT_AGGREGATION_ADAPTER_ID:
         return "playwright_local_admission_receipt_aggregation_not_production_admitted"
+    if (
+        node["adapter_id"]
+        == _ADMISSION_GATED_LOCAL_ADAPTER_REGISTRY_PROMOTION_ADAPTER_ID
+    ):
+        return "admission_gated_local_adapter_registry_promotion_not_production_admitted"
     if node["adapter_id"] == _OPERATOR_PLAYWRIGHT_RECEIPT_ADAPTER_ID:
         return "operator_provided_local_fixture_receipt_only_not_production_admitted"
     if node["adapter_id"] == _BOUNDED_PLAYWRIGHT_ADAPTER_DRAFT_ID:
@@ -1385,6 +1442,142 @@ def _run_playwright_local_admission_receipt_aggregation_node_if_requested(node):
         )
         if not complete
         else "Review aggregation evidence; success is local-fixture-only and not production admission.",
+        "required_human_approval": True,
+        "required_human_review": True,
+        **false_fields,
+    }
+
+
+def _run_admission_gated_local_adapter_registry_promotion_node_if_requested(node):
+    if (
+        node["adapter_id"]
+        != _ADMISSION_GATED_LOCAL_ADAPTER_REGISTRY_PROMOTION_ADAPTER_ID
+    ):
+        return None
+    if node["capability"] != _ADMISSION_GATED_LOCAL_ADAPTER_REGISTRY_PROMOTION_CAPABILITY:
+        raise ValueError(
+            "task graph admission-gated local adapter registry promotion capability is not registered"
+        )
+    inputs = node["inputs"]
+    admission_gate_decision = _required_string_input(
+        inputs,
+        "admission_gate_decision",
+        "admission-gated local adapter registry promotion",
+    )
+    output_dir = _required_string_input(
+        inputs,
+        "output_dir",
+        "admission-gated local adapter registry promotion",
+    )
+    promotion_id = _required_string_input(
+        inputs,
+        "promotion_id",
+        "admission-gated local adapter registry promotion",
+    )
+    review_attestation = _required_string_input(
+        inputs,
+        "review_attestation",
+        "admission-gated local adapter registry promotion",
+    )
+    project_id = _optional_nonempty_string_input(
+        inputs,
+        "project_id",
+        "admission-gated local adapter registry promotion",
+    )
+    reviewer_id = _optional_nonempty_string_input(
+        inputs,
+        "reviewer_id",
+        "admission-gated local adapter registry promotion",
+    )
+    operator_notes = _optional_nonempty_string_input(
+        inputs,
+        "operator_notes",
+        "admission-gated local adapter registry promotion",
+    )
+    registry_output = _optional_nonempty_string_input(
+        inputs,
+        "registry_output",
+        "admission-gated local adapter registry promotion",
+    )
+
+    from kernel.capabilities.admission_gated_local_adapter_registry_promotion import (
+        LOCAL_FIXTURE_PLAYWRIGHT_ADAPTER_ADMISSION_FALSE_FIELDS,
+        LOCAL_FIXTURE_PLAYWRIGHT_ADAPTER_ADMISSION_PERFORMED_FALSE_FIELDS,
+    )
+    from kernel.personal_ai.local_launcher import (
+        run_admission_gated_local_adapter_registry_promotion_launcher,
+    )
+
+    result = run_admission_gated_local_adapter_registry_promotion_launcher(
+        Path(admission_gate_decision),
+        Path(output_dir),
+        promotion_id,
+        review_attestation=review_attestation,
+        project_id=project_id,
+        reviewer_id=reviewer_id,
+        operator_notes=operator_notes,
+        registry_output=None if registry_output is None else Path(registry_output),
+    )
+    payload = result.payload
+    complete = bool(result.complete)
+    false_fields = dict(LOCAL_FIXTURE_PLAYWRIGHT_ADAPTER_ADMISSION_FALSE_FIELDS)
+    false_fields.update(
+        dict(LOCAL_FIXTURE_PLAYWRIGHT_ADAPTER_ADMISSION_PERFORMED_FALSE_FIELDS)
+    )
+    false_fields["local_fixture_admission_granted"] = payload.get(
+        "local_fixture_admission_granted",
+        False,
+    )
+    return {
+        "status": "completed" if complete else "failed",
+        "output_dir": result.output_dir.as_posix(),
+        "admission_gated_local_adapter_registry_promotion_complete": complete,
+        "admission_gated_local_adapter_registry_promotion_plan_path": payload.get(
+            "admission_gated_local_adapter_registry_promotion_plan_path"
+        ),
+        "admission_gated_local_adapter_registry_promotion_result_path": payload.get(
+            "admission_gated_local_adapter_registry_promotion_result_path"
+        ),
+        "admission_gated_local_adapter_registry_promotion_manifest_path": payload.get(
+            "admission_gated_local_adapter_registry_promotion_manifest_path"
+        ),
+        "admission_gated_local_adapter_registry_promotion_summary_path": payload.get(
+            "admission_gated_local_adapter_registry_promotion_summary_path"
+        ),
+        "admission_gated_local_adapter_registry_promotion_checklist_path": payload.get(
+            "admission_gated_local_adapter_registry_promotion_checklist_path"
+        ),
+        "artifact_index_path": payload.get("artifact_index_path"),
+        "artifact_index_manifest_path": payload.get("artifact_index_manifest_path"),
+        "registry_output_path": payload.get("registry_output_path"),
+        "promotion_id": payload.get("promotion_id"),
+        "promotion_status": payload.get("promotion_status"),
+        "promotion_decision": payload.get("promotion_decision"),
+        "next_allowed_action": payload.get("next_allowed_action"),
+        "source_gate_decision_path": payload.get("source_gate_decision_path"),
+        "source_gate_decision_sha256": payload.get("source_gate_decision_sha256"),
+        "source_gate_decision_type": payload.get("source_gate_decision_type"),
+        "source_gate_passed": payload.get("source_gate_passed"),
+        "aggregation_bound": payload.get("aggregation_bound"),
+        "regression_bound": payload.get("regression_bound"),
+        "registry_promotion_granted": payload.get("registry_promotion_granted"),
+        "production_promotion_granted": payload.get("production_promotion_granted"),
+        "local_fixture_only": payload.get("local_fixture_only"),
+        "non_production": payload.get("non_production"),
+        "production_adapter": payload.get("production_adapter"),
+        "allowed_scope": payload.get("allowed_scope"),
+        "denied_scope": payload.get("denied_scope"),
+        "rejection_reasons": payload.get("rejection_reasons"),
+        "failure_stage": None if complete else "registry_promotion_rejected",
+        "error_message": None
+        if complete
+        else ",".join(str(reason) for reason in payload.get("rejection_reasons", [])),
+        "safe_to_retry": not complete,
+        "replay_hint": (
+            "Fix the #427 admission gate decision evidence and rerun the promotion node."
+        )
+        if not complete
+        else "Use the promoted registry record only in the local-fixture lane under human review.",
         "required_human_approval": True,
         "required_human_review": True,
         **false_fields,
