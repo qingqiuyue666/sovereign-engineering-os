@@ -810,6 +810,33 @@ class LocalOnlyPlaywrightRegressionPackTests(unittest.TestCase):
         ):
             self.assertIn(required, text)
 
+    def test_AC_artifact_index_entry_missing_sha256_rejects(self):
+        root = Path(tempfile.mkdtemp())
+        self.addCleanup(lambda: self._cleanup_temp(root))
+        scenario_dir = root / "scenarios" / "deterministic_runner_schema"
+        receipt_dir = scenario_dir / "operator_receipt"
+        self.write_fake_receipt_tree(receipt_dir)
+
+        artifact_index_path = receipt_dir / "artifact_index.json"
+        artifact_index = read_json(artifact_index_path)
+        artifact_index["entries"][0].pop("sha256", None)
+        write_json(artifact_index_path, artifact_index)
+
+        result = suite_module._scenario_result_payload(
+            {
+                "scenario_id": "deterministic_runner_schema",
+                "scenario_type": "deterministic_runner_schema",
+                "requires_marker": True,
+                "requires_click": True,
+                "requires_status_text": True,
+            },
+            scenario_dir=scenario_dir,
+            receipt_dir=receipt_dir,
+        )
+        self.assertFalse(result["success"])
+        self.assertFalse(result["artifact_hashes_verified"])
+        self.assertIn("artifact_hash_mismatch", result["failure_reasons"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1856,9 +1856,11 @@ def _verify_index_payload(
             all_hashes = False
             continue
         recorded_hash = entry.get("sha256")
-        if isinstance(recorded_hash, str) and recorded_hash:
-            if sha256_file(path) != recorded_hash:
-                all_hashes = False
+        if not isinstance(recorded_hash, str) or not recorded_hash:
+            all_hashes = False
+            continue
+        if sha256_file(path) != recorded_hash:
+            all_hashes = False
     return {
         "paths_under_scenario_dir": paths_under,
         "no_symlink_paths": no_symlinks,
