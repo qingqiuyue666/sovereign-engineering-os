@@ -460,6 +460,53 @@ def build_default_adapter_registry() -> tuple[AdapterRegistryEntry, ...]:
             ),
         ),
         AdapterRegistryEntry(
+            adapter_id="local_fixture_adapter_usage_receipt",
+            adapter_name="Local-Fixture Adapter Usage Receipt",
+            mode=AdapterMode.LOCAL_FIXTURE,
+            risk_class=AdapterRiskClass.LOCAL_READONLY,
+            admission_status=AdapterAdmissionStatus.CANDIDATE,
+            capabilities=("launch_local_fixture_adapter_usage_receipt",),
+            required_controls=_REQUIRED_CONTROLS
+            + (
+                "usage_receipt_evidence_only",
+                "promotion_result_required",
+                "local_fixture_path_hash_only",
+                "one_usage_receipt_only",
+                "aggregation_bound_gate_pass_required",
+                "regression_bound_gate_pass_required",
+                "local_fixture_only",
+                "exact_review_attestation",
+                "artifact_index_binding",
+                "hash_verification",
+                "no_new_execution",
+                "no_live_websites",
+                "no_user_supplied_url",
+                "no_accounts",
+                "no_scraping",
+                "no_bypass",
+                "no_captcha",
+                "no_secrets",
+                "no_cookies",
+                "no_external_network",
+                "no_dependency_install",
+                "no_npm_npx",
+                "no_candidate_repo_access",
+                "no_candidate_code_execution",
+                "not_production_admitted",
+                "human_review_required",
+            ),
+            boundary=_approved_output_boundary(),
+            output_policy=_approved_output_policy(),
+            notes=(
+                "Usage receipt evidence only and not a production adapter. It "
+                "reads a #428 local-fixture registry promotion result, validates "
+                "one local fixture path and hash, and writes one usage receipt "
+                "without executing the adapter, Playwright, a browser, live "
+                "websites, arbitrary URLs, accounts, scraping, bypass, "
+                "autonomy, or production promotion."
+            ),
+        ),
+        AdapterRegistryEntry(
             adapter_id="real_browser_runtime_boundary",
             adapter_name="Real Browser Runtime Boundary",
             mode=AdapterMode.FUTURE_EXTERNAL,

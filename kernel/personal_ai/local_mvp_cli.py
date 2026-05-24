@@ -44,6 +44,7 @@ from kernel.personal_ai.local_launcher import (
     run_model_provider_dry_run_launcher,
     run_bounded_playwright_worker_adapter_draft_launcher,
     run_local_fixture_playwright_adapter_admission_gate_launcher,
+    run_local_fixture_adapter_usage_receipt_launcher,
     run_operator_provided_playwright_execution_receipt_launcher,
     run_playwright_local_fixture_sandbox_smoke_launcher,
     run_product_health_check_launcher,
@@ -139,6 +140,7 @@ _SUBCOMMANDS = {
     "launch-local-only-playwright-fixture-scenario-suite",
     "launch-playwright-local-admission-receipt-aggregation",
     "launch-admission-gated-local-adapter-registry-promotion",
+    "launch-local-fixture-adapter-usage-receipt",
     "launch-local-asset-smoke-promotion-gate",
     "launch-local-asset-iteration-promotion-gate",
     "launch-local-asset-smoke-iteration-review-packet",
@@ -1067,6 +1069,20 @@ def _main_subcommand(argv) -> int:
             )
             _print_command_payload(result.to_cli_payload())
             return 0 if result.complete else 1
+        if args.command == "launch-local-fixture-adapter-usage-receipt":
+            result = run_local_fixture_adapter_usage_receipt_launcher(
+                Path(args.promotion_result),
+                Path(args.output_dir),
+                args.usage_receipt_id,
+                review_attestation=args.review_attestation,
+                local_fixture_reference=args.local_fixture_reference,
+                project_id=args.project_id,
+                reviewer_id=args.reviewer_id,
+                operator_notes=args.operator_notes,
+                registry_entry=_optional_path(args.registry_entry),
+            )
+            _print_command_payload(result.to_cli_payload())
+            return 0 if result.complete else 1
         if args.command == "launch-office-workflow":
             result = run_local_office_launcher(
                 Path(args.input_workbook),
@@ -1910,6 +1926,19 @@ def _build_subcommand_parser():
     registry_promotion_parser.add_argument("--reviewer-id")
     registry_promotion_parser.add_argument("--operator-notes")
     registry_promotion_parser.add_argument("--registry-output")
+
+    usage_receipt_parser = subparsers.add_parser(
+        "launch-local-fixture-adapter-usage-receipt"
+    )
+    usage_receipt_parser.add_argument("--promotion-result", required=True)
+    usage_receipt_parser.add_argument("--output-dir", required=True)
+    usage_receipt_parser.add_argument("--usage-receipt-id", required=True)
+    usage_receipt_parser.add_argument("--review-attestation", required=True)
+    usage_receipt_parser.add_argument("--local-fixture-reference", required=True)
+    usage_receipt_parser.add_argument("--project-id")
+    usage_receipt_parser.add_argument("--reviewer-id")
+    usage_receipt_parser.add_argument("--operator-notes")
+    usage_receipt_parser.add_argument("--registry-entry")
 
     launch_office_parser = subparsers.add_parser("launch-office-workflow")
     launch_office_parser.add_argument("--input-workbook", required=True)

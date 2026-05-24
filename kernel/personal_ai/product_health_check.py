@@ -122,6 +122,10 @@ _LAUNCHER_WORKFLOW_CALLABLES = (
         "admission_gated_local_adapter_registry_promotion_workflow",
         "run_admission_gated_local_adapter_registry_promotion_launcher",
     ),
+    (
+        "local_fixture_adapter_usage_receipt_workflow",
+        "run_local_fixture_adapter_usage_receipt_launcher",
+    ),
     ("local_office_workflow", "run_local_office_launcher"),
     ("model_fixture_workflow", "run_model_fixture_launcher"),
     ("model_provider_dry_run_workflow", "run_model_provider_dry_run_launcher"),
@@ -164,6 +168,7 @@ _REQUIRED_CLI_SUBCOMMANDS = (
     "launch-local-only-playwright-fixture-scenario-suite",
     "launch-playwright-local-admission-receipt-aggregation",
     "launch-admission-gated-local-adapter-registry-promotion",
+    "launch-local-fixture-adapter-usage-receipt",
     "launch-office-workflow",
     "launch-model-fixture",
     "launch-model-provider-dry-run",
