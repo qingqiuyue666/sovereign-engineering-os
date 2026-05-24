@@ -89,6 +89,17 @@ _SOURCE_SMOKE_TYPE = "playwright_local_fixture_bounded_sandbox_smoke_v1"
 _INTENDED_USE = "browser_automation"
 _LOCAL_EXECUTION_SCOPE = "file_fixture_only"
 _FIXTURE_SCHEME = "file"
+_ALLOWED_SCENARIO_SETS = frozenset(("core", "extended", "regression"))
+_NEW_REGRESSION_SCENARIO_IDS = frozenset(
+    (
+        "delayed_render_marker",
+        "dom_mutation_click_state",
+        "local_form_like_interaction_no_account",
+        "screenshot_required",
+        "blocked_external_request_claim_rejection",
+        "deterministic_runner_schema",
+    )
+)
 
 _PLAN_READY_STATUS = "local_only_playwright_fixture_scenario_suite_plan_ready"
 _COMPLETED_STATUS = "local_only_playwright_fixture_scenario_suite_completed"
@@ -383,13 +394,13 @@ def _build_or_run_suite(
     selection_path = Path(selection_matrix)
     manifest_input_path = Path(playwright_candidate_manifest)
     output_path = Path(output_dir)
-    normalized_scenario_set = scenario_set if scenario_set in {"core", "extended"} else scenario_set
+    normalized_scenario_set = (
+        scenario_set if scenario_set in _ALLOWED_SCENARIO_SETS else scenario_set
+    )
     suite_paths = _suite_paths(output_path)
     scenarios_dir = output_path / LOCAL_ONLY_PLAYWRIGHT_FIXTURE_SCENARIO_SUITE_SCENARIOS_DIR_NAME
     planned_scenarios = (
-        _planned_scenarios(scenario_set)
-        if scenario_set in {"core", "extended"}
-        else ()
+        _planned_scenarios(scenario_set) if scenario_set in _ALLOWED_SCENARIO_SETS else ()
     )
 
     preflight_error = _preflight_error(
@@ -650,8 +661,11 @@ def _preflight_error(
         return "preflight_output_dir", output_error
     if not _non_empty_text(suite_id):
         return "preflight_suite_id", "suite_id is missing"
-    if scenario_set not in {"core", "extended"}:
-        return "preflight_scenario_set", "scenario_set must be core or extended"
+    if scenario_set not in _ALLOWED_SCENARIO_SETS:
+        return (
+            "preflight_scenario_set",
+            "scenario_set must be core, extended, or regression",
+        )
     attestation_error = _operator_attestation_error(operator_attestation)
     if attestation_error is not None:
         return "preflight_operator_attestation", attestation_error
@@ -792,6 +806,7 @@ def _candidate_manifest_error(manifest: dict[str, object]) -> str | None:
 
 
 def _planned_scenarios(scenario_set: str) -> tuple[dict[str, object], ...]:
+    regression_pack = scenario_set == "regression"
     scenarios: list[dict[str, object]] = [
         {
             "scenario_id": "static_click_marker",
@@ -818,7 +833,7 @@ def _planned_scenarios(scenario_set: str) -> tuple[dict[str, object], ...]:
             "requires_status_text": True,
         },
     ]
-    if scenario_set == "extended":
+    if scenario_set in {"extended", "regression"}:
         scenarios.extend(
             [
                 {
@@ -839,6 +854,63 @@ def _planned_scenarios(scenario_set: str) -> tuple[dict[str, object], ...]:
                 },
             ]
         )
+    if scenario_set == "regression":
+        scenarios.extend(
+            [
+                {
+                    "scenario_id": "delayed_render_marker",
+                    "scenario_type": "delayed_render_marker",
+                    "purpose": "require explicit delayed render marker evidence from local fixture receipt artifacts",
+                    "requires_marker": True,
+                    "requires_click": True,
+                    "requires_status_text": True,
+                },
+                {
+                    "scenario_id": "dom_mutation_click_state",
+                    "scenario_type": "dom_mutation_click_state",
+                    "purpose": "require explicit local DOM mutation evidence after click",
+                    "requires_marker": True,
+                    "requires_click": True,
+                    "requires_status_text": True,
+                },
+                {
+                    "scenario_id": "local_form_like_interaction_no_account",
+                    "scenario_type": "local_form_like_interaction_no_account",
+                    "purpose": "require local form-like input evidence while account workflows remain false",
+                    "requires_marker": True,
+                    "requires_click": True,
+                    "requires_status_text": True,
+                },
+                {
+                    "scenario_id": "screenshot_required",
+                    "scenario_type": "screenshot_required",
+                    "purpose": "require a local screenshot artifact that is indexed and hash verified",
+                    "requires_marker": True,
+                    "requires_click": True,
+                    "requires_status_text": True,
+                },
+                {
+                    "scenario_id": "blocked_external_request_claim_rejection",
+                    "scenario_type": "blocked_external_request_claim_rejection",
+                    "purpose": "reject any artifact claim of external requests or live navigation",
+                    "requires_marker": True,
+                    "requires_click": True,
+                    "requires_status_text": True,
+                },
+                {
+                    "scenario_id": "deterministic_runner_schema",
+                    "scenario_type": "deterministic_runner_schema",
+                    "purpose": "require deterministic embedded runner output schema fields and types",
+                    "requires_marker": True,
+                    "requires_click": True,
+                    "requires_status_text": True,
+                },
+            ]
+        )
+    if regression_pack:
+        for scenario in scenarios:
+            scenario["regression_pack_scenario"] = True
+            scenario["regression_pack_validation_applied"] = True
     return tuple(scenarios)
 
 
@@ -1205,6 +1277,18 @@ def _scenario_result_payload(
     payloads, errors = _load_receipt_payloads(paths)
     metrics = _scenario_metrics(paths, payloads, receipt_dir, scenario_dir)
     failure_reasons = _scenario_failure_reasons(scenario, metrics, errors, paths)
+    regression_pack_scenario = _is_regression_pack_scenario(scenario)
+    regression_pack_validation_applied = _regression_pack_validation_applies(scenario)
+    regression_pack_reasons = (
+        _regression_pack_validation_reasons(
+            scenario,
+            payloads=payloads,
+            scenario_dir=scenario_dir,
+        )
+        if regression_pack_validation_applied
+        else []
+    )
+    failure_reasons = _dedupe_strings(failure_reasons + regression_pack_reasons)
     success = not failure_reasons
     return {
         "scenario_id": scenario["scenario_id"],
@@ -1242,6 +1326,9 @@ def _scenario_result_payload(
         ),
         "candidate_repo_files_indexed_expected_false": False,
         "external_candidate_artifacts_indexed_expected_false": False,
+        "regression_pack_scenario": regression_pack_scenario,
+        "regression_pack_validation_applied": regression_pack_validation_applied,
+        "regression_pack_validation_reasons": regression_pack_reasons,
         "failure_reasons": failure_reasons,
     }
 
@@ -1485,6 +1572,181 @@ def _scenario_failure_reasons(
     return reasons
 
 
+def _is_regression_pack_scenario(scenario: dict[str, object]) -> bool:
+    return (
+        scenario.get("regression_pack_scenario") is True
+        or str(scenario.get("scenario_id")) in _NEW_REGRESSION_SCENARIO_IDS
+    )
+
+
+def _regression_pack_validation_applies(scenario: dict[str, object]) -> bool:
+    return (
+        scenario.get("regression_pack_validation_applied") is True
+        or str(scenario.get("scenario_id")) in _NEW_REGRESSION_SCENARIO_IDS
+    )
+
+
+def _regression_pack_validation_reasons(
+    scenario: dict[str, object],
+    *,
+    payloads: dict[str, dict[str, object]],
+    scenario_dir: Path,
+) -> list[str]:
+    scenario_id = str(scenario.get("scenario_id"))
+    if scenario_id == "delayed_render_marker":
+        if not _any_true_evidence(
+            payloads,
+            (
+                "delayed_marker_found",
+                "delayed_render_marker_found",
+                "embedded_delayed_marker_found",
+            ),
+        ):
+            return ["delayed_render_marker_evidence_missing"]
+    if scenario_id == "dom_mutation_click_state":
+        if not _any_true_evidence(
+            payloads,
+            (
+                "dom_mutation_observed",
+                "click_state_mutated",
+                "embedded_dom_mutation_observed",
+            ),
+        ):
+            return ["dom_mutation_click_state_evidence_missing"]
+    if scenario_id == "local_form_like_interaction_no_account":
+        if not _any_true_evidence(
+            payloads,
+            (
+                "local_form_interaction_completed",
+                "form_like_interaction_completed",
+                "embedded_local_form_interaction_completed",
+            ),
+        ):
+            return ["local_form_like_interaction_evidence_missing"]
+    if scenario_id == "screenshot_required":
+        return _screenshot_validation_reasons(payloads, scenario_dir)
+    if scenario_id == "blocked_external_request_claim_rejection":
+        if _blocked_external_request_claim_present(payloads):
+            return ["blocked_external_request_claim_present"]
+    if scenario_id == "deterministic_runner_schema":
+        if not _deterministic_runner_schema_valid(payloads["embedded_smoke_runner_output"]):
+            return ["deterministic_runner_schema_invalid"]
+    return []
+
+
+def _any_true_evidence(
+    payloads: dict[str, dict[str, object]],
+    field_names: tuple[str, ...],
+) -> bool:
+    for payload in payloads.values():
+        for field_name in field_names:
+            if payload.get(field_name) is True:
+                return True
+    return False
+
+
+def _screenshot_validation_reasons(
+    payloads: dict[str, dict[str, object]],
+    scenario_dir: Path,
+) -> list[str]:
+    screenshot_path_value = _first_text(
+        payloads["embedded_smoke_runner_output"].get("screenshot_path"),
+        payloads["embedded_smoke_result"].get("screenshot_path"),
+    )
+    if screenshot_path_value is None:
+        return ["screenshot_path_missing"]
+    screenshot_path = Path(screenshot_path_value)
+    if screenshot_path.is_symlink() or _path_has_symlink_component(
+        screenshot_path,
+        scenario_dir,
+    ):
+        return ["screenshot_path_is_symlink"]
+    if not _path_is_inside_non_strict(screenshot_path, scenario_dir):
+        return ["screenshot_path_outside_scenario_dir"]
+    if not screenshot_path.exists() or not screenshot_path.is_file():
+        return ["screenshot_file_missing"]
+    if not _indexed_hash_matches(
+        screenshot_path,
+        (
+            payloads["receipt_artifact_index"],
+            payloads["adapter_draft_artifact_index"],
+            payloads["embedded_smoke_artifact_index"],
+        ),
+    ):
+        return ["screenshot_hash_not_indexed_or_mismatched"]
+    return []
+
+
+def _indexed_hash_matches(
+    target_path: Path,
+    index_payloads: tuple[dict[str, object], ...],
+) -> bool:
+    try:
+        target_resolved = target_path.resolve(strict=True)
+    except OSError:
+        return False
+    target_hash = sha256_file(target_path)
+    for index_payload in index_payloads:
+        entries = index_payload.get("entries")
+        if not isinstance(entries, list):
+            continue
+        for entry in entries:
+            if not isinstance(entry, dict):
+                continue
+            path_value = entry.get("path")
+            if not isinstance(path_value, str) or not path_value:
+                continue
+            entry_path = Path(path_value)
+            try:
+                if entry_path.resolve(strict=True) != target_resolved:
+                    continue
+            except OSError:
+                continue
+            recorded_hash = entry.get("sha256")
+            if isinstance(recorded_hash, str) and recorded_hash == target_hash:
+                return True
+    return False
+
+
+def _blocked_external_request_claim_present(
+    payloads: dict[str, dict[str, object]],
+) -> bool:
+    for payload in payloads.values():
+        for field_name in ("non_local_request_count", "embedded_non_local_request_count"):
+            count = _int_or_none(payload.get(field_name))
+            if count is not None and count > 0:
+                return True
+        requests = payload.get("non_local_requests")
+        if isinstance(requests, list) and requests:
+            return True
+        for field_name in (
+            "external_network_performed",
+            "arbitrary_url_navigation_performed",
+            "live_website_automation_performed",
+        ):
+            if payload.get(field_name) is True:
+                return True
+    return False
+
+
+def _deterministic_runner_schema_valid(runner_payload: dict[str, object]) -> bool:
+    runner_type = runner_payload.get("runner_type")
+    fixture_url = runner_payload.get("fixture_url")
+    non_local_request_count = runner_payload.get("non_local_request_count")
+    return all(
+        (
+            isinstance(runner_type, str) and bool(runner_type.strip()),
+            isinstance(fixture_url, str) and fixture_url.startswith("file:"),
+            isinstance(runner_payload.get("marker_found"), bool),
+            isinstance(runner_payload.get("click_completed"), bool),
+            isinstance(runner_payload.get("status_text"), str),
+            isinstance(non_local_request_count, int)
+            and not isinstance(non_local_request_count, bool),
+            isinstance(runner_payload.get("success"), bool),
+        )
+    )
+
+
 def _apply_repeated_equivalence(scenario_results: list[dict[str, object]]) -> None:
     repeated = [
         result
@@ -1594,9 +1856,11 @@ def _verify_index_payload(
             all_hashes = False
             continue
         recorded_hash = entry.get("sha256")
-        if isinstance(recorded_hash, str) and recorded_hash:
-            if sha256_file(path) != recorded_hash:
-                all_hashes = False
+        if not isinstance(recorded_hash, str) or not recorded_hash:
+            all_hashes = False
+            continue
+        if sha256_file(path) != recorded_hash:
+            all_hashes = False
     return {
         "paths_under_scenario_dir": paths_under,
         "no_symlink_paths": no_symlinks,
@@ -2027,6 +2291,16 @@ def _path_is_inside(candidate_path: Path, root_path: Path) -> bool:
     return True
 
 
+def _path_is_inside_non_strict(candidate_path: Path, root_path: Path) -> bool:
+    try:
+        Path(candidate_path).resolve(strict=False).relative_to(
+            Path(root_path).resolve(strict=True)
+        )
+    except (OSError, ValueError):
+        return False
+    return True
+
+
 def _path_has_symlink_component(candidate_path: Path, root_path: Path) -> bool:
     relative = _relative_path(candidate_path, root_path)
     if relative is None:
@@ -2051,6 +2325,17 @@ def _role_slug(value: str) -> str:
         else:
             slug.append("_")
     return "_".join("".join(slug).split("_")) or "scenario"
+
+
+def _dedupe_strings(values: list[str]) -> list[str]:
+    result = []
+    seen = set()
+    for value in values:
+        if value in seen:
+            continue
+        seen.add(value)
+        result.append(value)
+    return result
 
 
 def _safe_text(value: object) -> str:
