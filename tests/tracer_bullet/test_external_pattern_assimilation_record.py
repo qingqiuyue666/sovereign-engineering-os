@@ -95,8 +95,16 @@ class ExternalPatternAssimilationRecordTests(unittest.TestCase):
                     self.assertNotIn(token, text)
 
     def test_branch_does_not_depend_on_hfx_pipeline_scaffolding_or_vendor_binary_assets(self) -> None:
+        base_ref = "origin/main"
+        if subprocess.run(
+            ["git", "rev-parse", "--verify", base_ref],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+        ).returncode != 0:
+            base_ref = "main"
         tracked = subprocess.run(
-            ["git", "diff", "--name-only", "main"],
+            ["git", "diff", "--name-only", base_ref],
             cwd=REPO_ROOT,
             check=True,
             text=True,
