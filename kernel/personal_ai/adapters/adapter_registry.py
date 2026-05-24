@@ -287,6 +287,46 @@ def build_default_adapter_registry() -> tuple[AdapterRegistryEntry, ...]:
             ),
         ),
         AdapterRegistryEntry(
+            adapter_id="local_fixture_playwright_adapter_admission_gate",
+            adapter_name="Local-Fixture Playwright Adapter Admission Gate",
+            mode=AdapterMode.LOCAL_FIXTURE,
+            risk_class=AdapterRiskClass.LOCAL_READONLY,
+            admission_status=AdapterAdmissionStatus.CANDIDATE,
+            capabilities=("launch_local_fixture_playwright_adapter_admission_gate",),
+            required_controls=_REQUIRED_CONTROLS
+            + (
+                "receipt_evidence_only",
+                "local_fixture_only",
+                "exact_review_attestation",
+                "artifact_index_binding",
+                "hash_verification",
+                "no_new_execution",
+                "no_live_websites",
+                "no_user_supplied_url",
+                "no_accounts",
+                "no_scraping",
+                "no_bypass",
+                "no_captcha",
+                "no_secrets",
+                "no_cookies",
+                "no_external_network",
+                "no_dependency_install",
+                "no_npm_npx",
+                "no_candidate_repo_access",
+                "no_candidate_code_execution",
+                "not_production_admitted",
+                "human_review_required",
+            ),
+            boundary=_approved_output_boundary(),
+            output_policy=_approved_output_policy(),
+            notes=(
+                "Admission/rejection gate only and not a production adapter. It "
+                "reads operator-provided #422 receipt evidence, may grant only "
+                "local-fixture-only admission, and remains blocked from live "
+                "websites, general browser automation, and production promotion."
+            ),
+        ),
+        AdapterRegistryEntry(
             adapter_id="real_browser_runtime_boundary",
             adapter_name="Real Browser Runtime Boundary",
             mode=AdapterMode.FUTURE_EXTERNAL,

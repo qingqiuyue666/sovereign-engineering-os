@@ -41,6 +41,7 @@ from kernel.personal_ai.local_launcher import (
     run_model_fixture_launcher,
     run_model_provider_dry_run_launcher,
     run_bounded_playwright_worker_adapter_draft_launcher,
+    run_local_fixture_playwright_adapter_admission_gate_launcher,
     run_operator_provided_playwright_execution_receipt_launcher,
     run_playwright_local_fixture_sandbox_smoke_launcher,
     run_product_health_check_launcher,
@@ -131,6 +132,7 @@ _SUBCOMMANDS = {
     "launch-playwright-local-fixture-sandbox-smoke",
     "launch-bounded-playwright-worker-adapter-draft",
     "launch-operator-provided-playwright-execution-receipt",
+    "launch-local-fixture-playwright-adapter-admission-gate",
     "launch-local-asset-smoke-promotion-gate",
     "launch-local-asset-iteration-promotion-gate",
     "launch-local-asset-smoke-iteration-review-packet",
@@ -991,6 +993,19 @@ def _main_subcommand(argv) -> int:
             )
             _print_command_payload(result.to_cli_payload())
             return 0 if result.complete else 1
+        if args.command == "launch-local-fixture-playwright-adapter-admission-gate":
+            result = run_local_fixture_playwright_adapter_admission_gate_launcher(
+                Path(args.receipt_dir),
+                Path(args.output_dir),
+                args.gate_id,
+                review_attestation=args.review_attestation,
+                project_id=args.project_id,
+                reviewer_id=args.reviewer_id,
+                operator_notes=args.operator_notes,
+                plan_only=args.plan_only,
+            )
+            _print_command_payload(result.to_cli_payload())
+            return 0 if result.complete else 1
         if args.command == "launch-office-workflow":
             result = run_local_office_launcher(
                 Path(args.input_workbook),
@@ -1733,6 +1748,21 @@ def _build_subcommand_parser():
     operator_receipt_parser.add_argument("--expected-node-version")
     operator_receipt_parser.add_argument("--expected-playwright-source")
     operator_receipt_parser.add_argument(
+        "--plan-only",
+        action="store_true",
+    )
+
+    admission_gate_parser = subparsers.add_parser(
+        "launch-local-fixture-playwright-adapter-admission-gate"
+    )
+    admission_gate_parser.add_argument("--receipt-dir", required=True)
+    admission_gate_parser.add_argument("--output-dir", required=True)
+    admission_gate_parser.add_argument("--gate-id", required=True)
+    admission_gate_parser.add_argument("--review-attestation", required=True)
+    admission_gate_parser.add_argument("--project-id")
+    admission_gate_parser.add_argument("--reviewer-id")
+    admission_gate_parser.add_argument("--operator-notes")
+    admission_gate_parser.add_argument(
         "--plan-only",
         action="store_true",
     )

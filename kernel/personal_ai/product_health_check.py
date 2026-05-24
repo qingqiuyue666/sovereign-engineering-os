@@ -106,6 +106,10 @@ _LAUNCHER_WORKFLOW_CALLABLES = (
         "operator_provided_playwright_execution_receipt_workflow",
         "run_operator_provided_playwright_execution_receipt_launcher",
     ),
+    (
+        "local_fixture_playwright_adapter_admission_gate_workflow",
+        "run_local_fixture_playwright_adapter_admission_gate_launcher",
+    ),
     ("local_office_workflow", "run_local_office_launcher"),
     ("model_fixture_workflow", "run_model_fixture_launcher"),
     ("model_provider_dry_run_workflow", "run_model_provider_dry_run_launcher"),
@@ -144,6 +148,7 @@ _REQUIRED_CLI_SUBCOMMANDS = (
     "launch-playwright-local-fixture-sandbox-smoke",
     "launch-bounded-playwright-worker-adapter-draft",
     "launch-operator-provided-playwright-execution-receipt",
+    "launch-local-fixture-playwright-adapter-admission-gate",
     "launch-office-workflow",
     "launch-model-fixture",
     "launch-model-provider-dry-run",

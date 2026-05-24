@@ -95,6 +95,12 @@ _OPERATOR_PLAYWRIGHT_RECEIPT_ADAPTER_ID = (
 _OPERATOR_PLAYWRIGHT_RECEIPT_CAPABILITY = (
     "launch_operator_provided_playwright_execution_receipt"
 )
+_LOCAL_FIXTURE_PLAYWRIGHT_ADMISSION_GATE_ADAPTER_ID = (
+    "local_fixture_playwright_adapter_admission_gate"
+)
+_LOCAL_FIXTURE_PLAYWRIGHT_ADMISSION_GATE_CAPABILITY = (
+    "launch_local_fixture_playwright_adapter_admission_gate"
+)
 _RUNTIME_ADMISSION_DECISION_TYPE = "personal_ai_runtime_admission_decision_v1"
 _GRAPH_EXECUTION_MODES = ("fixture_execution", "dry_run_plan")
 _NODE_EXECUTION_MODES = ("fixture", "mock", "dry_run", "real_runtime")
@@ -578,6 +584,11 @@ def _validate_adapter_routes(node_records, graph_execution_mode):
                 decision.reason_codes,
                 graph_execution_mode,
             )
+            and not _route_is_safe_local_fixture_playwright_admission_gate_fixture(
+                node,
+                decision.reason_codes,
+                graph_execution_mode,
+            )
         ):
             raise ValueError(
                 "task graph adapter route is not admitted: "
@@ -618,6 +629,20 @@ def _route_is_safe_operator_playwright_receipt_fixture(
     )
 
 
+def _route_is_safe_local_fixture_playwright_admission_gate_fixture(
+    node,
+    reason_codes,
+    graph_execution_mode,
+):
+    return (
+        graph_execution_mode == "fixture_execution"
+        and node["execution_mode"] == "fixture"
+        and node["adapter_id"] == _LOCAL_FIXTURE_PLAYWRIGHT_ADMISSION_GATE_ADAPTER_ID
+        and node["capability"] == _LOCAL_FIXTURE_PLAYWRIGHT_ADMISSION_GATE_CAPABILITY
+        and tuple(reason_codes) == ("adapter_not_admitted",)
+    )
+
+
 def _execute_graph_nodes(nodes_by_id, graph_execution_mode):
     executed = []
     status_by_node_id = {}
@@ -634,38 +659,44 @@ def _execute_graph_nodes(nodes_by_id, graph_execution_mode):
         elif graph_execution_mode == "dry_run_plan":
             record["status"] = "planned"
         else:
-            operator_playwright_receipt_result = (
-                _run_operator_playwright_receipt_node_if_requested(node)
+            admission_gate_result = (
+                _run_local_fixture_playwright_admission_gate_node_if_requested(node)
             )
-            if operator_playwright_receipt_result is not None:
-                record.update(operator_playwright_receipt_result)
+            if admission_gate_result is not None:
+                record.update(admission_gate_result)
             else:
-                bounded_playwright_draft_result = (
-                    _run_bounded_playwright_adapter_draft_node_if_requested(node)
+                operator_playwright_receipt_result = (
+                    _run_operator_playwright_receipt_node_if_requested(node)
                 )
-                if bounded_playwright_draft_result is not None:
-                    record.update(bounded_playwright_draft_result)
+                if operator_playwright_receipt_result is not None:
+                    record.update(operator_playwright_receipt_result)
                 else:
-                    playwright_smoke_result = _run_playwright_smoke_node_if_requested(
-                        node
+                    bounded_playwright_draft_result = (
+                        _run_bounded_playwright_adapter_draft_node_if_requested(node)
                     )
-                    if playwright_smoke_result is not None:
-                        record.update(playwright_smoke_result)
+                    if bounded_playwright_draft_result is not None:
+                        record.update(bounded_playwright_draft_result)
                     else:
-                        github_intake_result = _run_github_capability_intake_node_if_requested(
+                        playwright_smoke_result = _run_playwright_smoke_node_if_requested(
                             node
                         )
-                        if github_intake_result is not None:
-                            record.update(github_intake_result)
+                        if playwright_smoke_result is not None:
+                            record.update(playwright_smoke_result)
                         else:
-                            local_asset_result = _run_local_asset_node_if_requested(node)
-                            if local_asset_result is not None:
-                                record.update(local_asset_result)
+                            github_intake_result = _run_github_capability_intake_node_if_requested(
+                                node
+                            )
+                            if github_intake_result is not None:
+                                record.update(github_intake_result)
                             else:
-                                record["delivery_validation"] = (
-                                    _run_delivery_node_if_requested(node)
-                                )
-                                record["status"] = "completed"
+                                local_asset_result = _run_local_asset_node_if_requested(node)
+                                if local_asset_result is not None:
+                                    record.update(local_asset_result)
+                                else:
+                                    record["delivery_validation"] = (
+                                        _run_delivery_node_if_requested(node)
+                                    )
+                                    record["status"] = "completed"
         status_by_node_id[node_id] = record["status"]
         executed.append(record)
     return executed
@@ -683,6 +714,7 @@ def _base_node_execution_record(node, graph_execution_mode):
         "approval_checkpoint_id": node["approval_checkpoint_id"],
         "adapter_route_admitted": node["adapter_id"]
         not in (
+            _LOCAL_FIXTURE_PLAYWRIGHT_ADMISSION_GATE_ADAPTER_ID,
             _BOUNDED_PLAYWRIGHT_ADAPTER_DRAFT_ID,
             _OPERATOR_PLAYWRIGHT_RECEIPT_ADAPTER_ID,
         ),
@@ -697,6 +729,16 @@ def _base_node_execution_record(node, graph_execution_mode):
         else "completed",
         "required_human_approval": True,
     }
+    if node["adapter_id"] == _LOCAL_FIXTURE_PLAYWRIGHT_ADMISSION_GATE_ADAPTER_ID:
+        from kernel.capabilities.local_fixture_playwright_adapter_admission_gate import (
+            LOCAL_FIXTURE_PLAYWRIGHT_ADAPTER_ADMISSION_FALSE_FIELDS,
+            LOCAL_FIXTURE_PLAYWRIGHT_ADAPTER_ADMISSION_PERFORMED_FALSE_FIELDS,
+        )
+
+        record.update(dict(LOCAL_FIXTURE_PLAYWRIGHT_ADAPTER_ADMISSION_FALSE_FIELDS))
+        record.update(
+            dict(LOCAL_FIXTURE_PLAYWRIGHT_ADAPTER_ADMISSION_PERFORMED_FALSE_FIELDS)
+        )
     if node["adapter_id"] == _PLAYWRIGHT_SMOKE_ADAPTER_ID:
         from kernel.capabilities.playwright_local_fixture_sandbox_smoke import (
             PLAYWRIGHT_BOUNDARY_FALSE_FIELDS,
@@ -737,6 +779,8 @@ def _skipped_node_result(blocked_dependencies):
 
 
 def _adapter_route_policy(node, graph_execution_mode):
+    if node["adapter_id"] == _LOCAL_FIXTURE_PLAYWRIGHT_ADMISSION_GATE_ADAPTER_ID:
+        return "local_fixture_playwright_admission_gate_only_not_production_admitted"
     if node["adapter_id"] == _OPERATOR_PLAYWRIGHT_RECEIPT_ADAPTER_ID:
         return "operator_provided_local_fixture_receipt_only_not_production_admitted"
     if node["adapter_id"] == _BOUNDED_PLAYWRIGHT_ADAPTER_DRAFT_ID:
@@ -908,6 +952,148 @@ def _run_github_capability_intake_node_if_requested(node):
         "required_human_approval": True,
         "required_human_review": True,
         **dict(NO_SCOPE_FALSE_FIELDS),
+    }
+
+
+def _run_local_fixture_playwright_admission_gate_node_if_requested(node):
+    if node["adapter_id"] != _LOCAL_FIXTURE_PLAYWRIGHT_ADMISSION_GATE_ADAPTER_ID:
+        return None
+    if node["capability"] != _LOCAL_FIXTURE_PLAYWRIGHT_ADMISSION_GATE_CAPABILITY:
+        raise ValueError(
+            "task graph local-fixture Playwright admission gate capability is not registered"
+        )
+    inputs = node["inputs"]
+    receipt_dir = _required_string_input(
+        inputs,
+        "receipt_dir",
+        "local-fixture Playwright adapter admission gate",
+    )
+    output_dir = _required_string_input(
+        inputs,
+        "output_dir",
+        "local-fixture Playwright adapter admission gate",
+    )
+    gate_id = _required_string_input(
+        inputs,
+        "gate_id",
+        "local-fixture Playwright adapter admission gate",
+    )
+    review_attestation = _required_string_input(
+        inputs,
+        "review_attestation",
+        "local-fixture Playwright adapter admission gate",
+    )
+    project_id = _optional_nonempty_string_input(
+        inputs,
+        "project_id",
+        "local-fixture Playwright adapter admission gate",
+    )
+    reviewer_id = _optional_nonempty_string_input(
+        inputs,
+        "reviewer_id",
+        "local-fixture Playwright adapter admission gate",
+    )
+    operator_notes = _optional_nonempty_string_input(
+        inputs,
+        "operator_notes",
+        "local-fixture Playwright adapter admission gate",
+    )
+    plan_only = _optional_bool_input(inputs, "plan_only", False)
+
+    from kernel.capabilities.local_fixture_playwright_adapter_admission_gate import (
+        LOCAL_FIXTURE_PLAYWRIGHT_ADAPTER_ADMISSION_FALSE_FIELDS,
+        LOCAL_FIXTURE_PLAYWRIGHT_ADAPTER_ADMISSION_PERFORMED_FALSE_FIELDS,
+    )
+    from kernel.personal_ai.local_launcher import (
+        run_local_fixture_playwright_adapter_admission_gate_launcher,
+    )
+
+    result = run_local_fixture_playwright_adapter_admission_gate_launcher(
+        Path(receipt_dir),
+        Path(output_dir),
+        gate_id,
+        review_attestation=review_attestation,
+        project_id=project_id,
+        reviewer_id=reviewer_id,
+        operator_notes=operator_notes,
+        plan_only=plan_only,
+    )
+    payload = result.payload
+    complete = bool(result.complete)
+    false_fields = dict(LOCAL_FIXTURE_PLAYWRIGHT_ADAPTER_ADMISSION_FALSE_FIELDS)
+    false_fields.update(
+        dict(LOCAL_FIXTURE_PLAYWRIGHT_ADAPTER_ADMISSION_PERFORMED_FALSE_FIELDS)
+    )
+    false_fields["local_fixture_admission_granted"] = payload.get(
+        "local_fixture_admission_granted",
+        False,
+    )
+    return {
+        "status": "completed" if complete else "failed",
+        "output_dir": result.output_dir.as_posix(),
+        "local_fixture_playwright_adapter_admission_gate_complete": complete,
+        "local_fixture_playwright_adapter_admission_gate_plan_path": payload.get(
+            "local_fixture_playwright_adapter_admission_gate_plan_path"
+        ),
+        "local_fixture_playwright_adapter_admission_gate_manifest_path": payload.get(
+            "local_fixture_playwright_adapter_admission_gate_manifest_path"
+        ),
+        "local_fixture_playwright_adapter_admission_gate_summary_path": payload.get(
+            "local_fixture_playwright_adapter_admission_gate_summary_path"
+        ),
+        "local_fixture_playwright_adapter_admission_gate_checklist_path": payload.get(
+            "local_fixture_playwright_adapter_admission_gate_checklist_path"
+        ),
+        "local_fixture_playwright_adapter_admission_gate_decision_path": payload.get(
+            "local_fixture_playwright_adapter_admission_gate_decision_path"
+        ),
+        "artifact_index_path": payload.get("artifact_index_path"),
+        "artifact_index_manifest_path": payload.get("artifact_index_manifest_path"),
+        "receipt_dir": payload.get("receipt_dir"),
+        "receipt_plan_path": payload.get("receipt_plan_path"),
+        "receipt_manifest_path": payload.get("receipt_manifest_path"),
+        "receipt_result_path": payload.get("receipt_result_path"),
+        "receipt_artifact_index_path": payload.get("receipt_artifact_index_path"),
+        "adapter_draft_run_dir": payload.get("adapter_draft_run_dir"),
+        "adapter_draft_plan_path": payload.get("adapter_draft_plan_path"),
+        "adapter_draft_manifest_path": payload.get("adapter_draft_manifest_path"),
+        "adapter_draft_result_path": payload.get("adapter_draft_result_path"),
+        "embedded_smoke_dir": payload.get("embedded_smoke_dir"),
+        "embedded_smoke_plan_path": payload.get("embedded_smoke_plan_path"),
+        "embedded_smoke_manifest_path": payload.get("embedded_smoke_manifest_path"),
+        "embedded_smoke_result_path": payload.get("embedded_smoke_result_path"),
+        "gate_id": payload.get("gate_id"),
+        "receipt_id": payload.get("receipt_id"),
+        "adapter_draft_id": payload.get("adapter_draft_id"),
+        "candidate_id": payload.get("candidate_id"),
+        "repo_full_name": payload.get("repo_full_name"),
+        "gate_status": payload.get("gate_status"),
+        "gate_decision": payload.get("gate_decision"),
+        "next_allowed_action": payload.get("next_allowed_action"),
+        "admission_checks_total": payload.get("admission_checks_total"),
+        "admission_checks_passed": payload.get("admission_checks_passed"),
+        "admission_checks_failed": payload.get("admission_checks_failed"),
+        "failed_check_ids": payload.get("failed_check_ids"),
+        "receipt_success": payload.get("receipt_success"),
+        "adapter_draft_success": payload.get("adapter_draft_success"),
+        "embedded_smoke_success": payload.get("embedded_smoke_success"),
+        "embedded_fixture_url": payload.get("embedded_fixture_url"),
+        "embedded_fixture_url_scheme": payload.get("embedded_fixture_url_scheme"),
+        "embedded_non_local_request_count": payload.get(
+            "embedded_non_local_request_count"
+        ),
+        "artifact_hashes_verified": payload.get("artifact_hashes_verified"),
+        "failure_stage": None if complete else payload.get("failure_stage"),
+        "error_message": None if complete else payload.get("error_message"),
+        "safe_to_retry": not complete,
+        "replay_hint": (
+            "Fix the receipt evidence and rerun the local-fixture admission gate."
+        )
+        if not complete
+        else "Use the admitted adapter only in the local-fixture lane under human review.",
+        "required_human_approval": True,
+        "required_human_review": True,
+        **false_fields,
     }
 
 

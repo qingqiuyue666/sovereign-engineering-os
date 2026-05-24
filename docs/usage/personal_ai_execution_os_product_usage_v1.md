@@ -2422,6 +2422,87 @@ Task graphs can include the receipt node:
 The registry marks this receipt generator as candidate-only, non-production,
 local-fixture-only, and review-required.
 
+## Local-Fixture Playwright Adapter Admission Gate
+
+This command evaluates an operator-provided #422 receipt directory and writes a
+deterministic admission or rejection decision for the bounded Playwright worker
+adapter draft. It is an evidence gate only. It does not execute Playwright,
+execute Node, create browser automation, accept URLs, access live websites,
+run account workflows, scrape, bypass, read secrets or cookies, run package
+install/download logic, access candidate repository code, register a production
+adapter, or grant production promotion.
+
+Plan-only mode writes the gate review plan without evaluating admission:
+
+```bash
+python3 -m kernel.personal_ai.local_mvp_cli launch-local-fixture-playwright-adapter-admission-gate \
+  --receipt-dir /path/to/receipt-output \
+  --output-dir /path/to/gate-output \
+  --gate-id local-fixture-playwright-admission-gate-001 \
+  --review-attestation I_REVIEWED_OPERATOR_PROVIDED_PLAYWRIGHT_RECEIPT_LOCAL_FIXTURE_ONLY_NO_LIVE_WEBSITES_NO_ACCOUNTS_NO_SCRAPING_NO_BYPASS \
+  --project-id demo_project \
+  --reviewer-id reviewer-001 \
+  --plan-only
+```
+
+Run mode omits `--plan-only`. The review attestation must match exactly:
+
+`I_REVIEWED_OPERATOR_PROVIDED_PLAYWRIGHT_RECEIPT_LOCAL_FIXTURE_ONLY_NO_LIVE_WEBSITES_NO_ACCOUNTS_NO_SCRAPING_NO_BYPASS`
+
+The gate output directory must already exist, must not be a symlink, and must
+not contain expected gate output files. The receipt directory must exist, must
+not be a symlink, and is read as evidence only.
+
+Plan-only writes:
+
+- `local_fixture_playwright_adapter_admission_gate_plan.json`
+- `local_fixture_playwright_adapter_admission_gate_manifest.json`
+- `local_fixture_playwright_adapter_admission_gate_summary.md`
+- `local_fixture_playwright_adapter_admission_gate_checklist.md`
+- `artifact_index.json`
+- `artifact_index_manifest.json`
+
+Run mode also writes:
+
+- `local_fixture_playwright_adapter_admission_gate_decision.json`
+
+Admission is granted only when all blocker checks pass, including receipt,
+adapter draft, and embedded smoke success; `file` fixture scheme; zero
+non-local requests; false boundary fields; receipt-bound non-symlink artifact
+paths; no candidate repo or external candidate artifacts in indexes; matching
+receipt, adapter draft, embedded smoke, and manifest hashes; and agreement on
+key identifiers.
+
+Admission, when granted, is only `local_fixture_only`. Production admission,
+live website admission, general browser automation admission, arbitrary URL
+navigation, account workflows, scraping, bypass, captcha workflows, secrets,
+cookies, external network, installs, package runners, candidate repository
+access/execution, arbitrary commands, production promotion, and autonomous
+execution all remain denied.
+
+Task graphs can include the gate node:
+
+```json
+{
+  "node_id": "local_fixture_admission_gate",
+  "adapter_id": "local_fixture_playwright_adapter_admission_gate",
+  "capability": "launch_local_fixture_playwright_adapter_admission_gate",
+  "execution_mode": "fixture",
+  "depends_on": [],
+  "approval_checkpoint_required": true,
+  "inputs": {
+    "receipt_dir": "/path/to/receipt-output",
+    "output_dir": "/path/to/gate-output",
+    "gate_id": "local-fixture-playwright-admission-gate-001",
+    "review_attestation": "I_REVIEWED_OPERATOR_PROVIDED_PLAYWRIGHT_RECEIPT_LOCAL_FIXTURE_ONLY_NO_LIVE_WEBSITES_NO_ACCOUNTS_NO_SCRAPING_NO_BYPASS",
+    "project_id": "demo_project"
+  }
+}
+```
+
+The registry marks this gate as candidate-only and non-production. A successful
+gate decision does not move the project toward live website automation.
+
 Task graph execution now also emits `task_graph_artifact_outputs.json` in the
 graph `output_dir` after node execution. This manifest is a graph-level,
 metadata-only, non-authoritative artifact binding surface. It records
