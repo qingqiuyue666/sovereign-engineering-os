@@ -107,6 +107,12 @@ _LOCAL_ONLY_PLAYWRIGHT_FIXTURE_SCENARIO_SUITE_ADAPTER_ID = (
 _LOCAL_ONLY_PLAYWRIGHT_FIXTURE_SCENARIO_SUITE_CAPABILITY = (
     "launch_local_only_playwright_fixture_scenario_suite"
 )
+_PLAYWRIGHT_LOCAL_ADMISSION_RECEIPT_AGGREGATION_ADAPTER_ID = (
+    "playwright_local_admission_receipt_aggregation"
+)
+_PLAYWRIGHT_LOCAL_ADMISSION_RECEIPT_AGGREGATION_CAPABILITY = (
+    "launch_playwright_local_admission_receipt_aggregation"
+)
 _RUNTIME_ADMISSION_DECISION_TYPE = "personal_ai_runtime_admission_decision_v1"
 _GRAPH_EXECUTION_MODES = ("fixture_execution", "dry_run_plan")
 _NODE_EXECUTION_MODES = ("fixture", "mock", "dry_run", "real_runtime")
@@ -600,6 +606,11 @@ def _validate_adapter_routes(node_records, graph_execution_mode):
                 decision.reason_codes,
                 graph_execution_mode,
             )
+            and not _route_is_safe_playwright_local_admission_receipt_aggregation_fixture(
+                node,
+                decision.reason_codes,
+                graph_execution_mode,
+            )
         ):
             raise ValueError(
                 "task graph adapter route is not admitted: "
@@ -668,6 +679,22 @@ def _route_is_safe_local_only_playwright_fixture_scenario_suite_fixture(
     )
 
 
+def _route_is_safe_playwright_local_admission_receipt_aggregation_fixture(
+    node,
+    reason_codes,
+    graph_execution_mode,
+):
+    return (
+        graph_execution_mode == "fixture_execution"
+        and node["execution_mode"] == "fixture"
+        and node["adapter_id"]
+        == _PLAYWRIGHT_LOCAL_ADMISSION_RECEIPT_AGGREGATION_ADAPTER_ID
+        and node["capability"]
+        == _PLAYWRIGHT_LOCAL_ADMISSION_RECEIPT_AGGREGATION_CAPABILITY
+        and tuple(reason_codes) == ("adapter_not_admitted",)
+    )
+
+
 def _execute_graph_nodes(nodes_by_id, graph_execution_mode):
     executed = []
     status_by_node_id = {}
@@ -684,52 +711,66 @@ def _execute_graph_nodes(nodes_by_id, graph_execution_mode):
         elif graph_execution_mode == "dry_run_plan":
             record["status"] = "planned"
         else:
-            scenario_suite_result = (
-                _run_local_only_playwright_fixture_scenario_suite_node_if_requested(node)
-            )
-            if scenario_suite_result is not None:
-                record.update(scenario_suite_result)
-            else:
-                admission_gate_result = (
-                    _run_local_fixture_playwright_admission_gate_node_if_requested(node)
+            aggregation_result = (
+                _run_playwright_local_admission_receipt_aggregation_node_if_requested(
+                    node
                 )
-                if admission_gate_result is not None:
-                    record.update(admission_gate_result)
-                else:
-                    operator_playwright_receipt_result = (
-                        _run_operator_playwright_receipt_node_if_requested(node)
+            )
+            if aggregation_result is not None:
+                record.update(aggregation_result)
+            else:
+                scenario_suite_result = (
+                    _run_local_only_playwright_fixture_scenario_suite_node_if_requested(
+                        node
                     )
-                    if operator_playwright_receipt_result is not None:
-                        record.update(operator_playwright_receipt_result)
-                    else:
-                        bounded_playwright_draft_result = (
-                            _run_bounded_playwright_adapter_draft_node_if_requested(node)
+                )
+                if scenario_suite_result is not None:
+                    record.update(scenario_suite_result)
+                else:
+                    admission_gate_result = (
+                        _run_local_fixture_playwright_admission_gate_node_if_requested(
+                            node
                         )
-                        if bounded_playwright_draft_result is not None:
-                            record.update(bounded_playwright_draft_result)
+                    )
+                    if admission_gate_result is not None:
+                        record.update(admission_gate_result)
+                    else:
+                        operator_playwright_receipt_result = (
+                            _run_operator_playwright_receipt_node_if_requested(node)
+                        )
+                        if operator_playwright_receipt_result is not None:
+                            record.update(operator_playwright_receipt_result)
                         else:
-                            playwright_smoke_result = _run_playwright_smoke_node_if_requested(
-                                node
-                            )
-                            if playwright_smoke_result is not None:
-                                record.update(playwright_smoke_result)
-                            else:
-                                github_intake_result = _run_github_capability_intake_node_if_requested(
+                            bounded_playwright_draft_result = (
+                                _run_bounded_playwright_adapter_draft_node_if_requested(
                                     node
                                 )
-                                if github_intake_result is not None:
-                                    record.update(github_intake_result)
+                            )
+                            if bounded_playwright_draft_result is not None:
+                                record.update(bounded_playwright_draft_result)
+                            else:
+                                playwright_smoke_result = _run_playwright_smoke_node_if_requested(
+                                    node
+                                )
+                                if playwright_smoke_result is not None:
+                                    record.update(playwright_smoke_result)
                                 else:
-                                    local_asset_result = _run_local_asset_node_if_requested(
+                                    github_intake_result = _run_github_capability_intake_node_if_requested(
                                         node
                                     )
-                                    if local_asset_result is not None:
-                                        record.update(local_asset_result)
+                                    if github_intake_result is not None:
+                                        record.update(github_intake_result)
                                     else:
-                                        record["delivery_validation"] = (
-                                            _run_delivery_node_if_requested(node)
+                                        local_asset_result = _run_local_asset_node_if_requested(
+                                            node
                                         )
-                                        record["status"] = "completed"
+                                        if local_asset_result is not None:
+                                            record.update(local_asset_result)
+                                        else:
+                                            record["delivery_validation"] = (
+                                                _run_delivery_node_if_requested(node)
+                                            )
+                                            record["status"] = "completed"
         status_by_node_id[node_id] = record["status"]
         executed.append(record)
     return executed
@@ -751,6 +792,7 @@ def _base_node_execution_record(node, graph_execution_mode):
             _BOUNDED_PLAYWRIGHT_ADAPTER_DRAFT_ID,
             _OPERATOR_PLAYWRIGHT_RECEIPT_ADAPTER_ID,
             _LOCAL_ONLY_PLAYWRIGHT_FIXTURE_SCENARIO_SUITE_ADAPTER_ID,
+            _PLAYWRIGHT_LOCAL_ADMISSION_RECEIPT_AGGREGATION_ADAPTER_ID,
         ),
         "adapter_route_policy": "local_delivery_integration"
         if node["adapter_id"] == _DELIVERY_ADAPTER_ID
@@ -807,6 +849,18 @@ def _base_node_execution_record(node, graph_execution_mode):
         record.update(
             dict(LOCAL_ONLY_PLAYWRIGHT_FIXTURE_SCENARIO_SUITE_PERFORMED_FALSE_FIELDS)
         )
+    if node["adapter_id"] == _PLAYWRIGHT_LOCAL_ADMISSION_RECEIPT_AGGREGATION_ADAPTER_ID:
+        from kernel.capabilities.playwright_local_admission_receipt_aggregation import (
+            PLAYWRIGHT_LOCAL_ADMISSION_RECEIPT_AGGREGATION_DISABLED_FIELDS,
+            PLAYWRIGHT_LOCAL_ADMISSION_RECEIPT_AGGREGATION_PERFORMED_FALSE_FIELDS,
+        )
+
+        record.update(
+            dict(PLAYWRIGHT_LOCAL_ADMISSION_RECEIPT_AGGREGATION_DISABLED_FIELDS)
+        )
+        record.update(
+            dict(PLAYWRIGHT_LOCAL_ADMISSION_RECEIPT_AGGREGATION_PERFORMED_FALSE_FIELDS)
+        )
     return record
 
 
@@ -829,6 +883,8 @@ def _adapter_route_policy(node, graph_execution_mode):
         return "local_fixture_playwright_admission_gate_only_not_production_admitted"
     if node["adapter_id"] == _LOCAL_ONLY_PLAYWRIGHT_FIXTURE_SCENARIO_SUITE_ADAPTER_ID:
         return "local_only_playwright_fixture_scenario_suite_not_production_admitted"
+    if node["adapter_id"] == _PLAYWRIGHT_LOCAL_ADMISSION_RECEIPT_AGGREGATION_ADAPTER_ID:
+        return "playwright_local_admission_receipt_aggregation_not_production_admitted"
     if node["adapter_id"] == _OPERATOR_PLAYWRIGHT_RECEIPT_ADAPTER_ID:
         return "operator_provided_local_fixture_receipt_only_not_production_admitted"
     if node["adapter_id"] == _BOUNDED_PLAYWRIGHT_ADAPTER_DRAFT_ID:
@@ -1166,6 +1222,169 @@ def _run_local_only_playwright_fixture_scenario_suite_node_if_requested(node):
         )
         if not complete
         else "Review suite evidence; success is local-fixture-only and not production admission.",
+        "required_human_approval": True,
+        "required_human_review": True,
+        **false_fields,
+    }
+
+
+def _run_playwright_local_admission_receipt_aggregation_node_if_requested(node):
+    if node["adapter_id"] != _PLAYWRIGHT_LOCAL_ADMISSION_RECEIPT_AGGREGATION_ADAPTER_ID:
+        return None
+    if node["capability"] != _PLAYWRIGHT_LOCAL_ADMISSION_RECEIPT_AGGREGATION_CAPABILITY:
+        raise ValueError(
+            "task graph Playwright local admission receipt aggregation capability is not registered"
+        )
+    inputs = node["inputs"]
+    suite_run_dirs_manifest = _required_string_input(
+        inputs,
+        "suite_run_dirs",
+        "Playwright local admission receipt aggregation",
+    )
+    output_dir = _required_string_input(
+        inputs,
+        "output_dir",
+        "Playwright local admission receipt aggregation",
+    )
+    aggregation_id = _required_string_input(
+        inputs,
+        "aggregation_id",
+        "Playwright local admission receipt aggregation",
+    )
+    review_attestation = _required_string_input(
+        inputs,
+        "review_attestation",
+        "Playwright local admission receipt aggregation",
+    )
+    project_id = _optional_nonempty_string_input(
+        inputs,
+        "project_id",
+        "Playwright local admission receipt aggregation",
+    )
+    reviewer_id = _optional_nonempty_string_input(
+        inputs,
+        "reviewer_id",
+        "Playwright local admission receipt aggregation",
+    )
+    operator_notes = _optional_nonempty_string_input(
+        inputs,
+        "operator_notes",
+        "Playwright local admission receipt aggregation",
+    )
+    minimum_suite_runs = _optional_int_input(
+        inputs,
+        "minimum_suite_runs",
+        2,
+        "Playwright local admission receipt aggregation",
+    )
+    minimum_pass_rate_bps = _optional_int_input(
+        inputs,
+        "minimum_pass_rate_bps",
+        10000,
+        "Playwright local admission receipt aggregation",
+    )
+    maximum_flaky_rate_bps = _optional_int_input(
+        inputs,
+        "maximum_flaky_rate_bps",
+        0,
+        "Playwright local admission receipt aggregation",
+    )
+    maximum_evidence_age_days = _optional_int_input(
+        inputs,
+        "maximum_evidence_age_days",
+        30,
+        "Playwright local admission receipt aggregation",
+    )
+    plan_only = _optional_bool_input(inputs, "plan_only", False)
+
+    from kernel.capabilities.playwright_local_admission_receipt_aggregation import (
+        PLAYWRIGHT_LOCAL_ADMISSION_RECEIPT_AGGREGATION_DISABLED_FIELDS,
+        PLAYWRIGHT_LOCAL_ADMISSION_RECEIPT_AGGREGATION_PERFORMED_FALSE_FIELDS,
+    )
+    from kernel.personal_ai.local_launcher import (
+        run_playwright_local_admission_receipt_aggregation_launcher,
+    )
+
+    result = run_playwright_local_admission_receipt_aggregation_launcher(
+        Path(suite_run_dirs_manifest),
+        Path(output_dir),
+        aggregation_id,
+        review_attestation=review_attestation,
+        project_id=project_id,
+        reviewer_id=reviewer_id,
+        operator_notes=operator_notes,
+        minimum_suite_runs=minimum_suite_runs,
+        minimum_pass_rate_bps=minimum_pass_rate_bps,
+        maximum_flaky_rate_bps=maximum_flaky_rate_bps,
+        maximum_evidence_age_days=maximum_evidence_age_days,
+        plan_only=plan_only,
+    )
+    payload = result.payload
+    complete = bool(result.complete)
+    false_fields = dict(PLAYWRIGHT_LOCAL_ADMISSION_RECEIPT_AGGREGATION_DISABLED_FIELDS)
+    false_fields.update(
+        dict(PLAYWRIGHT_LOCAL_ADMISSION_RECEIPT_AGGREGATION_PERFORMED_FALSE_FIELDS)
+    )
+    return {
+        "status": "completed" if complete else "failed",
+        "output_dir": result.output_dir.as_posix(),
+        "playwright_local_admission_receipt_aggregation_complete": complete,
+        "playwright_local_admission_receipt_aggregation_plan_path": payload.get(
+            "playwright_local_admission_receipt_aggregation_plan_path"
+        ),
+        "playwright_local_admission_receipt_aggregation_manifest_path": payload.get(
+            "playwright_local_admission_receipt_aggregation_manifest_path"
+        ),
+        "playwright_local_admission_receipt_aggregation_summary_path": payload.get(
+            "playwright_local_admission_receipt_aggregation_summary_path"
+        ),
+        "playwright_local_admission_receipt_aggregation_checklist_path": payload.get(
+            "playwright_local_admission_receipt_aggregation_checklist_path"
+        ),
+        "playwright_local_admission_receipt_aggregation_result_path": payload.get(
+            "playwright_local_admission_receipt_aggregation_result_path"
+        ),
+        "artifact_index_path": payload.get("artifact_index_path"),
+        "artifact_index_manifest_path": payload.get("artifact_index_manifest_path"),
+        "suite_run_dirs_manifest_path": payload.get("suite_run_dirs_manifest_path"),
+        "suite_run_dirs_manifest_sha256": payload.get(
+            "suite_run_dirs_manifest_sha256"
+        ),
+        "aggregation_id": payload.get("aggregation_id"),
+        "suite_run_count_planned": payload.get("suite_run_count_planned"),
+        "suite_run_count_evaluated": payload.get("suite_run_count_evaluated"),
+        "suite_run_count_passed": payload.get("suite_run_count_passed"),
+        "suite_run_count_failed": payload.get("suite_run_count_failed"),
+        "suite_run_count_rejected": payload.get("suite_run_count_rejected"),
+        "scenario_count_total": payload.get("scenario_count_total"),
+        "scenario_count_passed": payload.get("scenario_count_passed"),
+        "scenario_count_failed": payload.get("scenario_count_failed"),
+        "pass_rate_bps": payload.get("pass_rate_bps"),
+        "flaky_rate_bps": payload.get("flaky_rate_bps"),
+        "flaky_scenario_ids": payload.get("flaky_scenario_ids"),
+        "regression_detected": payload.get("regression_detected"),
+        "stale_evidence_detected": payload.get("stale_evidence_detected"),
+        "missing_coverage_detected": payload.get("missing_coverage_detected"),
+        "aggregate_success": payload.get("aggregate_success"),
+        "local_fixture_aggregation_passed": payload.get(
+            "local_fixture_aggregation_passed"
+        ),
+        "aggregation_status": payload.get("aggregation_status"),
+        "aggregation_decision": payload.get("aggregation_decision"),
+        "next_allowed_action": payload.get("next_allowed_action"),
+        "candidate_id": payload.get("candidate_id"),
+        "selected_candidate_id": payload.get("selected_candidate_id"),
+        "repo_full_name": payload.get("repo_full_name"),
+        "local_execution_scope": payload.get("local_execution_scope"),
+        "fixture_url_scheme": payload.get("fixture_url_scheme"),
+        "failure_stage": None if complete else payload.get("failure_stage"),
+        "error_message": None if complete else payload.get("error_message"),
+        "safe_to_retry": not complete,
+        "replay_hint": (
+            "Fix Playwright local admission receipt aggregation inputs or rejected suite evidence and rerun this node."
+        )
+        if not complete
+        else "Review aggregation evidence; success is local-fixture-only and not production admission.",
         "required_human_approval": True,
         "required_human_review": True,
         **false_fields,

@@ -39,6 +39,7 @@ from kernel.personal_ai.local_launcher import (
     run_local_asset_smoke_review_packet_launcher,
     run_local_office_launcher,
     run_local_only_playwright_fixture_scenario_suite_launcher,
+    run_playwright_local_admission_receipt_aggregation_launcher,
     run_model_fixture_launcher,
     run_model_provider_dry_run_launcher,
     run_bounded_playwright_worker_adapter_draft_launcher,
@@ -135,6 +136,7 @@ _SUBCOMMANDS = {
     "launch-operator-provided-playwright-execution-receipt",
     "launch-local-fixture-playwright-adapter-admission-gate",
     "launch-local-only-playwright-fixture-scenario-suite",
+    "launch-playwright-local-admission-receipt-aggregation",
     "launch-local-asset-smoke-promotion-gate",
     "launch-local-asset-iteration-promotion-gate",
     "launch-local-asset-smoke-iteration-review-packet",
@@ -1027,6 +1029,23 @@ def _main_subcommand(argv) -> int:
             )
             _print_command_payload(result.to_cli_payload())
             return 0 if result.complete else 1
+        if args.command == "launch-playwright-local-admission-receipt-aggregation":
+            result = run_playwright_local_admission_receipt_aggregation_launcher(
+                Path(args.suite_run_dirs),
+                Path(args.output_dir),
+                args.aggregation_id,
+                review_attestation=args.review_attestation,
+                project_id=args.project_id,
+                reviewer_id=args.reviewer_id,
+                operator_notes=args.operator_notes,
+                minimum_suite_runs=args.minimum_suite_runs,
+                minimum_pass_rate_bps=args.minimum_pass_rate_bps,
+                maximum_flaky_rate_bps=args.maximum_flaky_rate_bps,
+                maximum_evidence_age_days=args.maximum_evidence_age_days,
+                plan_only=args.plan_only,
+            )
+            _print_command_payload(result.to_cli_payload())
+            return 0 if result.complete else 1
         if args.command == "launch-office-workflow":
             result = run_local_office_launcher(
                 Path(args.input_workbook),
@@ -1812,6 +1831,37 @@ def _build_subcommand_parser():
         default="core",
     )
     scenario_suite_parser.add_argument(
+        "--plan-only",
+        action="store_true",
+    )
+
+    aggregation_parser = subparsers.add_parser(
+        "launch-playwright-local-admission-receipt-aggregation"
+    )
+    aggregation_parser.add_argument("--suite-run-dirs", required=True)
+    aggregation_parser.add_argument("--output-dir", required=True)
+    aggregation_parser.add_argument("--aggregation-id", required=True)
+    aggregation_parser.add_argument("--review-attestation", required=True)
+    aggregation_parser.add_argument("--project-id")
+    aggregation_parser.add_argument("--reviewer-id")
+    aggregation_parser.add_argument("--operator-notes")
+    aggregation_parser.add_argument("--minimum-suite-runs", type=int, default=2)
+    aggregation_parser.add_argument(
+        "--minimum-pass-rate-bps",
+        type=int,
+        default=10000,
+    )
+    aggregation_parser.add_argument(
+        "--maximum-flaky-rate-bps",
+        type=int,
+        default=0,
+    )
+    aggregation_parser.add_argument(
+        "--maximum-evidence-age-days",
+        type=int,
+        default=30,
+    )
+    aggregation_parser.add_argument(
         "--plan-only",
         action="store_true",
     )
