@@ -1,0 +1,26 @@
+# $capability_id Output Artifact Manifest Contract
+
+## Purpose
+
+Describe expected scaffold artifacts without creating runtime authority.
+
+## Expected Output File Names
+
+$output_file_names
+
+## Required Manifest Fields
+
+- `manifest_id`
+- `capability_id`
+- `metadata_only`
+- `artifact_count`
+- `artifacts`
+- `validation`
+- `forbidden_boundaries_preserved`
+
+## Manifest Rules
+
+- Every artifact entry must have a relative path, purpose, and contract status.
+- Manifest text must not include credential material or cookie material.
+- Manifest text must not claim production readiness.
+- Manifest text must not describe live website automation support.

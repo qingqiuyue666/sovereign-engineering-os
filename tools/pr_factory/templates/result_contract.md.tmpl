@@ -1,0 +1,26 @@
+# $capability_id Result Contract
+
+## Purpose
+
+Define the metadata-only result shape expected from the scaffolded capability
+contract. This is documentation, not an execution implementation.
+
+## Required Fields
+
+- `capability_id`
+- `metadata_only`
+- `accepted`
+- `rejection_reason`
+- `output_file_names`
+- `forbidden_boundaries`
+
+## Deterministic Rejection Reasons
+
+$rejection_reasons
+
+## Fail-Closed Policy
+
+- Missing metadata-only authority returns `metadata_only_boundary_missing`.
+- Any forbidden boundary returns `forbidden_boundary_requested`.
+- Non-contract output requests return `non_contract_output_requested`.
+- Unsafe scaffold mutation requests return `unsafe_template_mutation_requested`.

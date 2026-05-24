@@ -1,0 +1,48 @@
+"""Tracer tests for the $capability_id metadata-only scaffold.
+
+These tests are placeholders for future PRs. Keep them focused on contract text
+and boundary preservation until a separate approved PR adds runtime behavior.
+"""
+
+from __future__ import annotations
+
+import unittest
+
+from capability.$capability_module_name import (
+    CAPABILITY_ID,
+    FORBIDDEN_BOUNDARIES,
+    build_metadata_result,
+    fail_closed_preflight,
+)
+
+
+class ${capability_class_name}MetadataScaffoldTests(unittest.TestCase):
+    def test_capability_id_is_stable(self):
+        self.assertEqual(CAPABILITY_ID, "$capability_id")
+
+    def test_preflight_accepts_metadata_only_request(self):
+        result = fail_closed_preflight(requested_boundaries=(), metadata_only=True)
+        self.assertTrue(result["accepted"])
+
+    def test_preflight_rejects_non_metadata_request(self):
+        result = fail_closed_preflight(requested_boundaries=(), metadata_only=False)
+        self.assertFalse(result["accepted"])
+        self.assertEqual(result["rejection_reason"], "metadata_only_boundary_missing")
+
+    def test_preflight_rejects_forbidden_boundary(self):
+        result = fail_closed_preflight(
+            requested_boundaries=("external network",),
+            metadata_only=True,
+        )
+        self.assertFalse(result["accepted"])
+        self.assertEqual(result["rejection_reason"], "forbidden_boundary_requested")
+
+    def test_metadata_result_is_contract_only(self):
+        result = build_metadata_result({"metadata_only": True})
+        contract = result.as_contract()
+        self.assertTrue(contract["metadata_only"])
+        self.assertIn("external network", FORBIDDEN_BOUNDARIES)
+
+
+if __name__ == "__main__":
+    unittest.main()

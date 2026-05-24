@@ -1,0 +1,27 @@
+# $capability_id Artifact Index Contract
+
+## Purpose
+
+Define a metadata-only index for scaffold outputs.
+
+## Required Fields
+
+- `index_id`
+- `capability_id`
+- `metadata_only`
+- `content_indexed`
+- `entries`
+- `artifact_index_manifest`
+
+## Entry Fields
+
+- `relative_path`
+- `artifact_type`
+- `contract_status`
+- `notes`
+
+## Boundary
+
+- `content_indexed` defaults to `false`.
+- Raw input content copying is out of scope.
+- Runtime receipts from live systems are out of scope.
