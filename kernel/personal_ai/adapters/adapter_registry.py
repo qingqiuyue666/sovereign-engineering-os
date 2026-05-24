@@ -296,6 +296,8 @@ def build_default_adapter_registry() -> tuple[AdapterRegistryEntry, ...]:
             required_controls=_REQUIRED_CONTROLS
             + (
                 "receipt_evidence_only",
+                "aggregation_evidence_binding",
+                "regression_evidence_binding",
                 "local_fixture_only",
                 "exact_review_attestation",
                 "artifact_index_binding",
