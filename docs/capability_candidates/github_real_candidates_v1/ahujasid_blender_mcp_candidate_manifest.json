@@ -1,0 +1,53 @@
+{
+  "candidate_id": "github-candidate-ahujasid-blender-mcp-v1",
+  "candidate_name": "Blender MCP",
+  "candidate_type": "github_capability_candidate_v1",
+  "capability_domains": [
+    "blender_pipeline",
+    "desktop_control",
+    "mcp_adapter",
+    "vfx_pipeline"
+  ],
+  "declared_external_services": [
+    "Blender local socket server",
+    "MCP client",
+    "optional external 3D asset/model APIs depending on enabled tools"
+  ],
+  "declared_file_system_permissions": [
+    "may modify Blender scene files",
+    "may create generated assets",
+    "may write exported scene artifacts"
+  ],
+  "declared_install_commands": [
+    "uvx blender-mcp",
+    "claude mcp add blender uvx blender-mcp"
+  ],
+  "declared_license": "MIT",
+  "declared_network_requirements": [
+    "none for local-only Blender control",
+    "optional asset/model APIs may require network and must remain disabled by default"
+  ],
+  "declared_risks": [
+    "can control Blender through an MCP/socket path",
+    "may execute Python inside Blender depending on enabled tools",
+    "could mutate open Blender scenes",
+    "requires strict local sandbox and human approval before live use",
+    "optional external asset/model APIs must remain disabled unless separately approved"
+  ],
+  "declared_run_commands": [
+    "uvx blender-mcp",
+    "blender with addon.py enabled"
+  ],
+  "declared_runtime_languages": [
+    "Python"
+  ],
+  "declared_secret_requirements": [],
+  "default_branch": "main",
+  "evidence_notes": "Included because it directly matches the local creative production OS direction, but execution risk is high enough to prevent first-adapter selection.",
+  "integration_hypothesis": "After Playwright local browser fixture smoke, build a separate Blender-only sandbox smoke with a disposable scene and no external asset/model APIs.",
+  "intended_use": "mcp_connector",
+  "repo_full_name": "ahujasid/blender-mcp",
+  "repo_url": "https://github.com/ahujasid/blender-mcp",
+  "source_origin": "web_research",
+  "user_value_hypothesis": "Blender MCP is a high-value creative candidate for the user's VFX/3D workflow and can become a later bounded creative worker."
+}
