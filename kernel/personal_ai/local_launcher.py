@@ -138,6 +138,10 @@ from kernel.capabilities.local_fixture_adapter_usage_receipt import (
     LOCAL_FIXTURE_ADAPTER_USAGE_RECEIPT_SUMMARY_FILE,
     run_local_fixture_adapter_usage_receipt_launcher as run_local_fixture_adapter_usage_receipt_capability,
 )
+from kernel.capabilities.local_fixture_adapter_dry_run_invocation_plan import (
+    LOCAL_FIXTURE_ADAPTER_DRY_RUN_INVOCATION_PLAN_SUMMARY_FILE,
+    run_local_fixture_adapter_dry_run_invocation_plan_launcher as run_local_fixture_adapter_dry_run_invocation_plan_capability,
+)
 from kernel.personal_ai.artifact_index import build_artifact_index
 from kernel.personal_ai.asset_scan_operational_control import (
     ASSET_SCAN_FAILURE_BUNDLE_FILE,
@@ -223,6 +227,7 @@ __all__ = [
     "run_playwright_local_admission_receipt_aggregation_launcher",
     "run_admission_gated_local_adapter_registry_promotion_launcher",
     "run_local_fixture_adapter_usage_receipt_launcher",
+    "run_local_fixture_adapter_dry_run_invocation_plan_launcher",
     "run_local_office_launcher",
     "run_model_fixture_launcher",
     "run_model_provider_dry_run_launcher",
@@ -2298,6 +2303,38 @@ def run_local_fixture_adapter_usage_receipt_launcher(
         summary_path=result.summary_path
         if result.summary_path is not None
         else output_path / LOCAL_FIXTURE_ADAPTER_USAGE_RECEIPT_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_local_fixture_adapter_dry_run_invocation_plan_launcher(
+    usage_receipt: Path,
+    output_dir: Path,
+    invocation_plan_id: str,
+    *,
+    review_attestation: str | None = None,
+    project_id: str | None = None,
+    reviewer_id: str | None = None,
+    operator_notes: str | None = None,
+) -> LauncherWorkflowResult:
+    output_path = Path(output_dir)
+    result = run_local_fixture_adapter_dry_run_invocation_plan_capability(
+        Path(usage_receipt),
+        output_path,
+        invocation_plan_id,
+        review_attestation=review_attestation,
+        project_id=project_id,
+        reviewer_id=reviewer_id,
+        operator_notes=operator_notes,
+    )
+    return LauncherWorkflowResult(
+        workflow="local_fixture_adapter_dry_run_invocation_plan_workflow",
+        output_dir=output_path,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else output_path / LOCAL_FIXTURE_ADAPTER_DRY_RUN_INVOCATION_PLAN_SUMMARY_FILE,
         required_human_approval=True,
     )
 
