@@ -2590,6 +2590,88 @@ The registry marks this suite as candidate-only and non-production. Suite
 success is local-fixture-only regression evidence; it is not production
 admission, live website admission, or general browser automation admission.
 
+## Playwright Local Admission Receipt Aggregation
+
+This command aggregates multiple existing #424 local-only fixture scenario
+suite output directories into one deterministic historical evidence packet. It
+only reads suite artifacts, verifies hashes and boundary fields, computes pass,
+flaky, regression, coverage, and staleness checks, and writes aggregation
+review artifacts. It does not run #424, #422, Playwright, Node, package
+managers, browser automation, candidate code, or live website flows.
+
+The suite run dirs are supplied through a JSON manifest so order and hash input
+are deterministic:
+
+```json
+{
+  "manifest_type": "playwright_local_fixture_suite_run_dirs_manifest_v1",
+  "suite_run_dirs": [
+    "/absolute/path/to/suite-run-001",
+    "/absolute/path/to/suite-run-002"
+  ]
+}
+```
+
+Plan-only mode writes the aggregation plan without evaluating suite runs:
+
+```bash
+python3 -m kernel.personal_ai.local_mvp_cli launch-playwright-local-admission-receipt-aggregation \
+  --suite-run-dirs /path/to/suite-run-dirs-manifest.json \
+  --output-dir /path/to/aggregation-output \
+  --aggregation-id playwright-local-aggregation-001 \
+  --review-attestation I_REVIEWED_LOCAL_ONLY_PLAYWRIGHT_SUITE_RUNS_NO_LIVE_WEBSITES_NO_ACCOUNTS_NO_SCRAPING_NO_BYPASS \
+  --plan-only
+```
+
+Run mode omits `--plan-only`. The default thresholds require at least two suite
+runs, 10000 bps pass rate, zero flaky scenarios, and evidence no older than 30
+days when age metadata is present. The review attestation must match exactly:
+
+`I_REVIEWED_LOCAL_ONLY_PLAYWRIGHT_SUITE_RUNS_NO_LIVE_WEBSITES_NO_ACCOUNTS_NO_SCRAPING_NO_BYPASS`
+
+The aggregation output directory must already exist, must not be a symlink, and
+must not contain expected aggregation output files. Each suite run directory
+must be a real non-symlink directory. Source artifact indexes must only point
+under their suite run directory, hashes must verify, candidate repo and
+external candidate artifact flags must be false, and production, live website,
+and general browser admission fields must remain false.
+
+Plan-only writes:
+
+- `playwright_local_admission_receipt_aggregation_plan.json`
+- `playwright_local_admission_receipt_aggregation_manifest.json`
+- `playwright_local_admission_receipt_aggregation_summary.md`
+- `playwright_local_admission_receipt_aggregation_checklist.md`
+- `artifact_index.json`
+- `artifact_index_manifest.json`
+
+Run mode also writes:
+
+- `playwright_local_admission_receipt_aggregation_result.json`
+
+Task graphs can include the aggregation node:
+
+```json
+{
+  "node_id": "playwright_local_admission_receipt_aggregation",
+  "adapter_id": "playwright_local_admission_receipt_aggregation",
+  "capability": "launch_playwright_local_admission_receipt_aggregation",
+  "execution_mode": "fixture",
+  "depends_on": [],
+  "approval_checkpoint_required": true,
+  "inputs": {
+    "suite_run_dirs": "/path/to/suite-run-dirs-manifest.json",
+    "output_dir": "/path/to/aggregation-output",
+    "aggregation_id": "playwright-local-aggregation-001",
+    "review_attestation": "I_REVIEWED_LOCAL_ONLY_PLAYWRIGHT_SUITE_RUNS_NO_LIVE_WEBSITES_NO_ACCOUNTS_NO_SCRAPING_NO_BYPASS"
+  }
+}
+```
+
+Aggregation success is historical local-fixture-only evidence. It is not
+production admission, live website admission, or general browser automation
+admission.
+
 Task graph execution now also emits `task_graph_artifact_outputs.json` in the
 graph `output_dir` after node execution. This manifest is a graph-level,
 metadata-only, non-authoritative artifact binding surface. It records

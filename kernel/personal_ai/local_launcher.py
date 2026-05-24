@@ -126,6 +126,10 @@ from kernel.capabilities.local_only_playwright_fixture_scenario_suite import (
     LOCAL_ONLY_PLAYWRIGHT_FIXTURE_SCENARIO_SUITE_SUMMARY_FILE,
     run_local_only_playwright_fixture_scenario_suite_launcher as run_local_only_playwright_fixture_scenario_suite_capability,
 )
+from kernel.capabilities.playwright_local_admission_receipt_aggregation import (
+    PLAYWRIGHT_LOCAL_ADMISSION_RECEIPT_AGGREGATION_SUMMARY_FILE,
+    run_playwright_local_admission_receipt_aggregation_launcher as run_playwright_local_admission_receipt_aggregation_capability,
+)
 from kernel.personal_ai.artifact_index import build_artifact_index
 from kernel.personal_ai.asset_scan_operational_control import (
     ASSET_SCAN_FAILURE_BUNDLE_FILE,
@@ -208,6 +212,7 @@ __all__ = [
     "run_operator_provided_playwright_execution_receipt_launcher",
     "run_local_fixture_playwright_adapter_admission_gate_launcher",
     "run_local_only_playwright_fixture_scenario_suite_launcher",
+    "run_playwright_local_admission_receipt_aggregation_launcher",
     "run_local_office_launcher",
     "run_model_fixture_launcher",
     "run_model_provider_dry_run_launcher",
@@ -2162,6 +2167,48 @@ def run_local_only_playwright_fixture_scenario_suite_launcher(
         summary_path=result.summary_path
         if result.summary_path is not None
         else output_path / LOCAL_ONLY_PLAYWRIGHT_FIXTURE_SCENARIO_SUITE_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_playwright_local_admission_receipt_aggregation_launcher(
+    suite_run_dirs_manifest: Path,
+    output_dir: Path,
+    aggregation_id: str,
+    *,
+    review_attestation: str | None = None,
+    project_id: str | None = None,
+    reviewer_id: str | None = None,
+    operator_notes: str | None = None,
+    minimum_suite_runs: int = 2,
+    minimum_pass_rate_bps: int = 10000,
+    maximum_flaky_rate_bps: int = 0,
+    maximum_evidence_age_days: int = 30,
+    plan_only: bool = False,
+) -> LauncherWorkflowResult:
+    output_path = Path(output_dir)
+    result = run_playwright_local_admission_receipt_aggregation_capability(
+        Path(suite_run_dirs_manifest),
+        output_path,
+        aggregation_id,
+        review_attestation=review_attestation,
+        project_id=project_id,
+        reviewer_id=reviewer_id,
+        operator_notes=operator_notes,
+        minimum_suite_runs=minimum_suite_runs,
+        minimum_pass_rate_bps=minimum_pass_rate_bps,
+        maximum_flaky_rate_bps=maximum_flaky_rate_bps,
+        maximum_evidence_age_days=maximum_evidence_age_days,
+        plan_only=plan_only,
+    )
+    return LauncherWorkflowResult(
+        workflow="playwright_local_admission_receipt_aggregation_workflow",
+        output_dir=output_path,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else output_path / PLAYWRIGHT_LOCAL_ADMISSION_RECEIPT_AGGREGATION_SUMMARY_FILE,
         required_human_approval=True,
     )
 

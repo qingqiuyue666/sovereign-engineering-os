@@ -96,6 +96,12 @@ _LOCAL_ONLY_PLAYWRIGHT_FIXTURE_SCENARIO_SUITE_ADAPTER_ID = (
 _LOCAL_ONLY_PLAYWRIGHT_FIXTURE_SCENARIO_SUITE_CAPABILITY = (
     "launch_local_only_playwright_fixture_scenario_suite"
 )
+_PLAYWRIGHT_LOCAL_ADMISSION_RECEIPT_AGGREGATION_ADAPTER_ID = (
+    "playwright_local_admission_receipt_aggregation"
+)
+_PLAYWRIGHT_LOCAL_ADMISSION_RECEIPT_AGGREGATION_CAPABILITY = (
+    "launch_playwright_local_admission_receipt_aggregation"
+)
 _DELIVERY_ADAPTER_ID = "runtime_delivery_package"
 _DELIVERY_CAPABILITY = "validate_runtime_delivery"
 
@@ -739,6 +745,31 @@ _LOCAL_ONLY_PLAYWRIGHT_FIXTURE_SCENARIO_SUITE_DIRECT_PATH_FIELDS = (
     ("artifact_index_manifest", "artifact_index_manifest_path"),
 )
 
+_PLAYWRIGHT_LOCAL_ADMISSION_RECEIPT_AGGREGATION_DIRECT_PATH_FIELDS = (
+    (
+        "playwright_local_admission_receipt_aggregation_plan",
+        "playwright_local_admission_receipt_aggregation_plan_path",
+    ),
+    (
+        "playwright_local_admission_receipt_aggregation_manifest",
+        "playwright_local_admission_receipt_aggregation_manifest_path",
+    ),
+    (
+        "playwright_local_admission_receipt_aggregation_summary",
+        "playwright_local_admission_receipt_aggregation_summary_path",
+    ),
+    (
+        "playwright_local_admission_receipt_aggregation_checklist",
+        "playwright_local_admission_receipt_aggregation_checklist_path",
+    ),
+    (
+        "playwright_local_admission_receipt_aggregation_result",
+        "playwright_local_admission_receipt_aggregation_result_path",
+    ),
+    ("artifact_index", "artifact_index_path"),
+    ("artifact_index_manifest", "artifact_index_manifest_path"),
+)
+
 _DELIVERY_PATH_FIELDS = (
     ("runtime_delivery_manifest", "runtime_delivery_manifest_path"),
     ("runtime_delivery_validation", "runtime_delivery_validation_path"),
@@ -799,6 +830,8 @@ _ROLE_ARTIFACT_TYPES = {
     "local_only_playwright_fixture_scenario_suite_summary": "markdown",
     "local_only_playwright_fixture_scenario_suite_checklist": "markdown",
     "local_only_playwright_fixture_scenario_suite_scenario_result": "json",
+    "playwright_local_admission_receipt_aggregation_summary": "markdown",
+    "playwright_local_admission_receipt_aggregation_checklist": "markdown",
     "embedded_playwright_local_fixture_sandbox_smoke_summary": "markdown",
     "embedded_playwright_local_fixture_sandbox_smoke_checklist": "markdown",
     "embedded_playwright_local_fixture_sandbox_smoke_screenshot": "png",
@@ -1112,6 +1145,15 @@ def _node_artifact_candidates(node, output_dir):
             output_dir,
         )
     if (
+        node["adapter_id"] == _PLAYWRIGHT_LOCAL_ADMISSION_RECEIPT_AGGREGATION_ADAPTER_ID
+        and node["capability"]
+        == _PLAYWRIGHT_LOCAL_ADMISSION_RECEIPT_AGGREGATION_CAPABILITY
+    ):
+        return _playwright_local_admission_receipt_aggregation_artifact_candidates(
+            node,
+            output_dir,
+        )
+    if (
         node["adapter_id"] == _DELIVERY_ADAPTER_ID
         and node["capability"] == _DELIVERY_CAPABILITY
     ):
@@ -1297,6 +1339,30 @@ def _local_only_playwright_fixture_scenario_suite_artifact_candidates(node, outp
                     + str(index),
                     path_value,
                 )
+    return [
+        _artifact_record(
+            node_id=node["node_id"],
+            adapter_id=node["adapter_id"],
+            capability=node["capability"],
+            node_status=node["status"],
+            artifact_role=role,
+            path_value=path_value,
+            output_dir=output_dir,
+        )
+        for role, path_value in role_paths
+    ]
+
+
+def _playwright_local_admission_receipt_aggregation_artifact_candidates(
+    node,
+    output_dir,
+):
+    role_paths = []
+    seen_roles = set()
+    for role, field_name in (
+        _PLAYWRIGHT_LOCAL_ADMISSION_RECEIPT_AGGREGATION_DIRECT_PATH_FIELDS
+    ):
+        _add_role_path(role_paths, seen_roles, role, node.get(field_name))
     return [
         _artifact_record(
             node_id=node["node_id"],
