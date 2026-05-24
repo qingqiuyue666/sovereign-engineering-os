@@ -558,6 +558,62 @@ def build_default_adapter_registry() -> tuple[AdapterRegistryEntry, ...]:
             ),
         ),
         AdapterRegistryEntry(
+            adapter_id="local_fixture_adapter_execution_gate_plan",
+            adapter_name="Local-Fixture Adapter Execution Gate Plan",
+            mode=AdapterMode.LOCAL_FIXTURE,
+            risk_class=AdapterRiskClass.LOCAL_READONLY,
+            admission_status=AdapterAdmissionStatus.CANDIDATE,
+            capabilities=(
+                "launch_local_fixture_adapter_execution_gate_plan",
+            ),
+            required_controls=_REQUIRED_CONTROLS
+            + (
+                "execution_gate_plan_only",
+                "dry_run_invocation_plan_result_required",
+                "local_fixture_path_hash_revalidation",
+                "dry_run_plan_bound",
+                "one_usage_receipt_bound",
+                "aggregation_bound_gate_pass_required",
+                "regression_bound_gate_pass_required",
+                "local_fixture_only",
+                "exact_review_attestation",
+                "artifact_index_binding",
+                "hash_verification",
+                "human_approval_request_only",
+                "no_executable_material",
+                "no_execution_runner",
+                "no_approval_token",
+                "no_new_execution",
+                "no_live_websites",
+                "no_user_supplied_url",
+                "no_accounts",
+                "no_scraping",
+                "no_bypass",
+                "no_captcha",
+                "no_secrets",
+                "no_cookies",
+                "no_external_network",
+                "no_dependency_install",
+                "no_npm_npx",
+                "no_candidate_repo_access",
+                "no_candidate_code_execution",
+                "not_production_admitted",
+                "human_review_required",
+            ),
+            boundary=_approved_output_boundary(),
+            output_policy=_approved_output_policy(),
+            notes=(
+                "Execution-gate plan evidence only and not a production "
+                "adapter. It reads a #430 local-fixture dry-run invocation "
+                "plan result, revalidates the local fixture path and hash, "
+                "and writes a non-executable gate plan plus human approval "
+                "request without commands, argv, adapter execution, "
+                "Playwright execution, browser opening, live websites, "
+                "arbitrary URLs, approval tokens, execution runners, "
+                "autonomy, or production promotion."
+            ),
+        ),
+        AdapterRegistryEntry(
             adapter_id="real_browser_runtime_boundary",
             adapter_name="Real Browser Runtime Boundary",
             mode=AdapterMode.FUTURE_EXTERNAL,

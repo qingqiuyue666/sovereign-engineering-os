@@ -44,6 +44,7 @@ from kernel.personal_ai.local_launcher import (
     run_model_provider_dry_run_launcher,
     run_bounded_playwright_worker_adapter_draft_launcher,
     run_local_fixture_adapter_dry_run_invocation_plan_launcher,
+    run_local_fixture_adapter_execution_gate_plan_launcher,
     run_local_fixture_playwright_adapter_admission_gate_launcher,
     run_local_fixture_adapter_usage_receipt_launcher,
     run_operator_provided_playwright_execution_receipt_launcher,
@@ -143,6 +144,7 @@ _SUBCOMMANDS = {
     "launch-admission-gated-local-adapter-registry-promotion",
     "launch-local-fixture-adapter-usage-receipt",
     "launch-local-fixture-adapter-dry-run-invocation-plan",
+    "launch-local-fixture-adapter-execution-gate-plan",
     "launch-local-asset-smoke-promotion-gate",
     "launch-local-asset-iteration-promotion-gate",
     "launch-local-asset-smoke-iteration-review-packet",
@@ -1100,6 +1102,18 @@ def _main_subcommand(argv) -> int:
             )
             _print_command_payload(result.to_cli_payload())
             return 0 if result.complete else 1
+        if args.command == "launch-local-fixture-adapter-execution-gate-plan":
+            result = run_local_fixture_adapter_execution_gate_plan_launcher(
+                Path(args.dry_run_plan),
+                Path(args.output_dir),
+                args.execution_gate_plan_id,
+                review_attestation=args.review_attestation,
+                project_id=args.project_id,
+                reviewer_id=args.reviewer_id,
+                operator_notes=args.operator_notes,
+            )
+            _print_command_payload(result.to_cli_payload())
+            return 0 if result.complete else 1
         if args.command == "launch-office-workflow":
             result = run_local_office_launcher(
                 Path(args.input_workbook),
@@ -1967,6 +1981,17 @@ def _build_subcommand_parser():
     invocation_plan_parser.add_argument("--project-id")
     invocation_plan_parser.add_argument("--reviewer-id")
     invocation_plan_parser.add_argument("--operator-notes")
+
+    execution_gate_plan_parser = subparsers.add_parser(
+        "launch-local-fixture-adapter-execution-gate-plan"
+    )
+    execution_gate_plan_parser.add_argument("--dry-run-plan", required=True)
+    execution_gate_plan_parser.add_argument("--output-dir", required=True)
+    execution_gate_plan_parser.add_argument("--execution-gate-plan-id", required=True)
+    execution_gate_plan_parser.add_argument("--review-attestation", required=True)
+    execution_gate_plan_parser.add_argument("--project-id")
+    execution_gate_plan_parser.add_argument("--reviewer-id")
+    execution_gate_plan_parser.add_argument("--operator-notes")
 
     launch_office_parser = subparsers.add_parser("launch-office-workflow")
     launch_office_parser.add_argument("--input-workbook", required=True)
