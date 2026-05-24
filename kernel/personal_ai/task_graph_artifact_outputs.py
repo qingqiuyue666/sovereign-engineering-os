@@ -72,6 +72,8 @@ _GITHUB_CAPABILITY_ADAPTER_ID = "github_capability_intake_packet"
 _GITHUB_CAPABILITY_INTAKE_PACKET_CAPABILITY = (
     "launch_github_capability_intake_packet"
 )
+_PLAYWRIGHT_SMOKE_ADAPTER_ID = "playwright_local_fixture_sandbox_smoke"
+_PLAYWRIGHT_SMOKE_CAPABILITY = "launch_playwright_local_fixture_sandbox_smoke"
 _DELIVERY_ADAPTER_ID = "runtime_delivery_package"
 _DELIVERY_CAPABILITY = "validate_runtime_delivery"
 
@@ -506,6 +508,42 @@ _GITHUB_CAPABILITY_INTAKE_PACKET_DIRECT_PATH_FIELDS = (
     ("artifact_index_manifest", "artifact_index_manifest_path"),
 )
 
+_PLAYWRIGHT_SMOKE_DIRECT_PATH_FIELDS = (
+    (
+        "playwright_local_fixture_sandbox_smoke_plan",
+        "playwright_local_fixture_sandbox_smoke_plan_path",
+    ),
+    (
+        "playwright_local_fixture_sandbox_smoke_manifest",
+        "playwright_local_fixture_sandbox_smoke_manifest_path",
+    ),
+    (
+        "playwright_local_fixture_sandbox_smoke_summary",
+        "playwright_local_fixture_sandbox_smoke_summary_path",
+    ),
+    (
+        "playwright_local_fixture_sandbox_smoke_checklist",
+        "playwright_local_fixture_sandbox_smoke_checklist_path",
+    ),
+    (
+        "playwright_local_fixture_sandbox_smoke_result",
+        "playwright_local_fixture_sandbox_smoke_result_path",
+    ),
+    (
+        "playwright_local_fixture_sandbox_smoke_runner_output",
+        "playwright_local_fixture_sandbox_smoke_runner_output_path",
+    ),
+    (
+        "playwright_local_fixture_sandbox_smoke_screenshot",
+        "playwright_local_fixture_sandbox_smoke_screenshot_path",
+    ),
+    ("playwright_local_fixture_index_html", "fixture_index_path"),
+    ("playwright_local_fixture_app_js", "fixture_app_js_path"),
+    ("playwright_local_fixture_style_css", "fixture_style_css_path"),
+    ("artifact_index", "artifact_index_path"),
+    ("artifact_index_manifest", "artifact_index_manifest_path"),
+)
+
 _DELIVERY_PATH_FIELDS = (
     ("runtime_delivery_manifest", "runtime_delivery_manifest_path"),
     ("runtime_delivery_validation", "runtime_delivery_validation_path"),
@@ -551,6 +589,12 @@ _ROLE_ARTIFACT_TYPES = {
     "local_asset_next_bounded_smoke_cycle_contract_human_review_from_run_promotion_gate_checklist": "markdown",
     "github_capability_intake_packet_summary": "markdown",
     "github_capability_intake_packet_checklist": "markdown",
+    "playwright_local_fixture_sandbox_smoke_summary": "markdown",
+    "playwright_local_fixture_sandbox_smoke_checklist": "markdown",
+    "playwright_local_fixture_sandbox_smoke_screenshot": "png",
+    "playwright_local_fixture_index_html": "html",
+    "playwright_local_fixture_app_js": "javascript",
+    "playwright_local_fixture_style_css": "css",
     "local_asset_smoke_human_decision_checklist": "markdown",
     "local_asset_sqlite_query_summary": "markdown",
     "local_asset_smoke_readiness_summary": "markdown",
@@ -824,6 +868,11 @@ def _node_artifact_candidates(node, output_dir):
             output_dir,
         )
     if (
+        node["adapter_id"] == _PLAYWRIGHT_SMOKE_ADAPTER_ID
+        and node["capability"] == _PLAYWRIGHT_SMOKE_CAPABILITY
+    ):
+        return _playwright_smoke_artifact_candidates(node, output_dir)
+    if (
         node["adapter_id"] == _DELIVERY_ADAPTER_ID
         and node["capability"] == _DELIVERY_CAPABILITY
     ):
@@ -900,6 +949,25 @@ def _github_capability_intake_packet_artifact_candidates(node, output_dir):
     role_paths = []
     seen_roles = set()
     for role, field_name in _GITHUB_CAPABILITY_INTAKE_PACKET_DIRECT_PATH_FIELDS:
+        _add_role_path(role_paths, seen_roles, role, node.get(field_name))
+    return [
+        _artifact_record(
+            node_id=node["node_id"],
+            adapter_id=node["adapter_id"],
+            capability=node["capability"],
+            node_status=node["status"],
+            artifact_role=role,
+            path_value=path_value,
+            output_dir=output_dir,
+        )
+        for role, path_value in role_paths
+    ]
+
+
+def _playwright_smoke_artifact_candidates(node, output_dir):
+    role_paths = []
+    seen_roles = set()
+    for role, field_name in _PLAYWRIGHT_SMOKE_DIRECT_PATH_FIELDS:
         _add_role_path(role_paths, seen_roles, role, node.get(field_name))
     return [
         _artifact_record(
