@@ -208,6 +208,10 @@ class LocalFixtureAdapterDryRunInvocationPlanTests(unittest.TestCase):
         self.assertFalse(payload["local_fixture_symlink_detected"])
         self.assertTrue(payload["local_fixture_under_allowed_root"])
         self.assertEqual(
+            payload["local_fixture_allowed_root"],
+            receipt_path.parent.as_posix(),
+        )
+        self.assertEqual(
             payload["invocation_plan_status"],
             "local_fixture_adapter_dry_run_invocation_plan_completed",
         )
@@ -311,6 +315,56 @@ class LocalFixtureAdapterDryRunInvocationPlanTests(unittest.TestCase):
         for mutator, reason in cases:
             with self.subTest(reason=reason):
                 self.assert_rejects_receipt_mutation(mutator, reason)
+
+    def test_usage_receipt_output_dir_mismatch_rejects_without_fixture_mutation(self):
+        root, receipt_path, plan_output, _fixture_path, usage_output = (
+            self.make_workspace()
+        )
+        payload = read_json(receipt_path)
+        payload["output_dir"] = root.as_posix()
+        write_json(receipt_path, payload)
+
+        result = self.run_plan(receipt_path, plan_output)
+        result_payload = read_json(result.result_path)
+
+        self.assertFalse(result.complete)
+        self.assertIn(
+            "usage_receipt_output_dir_mismatch",
+            result.rejection_reasons,
+        )
+        self.assertNotIn(
+            "local_fixture_path_outside_allowed_root",
+            result.rejection_reasons,
+        )
+        self.assertEqual(
+            result_payload["local_fixture_allowed_root"],
+            usage_output.as_posix(),
+        )
+        self.assertTrue(result_payload["local_fixture_revalidated"])
+
+    def test_widened_usage_receipt_output_dir_cannot_admit_outside_fixture(self):
+        root, receipt_path, plan_output, _fixture_path, _usage_output = (
+            self.make_workspace()
+        )
+        outside_fixture = root / "outside.html"
+        outside_fixture.write_text("<!doctype html>\n", encoding="utf-8")
+        payload = read_json(receipt_path)
+        payload["output_dir"] = root.as_posix()
+        payload["local_fixture_path"] = outside_fixture.as_posix()
+        payload["local_fixture_sha256"] = sha256_file(outside_fixture)
+        write_json(receipt_path, payload)
+
+        result = self.run_plan(receipt_path, plan_output)
+
+        self.assertFalse(result.complete)
+        self.assertIn(
+            "usage_receipt_output_dir_mismatch",
+            result.rejection_reasons,
+        )
+        self.assertIn(
+            "local_fixture_path_outside_allowed_root",
+            result.rejection_reasons,
+        )
 
     def test_local_fixture_revalidation_rejections_are_deterministic(self):
         root, receipt_path, plan_output, fixture_path, _usage_output = (

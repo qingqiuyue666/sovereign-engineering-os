@@ -406,6 +406,7 @@ def _usage_receipt_rejection_reasons(
     payload: dict[str, object],
 ) -> list[str]:
     reasons: list[str] = []
+    reasons.extend(_usage_receipt_output_dir_rejection_reasons(source_path, payload))
     if payload.get("receipt_type") != _USAGE_RECEIPT_TYPE:
         reasons.append("usage_receipt_type_mismatch")
     if payload.get("promotion_status") != _USAGE_RECEIPT_COMPLETED_STATUS:
@@ -488,6 +489,22 @@ def _usage_receipt_rejection_reasons(
     return _dedupe_strings(reasons)
 
 
+def _usage_receipt_output_dir_rejection_reasons(
+    source_path: Path,
+    payload: dict[str, object],
+) -> list[str]:
+    if "output_dir" not in payload:
+        return []
+    output_dir = payload.get("output_dir")
+    if not _non_empty_text(output_dir):
+        return ["usage_receipt_output_dir_mismatch"]
+    if Path(str(output_dir)).resolve(strict=False) != source_path.parent.resolve(
+        strict=False
+    ):
+        return ["usage_receipt_output_dir_mismatch"]
+    return []
+
+
 def _local_fixture_revalidation_metadata(
     source_path: Path,
     payload: dict[str, object],
@@ -496,7 +513,7 @@ def _local_fixture_revalidation_metadata(
     reasons: list[str] = []
     path_value = payload.get("local_fixture_path")
     expected_sha = payload.get("local_fixture_sha256")
-    allowed_root = _allowed_fixture_root(source_path, payload)
+    allowed_root = _allowed_fixture_root(source_path)
     if not _non_empty_text(path_value):
         reasons.append("local_fixture_path_missing")
         return metadata, _dedupe_strings(reasons)
@@ -553,13 +570,7 @@ def _empty_fixture_metadata(payload: dict[str, object]) -> dict[str, object]:
     }
 
 
-def _allowed_fixture_root(
-    source_path: Path,
-    payload: dict[str, object],
-) -> Path:
-    output_dir = payload.get("output_dir")
-    if _non_empty_text(output_dir):
-        return Path(str(output_dir))
+def _allowed_fixture_root(source_path: Path) -> Path:
     return source_path.parent
 
 
