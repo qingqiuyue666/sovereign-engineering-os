@@ -138,6 +138,26 @@ _LAUNCHER_WORKFLOW_CALLABLES = (
         "local_fixture_human_approval_artifact_workflow",
         "run_local_fixture_human_approval_artifact_launcher",
     ),
+    (
+        "local_fixture_runner_contract_draft_workflow",
+        "run_local_fixture_runner_contract_draft_launcher",
+    ),
+    (
+        "local_fixture_runner_stub_admission_gate_workflow",
+        "run_local_fixture_runner_stub_admission_gate_launcher",
+    ),
+    (
+        "local_fixture_runner_receipt_contract_draft_workflow",
+        "run_local_fixture_runner_receipt_contract_draft_launcher",
+    ),
+    (
+        "local_fixture_runner_receipt_preflight_verifier_workflow",
+        "run_local_fixture_runner_receipt_preflight_verifier_launcher",
+    ),
+    (
+        "local_fixture_runner_receipt_metadata_artifact_workflow",
+        "run_local_fixture_runner_receipt_metadata_artifact_launcher",
+    ),
     ("local_office_workflow", "run_local_office_launcher"),
     ("model_fixture_workflow", "run_model_fixture_launcher"),
     ("model_provider_dry_run_workflow", "run_model_provider_dry_run_launcher"),
@@ -184,6 +204,11 @@ _REQUIRED_CLI_SUBCOMMANDS = (
     "launch-local-fixture-adapter-dry-run-invocation-plan",
     "launch-local-fixture-adapter-execution-gate-plan",
     "launch-local-fixture-human-approval-artifact",
+    "launch-local-fixture-runner-contract-draft",
+    "launch-local-fixture-runner-stub-admission-gate",
+    "launch-local-fixture-runner-receipt-contract-draft",
+    "launch-local-fixture-runner-receipt-preflight-verifier",
+    "launch-local-fixture-runner-receipt-metadata-artifact",
     "launch-office-workflow",
     "launch-model-fixture",
     "launch-model-provider-dry-run",

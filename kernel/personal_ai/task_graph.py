@@ -143,6 +143,61 @@ _LOCAL_FIXTURE_HUMAN_APPROVAL_ARTIFACT_ADAPTER_ID = (
 _LOCAL_FIXTURE_HUMAN_APPROVAL_ARTIFACT_CAPABILITY = (
     "launch_local_fixture_human_approval_artifact"
 )
+_LOCAL_FIXTURE_RUNNER_CONTRACT_DRAFT_ADAPTER_ID = (
+    "local_fixture_runner_contract_draft"
+)
+_LOCAL_FIXTURE_RUNNER_CONTRACT_DRAFT_CAPABILITY = (
+    "launch_local_fixture_runner_contract_draft"
+)
+_LOCAL_FIXTURE_RUNNER_STUB_ADMISSION_GATE_ADAPTER_ID = (
+    "local_fixture_runner_stub_admission_gate"
+)
+_LOCAL_FIXTURE_RUNNER_STUB_ADMISSION_GATE_CAPABILITY = (
+    "launch_local_fixture_runner_stub_admission_gate"
+)
+_LOCAL_FIXTURE_RUNNER_RECEIPT_CONTRACT_DRAFT_ADAPTER_ID = (
+    "local_fixture_runner_receipt_contract_draft"
+)
+_LOCAL_FIXTURE_RUNNER_RECEIPT_CONTRACT_DRAFT_CAPABILITY = (
+    "launch_local_fixture_runner_receipt_contract_draft"
+)
+_LOCAL_FIXTURE_RUNNER_RECEIPT_PREFLIGHT_VERIFIER_ADAPTER_ID = (
+    "local_fixture_runner_receipt_preflight_verifier"
+)
+_LOCAL_FIXTURE_RUNNER_RECEIPT_PREFLIGHT_VERIFIER_CAPABILITY = (
+    "launch_local_fixture_runner_receipt_preflight_verifier"
+)
+_LOCAL_FIXTURE_RUNNER_RECEIPT_METADATA_ARTIFACT_ADAPTER_ID = (
+    "local_fixture_runner_receipt_metadata_artifact"
+)
+_LOCAL_FIXTURE_RUNNER_RECEIPT_METADATA_ARTIFACT_CAPABILITY = (
+    "launch_local_fixture_runner_receipt_metadata_artifact"
+)
+_LOCAL_FIXTURE_RUNNER_METADATA_CHAIN_ROUTES = (
+    (
+        _LOCAL_FIXTURE_RUNNER_CONTRACT_DRAFT_ADAPTER_ID,
+        _LOCAL_FIXTURE_RUNNER_CONTRACT_DRAFT_CAPABILITY,
+    ),
+    (
+        _LOCAL_FIXTURE_RUNNER_STUB_ADMISSION_GATE_ADAPTER_ID,
+        _LOCAL_FIXTURE_RUNNER_STUB_ADMISSION_GATE_CAPABILITY,
+    ),
+    (
+        _LOCAL_FIXTURE_RUNNER_RECEIPT_CONTRACT_DRAFT_ADAPTER_ID,
+        _LOCAL_FIXTURE_RUNNER_RECEIPT_CONTRACT_DRAFT_CAPABILITY,
+    ),
+    (
+        _LOCAL_FIXTURE_RUNNER_RECEIPT_PREFLIGHT_VERIFIER_ADAPTER_ID,
+        _LOCAL_FIXTURE_RUNNER_RECEIPT_PREFLIGHT_VERIFIER_CAPABILITY,
+    ),
+    (
+        _LOCAL_FIXTURE_RUNNER_RECEIPT_METADATA_ARTIFACT_ADAPTER_ID,
+        _LOCAL_FIXTURE_RUNNER_RECEIPT_METADATA_ARTIFACT_CAPABILITY,
+    ),
+)
+_LOCAL_FIXTURE_RUNNER_METADATA_CHAIN_ADAPTER_IDS = tuple(
+    adapter_id for adapter_id, _capability in _LOCAL_FIXTURE_RUNNER_METADATA_CHAIN_ROUTES
+)
 _RUNTIME_ADMISSION_DECISION_TYPE = "personal_ai_runtime_admission_decision_v1"
 _GRAPH_EXECUTION_MODES = ("fixture_execution", "dry_run_plan")
 _NODE_EXECUTION_MODES = ("fixture", "mock", "dry_run", "real_runtime")
@@ -666,6 +721,11 @@ def _validate_adapter_routes(node_records, graph_execution_mode):
                 decision.reason_codes,
                 graph_execution_mode,
             )
+            and not _route_is_safe_local_fixture_runner_metadata_chain_fixture(
+                node,
+                decision.reason_codes,
+                graph_execution_mode,
+            )
         ):
             raise ValueError(
                 "task graph adapter route is not admitted: "
@@ -828,6 +888,20 @@ def _route_is_safe_local_fixture_human_approval_artifact_fixture(
     )
 
 
+def _route_is_safe_local_fixture_runner_metadata_chain_fixture(
+    node,
+    reason_codes,
+    graph_execution_mode,
+):
+    return (
+        graph_execution_mode == "fixture_execution"
+        and node["execution_mode"] == "fixture"
+        and (node["adapter_id"], node["capability"])
+        in _LOCAL_FIXTURE_RUNNER_METADATA_CHAIN_ROUTES
+        and tuple(reason_codes) == ("adapter_not_admitted",)
+    )
+
+
 def _execute_graph_nodes(nodes_by_id, graph_execution_mode):
     executed = []
     status_by_node_id = {}
@@ -941,6 +1015,13 @@ def _execute_graph_nodes(nodes_by_id, graph_execution_mode):
             )
             if approval_artifact_result is not None:
                 record.update(approval_artifact_result)
+            runner_metadata_chain_result = (
+                _run_local_fixture_runner_metadata_chain_node_if_requested(
+                    node
+                )
+            )
+            if runner_metadata_chain_result is not None:
+                record.update(runner_metadata_chain_result)
         status_by_node_id[node_id] = record["status"]
         executed.append(record)
     return executed
@@ -968,6 +1049,7 @@ def _base_node_execution_record(node, graph_execution_mode):
             _LOCAL_FIXTURE_ADAPTER_DRY_RUN_INVOCATION_PLAN_ADAPTER_ID,
             _LOCAL_FIXTURE_ADAPTER_EXECUTION_GATE_PLAN_ADAPTER_ID,
             _LOCAL_FIXTURE_HUMAN_APPROVAL_ARTIFACT_ADAPTER_ID,
+            *_LOCAL_FIXTURE_RUNNER_METADATA_CHAIN_ADAPTER_IDS,
         ),
         "adapter_route_policy": "local_delivery_integration"
         if node["adapter_id"] == _DELIVERY_ADAPTER_ID
@@ -1160,6 +1242,82 @@ def _base_node_execution_record(node, graph_execution_mode):
         record["future_runner_requires_separate_pr"] = True
         record["future_execution_requires_separate_runner_receipt"] = True
         record["future_execution_requires_explicit_local_fixture_runner_gate"] = True
+    if node["adapter_id"] == _LOCAL_FIXTURE_RUNNER_CONTRACT_DRAFT_ADAPTER_ID:
+        from kernel.capabilities.local_fixture_runner_contract_draft import (
+            LOCAL_FIXTURE_RUNNER_CONTRACT_DRAFT_REQUIRED_FALSE_FIELDS,
+        )
+
+        record.update(
+            {
+                field_name: False
+                for field_name in LOCAL_FIXTURE_RUNNER_CONTRACT_DRAFT_REQUIRED_FALSE_FIELDS
+            }
+        )
+        record["contract_only"] = True
+        record["metadata_only"] = True
+        record["future_runner_requires_separate_implementation_pr"] = True
+    if node["adapter_id"] == _LOCAL_FIXTURE_RUNNER_STUB_ADMISSION_GATE_ADAPTER_ID:
+        from kernel.capabilities.local_fixture_runner_stub_admission_gate import (
+            LOCAL_FIXTURE_RUNNER_STUB_ADMISSION_GATE_FALSE_FIELDS,
+        )
+
+        record.update(
+            {
+                field_name: False
+                for field_name in LOCAL_FIXTURE_RUNNER_STUB_ADMISSION_GATE_FALSE_FIELDS
+            }
+        )
+        record["metadata_only"] = True
+        record["future_runner_stub_requires_separate_pr"] = True
+    if (
+        node["adapter_id"]
+        == _LOCAL_FIXTURE_RUNNER_RECEIPT_CONTRACT_DRAFT_ADAPTER_ID
+    ):
+        from kernel.capabilities.local_fixture_runner_receipt_contract_draft import (
+            LOCAL_FIXTURE_RUNNER_RECEIPT_CONTRACT_DRAFT_REQUIRED_FALSE_FIELDS,
+        )
+
+        record.update(
+            {
+                field_name: False
+                for field_name in LOCAL_FIXTURE_RUNNER_RECEIPT_CONTRACT_DRAFT_REQUIRED_FALSE_FIELDS
+            }
+        )
+        record["contract_only"] = True
+        record["metadata_only"] = True
+        record["future_runner_receipt_requires_separate_pr"] = True
+    if (
+        node["adapter_id"]
+        == _LOCAL_FIXTURE_RUNNER_RECEIPT_PREFLIGHT_VERIFIER_ADAPTER_ID
+    ):
+        from kernel.capabilities.local_fixture_runner_receipt_preflight_verifier import (
+            LOCAL_FIXTURE_RUNNER_RECEIPT_PREFLIGHT_VERIFIER_FALSE_FIELDS,
+        )
+
+        record.update(
+            {
+                field_name: False
+                for field_name in LOCAL_FIXTURE_RUNNER_RECEIPT_PREFLIGHT_VERIFIER_FALSE_FIELDS
+            }
+        )
+        record["metadata_only"] = True
+        record["future_runner_receipt_requires_separate_pr"] = True
+    if (
+        node["adapter_id"]
+        == _LOCAL_FIXTURE_RUNNER_RECEIPT_METADATA_ARTIFACT_ADAPTER_ID
+    ):
+        from kernel.capabilities.local_fixture_runner_receipt_metadata_artifact import (
+            LOCAL_FIXTURE_RUNNER_RECEIPT_METADATA_ARTIFACT_FALSE_FIELDS,
+        )
+
+        record.update(
+            {
+                field_name: False
+                for field_name in LOCAL_FIXTURE_RUNNER_RECEIPT_METADATA_ARTIFACT_FALSE_FIELDS
+            }
+        )
+        record["metadata_only"] = True
+        record["receipt_metadata_only"] = True
     return record
 
 
@@ -1206,6 +1364,11 @@ def _adapter_route_policy(node, graph_execution_mode):
         == _LOCAL_FIXTURE_HUMAN_APPROVAL_ARTIFACT_ADAPTER_ID
     ):
         return "local_fixture_human_approval_artifact_not_production_admitted"
+    if (
+        node["adapter_id"],
+        node["capability"],
+    ) in _LOCAL_FIXTURE_RUNNER_METADATA_CHAIN_ROUTES:
+        return "local_fixture_runner_metadata_chain_not_production_admitted"
     if node["adapter_id"] == _OPERATOR_PLAYWRIGHT_RECEIPT_ADAPTER_ID:
         return "operator_provided_local_fixture_receipt_only_not_production_admitted"
     if node["adapter_id"] == _BOUNDED_PLAYWRIGHT_ADAPTER_DRAFT_ID:
@@ -2500,6 +2663,309 @@ def _run_local_fixture_human_approval_artifact_node_if_requested(node):
         "required_human_review": True,
         **false_fields,
     }
+
+
+def _run_local_fixture_runner_metadata_chain_node_if_requested(node):
+    route = (node["adapter_id"], node["capability"])
+    if route not in _LOCAL_FIXTURE_RUNNER_METADATA_CHAIN_ROUTES:
+        return None
+    inputs = node["inputs"]
+    output_dir = _required_string_input(
+        inputs,
+        "output_dir",
+        "local-fixture runner metadata chain",
+    )
+
+    if route == (
+        _LOCAL_FIXTURE_RUNNER_CONTRACT_DRAFT_ADAPTER_ID,
+        _LOCAL_FIXTURE_RUNNER_CONTRACT_DRAFT_CAPABILITY,
+    ):
+        from kernel.capabilities.local_fixture_runner_contract_draft import (
+            LOCAL_FIXTURE_RUNNER_CONTRACT_DRAFT_REQUIRED_FALSE_FIELDS,
+        )
+        from kernel.personal_ai.local_launcher import (
+            run_local_fixture_runner_contract_draft_launcher,
+        )
+
+        result = run_local_fixture_runner_contract_draft_launcher(
+            Path(output_dir),
+            _required_string_input(
+                inputs,
+                "runner_contract_id",
+                "local-fixture runner contract draft",
+            ),
+            review_attestation=_required_string_input(
+                inputs,
+                "review_attestation",
+                "local-fixture runner contract draft",
+            ),
+            project_id=_optional_nonempty_string_input(
+                inputs,
+                "project_id",
+                "local-fixture runner contract draft",
+            ),
+            reviewer_id=_optional_nonempty_string_input(
+                inputs,
+                "reviewer_id",
+                "local-fixture runner contract draft",
+            ),
+            operator_notes=_optional_nonempty_string_input(
+                inputs,
+                "operator_notes",
+                "local-fixture runner contract draft",
+            ),
+        )
+        return _runner_metadata_chain_result_record(
+            node["adapter_id"],
+            result,
+            LOCAL_FIXTURE_RUNNER_CONTRACT_DRAFT_REQUIRED_FALSE_FIELDS,
+        )
+
+    if route == (
+        _LOCAL_FIXTURE_RUNNER_STUB_ADMISSION_GATE_ADAPTER_ID,
+        _LOCAL_FIXTURE_RUNNER_STUB_ADMISSION_GATE_CAPABILITY,
+    ):
+        from kernel.capabilities.local_fixture_runner_stub_admission_gate import (
+            LOCAL_FIXTURE_RUNNER_STUB_ADMISSION_GATE_FALSE_FIELDS,
+        )
+        from kernel.personal_ai.local_launcher import (
+            run_local_fixture_runner_stub_admission_gate_launcher,
+        )
+
+        result = run_local_fixture_runner_stub_admission_gate_launcher(
+            Path(
+                _required_string_input(
+                    inputs,
+                    "human_approval_artifact_result",
+                    "local-fixture runner stub admission gate",
+                )
+            ),
+            Path(
+                _required_string_input(
+                    inputs,
+                    "runner_contract_draft_result",
+                    "local-fixture runner stub admission gate",
+                )
+            ),
+            Path(output_dir),
+            _required_string_input(
+                inputs,
+                "gate_id",
+                "local-fixture runner stub admission gate",
+            ),
+            _required_string_input(
+                inputs,
+                "reviewer_id",
+                "local-fixture runner stub admission gate",
+            ),
+            _required_string_input(
+                inputs,
+                "review_attestation",
+                "local-fixture runner stub admission gate",
+            ),
+        )
+        return _runner_metadata_chain_result_record(
+            node["adapter_id"],
+            result,
+            LOCAL_FIXTURE_RUNNER_STUB_ADMISSION_GATE_FALSE_FIELDS,
+        )
+
+    if route == (
+        _LOCAL_FIXTURE_RUNNER_RECEIPT_CONTRACT_DRAFT_ADAPTER_ID,
+        _LOCAL_FIXTURE_RUNNER_RECEIPT_CONTRACT_DRAFT_CAPABILITY,
+    ):
+        from kernel.capabilities.local_fixture_runner_receipt_contract_draft import (
+            LOCAL_FIXTURE_RUNNER_RECEIPT_CONTRACT_DRAFT_REQUIRED_FALSE_FIELDS,
+        )
+        from kernel.personal_ai.local_launcher import (
+            run_local_fixture_runner_receipt_contract_draft_launcher,
+        )
+
+        result = run_local_fixture_runner_receipt_contract_draft_launcher(
+            Path(output_dir),
+            _required_string_input(
+                inputs,
+                "receipt_contract_id",
+                "local-fixture runner receipt contract draft",
+            ),
+            _required_string_input(
+                inputs,
+                "reviewer_id",
+                "local-fixture runner receipt contract draft",
+            ),
+            _required_string_input(
+                inputs,
+                "review_attestation",
+                "local-fixture runner receipt contract draft",
+            ),
+            project_id=_optional_nonempty_string_input(
+                inputs,
+                "project_id",
+                "local-fixture runner receipt contract draft",
+            ),
+            operator_notes=_optional_nonempty_string_input(
+                inputs,
+                "operator_notes",
+                "local-fixture runner receipt contract draft",
+            ),
+        )
+        return _runner_metadata_chain_result_record(
+            node["adapter_id"],
+            result,
+            LOCAL_FIXTURE_RUNNER_RECEIPT_CONTRACT_DRAFT_REQUIRED_FALSE_FIELDS,
+        )
+
+    if route == (
+        _LOCAL_FIXTURE_RUNNER_RECEIPT_PREFLIGHT_VERIFIER_ADAPTER_ID,
+        _LOCAL_FIXTURE_RUNNER_RECEIPT_PREFLIGHT_VERIFIER_CAPABILITY,
+    ):
+        from kernel.capabilities.local_fixture_runner_receipt_preflight_verifier import (
+            LOCAL_FIXTURE_RUNNER_RECEIPT_PREFLIGHT_VERIFIER_FALSE_FIELDS,
+        )
+        from kernel.personal_ai.local_launcher import (
+            run_local_fixture_runner_receipt_preflight_verifier_launcher,
+        )
+
+        result = run_local_fixture_runner_receipt_preflight_verifier_launcher(
+            Path(
+                _required_string_input(
+                    inputs,
+                    "runner_stub_admission_gate_result",
+                    "local-fixture runner receipt preflight verifier",
+                )
+            ),
+            Path(
+                _required_string_input(
+                    inputs,
+                    "runner_receipt_contract_draft_result",
+                    "local-fixture runner receipt preflight verifier",
+                )
+            ),
+            Path(
+                _required_string_input(
+                    inputs,
+                    "human_approval_artifact_result",
+                    "local-fixture runner receipt preflight verifier",
+                )
+            ),
+            Path(output_dir),
+            _required_string_input(
+                inputs,
+                "preflight_id",
+                "local-fixture runner receipt preflight verifier",
+            ),
+            _required_string_input(
+                inputs,
+                "reviewer_id",
+                "local-fixture runner receipt preflight verifier",
+            ),
+            _required_string_input(
+                inputs,
+                "review_attestation",
+                "local-fixture runner receipt preflight verifier",
+            ),
+            project_id=_optional_nonempty_string_input(
+                inputs,
+                "project_id",
+                "local-fixture runner receipt preflight verifier",
+            ),
+            operator_notes=_optional_nonempty_string_input(
+                inputs,
+                "operator_notes",
+                "local-fixture runner receipt preflight verifier",
+            ),
+        )
+        return _runner_metadata_chain_result_record(
+            node["adapter_id"],
+            result,
+            LOCAL_FIXTURE_RUNNER_RECEIPT_PREFLIGHT_VERIFIER_FALSE_FIELDS,
+        )
+
+    if route == (
+        _LOCAL_FIXTURE_RUNNER_RECEIPT_METADATA_ARTIFACT_ADAPTER_ID,
+        _LOCAL_FIXTURE_RUNNER_RECEIPT_METADATA_ARTIFACT_CAPABILITY,
+    ):
+        from kernel.capabilities.local_fixture_runner_receipt_metadata_artifact import (
+            LOCAL_FIXTURE_RUNNER_RECEIPT_METADATA_ARTIFACT_FALSE_FIELDS,
+        )
+        from kernel.personal_ai.local_launcher import (
+            run_local_fixture_runner_receipt_metadata_artifact_launcher,
+        )
+
+        result = run_local_fixture_runner_receipt_metadata_artifact_launcher(
+            Path(
+                _required_string_input(
+                    inputs,
+                    "runner_receipt_preflight_result",
+                    "local-fixture runner receipt metadata artifact",
+                )
+            ),
+            Path(output_dir),
+            _required_string_input(
+                inputs,
+                "runner_receipt_id",
+                "local-fixture runner receipt metadata artifact",
+            ),
+            _required_string_input(
+                inputs,
+                "reviewer_id",
+                "local-fixture runner receipt metadata artifact",
+            ),
+            _required_string_input(
+                inputs,
+                "review_attestation",
+                "local-fixture runner receipt metadata artifact",
+            ),
+            project_id=_optional_nonempty_string_input(
+                inputs,
+                "project_id",
+                "local-fixture runner receipt metadata artifact",
+            ),
+            operator_notes=_optional_nonempty_string_input(
+                inputs,
+                "operator_notes",
+                "local-fixture runner receipt metadata artifact",
+            ),
+        )
+        return _runner_metadata_chain_result_record(
+            node["adapter_id"],
+            result,
+            LOCAL_FIXTURE_RUNNER_RECEIPT_METADATA_ARTIFACT_FALSE_FIELDS,
+        )
+
+    raise ValueError("task graph local-fixture runner metadata capability is not registered")
+
+
+def _runner_metadata_chain_result_record(adapter_id, result, false_fields):
+    payload = dict(result.payload)
+    complete = bool(result.complete)
+    rejection_reasons = payload.get("rejection_reasons", [])
+    record = dict(payload)
+    record.update(
+        {
+            "status": "completed" if complete else "failed",
+            "output_dir": result.output_dir.as_posix(),
+            adapter_id + "_complete": complete,
+            "failure_stage": None if complete else adapter_id + "_rejected",
+            "error_message": None
+            if complete
+            else ",".join(str(reason) for reason in rejection_reasons),
+            "safe_to_retry": not complete,
+            "replay_hint": (
+                "Fix local-fixture runner metadata inputs and rerun this node."
+            )
+            if not complete
+            else (
+                "Review metadata artifact; no runner, token, execution, "
+                "browser, network, or production path was created."
+            ),
+            "required_human_approval": True,
+            "required_human_review": True,
+            "metadata_only": True,
+        }
+    )
+    record.update({field_name: False for field_name in false_fields})
+    return record
 
 
 def _run_local_fixture_playwright_admission_gate_node_if_requested(node):

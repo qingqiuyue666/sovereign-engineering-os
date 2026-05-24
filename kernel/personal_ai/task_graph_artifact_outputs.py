@@ -132,6 +132,36 @@ _LOCAL_FIXTURE_HUMAN_APPROVAL_ARTIFACT_ADAPTER_ID = (
 _LOCAL_FIXTURE_HUMAN_APPROVAL_ARTIFACT_CAPABILITY = (
     "launch_local_fixture_human_approval_artifact"
 )
+_LOCAL_FIXTURE_RUNNER_CONTRACT_DRAFT_ADAPTER_ID = (
+    "local_fixture_runner_contract_draft"
+)
+_LOCAL_FIXTURE_RUNNER_CONTRACT_DRAFT_CAPABILITY = (
+    "launch_local_fixture_runner_contract_draft"
+)
+_LOCAL_FIXTURE_RUNNER_STUB_ADMISSION_GATE_ADAPTER_ID = (
+    "local_fixture_runner_stub_admission_gate"
+)
+_LOCAL_FIXTURE_RUNNER_STUB_ADMISSION_GATE_CAPABILITY = (
+    "launch_local_fixture_runner_stub_admission_gate"
+)
+_LOCAL_FIXTURE_RUNNER_RECEIPT_CONTRACT_DRAFT_ADAPTER_ID = (
+    "local_fixture_runner_receipt_contract_draft"
+)
+_LOCAL_FIXTURE_RUNNER_RECEIPT_CONTRACT_DRAFT_CAPABILITY = (
+    "launch_local_fixture_runner_receipt_contract_draft"
+)
+_LOCAL_FIXTURE_RUNNER_RECEIPT_PREFLIGHT_VERIFIER_ADAPTER_ID = (
+    "local_fixture_runner_receipt_preflight_verifier"
+)
+_LOCAL_FIXTURE_RUNNER_RECEIPT_PREFLIGHT_VERIFIER_CAPABILITY = (
+    "launch_local_fixture_runner_receipt_preflight_verifier"
+)
+_LOCAL_FIXTURE_RUNNER_RECEIPT_METADATA_ARTIFACT_ADAPTER_ID = (
+    "local_fixture_runner_receipt_metadata_artifact"
+)
+_LOCAL_FIXTURE_RUNNER_RECEIPT_METADATA_ARTIFACT_CAPABILITY = (
+    "launch_local_fixture_runner_receipt_metadata_artifact"
+)
 _DELIVERY_ADAPTER_ID = "runtime_delivery_package"
 _DELIVERY_CAPABILITY = "validate_runtime_delivery"
 
@@ -930,6 +960,56 @@ _LOCAL_FIXTURE_HUMAN_APPROVAL_ARTIFACT_DIRECT_PATH_FIELDS = (
     ("artifact_index_manifest", "artifact_index_manifest_path"),
 )
 
+_LOCAL_FIXTURE_RUNNER_CONTRACT_DRAFT_DIRECT_PATH_FIELDS = (
+    ("local_fixture_runner_contract_draft", "contract_path"),
+    ("local_fixture_runner_contract_draft_result", "result_path"),
+    ("local_fixture_runner_contract_draft_manifest", "manifest_path"),
+    ("local_fixture_runner_contract_draft_summary", "summary_path"),
+    ("local_fixture_runner_contract_draft_checklist", "checklist_path"),
+    ("artifact_index", "artifact_index_path"),
+    ("artifact_index_manifest", "artifact_index_manifest_path"),
+)
+
+_LOCAL_FIXTURE_RUNNER_STUB_ADMISSION_GATE_DIRECT_PATH_FIELDS = (
+    ("local_fixture_runner_stub_admission_gate", "gate_path"),
+    ("local_fixture_runner_stub_admission_gate_result", "result_path"),
+    ("local_fixture_runner_stub_admission_gate_manifest", "manifest_path"),
+    ("local_fixture_runner_stub_admission_gate_summary", "summary_path"),
+    ("local_fixture_runner_stub_admission_gate_checklist", "checklist_path"),
+    ("artifact_index", "artifact_index_path"),
+    ("artifact_index_manifest", "artifact_index_manifest_path"),
+)
+
+_LOCAL_FIXTURE_RUNNER_RECEIPT_CONTRACT_DRAFT_DIRECT_PATH_FIELDS = (
+    ("local_fixture_runner_receipt_contract_draft", "contract_path"),
+    ("local_fixture_runner_receipt_contract_draft_result", "result_path"),
+    ("local_fixture_runner_receipt_contract_draft_manifest", "manifest_path"),
+    ("local_fixture_runner_receipt_contract_draft_summary", "summary_path"),
+    ("local_fixture_runner_receipt_contract_draft_checklist", "checklist_path"),
+    ("artifact_index", "artifact_index_path"),
+    ("artifact_index_manifest", "artifact_index_manifest_path"),
+)
+
+_LOCAL_FIXTURE_RUNNER_RECEIPT_PREFLIGHT_VERIFIER_DIRECT_PATH_FIELDS = (
+    ("local_fixture_runner_receipt_preflight_verifier", "preflight_path"),
+    ("local_fixture_runner_receipt_preflight_verifier_result", "result_path"),
+    ("local_fixture_runner_receipt_preflight_verifier_manifest", "manifest_path"),
+    ("local_fixture_runner_receipt_preflight_verifier_summary", "summary_path"),
+    ("local_fixture_runner_receipt_preflight_verifier_checklist", "checklist_path"),
+    ("artifact_index", "artifact_index_path"),
+    ("artifact_index_manifest", "artifact_index_manifest_path"),
+)
+
+_LOCAL_FIXTURE_RUNNER_RECEIPT_METADATA_ARTIFACT_DIRECT_PATH_FIELDS = (
+    ("local_fixture_runner_receipt_metadata_artifact", "receipt_path"),
+    ("local_fixture_runner_receipt_metadata_artifact_result", "result_path"),
+    ("local_fixture_runner_receipt_metadata_artifact_manifest", "manifest_path"),
+    ("local_fixture_runner_receipt_metadata_artifact_summary", "summary_path"),
+    ("local_fixture_runner_receipt_metadata_artifact_checklist", "checklist_path"),
+    ("artifact_index", "artifact_index_path"),
+    ("artifact_index_manifest", "artifact_index_manifest_path"),
+)
+
 _DELIVERY_PATH_FIELDS = (
     ("runtime_delivery_manifest", "runtime_delivery_manifest_path"),
     ("runtime_delivery_validation", "runtime_delivery_validation_path"),
@@ -1003,6 +1083,16 @@ _ROLE_ARTIFACT_TYPES = {
     "local_fixture_adapter_execution_gate_plan_checklist": "markdown",
     "local_fixture_human_approval_artifact_summary": "markdown",
     "local_fixture_human_approval_artifact_checklist": "markdown",
+    "local_fixture_runner_contract_draft_summary": "markdown",
+    "local_fixture_runner_contract_draft_checklist": "markdown",
+    "local_fixture_runner_stub_admission_gate_summary": "markdown",
+    "local_fixture_runner_stub_admission_gate_checklist": "markdown",
+    "local_fixture_runner_receipt_contract_draft_summary": "markdown",
+    "local_fixture_runner_receipt_contract_draft_checklist": "markdown",
+    "local_fixture_runner_receipt_preflight_verifier_summary": "markdown",
+    "local_fixture_runner_receipt_preflight_verifier_checklist": "markdown",
+    "local_fixture_runner_receipt_metadata_artifact_summary": "markdown",
+    "local_fixture_runner_receipt_metadata_artifact_checklist": "markdown",
     "embedded_playwright_local_fixture_sandbox_smoke_summary": "markdown",
     "embedded_playwright_local_fixture_sandbox_smoke_checklist": "markdown",
     "embedded_playwright_local_fixture_sandbox_smoke_screenshot": "png",
@@ -1369,6 +1459,53 @@ def _node_artifact_candidates(node, output_dir):
             output_dir,
         )
     if (
+        node["adapter_id"] == _LOCAL_FIXTURE_RUNNER_CONTRACT_DRAFT_ADAPTER_ID
+        and node["capability"] == _LOCAL_FIXTURE_RUNNER_CONTRACT_DRAFT_CAPABILITY
+    ):
+        return _local_fixture_runner_contract_draft_artifact_candidates(
+            node,
+            output_dir,
+        )
+    if (
+        node["adapter_id"] == _LOCAL_FIXTURE_RUNNER_STUB_ADMISSION_GATE_ADAPTER_ID
+        and node["capability"]
+        == _LOCAL_FIXTURE_RUNNER_STUB_ADMISSION_GATE_CAPABILITY
+    ):
+        return _local_fixture_runner_stub_admission_gate_artifact_candidates(
+            node,
+            output_dir,
+        )
+    if (
+        node["adapter_id"]
+        == _LOCAL_FIXTURE_RUNNER_RECEIPT_CONTRACT_DRAFT_ADAPTER_ID
+        and node["capability"]
+        == _LOCAL_FIXTURE_RUNNER_RECEIPT_CONTRACT_DRAFT_CAPABILITY
+    ):
+        return _local_fixture_runner_receipt_contract_draft_artifact_candidates(
+            node,
+            output_dir,
+        )
+    if (
+        node["adapter_id"]
+        == _LOCAL_FIXTURE_RUNNER_RECEIPT_PREFLIGHT_VERIFIER_ADAPTER_ID
+        and node["capability"]
+        == _LOCAL_FIXTURE_RUNNER_RECEIPT_PREFLIGHT_VERIFIER_CAPABILITY
+    ):
+        return _local_fixture_runner_receipt_preflight_verifier_artifact_candidates(
+            node,
+            output_dir,
+        )
+    if (
+        node["adapter_id"]
+        == _LOCAL_FIXTURE_RUNNER_RECEIPT_METADATA_ARTIFACT_ADAPTER_ID
+        and node["capability"]
+        == _LOCAL_FIXTURE_RUNNER_RECEIPT_METADATA_ARTIFACT_CAPABILITY
+    ):
+        return _local_fixture_runner_receipt_metadata_artifact_candidates(
+            node,
+            output_dir,
+        )
+    if (
         node["adapter_id"] == _DELIVERY_ADAPTER_ID
         and node["capability"] == _DELIVERY_CAPABILITY
     ):
@@ -1692,6 +1829,74 @@ def _local_fixture_human_approval_artifact_candidates(
     for role, field_name in (
         _LOCAL_FIXTURE_HUMAN_APPROVAL_ARTIFACT_DIRECT_PATH_FIELDS
     ):
+        _add_role_path(role_paths, seen_roles, role, node.get(field_name))
+    return [
+        _artifact_record(
+            node_id=node["node_id"],
+            adapter_id=node["adapter_id"],
+            capability=node["capability"],
+            node_status=node["status"],
+            artifact_role=role,
+            path_value=path_value,
+            output_dir=output_dir,
+        )
+        for role, path_value in role_paths
+    ]
+
+
+def _local_fixture_runner_contract_draft_artifact_candidates(node, output_dir):
+    return _direct_path_artifact_candidates(
+        node,
+        output_dir,
+        _LOCAL_FIXTURE_RUNNER_CONTRACT_DRAFT_DIRECT_PATH_FIELDS,
+    )
+
+
+def _local_fixture_runner_stub_admission_gate_artifact_candidates(
+    node,
+    output_dir,
+):
+    return _direct_path_artifact_candidates(
+        node,
+        output_dir,
+        _LOCAL_FIXTURE_RUNNER_STUB_ADMISSION_GATE_DIRECT_PATH_FIELDS,
+    )
+
+
+def _local_fixture_runner_receipt_contract_draft_artifact_candidates(
+    node,
+    output_dir,
+):
+    return _direct_path_artifact_candidates(
+        node,
+        output_dir,
+        _LOCAL_FIXTURE_RUNNER_RECEIPT_CONTRACT_DRAFT_DIRECT_PATH_FIELDS,
+    )
+
+
+def _local_fixture_runner_receipt_preflight_verifier_artifact_candidates(
+    node,
+    output_dir,
+):
+    return _direct_path_artifact_candidates(
+        node,
+        output_dir,
+        _LOCAL_FIXTURE_RUNNER_RECEIPT_PREFLIGHT_VERIFIER_DIRECT_PATH_FIELDS,
+    )
+
+
+def _local_fixture_runner_receipt_metadata_artifact_candidates(node, output_dir):
+    return _direct_path_artifact_candidates(
+        node,
+        output_dir,
+        _LOCAL_FIXTURE_RUNNER_RECEIPT_METADATA_ARTIFACT_DIRECT_PATH_FIELDS,
+    )
+
+
+def _direct_path_artifact_candidates(node, output_dir, direct_path_fields):
+    role_paths = []
+    seen_roles = set()
+    for role, field_name in direct_path_fields:
         _add_role_path(role_paths, seen_roles, role, node.get(field_name))
     return [
         _artifact_record(

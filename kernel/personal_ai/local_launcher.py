@@ -150,6 +150,26 @@ from kernel.capabilities.local_fixture_human_approval_artifact import (
     LOCAL_FIXTURE_HUMAN_APPROVAL_ARTIFACT_SUMMARY_FILE,
     run_local_fixture_human_approval_artifact_launcher as run_local_fixture_human_approval_artifact_capability,
 )
+from kernel.capabilities.local_fixture_runner_contract_draft import (
+    LOCAL_FIXTURE_RUNNER_CONTRACT_DRAFT_SUMMARY_FILE,
+    run_local_fixture_runner_contract_draft_launcher as run_local_fixture_runner_contract_draft_capability,
+)
+from kernel.capabilities.local_fixture_runner_stub_admission_gate import (
+    LOCAL_FIXTURE_RUNNER_STUB_ADMISSION_GATE_SUMMARY_FILE,
+    run_local_fixture_runner_stub_admission_gate_launcher as run_local_fixture_runner_stub_admission_gate_capability,
+)
+from kernel.capabilities.local_fixture_runner_receipt_contract_draft import (
+    LOCAL_FIXTURE_RUNNER_RECEIPT_CONTRACT_DRAFT_SUMMARY_FILE,
+    run_local_fixture_runner_receipt_contract_draft_launcher as run_local_fixture_runner_receipt_contract_draft_capability,
+)
+from kernel.capabilities.local_fixture_runner_receipt_preflight_verifier import (
+    LOCAL_FIXTURE_RUNNER_RECEIPT_PREFLIGHT_VERIFIER_SUMMARY_FILE,
+    run_local_fixture_runner_receipt_preflight_verifier_launcher as run_local_fixture_runner_receipt_preflight_verifier_capability,
+)
+from kernel.capabilities.local_fixture_runner_receipt_metadata_artifact import (
+    LOCAL_FIXTURE_RUNNER_RECEIPT_METADATA_ARTIFACT_SUMMARY_FILE,
+    run_local_fixture_runner_receipt_metadata_artifact_launcher as run_local_fixture_runner_receipt_metadata_artifact_capability,
+)
 from kernel.personal_ai.artifact_index import build_artifact_index
 from kernel.personal_ai.asset_scan_operational_control import (
     ASSET_SCAN_FAILURE_BUNDLE_FILE,
@@ -238,6 +258,11 @@ __all__ = [
     "run_local_fixture_adapter_dry_run_invocation_plan_launcher",
     "run_local_fixture_adapter_execution_gate_plan_launcher",
     "run_local_fixture_human_approval_artifact_launcher",
+    "run_local_fixture_runner_contract_draft_launcher",
+    "run_local_fixture_runner_stub_admission_gate_launcher",
+    "run_local_fixture_runner_receipt_contract_draft_launcher",
+    "run_local_fixture_runner_receipt_preflight_verifier_launcher",
+    "run_local_fixture_runner_receipt_metadata_artifact_launcher",
     "run_local_office_launcher",
     "run_model_fixture_launcher",
     "run_model_provider_dry_run_launcher",
@@ -2409,6 +2434,166 @@ def run_local_fixture_human_approval_artifact_launcher(
         summary_path=result.summary_path
         if result.summary_path is not None
         else output_path / LOCAL_FIXTURE_HUMAN_APPROVAL_ARTIFACT_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_local_fixture_runner_contract_draft_launcher(
+    output_dir: Path,
+    runner_contract_id: str,
+    *,
+    review_attestation: str | None = None,
+    project_id: str | None = None,
+    reviewer_id: str | None = None,
+    operator_notes: str | None = None,
+) -> LauncherWorkflowResult:
+    output_path = Path(output_dir)
+    result = run_local_fixture_runner_contract_draft_capability(
+        output_path,
+        runner_contract_id,
+        review_attestation=review_attestation,
+        project_id=project_id,
+        reviewer_id=reviewer_id,
+        operator_notes=operator_notes,
+    )
+    return LauncherWorkflowResult(
+        workflow="local_fixture_runner_contract_draft_workflow",
+        output_dir=output_path,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else output_path / LOCAL_FIXTURE_RUNNER_CONTRACT_DRAFT_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_local_fixture_runner_stub_admission_gate_launcher(
+    human_approval_artifact_result: Path,
+    runner_contract_draft_result: Path,
+    output_dir: Path,
+    gate_id: str,
+    reviewer_id: str,
+    review_attestation: str | None,
+) -> LauncherWorkflowResult:
+    output_path = Path(output_dir)
+    result = run_local_fixture_runner_stub_admission_gate_capability(
+        Path(human_approval_artifact_result),
+        Path(runner_contract_draft_result),
+        output_path,
+        gate_id,
+        reviewer_id,
+        review_attestation,
+    )
+    return LauncherWorkflowResult(
+        workflow="local_fixture_runner_stub_admission_gate_workflow",
+        output_dir=output_path,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else output_path / LOCAL_FIXTURE_RUNNER_STUB_ADMISSION_GATE_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_local_fixture_runner_receipt_contract_draft_launcher(
+    output_dir: Path,
+    receipt_contract_id: str,
+    reviewer_id: str,
+    review_attestation: str | None,
+    *,
+    project_id: str | None = None,
+    operator_notes: str | None = None,
+) -> LauncherWorkflowResult:
+    output_path = Path(output_dir)
+    result = run_local_fixture_runner_receipt_contract_draft_capability(
+        output_path,
+        receipt_contract_id,
+        reviewer_id,
+        review_attestation,
+        project_id=project_id,
+        operator_notes=operator_notes,
+    )
+    return LauncherWorkflowResult(
+        workflow="local_fixture_runner_receipt_contract_draft_workflow",
+        output_dir=output_path,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else output_path
+        / LOCAL_FIXTURE_RUNNER_RECEIPT_CONTRACT_DRAFT_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_local_fixture_runner_receipt_preflight_verifier_launcher(
+    runner_stub_admission_gate_result: Path,
+    runner_receipt_contract_draft_result: Path,
+    human_approval_artifact_result: Path,
+    output_dir: Path,
+    preflight_id: str,
+    reviewer_id: str,
+    review_attestation: str | None,
+    *,
+    project_id: str | None = None,
+    operator_notes: str | None = None,
+) -> LauncherWorkflowResult:
+    output_path = Path(output_dir)
+    result = run_local_fixture_runner_receipt_preflight_verifier_capability(
+        Path(runner_stub_admission_gate_result),
+        Path(runner_receipt_contract_draft_result),
+        Path(human_approval_artifact_result),
+        output_path,
+        preflight_id,
+        reviewer_id,
+        review_attestation,
+        project_id=project_id,
+        operator_notes=operator_notes,
+    )
+    return LauncherWorkflowResult(
+        workflow="local_fixture_runner_receipt_preflight_verifier_workflow",
+        output_dir=output_path,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else output_path
+        / LOCAL_FIXTURE_RUNNER_RECEIPT_PREFLIGHT_VERIFIER_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_local_fixture_runner_receipt_metadata_artifact_launcher(
+    runner_receipt_preflight_result: Path,
+    output_dir: Path,
+    runner_receipt_id: str,
+    reviewer_id: str,
+    review_attestation: str | None,
+    *,
+    project_id: str | None = None,
+    operator_notes: str | None = None,
+) -> LauncherWorkflowResult:
+    output_path = Path(output_dir)
+    result = run_local_fixture_runner_receipt_metadata_artifact_capability(
+        Path(runner_receipt_preflight_result),
+        output_path,
+        runner_receipt_id,
+        reviewer_id,
+        review_attestation,
+        project_id=project_id,
+        operator_notes=operator_notes,
+    )
+    return LauncherWorkflowResult(
+        workflow="local_fixture_runner_receipt_metadata_artifact_workflow",
+        output_dir=output_path,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else output_path
+        / LOCAL_FIXTURE_RUNNER_RECEIPT_METADATA_ARTIFACT_SUMMARY_FILE,
         required_human_approval=True,
     )
 
