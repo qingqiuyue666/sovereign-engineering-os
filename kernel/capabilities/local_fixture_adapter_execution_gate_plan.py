@@ -910,6 +910,10 @@ def _result_payload(
         is True,
         "usage_receipt_type": dry_run_payload.get("usage_receipt_type"),
         "usage_receipt_sha256": dry_run_payload.get("usage_receipt_sha256"),
+        "usage_receipt_validated": dry_run_payload.get("usage_receipt_validated")
+        is True,
+        "usage_receipt_granted": dry_run_payload.get("usage_receipt_granted")
+        is True,
         "promotion_type": dry_run_payload.get("promotion_type"),
         "promotion_result_sha256": dry_run_payload.get("promotion_result_sha256"),
         "source_gate_decision_type": dry_run_payload.get("source_gate_decision_type"),
