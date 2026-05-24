@@ -38,6 +38,7 @@ from kernel.personal_ai.local_launcher import (
     run_local_asset_smoke_readiness_launcher,
     run_local_asset_smoke_review_packet_launcher,
     run_local_office_launcher,
+    run_local_only_playwright_fixture_scenario_suite_launcher,
     run_model_fixture_launcher,
     run_model_provider_dry_run_launcher,
     run_bounded_playwright_worker_adapter_draft_launcher,
@@ -133,6 +134,7 @@ _SUBCOMMANDS = {
     "launch-bounded-playwright-worker-adapter-draft",
     "launch-operator-provided-playwright-execution-receipt",
     "launch-local-fixture-playwright-adapter-admission-gate",
+    "launch-local-only-playwright-fixture-scenario-suite",
     "launch-local-asset-smoke-promotion-gate",
     "launch-local-asset-iteration-promotion-gate",
     "launch-local-asset-smoke-iteration-review-packet",
@@ -1006,6 +1008,25 @@ def _main_subcommand(argv) -> int:
             )
             _print_command_payload(result.to_cli_payload())
             return 0 if result.complete else 1
+        if args.command == "launch-local-only-playwright-fixture-scenario-suite":
+            result = run_local_only_playwright_fixture_scenario_suite_launcher(
+                Path(args.selection_matrix),
+                Path(args.playwright_candidate_manifest),
+                Path(args.output_dir),
+                args.suite_id,
+                node_command=_optional_path(args.node_command),
+                runner_script=_optional_path(args.runner_script),
+                operator_attestation=args.operator_attestation,
+                project_id=args.project_id,
+                reviewer_id=args.reviewer_id,
+                operator_notes=args.operator_notes,
+                expected_node_version=args.expected_node_version,
+                expected_playwright_source=args.expected_playwright_source,
+                scenario_set=args.scenario_set,
+                plan_only=args.plan_only,
+            )
+            _print_command_payload(result.to_cli_payload())
+            return 0 if result.complete else 1
         if args.command == "launch-office-workflow":
             result = run_local_office_launcher(
                 Path(args.input_workbook),
@@ -1763,6 +1784,34 @@ def _build_subcommand_parser():
     admission_gate_parser.add_argument("--reviewer-id")
     admission_gate_parser.add_argument("--operator-notes")
     admission_gate_parser.add_argument(
+        "--plan-only",
+        action="store_true",
+    )
+
+    scenario_suite_parser = subparsers.add_parser(
+        "launch-local-only-playwright-fixture-scenario-suite"
+    )
+    scenario_suite_parser.add_argument("--selection-matrix", required=True)
+    scenario_suite_parser.add_argument(
+        "--playwright-candidate-manifest",
+        required=True,
+    )
+    scenario_suite_parser.add_argument("--output-dir", required=True)
+    scenario_suite_parser.add_argument("--suite-id", required=True)
+    scenario_suite_parser.add_argument("--node-command", required=True)
+    scenario_suite_parser.add_argument("--runner-script", required=True)
+    scenario_suite_parser.add_argument("--operator-attestation", required=True)
+    scenario_suite_parser.add_argument("--project-id")
+    scenario_suite_parser.add_argument("--reviewer-id")
+    scenario_suite_parser.add_argument("--operator-notes")
+    scenario_suite_parser.add_argument("--expected-node-version")
+    scenario_suite_parser.add_argument("--expected-playwright-source")
+    scenario_suite_parser.add_argument(
+        "--scenario-set",
+        choices=("core", "extended"),
+        default="core",
+    )
+    scenario_suite_parser.add_argument(
         "--plan-only",
         action="store_true",
     )

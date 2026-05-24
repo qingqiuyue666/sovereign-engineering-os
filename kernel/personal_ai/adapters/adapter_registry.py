@@ -327,6 +327,49 @@ def build_default_adapter_registry() -> tuple[AdapterRegistryEntry, ...]:
             ),
         ),
         AdapterRegistryEntry(
+            adapter_id="local_only_playwright_fixture_scenario_suite",
+            adapter_name="Local-Only Playwright Fixture Scenario Suite",
+            mode=AdapterMode.LOCAL_FIXTURE,
+            risk_class=AdapterRiskClass.LOCAL_BROWSER_FIXTURE,
+            admission_status=AdapterAdmissionStatus.CANDIDATE,
+            capabilities=("launch_local_only_playwright_fixture_scenario_suite",),
+            required_controls=_REQUIRED_CONTROLS
+            + (
+                "scenario_suite_only",
+                "operator_provided_receipt_path_only",
+                "local_fixture_only",
+                "generated_fixture_only",
+                "exact_operator_attestation",
+                "artifact_index_binding",
+                "hash_verification",
+                "no_live_websites",
+                "no_user_supplied_url",
+                "no_accounts",
+                "no_scraping",
+                "no_bypass",
+                "no_captcha",
+                "no_secrets",
+                "no_cookies",
+                "no_external_network",
+                "no_dependency_install",
+                "no_npm_npx",
+                "no_candidate_repo_access",
+                "no_candidate_code_execution",
+                "not_production_admitted",
+                "human_review_required",
+            ),
+            boundary=_approved_output_boundary(),
+            output_policy=_approved_output_policy(),
+            notes=(
+                "Local-only fixture scenario suite capability and not a "
+                "production adapter. It delegates each scenario only through "
+                "the operator-provided #422 receipt path and may produce "
+                "local-fixture-only regression confidence evidence. It remains "
+                "blocked from live websites, general browser automation, "
+                "adapter registration, and production promotion."
+            ),
+        ),
+        AdapterRegistryEntry(
             adapter_id="real_browser_runtime_boundary",
             adapter_name="Real Browser Runtime Boundary",
             mode=AdapterMode.FUTURE_EXTERNAL,

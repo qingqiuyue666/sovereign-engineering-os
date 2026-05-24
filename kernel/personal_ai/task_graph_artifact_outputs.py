@@ -90,6 +90,12 @@ _LOCAL_FIXTURE_PLAYWRIGHT_ADMISSION_GATE_ADAPTER_ID = (
 _LOCAL_FIXTURE_PLAYWRIGHT_ADMISSION_GATE_CAPABILITY = (
     "launch_local_fixture_playwright_adapter_admission_gate"
 )
+_LOCAL_ONLY_PLAYWRIGHT_FIXTURE_SCENARIO_SUITE_ADAPTER_ID = (
+    "local_only_playwright_fixture_scenario_suite"
+)
+_LOCAL_ONLY_PLAYWRIGHT_FIXTURE_SCENARIO_SUITE_CAPABILITY = (
+    "launch_local_only_playwright_fixture_scenario_suite"
+)
 _DELIVERY_ADAPTER_ID = "runtime_delivery_package"
 _DELIVERY_CAPABILITY = "validate_runtime_delivery"
 
@@ -708,6 +714,31 @@ _LOCAL_FIXTURE_PLAYWRIGHT_ADMISSION_GATE_DIRECT_PATH_FIELDS = (
     ("artifact_index_manifest", "artifact_index_manifest_path"),
 )
 
+_LOCAL_ONLY_PLAYWRIGHT_FIXTURE_SCENARIO_SUITE_DIRECT_PATH_FIELDS = (
+    (
+        "local_only_playwright_fixture_scenario_suite_plan",
+        "local_only_playwright_fixture_scenario_suite_plan_path",
+    ),
+    (
+        "local_only_playwright_fixture_scenario_suite_manifest",
+        "local_only_playwright_fixture_scenario_suite_manifest_path",
+    ),
+    (
+        "local_only_playwright_fixture_scenario_suite_summary",
+        "local_only_playwright_fixture_scenario_suite_summary_path",
+    ),
+    (
+        "local_only_playwright_fixture_scenario_suite_checklist",
+        "local_only_playwright_fixture_scenario_suite_checklist_path",
+    ),
+    (
+        "local_only_playwright_fixture_scenario_suite_result",
+        "local_only_playwright_fixture_scenario_suite_result_path",
+    ),
+    ("artifact_index", "artifact_index_path"),
+    ("artifact_index_manifest", "artifact_index_manifest_path"),
+)
+
 _DELIVERY_PATH_FIELDS = (
     ("runtime_delivery_manifest", "runtime_delivery_manifest_path"),
     ("runtime_delivery_validation", "runtime_delivery_validation_path"),
@@ -765,6 +796,9 @@ _ROLE_ARTIFACT_TYPES = {
     "operator_provided_playwright_execution_receipt_checklist": "markdown",
     "local_fixture_playwright_adapter_admission_gate_summary": "markdown",
     "local_fixture_playwright_adapter_admission_gate_checklist": "markdown",
+    "local_only_playwright_fixture_scenario_suite_summary": "markdown",
+    "local_only_playwright_fixture_scenario_suite_checklist": "markdown",
+    "local_only_playwright_fixture_scenario_suite_scenario_result": "json",
     "embedded_playwright_local_fixture_sandbox_smoke_summary": "markdown",
     "embedded_playwright_local_fixture_sandbox_smoke_checklist": "markdown",
     "embedded_playwright_local_fixture_sandbox_smoke_screenshot": "png",
@@ -1070,6 +1104,14 @@ def _node_artifact_candidates(node, output_dir):
             output_dir,
         )
     if (
+        node["adapter_id"] == _LOCAL_ONLY_PLAYWRIGHT_FIXTURE_SCENARIO_SUITE_ADAPTER_ID
+        and node["capability"] == _LOCAL_ONLY_PLAYWRIGHT_FIXTURE_SCENARIO_SUITE_CAPABILITY
+    ):
+        return _local_only_playwright_fixture_scenario_suite_artifact_candidates(
+            node,
+            output_dir,
+        )
+    if (
         node["adapter_id"] == _DELIVERY_ADAPTER_ID
         and node["capability"] == _DELIVERY_CAPABILITY
     ):
@@ -1223,6 +1265,38 @@ def _local_fixture_playwright_admission_gate_artifact_candidates(node, output_di
     seen_roles = set()
     for role, field_name in _LOCAL_FIXTURE_PLAYWRIGHT_ADMISSION_GATE_DIRECT_PATH_FIELDS:
         _add_role_path(role_paths, seen_roles, role, node.get(field_name))
+    return [
+        _artifact_record(
+            node_id=node["node_id"],
+            adapter_id=node["adapter_id"],
+            capability=node["capability"],
+            node_status=node["status"],
+            artifact_role=role,
+            path_value=path_value,
+            output_dir=output_dir,
+        )
+        for role, path_value in role_paths
+    ]
+
+
+def _local_only_playwright_fixture_scenario_suite_artifact_candidates(node, output_dir):
+    role_paths = []
+    seen_roles = set()
+    for role, field_name in (
+        _LOCAL_ONLY_PLAYWRIGHT_FIXTURE_SCENARIO_SUITE_DIRECT_PATH_FIELDS
+    ):
+        _add_role_path(role_paths, seen_roles, role, node.get(field_name))
+    scenario_result_paths = node.get("scenario_result_paths")
+    if isinstance(scenario_result_paths, list):
+        for index, path_value in enumerate(scenario_result_paths, start=1):
+            if isinstance(path_value, str) and path_value:
+                _add_role_path(
+                    role_paths,
+                    seen_roles,
+                    "local_only_playwright_fixture_scenario_suite_scenario_result_"
+                    + str(index),
+                    path_value,
+                )
     return [
         _artifact_record(
             node_id=node["node_id"],
