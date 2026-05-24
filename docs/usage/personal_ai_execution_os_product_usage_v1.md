@@ -2503,6 +2503,93 @@ Task graphs can include the gate node:
 The registry marks this gate as candidate-only and non-production. A successful
 gate decision does not move the project toward live website automation.
 
+## Local-Only Playwright Fixture Scenario Suite
+
+This command creates a stronger local-only fixture scenario suite after the
+operator-provided #422 receipt path exists. It declares deterministic scenarios,
+runs each scenario through the existing #422 receipt wrapper, and evaluates the
+receipt, adapter draft, embedded smoke, boundary, artifact index, and hash
+evidence. It does not accept URLs and does not create live website or general
+browser automation.
+
+Plan-only mode writes the suite plan without invoking #422:
+
+```bash
+python3 -m kernel.personal_ai.local_mvp_cli launch-local-only-playwright-fixture-scenario-suite \
+  --selection-matrix docs/capability_candidates/github_real_candidates_v1/candidate_selection_matrix.json \
+  --playwright-candidate-manifest docs/capability_candidates/github_real_candidates_v1/microsoft_playwright_candidate_manifest.json \
+  --output-dir /path/to/scenario-suite-output \
+  --suite-id local-only-playwright-fixture-suite-001 \
+  --node-command /absolute/path/to/node \
+  --runner-script tools/playwright/local_fixture_smoke_runner.js \
+  --operator-attestation I_UNDERSTAND_THIS_RUN_IS_LOCAL_FIXTURE_ONLY_NO_LIVE_WEBSITES_NO_ACCOUNTS_NO_SCRAPING_NO_BYPASS \
+  --scenario-set core \
+  --plan-only
+```
+
+Run mode omits `--plan-only`. `--scenario-set` may be `core` or `extended`;
+the default is `core`. The operator attestation must match exactly:
+
+`I_UNDERSTAND_THIS_RUN_IS_LOCAL_FIXTURE_ONLY_NO_LIVE_WEBSITES_NO_ACCOUNTS_NO_SCRAPING_NO_BYPASS`
+
+The suite output directory must already exist, must not be a symlink, must not
+contain expected suite output files, and must not already contain `scenarios/`.
+The supplied executable and runner script must exist, be regular non-symlink
+files, and the runner must be inside the repository root or suite output
+directory. The runner must not be from candidate repository code or evidence.
+
+Plan-only writes:
+
+- `local_only_playwright_fixture_scenario_suite_plan.json`
+- `local_only_playwright_fixture_scenario_suite_manifest.json`
+- `local_only_playwright_fixture_scenario_suite_summary.md`
+- `local_only_playwright_fixture_scenario_suite_checklist.md`
+- `artifact_index.json`
+- `artifact_index_manifest.json`
+
+Run mode also writes:
+
+- `local_only_playwright_fixture_scenario_suite_result.json`
+- `scenarios/static_click_marker/operator_receipt/`
+- `scenarios/repeated_local_fixture_execution_a/operator_receipt/`
+- `scenarios/repeated_local_fixture_execution_b/operator_receipt/`
+- each scenario's `scenario_result.json`
+
+The `extended` scenario set also writes `output_integrity_scenario` and
+`boundary_false_scenario` scenario directories. Scenario success requires the
+#422 receipt result, #421 adapter result, and #420 embedded smoke result to
+succeed; a `file` fixture scheme; zero non-local requests; marker, click, and
+status evidence where applicable; false boundary fields; artifact indexes under
+the scenario directory; no symlink indexed paths; no candidate repo or external
+candidate artifacts indexed; and matching recorded hashes.
+
+Task graphs can include the scenario suite node:
+
+```json
+{
+  "node_id": "local_only_playwright_fixture_scenario_suite",
+  "adapter_id": "local_only_playwright_fixture_scenario_suite",
+  "capability": "launch_local_only_playwright_fixture_scenario_suite",
+  "execution_mode": "fixture",
+  "depends_on": [],
+  "approval_checkpoint_required": true,
+  "inputs": {
+    "selection_matrix": "docs/capability_candidates/github_real_candidates_v1/candidate_selection_matrix.json",
+    "playwright_candidate_manifest": "docs/capability_candidates/github_real_candidates_v1/microsoft_playwright_candidate_manifest.json",
+    "output_dir": "/path/to/scenario-suite-output",
+    "suite_id": "local-only-playwright-fixture-suite-001",
+    "node_command": "/absolute/path/to/node",
+    "runner_script": "tools/playwright/local_fixture_smoke_runner.js",
+    "operator_attestation": "I_UNDERSTAND_THIS_RUN_IS_LOCAL_FIXTURE_ONLY_NO_LIVE_WEBSITES_NO_ACCOUNTS_NO_SCRAPING_NO_BYPASS",
+    "scenario_set": "core"
+  }
+}
+```
+
+The registry marks this suite as candidate-only and non-production. Suite
+success is local-fixture-only regression evidence; it is not production
+admission, live website admission, or general browser automation admission.
+
 Task graph execution now also emits `task_graph_artifact_outputs.json` in the
 graph `output_dir` after node execution. This manifest is a graph-level,
 metadata-only, non-authoritative artifact binding surface. It records

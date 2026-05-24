@@ -101,6 +101,12 @@ _LOCAL_FIXTURE_PLAYWRIGHT_ADMISSION_GATE_ADAPTER_ID = (
 _LOCAL_FIXTURE_PLAYWRIGHT_ADMISSION_GATE_CAPABILITY = (
     "launch_local_fixture_playwright_adapter_admission_gate"
 )
+_LOCAL_ONLY_PLAYWRIGHT_FIXTURE_SCENARIO_SUITE_ADAPTER_ID = (
+    "local_only_playwright_fixture_scenario_suite"
+)
+_LOCAL_ONLY_PLAYWRIGHT_FIXTURE_SCENARIO_SUITE_CAPABILITY = (
+    "launch_local_only_playwright_fixture_scenario_suite"
+)
 _RUNTIME_ADMISSION_DECISION_TYPE = "personal_ai_runtime_admission_decision_v1"
 _GRAPH_EXECUTION_MODES = ("fixture_execution", "dry_run_plan")
 _NODE_EXECUTION_MODES = ("fixture", "mock", "dry_run", "real_runtime")
@@ -589,6 +595,11 @@ def _validate_adapter_routes(node_records, graph_execution_mode):
                 decision.reason_codes,
                 graph_execution_mode,
             )
+            and not _route_is_safe_local_only_playwright_fixture_scenario_suite_fixture(
+                node,
+                decision.reason_codes,
+                graph_execution_mode,
+            )
         ):
             raise ValueError(
                 "task graph adapter route is not admitted: "
@@ -643,6 +654,20 @@ def _route_is_safe_local_fixture_playwright_admission_gate_fixture(
     )
 
 
+def _route_is_safe_local_only_playwright_fixture_scenario_suite_fixture(
+    node,
+    reason_codes,
+    graph_execution_mode,
+):
+    return (
+        graph_execution_mode == "fixture_execution"
+        and node["execution_mode"] == "fixture"
+        and node["adapter_id"] == _LOCAL_ONLY_PLAYWRIGHT_FIXTURE_SCENARIO_SUITE_ADAPTER_ID
+        and node["capability"] == _LOCAL_ONLY_PLAYWRIGHT_FIXTURE_SCENARIO_SUITE_CAPABILITY
+        and tuple(reason_codes) == ("adapter_not_admitted",)
+    )
+
+
 def _execute_graph_nodes(nodes_by_id, graph_execution_mode):
     executed = []
     status_by_node_id = {}
@@ -659,44 +684,52 @@ def _execute_graph_nodes(nodes_by_id, graph_execution_mode):
         elif graph_execution_mode == "dry_run_plan":
             record["status"] = "planned"
         else:
-            admission_gate_result = (
-                _run_local_fixture_playwright_admission_gate_node_if_requested(node)
+            scenario_suite_result = (
+                _run_local_only_playwright_fixture_scenario_suite_node_if_requested(node)
             )
-            if admission_gate_result is not None:
-                record.update(admission_gate_result)
+            if scenario_suite_result is not None:
+                record.update(scenario_suite_result)
             else:
-                operator_playwright_receipt_result = (
-                    _run_operator_playwright_receipt_node_if_requested(node)
+                admission_gate_result = (
+                    _run_local_fixture_playwright_admission_gate_node_if_requested(node)
                 )
-                if operator_playwright_receipt_result is not None:
-                    record.update(operator_playwright_receipt_result)
+                if admission_gate_result is not None:
+                    record.update(admission_gate_result)
                 else:
-                    bounded_playwright_draft_result = (
-                        _run_bounded_playwright_adapter_draft_node_if_requested(node)
+                    operator_playwright_receipt_result = (
+                        _run_operator_playwright_receipt_node_if_requested(node)
                     )
-                    if bounded_playwright_draft_result is not None:
-                        record.update(bounded_playwright_draft_result)
+                    if operator_playwright_receipt_result is not None:
+                        record.update(operator_playwright_receipt_result)
                     else:
-                        playwright_smoke_result = _run_playwright_smoke_node_if_requested(
-                            node
+                        bounded_playwright_draft_result = (
+                            _run_bounded_playwright_adapter_draft_node_if_requested(node)
                         )
-                        if playwright_smoke_result is not None:
-                            record.update(playwright_smoke_result)
+                        if bounded_playwright_draft_result is not None:
+                            record.update(bounded_playwright_draft_result)
                         else:
-                            github_intake_result = _run_github_capability_intake_node_if_requested(
+                            playwright_smoke_result = _run_playwright_smoke_node_if_requested(
                                 node
                             )
-                            if github_intake_result is not None:
-                                record.update(github_intake_result)
+                            if playwright_smoke_result is not None:
+                                record.update(playwright_smoke_result)
                             else:
-                                local_asset_result = _run_local_asset_node_if_requested(node)
-                                if local_asset_result is not None:
-                                    record.update(local_asset_result)
+                                github_intake_result = _run_github_capability_intake_node_if_requested(
+                                    node
+                                )
+                                if github_intake_result is not None:
+                                    record.update(github_intake_result)
                                 else:
-                                    record["delivery_validation"] = (
-                                        _run_delivery_node_if_requested(node)
+                                    local_asset_result = _run_local_asset_node_if_requested(
+                                        node
                                     )
-                                    record["status"] = "completed"
+                                    if local_asset_result is not None:
+                                        record.update(local_asset_result)
+                                    else:
+                                        record["delivery_validation"] = (
+                                            _run_delivery_node_if_requested(node)
+                                        )
+                                        record["status"] = "completed"
         status_by_node_id[node_id] = record["status"]
         executed.append(record)
     return executed
@@ -717,6 +750,7 @@ def _base_node_execution_record(node, graph_execution_mode):
             _LOCAL_FIXTURE_PLAYWRIGHT_ADMISSION_GATE_ADAPTER_ID,
             _BOUNDED_PLAYWRIGHT_ADAPTER_DRAFT_ID,
             _OPERATOR_PLAYWRIGHT_RECEIPT_ADAPTER_ID,
+            _LOCAL_ONLY_PLAYWRIGHT_FIXTURE_SCENARIO_SUITE_ADAPTER_ID,
         ),
         "adapter_route_policy": "local_delivery_integration"
         if node["adapter_id"] == _DELIVERY_ADAPTER_ID
@@ -761,6 +795,18 @@ def _base_node_execution_record(node, graph_execution_mode):
         record.update(
             dict(OPERATOR_PROVIDED_PLAYWRIGHT_EXECUTION_RECEIPT_BOUNDARY_FALSE_FIELDS)
         )
+    if node["adapter_id"] == _LOCAL_ONLY_PLAYWRIGHT_FIXTURE_SCENARIO_SUITE_ADAPTER_ID:
+        from kernel.capabilities.local_only_playwright_fixture_scenario_suite import (
+            LOCAL_ONLY_PLAYWRIGHT_FIXTURE_SCENARIO_SUITE_DISABLED_FIELDS,
+            LOCAL_ONLY_PLAYWRIGHT_FIXTURE_SCENARIO_SUITE_PERFORMED_FALSE_FIELDS,
+        )
+
+        record.update(
+            dict(LOCAL_ONLY_PLAYWRIGHT_FIXTURE_SCENARIO_SUITE_DISABLED_FIELDS)
+        )
+        record.update(
+            dict(LOCAL_ONLY_PLAYWRIGHT_FIXTURE_SCENARIO_SUITE_PERFORMED_FALSE_FIELDS)
+        )
     return record
 
 
@@ -781,6 +827,8 @@ def _skipped_node_result(blocked_dependencies):
 def _adapter_route_policy(node, graph_execution_mode):
     if node["adapter_id"] == _LOCAL_FIXTURE_PLAYWRIGHT_ADMISSION_GATE_ADAPTER_ID:
         return "local_fixture_playwright_admission_gate_only_not_production_admitted"
+    if node["adapter_id"] == _LOCAL_ONLY_PLAYWRIGHT_FIXTURE_SCENARIO_SUITE_ADAPTER_ID:
+        return "local_only_playwright_fixture_scenario_suite_not_production_admitted"
     if node["adapter_id"] == _OPERATOR_PLAYWRIGHT_RECEIPT_ADAPTER_ID:
         return "operator_provided_local_fixture_receipt_only_not_production_admitted"
     if node["adapter_id"] == _BOUNDED_PLAYWRIGHT_ADAPTER_DRAFT_ID:
@@ -952,6 +1000,175 @@ def _run_github_capability_intake_node_if_requested(node):
         "required_human_approval": True,
         "required_human_review": True,
         **dict(NO_SCOPE_FALSE_FIELDS),
+    }
+
+
+def _run_local_only_playwright_fixture_scenario_suite_node_if_requested(node):
+    if node["adapter_id"] != _LOCAL_ONLY_PLAYWRIGHT_FIXTURE_SCENARIO_SUITE_ADAPTER_ID:
+        return None
+    if node["capability"] != _LOCAL_ONLY_PLAYWRIGHT_FIXTURE_SCENARIO_SUITE_CAPABILITY:
+        raise ValueError(
+            "task graph local-only Playwright fixture scenario suite capability is not registered"
+        )
+    inputs = node["inputs"]
+    selection_matrix = _required_string_input(
+        inputs,
+        "selection_matrix",
+        "local-only Playwright fixture scenario suite",
+    )
+    candidate_manifest = _required_string_input(
+        inputs,
+        "playwright_candidate_manifest",
+        "local-only Playwright fixture scenario suite",
+    )
+    output_dir = _required_string_input(
+        inputs,
+        "output_dir",
+        "local-only Playwright fixture scenario suite",
+    )
+    suite_id = _required_string_input(
+        inputs,
+        "suite_id",
+        "local-only Playwright fixture scenario suite",
+    )
+    node_command = _required_string_input(
+        inputs,
+        "node_command",
+        "local-only Playwright fixture scenario suite",
+    )
+    runner_script = _required_string_input(
+        inputs,
+        "runner_script",
+        "local-only Playwright fixture scenario suite",
+    )
+    operator_attestation = _required_string_input(
+        inputs,
+        "operator_attestation",
+        "local-only Playwright fixture scenario suite",
+    )
+    project_id = _optional_nonempty_string_input(
+        inputs,
+        "project_id",
+        "local-only Playwright fixture scenario suite",
+    )
+    reviewer_id = _optional_nonempty_string_input(
+        inputs,
+        "reviewer_id",
+        "local-only Playwright fixture scenario suite",
+    )
+    operator_notes = _optional_nonempty_string_input(
+        inputs,
+        "operator_notes",
+        "local-only Playwright fixture scenario suite",
+    )
+    expected_node_version = _optional_nonempty_string_input(
+        inputs,
+        "expected_node_version",
+        "local-only Playwright fixture scenario suite",
+    )
+    expected_playwright_source = _optional_nonempty_string_input(
+        inputs,
+        "expected_playwright_source",
+        "local-only Playwright fixture scenario suite",
+    )
+    scenario_set = _optional_nonempty_string_input(
+        inputs,
+        "scenario_set",
+        "local-only Playwright fixture scenario suite",
+    ) or "core"
+    plan_only = _optional_bool_input(inputs, "plan_only", False)
+
+    from kernel.capabilities.local_only_playwright_fixture_scenario_suite import (
+        LOCAL_ONLY_PLAYWRIGHT_FIXTURE_SCENARIO_SUITE_DISABLED_FIELDS,
+        LOCAL_ONLY_PLAYWRIGHT_FIXTURE_SCENARIO_SUITE_PERFORMED_FALSE_FIELDS,
+    )
+    from kernel.personal_ai.local_launcher import (
+        run_local_only_playwright_fixture_scenario_suite_launcher,
+    )
+
+    result = run_local_only_playwright_fixture_scenario_suite_launcher(
+        Path(selection_matrix),
+        Path(candidate_manifest),
+        Path(output_dir),
+        suite_id,
+        node_command=Path(node_command),
+        runner_script=Path(runner_script),
+        operator_attestation=operator_attestation,
+        project_id=project_id,
+        reviewer_id=reviewer_id,
+        operator_notes=operator_notes,
+        expected_node_version=expected_node_version,
+        expected_playwright_source=expected_playwright_source,
+        scenario_set=scenario_set,
+        plan_only=plan_only,
+    )
+    payload = result.payload
+    complete = bool(result.complete)
+    false_fields = dict(LOCAL_ONLY_PLAYWRIGHT_FIXTURE_SCENARIO_SUITE_DISABLED_FIELDS)
+    false_fields.update(
+        dict(LOCAL_ONLY_PLAYWRIGHT_FIXTURE_SCENARIO_SUITE_PERFORMED_FALSE_FIELDS)
+    )
+    return {
+        "status": "completed" if complete else "failed",
+        "output_dir": result.output_dir.as_posix(),
+        "local_only_playwright_fixture_scenario_suite_complete": complete,
+        "local_only_playwright_fixture_scenario_suite_plan_path": payload.get(
+            "local_only_playwright_fixture_scenario_suite_plan_path"
+        ),
+        "local_only_playwright_fixture_scenario_suite_manifest_path": payload.get(
+            "local_only_playwright_fixture_scenario_suite_manifest_path"
+        ),
+        "local_only_playwright_fixture_scenario_suite_summary_path": payload.get(
+            "local_only_playwright_fixture_scenario_suite_summary_path"
+        ),
+        "local_only_playwright_fixture_scenario_suite_checklist_path": payload.get(
+            "local_only_playwright_fixture_scenario_suite_checklist_path"
+        ),
+        "local_only_playwright_fixture_scenario_suite_result_path": payload.get(
+            "local_only_playwright_fixture_scenario_suite_result_path"
+        ),
+        "artifact_index_path": payload.get("artifact_index_path"),
+        "artifact_index_manifest_path": payload.get("artifact_index_manifest_path"),
+        "scenarios_dir": payload.get("scenarios_dir"),
+        "scenario_result_paths": payload.get("scenario_result_paths"),
+        "suite_id": payload.get("suite_id"),
+        "scenario_set": payload.get("scenario_set"),
+        "scenario_count_planned": payload.get("scenario_count_planned"),
+        "scenario_count_executed": payload.get("scenario_count_executed"),
+        "scenario_count_passed": payload.get("scenario_count_passed"),
+        "scenario_count_failed": payload.get("scenario_count_failed"),
+        "suite_success": payload.get("suite_success"),
+        "suite_status": payload.get("suite_status"),
+        "suite_decision": payload.get("suite_decision"),
+        "next_allowed_action": payload.get("next_allowed_action"),
+        "selection_matrix_path": payload.get("selection_matrix_path"),
+        "selection_matrix_sha256": payload.get("selection_matrix_sha256"),
+        "playwright_candidate_manifest_path": payload.get(
+            "playwright_candidate_manifest_path"
+        ),
+        "playwright_candidate_manifest_sha256": payload.get(
+            "playwright_candidate_manifest_sha256"
+        ),
+        "node_command_path": payload.get("node_command_path"),
+        "node_command_sha256": payload.get("node_command_sha256"),
+        "runner_script_path": payload.get("runner_script_path"),
+        "runner_script_sha256": payload.get("runner_script_sha256"),
+        "candidate_id": payload.get("candidate_id"),
+        "selected_candidate_id": payload.get("selected_candidate_id"),
+        "repo_full_name": payload.get("repo_full_name"),
+        "local_execution_scope": payload.get("local_execution_scope"),
+        "fixture_url_scheme": payload.get("fixture_url_scheme"),
+        "failure_stage": None if complete else payload.get("failure_stage"),
+        "error_message": None if complete else payload.get("error_message"),
+        "safe_to_retry": not complete,
+        "replay_hint": (
+            "Fix local-only Playwright fixture scenario suite inputs or failed receipt evidence and rerun this node."
+        )
+        if not complete
+        else "Review suite evidence; success is local-fixture-only and not production admission.",
+        "required_human_approval": True,
+        "required_human_review": True,
+        **false_fields,
     }
 
 

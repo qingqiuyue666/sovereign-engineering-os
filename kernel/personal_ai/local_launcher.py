@@ -122,6 +122,10 @@ from kernel.capabilities.local_fixture_playwright_adapter_admission_gate import 
     LOCAL_FIXTURE_PLAYWRIGHT_ADAPTER_ADMISSION_GATE_SUMMARY_FILE,
     run_local_fixture_playwright_adapter_admission_gate_launcher as run_local_fixture_playwright_adapter_admission_gate_capability,
 )
+from kernel.capabilities.local_only_playwright_fixture_scenario_suite import (
+    LOCAL_ONLY_PLAYWRIGHT_FIXTURE_SCENARIO_SUITE_SUMMARY_FILE,
+    run_local_only_playwright_fixture_scenario_suite_launcher as run_local_only_playwright_fixture_scenario_suite_capability,
+)
 from kernel.personal_ai.artifact_index import build_artifact_index
 from kernel.personal_ai.asset_scan_operational_control import (
     ASSET_SCAN_FAILURE_BUNDLE_FILE,
@@ -203,6 +207,7 @@ __all__ = [
     "run_bounded_playwright_worker_adapter_draft_launcher",
     "run_operator_provided_playwright_execution_receipt_launcher",
     "run_local_fixture_playwright_adapter_admission_gate_launcher",
+    "run_local_only_playwright_fixture_scenario_suite_launcher",
     "run_local_office_launcher",
     "run_model_fixture_launcher",
     "run_model_provider_dry_run_launcher",
@@ -2111,6 +2116,52 @@ def run_local_fixture_playwright_adapter_admission_gate_launcher(
         summary_path=result.summary_path
         if result.summary_path is not None
         else output_path / LOCAL_FIXTURE_PLAYWRIGHT_ADAPTER_ADMISSION_GATE_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_local_only_playwright_fixture_scenario_suite_launcher(
+    selection_matrix: Path,
+    playwright_candidate_manifest: Path,
+    output_dir: Path,
+    suite_id: str,
+    *,
+    node_command: Path | None = None,
+    runner_script: Path | None = None,
+    operator_attestation: str | None = None,
+    project_id: str | None = None,
+    reviewer_id: str | None = None,
+    operator_notes: str | None = None,
+    expected_node_version: str | None = None,
+    expected_playwright_source: str | None = None,
+    scenario_set: str = "core",
+    plan_only: bool = False,
+) -> LauncherWorkflowResult:
+    output_path = Path(output_dir)
+    result = run_local_only_playwright_fixture_scenario_suite_capability(
+        Path(selection_matrix),
+        Path(playwright_candidate_manifest),
+        output_path,
+        suite_id,
+        node_command=None if node_command is None else Path(node_command),
+        runner_script=None if runner_script is None else Path(runner_script),
+        operator_attestation=operator_attestation,
+        project_id=project_id,
+        reviewer_id=reviewer_id,
+        operator_notes=operator_notes,
+        expected_node_version=expected_node_version,
+        expected_playwright_source=expected_playwright_source,
+        scenario_set=scenario_set,
+        plan_only=plan_only,
+    )
+    return LauncherWorkflowResult(
+        workflow="local_only_playwright_fixture_scenario_suite_workflow",
+        output_dir=output_path,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else output_path / LOCAL_ONLY_PLAYWRIGHT_FIXTURE_SCENARIO_SUITE_SUMMARY_FILE,
         required_human_approval=True,
     )
 
