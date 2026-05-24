@@ -102,6 +102,12 @@ _PLAYWRIGHT_LOCAL_ADMISSION_RECEIPT_AGGREGATION_ADAPTER_ID = (
 _PLAYWRIGHT_LOCAL_ADMISSION_RECEIPT_AGGREGATION_CAPABILITY = (
     "launch_playwright_local_admission_receipt_aggregation"
 )
+_ADMISSION_GATED_LOCAL_ADAPTER_REGISTRY_PROMOTION_ADAPTER_ID = (
+    "admission_gated_local_adapter_registry_promotion"
+)
+_ADMISSION_GATED_LOCAL_ADAPTER_REGISTRY_PROMOTION_CAPABILITY = (
+    "launch_admission_gated_local_adapter_registry_promotion"
+)
 _DELIVERY_ADAPTER_ID = "runtime_delivery_package"
 _DELIVERY_CAPABILITY = "validate_runtime_delivery"
 
@@ -770,6 +776,32 @@ _PLAYWRIGHT_LOCAL_ADMISSION_RECEIPT_AGGREGATION_DIRECT_PATH_FIELDS = (
     ("artifact_index_manifest", "artifact_index_manifest_path"),
 )
 
+_ADMISSION_GATED_LOCAL_ADAPTER_REGISTRY_PROMOTION_DIRECT_PATH_FIELDS = (
+    (
+        "admission_gated_local_adapter_registry_promotion_plan",
+        "admission_gated_local_adapter_registry_promotion_plan_path",
+    ),
+    (
+        "admission_gated_local_adapter_registry_promotion_result",
+        "admission_gated_local_adapter_registry_promotion_result_path",
+    ),
+    (
+        "admission_gated_local_adapter_registry_promotion_manifest",
+        "admission_gated_local_adapter_registry_promotion_manifest_path",
+    ),
+    (
+        "admission_gated_local_adapter_registry_promotion_summary",
+        "admission_gated_local_adapter_registry_promotion_summary_path",
+    ),
+    (
+        "admission_gated_local_adapter_registry_promotion_checklist",
+        "admission_gated_local_adapter_registry_promotion_checklist_path",
+    ),
+    ("local_fixture_only_adapter_registry_entry", "registry_output_path"),
+    ("artifact_index", "artifact_index_path"),
+    ("artifact_index_manifest", "artifact_index_manifest_path"),
+)
+
 _DELIVERY_PATH_FIELDS = (
     ("runtime_delivery_manifest", "runtime_delivery_manifest_path"),
     ("runtime_delivery_validation", "runtime_delivery_validation_path"),
@@ -832,6 +864,8 @@ _ROLE_ARTIFACT_TYPES = {
     "local_only_playwright_fixture_scenario_suite_scenario_result": "json",
     "playwright_local_admission_receipt_aggregation_summary": "markdown",
     "playwright_local_admission_receipt_aggregation_checklist": "markdown",
+    "admission_gated_local_adapter_registry_promotion_summary": "markdown",
+    "admission_gated_local_adapter_registry_promotion_checklist": "markdown",
     "embedded_playwright_local_fixture_sandbox_smoke_summary": "markdown",
     "embedded_playwright_local_fixture_sandbox_smoke_checklist": "markdown",
     "embedded_playwright_local_fixture_sandbox_smoke_screenshot": "png",
@@ -1154,6 +1188,16 @@ def _node_artifact_candidates(node, output_dir):
             output_dir,
         )
     if (
+        node["adapter_id"]
+        == _ADMISSION_GATED_LOCAL_ADAPTER_REGISTRY_PROMOTION_ADAPTER_ID
+        and node["capability"]
+        == _ADMISSION_GATED_LOCAL_ADAPTER_REGISTRY_PROMOTION_CAPABILITY
+    ):
+        return _admission_gated_local_adapter_registry_promotion_artifact_candidates(
+            node,
+            output_dir,
+        )
+    if (
         node["adapter_id"] == _DELIVERY_ADAPTER_ID
         and node["capability"] == _DELIVERY_CAPABILITY
     ):
@@ -1361,6 +1405,30 @@ def _playwright_local_admission_receipt_aggregation_artifact_candidates(
     seen_roles = set()
     for role, field_name in (
         _PLAYWRIGHT_LOCAL_ADMISSION_RECEIPT_AGGREGATION_DIRECT_PATH_FIELDS
+    ):
+        _add_role_path(role_paths, seen_roles, role, node.get(field_name))
+    return [
+        _artifact_record(
+            node_id=node["node_id"],
+            adapter_id=node["adapter_id"],
+            capability=node["capability"],
+            node_status=node["status"],
+            artifact_role=role,
+            path_value=path_value,
+            output_dir=output_dir,
+        )
+        for role, path_value in role_paths
+    ]
+
+
+def _admission_gated_local_adapter_registry_promotion_artifact_candidates(
+    node,
+    output_dir,
+):
+    role_paths = []
+    seen_roles = set()
+    for role, field_name in (
+        _ADMISSION_GATED_LOCAL_ADAPTER_REGISTRY_PROMOTION_DIRECT_PATH_FIELDS
     ):
         _add_role_path(role_paths, seen_roles, role, node.get(field_name))
     return [

@@ -48,6 +48,7 @@ from kernel.personal_ai.local_launcher import (
     run_playwright_local_fixture_sandbox_smoke_launcher,
     run_product_health_check_launcher,
     run_runtime_delivery_validation_launcher,
+    run_admission_gated_local_adapter_registry_promotion_launcher,
     run_task_graph_launcher,
 )
 from kernel.personal_ai.output_package import build_approved_output_package
@@ -137,6 +138,7 @@ _SUBCOMMANDS = {
     "launch-local-fixture-playwright-adapter-admission-gate",
     "launch-local-only-playwright-fixture-scenario-suite",
     "launch-playwright-local-admission-receipt-aggregation",
+    "launch-admission-gated-local-adapter-registry-promotion",
     "launch-local-asset-smoke-promotion-gate",
     "launch-local-asset-iteration-promotion-gate",
     "launch-local-asset-smoke-iteration-review-packet",
@@ -1049,6 +1051,22 @@ def _main_subcommand(argv) -> int:
             )
             _print_command_payload(result.to_cli_payload())
             return 0 if result.complete else 1
+        if (
+            args.command
+            == "launch-admission-gated-local-adapter-registry-promotion"
+        ):
+            result = run_admission_gated_local_adapter_registry_promotion_launcher(
+                Path(args.admission_gate_decision),
+                Path(args.output_dir),
+                args.promotion_id,
+                review_attestation=args.review_attestation,
+                project_id=args.project_id,
+                reviewer_id=args.reviewer_id,
+                operator_notes=args.operator_notes,
+                registry_output=_optional_path(args.registry_output),
+            )
+            _print_command_payload(result.to_cli_payload())
+            return 0 if result.complete else 1
         if args.command == "launch-office-workflow":
             result = run_local_office_launcher(
                 Path(args.input_workbook),
@@ -1877,6 +1895,21 @@ def _build_subcommand_parser():
         "--plan-only",
         action="store_true",
     )
+
+    registry_promotion_parser = subparsers.add_parser(
+        "launch-admission-gated-local-adapter-registry-promotion"
+    )
+    registry_promotion_parser.add_argument(
+        "--admission-gate-decision",
+        required=True,
+    )
+    registry_promotion_parser.add_argument("--output-dir", required=True)
+    registry_promotion_parser.add_argument("--promotion-id", required=True)
+    registry_promotion_parser.add_argument("--review-attestation", required=True)
+    registry_promotion_parser.add_argument("--project-id")
+    registry_promotion_parser.add_argument("--reviewer-id")
+    registry_promotion_parser.add_argument("--operator-notes")
+    registry_promotion_parser.add_argument("--registry-output")
 
     launch_office_parser = subparsers.add_parser("launch-office-workflow")
     launch_office_parser.add_argument("--input-workbook", required=True)
