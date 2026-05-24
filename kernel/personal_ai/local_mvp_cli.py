@@ -47,6 +47,11 @@ from kernel.personal_ai.local_launcher import (
     run_local_fixture_adapter_execution_gate_plan_launcher,
     run_local_fixture_human_approval_artifact_launcher,
     run_local_fixture_playwright_adapter_admission_gate_launcher,
+    run_local_fixture_runner_contract_draft_launcher,
+    run_local_fixture_runner_receipt_contract_draft_launcher,
+    run_local_fixture_runner_receipt_metadata_artifact_launcher,
+    run_local_fixture_runner_receipt_preflight_verifier_launcher,
+    run_local_fixture_runner_stub_admission_gate_launcher,
     run_local_fixture_adapter_usage_receipt_launcher,
     run_operator_provided_playwright_execution_receipt_launcher,
     run_playwright_local_fixture_sandbox_smoke_launcher,
@@ -147,6 +152,11 @@ _SUBCOMMANDS = {
     "launch-local-fixture-adapter-dry-run-invocation-plan",
     "launch-local-fixture-adapter-execution-gate-plan",
     "launch-local-fixture-human-approval-artifact",
+    "launch-local-fixture-runner-contract-draft",
+    "launch-local-fixture-runner-stub-admission-gate",
+    "launch-local-fixture-runner-receipt-contract-draft",
+    "launch-local-fixture-runner-receipt-preflight-verifier",
+    "launch-local-fixture-runner-receipt-metadata-artifact",
     "launch-local-asset-smoke-promotion-gate",
     "launch-local-asset-iteration-promotion-gate",
     "launch-local-asset-smoke-iteration-review-packet",
@@ -1128,6 +1138,65 @@ def _main_subcommand(argv) -> int:
             )
             _print_command_payload(result.to_cli_payload())
             return 0 if result.complete else 1
+        if args.command == "launch-local-fixture-runner-contract-draft":
+            result = run_local_fixture_runner_contract_draft_launcher(
+                Path(args.output_dir),
+                args.runner_contract_id,
+                review_attestation=args.review_attestation,
+                project_id=args.project_id,
+                reviewer_id=args.reviewer_id,
+                operator_notes=args.operator_notes,
+            )
+            _print_command_payload(result.to_cli_payload())
+            return 0 if result.complete else 1
+        if args.command == "launch-local-fixture-runner-stub-admission-gate":
+            result = run_local_fixture_runner_stub_admission_gate_launcher(
+                Path(args.human_approval_artifact_result),
+                Path(args.runner_contract_draft_result),
+                Path(args.output_dir),
+                args.gate_id,
+                args.reviewer_id,
+                args.review_attestation,
+            )
+            _print_command_payload(result.to_cli_payload())
+            return 0 if result.complete else 1
+        if args.command == "launch-local-fixture-runner-receipt-contract-draft":
+            result = run_local_fixture_runner_receipt_contract_draft_launcher(
+                Path(args.output_dir),
+                args.receipt_contract_id,
+                args.reviewer_id,
+                args.review_attestation,
+                project_id=args.project_id,
+                operator_notes=args.operator_notes,
+            )
+            _print_command_payload(result.to_cli_payload())
+            return 0 if result.complete else 1
+        if args.command == "launch-local-fixture-runner-receipt-preflight-verifier":
+            result = run_local_fixture_runner_receipt_preflight_verifier_launcher(
+                Path(args.runner_stub_admission_gate_result),
+                Path(args.runner_receipt_contract_draft_result),
+                Path(args.human_approval_artifact_result),
+                Path(args.output_dir),
+                args.preflight_id,
+                args.reviewer_id,
+                args.review_attestation,
+                project_id=args.project_id,
+                operator_notes=args.operator_notes,
+            )
+            _print_command_payload(result.to_cli_payload())
+            return 0 if result.complete else 1
+        if args.command == "launch-local-fixture-runner-receipt-metadata-artifact":
+            result = run_local_fixture_runner_receipt_metadata_artifact_launcher(
+                Path(args.runner_receipt_preflight_result),
+                Path(args.output_dir),
+                args.runner_receipt_id,
+                args.reviewer_id,
+                args.review_attestation,
+                project_id=args.project_id,
+                operator_notes=args.operator_notes,
+            )
+            _print_command_payload(result.to_cli_payload())
+            return 0 if result.complete else 1
         if args.command == "launch-office-workflow":
             result = run_local_office_launcher(
                 Path(args.input_workbook),
@@ -2026,6 +2095,93 @@ def _build_subcommand_parser():
     )
     human_approval_artifact_parser.add_argument("--project-id")
     human_approval_artifact_parser.add_argument("--operator-notes")
+
+    runner_contract_parser = subparsers.add_parser(
+        "launch-local-fixture-runner-contract-draft"
+    )
+    runner_contract_parser.add_argument("--output-dir", required=True)
+    runner_contract_parser.add_argument("--runner-contract-id", required=True)
+    runner_contract_parser.add_argument("--review-attestation", required=True)
+    runner_contract_parser.add_argument("--project-id")
+    runner_contract_parser.add_argument("--reviewer-id")
+    runner_contract_parser.add_argument("--operator-notes")
+
+    runner_stub_gate_parser = subparsers.add_parser(
+        "launch-local-fixture-runner-stub-admission-gate"
+    )
+    runner_stub_gate_parser.add_argument(
+        "--human-approval-artifact-result",
+        required=True,
+    )
+    runner_stub_gate_parser.add_argument(
+        "--runner-contract-draft-result",
+        required=True,
+    )
+    runner_stub_gate_parser.add_argument("--output-dir", required=True)
+    runner_stub_gate_parser.add_argument("--gate-id", required=True)
+    runner_stub_gate_parser.add_argument("--reviewer-id", required=True)
+    runner_stub_gate_parser.add_argument("--review-attestation", required=True)
+
+    runner_receipt_contract_parser = subparsers.add_parser(
+        "launch-local-fixture-runner-receipt-contract-draft"
+    )
+    runner_receipt_contract_parser.add_argument("--output-dir", required=True)
+    runner_receipt_contract_parser.add_argument(
+        "--receipt-contract-id",
+        required=True,
+    )
+    runner_receipt_contract_parser.add_argument("--reviewer-id", required=True)
+    runner_receipt_contract_parser.add_argument(
+        "--review-attestation",
+        required=True,
+    )
+    runner_receipt_contract_parser.add_argument("--project-id")
+    runner_receipt_contract_parser.add_argument("--operator-notes")
+
+    runner_receipt_preflight_parser = subparsers.add_parser(
+        "launch-local-fixture-runner-receipt-preflight-verifier"
+    )
+    runner_receipt_preflight_parser.add_argument(
+        "--runner-stub-admission-gate-result",
+        required=True,
+    )
+    runner_receipt_preflight_parser.add_argument(
+        "--runner-receipt-contract-draft-result",
+        required=True,
+    )
+    runner_receipt_preflight_parser.add_argument(
+        "--human-approval-artifact-result",
+        required=True,
+    )
+    runner_receipt_preflight_parser.add_argument("--output-dir", required=True)
+    runner_receipt_preflight_parser.add_argument("--preflight-id", required=True)
+    runner_receipt_preflight_parser.add_argument("--reviewer-id", required=True)
+    runner_receipt_preflight_parser.add_argument(
+        "--review-attestation",
+        required=True,
+    )
+    runner_receipt_preflight_parser.add_argument("--project-id")
+    runner_receipt_preflight_parser.add_argument("--operator-notes")
+
+    runner_receipt_metadata_parser = subparsers.add_parser(
+        "launch-local-fixture-runner-receipt-metadata-artifact"
+    )
+    runner_receipt_metadata_parser.add_argument(
+        "--runner-receipt-preflight-result",
+        required=True,
+    )
+    runner_receipt_metadata_parser.add_argument("--output-dir", required=True)
+    runner_receipt_metadata_parser.add_argument(
+        "--runner-receipt-id",
+        required=True,
+    )
+    runner_receipt_metadata_parser.add_argument("--reviewer-id", required=True)
+    runner_receipt_metadata_parser.add_argument(
+        "--review-attestation",
+        required=True,
+    )
+    runner_receipt_metadata_parser.add_argument("--project-id")
+    runner_receipt_metadata_parser.add_argument("--operator-notes")
 
     launch_office_parser = subparsers.add_parser("launch-office-workflow")
     launch_office_parser.add_argument("--input-workbook", required=True)

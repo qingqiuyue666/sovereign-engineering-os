@@ -39,11 +39,19 @@ except Exception as _qt_import_error:  # pragma: no cover - depends on host imag
         def __init__(self, *_args: object, **_kwargs: object) -> None:
             raise RuntimeError("PySide6 is required to start the Sovereign Console GUI") from QT_IMPORT_ERROR
 
+    class _StyleShim:
+        def unpolish(self, *_args: object, **_kwargs: object) -> None:
+            return None
+
+        def polish(self, *_args: object, **_kwargs: object) -> None:
+            return None
+
     class _QtObjectShim:
-        def __init__(self, *_args: object, **_kwargs: object) -> None:
+        def __init__(self, *args: object, **_kwargs: object) -> None:
             self._visible = False
             self._enabled = True
-            self._text = ""
+            self._text = str(args[0]) if args and isinstance(args[0], str) else ""
+            self._style = _StyleShim()
 
         def __getattr__(self, _name: str) -> object:
             def _noop(*_args: object, **_kwargs: object) -> object | None:
@@ -68,6 +76,9 @@ except Exception as _qt_import_error:  # pragma: no cover - depends on host imag
 
         def text(self) -> str:
             return self._text
+
+        def style(self) -> _StyleShim:
+            return self._style
 
     class _SignalShim:
         def __init__(self, *_args: object, **_kwargs: object) -> None:

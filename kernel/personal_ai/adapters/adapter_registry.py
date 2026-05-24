@@ -655,6 +655,204 @@ def build_default_adapter_registry() -> tuple[AdapterRegistryEntry, ...]:
             ),
         ),
         AdapterRegistryEntry(
+            adapter_id="local_fixture_runner_contract_draft",
+            adapter_name="Local-Fixture Runner Contract Draft",
+            mode=AdapterMode.LOCAL_FIXTURE,
+            risk_class=AdapterRiskClass.LOCAL_READONLY,
+            admission_status=AdapterAdmissionStatus.CANDIDATE,
+            capabilities=("launch_local_fixture_runner_contract_draft",),
+            required_controls=_REQUIRED_CONTROLS
+            + (
+                "contract_draft_only",
+                "metadata_only",
+                "exact_review_attestation",
+                "artifact_index_binding",
+                "hash_verification",
+                "no_runner",
+                "no_runnable_job",
+                "no_approval_token",
+                "no_execution_token",
+                "no_adapter_execution",
+                "no_playwright_execution",
+                "no_browser_opening",
+                "no_network_access",
+                "no_live_websites",
+                "no_production_promotion",
+                "no_autonomy",
+                "future_runner_requires_separate_pr",
+            ),
+            boundary=_approved_output_boundary(),
+            output_policy=_approved_output_policy(),
+            notes=(
+                "Runner contract draft metadata only and not production "
+                "admitted. It records governance metadata for a future separate "
+                "local-fixture runner PR without creating a runner, runnable "
+                "job, token, adapter execution, Playwright execution, browser "
+                "opening, network access, live website access, autonomy, or "
+                "production promotion."
+            ),
+        ),
+        AdapterRegistryEntry(
+            adapter_id="local_fixture_runner_stub_admission_gate",
+            adapter_name="Local-Fixture Runner Stub Admission Gate",
+            mode=AdapterMode.LOCAL_FIXTURE,
+            risk_class=AdapterRiskClass.LOCAL_READONLY,
+            admission_status=AdapterAdmissionStatus.CANDIDATE,
+            capabilities=("launch_local_fixture_runner_stub_admission_gate",),
+            required_controls=_REQUIRED_CONTROLS
+            + (
+                "runner_stub_gate_only",
+                "upstream_human_approval_artifact_required",
+                "runner_contract_draft_result_required",
+                "exact_review_attestation",
+                "artifact_index_binding",
+                "hash_verification",
+                "metadata_only",
+                "no_runner_stub",
+                "no_runner",
+                "no_runnable_job",
+                "no_approval_token",
+                "no_execution_token",
+                "no_adapter_execution",
+                "no_playwright_execution",
+                "no_browser_opening",
+                "no_network_access",
+                "no_live_websites",
+                "no_production_promotion",
+                "no_autonomy",
+                "future_runner_stub_requires_separate_pr",
+            ),
+            boundary=_approved_output_boundary(),
+            output_policy=_approved_output_policy(),
+            notes=(
+                "Runner-stub admission metadata only and not production "
+                "admitted. It reads existing human approval and runner contract "
+                "draft evidence, then records a gate decision without creating "
+                "a stub, runner, runnable job, token, adapter execution, "
+                "Playwright execution, browser opening, network access, live "
+                "website access, autonomy, or production promotion."
+            ),
+        ),
+        AdapterRegistryEntry(
+            adapter_id="local_fixture_runner_receipt_contract_draft",
+            adapter_name="Local-Fixture Runner Receipt Contract Draft",
+            mode=AdapterMode.LOCAL_FIXTURE,
+            risk_class=AdapterRiskClass.LOCAL_READONLY,
+            admission_status=AdapterAdmissionStatus.CANDIDATE,
+            capabilities=("launch_local_fixture_runner_receipt_contract_draft",),
+            required_controls=_REQUIRED_CONTROLS
+            + (
+                "receipt_contract_draft_only",
+                "metadata_only",
+                "exact_review_attestation",
+                "artifact_index_binding",
+                "hash_verification",
+                "no_runner",
+                "no_runnable_job",
+                "no_approval_token",
+                "no_execution_token",
+                "no_adapter_execution",
+                "no_playwright_execution",
+                "no_browser_opening",
+                "no_network_access",
+                "no_live_websites",
+                "no_production_promotion",
+                "no_autonomy",
+                "future_receipt_requires_separate_pr",
+            ),
+            boundary=_approved_output_boundary(),
+            output_policy=_approved_output_policy(),
+            notes=(
+                "Runner receipt contract draft metadata only and not production "
+                "admitted. It records the future receipt schema boundary "
+                "without creating a runner, runnable job, token, adapter "
+                "execution, Playwright execution, browser opening, network "
+                "access, live website access, autonomy, or production "
+                "promotion."
+            ),
+        ),
+        AdapterRegistryEntry(
+            adapter_id="local_fixture_runner_receipt_preflight_verifier",
+            adapter_name="Local-Fixture Runner Receipt Preflight Verifier",
+            mode=AdapterMode.LOCAL_FIXTURE,
+            risk_class=AdapterRiskClass.LOCAL_READONLY,
+            admission_status=AdapterAdmissionStatus.CANDIDATE,
+            capabilities=("launch_local_fixture_runner_receipt_preflight_verifier",),
+            required_controls=_REQUIRED_CONTROLS
+            + (
+                "receipt_preflight_only",
+                "runner_stub_gate_result_required",
+                "runner_receipt_contract_result_required",
+                "human_approval_artifact_required",
+                "exact_review_attestation",
+                "artifact_index_binding",
+                "hash_verification",
+                "metadata_only",
+                "no_runner_stub",
+                "no_runner",
+                "no_runnable_job",
+                "no_approval_token",
+                "no_execution_token",
+                "no_adapter_execution",
+                "no_playwright_execution",
+                "no_browser_opening",
+                "no_network_access",
+                "no_live_websites",
+                "no_production_promotion",
+                "no_autonomy",
+            ),
+            boundary=_approved_output_boundary(),
+            output_policy=_approved_output_policy(),
+            notes=(
+                "Runner receipt preflight verifier metadata only and not "
+                "production admitted. It validates existing runner-stub gate, "
+                "receipt contract, and human approval metadata before any "
+                "future receipt artifact PR without creating a runner, stub, "
+                "runnable job, token, adapter execution, Playwright execution, "
+                "browser opening, network access, live website access, "
+                "autonomy, or production promotion."
+            ),
+        ),
+        AdapterRegistryEntry(
+            adapter_id="local_fixture_runner_receipt_metadata_artifact",
+            adapter_name="Local-Fixture Runner Receipt Metadata Artifact",
+            mode=AdapterMode.LOCAL_FIXTURE,
+            risk_class=AdapterRiskClass.LOCAL_READONLY,
+            admission_status=AdapterAdmissionStatus.CANDIDATE,
+            capabilities=("launch_local_fixture_runner_receipt_metadata_artifact",),
+            required_controls=_REQUIRED_CONTROLS
+            + (
+                "receipt_metadata_artifact_only",
+                "receipt_preflight_result_required",
+                "exact_review_attestation",
+                "artifact_index_binding",
+                "hash_verification",
+                "metadata_only",
+                "no_runner_stub",
+                "no_runner",
+                "no_runnable_job",
+                "no_approval_token",
+                "no_execution_token",
+                "no_adapter_execution",
+                "no_playwright_execution",
+                "no_browser_opening",
+                "no_network_access",
+                "no_live_websites",
+                "no_production_promotion",
+                "no_autonomy",
+            ),
+            boundary=_approved_output_boundary(),
+            output_policy=_approved_output_policy(),
+            notes=(
+                "Runner receipt artifact metadata only and not production "
+                "admitted. It records a non-executable receipt from verified "
+                "preflight metadata without creating a runner, stub, runnable "
+                "job, token, adapter execution, Playwright execution, browser "
+                "opening, network access, live website access, autonomy, or "
+                "production promotion."
+            ),
+        ),
+        AdapterRegistryEntry(
             adapter_id="real_browser_runtime_boundary",
             adapter_name="Real Browser Runtime Boundary",
             mode=AdapterMode.FUTURE_EXTERNAL,
