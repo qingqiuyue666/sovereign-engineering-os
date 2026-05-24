@@ -125,6 +125,12 @@ _LOCAL_FIXTURE_ADAPTER_USAGE_RECEIPT_ADAPTER_ID = (
 _LOCAL_FIXTURE_ADAPTER_USAGE_RECEIPT_CAPABILITY = (
     "launch_local_fixture_adapter_usage_receipt"
 )
+_LOCAL_FIXTURE_ADAPTER_DRY_RUN_INVOCATION_PLAN_ADAPTER_ID = (
+    "local_fixture_adapter_dry_run_invocation_plan"
+)
+_LOCAL_FIXTURE_ADAPTER_DRY_RUN_INVOCATION_PLAN_CAPABILITY = (
+    "launch_local_fixture_adapter_dry_run_invocation_plan"
+)
 _RUNTIME_ADMISSION_DECISION_TYPE = "personal_ai_runtime_admission_decision_v1"
 _GRAPH_EXECUTION_MODES = ("fixture_execution", "dry_run_plan")
 _NODE_EXECUTION_MODES = ("fixture", "mock", "dry_run", "real_runtime")
@@ -633,6 +639,11 @@ def _validate_adapter_routes(node_records, graph_execution_mode):
                 decision.reason_codes,
                 graph_execution_mode,
             )
+            and not _route_is_safe_local_fixture_adapter_dry_run_invocation_plan_fixture(
+                node,
+                decision.reason_codes,
+                graph_execution_mode,
+            )
         ):
             raise ValueError(
                 "task graph adapter route is not admitted: "
@@ -747,6 +758,22 @@ def _route_is_safe_local_fixture_adapter_usage_receipt_fixture(
     )
 
 
+def _route_is_safe_local_fixture_adapter_dry_run_invocation_plan_fixture(
+    node,
+    reason_codes,
+    graph_execution_mode,
+):
+    return (
+        graph_execution_mode == "fixture_execution"
+        and node["execution_mode"] == "fixture"
+        and node["adapter_id"]
+        == _LOCAL_FIXTURE_ADAPTER_DRY_RUN_INVOCATION_PLAN_ADAPTER_ID
+        and node["capability"]
+        == _LOCAL_FIXTURE_ADAPTER_DRY_RUN_INVOCATION_PLAN_CAPABILITY
+        and tuple(reason_codes) == ("adapter_not_admitted",)
+    )
+
+
 def _execute_graph_nodes(nodes_by_id, graph_execution_mode):
     executed = []
     status_by_node_id = {}
@@ -839,6 +866,13 @@ def _execute_graph_nodes(nodes_by_id, graph_execution_mode):
             )
             if usage_receipt_result is not None:
                 record.update(usage_receipt_result)
+            dry_run_plan_result = (
+                _run_local_fixture_adapter_dry_run_invocation_plan_node_if_requested(
+                    node
+                )
+            )
+            if dry_run_plan_result is not None:
+                record.update(dry_run_plan_result)
         status_by_node_id[node_id] = record["status"]
         executed.append(record)
     return executed
@@ -863,6 +897,7 @@ def _base_node_execution_record(node, graph_execution_mode):
             _PLAYWRIGHT_LOCAL_ADMISSION_RECEIPT_AGGREGATION_ADAPTER_ID,
             _ADMISSION_GATED_LOCAL_ADAPTER_REGISTRY_PROMOTION_ADAPTER_ID,
             _LOCAL_FIXTURE_ADAPTER_USAGE_RECEIPT_ADAPTER_ID,
+            _LOCAL_FIXTURE_ADAPTER_DRY_RUN_INVOCATION_PLAN_ADAPTER_ID,
         ),
         "adapter_route_policy": "local_delivery_integration"
         if node["adapter_id"] == _DELIVERY_ADAPTER_ID
@@ -962,6 +997,36 @@ def _base_node_execution_record(node, graph_execution_mode):
                 for field_name in LOCAL_FIXTURE_ADAPTER_USAGE_RECEIPT_FORBIDDEN_PERFORMED_FIELDS
             }
         )
+    if (
+        node["adapter_id"]
+        == _LOCAL_FIXTURE_ADAPTER_DRY_RUN_INVOCATION_PLAN_ADAPTER_ID
+    ):
+        from kernel.capabilities.local_fixture_adapter_dry_run_invocation_plan import (
+            LOCAL_FIXTURE_ADAPTER_DRY_RUN_INVOCATION_PLAN_DENIED_ADMISSION_FIELDS,
+            LOCAL_FIXTURE_ADAPTER_DRY_RUN_INVOCATION_PLAN_FORBIDDEN_PERFORMED_FIELDS,
+            LOCAL_FIXTURE_ADAPTER_DRY_RUN_INVOCATION_PLAN_MATERIALIZED_FALSE_FIELDS,
+        )
+
+        record.update(
+            {
+                field_name: False
+                for field_name in LOCAL_FIXTURE_ADAPTER_DRY_RUN_INVOCATION_PLAN_DENIED_ADMISSION_FIELDS
+            }
+        )
+        record.update(
+            {
+                field_name: False
+                for field_name in LOCAL_FIXTURE_ADAPTER_DRY_RUN_INVOCATION_PLAN_FORBIDDEN_PERFORMED_FIELDS
+            }
+        )
+        record.update(
+            {
+                field_name: False
+                for field_name in LOCAL_FIXTURE_ADAPTER_DRY_RUN_INVOCATION_PLAN_MATERIALIZED_FALSE_FIELDS
+            }
+        )
+        record["future_invocation_requires_separate_execution_gate"] = True
+        record["future_execution_requires_human_approval"] = True
     return record
 
 
@@ -993,6 +1058,11 @@ def _adapter_route_policy(node, graph_execution_mode):
         return "admission_gated_local_adapter_registry_promotion_not_production_admitted"
     if node["adapter_id"] == _LOCAL_FIXTURE_ADAPTER_USAGE_RECEIPT_ADAPTER_ID:
         return "local_fixture_adapter_usage_receipt_not_production_admitted"
+    if (
+        node["adapter_id"]
+        == _LOCAL_FIXTURE_ADAPTER_DRY_RUN_INVOCATION_PLAN_ADAPTER_ID
+    ):
+        return "local_fixture_adapter_dry_run_invocation_plan_not_production_admitted"
     if node["adapter_id"] == _OPERATOR_PLAYWRIGHT_RECEIPT_ADAPTER_ID:
         return "operator_provided_local_fixture_receipt_only_not_production_admitted"
     if node["adapter_id"] == _BOUNDED_PLAYWRIGHT_ADAPTER_DRAFT_ID:
@@ -1789,6 +1859,170 @@ def _run_local_fixture_adapter_usage_receipt_node_if_requested(node):
         )
         if not complete
         else "Review the usage receipt before any separate execution proposal.",
+        "required_human_approval": True,
+        "required_human_review": True,
+        **false_fields,
+    }
+
+
+def _run_local_fixture_adapter_dry_run_invocation_plan_node_if_requested(node):
+    if (
+        node["adapter_id"]
+        != _LOCAL_FIXTURE_ADAPTER_DRY_RUN_INVOCATION_PLAN_ADAPTER_ID
+    ):
+        return None
+    if node["capability"] != _LOCAL_FIXTURE_ADAPTER_DRY_RUN_INVOCATION_PLAN_CAPABILITY:
+        raise ValueError(
+            "task graph local-fixture adapter dry-run invocation plan capability is not registered"
+        )
+    inputs = node["inputs"]
+    usage_receipt = _required_string_input(
+        inputs,
+        "usage_receipt",
+        "local-fixture adapter dry-run invocation plan",
+    )
+    output_dir = _required_string_input(
+        inputs,
+        "output_dir",
+        "local-fixture adapter dry-run invocation plan",
+    )
+    invocation_plan_id = _required_string_input(
+        inputs,
+        "invocation_plan_id",
+        "local-fixture adapter dry-run invocation plan",
+    )
+    review_attestation = _required_string_input(
+        inputs,
+        "review_attestation",
+        "local-fixture adapter dry-run invocation plan",
+    )
+    project_id = _optional_nonempty_string_input(
+        inputs,
+        "project_id",
+        "local-fixture adapter dry-run invocation plan",
+    )
+    reviewer_id = _optional_nonempty_string_input(
+        inputs,
+        "reviewer_id",
+        "local-fixture adapter dry-run invocation plan",
+    )
+    operator_notes = _optional_nonempty_string_input(
+        inputs,
+        "operator_notes",
+        "local-fixture adapter dry-run invocation plan",
+    )
+
+    from kernel.capabilities.local_fixture_adapter_dry_run_invocation_plan import (
+        LOCAL_FIXTURE_ADAPTER_DRY_RUN_INVOCATION_PLAN_DENIED_ADMISSION_FIELDS,
+        LOCAL_FIXTURE_ADAPTER_DRY_RUN_INVOCATION_PLAN_FORBIDDEN_PERFORMED_FIELDS,
+        LOCAL_FIXTURE_ADAPTER_DRY_RUN_INVOCATION_PLAN_MATERIALIZED_FALSE_FIELDS,
+    )
+    from kernel.personal_ai.local_launcher import (
+        run_local_fixture_adapter_dry_run_invocation_plan_launcher,
+    )
+
+    result = run_local_fixture_adapter_dry_run_invocation_plan_launcher(
+        Path(usage_receipt),
+        Path(output_dir),
+        invocation_plan_id,
+        review_attestation=review_attestation,
+        project_id=project_id,
+        reviewer_id=reviewer_id,
+        operator_notes=operator_notes,
+    )
+    payload = result.payload
+    complete = bool(result.complete)
+    false_fields = {
+        field_name: False
+        for field_name in LOCAL_FIXTURE_ADAPTER_DRY_RUN_INVOCATION_PLAN_DENIED_ADMISSION_FIELDS
+    }
+    false_fields.update(
+        {
+            field_name: False
+            for field_name in LOCAL_FIXTURE_ADAPTER_DRY_RUN_INVOCATION_PLAN_FORBIDDEN_PERFORMED_FIELDS
+        }
+    )
+    false_fields.update(
+        {
+            field_name: False
+            for field_name in LOCAL_FIXTURE_ADAPTER_DRY_RUN_INVOCATION_PLAN_MATERIALIZED_FALSE_FIELDS
+        }
+    )
+    false_fields["future_invocation_requires_separate_execution_gate"] = True
+    false_fields["future_execution_requires_human_approval"] = True
+    return {
+        "status": "completed" if complete else "failed",
+        "output_dir": result.output_dir.as_posix(),
+        "local_fixture_adapter_dry_run_invocation_plan_complete": complete,
+        "local_fixture_adapter_dry_run_invocation_plan_plan_path": payload.get(
+            "local_fixture_adapter_dry_run_invocation_plan_plan_path"
+        ),
+        "local_fixture_adapter_dry_run_invocation_plan_result_path": payload.get(
+            "local_fixture_adapter_dry_run_invocation_plan_result_path"
+        ),
+        "local_fixture_adapter_dry_run_invocation_plan_manifest_path": payload.get(
+            "local_fixture_adapter_dry_run_invocation_plan_manifest_path"
+        ),
+        "local_fixture_adapter_dry_run_invocation_plan_summary_path": payload.get(
+            "local_fixture_adapter_dry_run_invocation_plan_summary_path"
+        ),
+        "local_fixture_adapter_dry_run_invocation_plan_checklist_path": payload.get(
+            "local_fixture_adapter_dry_run_invocation_plan_checklist_path"
+        ),
+        "artifact_index_path": payload.get("artifact_index_path"),
+        "artifact_index_manifest_path": payload.get("artifact_index_manifest_path"),
+        "invocation_plan_id": payload.get("invocation_plan_id"),
+        "invocation_plan_status": payload.get("invocation_plan_status"),
+        "invocation_plan_decision": payload.get("invocation_plan_decision"),
+        "invocation_plan_granted": payload.get("invocation_plan_granted"),
+        "usage_receipt_path": payload.get("usage_receipt_path"),
+        "usage_receipt_sha256": payload.get("usage_receipt_sha256"),
+        "usage_receipt_type": payload.get("usage_receipt_type"),
+        "usage_receipt_validated": payload.get("usage_receipt_validated"),
+        "usage_receipt_granted": payload.get("usage_receipt_granted"),
+        "promotion_type": payload.get("promotion_type"),
+        "promotion_result_sha256": payload.get("promotion_result_sha256"),
+        "source_gate_decision_type": payload.get("source_gate_decision_type"),
+        "source_gate_decision_sha256": payload.get("source_gate_decision_sha256"),
+        "source_gate_passed": payload.get("source_gate_passed"),
+        "registry_promotion_granted": payload.get("registry_promotion_granted"),
+        "aggregation_bound": payload.get("aggregation_bound"),
+        "regression_bound": payload.get("regression_bound"),
+        "local_fixture_only": payload.get("local_fixture_only"),
+        "one_usage_receipt_bound": payload.get("one_usage_receipt_bound"),
+        "dry_run_plan_only": payload.get("dry_run_plan_only"),
+        "local_fixture_reference": payload.get("local_fixture_reference"),
+        "local_fixture_reference_scheme": payload.get(
+            "local_fixture_reference_scheme"
+        ),
+        "local_fixture_path": payload.get("local_fixture_path"),
+        "local_fixture_sha256": payload.get("local_fixture_sha256"),
+        "local_fixture_revalidated": payload.get("local_fixture_revalidated"),
+        "local_fixture_exists": payload.get("local_fixture_exists"),
+        "local_fixture_regular_file": payload.get("local_fixture_regular_file"),
+        "local_fixture_symlink_detected": payload.get(
+            "local_fixture_symlink_detected"
+        ),
+        "local_fixture_under_allowed_root": payload.get(
+            "local_fixture_under_allowed_root"
+        ),
+        "promoted_adapter_id": payload.get("adapter_id"),
+        "candidate_id": payload.get("candidate_id"),
+        "repo_full_name": payload.get("repo_full_name"),
+        "non_production": payload.get("non_production"),
+        "production_adapter": payload.get("production_adapter"),
+        "rejection_reasons": payload.get("rejection_reasons"),
+        "next_allowed_action": payload.get("next_allowed_action"),
+        "failure_stage": None if complete else "dry_run_invocation_plan_rejected",
+        "error_message": None
+        if complete
+        else ",".join(str(reason) for reason in payload.get("rejection_reasons", [])),
+        "safe_to_retry": not complete,
+        "replay_hint": (
+            "Fix the #429 usage receipt result or local fixture metadata and rerun the dry-run plan node."
+        )
+        if not complete
+        else "Review the dry-run invocation plan before any separate execution gate.",
         "required_human_approval": True,
         "required_human_review": True,
         **false_fields,
