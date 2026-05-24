@@ -215,6 +215,43 @@ class AdmissionGatedLocalAdapterRegistryPromotionTests(unittest.TestCase):
             "gate_status_not_admitted",
         )
 
+    def test_source_adapter_id_mismatch_rejects(self):
+        self.assert_rejects_mutation(
+            lambda payload: payload.update({"adapter_id": "wrong-adapter"}),
+            "source_adapter_id_mismatch",
+        )
+
+    def test_source_candidate_id_mismatch_rejects(self):
+        self.assert_rejects_mutation(
+            lambda payload: payload.update({"candidate_id": "wrong-candidate"}),
+            "source_candidate_id_mismatch",
+        )
+
+    def test_source_repo_full_name_mismatch_rejects(self):
+        self.assert_rejects_mutation(
+            lambda payload: payload.update({"repo_full_name": "wrong/repo"}),
+            "source_repo_full_name_mismatch",
+        )
+
+    def test_source_identity_mismatches_are_independent(self):
+        _root, decision_path, output_dir = self.make_workspace()
+        payload = read_json(decision_path)
+        payload.update(
+            {
+                "adapter_id": "wrong-adapter",
+                "candidate_id": "wrong-candidate",
+                "repo_full_name": "wrong/repo",
+            }
+        )
+        write_json(decision_path, payload)
+
+        result = self.run_promotion(decision_path, output_dir)
+
+        self.assertFalse(result.complete)
+        self.assertIn("source_adapter_id_mismatch", result.rejection_reasons)
+        self.assertIn("source_candidate_id_mismatch", result.rejection_reasons)
+        self.assertIn("source_repo_full_name_mismatch", result.rejection_reasons)
+
     def test_local_fixture_admission_false_rejects(self):
         self.assert_rejects_mutation(
             lambda payload: payload.update({"local_fixture_admission_granted": False}),

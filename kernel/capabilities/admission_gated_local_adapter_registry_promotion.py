@@ -450,6 +450,12 @@ def _source_decision_rejection_reasons(
         reasons.append("gate_status_not_admitted")
     if payload.get("gate_decision") != _SOURCE_ADMIT_DECISION:
         reasons.append("gate_decision_not_local_fixture_admit")
+    if payload.get("adapter_id") != _PROMOTED_ADAPTER_ID:
+        reasons.append("source_adapter_id_mismatch")
+    if payload.get("candidate_id") != _CANDIDATE_ID:
+        reasons.append("source_candidate_id_mismatch")
+    if payload.get("repo_full_name") != _REPO_FULL_NAME:
+        reasons.append("source_repo_full_name_mismatch")
     if payload.get("local_fixture_admission_granted") is not True:
         reasons.append("local_fixture_admission_not_granted")
     if payload.get("production_admission_granted") is not False:
