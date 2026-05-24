@@ -1,0 +1,80 @@
+"""Metadata-only capability scaffold for $capability_id.
+
+METADATA-ONLY SCAFFOLD: this file is a contract template. It is intentionally
+inert and must not be expanded into runtime governance, token issuance, runner
+creation, adapter execution, browser launch, or network access.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, asdict
+from typing import Mapping, Sequence
+
+CAPABILITY_ID = "$capability_id"
+OUTPUT_FILE_NAMES = $output_file_names_python
+
+FORBIDDEN_BOUNDARIES = $forbidden_boundaries_python
+
+DETERMINISTIC_REJECTION_REASONS = $rejection_reasons_python
+
+
+@dataclass(frozen=True)
+class ${capability_class_name}MetadataResult:
+    capability_id: str
+    metadata_only: bool
+    accepted: bool
+    rejection_reason: str
+    output_file_names: tuple[str, ...]
+    forbidden_boundaries: tuple[str, ...]
+
+    def as_contract(self) -> dict[str, object]:
+        return asdict(self)
+
+
+def fail_closed_preflight(requested_boundaries: Sequence[str], metadata_only: bool) -> dict[str, object]:
+    """Return deterministic metadata-only admission text without side effects."""
+    if not metadata_only:
+        return {
+            "accepted": False,
+            "rejection_reason": "metadata_only_boundary_missing",
+        }
+    blocked = tuple(item for item in requested_boundaries if item in FORBIDDEN_BOUNDARIES)
+    if blocked:
+        return {
+            "accepted": False,
+            "rejection_reason": "forbidden_boundary_requested",
+            "blocked": blocked,
+        }
+    return {
+        "accepted": True,
+        "rejection_reason": "",
+    }
+
+
+def build_metadata_result(request: Mapping[str, object]) -> ${capability_class_name}MetadataResult:
+    requested = request.get("requested_boundaries", ())
+    if isinstance(requested, str) or not isinstance(requested, Sequence):
+        requested = ("unsafe_template_mutation_requested",)
+    preflight = fail_closed_preflight(
+        requested_boundaries=tuple(str(item) for item in requested),
+        metadata_only=request.get("metadata_only") is True,
+    )
+    return ${capability_class_name}MetadataResult(
+        capability_id=CAPABILITY_ID,
+        metadata_only=request.get("metadata_only") is True,
+        accepted=bool(preflight["accepted"]),
+        rejection_reason=str(preflight["rejection_reason"]),
+        output_file_names=OUTPUT_FILE_NAMES,
+        forbidden_boundaries=FORBIDDEN_BOUNDARIES,
+    )
+
+
+__all__ = [
+    "CAPABILITY_ID",
+    "OUTPUT_FILE_NAMES",
+    "FORBIDDEN_BOUNDARIES",
+    "DETERMINISTIC_REJECTION_REASONS",
+    "${capability_class_name}MetadataResult",
+    "fail_closed_preflight",
+    "build_metadata_result",
+]
