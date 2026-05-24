@@ -1,0 +1,63 @@
+{
+  "adapter_generated": false,
+  "adapter_registered": false,
+  "authority": "non_authority_candidate_evaluation_record",
+  "auto_adoption_performed": false,
+  "autonomous_execution_performed": false,
+  "candidate_code_imported": false,
+  "candidates": [
+    {
+      "adapter_generation_allowed": false,
+      "candidate_id": "github-candidate-microsoft-playwright-v1",
+      "decision": "select_for_first_bounded_sandbox_smoke",
+      "intended_use": "browser_automation",
+      "license_review_required": true,
+      "next_allowed_action": "create_playwright_local_fixture_sandbox_smoke_plan",
+      "primary_risk": "Browser automation can access live websites and may capture private data in traces, screenshots, videos, or profiles.",
+      "primary_value": "Mature browser automation substrate with strong local worker, CLI, agent, MCP, and observability relevance.",
+      "repo_full_name": "microsoft/playwright",
+      "sandbox_review_required": true,
+      "security_review_required": true,
+      "selected_for_first_sandbox_smoke": true,
+      "selection_rank": 1
+    },
+    {
+      "adapter_generation_allowed": false,
+      "candidate_id": "github-candidate-ahujasid-blender-mcp-v1",
+      "decision": "hold_for_later_creative_sandbox",
+      "intended_use": "mcp_connector",
+      "license_review_required": true,
+      "next_allowed_action": "define_blender_mcp_disposable_scene_sandbox_boundary",
+      "primary_risk": "Blender-side command/socket behavior and possible Python execution can mutate local creative scenes.",
+      "primary_value": "High-value local creative and VFX workflow connector candidate.",
+      "repo_full_name": "ahujasid/blender-mcp",
+      "sandbox_review_required": true,
+      "security_review_required": true,
+      "selected_for_first_sandbox_smoke": false,
+      "selection_rank": 2
+    },
+    {
+      "adapter_generation_allowed": false,
+      "candidate_id": "github-candidate-ultrafunkamsterdam-nodriver-v1",
+      "decision": "hold_high_risk_reference_only",
+      "intended_use": "browser_automation",
+      "license_review_required": true,
+      "next_allowed_action": "require_policy_legal_safety_review_before_any_sandbox",
+      "primary_risk": "Anti-bot and detection-avoidance orientation, AGPL licensing, and live website automation risk make it unsuitable for a first adapter.",
+      "primary_value": "Potential low-level browser automation reference material.",
+      "repo_full_name": "ultrafunkamsterdam/nodriver",
+      "sandbox_review_required": true,
+      "security_review_required": true,
+      "selected_for_first_sandbox_smoke": false,
+      "selection_rank": 3
+    }
+  ],
+  "dependency_installation_performed": false,
+  "git_clone_performed": false,
+  "git_command_performed": false,
+  "github_network_search_performed_by_code": false,
+  "matrix_type": "real_github_candidate_selection_matrix_v1",
+  "network_access_performed": false,
+  "selection_pack_id": "real-github-candidate-evaluation-pack-v1",
+  "third_party_code_execution_performed": false
+}

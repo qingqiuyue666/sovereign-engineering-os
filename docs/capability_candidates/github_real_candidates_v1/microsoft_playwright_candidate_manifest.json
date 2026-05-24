@@ -1,0 +1,56 @@
+{
+  "candidate_id": "github-candidate-microsoft-playwright-v1",
+  "candidate_name": "Microsoft Playwright",
+  "candidate_type": "github_capability_candidate_v1",
+  "capability_domains": [
+    "ai_agent_orchestration",
+    "browser_automation",
+    "mcp_adapter",
+    "observability"
+  ],
+  "declared_external_services": [
+    "browser runtimes",
+    "optional MCP client",
+    "optional package registry for installation"
+  ],
+  "declared_file_system_permissions": [
+    "writes screenshots/traces/videos/output artifacts when configured",
+    "may write browser profiles or cache directories"
+  ],
+  "declared_install_commands": [
+    "npm i playwright",
+    "npm install -g @playwright/cli@latest",
+    "npx @playwright/mcp@latest"
+  ],
+  "declared_license": "Apache-2.0",
+  "declared_network_requirements": [
+    "browser downloads may require network during install",
+    "web targets require network during automation",
+    "package registry access may be required during install"
+  ],
+  "declared_risks": [
+    "browser automation can access live websites",
+    "generated traces/screenshots may contain private data",
+    "network use must be explicitly gated",
+    "install step may download browser binaries",
+    "must not receive secrets unless separately approved"
+  ],
+  "declared_run_commands": [
+    "playwright-cli open",
+    "npx playwright test",
+    "npx @playwright/mcp@latest"
+  ],
+  "declared_runtime_languages": [
+    "TypeScript",
+    "JavaScript"
+  ],
+  "declared_secret_requirements": [],
+  "default_branch": "main",
+  "evidence_notes": "Selected as preferred first sandbox smoke candidate because it is mature, broadly useful, agent-relevant, and easier to sandbox against local fixture pages.",
+  "integration_hypothesis": "Use the intake packet first, then build a bounded sandbox smoke around local fixture pages before any live website access.",
+  "intended_use": "browser_automation",
+  "repo_full_name": "microsoft/playwright",
+  "repo_url": "https://github.com/microsoft/playwright",
+  "source_origin": "web_research",
+  "user_value_hypothesis": "Playwright can become the first bounded browser automation worker substrate for local AI execution workflows."
+}
