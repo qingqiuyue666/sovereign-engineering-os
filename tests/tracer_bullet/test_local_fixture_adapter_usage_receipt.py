@@ -342,6 +342,23 @@ class LocalFixtureAdapterUsageReceiptTests(unittest.TestCase):
             with self.subTest(reason=reason):
                 self.assert_rejects_promotion_mutation(mutator, reason)
 
+    def test_missing_legacy_performed_false_field_rejects(self):
+        self.assert_rejects_promotion_mutation(
+            lambda payload: payload.pop("external_network_performed"),
+            "performed_forbidden_action",
+        )
+
+    def test_missing_429_specific_performed_false_field_rejects(self):
+        for field_name in (
+            "adapter_execution_performed",
+            "playwright_execution_performed",
+        ):
+            with self.subTest(field_name=field_name):
+                self.assert_rejects_promotion_mutation(
+                    lambda payload, field_name=field_name: payload.pop(field_name),
+                    "performed_forbidden_action",
+                )
+
     def test_embedded_registry_record_missing_or_invalid_rejects(self):
         cases = (
             lambda payload: payload.pop("registry_record"),
@@ -407,6 +424,57 @@ class LocalFixtureAdapterUsageReceiptTests(unittest.TestCase):
 
                 self.assertFalse(result.complete)
                 self.assertIn(reason, result.rejection_reasons)
+
+    def test_registry_entry_source_hash_mismatch_rejects(self):
+        _root, promotion_path, output_dir, fixture_path = self.make_workspace()
+        registry_entry = promotion_path.parent / "local_registry_entry.json"
+        write_json(
+            registry_entry,
+            {
+                **self.valid_registry_record(),
+                "source_gate_decision_sha256": "b" * 64,
+            },
+        )
+
+        result = self.run_receipt(
+            promotion_path,
+            output_dir,
+            fixture_path,
+            registry_entry=registry_entry,
+        )
+
+        self.assertFalse(result.complete)
+        self.assertIn("registry_entry_identity_mismatch", result.rejection_reasons)
+
+    def test_registry_entry_bound_scope_mismatch_rejects(self):
+        for field_name in (
+            "aggregation_bound",
+            "regression_bound",
+            "local_fixture_only",
+        ):
+            with self.subTest(field_name=field_name):
+                _root, promotion_path, output_dir, fixture_path = self.make_workspace()
+                registry_entry = promotion_path.parent / "local_registry_entry.json"
+                write_json(
+                    registry_entry,
+                    {
+                        **self.valid_registry_record(),
+                        field_name: False,
+                    },
+                )
+
+                result = self.run_receipt(
+                    promotion_path,
+                    output_dir,
+                    fixture_path,
+                    registry_entry=registry_entry,
+                )
+
+                self.assertFalse(result.complete)
+                self.assertIn(
+                    "registry_entry_identity_mismatch",
+                    result.rejection_reasons,
+                )
 
     def _make_registry_symlink(self, root, _promotion_path, registry_entry):
         target = root / "registry-target.json"

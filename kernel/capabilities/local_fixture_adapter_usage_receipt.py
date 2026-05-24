@@ -507,7 +507,6 @@ def _promotion_result_rejection_reasons(
     if any(
         payload.get(field_name) is not False
         for field_name in LOCAL_FIXTURE_ADAPTER_USAGE_RECEIPT_FORBIDDEN_PERFORMED_FIELDS
-        if field_name in payload or field_name == "production_promotion_granted"
     ):
         reasons.append("performed_forbidden_action")
     registry_record = payload.get("registry_record")
@@ -625,6 +624,41 @@ def _registry_entry_rejection_reasons(
             if registry_entry.get(field_name) != embedded_record.get(field_name):
                 reasons.append("registry_entry_identity_mismatch")
                 break
+        for field_name in (
+            "source_gate_decision_sha256",
+            "source_gate_decision_type",
+            "source_gate_passed",
+            "aggregation_bound",
+            "regression_bound",
+            "local_fixture_only",
+            "human_review_required",
+            "required_human_approval",
+            "non_production",
+        ):
+            if (
+                field_name not in registry_entry
+                or field_name not in embedded_record
+                or registry_entry.get(field_name) != embedded_record.get(field_name)
+            ):
+                reasons.append("registry_entry_identity_mismatch")
+                break
+    for field_name in (
+        "source_gate_decision_sha256",
+        "source_gate_decision_type",
+        "source_gate_passed",
+        "aggregation_bound",
+        "regression_bound",
+        "local_fixture_only",
+        "human_review_required",
+        "required_human_approval",
+        "non_production",
+    ):
+        if (
+            field_name in promotion_payload
+            and registry_entry.get(field_name) != promotion_payload.get(field_name)
+        ):
+            reasons.append("registry_entry_identity_mismatch")
+            break
     denied_scope = registry_entry.get("denied_scope")
     if not isinstance(denied_scope, list) or not set(
         ADMISSION_GATED_LOCAL_ADAPTER_REGISTRY_PROMOTION_DENIED_SCOPE
