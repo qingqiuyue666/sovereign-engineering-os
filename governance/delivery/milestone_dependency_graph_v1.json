@@ -1,0 +1,362 @@
+{
+  "$schema": "./milestone_dependency_graph_v1.schema.json",
+  "graph_type": "sovereign_os_milestone_dependency_graph_v1",
+  "version": "v1",
+  "base_assumption": "PR #442 merged; main includes metadata-only local-fixture runner-chain integration; real execution remains unadmitted until B1.",
+  "runtime_authority_granted": false,
+  "merge_automation_granted": false,
+  "branch_deletion_granted": false,
+  "direct_main_push_granted": false,
+  "forbidden_surface_policy": {
+    "no_runtime_execution": true,
+    "no_auto_merge": true,
+    "no_branch_deletion": true,
+    "no_direct_main_push": true,
+    "no_browser_or_network": true,
+    "no_provider_live_calls": true,
+    "no_production_autonomy": true,
+    "denied_surfaces": [
+      "arbitrary shell execution",
+      "shell=True",
+      "arbitrary argv",
+      "arbitrary command_line",
+      "browser opening",
+      "Playwright live execution",
+      "network access",
+      "live website access",
+      "account login",
+      "account registration",
+      "payment workflows",
+      "scraping",
+      "bypass workflows",
+      "CAPTCHA workflows",
+      "credential storage",
+      "provider API live calls",
+      "production autonomy",
+      "unbounded daemon",
+      "unbounded scheduler",
+      "source asset overwrite",
+      "silent failure",
+      "test skipping",
+      "direct push to main",
+      "auto-merge",
+      "branch deletion"
+    ]
+  },
+  "milestones": [
+    {
+      "id": "A1",
+      "name": "Delivery Backlog V1",
+      "slug": "delivery-backlog-v1",
+      "branch": "feat/delivery-backlog-v1",
+      "pr_title": "feat: add delivery backlog v1",
+      "group": "delivery_control_foundation",
+      "priority_order": 1,
+      "dependencies": [],
+      "independent_parallelizable": true,
+      "blocked_by_merge": false,
+      "can_merge_independently": true,
+      "dependency_note": "Governance-only backlog.",
+      "forbidden_surfaces": []
+    },
+    {
+      "id": "A2",
+      "name": "Milestone Dependency Graph V1",
+      "slug": "milestone-dependency-graph-v1",
+      "branch": "feat/milestone-dependency-graph-v1",
+      "pr_title": "feat: add milestone dependency graph v1",
+      "group": "delivery_control_foundation",
+      "priority_order": 2,
+      "dependencies": [],
+      "independent_parallelizable": true,
+      "blocked_by_merge": false,
+      "can_merge_independently": true,
+      "dependency_note": "Machine-readable graph; does not import A1.",
+      "forbidden_surfaces": []
+    },
+    {
+      "id": "A3",
+      "name": "PR Factory And Merge Audit V1",
+      "slug": "pr-factory-merge-audit-v1",
+      "branch": "feat/pr-factory-merge-audit-v1",
+      "pr_title": "feat: add pr factory and merge audit v1",
+      "group": "delivery_control_foundation",
+      "priority_order": 3,
+      "dependencies": [],
+      "independent_parallelizable": true,
+      "blocked_by_merge": false,
+      "can_merge_independently": true,
+      "dependency_note": "Read-only readiness and artifact-generation tooling.",
+      "forbidden_surfaces": [
+        "auto-merge",
+        "branch deletion",
+        "direct push to main"
+      ]
+    },
+    {
+      "id": "C1",
+      "name": "Artifact Ledger Viewer V1",
+      "slug": "artifact-ledger-viewer-v1",
+      "branch": "feat/artifact-ledger-viewer-v1",
+      "pr_title": "feat: add artifact ledger viewer v1",
+      "group": "evidence_operator_visibility",
+      "priority_order": 4,
+      "dependencies": [],
+      "independent_parallelizable": true,
+      "blocked_by_merge": false,
+      "can_merge_independently": true,
+      "dependency_note": "Read-only listing and summary surface.",
+      "forbidden_surfaces": [
+        "mutation",
+        "deletion",
+        "raw secret display"
+      ]
+    },
+    {
+      "id": "D1",
+      "name": "Bounded Worker Registry V1",
+      "slug": "bounded-worker-registry-v1",
+      "branch": "feat/bounded-worker-registry-v1",
+      "pr_title": "feat: add bounded worker registry v1",
+      "group": "worker_adapter_foundation",
+      "priority_order": 5,
+      "dependencies": [],
+      "independent_parallelizable": true,
+      "blocked_by_merge": false,
+      "can_merge_independently": true,
+      "dependency_note": "Worker declarations only; live providers disabled.",
+      "forbidden_surfaces": [
+        "live provider API calls",
+        "credential storage",
+        "tool execution"
+      ]
+    },
+    {
+      "id": "C2",
+      "name": "Operator Dashboard Model V1",
+      "slug": "operator-dashboard-model-v1",
+      "branch": "feat/operator-dashboard-model-v1",
+      "pr_title": "feat: add operator dashboard model v1",
+      "group": "evidence_operator_visibility",
+      "priority_order": 6,
+      "dependencies": [],
+      "independent_parallelizable": true,
+      "blocked_by_merge": false,
+      "can_merge_independently": true,
+      "dependency_note": "Read-only model/view.",
+      "forbidden_surfaces": [
+        "mutation",
+        "merge",
+        "deletion",
+        "production execution"
+      ]
+    },
+    {
+      "id": "D2",
+      "name": "Domain Adapter Foundation V1",
+      "slug": "domain-adapter-foundation-v1",
+      "branch": "feat/domain-adapter-foundation-v1",
+      "pr_title": "feat: add domain adapter foundation v1",
+      "group": "worker_adapter_foundation",
+      "priority_order": 7,
+      "dependencies": [],
+      "independent_parallelizable": true,
+      "blocked_by_merge": false,
+      "can_merge_independently": true,
+      "dependency_note": "Contract foundation; no live DCC execution.",
+      "forbidden_surfaces": [
+        "DCC process launch",
+        "ComfyUI live run",
+        "source asset overwrite"
+      ]
+    },
+    {
+      "id": "B1",
+      "name": "Real Local Runner Boundary V1",
+      "slug": "real-local-runner-boundary-v1",
+      "branch": "feat/real-local-runner-boundary-v1",
+      "pr_title": "feat: add real local runner boundary v1",
+      "group": "controlled_local_execution_chain",
+      "priority_order": 8,
+      "dependencies": [],
+      "independent_parallelizable": false,
+      "blocked_by_merge": false,
+      "can_merge_independently": true,
+      "dependency_note": "First bounded execution boundary; admits only immutable allowlisted command_id execution.",
+      "allowed_surface": "repo-owned validation commands resolved by immutable command_id allowlist",
+      "forbidden_surfaces": [
+        "arbitrary shell execution",
+        "shell=True",
+        "arbitrary argv",
+        "browser opening",
+        "network access",
+        "provider API live calls",
+        "production autonomy"
+      ]
+    },
+    {
+      "id": "E1",
+      "name": "End-To-End Acceptance Matrix V1",
+      "slug": "e2e-acceptance-matrix-v1",
+      "branch": "feat/e2e-acceptance-matrix-v1",
+      "pr_title": "feat: add end-to-end acceptance matrix v1",
+      "group": "acceptance_release_readiness",
+      "priority_order": 9,
+      "dependencies": [],
+      "independent_parallelizable": true,
+      "blocked_by_merge": false,
+      "can_merge_independently": true,
+      "dependency_note": "Acceptance/governance matrix may reference future milestones without importing their code.",
+      "forbidden_surfaces": [
+        "runtime behavior",
+        "production execution"
+      ]
+    },
+    {
+      "id": "E2",
+      "name": "Mainline Release Readiness Gate V1",
+      "slug": "mainline-release-readiness-gate-v1",
+      "branch": "feat/mainline-release-readiness-gate-v1",
+      "pr_title": "feat: add mainline release readiness gate v1",
+      "group": "acceptance_release_readiness",
+      "priority_order": 10,
+      "dependencies": [],
+      "independent_parallelizable": true,
+      "blocked_by_merge": false,
+      "can_merge_independently": true,
+      "dependency_note": "Descriptor and recommendation artifact only; no release automation.",
+      "forbidden_surfaces": [
+        "auto release",
+        "auto merge",
+        "branch deletion",
+        "production promotion"
+      ]
+    },
+    {
+      "id": "B2",
+      "name": "Capability Token Lifecycle V1",
+      "slug": "capability-token-lifecycle-v1",
+      "branch": "feat/capability-token-lifecycle-v1",
+      "pr_title": "feat: add capability token lifecycle v1",
+      "group": "controlled_local_execution_chain",
+      "priority_order": 11,
+      "dependencies": [
+        "B1"
+      ],
+      "independent_parallelizable": false,
+      "blocked_by_merge": true,
+      "blocked_state": "WAITING_FOR_PREVIOUS_PR_MERGE",
+      "can_merge_independently": false,
+      "dependency_note": "Concrete runner-bound lifecycle waits for B1 merge unless implemented as standalone contract-only.",
+      "forbidden_surfaces": [
+        "arbitrary shell execution",
+        "network access",
+        "browser opening",
+        "credential storage",
+        "production autonomy"
+      ]
+    },
+    {
+      "id": "B3",
+      "name": "Local Job Queue V1",
+      "slug": "local-job-queue-v1",
+      "branch": "feat/local-job-queue-v1",
+      "pr_title": "feat: add local job queue v1",
+      "group": "controlled_local_execution_chain",
+      "priority_order": 12,
+      "dependencies": [
+        "B1",
+        "B2"
+      ],
+      "independent_parallelizable": false,
+      "blocked_by_merge": true,
+      "blocked_state": "WAITING_FOR_PREVIOUS_PR_MERGE",
+      "can_merge_independently": false,
+      "dependency_note": "Concrete queue integration waits for runner/token contracts unless contract-only.",
+      "forbidden_surfaces": [
+        "unbounded daemon",
+        "uncontrolled scheduler",
+        "network access",
+        "browser opening",
+        "production execution"
+      ]
+    },
+    {
+      "id": "B4",
+      "name": "Replay Engine V1",
+      "slug": "replay-engine-v1",
+      "branch": "feat/replay-engine-v1",
+      "pr_title": "feat: add replay engine v1",
+      "group": "controlled_local_execution_chain",
+      "priority_order": 13,
+      "dependencies": [
+        "B1"
+      ],
+      "independent_parallelizable": false,
+      "blocked_by_merge": true,
+      "blocked_state": "WAITING_FOR_PREVIOUS_PR_MERGE",
+      "can_merge_independently": false,
+      "dependency_note": "Concrete replay waits for B1 receipt/replay artifacts unless standalone contract-only.",
+      "forbidden_surfaces": [
+        "automatic re-execution",
+        "network access",
+        "browser opening"
+      ]
+    },
+    {
+      "id": "D3",
+      "name": "ComfyUI Local Adapter Contract V1",
+      "slug": "comfyui-local-adapter-contract-v1",
+      "branch": "feat/comfyui-local-adapter-contract-v1",
+      "pr_title": "feat: add comfyui local adapter contract v1",
+      "group": "worker_adapter_foundation",
+      "priority_order": 14,
+      "dependencies": [
+        "D2"
+      ],
+      "independent_parallelizable": false,
+      "blocked_by_merge": true,
+      "blocked_state": "WAITING_FOR_DOMAIN_ADAPTER_FOUNDATION_MERGE",
+      "can_merge_independently": false,
+      "dependency_note": "Depends on D2 shared adapter foundation unless implemented as standalone contract-only.",
+      "forbidden_surfaces": [
+        "live ComfyUI execution",
+        "model download",
+        "network access",
+        "arbitrary Python"
+      ]
+    },
+    {
+      "id": "D4",
+      "name": "DCC Adapter Foundation V1",
+      "slug": "dcc-adapter-foundation-v1",
+      "branch": "feat/dcc-adapter-foundation-v1",
+      "pr_title": "feat: add dcc adapter foundation v1",
+      "group": "worker_adapter_foundation",
+      "priority_order": 15,
+      "dependencies": [
+        "D2"
+      ],
+      "independent_parallelizable": false,
+      "blocked_by_merge": true,
+      "blocked_state": "WAITING_FOR_DOMAIN_ADAPTER_FOUNDATION_MERGE",
+      "can_merge_independently": false,
+      "dependency_note": "Depends on D2 shared adapter foundation unless implemented as standalone contract/readiness doc.",
+      "forbidden_surfaces": [
+        "live DCC process launch",
+        "scene mutation execution",
+        "external network",
+        "source asset overwrite"
+      ]
+    }
+  ],
+  "merge_readiness": {
+    "requires_focused_tests": true,
+    "requires_unittest_discover": true,
+    "requires_make_ci": true,
+    "requires_diff_check": true,
+    "requires_github_actions_green": true,
+    "requires_human_merge": true,
+    "auto_merge_permitted": false
+  }
+}

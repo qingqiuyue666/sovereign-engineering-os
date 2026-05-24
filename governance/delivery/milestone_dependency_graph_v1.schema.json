@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Sovereign OS Milestone Dependency Graph V1",
+  "type": "object",
+  "required": [
+    "graph_type",
+    "version",
+    "runtime_authority_granted",
+    "merge_automation_granted",
+    "branch_deletion_granted",
+    "direct_main_push_granted",
+    "milestones",
+    "forbidden_surface_policy"
+  ],
+  "properties": {
+    "graph_type": {
+      "const": "sovereign_os_milestone_dependency_graph_v1"
+    },
+    "version": {
+      "const": "v1"
+    },
+    "runtime_authority_granted": {
+      "const": false
+    },
+    "merge_automation_granted": {
+      "const": false
+    },
+    "branch_deletion_granted": {
+      "const": false
+    },
+    "direct_main_push_granted": {
+      "const": false
+    },
+    "milestones": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "slug",
+          "branch",
+          "pr_title",
+          "group",
+          "priority_order",
+          "dependencies",
+          "independent_parallelizable",
+          "blocked_by_merge",
+          "can_merge_independently",
+          "forbidden_surfaces"
+        ]
+      }
+    },
+    "forbidden_surface_policy": {
+      "type": "object",
+      "required": [
+        "no_runtime_execution",
+        "no_auto_merge",
+        "no_branch_deletion",
+        "no_direct_main_push",
+        "no_browser_or_network",
+        "no_provider_live_calls",
+        "no_production_autonomy"
+      ]
+    }
+  }
+}
