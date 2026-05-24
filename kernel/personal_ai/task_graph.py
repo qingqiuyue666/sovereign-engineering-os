@@ -137,6 +137,12 @@ _LOCAL_FIXTURE_ADAPTER_EXECUTION_GATE_PLAN_ADAPTER_ID = (
 _LOCAL_FIXTURE_ADAPTER_EXECUTION_GATE_PLAN_CAPABILITY = (
     "launch_local_fixture_adapter_execution_gate_plan"
 )
+_LOCAL_FIXTURE_HUMAN_APPROVAL_ARTIFACT_ADAPTER_ID = (
+    "local_fixture_human_approval_artifact"
+)
+_LOCAL_FIXTURE_HUMAN_APPROVAL_ARTIFACT_CAPABILITY = (
+    "launch_local_fixture_human_approval_artifact"
+)
 _RUNTIME_ADMISSION_DECISION_TYPE = "personal_ai_runtime_admission_decision_v1"
 _GRAPH_EXECUTION_MODES = ("fixture_execution", "dry_run_plan")
 _NODE_EXECUTION_MODES = ("fixture", "mock", "dry_run", "real_runtime")
@@ -655,6 +661,11 @@ def _validate_adapter_routes(node_records, graph_execution_mode):
                 decision.reason_codes,
                 graph_execution_mode,
             )
+            and not _route_is_safe_local_fixture_human_approval_artifact_fixture(
+                node,
+                decision.reason_codes,
+                graph_execution_mode,
+            )
         ):
             raise ValueError(
                 "task graph adapter route is not admitted: "
@@ -801,6 +812,22 @@ def _route_is_safe_local_fixture_adapter_execution_gate_plan_fixture(
     )
 
 
+def _route_is_safe_local_fixture_human_approval_artifact_fixture(
+    node,
+    reason_codes,
+    graph_execution_mode,
+):
+    return (
+        graph_execution_mode == "fixture_execution"
+        and node["execution_mode"] == "fixture"
+        and node["adapter_id"]
+        == _LOCAL_FIXTURE_HUMAN_APPROVAL_ARTIFACT_ADAPTER_ID
+        and node["capability"]
+        == _LOCAL_FIXTURE_HUMAN_APPROVAL_ARTIFACT_CAPABILITY
+        and tuple(reason_codes) == ("adapter_not_admitted",)
+    )
+
+
 def _execute_graph_nodes(nodes_by_id, graph_execution_mode):
     executed = []
     status_by_node_id = {}
@@ -907,6 +934,13 @@ def _execute_graph_nodes(nodes_by_id, graph_execution_mode):
             )
             if execution_gate_plan_result is not None:
                 record.update(execution_gate_plan_result)
+            approval_artifact_result = (
+                _run_local_fixture_human_approval_artifact_node_if_requested(
+                    node
+                )
+            )
+            if approval_artifact_result is not None:
+                record.update(approval_artifact_result)
         status_by_node_id[node_id] = record["status"]
         executed.append(record)
     return executed
@@ -933,6 +967,7 @@ def _base_node_execution_record(node, graph_execution_mode):
             _LOCAL_FIXTURE_ADAPTER_USAGE_RECEIPT_ADAPTER_ID,
             _LOCAL_FIXTURE_ADAPTER_DRY_RUN_INVOCATION_PLAN_ADAPTER_ID,
             _LOCAL_FIXTURE_ADAPTER_EXECUTION_GATE_PLAN_ADAPTER_ID,
+            _LOCAL_FIXTURE_HUMAN_APPROVAL_ARTIFACT_ADAPTER_ID,
         ),
         "adapter_route_policy": "local_delivery_integration"
         if node["adapter_id"] == _DELIVERY_ADAPTER_ID
@@ -1096,6 +1131,35 @@ def _base_node_execution_record(node, graph_execution_mode):
         record["execution_runner_created"] = False
         record["future_execution_requires_separate_human_approval_artifact"] = True
         record["future_execution_requires_separate_execution_runner_pr"] = True
+    if (
+        node["adapter_id"]
+        == _LOCAL_FIXTURE_HUMAN_APPROVAL_ARTIFACT_ADAPTER_ID
+    ):
+        from kernel.capabilities.local_fixture_human_approval_artifact import (
+            LOCAL_FIXTURE_HUMAN_APPROVAL_ARTIFACT_REQUIRED_SOURCE_FALSE_FIELDS,
+        )
+
+        record.update(
+            {
+                field_name: False
+                for field_name in LOCAL_FIXTURE_HUMAN_APPROVAL_ARTIFACT_REQUIRED_SOURCE_FALSE_FIELDS
+            }
+        )
+        record["approval_token_issued"] = False
+        record["execution_token_issued"] = False
+        record["runner_created"] = False
+        record["runnable_job_created"] = False
+        record["adapter_execution_performed"] = False
+        record["playwright_execution_performed"] = False
+        record["browser_open_performed"] = False
+        record["network_access_performed"] = False
+        record["live_website_access_performed"] = False
+        record["autonomous_execution_performed"] = False
+        record["production_promotion_granted"] = False
+        record["metadata_only"] = True
+        record["future_runner_requires_separate_pr"] = True
+        record["future_execution_requires_separate_runner_receipt"] = True
+        record["future_execution_requires_explicit_local_fixture_runner_gate"] = True
     return record
 
 
@@ -1137,6 +1201,11 @@ def _adapter_route_policy(node, graph_execution_mode):
         == _LOCAL_FIXTURE_ADAPTER_EXECUTION_GATE_PLAN_ADAPTER_ID
     ):
         return "local_fixture_adapter_execution_gate_plan_not_production_admitted"
+    if (
+        node["adapter_id"]
+        == _LOCAL_FIXTURE_HUMAN_APPROVAL_ARTIFACT_ADAPTER_ID
+    ):
+        return "local_fixture_human_approval_artifact_not_production_admitted"
     if node["adapter_id"] == _OPERATOR_PLAYWRIGHT_RECEIPT_ADAPTER_ID:
         return "operator_provided_local_fixture_receipt_only_not_production_admitted"
     if node["adapter_id"] == _BOUNDED_PLAYWRIGHT_ADAPTER_DRAFT_ID:
@@ -2274,6 +2343,159 @@ def _run_local_fixture_adapter_execution_gate_plan_node_if_requested(node):
         )
         if not complete
         else "Human review is required before any separate execution runner proposal.",
+        "required_human_approval": True,
+        "required_human_review": True,
+        **false_fields,
+    }
+
+
+def _run_local_fixture_human_approval_artifact_node_if_requested(node):
+    if (
+        node["adapter_id"]
+        != _LOCAL_FIXTURE_HUMAN_APPROVAL_ARTIFACT_ADAPTER_ID
+    ):
+        return None
+    if node["capability"] != _LOCAL_FIXTURE_HUMAN_APPROVAL_ARTIFACT_CAPABILITY:
+        raise ValueError(
+            "task graph local-fixture human approval artifact capability is not registered"
+        )
+    inputs = node["inputs"]
+    execution_gate_plan = _required_string_input(
+        inputs,
+        "execution_gate_plan",
+        "local-fixture human approval artifact",
+    )
+    output_dir = _required_string_input(
+        inputs,
+        "output_dir",
+        "local-fixture human approval artifact",
+    )
+    approval_artifact_id = _required_string_input(
+        inputs,
+        "approval_artifact_id",
+        "local-fixture human approval artifact",
+    )
+    reviewer_id = _required_string_input(
+        inputs,
+        "reviewer_id",
+        "local-fixture human approval artifact",
+    )
+    approval_attestation = _required_string_input(
+        inputs,
+        "approval_attestation",
+        "local-fixture human approval artifact",
+    )
+    project_id = _optional_nonempty_string_input(
+        inputs,
+        "project_id",
+        "local-fixture human approval artifact",
+    )
+    operator_notes = _optional_nonempty_string_input(
+        inputs,
+        "operator_notes",
+        "local-fixture human approval artifact",
+    )
+
+    from kernel.capabilities.local_fixture_human_approval_artifact import (
+        LOCAL_FIXTURE_HUMAN_APPROVAL_ARTIFACT_REQUIRED_SOURCE_FALSE_FIELDS,
+    )
+    from kernel.personal_ai.local_launcher import (
+        run_local_fixture_human_approval_artifact_launcher,
+    )
+
+    result = run_local_fixture_human_approval_artifact_launcher(
+        Path(execution_gate_plan),
+        Path(output_dir),
+        approval_artifact_id,
+        reviewer_id,
+        approval_attestation,
+        project_id=project_id,
+        operator_notes=operator_notes,
+    )
+    payload = result.payload
+    complete = bool(result.complete)
+    false_fields = {
+        field_name: False
+        for field_name in LOCAL_FIXTURE_HUMAN_APPROVAL_ARTIFACT_REQUIRED_SOURCE_FALSE_FIELDS
+    }
+    false_fields.update(
+        {
+            "approval_token_issued": False,
+            "execution_token_issued": False,
+            "runner_created": False,
+            "runnable_job_created": False,
+            "adapter_execution_performed": False,
+            "playwright_execution_performed": False,
+            "browser_open_performed": False,
+            "network_access_performed": False,
+            "live_website_access_performed": False,
+            "autonomous_execution_performed": False,
+            "production_promotion_granted": False,
+        }
+    )
+    return {
+        "status": "completed" if complete else "failed",
+        "output_dir": result.output_dir.as_posix(),
+        "local_fixture_human_approval_artifact_complete": complete,
+        "local_fixture_human_approval_artifact_path": payload.get(
+            "local_fixture_human_approval_artifact_path"
+        ),
+        "local_fixture_human_approval_artifact_result_path": payload.get(
+            "local_fixture_human_approval_artifact_result_path"
+        ),
+        "local_fixture_human_approval_artifact_manifest_path": payload.get(
+            "local_fixture_human_approval_artifact_manifest_path"
+        ),
+        "local_fixture_human_approval_artifact_summary_path": payload.get(
+            "local_fixture_human_approval_artifact_summary_path"
+        ),
+        "local_fixture_human_approval_artifact_checklist_path": payload.get(
+            "local_fixture_human_approval_artifact_checklist_path"
+        ),
+        "artifact_index_path": payload.get("artifact_index_path"),
+        "artifact_index_manifest_path": payload.get("artifact_index_manifest_path"),
+        "approval_artifact_id": payload.get("approval_artifact_id"),
+        "approval_recorded": payload.get("approval_recorded"),
+        "approval_artifact_status": payload.get("approval_artifact_status"),
+        "approval_artifact_decision": payload.get("approval_artifact_decision"),
+        "source_execution_gate_plan_path": payload.get(
+            "source_execution_gate_plan_path"
+        ),
+        "source_execution_gate_plan_sha256": payload.get(
+            "source_execution_gate_plan_sha256"
+        ),
+        "source_execution_gate_plan_id": payload.get(
+            "source_execution_gate_plan_id"
+        ),
+        "source_gate_plan_type": payload.get("source_gate_plan_type"),
+        "source_gate_plan_status": payload.get("source_gate_plan_status"),
+        "source_gate_plan_decision": payload.get("source_gate_plan_decision"),
+        "promoted_adapter_id": payload.get("adapter_id"),
+        "candidate_id": payload.get("candidate_id"),
+        "repo_full_name": payload.get("repo_full_name"),
+        "local_fixture_sha256": payload.get("local_fixture_sha256"),
+        "metadata_only": payload.get("metadata_only"),
+        "future_runner_requires_separate_pr": payload.get(
+            "future_runner_requires_separate_pr"
+        ),
+        "future_execution_requires_separate_runner_receipt": payload.get(
+            "future_execution_requires_separate_runner_receipt"
+        ),
+        "future_execution_requires_explicit_local_fixture_runner_gate": payload.get(
+            "future_execution_requires_explicit_local_fixture_runner_gate"
+        ),
+        "rejection_reasons": payload.get("rejection_reasons"),
+        "next_allowed_action": payload.get("next_allowed_action"),
+        "failure_stage": None if complete else "human_approval_artifact_rejected",
+        "error_message": None
+        if complete
+        else ",".join(str(reason) for reason in payload.get("rejection_reasons", [])),
+        "safe_to_retry": not complete,
+        "replay_hint": (
+            "Fix the #431 execution-gate plan result or approval artifact metadata and rerun the approval artifact node."
+        )
+        if not complete
+        else "A separate runner-contract PR remains required before future local-fixture execution.",
         "required_human_approval": True,
         "required_human_review": True,
         **false_fields,

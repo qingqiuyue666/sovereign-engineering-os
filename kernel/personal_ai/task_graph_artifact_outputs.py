@@ -126,6 +126,12 @@ _LOCAL_FIXTURE_ADAPTER_EXECUTION_GATE_PLAN_ADAPTER_ID = (
 _LOCAL_FIXTURE_ADAPTER_EXECUTION_GATE_PLAN_CAPABILITY = (
     "launch_local_fixture_adapter_execution_gate_plan"
 )
+_LOCAL_FIXTURE_HUMAN_APPROVAL_ARTIFACT_ADAPTER_ID = (
+    "local_fixture_human_approval_artifact"
+)
+_LOCAL_FIXTURE_HUMAN_APPROVAL_ARTIFACT_CAPABILITY = (
+    "launch_local_fixture_human_approval_artifact"
+)
 _DELIVERY_ADAPTER_ID = "runtime_delivery_package"
 _DELIVERY_CAPABILITY = "validate_runtime_delivery"
 
@@ -899,6 +905,31 @@ _LOCAL_FIXTURE_ADAPTER_EXECUTION_GATE_PLAN_DIRECT_PATH_FIELDS = (
     ("artifact_index_manifest", "artifact_index_manifest_path"),
 )
 
+_LOCAL_FIXTURE_HUMAN_APPROVAL_ARTIFACT_DIRECT_PATH_FIELDS = (
+    (
+        "local_fixture_human_approval_artifact",
+        "local_fixture_human_approval_artifact_path",
+    ),
+    (
+        "local_fixture_human_approval_artifact_result",
+        "local_fixture_human_approval_artifact_result_path",
+    ),
+    (
+        "local_fixture_human_approval_artifact_manifest",
+        "local_fixture_human_approval_artifact_manifest_path",
+    ),
+    (
+        "local_fixture_human_approval_artifact_summary",
+        "local_fixture_human_approval_artifact_summary_path",
+    ),
+    (
+        "local_fixture_human_approval_artifact_checklist",
+        "local_fixture_human_approval_artifact_checklist_path",
+    ),
+    ("artifact_index", "artifact_index_path"),
+    ("artifact_index_manifest", "artifact_index_manifest_path"),
+)
+
 _DELIVERY_PATH_FIELDS = (
     ("runtime_delivery_manifest", "runtime_delivery_manifest_path"),
     ("runtime_delivery_validation", "runtime_delivery_validation_path"),
@@ -970,6 +1001,8 @@ _ROLE_ARTIFACT_TYPES = {
     "local_fixture_adapter_execution_gate_plan_human_approval_request": "markdown",
     "local_fixture_adapter_execution_gate_plan_summary": "markdown",
     "local_fixture_adapter_execution_gate_plan_checklist": "markdown",
+    "local_fixture_human_approval_artifact_summary": "markdown",
+    "local_fixture_human_approval_artifact_checklist": "markdown",
     "embedded_playwright_local_fixture_sandbox_smoke_summary": "markdown",
     "embedded_playwright_local_fixture_sandbox_smoke_checklist": "markdown",
     "embedded_playwright_local_fixture_sandbox_smoke_screenshot": "png",
@@ -1328,6 +1361,14 @@ def _node_artifact_candidates(node, output_dir):
             output_dir,
         )
     if (
+        node["adapter_id"] == _LOCAL_FIXTURE_HUMAN_APPROVAL_ARTIFACT_ADAPTER_ID
+        and node["capability"] == _LOCAL_FIXTURE_HUMAN_APPROVAL_ARTIFACT_CAPABILITY
+    ):
+        return _local_fixture_human_approval_artifact_candidates(
+            node,
+            output_dir,
+        )
+    if (
         node["adapter_id"] == _DELIVERY_ADAPTER_ID
         and node["capability"] == _DELIVERY_CAPABILITY
     ):
@@ -1626,6 +1667,30 @@ def _local_fixture_adapter_execution_gate_plan_artifact_candidates(
     seen_roles = set()
     for role, field_name in (
         _LOCAL_FIXTURE_ADAPTER_EXECUTION_GATE_PLAN_DIRECT_PATH_FIELDS
+    ):
+        _add_role_path(role_paths, seen_roles, role, node.get(field_name))
+    return [
+        _artifact_record(
+            node_id=node["node_id"],
+            adapter_id=node["adapter_id"],
+            capability=node["capability"],
+            node_status=node["status"],
+            artifact_role=role,
+            path_value=path_value,
+            output_dir=output_dir,
+        )
+        for role, path_value in role_paths
+    ]
+
+
+def _local_fixture_human_approval_artifact_candidates(
+    node,
+    output_dir,
+):
+    role_paths = []
+    seen_roles = set()
+    for role, field_name in (
+        _LOCAL_FIXTURE_HUMAN_APPROVAL_ARTIFACT_DIRECT_PATH_FIELDS
     ):
         _add_role_path(role_paths, seen_roles, role, node.get(field_name))
     return [

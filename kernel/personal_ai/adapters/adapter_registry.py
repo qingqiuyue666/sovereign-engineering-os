@@ -614,6 +614,47 @@ def build_default_adapter_registry() -> tuple[AdapterRegistryEntry, ...]:
             ),
         ),
         AdapterRegistryEntry(
+            adapter_id="local_fixture_human_approval_artifact",
+            adapter_name="Local-Fixture Human Approval Artifact",
+            mode=AdapterMode.LOCAL_FIXTURE,
+            risk_class=AdapterRiskClass.LOCAL_READONLY,
+            admission_status=AdapterAdmissionStatus.CANDIDATE,
+            capabilities=("launch_local_fixture_human_approval_artifact",),
+            required_controls=_REQUIRED_CONTROLS
+            + (
+                "human_review_metadata_record_only",
+                "execution_gate_plan_result_required",
+                "exact_approval_attestation",
+                "artifact_index_binding",
+                "hash_verification",
+                "metadata_only",
+                "no_execution_token",
+                "no_approval_token",
+                "no_runner",
+                "no_runnable_job",
+                "no_adapter_execution",
+                "no_playwright_execution",
+                "no_browser_opening",
+                "no_network_access",
+                "no_live_websites",
+                "no_production_promotion",
+                "no_autonomy",
+                "separate_runner_contract_pr_required",
+                "separate_local_fixture_runner_gate_required",
+                "separate_runner_receipt_required",
+            ),
+            boundary=_approved_output_boundary(),
+            output_policy=_approved_output_policy(),
+            notes=(
+                "Human approval artifact metadata only and not a production "
+                "adapter. It reads a #431 local-fixture execution-gate plan "
+                "result and records reviewer approval for a future separate "
+                "runner-contract PR without tokens, runners, adapter "
+                "execution, Playwright execution, browser opening, network "
+                "access, live websites, autonomy, or production promotion."
+            ),
+        ),
+        AdapterRegistryEntry(
             adapter_id="real_browser_runtime_boundary",
             adapter_name="Real Browser Runtime Boundary",
             mode=AdapterMode.FUTURE_EXTERNAL,
