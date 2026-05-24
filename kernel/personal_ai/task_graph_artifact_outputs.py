@@ -84,6 +84,12 @@ _OPERATOR_PLAYWRIGHT_RECEIPT_ADAPTER_ID = (
 _OPERATOR_PLAYWRIGHT_RECEIPT_CAPABILITY = (
     "launch_operator_provided_playwright_execution_receipt"
 )
+_LOCAL_FIXTURE_PLAYWRIGHT_ADMISSION_GATE_ADAPTER_ID = (
+    "local_fixture_playwright_adapter_admission_gate"
+)
+_LOCAL_FIXTURE_PLAYWRIGHT_ADMISSION_GATE_CAPABILITY = (
+    "launch_local_fixture_playwright_adapter_admission_gate"
+)
 _DELIVERY_ADAPTER_ID = "runtime_delivery_package"
 _DELIVERY_CAPABILITY = "validate_runtime_delivery"
 
@@ -677,6 +683,31 @@ _OPERATOR_PLAYWRIGHT_RECEIPT_DIRECT_PATH_FIELDS = (
     ("artifact_index_manifest", "artifact_index_manifest_path"),
 )
 
+_LOCAL_FIXTURE_PLAYWRIGHT_ADMISSION_GATE_DIRECT_PATH_FIELDS = (
+    (
+        "local_fixture_playwright_adapter_admission_gate_plan",
+        "local_fixture_playwright_adapter_admission_gate_plan_path",
+    ),
+    (
+        "local_fixture_playwright_adapter_admission_gate_manifest",
+        "local_fixture_playwright_adapter_admission_gate_manifest_path",
+    ),
+    (
+        "local_fixture_playwright_adapter_admission_gate_summary",
+        "local_fixture_playwright_adapter_admission_gate_summary_path",
+    ),
+    (
+        "local_fixture_playwright_adapter_admission_gate_checklist",
+        "local_fixture_playwright_adapter_admission_gate_checklist_path",
+    ),
+    (
+        "local_fixture_playwright_adapter_admission_gate_decision",
+        "local_fixture_playwright_adapter_admission_gate_decision_path",
+    ),
+    ("artifact_index", "artifact_index_path"),
+    ("artifact_index_manifest", "artifact_index_manifest_path"),
+)
+
 _DELIVERY_PATH_FIELDS = (
     ("runtime_delivery_manifest", "runtime_delivery_manifest_path"),
     ("runtime_delivery_validation", "runtime_delivery_validation_path"),
@@ -732,6 +763,8 @@ _ROLE_ARTIFACT_TYPES = {
     "bounded_playwright_worker_adapter_draft_checklist": "markdown",
     "operator_provided_playwright_execution_receipt_summary": "markdown",
     "operator_provided_playwright_execution_receipt_checklist": "markdown",
+    "local_fixture_playwright_adapter_admission_gate_summary": "markdown",
+    "local_fixture_playwright_adapter_admission_gate_checklist": "markdown",
     "embedded_playwright_local_fixture_sandbox_smoke_summary": "markdown",
     "embedded_playwright_local_fixture_sandbox_smoke_checklist": "markdown",
     "embedded_playwright_local_fixture_sandbox_smoke_screenshot": "png",
@@ -1029,6 +1062,14 @@ def _node_artifact_candidates(node, output_dir):
     ):
         return _operator_playwright_receipt_artifact_candidates(node, output_dir)
     if (
+        node["adapter_id"] == _LOCAL_FIXTURE_PLAYWRIGHT_ADMISSION_GATE_ADAPTER_ID
+        and node["capability"] == _LOCAL_FIXTURE_PLAYWRIGHT_ADMISSION_GATE_CAPABILITY
+    ):
+        return _local_fixture_playwright_admission_gate_artifact_candidates(
+            node,
+            output_dir,
+        )
+    if (
         node["adapter_id"] == _DELIVERY_ADAPTER_ID
         and node["capability"] == _DELIVERY_CAPABILITY
     ):
@@ -1162,6 +1203,25 @@ def _operator_playwright_receipt_artifact_candidates(node, output_dir):
     role_paths = []
     seen_roles = set()
     for role, field_name in _OPERATOR_PLAYWRIGHT_RECEIPT_DIRECT_PATH_FIELDS:
+        _add_role_path(role_paths, seen_roles, role, node.get(field_name))
+    return [
+        _artifact_record(
+            node_id=node["node_id"],
+            adapter_id=node["adapter_id"],
+            capability=node["capability"],
+            node_status=node["status"],
+            artifact_role=role,
+            path_value=path_value,
+            output_dir=output_dir,
+        )
+        for role, path_value in role_paths
+    ]
+
+
+def _local_fixture_playwright_admission_gate_artifact_candidates(node, output_dir):
+    role_paths = []
+    seen_roles = set()
+    for role, field_name in _LOCAL_FIXTURE_PLAYWRIGHT_ADMISSION_GATE_DIRECT_PATH_FIELDS:
         _add_role_path(role_paths, seen_roles, role, node.get(field_name))
     return [
         _artifact_record(
