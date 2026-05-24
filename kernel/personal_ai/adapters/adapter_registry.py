@@ -203,6 +203,47 @@ def build_default_adapter_registry() -> tuple[AdapterRegistryEntry, ...]:
             ),
         ),
         AdapterRegistryEntry(
+            adapter_id="bounded_playwright_worker_adapter_draft",
+            adapter_name="Bounded Playwright Worker Adapter Draft",
+            mode=AdapterMode.LOCAL_FIXTURE,
+            risk_class=AdapterRiskClass.LOCAL_BROWSER_FIXTURE,
+            admission_status=AdapterAdmissionStatus.CANDIDATE,
+            capabilities=("launch_bounded_playwright_worker_adapter_draft",),
+            required_controls=_REQUIRED_CONTROLS
+            + (
+                "adapter_draft_only",
+                "local_fixture_only",
+                "generated_fixture_only",
+                "explicit_execution_flag",
+                "embedded_smoke_wrapper_only",
+                "artifact_index_binding",
+                "no_live_websites",
+                "no_user_supplied_url",
+                "no_accounts",
+                "no_scraping",
+                "no_bypass",
+                "no_captcha",
+                "no_secrets",
+                "no_cookies",
+                "no_external_network",
+                "no_dependency_install",
+                "no_npm_npx",
+                "no_candidate_repo_access",
+                "no_candidate_code_execution",
+                "not_production_admitted",
+                "human_review_required",
+            ),
+            boundary=_approved_output_boundary(),
+            output_policy=_approved_output_policy(),
+            notes=(
+                "Draft only and not production admitted. Wraps the existing "
+                "Playwright local fixture smoke into a worker-adapter-shaped "
+                "contract; local generated file fixture only, no live websites, "
+                "no arbitrary URLs, no accounts, no scraping, and human review "
+                "required."
+            ),
+        ),
+        AdapterRegistryEntry(
             adapter_id="real_browser_runtime_boundary",
             adapter_name="Real Browser Runtime Boundary",
             mode=AdapterMode.FUTURE_EXTERNAL,

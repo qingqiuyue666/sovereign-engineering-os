@@ -40,6 +40,7 @@ from kernel.personal_ai.local_launcher import (
     run_local_office_launcher,
     run_model_fixture_launcher,
     run_model_provider_dry_run_launcher,
+    run_bounded_playwright_worker_adapter_draft_launcher,
     run_playwright_local_fixture_sandbox_smoke_launcher,
     run_product_health_check_launcher,
     run_runtime_delivery_validation_launcher,
@@ -127,6 +128,7 @@ _SUBCOMMANDS = {
     "launch-local-asset-next-bounded-smoke-cycle-contract-human-review-from-run-promotion-gate",
     "launch-github-capability-intake-packet",
     "launch-playwright-local-fixture-sandbox-smoke",
+    "launch-bounded-playwright-worker-adapter-draft",
     "launch-local-asset-smoke-promotion-gate",
     "launch-local-asset-iteration-promotion-gate",
     "launch-local-asset-smoke-iteration-review-packet",
@@ -954,6 +956,21 @@ def _main_subcommand(argv) -> int:
             )
             _print_command_payload(result.to_cli_payload())
             return 0 if result.complete else 1
+        if args.command == "launch-bounded-playwright-worker-adapter-draft":
+            result = run_bounded_playwright_worker_adapter_draft_launcher(
+                Path(args.selection_matrix),
+                Path(args.playwright_candidate_manifest),
+                Path(args.output_dir),
+                args.adapter_draft_id,
+                project_id=args.project_id,
+                reviewer_id=args.reviewer_id,
+                operator_notes=args.operator_notes,
+                node_command=_optional_path(args.node_command),
+                runner_script=_optional_path(args.runner_script),
+                execute_local_fixture_smoke=args.execute_local_fixture_smoke,
+            )
+            _print_command_payload(result.to_cli_payload())
+            return 0 if result.complete else 1
         if args.command == "launch-office-workflow":
             result = run_local_office_launcher(
                 Path(args.input_workbook),
@@ -1647,6 +1664,32 @@ def _build_subcommand_parser():
     playwright_smoke_parser.add_argument("--node-command")
     playwright_smoke_parser.add_argument("--runner-script")
     playwright_smoke_parser.add_argument(
+        "--execute-local-fixture-smoke",
+        action="store_true",
+    )
+
+    bounded_playwright_adapter_parser = subparsers.add_parser(
+        "launch-bounded-playwright-worker-adapter-draft"
+    )
+    bounded_playwright_adapter_parser.add_argument(
+        "--selection-matrix",
+        required=True,
+    )
+    bounded_playwright_adapter_parser.add_argument(
+        "--playwright-candidate-manifest",
+        required=True,
+    )
+    bounded_playwright_adapter_parser.add_argument("--output-dir", required=True)
+    bounded_playwright_adapter_parser.add_argument(
+        "--adapter-draft-id",
+        required=True,
+    )
+    bounded_playwright_adapter_parser.add_argument("--project-id")
+    bounded_playwright_adapter_parser.add_argument("--reviewer-id")
+    bounded_playwright_adapter_parser.add_argument("--operator-notes")
+    bounded_playwright_adapter_parser.add_argument("--node-command")
+    bounded_playwright_adapter_parser.add_argument("--runner-script")
+    bounded_playwright_adapter_parser.add_argument(
         "--execute-local-fixture-smoke",
         action="store_true",
     )

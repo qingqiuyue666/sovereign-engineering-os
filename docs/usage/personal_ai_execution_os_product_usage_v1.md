@@ -2248,6 +2248,98 @@ false boundary fields for live websites, accounts, scraping, bypass, secrets,
 installs, external network, candidate access, adapter generation, and production
 promotion.
 
+## Bounded Playwright Worker Adapter Draft
+
+This command drafts a worker-adapter-shaped envelope around the Playwright local
+fixture sandbox smoke only. Plan-only mode is the default:
+
+```bash
+python3 -m kernel.personal_ai.local_mvp_cli launch-bounded-playwright-worker-adapter-draft \
+  --selection-matrix docs/capability_candidates/github_real_candidates_v1/candidate_selection_matrix.json \
+  --playwright-candidate-manifest docs/capability_candidates/github_real_candidates_v1/microsoft_playwright_candidate_manifest.json \
+  --output-dir /path/to/adapter-draft-output \
+  --adapter-draft-id bounded-playwright-worker-adapter-draft-001 \
+  --project-id demo_project \
+  --reviewer-id reviewer-001
+```
+
+Explicit local fixture smoke execution requires all plan arguments plus:
+
+```bash
+  --node-command /absolute/path/to/node \
+  --runner-script tools/playwright/local_fixture_smoke_runner.js \
+  --execute-local-fixture-smoke
+```
+
+The adapter draft writes wrapper artifacts in `output_dir` and delegates the
+embedded smoke to `output_dir/embedded_smoke/`. The embedded smoke still owns
+candidate matrix validation, manifest validation, generated fixture creation,
+`file://` fixture URL generation, shell-free runner invocation, timeout policy,
+and local-only result normalization.
+
+Plan-only writes:
+
+- `bounded_playwright_worker_adapter_draft_plan.json`
+- `bounded_playwright_worker_adapter_draft_manifest.json`
+- `bounded_playwright_worker_adapter_draft_summary.md`
+- `bounded_playwright_worker_adapter_draft_checklist.md`
+- `embedded_smoke/playwright_local_fixture_sandbox_smoke_plan.json`
+- `embedded_smoke/playwright_local_fixture_sandbox_smoke_manifest.json`
+- `embedded_smoke/playwright_local_fixture_sandbox_smoke_summary.md`
+- `embedded_smoke/playwright_local_fixture_sandbox_smoke_checklist.md`
+- `embedded_smoke/fixture/index.html`
+- `embedded_smoke/fixture/app.js`
+- `embedded_smoke/fixture/style.css`
+- `embedded_smoke/artifact_index.json`
+- `embedded_smoke/artifact_index_manifest.json`
+- `artifact_index.json`
+- `artifact_index_manifest.json`
+
+Successful explicit execution also writes:
+
+- `embedded_smoke/playwright_local_fixture_sandbox_smoke_result.json`
+- `embedded_smoke/playwright_local_fixture_sandbox_smoke_runner_output.json`
+- `embedded_smoke/screenshot.png`
+- `bounded_playwright_worker_adapter_draft_result.json`
+
+The wrapper output directory must already exist, must not be a symlink, must not
+contain expected wrapper output files, and must not already contain
+`embedded_smoke/`. Preflight failures return structured failure payloads and
+write no artifacts. Execution failures may leave wrapper plan artifacts,
+embedded smoke outputs, and a failed wrapper result, but never claim success.
+
+This adapter draft is not production admitted. It does not create a general
+browser automation adapter, accept arbitrary URLs, use live websites, run
+account/login/registration workflows, scrape, bypass, handle captcha workflows,
+use secrets or cookies, access external network, install packages, call
+`npm`/`npx`, download browsers, access candidate repositories, import or execute
+candidate code, register an adapter, grant production promotion, or execute
+autonomously.
+
+Task graphs can include the draft node:
+
+```json
+{
+  "node_id": "bounded_playwright_adapter_draft",
+  "adapter_id": "bounded_playwright_worker_adapter_draft",
+  "capability": "launch_bounded_playwright_worker_adapter_draft",
+  "execution_mode": "fixture",
+  "depends_on": [],
+  "approval_checkpoint_required": true,
+  "inputs": {
+    "selection_matrix": "docs/capability_candidates/github_real_candidates_v1/candidate_selection_matrix.json",
+    "playwright_candidate_manifest": "docs/capability_candidates/github_real_candidates_v1/microsoft_playwright_candidate_manifest.json",
+    "output_dir": "/path/to/adapter-draft-output",
+    "adapter_draft_id": "bounded-playwright-worker-adapter-draft-001",
+    "project_id": "demo_project"
+  }
+}
+```
+
+The registry marks this adapter draft as a candidate, not admitted production
+runtime. The task graph route is fixture-only and exists solely to bind wrapper
+and embedded smoke artifact outputs for human review.
+
 Task graph execution now also emits `task_graph_artifact_outputs.json` in the
 graph `output_dir` after node execution. This manifest is a graph-level,
 metadata-only, non-authoritative artifact binding surface. It records
