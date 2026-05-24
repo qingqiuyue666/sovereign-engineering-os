@@ -106,6 +106,10 @@ from kernel.capabilities.github_capability_intake_packet import (
     GITHUB_CAPABILITY_INTAKE_PACKET_SUMMARY_FILE,
     build_github_capability_intake_packet,
 )
+from kernel.capabilities.playwright_local_fixture_sandbox_smoke import (
+    PLAYWRIGHT_LOCAL_FIXTURE_SANDBOX_SMOKE_SUMMARY_FILE,
+    run_playwright_local_fixture_sandbox_smoke,
+)
 from kernel.personal_ai.artifact_index import build_artifact_index
 from kernel.personal_ai.asset_scan_operational_control import (
     ASSET_SCAN_FAILURE_BUNDLE_FILE,
@@ -183,6 +187,7 @@ __all__ = [
     "run_local_asset_next_bounded_smoke_cycle_contract_from_run_promotion_gate_launcher",
     "run_local_asset_next_bounded_smoke_cycle_contract_human_review_from_run_promotion_gate_launcher",
     "run_github_capability_intake_packet_launcher",
+    "run_playwright_local_fixture_sandbox_smoke_launcher",
     "run_local_office_launcher",
     "run_model_fixture_launcher",
     "run_model_provider_dry_run_launcher",
@@ -1937,6 +1942,44 @@ def run_github_capability_intake_packet_launcher(
         summary_path=result.summary_path
         if result.summary_path is not None
         else output_path / GITHUB_CAPABILITY_INTAKE_PACKET_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_playwright_local_fixture_sandbox_smoke_launcher(
+    selection_matrix: Path,
+    playwright_candidate_manifest: Path,
+    output_dir: Path,
+    smoke_id: str,
+    *,
+    project_id: str | None = None,
+    reviewer_id: str | None = None,
+    operator_notes: str | None = None,
+    node_command: Path | None = None,
+    runner_script: Path | None = None,
+    execute_local_fixture_smoke: bool = False,
+) -> LauncherWorkflowResult:
+    output_path = Path(output_dir)
+    result = run_playwright_local_fixture_sandbox_smoke(
+        Path(selection_matrix),
+        Path(playwright_candidate_manifest),
+        output_path,
+        smoke_id,
+        project_id=project_id,
+        reviewer_id=reviewer_id,
+        operator_notes=operator_notes,
+        node_command=None if node_command is None else Path(node_command),
+        runner_script=None if runner_script is None else Path(runner_script),
+        execute_local_fixture_smoke=execute_local_fixture_smoke,
+    )
+    return LauncherWorkflowResult(
+        workflow="playwright_local_fixture_sandbox_smoke_workflow",
+        output_dir=output_path,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else output_path / PLAYWRIGHT_LOCAL_FIXTURE_SANDBOX_SMOKE_SUMMARY_FILE,
         required_human_approval=True,
     )
 

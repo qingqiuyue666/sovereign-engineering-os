@@ -172,6 +172,37 @@ def build_default_adapter_registry() -> tuple[AdapterRegistryEntry, ...]:
             ),
         ),
         AdapterRegistryEntry(
+            adapter_id="playwright_local_fixture_sandbox_smoke",
+            adapter_name="Playwright Local Fixture Sandbox Smoke",
+            mode=AdapterMode.LOCAL_FIXTURE,
+            risk_class=AdapterRiskClass.LOCAL_BROWSER_FIXTURE,
+            admission_status=AdapterAdmissionStatus.ADMITTED,
+            capabilities=("launch_playwright_local_fixture_sandbox_smoke",),
+            required_controls=_REQUIRED_CONTROLS
+            + (
+                "local_fixture_only",
+                "explicit_execution_flag",
+                "owned_runner_only",
+                "artifact_index_binding",
+                "no_live_websites",
+                "no_accounts",
+                "no_scraping",
+                "no_bypass",
+                "no_secrets",
+                "no_dependency_install",
+                "no_npm_npx",
+                "human_review_required",
+            ),
+            boundary=_approved_output_boundary(),
+            output_policy=_approved_output_policy(),
+            notes=(
+                "Builds and optionally executes a repository-owned Playwright "
+                "local fixture smoke only; no live websites, package installs, "
+                "browser downloads, candidate code execution, adapter generation, "
+                "or production promotion."
+            ),
+        ),
+        AdapterRegistryEntry(
             adapter_id="real_browser_runtime_boundary",
             adapter_name="Real Browser Runtime Boundary",
             mode=AdapterMode.FUTURE_EXTERNAL,

@@ -83,6 +83,8 @@ _GITHUB_CAPABILITY_ADAPTER_ID = "github_capability_intake_packet"
 _GITHUB_CAPABILITY_INTAKE_PACKET_CAPABILITY = (
     "launch_github_capability_intake_packet"
 )
+_PLAYWRIGHT_SMOKE_ADAPTER_ID = "playwright_local_fixture_sandbox_smoke"
+_PLAYWRIGHT_SMOKE_CAPABILITY = "launch_playwright_local_fixture_sandbox_smoke"
 _RUNTIME_ADMISSION_DECISION_TYPE = "personal_ai_runtime_admission_decision_v1"
 _GRAPH_EXECUTION_MODES = ("fixture_execution", "dry_run_plan")
 _NODE_EXECUTION_MODES = ("fixture", "mock", "dry_run", "real_runtime")
@@ -585,25 +587,31 @@ def _execute_graph_nodes(nodes_by_id, graph_execution_mode):
         elif graph_execution_mode == "dry_run_plan":
             record["status"] = "planned"
         else:
-            github_intake_result = _run_github_capability_intake_node_if_requested(
+            playwright_smoke_result = _run_playwright_smoke_node_if_requested(
                 node
             )
-            if github_intake_result is not None:
-                record.update(github_intake_result)
+            if playwright_smoke_result is not None:
+                record.update(playwright_smoke_result)
             else:
-                local_asset_result = _run_local_asset_node_if_requested(node)
-                if local_asset_result is not None:
-                    record.update(local_asset_result)
+                github_intake_result = _run_github_capability_intake_node_if_requested(
+                    node
+                )
+                if github_intake_result is not None:
+                    record.update(github_intake_result)
                 else:
-                    record["delivery_validation"] = _run_delivery_node_if_requested(node)
-                    record["status"] = "completed"
+                    local_asset_result = _run_local_asset_node_if_requested(node)
+                    if local_asset_result is not None:
+                        record.update(local_asset_result)
+                    else:
+                        record["delivery_validation"] = _run_delivery_node_if_requested(node)
+                        record["status"] = "completed"
         status_by_node_id[node_id] = record["status"]
         executed.append(record)
     return executed
 
 
 def _base_node_execution_record(node, graph_execution_mode):
-    return {
+    record = {
         "node_id": node["node_id"],
         "adapter_id": node["adapter_id"],
         "capability": node["capability"],
@@ -624,6 +632,13 @@ def _base_node_execution_record(node, graph_execution_mode):
         else "completed",
         "required_human_approval": True,
     }
+    if node["adapter_id"] == _PLAYWRIGHT_SMOKE_ADAPTER_ID:
+        from kernel.capabilities.playwright_local_fixture_sandbox_smoke import (
+            PLAYWRIGHT_BOUNDARY_FALSE_FIELDS,
+        )
+
+        record.update(dict(PLAYWRIGHT_BOUNDARY_FALSE_FIELDS))
+    return record
 
 
 def _skipped_node_result(blocked_dependencies):
@@ -808,6 +823,144 @@ def _run_github_capability_intake_node_if_requested(node):
         "required_human_approval": True,
         "required_human_review": True,
         **dict(NO_SCOPE_FALSE_FIELDS),
+    }
+
+
+def _run_playwright_smoke_node_if_requested(node):
+    if node["adapter_id"] != _PLAYWRIGHT_SMOKE_ADAPTER_ID:
+        return None
+    if node["capability"] != _PLAYWRIGHT_SMOKE_CAPABILITY:
+        raise ValueError("task graph playwright smoke capability is not registered")
+    inputs = node["inputs"]
+    selection_matrix = _required_string_input(
+        inputs,
+        "selection_matrix",
+        "playwright local fixture smoke",
+    )
+    candidate_manifest = _required_string_input(
+        inputs,
+        "playwright_candidate_manifest",
+        "playwright local fixture smoke",
+    )
+    output_dir = _required_string_input(
+        inputs,
+        "output_dir",
+        "playwright local fixture smoke",
+    )
+    smoke_id = _required_string_input(
+        inputs,
+        "smoke_id",
+        "playwright local fixture smoke",
+    )
+    project_id = _optional_nonempty_string_input(
+        inputs,
+        "project_id",
+        "playwright local fixture smoke",
+    )
+    reviewer_id = _optional_nonempty_string_input(
+        inputs,
+        "reviewer_id",
+        "playwright local fixture smoke",
+    )
+    operator_notes = _optional_nonempty_string_input(
+        inputs,
+        "operator_notes",
+        "playwright local fixture smoke",
+    )
+    node_command = _optional_nonempty_string_input(
+        inputs,
+        "node_command",
+        "playwright local fixture smoke",
+    )
+    runner_script = _optional_nonempty_string_input(
+        inputs,
+        "runner_script",
+        "playwright local fixture smoke",
+    )
+    execute_local_fixture_smoke = _optional_bool_input(
+        inputs,
+        "execute_local_fixture_smoke",
+        False,
+    )
+
+    from kernel.capabilities.playwright_local_fixture_sandbox_smoke import (
+        PLAYWRIGHT_BOUNDARY_FALSE_FIELDS,
+    )
+    from kernel.personal_ai.local_launcher import (
+        run_playwright_local_fixture_sandbox_smoke_launcher,
+    )
+
+    result = run_playwright_local_fixture_sandbox_smoke_launcher(
+        Path(selection_matrix),
+        Path(candidate_manifest),
+        Path(output_dir),
+        smoke_id,
+        project_id=project_id,
+        reviewer_id=reviewer_id,
+        operator_notes=operator_notes,
+        node_command=None if node_command is None else Path(node_command),
+        runner_script=None if runner_script is None else Path(runner_script),
+        execute_local_fixture_smoke=execute_local_fixture_smoke,
+    )
+    payload = result.payload
+    complete = bool(result.complete)
+    return {
+        "status": "completed" if complete else "failed",
+        "output_dir": result.output_dir.as_posix(),
+        "playwright_local_fixture_sandbox_smoke_complete": complete,
+        "playwright_local_fixture_sandbox_smoke_plan_path": payload.get(
+            "playwright_local_fixture_sandbox_smoke_plan_path"
+        ),
+        "playwright_local_fixture_sandbox_smoke_manifest_path": payload.get(
+            "playwright_local_fixture_sandbox_smoke_manifest_path"
+        ),
+        "playwright_local_fixture_sandbox_smoke_summary_path": payload.get(
+            "playwright_local_fixture_sandbox_smoke_summary_path"
+        ),
+        "playwright_local_fixture_sandbox_smoke_checklist_path": payload.get(
+            "playwright_local_fixture_sandbox_smoke_checklist_path"
+        ),
+        "playwright_local_fixture_sandbox_smoke_result_path": payload.get(
+            "playwright_local_fixture_sandbox_smoke_result_path"
+        ),
+        "playwright_local_fixture_sandbox_smoke_runner_output_path": payload.get(
+            "playwright_local_fixture_sandbox_smoke_runner_output_path"
+        ),
+        "playwright_local_fixture_sandbox_smoke_screenshot_path": payload.get(
+            "playwright_local_fixture_sandbox_smoke_screenshot_path"
+        ),
+        "artifact_index_path": payload.get("artifact_index_path"),
+        "artifact_index_manifest_path": payload.get("artifact_index_manifest_path"),
+        "fixture_dir": payload.get("fixture_dir"),
+        "fixture_index_path": payload.get("fixture_index_path"),
+        "fixture_app_js_path": payload.get("fixture_app_js_path"),
+        "fixture_style_css_path": payload.get("fixture_style_css_path"),
+        "fixture_url": payload.get("fixture_url"),
+        "fixture_url_scheme": payload.get("fixture_url_scheme"),
+        "smoke_id": payload.get("smoke_id"),
+        "project_id": payload.get("project_id"),
+        "reviewer_id": payload.get("reviewer_id"),
+        "candidate_id": payload.get("candidate_id"),
+        "repo_full_name": payload.get("repo_full_name"),
+        "intended_use": payload.get("intended_use"),
+        "executed": payload.get("executed"),
+        "success": payload.get("success"),
+        "bounded_local_fixture_execution_only": True,
+        "owned_local_smoke_runner_executed": payload.get(
+            "owned_local_smoke_runner_executed"
+        ),
+        "smoke_status": payload.get("smoke_status"),
+        "smoke_decision": payload.get("smoke_decision"),
+        "next_allowed_action": payload.get("next_allowed_action"),
+        "failure_stage": None if complete else payload.get("failure_stage"),
+        "error_message": None if complete else payload.get("error_message"),
+        "safe_to_retry": not complete,
+        "replay_hint": "Fix Playwright local fixture smoke preflight or runner output and rerun this node."
+        if not complete
+        else "Review the local fixture smoke result before any adapter draft.",
+        "required_human_approval": True,
+        "required_human_review": True,
+        **dict(PLAYWRIGHT_BOUNDARY_FALSE_FIELDS),
     }
 
 

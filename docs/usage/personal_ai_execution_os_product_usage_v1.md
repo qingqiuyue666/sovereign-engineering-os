@@ -2163,6 +2163,91 @@ classifications, binds artifact outputs into `task_graph_artifact_outputs.json`,
 and keeps all network/search/clone/git/install/execution/import/adapter/adoption
 boundary fields false.
 
+## Playwright Local Fixture Sandbox Smoke
+
+Plan-only mode is the default:
+
+```bash
+python3 -m kernel.personal_ai.local_mvp_cli launch-playwright-local-fixture-sandbox-smoke \
+  --selection-matrix docs/capability_candidates/github_real_candidates_v1/candidate_selection_matrix.json \
+  --playwright-candidate-manifest docs/capability_candidates/github_real_candidates_v1/microsoft_playwright_candidate_manifest.json \
+  --output-dir /path/to/smoke-output \
+  --smoke-id playwright-local-fixture-smoke-001 \
+  --project-id demo_project \
+  --reviewer-id reviewer-001
+```
+
+Explicit local fixture execution requires all plan arguments plus:
+
+```bash
+  --node-command /absolute/path/to/node \
+  --runner-script tools/playwright/local_fixture_smoke_runner.js \
+  --execute-local-fixture-smoke
+```
+
+The command validates the #419 selection matrix and the
+`microsoft/playwright` candidate manifest, then generates only repository-owned
+fixture files under `output_dir/fixture/`. The fixture URL is generated from
+`fixture/index.html` as `file://`; target URLs are not accepted from user input.
+
+Plan-only writes:
+
+- `playwright_local_fixture_sandbox_smoke_plan.json`
+- `playwright_local_fixture_sandbox_smoke_manifest.json`
+- `playwright_local_fixture_sandbox_smoke_summary.md`
+- `playwright_local_fixture_sandbox_smoke_checklist.md`
+- `fixture/index.html`
+- `fixture/app.js`
+- `fixture/style.css`
+- `artifact_index.json`
+- `artifact_index_manifest.json`
+
+Successful explicit execution also writes:
+
+- `playwright_local_fixture_sandbox_smoke_result.json`
+- `playwright_local_fixture_sandbox_smoke_runner_output.json`
+- `screenshot.png`
+
+The execution path invokes only the supplied `node_command` with the supplied
+owned `runner_script` and fixed fixture arguments. It uses `shell = false`,
+times out within 30 seconds, captures bounded stdout/stderr, and fails closed on
+nonzero exit, timeout, malformed runner output, missing runner output, or any
+non-local request report.
+
+This smoke does not access live websites, run account workflows, scrape,
+bypass, use secrets, install dependencies, use `npm`/`npx`, download browsers,
+access candidate repositories, execute or import candidate code, generate or
+register adapters, grant production promotion, or perform automatic approval.
+If Playwright is unavailable to the local runner, the runner records
+`playwright_dependency_missing`; unit tests use a deterministic fake runner and
+do not require Playwright or browser binaries.
+
+Task graphs can include a Playwright local fixture smoke node:
+
+```json
+{
+  "node_id": "playwright_smoke",
+  "adapter_id": "playwright_local_fixture_sandbox_smoke",
+  "capability": "launch_playwright_local_fixture_sandbox_smoke",
+  "execution_mode": "fixture",
+  "depends_on": [],
+  "approval_checkpoint_required": true,
+  "inputs": {
+    "selection_matrix": "docs/capability_candidates/github_real_candidates_v1/candidate_selection_matrix.json",
+    "playwright_candidate_manifest": "docs/capability_candidates/github_real_candidates_v1/microsoft_playwright_candidate_manifest.json",
+    "output_dir": "/path/to/smoke-output",
+    "smoke_id": "playwright-local-fixture-smoke-001",
+    "project_id": "demo_project"
+  }
+}
+```
+
+The node writes smoke artifact paths into the graph execution manifest and
+binds them into `task_graph_artifact_outputs.json`, while preserving explicit
+false boundary fields for live websites, accounts, scraping, bypass, secrets,
+installs, external network, candidate access, adapter generation, and production
+promotion.
+
 Task graph execution now also emits `task_graph_artifact_outputs.json` in the
 graph `output_dir` after node execution. This manifest is a graph-level,
 metadata-only, non-authoritative artifact binding surface. It records
