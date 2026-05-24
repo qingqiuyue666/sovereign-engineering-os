@@ -69,13 +69,16 @@ class LocalFixtureAdapterExecutionGatePlanTests(unittest.TestCase):
         gate_output.mkdir()
         usage_output = root / "usage-output"
         usage_output.mkdir()
-        fixture_path = dry_output / "fixture.html"
+        fixture_path = usage_output / "fixture.html"
         fixture_path.write_text(
             "<!doctype html><title>fixture</title>\n",
             encoding="utf-8",
         )
-        receipt_path = dry_output / "local_fixture_adapter_usage_receipt_result.json"
-        receipt_path.write_text("{}\n", encoding="utf-8")
+        receipt_path = usage_output / "local_fixture_adapter_usage_receipt_result.json"
+        write_json_atomically(
+            receipt_path,
+            self.valid_usage_receipt_result(usage_output, fixture_path),
+        )
         dry_run_path = (
             dry_output / "local_fixture_adapter_dry_run_invocation_plan_result.json"
         )
@@ -89,6 +92,51 @@ class LocalFixtureAdapterExecutionGatePlanTests(unittest.TestCase):
         )
         return root, dry_run_path, gate_output, fixture_path, usage_output
 
+    def valid_usage_receipt_result(self, usage_output, fixture_path):
+        return {
+            "receipt_type": "local_fixture_adapter_usage_receipt_v1",
+            "authority": "non_authority_local_fixture_usage_receipt_record",
+            "execution_capability": "local_fixture_adapter_usage_receipt_only",
+            "usage_receipt_id": "usage-001",
+            "adapter_id": "bounded_playwright_worker_adapter_draft",
+            "candidate_id": "github-candidate-microsoft-playwright-v1",
+            "repo_full_name": "microsoft/playwright",
+            "promotion_type": "admission_gated_local_adapter_registry_promotion_v1",
+            "promotion_status": "local_fixture_adapter_usage_receipt_completed",
+            "promotion_decision": "record_one_local_fixture_adapter_usage_receipt",
+            "source_gate_decision_type": "local_fixture_playwright_adapter_admission_gate_decision_v1",
+            "source_gate_decision_sha256": "a" * 64,
+            "source_gate_passed": True,
+            "registry_promotion_granted": True,
+            "promotion_validated": True,
+            "aggregation_bound": True,
+            "regression_bound": True,
+            "local_fixture_only": True,
+            "one_usage_receipt_only": True,
+            "local_fixture_reference": fixture_path.as_posix(),
+            "local_fixture_reference_scheme": "file",
+            "local_fixture_path": fixture_path.as_posix(),
+            "local_fixture_allowed_root": usage_output.as_posix(),
+            "local_fixture_sha256": sha256_file(fixture_path),
+            "local_fixture_exists": True,
+            "local_fixture_regular_file": True,
+            "local_fixture_symlink_detected": False,
+            "local_fixture_under_allowed_root": True,
+            "human_review_required": True,
+            "required_human_approval": True,
+            "non_production": True,
+            "production_adapter": False,
+            "usage_receipt_granted": True,
+            "complete": True,
+            "rejected": False,
+            "rejection_reasons": [],
+            "next_allowed_action": "human_review_local_fixture_usage_receipt_before_any_execution",
+            "output_dir": usage_output.as_posix(),
+            "no_live_website": True,
+            "no_general_browser_automation": True,
+            "no_autonomy": True,
+        }
+
     def valid_dry_run_plan_result(self, dry_output, fixture_path, receipt_path):
         payload = {
             "plan_type": "local_fixture_adapter_dry_run_invocation_plan_v1",
@@ -99,7 +147,7 @@ class LocalFixtureAdapterExecutionGatePlanTests(unittest.TestCase):
             "candidate_id": "github-candidate-microsoft-playwright-v1",
             "repo_full_name": "microsoft/playwright",
             "usage_receipt_path": receipt_path.as_posix(),
-            "usage_receipt_sha256": "c" * 64,
+            "usage_receipt_sha256": sha256_file(receipt_path),
             "usage_receipt_type": "local_fixture_adapter_usage_receipt_v1",
             "usage_receipt_validated": True,
             "usage_receipt_granted": True,
@@ -196,7 +244,7 @@ class LocalFixtureAdapterExecutionGatePlanTests(unittest.TestCase):
         self.assertIn(reason, read_json(result.result_path)["rejection_reasons"])
 
     def test_valid_dry_run_plan_plus_existing_fixture_writes_execution_gate_plan(self):
-        _root, dry_run_path, gate_output, fixture_path, _usage_output = (
+        _root, dry_run_path, gate_output, fixture_path, usage_output = (
             self.make_workspace()
         )
 
@@ -232,7 +280,7 @@ class LocalFixtureAdapterExecutionGatePlanTests(unittest.TestCase):
         self.assertEqual(payload["local_fixture_sha256"], sha256_file(fixture_path))
         self.assertEqual(
             payload["local_fixture_allowed_root"],
-            dry_run_path.parent.as_posix(),
+            usage_output.as_posix(),
         )
         self.assertTrue(payload["local_fixture_revalidated"])
         self.assertTrue(payload["local_fixture_exists"])
@@ -364,7 +412,7 @@ class LocalFixtureAdapterExecutionGatePlanTests(unittest.TestCase):
                 self.assert_rejects_plan_mutation(mutator, reason)
 
     def test_dry_run_plan_output_dir_mismatch_rejects_without_fixture_mutation(self):
-        root, dry_run_path, gate_output, _fixture_path, _usage_output = (
+        root, dry_run_path, gate_output, _fixture_path, usage_output = (
             self.make_workspace()
         )
         payload = read_json(dry_run_path)
@@ -381,7 +429,7 @@ class LocalFixtureAdapterExecutionGatePlanTests(unittest.TestCase):
         )
         self.assertEqual(
             result_payload["local_fixture_allowed_root"],
-            dry_run_path.parent.as_posix(),
+            usage_output.as_posix(),
         )
         self.assertTrue(result_payload["local_fixture_revalidated"])
 
@@ -409,16 +457,68 @@ class LocalFixtureAdapterExecutionGatePlanTests(unittest.TestCase):
             result.rejection_reasons,
         )
 
-    def test_usage_receipt_path_widening_cannot_admit_outside_fixture(self):
+    def test_usage_receipt_missing_rejects(self):
+        _root, dry_run_path, gate_output, _fixture_path, usage_output = (
+            self.make_workspace()
+        )
+        receipt_path = usage_output / "local_fixture_adapter_usage_receipt_result.json"
+        receipt_path.unlink()
+
+        result = self.run_plan(dry_run_path, gate_output)
+
+        self.assertFalse(result.complete)
+        self.assertIn("usage_receipt_path_not_file", result.rejection_reasons)
+
+    def test_usage_receipt_symlink_rejects(self):
         root, dry_run_path, gate_output, _fixture_path, usage_output = (
             self.make_workspace()
         )
-        outside_fixture = usage_output / "outside.html"
-        outside_fixture.write_text("<!doctype html>\n", encoding="utf-8")
+        receipt_path = usage_output / "local_fixture_adapter_usage_receipt_result.json"
+        receipt_link = root / "usage-receipt-link.json"
+        receipt_link.symlink_to(receipt_path)
         payload = read_json(dry_run_path)
-        payload["usage_receipt_path"] = (
-            usage_output / "local_fixture_adapter_usage_receipt_result.json"
-        ).as_posix()
+        payload["usage_receipt_path"] = receipt_link.as_posix()
+        payload["usage_receipt_sha256"] = sha256_file(receipt_path)
+        write_json(dry_run_path, payload)
+
+        result = self.run_plan(dry_run_path, gate_output)
+
+        self.assertFalse(result.complete)
+        self.assertIn("usage_receipt_path_is_symlink", result.rejection_reasons)
+
+    def test_usage_receipt_sha_mismatch_rejects(self):
+        _root, dry_run_path, gate_output, _fixture_path, _usage_output = (
+            self.make_workspace()
+        )
+        payload = read_json(dry_run_path)
+        payload["usage_receipt_sha256"] = "0" * 64
+        write_json(dry_run_path, payload)
+
+        result = self.run_plan(dry_run_path, gate_output)
+
+        self.assertFalse(result.complete)
+        self.assertIn("usage_receipt_sha_mismatch", result.rejection_reasons)
+
+    def test_usage_receipt_path_widening_cannot_admit_outside_fixture(self):
+        root, dry_run_path, gate_output, _fixture_path, _usage_output = (
+            self.make_workspace()
+        )
+        outside_root = root / "outside-usage-output"
+        outside_root.mkdir()
+        outside_fixture = outside_root / "outside.html"
+        outside_fixture.write_text("<!doctype html>\n", encoding="utf-8")
+        outside_receipt = outside_root / "local_fixture_adapter_usage_receipt_result.json"
+        write_json(
+            outside_receipt,
+            {
+                "receipt_type": "not_a_local_fixture_adapter_usage_receipt_v1",
+                "usage_receipt_granted": False,
+            },
+        )
+        payload = read_json(dry_run_path)
+        payload["usage_receipt_path"] = outside_receipt.as_posix()
+        payload["usage_receipt_sha256"] = sha256_file(outside_receipt)
+        payload["local_fixture_allowed_root"] = outside_root.as_posix()
         payload["local_fixture_path"] = outside_fixture.as_posix()
         payload["local_fixture_sha256"] = sha256_file(outside_fixture)
         write_json(dry_run_path, payload)
@@ -426,23 +526,39 @@ class LocalFixtureAdapterExecutionGatePlanTests(unittest.TestCase):
         result = self.run_plan(dry_run_path, gate_output)
 
         self.assertFalse(result.complete)
-        self.assertIn(
-            "dry_run_plan_usage_receipt_path_mismatch",
-            result.rejection_reasons,
-        )
+        self.assertIn("usage_receipt_type_mismatch", result.rejection_reasons)
+        self.assertIn("usage_receipt_not_granted", result.rejection_reasons)
         self.assertIn(
             "local_fixture_path_outside_allowed_root",
             result.rejection_reasons,
         )
 
-    def test_local_fixture_allowed_root_widening_cannot_admit_outside_fixture(self):
-        _root, dry_run_path, gate_output, _fixture_path, usage_output = (
+    def test_local_fixture_allowed_root_mismatch_rejects(self):
+        root, dry_run_path, gate_output, _fixture_path, _usage_output = (
             self.make_workspace()
         )
-        outside_fixture = usage_output / "outside.html"
+        payload = read_json(dry_run_path)
+        payload["local_fixture_allowed_root"] = root.as_posix()
+        write_json(dry_run_path, payload)
+
+        result = self.run_plan(dry_run_path, gate_output)
+
+        self.assertFalse(result.complete)
+        self.assertIn(
+            "dry_run_plan_local_fixture_allowed_root_mismatch",
+            result.rejection_reasons,
+        )
+
+    def test_local_fixture_allowed_root_widening_cannot_admit_outside_fixture(self):
+        root, dry_run_path, gate_output, _fixture_path, _usage_output = (
+            self.make_workspace()
+        )
+        outside_root = root / "outside-root"
+        outside_root.mkdir()
+        outside_fixture = outside_root / "outside.html"
         outside_fixture.write_text("<!doctype html>\n", encoding="utf-8")
         payload = read_json(dry_run_path)
-        payload["local_fixture_allowed_root"] = usage_output.as_posix()
+        payload["local_fixture_allowed_root"] = outside_root.as_posix()
         payload["local_fixture_path"] = outside_fixture.as_posix()
         payload["local_fixture_sha256"] = sha256_file(outside_fixture)
         write_json(dry_run_path, payload)
@@ -460,14 +576,16 @@ class LocalFixtureAdapterExecutionGatePlanTests(unittest.TestCase):
         )
 
     def test_missing_usage_receipt_path_with_widened_allowed_root_rejects(self):
-        _root, dry_run_path, gate_output, _fixture_path, usage_output = (
+        root, dry_run_path, gate_output, _fixture_path, _usage_output = (
             self.make_workspace()
         )
-        outside_fixture = usage_output / "outside.html"
+        outside_root = root / "outside-root"
+        outside_root.mkdir()
+        outside_fixture = outside_root / "outside.html"
         outside_fixture.write_text("<!doctype html>\n", encoding="utf-8")
         payload = read_json(dry_run_path)
         payload.pop("usage_receipt_path")
-        payload["local_fixture_allowed_root"] = usage_output.as_posix()
+        payload["local_fixture_allowed_root"] = outside_root.as_posix()
         payload["local_fixture_path"] = outside_fixture.as_posix()
         payload["local_fixture_sha256"] = sha256_file(outside_fixture)
         write_json(dry_run_path, payload)
@@ -476,7 +594,7 @@ class LocalFixtureAdapterExecutionGatePlanTests(unittest.TestCase):
 
         self.assertFalse(result.complete)
         self.assertIn(
-            "dry_run_plan_local_fixture_allowed_root_mismatch",
+            "usage_receipt_path_missing",
             result.rejection_reasons,
         )
         self.assertIn(
@@ -493,10 +611,10 @@ class LocalFixtureAdapterExecutionGatePlanTests(unittest.TestCase):
         self.assertFalse(result.complete)
         self.assertIn("local_fixture_path_missing", result.rejection_reasons)
 
-        root, dry_run_path, gate_output, fixture_path, _usage_output = (
+        root, dry_run_path, gate_output, fixture_path, usage_output = (
             self.make_workspace()
         )
-        symlink_fixture = dry_run_path.parent / "fixture-link.html"
+        symlink_fixture = usage_output / "fixture-link.html"
         symlink_fixture.symlink_to(fixture_path)
         payload = read_json(dry_run_path)
         payload["local_fixture_path"] = symlink_fixture.as_posix()
@@ -505,10 +623,10 @@ class LocalFixtureAdapterExecutionGatePlanTests(unittest.TestCase):
         self.assertFalse(result.complete)
         self.assertIn("local_fixture_path_is_symlink", result.rejection_reasons)
 
-        root, dry_run_path, gate_output, _fixture_path, _usage_output = (
+        root, dry_run_path, gate_output, _fixture_path, usage_output = (
             self.make_workspace()
         )
-        fixture_dir = dry_run_path.parent / "fixture-dir"
+        fixture_dir = usage_output / "fixture-dir"
         fixture_dir.mkdir()
         payload = read_json(dry_run_path)
         payload["local_fixture_path"] = fixture_dir.as_posix()
@@ -533,14 +651,14 @@ class LocalFixtureAdapterExecutionGatePlanTests(unittest.TestCase):
             result.rejection_reasons,
         )
 
-        root, dry_run_path, gate_output, _fixture_path, _usage_output = (
+        root, dry_run_path, gate_output, _fixture_path, usage_output = (
             self.make_workspace()
         )
         target_dir = root / "target-dir"
         target_dir.mkdir()
         linked_fixture = target_dir / "fixture.html"
         linked_fixture.write_text("<!doctype html>\n", encoding="utf-8")
-        link_dir = dry_run_path.parent / "link-dir"
+        link_dir = usage_output / "link-dir"
         link_dir.symlink_to(target_dir)
         payload = read_json(dry_run_path)
         payload["local_fixture_path"] = (link_dir / "fixture.html").as_posix()
@@ -706,9 +824,10 @@ class LocalFixtureAdapterExecutionGatePlanTests(unittest.TestCase):
             yield prefix, value
 
     def test_human_approval_request_contains_warning_language_and_hashes(self):
-        _root, dry_run_path, gate_output, fixture_path, _usage_output = (
+        _root, dry_run_path, gate_output, fixture_path, usage_output = (
             self.make_workspace()
         )
+        receipt_path = usage_output / "local_fixture_adapter_usage_receipt_result.json"
 
         result = self.run_plan(dry_run_path, gate_output)
         text = result.human_approval_request_path.read_text(encoding="utf-8")
@@ -729,7 +848,7 @@ class LocalFixtureAdapterExecutionGatePlanTests(unittest.TestCase):
             "The current artifact is only a gate plan.",
             "Execution gate plan ID: gate-001",
             sha256_file(dry_run_path),
-            "c" * 64,
+            sha256_file(receipt_path),
             "b" * 64,
             "a" * 64,
             sha256_file(fixture_path),

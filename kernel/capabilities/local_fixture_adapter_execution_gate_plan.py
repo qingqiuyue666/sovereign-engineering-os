@@ -612,22 +612,53 @@ def _allowed_fixture_root(
     source_path: Path,
     payload: dict[str, object],
 ) -> tuple[Path, list[str]]:
-    canonical_root = source_path.parent
+    fallback_root = source_path.parent
     reasons: list[str] = []
-    if "usage_receipt_path" in payload:
-        usage_receipt_path = payload.get("usage_receipt_path")
-        if not _non_empty_text(usage_receipt_path) or not _path_is_inside(
-            _path_from_value(str(usage_receipt_path), canonical_root),
-            canonical_root,
-        ):
-            reasons.append("dry_run_plan_usage_receipt_path_mismatch")
-    if "local_fixture_allowed_root" in payload:
-        allowed_root_value = payload.get("local_fixture_allowed_root")
-        if not _non_empty_text(allowed_root_value) or Path(
-            str(allowed_root_value)
-        ).resolve(strict=False) != canonical_root.resolve(strict=False):
-            reasons.append("dry_run_plan_local_fixture_allowed_root_mismatch")
-    return canonical_root, reasons
+    usage_receipt_path_value = payload.get("usage_receipt_path")
+    expected_usage_sha = payload.get("usage_receipt_sha256")
+    if not _non_empty_text(usage_receipt_path_value):
+        reasons.append("usage_receipt_path_missing")
+        return fallback_root, reasons
+
+    usage_receipt_path = _path_from_value(
+        str(usage_receipt_path_value),
+        source_path.parent,
+    )
+    if _candidate_repo_marker_in_path(usage_receipt_path):
+        reasons.append("candidate_repo_path_rejected")
+        return fallback_root, _dedupe_strings(reasons)
+    if usage_receipt_path.is_symlink():
+        reasons.append("usage_receipt_path_is_symlink")
+        return fallback_root, _dedupe_strings(reasons)
+    if not usage_receipt_path.exists() or not usage_receipt_path.is_file():
+        reasons.append("usage_receipt_path_not_file")
+        return fallback_root, _dedupe_strings(reasons)
+    if not _non_empty_text(expected_usage_sha):
+        reasons.append("usage_receipt_sha_missing")
+        return fallback_root, _dedupe_strings(reasons)
+    if sha256_file(usage_receipt_path) != expected_usage_sha:
+        reasons.append("usage_receipt_sha_mismatch")
+        return fallback_root, _dedupe_strings(reasons)
+
+    receipt_payload, receipt_ok = _read_json_object_if_regular(usage_receipt_path)
+    if not receipt_ok:
+        reasons.append("usage_receipt_not_json_object")
+        return fallback_root, _dedupe_strings(reasons)
+    if receipt_payload.get("receipt_type") != _USAGE_RECEIPT_TYPE:
+        reasons.append("usage_receipt_type_mismatch")
+    if receipt_payload.get("usage_receipt_granted") is not True:
+        reasons.append("usage_receipt_not_granted")
+    if reasons:
+        return fallback_root, _dedupe_strings(reasons)
+
+    canonical_root = usage_receipt_path.parent
+    allowed_root_value = payload.get("local_fixture_allowed_root")
+    if not _non_empty_text(allowed_root_value) or _path_from_value(
+        str(allowed_root_value),
+        source_path.parent,
+    ).resolve(strict=False) != canonical_root.resolve(strict=False):
+        reasons.append("dry_run_plan_local_fixture_allowed_root_mismatch")
+    return canonical_root, _dedupe_strings(reasons)
 
 
 def _review_attestation_rejection_reasons(value: str | None) -> list[str]:
