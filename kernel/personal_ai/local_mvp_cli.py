@@ -45,6 +45,7 @@ from kernel.personal_ai.local_launcher import (
     run_bounded_playwright_worker_adapter_draft_launcher,
     run_local_fixture_adapter_dry_run_invocation_plan_launcher,
     run_local_fixture_adapter_execution_gate_plan_launcher,
+    run_local_fixture_human_approval_artifact_launcher,
     run_local_fixture_playwright_adapter_admission_gate_launcher,
     run_local_fixture_adapter_usage_receipt_launcher,
     run_operator_provided_playwright_execution_receipt_launcher,
@@ -145,6 +146,7 @@ _SUBCOMMANDS = {
     "launch-local-fixture-adapter-usage-receipt",
     "launch-local-fixture-adapter-dry-run-invocation-plan",
     "launch-local-fixture-adapter-execution-gate-plan",
+    "launch-local-fixture-human-approval-artifact",
     "launch-local-asset-smoke-promotion-gate",
     "launch-local-asset-iteration-promotion-gate",
     "launch-local-asset-smoke-iteration-review-packet",
@@ -1114,6 +1116,18 @@ def _main_subcommand(argv) -> int:
             )
             _print_command_payload(result.to_cli_payload())
             return 0 if result.complete else 1
+        if args.command == "launch-local-fixture-human-approval-artifact":
+            result = run_local_fixture_human_approval_artifact_launcher(
+                Path(args.execution_gate_plan),
+                Path(args.output_dir),
+                args.approval_artifact_id,
+                args.reviewer_id,
+                args.approval_attestation,
+                project_id=args.project_id,
+                operator_notes=args.operator_notes,
+            )
+            _print_command_payload(result.to_cli_payload())
+            return 0 if result.complete else 1
         if args.command == "launch-office-workflow":
             result = run_local_office_launcher(
                 Path(args.input_workbook),
@@ -1992,6 +2006,26 @@ def _build_subcommand_parser():
     execution_gate_plan_parser.add_argument("--project-id")
     execution_gate_plan_parser.add_argument("--reviewer-id")
     execution_gate_plan_parser.add_argument("--operator-notes")
+
+    human_approval_artifact_parser = subparsers.add_parser(
+        "launch-local-fixture-human-approval-artifact"
+    )
+    human_approval_artifact_parser.add_argument(
+        "--execution-gate-plan",
+        required=True,
+    )
+    human_approval_artifact_parser.add_argument("--output-dir", required=True)
+    human_approval_artifact_parser.add_argument(
+        "--approval-artifact-id",
+        required=True,
+    )
+    human_approval_artifact_parser.add_argument("--reviewer-id", required=True)
+    human_approval_artifact_parser.add_argument(
+        "--approval-attestation",
+        required=True,
+    )
+    human_approval_artifact_parser.add_argument("--project-id")
+    human_approval_artifact_parser.add_argument("--operator-notes")
 
     launch_office_parser = subparsers.add_parser("launch-office-workflow")
     launch_office_parser.add_argument("--input-workbook", required=True)

@@ -134,6 +134,10 @@ _LAUNCHER_WORKFLOW_CALLABLES = (
         "local_fixture_adapter_execution_gate_plan_workflow",
         "run_local_fixture_adapter_execution_gate_plan_launcher",
     ),
+    (
+        "local_fixture_human_approval_artifact_workflow",
+        "run_local_fixture_human_approval_artifact_launcher",
+    ),
     ("local_office_workflow", "run_local_office_launcher"),
     ("model_fixture_workflow", "run_model_fixture_launcher"),
     ("model_provider_dry_run_workflow", "run_model_provider_dry_run_launcher"),
@@ -179,6 +183,7 @@ _REQUIRED_CLI_SUBCOMMANDS = (
     "launch-local-fixture-adapter-usage-receipt",
     "launch-local-fixture-adapter-dry-run-invocation-plan",
     "launch-local-fixture-adapter-execution-gate-plan",
+    "launch-local-fixture-human-approval-artifact",
     "launch-office-workflow",
     "launch-model-fixture",
     "launch-model-provider-dry-run",

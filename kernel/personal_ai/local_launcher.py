@@ -146,6 +146,10 @@ from kernel.capabilities.local_fixture_adapter_execution_gate_plan import (
     LOCAL_FIXTURE_ADAPTER_EXECUTION_GATE_PLAN_SUMMARY_FILE,
     run_local_fixture_adapter_execution_gate_plan_launcher as run_local_fixture_adapter_execution_gate_plan_capability,
 )
+from kernel.capabilities.local_fixture_human_approval_artifact import (
+    LOCAL_FIXTURE_HUMAN_APPROVAL_ARTIFACT_SUMMARY_FILE,
+    run_local_fixture_human_approval_artifact_launcher as run_local_fixture_human_approval_artifact_capability,
+)
 from kernel.personal_ai.artifact_index import build_artifact_index
 from kernel.personal_ai.asset_scan_operational_control import (
     ASSET_SCAN_FAILURE_BUNDLE_FILE,
@@ -233,6 +237,7 @@ __all__ = [
     "run_local_fixture_adapter_usage_receipt_launcher",
     "run_local_fixture_adapter_dry_run_invocation_plan_launcher",
     "run_local_fixture_adapter_execution_gate_plan_launcher",
+    "run_local_fixture_human_approval_artifact_launcher",
     "run_local_office_launcher",
     "run_model_fixture_launcher",
     "run_model_provider_dry_run_launcher",
@@ -2372,6 +2377,38 @@ def run_local_fixture_adapter_execution_gate_plan_launcher(
         summary_path=result.summary_path
         if result.summary_path is not None
         else output_path / LOCAL_FIXTURE_ADAPTER_EXECUTION_GATE_PLAN_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_local_fixture_human_approval_artifact_launcher(
+    execution_gate_plan: Path,
+    output_dir: Path,
+    approval_artifact_id: str,
+    reviewer_id: str,
+    approval_attestation: str,
+    *,
+    project_id: str | None = None,
+    operator_notes: str | None = None,
+) -> LauncherWorkflowResult:
+    output_path = Path(output_dir)
+    result = run_local_fixture_human_approval_artifact_capability(
+        Path(execution_gate_plan),
+        output_path,
+        approval_artifact_id,
+        reviewer_id,
+        approval_attestation,
+        project_id=project_id,
+        operator_notes=operator_notes,
+    )
+    return LauncherWorkflowResult(
+        workflow="local_fixture_human_approval_artifact_workflow",
+        output_dir=output_path,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else output_path / LOCAL_FIXTURE_HUMAN_APPROVAL_ARTIFACT_SUMMARY_FILE,
         required_human_approval=True,
     )
 
