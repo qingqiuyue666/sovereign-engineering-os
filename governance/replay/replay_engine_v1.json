@@ -3,26 +3,59 @@
   "version": "v1",
   "status": "standalone_descriptor_verifier",
   "integration_dependency": {
-    "real_local_runner_boundary_v1": "semantic_dependency",
+    "real_local_runner_boundary_v1": "merged_dependency",
+    "capability_token_lifecycle_v1": "merged_metadata_dependency",
+    "local_job_queue_v1": "merged_metadata_dependency",
     "uses_unmerged_runner_artifacts": false,
-    "runner_receipt_integration_deferred": true
+    "runner_receipt_integration_deferred": false
   },
   "required_comparisons": [
-    "receipt_digest",
-    "environment_digest",
     "command_id",
     "argv_hash",
-    "output_digest",
+    "resolved_argv_hash",
+    "executable_path",
+    "executable_realpath",
+    "executable_sha256_or_unavailable_reason",
+    "environment_digest",
+    "environment_path_policy_id",
+    "executable_resolution_policy_id",
+    "resolution_policy_digest",
+    "stdout_sha256",
+    "stderr_sha256",
+    "receipt_sha256",
     "exit_code"
   ],
+  "optional_metadata_comparisons": {
+    "capability_token_lifecycle_v1": [
+      "token_id_or_ref",
+      "token_command_id_binding",
+      "token_scope_binding",
+      "repo_revision_binding",
+      "approval_artifact_binding",
+      "consumed_revoked_or_expired_state_as_evidence_only"
+    ],
+    "local_job_queue_v1": [
+      "job_id_or_ref",
+      "job_state_evidence",
+      "append_only_event_ref",
+      "runner_receipt_ref",
+      "token_receipt_or_ref_when_available"
+    ]
+  },
   "allowed_report_classifications": [
     "REPLAY_MATCH",
     "RECEIPT_MISMATCH",
     "ENVIRONMENT_MISMATCH",
     "COMMAND_MISMATCH",
     "ARGV_MISMATCH",
+    "RESOLVED_ARGV_MISMATCH",
+    "EXECUTABLE_PATH_MISMATCH",
+    "EXECUTABLE_SHA256_MISMATCH",
+    "RESOLUTION_POLICY_MISMATCH",
     "OUTPUT_MISMATCH",
     "EXIT_CODE_MISMATCH",
+    "TOKEN_METADATA_MISMATCH",
+    "QUEUE_METADATA_MISMATCH",
     "MULTIPLE_MISMATCHES",
     "INVALID_DESCRIPTOR",
     "REPLAY_REJECTED"
@@ -31,7 +64,15 @@
   "report_required": true,
   "forbidden_authority": {
     "command_execution_authorized": false,
+    "runner_job_execution_authorized": false,
     "automatic_reexecution_authorized": false,
+    "token_consumption_authorized": false,
+    "token_issue_authorized": false,
+    "token_revocation_authorized": false,
+    "queue_mutation_authorized": false,
+    "job_enqueue_authorized": false,
+    "daemon_authorized": false,
+    "scheduler_authorized": false,
     "arbitrary_shell_authorized": false,
     "shell_true_authorized": false,
     "arbitrary_argv_authorized": false,
