@@ -1,0 +1,90 @@
+{
+  "object_type": "MinimalControlledExecutionRoadmap",
+  "roadmap_id": "minimal_controlled_execution_v1",
+  "status": "ROADMAP_ONLY",
+  "next_target_state": "MINIMAL_CONTROLLED_EXECUTION_READY",
+  "implementation_allowed_in_this_pr": false,
+  "runner_implemented": false,
+  "allowlisted_runner_implemented": false,
+  "allowed_command_set": [
+    "git status --short",
+    "git diff --check",
+    "python3 -m unittest discover tests",
+    "make ci"
+  ],
+  "explicit_forbidden_commands": [
+    "arbitrary shell",
+    "arbitrary argv",
+    "command_line",
+    "payload-provided executable",
+    "payload-provided cwd/env/path",
+    "payload-provided timeout",
+    "network calls",
+    "browser control",
+    "provider API",
+    "credentials",
+    "DCC launch",
+    "ComfyUI launch",
+    "MCP execution",
+    "CLI plugin execution",
+    "package install",
+    "file deletion",
+    "asset mutation"
+  ],
+  "required_execution_closure_components": [
+    "TaskIntent",
+    "PolicyDecision",
+    "CommandEnvelope",
+    "AdmissionDecision",
+    "ApprovalToken if required",
+    "AllowlistedRunner",
+    "ExecutionReceipt",
+    "Verifier",
+    "JournalRecord",
+    "FailureBundle",
+    "OperatorTaskSnapshot"
+  ],
+  "receipt_requirements": [
+    "command_id",
+    "allowlist_id",
+    "started_at",
+    "ended_at",
+    "exit_code",
+    "stdout_digest",
+    "stderr_digest",
+    "output_truncation_policy",
+    "working_tree_before",
+    "working_tree_after",
+    "verifier_result",
+    "journal_entry_id",
+    "receipt_hash"
+  ],
+  "failure_bundle_requirements": [
+    "failure_id",
+    "failed_step",
+    "exit_code",
+    "stderr_digest",
+    "stdout_digest",
+    "verifier_failure",
+    "rollback_required",
+    "human_review_required",
+    "evidence_refs"
+  ],
+  "non_goals": [
+    "no general shell",
+    "no DCC control",
+    "no ComfyUI execution",
+    "no provider API",
+    "no browser automation",
+    "no package install",
+    "no GUI",
+    "no autonomous production action"
+  ],
+  "admission_criteria": [
+    "Commands must be selected by command_id from the allowlist.",
+    "Payloads must not supply executable, argv, cwd, env, path, or timeout.",
+    "Outputs must be recorded by digest with truncation policy.",
+    "Verifier result and journal entry ID are required before closure.",
+    "Failures must produce a FailureBundle with human review status."
+  ]
+}
