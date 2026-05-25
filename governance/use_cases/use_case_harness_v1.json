@@ -1,0 +1,69 @@
+{
+  "object_type": "UseCaseHarnessPolicy",
+  "harness_id": "use_case_harness_v1",
+  "status": "ACTIVE",
+  "documentation_and_fixtures_only": true,
+  "execution_allowed": false,
+  "runner_allowed": false,
+  "network_allowed": false,
+  "provider_api_allowed": false,
+  "browser_allowed": false,
+  "github_api_allowed": false,
+  "dcc_launch_allowed": false,
+  "comfyui_launch_allowed": false,
+  "asset_mutation_allowed": false,
+  "future_module_admission": {
+    "requires_use_case_id": true,
+    "minimum_use_case_ids": 1,
+    "accepted_field": "use_case_ids"
+  },
+  "required_files_per_use_case": [
+    "problem.md",
+    "input_example.json",
+    "expected_output.json",
+    "acceptance.md",
+    "manual_baseline.md",
+    "automation_gain.md",
+    "failure_modes.md"
+  ],
+  "use_cases": [
+    {
+      "use_case_id": "uc_001_codex_pr_preflight",
+      "goal": "evaluate Codex-created PR before merge",
+      "stable": true
+    },
+    {
+      "use_case_id": "uc_002_local_test_receipt",
+      "goal": "turn local test command results into receipts",
+      "stable": true
+    },
+    {
+      "use_case_id": "uc_003_github_pr_audit",
+      "goal": "audit provided GitHub PR metadata, diff, and CI snapshots before merge",
+      "stable": true
+    },
+    {
+      "use_case_id": "uc_004_comfyui_workflow_static_check",
+      "goal": "statically inspect ComfyUI workflow JSON without launching ComfyUI",
+      "stable": true
+    },
+    {
+      "use_case_id": "uc_005_creative_tool_inventory",
+      "goal": "inventory installed creative tools without controlling them",
+      "stable": true
+    }
+  ],
+  "forbidden_surfaces": [
+    "runner",
+    "subprocess",
+    "raw_command_execution",
+    "network_call",
+    "provider_api_call",
+    "browser_control",
+    "github_api_call",
+    "dcc_launch",
+    "comfyui_launch",
+    "asset_mutation",
+    "tool_control"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "use_case_id": "uc_004_comfyui_workflow_static_check",
+  "output_type": "comfyui_static_workflow_check",
+  "execution_allowed": false,
+  "runner_required": false,
+  "network_required": false,
+  "static_check_only": true,
+  "comfyui_launch_allowed": false,
+  "dcc_launch_allowed": false,
+  "checks": [
+    "json_parsed",
+    "nodes_present",
+    "links_present",
+    "missing_reference_report"
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "use_case_id": "uc_001_codex_pr_preflight",
+  "input_type": "operator_provided_pr_preflight_fixture",
+  "branch": "example/codex-pr",
+  "base_sha": "sha-example-base",
+  "head_sha": "sha-example-head",
+  "changed_files": [
+    "kernel/example.py",
+    "tests/tracer_bullet/test_example.py"
+  ],
+  "local_checks": [
+    {
+      "command_id": "focused_unittest",
+      "status": "PASS",
+      "exit_code": 0
+    }
+  ],
+  "forbidden_surface_confirmations": {
+    "shell_true": false,
+    "network": false,
+    "provider_api": false,
+    "asset_mutation": false
+  }
+}

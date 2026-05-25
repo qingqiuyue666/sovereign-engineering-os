@@ -1,0 +1,15 @@
+{
+  "use_case_id": "uc_005_creative_tool_inventory",
+  "input_type": "operator_provided_creative_tool_inventory",
+  "inventory_source": "manual_snapshot",
+  "tools": [
+    {
+      "tool_id": "blender",
+      "display_name": "Blender",
+      "installed": true,
+      "version": "example-version",
+      "control_allowed": false
+    }
+  ],
+  "inventory_only": true
+}
