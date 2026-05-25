@@ -1,0 +1,55 @@
+{
+  "policy_type": "task_to_workflow_router_skeleton_v1",
+  "version": "v1",
+  "runtime_admitted": true,
+  "production_admitted": false,
+  "descriptor_only": true,
+  "workflow_execution_allowed": false,
+  "subprocess_allowed": false,
+  "network_allowed": false,
+  "browser_allowed": false,
+  "provider_api_allowed": false,
+  "model_calls_allowed": false,
+  "tool_launch_allowed": false,
+  "raw_command_allowed": false,
+  "command_line_allowed": false,
+  "argv_allowed": false,
+  "supported_domains": [
+    "VIDEO",
+    "VFX",
+    "AI_IMAGE",
+    "COMFYUI_WORKFLOW",
+    "DCC_SCENE",
+    "GIT_CODE_AUDIT",
+    "ASSET_INGESTION",
+    "RELEASE_VALIDATION"
+  ],
+  "task_intent_fields": [
+    "task_id",
+    "domain",
+    "objective",
+    "inputs",
+    "constraints",
+    "risk_tolerance",
+    "desired_outputs"
+  ],
+  "workflow_graph_descriptor_fields": [
+    "workflow_id",
+    "workflow_version",
+    "nodes",
+    "edges",
+    "required_tools",
+    "required_assets",
+    "approval_requirements",
+    "evidence_requirements",
+    "rollback_plan",
+    "evaluation_plan",
+    "graph_hash"
+  ],
+  "high_risk_domains_require_approval": [
+    "VFX",
+    "COMFYUI_WORKFLOW",
+    "DCC_SCENE"
+  ],
+  "graph_hash_deterministic": true
+}
