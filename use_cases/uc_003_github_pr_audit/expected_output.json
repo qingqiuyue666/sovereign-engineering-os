@@ -1,0 +1,15 @@
+{
+  "use_case_id": "uc_003_github_pr_audit",
+  "output_type": "github_pr_audit_packet",
+  "execution_allowed": false,
+  "runner_required": false,
+  "network_required": false,
+  "github_api_call_allowed": false,
+  "required_evidence": [
+    "metadata_snapshot",
+    "changed_files",
+    "ci_snapshot",
+    "merge_blockers"
+  ],
+  "merge_readiness": "derived_from_supplied_snapshot"
+}

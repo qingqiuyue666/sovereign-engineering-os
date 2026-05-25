@@ -1,0 +1,18 @@
+{
+  "use_case_id": "uc_005_creative_tool_inventory",
+  "output_type": "creative_tool_inventory_packet",
+  "execution_allowed": false,
+  "runner_required": false,
+  "network_required": false,
+  "inventory_only": true,
+  "tool_control_allowed": false,
+  "dcc_launch_allowed": false,
+  "asset_mutation_allowed": false,
+  "required_evidence": [
+    "tool_id",
+    "display_name",
+    "installed",
+    "version",
+    "control_allowed"
+  ]
+}
