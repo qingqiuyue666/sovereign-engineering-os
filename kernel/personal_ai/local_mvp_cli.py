@@ -52,6 +52,7 @@ from kernel.personal_ai.local_launcher import (
     run_local_fixture_runner_receipt_metadata_artifact_launcher,
     run_local_fixture_runner_receipt_preflight_verifier_launcher,
     run_local_fixture_runner_stub_admission_gate_launcher,
+    run_real_local_runner_boundary_launcher,
     run_local_fixture_adapter_usage_receipt_launcher,
     run_operator_provided_playwright_execution_receipt_launcher,
     run_playwright_local_fixture_sandbox_smoke_launcher,
@@ -157,6 +158,7 @@ _SUBCOMMANDS = {
     "launch-local-fixture-runner-receipt-contract-draft",
     "launch-local-fixture-runner-receipt-preflight-verifier",
     "launch-local-fixture-runner-receipt-metadata-artifact",
+    "launch-real-local-runner-boundary",
     "launch-local-asset-smoke-promotion-gate",
     "launch-local-asset-iteration-promotion-gate",
     "launch-local-asset-smoke-iteration-review-packet",
@@ -1197,6 +1199,18 @@ def _main_subcommand(argv) -> int:
             )
             _print_command_payload(result.to_cli_payload())
             return 0 if result.complete else 1
+        if args.command == "launch-real-local-runner-boundary":
+            result = run_real_local_runner_boundary_launcher(
+                args.command_id,
+                Path(args.output_dir),
+                Path(args.approval_artifact),
+                args.run_id,
+                timeout_seconds=args.timeout_seconds,
+                repo_root=Path(args.repo_root) if args.repo_root else None,
+                repo_revision=args.repo_revision,
+            )
+            _print_command_payload(result.to_cli_payload())
+            return 0 if result.complete else 1
         if args.command == "launch-office-workflow":
             result = run_local_office_launcher(
                 Path(args.input_workbook),
@@ -2182,6 +2196,24 @@ def _build_subcommand_parser():
     )
     runner_receipt_metadata_parser.add_argument("--project-id")
     runner_receipt_metadata_parser.add_argument("--operator-notes")
+
+    real_local_runner_parser = subparsers.add_parser(
+        "launch-real-local-runner-boundary"
+    )
+    real_local_runner_parser.add_argument("--command-id", required=True)
+    real_local_runner_parser.add_argument("--output-dir", required=True)
+    real_local_runner_parser.add_argument("--approval-artifact", required=True)
+    real_local_runner_parser.add_argument("--run-id", required=True)
+    real_local_runner_parser.add_argument(
+        "--timeout-seconds",
+        required=True,
+        type=float,
+    )
+    real_local_runner_parser.add_argument("--repo-root")
+    real_local_runner_parser.add_argument(
+        "--repo-revision",
+        default="not_provided",
+    )
 
     launch_office_parser = subparsers.add_parser("launch-office-workflow")
     launch_office_parser.add_argument("--input-workbook", required=True)

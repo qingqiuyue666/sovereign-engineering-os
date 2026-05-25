@@ -173,6 +173,8 @@ _LOCAL_FIXTURE_RUNNER_RECEIPT_METADATA_ARTIFACT_ADAPTER_ID = (
 _LOCAL_FIXTURE_RUNNER_RECEIPT_METADATA_ARTIFACT_CAPABILITY = (
     "launch_local_fixture_runner_receipt_metadata_artifact"
 )
+_REAL_LOCAL_RUNNER_BOUNDARY_ADAPTER_ID = "real_local_runner_boundary"
+_REAL_LOCAL_RUNNER_BOUNDARY_CAPABILITY = "launch_real_local_runner_boundary"
 _LOCAL_FIXTURE_RUNNER_METADATA_CHAIN_ROUTES = (
     (
         _LOCAL_FIXTURE_RUNNER_CONTRACT_DRAFT_ADAPTER_ID,
@@ -726,6 +728,11 @@ def _validate_adapter_routes(node_records, graph_execution_mode):
                 decision.reason_codes,
                 graph_execution_mode,
             )
+            and not _route_is_safe_real_local_runner_boundary_fixture(
+                node,
+                decision.reason_codes,
+                graph_execution_mode,
+            )
         ):
             raise ValueError(
                 "task graph adapter route is not admitted: "
@@ -902,6 +909,20 @@ def _route_is_safe_local_fixture_runner_metadata_chain_fixture(
     )
 
 
+def _route_is_safe_real_local_runner_boundary_fixture(
+    node,
+    reason_codes,
+    graph_execution_mode,
+):
+    return (
+        graph_execution_mode == "fixture_execution"
+        and node["execution_mode"] == "fixture"
+        and node["adapter_id"] == _REAL_LOCAL_RUNNER_BOUNDARY_ADAPTER_ID
+        and node["capability"] == _REAL_LOCAL_RUNNER_BOUNDARY_CAPABILITY
+        and tuple(reason_codes) == ("adapter_not_admitted",)
+    )
+
+
 def _execute_graph_nodes(nodes_by_id, graph_execution_mode):
     executed = []
     status_by_node_id = {}
@@ -1022,6 +1043,11 @@ def _execute_graph_nodes(nodes_by_id, graph_execution_mode):
             )
             if runner_metadata_chain_result is not None:
                 record.update(runner_metadata_chain_result)
+            real_local_runner_result = (
+                _run_real_local_runner_boundary_node_if_requested(node)
+            )
+            if real_local_runner_result is not None:
+                record.update(real_local_runner_result)
         status_by_node_id[node_id] = record["status"]
         executed.append(record)
     return executed
@@ -1049,6 +1075,7 @@ def _base_node_execution_record(node, graph_execution_mode):
             _LOCAL_FIXTURE_ADAPTER_DRY_RUN_INVOCATION_PLAN_ADAPTER_ID,
             _LOCAL_FIXTURE_ADAPTER_EXECUTION_GATE_PLAN_ADAPTER_ID,
             _LOCAL_FIXTURE_HUMAN_APPROVAL_ARTIFACT_ADAPTER_ID,
+            _REAL_LOCAL_RUNNER_BOUNDARY_ADAPTER_ID,
             *_LOCAL_FIXTURE_RUNNER_METADATA_CHAIN_ADAPTER_IDS,
         ),
         "adapter_route_policy": "local_delivery_integration"
@@ -1318,6 +1345,18 @@ def _base_node_execution_record(node, graph_execution_mode):
         )
         record["metadata_only"] = True
         record["receipt_metadata_only"] = True
+    if node["adapter_id"] == _REAL_LOCAL_RUNNER_BOUNDARY_ADAPTER_ID:
+        record["metadata_only"] = False
+        record["command_id_only"] = True
+        record["user_command_line_allowed"] = False
+        record["user_argv_allowed"] = False
+        record["shell"] = False
+        record["network_access_performed"] = False
+        record["browser_open_performed"] = False
+        record["provider_api_called"] = False
+        record["production_autonomy_enabled"] = False
+        record["controlled_local_runner_execution_performed"] = True
+        record["adapter_route_admitted"] = False
     return record
 
 
@@ -1369,6 +1408,8 @@ def _adapter_route_policy(node, graph_execution_mode):
         node["capability"],
     ) in _LOCAL_FIXTURE_RUNNER_METADATA_CHAIN_ROUTES:
         return "local_fixture_runner_metadata_chain_not_production_admitted"
+    if node["adapter_id"] == _REAL_LOCAL_RUNNER_BOUNDARY_ADAPTER_ID:
+        return "real_local_runner_boundary_candidate_not_production_admitted"
     if node["adapter_id"] == _OPERATOR_PLAYWRIGHT_RECEIPT_ADAPTER_ID:
         return "operator_provided_local_fixture_receipt_only_not_production_admitted"
     if node["adapter_id"] == _BOUNDED_PLAYWRIGHT_ADAPTER_DRAFT_ID:
@@ -1379,6 +1420,76 @@ def _adapter_route_policy(node, graph_execution_mode):
     ):
         return "runtime_admission_dry_run_plan"
     return "registry_admitted"
+
+
+def _run_real_local_runner_boundary_node_if_requested(node):
+    if node["adapter_id"] != _REAL_LOCAL_RUNNER_BOUNDARY_ADAPTER_ID:
+        return None
+    if node["capability"] != _REAL_LOCAL_RUNNER_BOUNDARY_CAPABILITY:
+        raise ValueError("task graph real local runner capability is not registered")
+    inputs = node["inputs"]
+    command_id = _required_string_input(inputs, "command_id", "real local runner")
+    output_dir = _required_string_input(inputs, "output_dir", "real local runner")
+    approval_artifact_path = _required_string_input(
+        inputs,
+        "approval_artifact_path",
+        "real local runner",
+    )
+    run_id = _required_string_input(inputs, "run_id", "real local runner")
+    timeout_seconds = inputs.get("timeout_seconds")
+    if not isinstance(timeout_seconds, (int, float)) or isinstance(
+        timeout_seconds,
+        bool,
+    ):
+        raise ValueError("task graph real local runner timeout_seconds is missing")
+    repo_root = _optional_nonempty_string_input(
+        inputs,
+        "repo_root",
+        "real local runner",
+    )
+    repo_revision = _optional_nonempty_string_input(
+        inputs,
+        "repo_revision",
+        "real local runner",
+    )
+
+    from kernel.runtime.real_local_runner_boundary import (
+        run_real_local_runner_boundary_launcher,
+    )
+
+    result = run_real_local_runner_boundary_launcher(
+        command_id,
+        Path(output_dir),
+        Path(approval_artifact_path),
+        run_id,
+        timeout_seconds=float(timeout_seconds),
+        repo_root=None if repo_root is None else Path(repo_root),
+        repo_revision="not_provided" if repo_revision is None else repo_revision,
+    )
+    payload = result.to_cli_payload()
+    return {
+        "status": "completed" if result.complete else "failed",
+        "real_local_runner_complete": result.complete,
+        "real_local_runner_status": result.status,
+        "real_local_runner_exit_code": result.exit_code,
+        "real_local_runner_timed_out": result.timed_out,
+        "real_local_runner_receipt_path": payload["receipt_path"],
+        "real_local_runner_stdout_path": payload["stdout_path"],
+        "real_local_runner_stderr_path": payload["stderr_path"],
+        "real_local_runner_replay_manifest_path": payload["replay_manifest_path"],
+        "real_local_runner_failure_bundle_path": payload["failure_bundle_path"],
+        "real_local_runner_artifact_binding_path": payload["artifact_binding_path"],
+        "real_local_runner_summary_path": payload["summary_path"],
+        "command_id_only": True,
+        "user_command_line_allowed": False,
+        "user_argv_allowed": False,
+        "shell": False,
+        "network_access_performed": False,
+        "browser_open_performed": False,
+        "provider_api_called": False,
+        "production_autonomy_enabled": False,
+        "adapter_route_admitted": False,
+    }
 
 
 def _run_delivery_node_if_requested(node):
