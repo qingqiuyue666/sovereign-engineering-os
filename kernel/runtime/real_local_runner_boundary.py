@@ -15,6 +15,7 @@ from typing import Mapping, Sequence
 import json
 import os
 import subprocess
+import sys
 import time
 
 from kernel.personal_ai.hash_utils import sha256_canonical_json, sha256_file
@@ -26,6 +27,8 @@ __all__ = [
     "REAL_LOCAL_RUNNER_ARTIFACT_BINDING_FILE",
     "REAL_LOCAL_RUNNER_COMMAND_ALLOWLIST",
     "REAL_LOCAL_RUNNER_DESCRIPTOR_FILE",
+    "REAL_LOCAL_RUNNER_ENVIRONMENT_PATH_POLICY_ID",
+    "REAL_LOCAL_RUNNER_EXECUTABLE_RESOLUTION_POLICY_ID",
     "REAL_LOCAL_RUNNER_FAILURE_BUNDLE_FILE",
     "REAL_LOCAL_RUNNER_RECEIPT_FILE",
     "REAL_LOCAL_RUNNER_REPLAY_MANIFEST_FILE",
@@ -42,6 +45,12 @@ __all__ = [
 
 REAL_LOCAL_RUNNER_ADAPTER_ID = "real_local_runner_boundary"
 REAL_LOCAL_RUNNER_CAPABILITY = "launch_real_local_runner_boundary"
+REAL_LOCAL_RUNNER_ENVIRONMENT_PATH_POLICY_ID = (
+    "real_local_runner_deterministic_path_env_v1"
+)
+REAL_LOCAL_RUNNER_EXECUTABLE_RESOLUTION_POLICY_ID = (
+    "real_local_runner_system_brew_repo_executable_resolution_v1"
+)
 REAL_LOCAL_RUNNER_APPROVAL_ATTESTATION = (
     "I_REVIEWED_REAL_LOCAL_RUNNER_BOUNDARY_V1_COMMAND_ID_ONLY_"
     "NO_SHELL_NO_ARGV_OVERRIDE_NO_NETWORK_NO_BROWSER_NO_PRODUCTION"
@@ -118,6 +127,26 @@ _OUTPUT_FILES = (
     REAL_LOCAL_RUNNER_REPLAY_MANIFEST_FILE,
     REAL_LOCAL_RUNNER_ARTIFACT_BINDING_FILE,
     REAL_LOCAL_RUNNER_SUMMARY_FILE,
+)
+_SYSTEM_EXECUTABLE_ROOTS = (
+    "/usr/bin",
+    "/bin",
+    "/usr/sbin",
+    "/sbin",
+    "/System/Cryptexes/App/usr/bin",
+    "/Library/Apple/usr/bin",
+)
+_BREW_EXECUTABLE_ROOTS = (
+    "/opt/homebrew/bin",
+    "/opt/homebrew/sbin",
+    "/opt/homebrew/Cellar",
+    "/usr/local/bin",
+    "/usr/local/sbin",
+    "/usr/local/Cellar",
+)
+_REPO_EXECUTABLE_RELATIVE_ROOTS = (
+    "tools/bin",
+    ".venv/bin",
 )
 
 
@@ -252,6 +281,13 @@ def preflight_real_local_runner_descriptor(
     except ValueError as error:
         argv = ()
         failures.append(str(error))
+    resolution = _executable_resolution_payload(
+        command_id=descriptor.command_id,
+        argv=argv,
+        repo_root=descriptor.repo_root,
+        include_host_path_check=True,
+    )
+    failures.extend(resolution["failure_reasons"])
     failures.extend(_allowlist_rejection_reasons(argv))
     failures.extend(_descriptor_rejection_reasons(descriptor))
     failures.extend(_output_sandbox_rejection_reasons(descriptor.output_dir))
@@ -263,6 +299,20 @@ def preflight_real_local_runner_descriptor(
         "command_id": descriptor.command_id,
         "argv_hash": sha256_canonical_json(list(argv)),
         "command_id_only": True,
+        "environment_path_policy_id": REAL_LOCAL_RUNNER_ENVIRONMENT_PATH_POLICY_ID,
+        "executable_resolution_policy_id": (
+            REAL_LOCAL_RUNNER_EXECUTABLE_RESOLUTION_POLICY_ID
+        ),
+        "executable_resolution": resolution,
+        "resolution_policy_digest": resolution["resolution_policy_digest"],
+        "resolved_argv": resolution["resolved_argv"],
+        "resolved_argv_hash": resolution["resolved_argv_hash"],
+        "resolved_executable_path": resolution["resolved_executable_path"],
+        "resolved_executable_realpath": resolution["resolved_executable_realpath"],
+        "resolved_executable_sha256": resolution["resolved_executable_sha256"],
+        "resolved_executable_sha256_unavailable_reason": (
+            resolution["resolved_executable_sha256_unavailable_reason"]
+        ),
         "user_command_line_allowed": False,
         "user_argv_allowed": False,
         "shell_allowed": False,
@@ -317,6 +367,9 @@ def run_real_local_runner_boundary(
 
     paths = _artifact_paths(descriptor.output_dir)
     _write_json_exclusive(paths[REAL_LOCAL_RUNNER_DESCRIPTOR_FILE], descriptor.to_dict())
+    resolution = preflight["executable_resolution"]
+    resolved_argv = _required_resolved_argv(resolution)
+    runner_environment = _runner_environment(descriptor.repo_root)
     started_at = time.time()
     timed_out = False
     exit_code: int | None
@@ -324,14 +377,14 @@ def run_real_local_runner_boundary(
     stderr_text = ""
     try:
         completed = subprocess.run(
-            list(descriptor.argv),
+            resolved_argv,
             cwd=descriptor.repo_root,
             capture_output=True,
             text=True,
             timeout=descriptor.timeout_seconds,
             shell=False,
             check=False,
-            env=_runner_environment(),
+            env=runner_environment,
         )
         exit_code = completed.returncode
         stdout_text = completed.stdout
@@ -354,6 +407,8 @@ def run_real_local_runner_boundary(
         timed_out=timed_out,
         duration_ms=duration_ms,
         paths=paths,
+        resolution=resolution,
+        runner_environment=runner_environment,
     )
     _write_json_exclusive(paths[REAL_LOCAL_RUNNER_RECEIPT_FILE], receipt)
 
@@ -371,6 +426,8 @@ def run_real_local_runner_boundary(
         receipt=receipt,
         paths=paths,
         failure_bundle_path=failure_bundle_path,
+        resolution=resolution,
+        runner_environment=runner_environment,
     )
     _write_json_exclusive(
         paths[REAL_LOCAL_RUNNER_REPLAY_MANIFEST_FILE],
@@ -531,15 +588,286 @@ def _approval_rejection_reasons(
     return tuple(failures)
 
 
-def _runner_environment() -> dict[str, str]:
-    return {
+def _runner_environment(repo_root: Path) -> dict[str, str]:
+    environment = {
         "LC_ALL": "C",
-        "PATH": os.environ.get("PATH", "/usr/bin:/bin:/usr/sbin:/sbin"),
+        "PATH": os.pathsep.join(_deterministic_path_entries(repo_root)),
         "PYTHONDONTWRITEBYTECODE": "1",
         "REAL_LOCAL_RUNNER_NETWORK_ALLOWED": "0",
         "REAL_LOCAL_RUNNER_BROWSER_ALLOWED": "0",
         "REAL_LOCAL_RUNNER_PRODUCTION_AUTONOMY_ALLOWED": "0",
     }
+    python_resolution = _executable_resolution_payload(
+        command_id="runner_environment_python",
+        argv=("python3",),
+        repo_root=repo_root,
+        include_host_path_check=False,
+    )
+    if python_resolution["accepted"]:
+        environment["PYTHON"] = str(python_resolution["resolved_executable_path"])
+    return environment
+
+
+def _executable_resolution_payload(
+    *,
+    command_id: str,
+    argv: Sequence[str],
+    repo_root: Path,
+    include_host_path_check: bool,
+) -> dict[str, object]:
+    executable_name = argv[0] if argv else ""
+    policy_material = _resolution_policy_material(repo_root, executable_name)
+    failures: list[str] = []
+    if not executable_name:
+        failures.append("executable_name_missing")
+    elif Path(executable_name).name != executable_name:
+        failures.append("executable_name_must_be_bare_filename:" + executable_name)
+    elif os.path.isabs(executable_name) or os.sep in executable_name:
+        failures.append("executable_name_must_not_include_path:" + executable_name)
+
+    inspected: dict[str, object] | None = None
+    candidate_failure_reasons: list[str] = []
+    if not failures:
+        for candidate in _candidate_executable_paths(executable_name, repo_root):
+            candidate_failures, candidate_payload = _inspect_executable_candidate(
+                candidate,
+                executable_name=executable_name,
+                repo_root=repo_root,
+            )
+            if not candidate_failures:
+                inspected = candidate_payload
+                break
+            candidate_failure_reasons.extend(candidate_failures)
+        if inspected is None:
+            failures.extend(sorted(set(candidate_failure_reasons)))
+            failures.append("executable_resolution_missing:" + executable_name)
+
+    if include_host_path_check and executable_name:
+        failures.extend(_host_path_hijack_rejection_reasons(executable_name, repo_root))
+
+    resolved_path = "" if inspected is None else str(inspected["path"])
+    resolved_realpath = "" if inspected is None else str(inspected["realpath"])
+    resolved_argv = [resolved_path, *list(argv[1:])] if inspected is not None else []
+    return {
+        "accepted": not failures,
+        "command_id": command_id,
+        "deterministic_path_entries": _deterministic_path_entries(repo_root),
+        "environment_path_policy_id": REAL_LOCAL_RUNNER_ENVIRONMENT_PATH_POLICY_ID,
+        "executable_name": executable_name,
+        "executable_resolution_policy_id": (
+            REAL_LOCAL_RUNNER_EXECUTABLE_RESOLUTION_POLICY_ID
+        ),
+        "failure_reasons": tuple(failures),
+        "host_path_used_for_resolution": False,
+        "resolution_policy_digest": sha256_canonical_json(policy_material),
+        "resolution_policy_material": policy_material,
+        "resolved_argv": resolved_argv,
+        "resolved_argv_hash": sha256_canonical_json(resolved_argv),
+        "resolved_executable_is_symlink": False
+        if inspected is None
+        else bool(inspected["is_symlink"]),
+        "resolved_executable_path": resolved_path,
+        "resolved_executable_realpath": resolved_realpath,
+        "resolved_executable_root_policy": ""
+        if inspected is None
+        else str(inspected["root_policy"]),
+        "resolved_executable_sha256": None
+        if inspected is None
+        else inspected["sha256"],
+        "resolved_executable_sha256_unavailable_reason": "executable_not_resolved"
+        if inspected is None
+        else inspected["sha256_unavailable_reason"],
+    }
+
+
+def _required_resolved_argv(resolution: Mapping[str, object]) -> list[str]:
+    resolved_argv = resolution.get("resolved_argv")
+    if not isinstance(resolved_argv, list) or not resolved_argv:
+        raise ValueError("real_local_runner_executable_not_resolved")
+    if not all(isinstance(part, str) and part for part in resolved_argv):
+        raise ValueError("real_local_runner_resolved_argv_invalid")
+    return list(resolved_argv)
+
+
+def _candidate_executable_paths(
+    executable_name: str,
+    repo_root: Path,
+) -> tuple[Path, ...]:
+    candidates: list[Path] = []
+    if executable_name == "python3" and sys.executable:
+        active_python = Path(sys.executable)
+        if active_python.name.startswith("python"):
+            candidates.append(active_python)
+    candidates.extend(
+        Path(root) / executable_name for root in _deterministic_path_entries(repo_root)
+    )
+    return _unique_paths(candidates)
+
+
+def _inspect_executable_candidate(
+    path: Path,
+    *,
+    executable_name: str,
+    repo_root: Path,
+) -> tuple[tuple[str, ...], dict[str, object] | None]:
+    candidate = _absolute_path(path)
+    realpath = _real_path(candidate)
+    failures: list[str] = []
+    if not candidate.exists():
+        failures.append("executable_missing:" + candidate.as_posix())
+        return tuple(failures), None
+    if not candidate.is_file():
+        failures.append("executable_not_file:" + candidate.as_posix())
+    if not os.access(candidate, os.X_OK):
+        failures.append("executable_not_executable:" + candidate.as_posix())
+    link_policy = _executable_root_policy(candidate, executable_name, repo_root)
+    realpath_policy = _executable_root_policy(realpath, executable_name, repo_root)
+    if link_policy is None:
+        failures.append("executable_outside_allowed_roots:" + candidate.as_posix())
+    if candidate.is_symlink() and realpath_policy is None:
+        failures.append("executable_symlink_unsafe:" + candidate.as_posix())
+    if not candidate.is_symlink() and realpath_policy is None:
+        failures.append("executable_realpath_outside_allowed_roots:" + realpath.as_posix())
+    if failures:
+        return tuple(failures), None
+    executable_sha256, unavailable_reason = _sha256_file_or_unavailable(realpath)
+    return (), {
+        "is_symlink": candidate.is_symlink(),
+        "path": candidate.as_posix(),
+        "realpath": realpath.as_posix(),
+        "root_policy": realpath_policy or link_policy,
+        "sha256": executable_sha256,
+        "sha256_unavailable_reason": unavailable_reason,
+    }
+
+
+def _host_path_hijack_rejection_reasons(
+    executable_name: str,
+    repo_root: Path,
+) -> tuple[str, ...]:
+    host_match = _first_host_path_match(executable_name)
+    if host_match is None:
+        return ()
+    failures, _payload = _inspect_executable_candidate(
+        host_match,
+        executable_name=executable_name,
+        repo_root=repo_root,
+    )
+    if failures:
+        return ("host_path_hijack_forbidden:" + executable_name,)
+    return ()
+
+
+def _first_host_path_match(executable_name: str) -> Path | None:
+    for entry in os.environ.get("PATH", "").split(os.pathsep):
+        if not entry:
+            entry = "."
+        candidate = Path(entry) / executable_name
+        if candidate.exists() and candidate.is_file() and os.access(candidate, os.X_OK):
+            return candidate
+    return None
+
+
+def _deterministic_path_entries(repo_root: Path) -> list[str]:
+    entries = [
+        (Path(repo_root) / relative_root).as_posix()
+        for relative_root in _REPO_EXECUTABLE_RELATIVE_ROOTS
+    ]
+    entries.extend(_SYSTEM_EXECUTABLE_ROOTS)
+    entries.extend(_BREW_EXECUTABLE_ROOTS)
+    return [path.as_posix() for path in _unique_paths(Path(entry) for entry in entries)]
+
+
+def _allowed_root_entries(
+    repo_root: Path,
+    executable_name: str,
+) -> tuple[tuple[Path, str], ...]:
+    roots: list[tuple[Path, str]] = []
+    roots.extend(
+        (Path(repo_root) / relative_root, "repo_tool_root")
+        for relative_root in _REPO_EXECUTABLE_RELATIVE_ROOTS
+    )
+    roots.extend((Path(root), "system_tool_root") for root in _SYSTEM_EXECUTABLE_ROOTS)
+    roots.extend((Path(root), "brew_tool_root") for root in _BREW_EXECUTABLE_ROOTS)
+    if executable_name == "python3" and sys.executable:
+        active_python = Path(sys.executable)
+        roots.append((active_python.parent, "explicit_active_python_runtime"))
+        roots.append(
+            (
+                _real_path(active_python).parent,
+                "explicit_active_python_runtime_realpath",
+            )
+        )
+    return tuple(roots)
+
+
+def _executable_root_policy(
+    path: Path,
+    executable_name: str,
+    repo_root: Path,
+) -> str | None:
+    candidate = _absolute_path(path)
+    for root, policy in _allowed_root_entries(repo_root, executable_name):
+        if _path_is_inside_without_following(candidate, root):
+            return policy
+    return None
+
+
+def _resolution_policy_material(repo_root: Path, executable_name: str) -> dict[str, object]:
+    return {
+        "allowed_root_policies": [
+            {
+                "path": _absolute_path(root).as_posix(),
+                "policy": policy,
+            }
+            for root, policy in _allowed_root_entries(repo_root, executable_name)
+        ],
+        "environment_path_policy_id": REAL_LOCAL_RUNNER_ENVIRONMENT_PATH_POLICY_ID,
+        "executable_name": executable_name,
+        "executable_resolution_policy_id": (
+            REAL_LOCAL_RUNNER_EXECUTABLE_RESOLUTION_POLICY_ID
+        ),
+        "host_path_used_for_resolution": False,
+        "host_path_hijack_rejected": True,
+        "path_search_order": _deterministic_path_entries(repo_root),
+        "symlink_policy": "allowed_only_when_link_and_realpath_remain_in_allowed_roots",
+    }
+
+
+def _sha256_file_or_unavailable(path: Path) -> tuple[str | None, str | None]:
+    try:
+        return sha256_file(Path(path)), None
+    except OSError as error:
+        return None, error.__class__.__name__
+    except ValueError as error:
+        return None, str(error)
+
+
+def _absolute_path(path: Path) -> Path:
+    return Path(os.path.abspath(Path(path)))
+
+
+def _real_path(path: Path) -> Path:
+    return Path(path).resolve(strict=False)
+
+
+def _unique_paths(paths: Sequence[Path]) -> tuple[Path, ...]:
+    unique: list[Path] = []
+    seen: set[str] = set()
+    for path in paths:
+        normalized = _absolute_path(path).as_posix()
+        if normalized not in seen:
+            seen.add(normalized)
+            unique.append(_absolute_path(path))
+    return tuple(unique)
+
+
+def _path_is_inside_without_following(candidate_path: Path, root_path: Path) -> bool:
+    try:
+        _absolute_path(candidate_path).relative_to(_absolute_path(root_path))
+        return True
+    except ValueError:
+        return False
 
 
 def _artifact_paths(output_dir: Path) -> dict[str, Path]:
@@ -596,6 +924,8 @@ def _receipt_payload(
     timed_out: bool,
     duration_ms: int,
     paths: Mapping[str, Path],
+    resolution: Mapping[str, object],
+    runner_environment: Mapping[str, str],
 ) -> dict[str, object]:
     return {
         "receipt_type": "real_local_runner_receipt_v1",
@@ -604,18 +934,35 @@ def _receipt_payload(
         "argv": list(descriptor.argv),
         "argv_hash": sha256_canonical_json(list(descriptor.argv)),
         "browser_allowed": False,
+        "credential_storage_allowed": False,
         "command_id": descriptor.command_id,
         "command_id_only": True,
         "duration_ms": duration_ms,
+        "environment_digest": sha256_canonical_json(dict(runner_environment)),
+        "environment_path_policy_id": REAL_LOCAL_RUNNER_ENVIRONMENT_PATH_POLICY_ID,
         "exit_code": exit_code,
+        "executable_resolution_policy_id": (
+            REAL_LOCAL_RUNNER_EXECUTABLE_RESOLUTION_POLICY_ID
+        ),
         "human_approval_required": True,
+        "live_website_allowed": False,
         "network_allowed": False,
         "output_sandbox": descriptor.output_dir.as_posix(),
         "production_autonomy_allowed": False,
         "provider_api_allowed": False,
         "repo_revision": descriptor.repo_revision,
+        "resolution_policy_digest": resolution["resolution_policy_digest"],
+        "resolved_argv": resolution["resolved_argv"],
+        "resolved_argv_hash": resolution["resolved_argv_hash"],
+        "resolved_executable_path": resolution["resolved_executable_path"],
+        "resolved_executable_realpath": resolution["resolved_executable_realpath"],
+        "resolved_executable_sha256": resolution["resolved_executable_sha256"],
+        "resolved_executable_sha256_unavailable_reason": (
+            resolution["resolved_executable_sha256_unavailable_reason"]
+        ),
         "run_id": descriptor.run_id,
         "shell": False,
+        "shell_allowed": False,
         "status": status,
         "stderr_path": paths[REAL_LOCAL_RUNNER_STDERR_FILE].as_posix(),
         "stderr_sha256": sha256_file(paths[REAL_LOCAL_RUNNER_STDERR_FILE]),
@@ -640,6 +987,7 @@ def _failure_bundle_payload(receipt: Mapping[str, object]) -> dict[str, object]:
         "human_review_required": True,
         "network_allowed": False,
         "browser_allowed": False,
+        "provider_api_allowed": False,
         "production_autonomy_allowed": False,
         "receipt_status": receipt["status"],
         "run_id": receipt["run_id"],
@@ -656,6 +1004,8 @@ def _replay_manifest_payload(
     receipt: Mapping[str, object],
     paths: Mapping[str, Path],
     failure_bundle_path: Path | None,
+    resolution: Mapping[str, object],
+    runner_environment: Mapping[str, str],
 ) -> dict[str, object]:
     return {
         "replay_manifest_type": "real_local_runner_replay_manifest_v1",
@@ -664,7 +1014,17 @@ def _replay_manifest_payload(
         "argv_hash": receipt["argv_hash"],
         "command_id": descriptor.command_id,
         "command_id_match_required": True,
-        "environment_digest": sha256_canonical_json(_runner_environment()),
+        "environment_digest": sha256_canonical_json(dict(runner_environment)),
+        "environment_path_policy_id": REAL_LOCAL_RUNNER_ENVIRONMENT_PATH_POLICY_ID,
+        "executable_path": resolution["resolved_executable_path"],
+        "executable_realpath": resolution["resolved_executable_realpath"],
+        "executable_resolution_policy_id": (
+            REAL_LOCAL_RUNNER_EXECUTABLE_RESOLUTION_POLICY_ID
+        ),
+        "executable_sha256": resolution["resolved_executable_sha256"],
+        "executable_sha256_unavailable_reason": (
+            resolution["resolved_executable_sha256_unavailable_reason"]
+        ),
         "failure_bundle_path": None
         if failure_bundle_path is None
         else failure_bundle_path.as_posix(),
@@ -672,6 +1032,8 @@ def _replay_manifest_payload(
         "receipt_path": paths[REAL_LOCAL_RUNNER_RECEIPT_FILE].as_posix(),
         "receipt_sha256": sha256_file(paths[REAL_LOCAL_RUNNER_RECEIPT_FILE]),
         "repo_revision": descriptor.repo_revision,
+        "resolution_policy_digest": resolution["resolution_policy_digest"],
+        "resolved_argv_hash": resolution["resolved_argv_hash"],
         "run_id": descriptor.run_id,
         "stderr_sha256": receipt["stderr_sha256"],
         "stdout_sha256": receipt["stdout_sha256"],

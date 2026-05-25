@@ -9,6 +9,45 @@
   "user_argv_allowed": false,
   "shell_allowed": false,
   "shell_false_required": true,
+  "environment_path_policy_id": "real_local_runner_deterministic_path_env_v1",
+  "executable_resolution_policy_id": "real_local_runner_system_brew_repo_executable_resolution_v1",
+  "host_path_inherited_for_runner_environment": false,
+  "host_path_used_for_executable_resolution": false,
+  "path_hijack_rejected": true,
+  "executable_resolution_required": true,
+  "executable_absolute_path_required": true,
+  "executable_sha256_required_when_feasible": true,
+  "executable_sha256_unavailable_reason_required_when_unavailable": true,
+  "executable_symlink_policy": "allowed_only_when_link_and_realpath_remain_in_allowed_system_brew_repo_or_explicitly_justified_roots",
+  "allowed_executable_root_classes": [
+    "system_tool_root",
+    "brew_tool_root",
+    "repo_tool_root",
+    "explicit_active_python_runtime"
+  ],
+  "deterministic_path_search_order": [
+    "repo_root/tools/bin",
+    "repo_root/.venv/bin",
+    "/usr/bin",
+    "/bin",
+    "/usr/sbin",
+    "/sbin",
+    "/System/Cryptexes/App/usr/bin",
+    "/Library/Apple/usr/bin",
+    "/opt/homebrew/bin",
+    "/opt/homebrew/sbin",
+    "/opt/homebrew/Cellar",
+    "/usr/local/bin",
+    "/usr/local/sbin",
+    "/usr/local/Cellar"
+  ],
+  "explicit_executable_root_justifications": [
+    {
+      "root_class": "explicit_active_python_runtime",
+      "applies_to": "python3",
+      "reason": "python3 allowlisted commands use the already-running Python interpreter so unittest validation does not depend on host PATH lookup."
+    }
+  ],
   "timeout_required": true,
   "output_sandbox_required": true,
   "stdout_capture_required": true,
@@ -23,6 +62,27 @@
   "provider_api_allowed": false,
   "credential_storage_allowed": false,
   "production_autonomy_allowed": false,
+  "network_policy_statement": "network_allowed=false means the runner policy does not authorize network use; this policy does not claim OS-level network sandboxing.",
+  "receipt_evidence_required": [
+    "command_id",
+    "argv_hash",
+    "resolved_executable_path",
+    "resolved_executable_sha256_or_unavailable_reason",
+    "environment_path_policy_id",
+    "shell=false",
+    "user_command_line_allowed=false",
+    "user_argv_allowed=false",
+    "network_browser_provider_production_flags=false"
+  ],
+  "replay_evidence_required": [
+    "command_id",
+    "argv_hash",
+    "executable_path",
+    "executable_sha256_or_digest",
+    "environment_digest",
+    "resolution_policy_digest",
+    "automatic_reexecution_allowed=false"
+  ],
   "allowlisted_commands": {
     "focused_runner_chain_tests": [
       "python3",
