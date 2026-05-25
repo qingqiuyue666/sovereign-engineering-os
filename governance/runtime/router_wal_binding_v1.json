@@ -1,0 +1,43 @@
+{
+  "policy_type": "router_wal_binding_v1",
+  "version": 1,
+  "purpose": "Bind command envelope admission results to append-only SQLite WAL journal events.",
+  "uses_command_envelope_admission_router": true,
+  "uses_sqlite_wal_execution_journal": true,
+  "duplicates_router_logic": false,
+  "duplicates_journal_logic": false,
+  "execute_default": false,
+  "payload_material_storage_allowed": false,
+  "journal_payload_policy": "structured_report_and_receipt_digests_only",
+  "raw_command_execution_allowed": false,
+  "payload_argv_allowed": false,
+  "payload_command_line_allowed": false,
+  "payload_cwd_env_path_executable_timeout_allowed": false,
+  "shell_allowed": false,
+  "network_allowed": false,
+  "browser_allowed": false,
+  "provider_api_allowed": false,
+  "credential_storage_allowed": false,
+  "dcc_launch_allowed": false,
+  "comfyui_launch_allowed": false,
+  "production_autonomy_allowed": false,
+  "real_artifacts_default_write_allowed": false,
+  "event_mapping": {
+    "admitted": "admission_events",
+    "rejected_or_quarantined": "quarantine_events",
+    "execution_receipt_present": "execution_receipts"
+  },
+  "required_tests": [
+    "valid PASS execute=False writes admission event",
+    "execute=False never calls subprocess",
+    "BLOCKED writes quarantine event",
+    "FATAL writes quarantine event",
+    "forbidden COMMAND writes quarantine event",
+    "malformed XML writes quarantine event",
+    "execute=True valid registry command writes receipt event",
+    "journal chain verifies after binding writes",
+    "no raw XML payload stored in journal",
+    "no shell=True in binding source",
+    "binding does not accept payload-provided argv/cwd/env/path"
+  ]
+}
