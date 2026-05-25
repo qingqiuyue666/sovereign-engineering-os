@@ -1,0 +1,51 @@
+{
+  "policy_type": "domain_adapter_foundation_v1",
+  "version": "v1",
+  "contract_only": true,
+  "runtime_admitted": false,
+  "live_dcc_execution_allowed": false,
+  "process_launch_allowed": false,
+  "network_access_allowed": false,
+  "source_asset_overwrite_allowed": false,
+  "external_download_allowed": false,
+  "provider_api_call_allowed": false,
+  "production_autonomy_allowed": false,
+  "adapter_families": [
+    "comfyui",
+    "houdini",
+    "blender",
+    "unreal",
+    "davinci_resolve",
+    "after_effects",
+    "generic_local"
+  ],
+  "operation_classes": [
+    "read_state_proxy",
+    "validate_operation_plan",
+    "bind_asset_hashes",
+    "declare_output_manifest",
+    "record_provenance",
+    "prepare_replay"
+  ],
+  "required_descriptors": [
+    "state_proxy_descriptor",
+    "operation_plan_descriptor",
+    "asset_hash_binding",
+    "output_manifest_contract",
+    "provenance_policy",
+    "replay_policy",
+    "adapter_admission_rules"
+  ],
+  "required_controls": [
+    "human_approval",
+    "capability_token",
+    "source_asset_hashes",
+    "operation_plan_hash",
+    "output_manifest",
+    "provenance_record",
+    "replay_descriptor",
+    "environment_digest"
+  ],
+  "admission_state": "candidate",
+  "future_runtime_admission_required": true
+}
