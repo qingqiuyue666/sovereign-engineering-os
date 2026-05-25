@@ -1,0 +1,317 @@
+{
+  "descriptor_type": "seos_mainline_release_readiness_gate",
+  "version": "v1",
+  "status": "contract_only",
+  "default_recommendation": "DO_NOT_RELEASE",
+  "allowed_recommendations": [
+    "RELEASE_ALLOWED",
+    "DO_NOT_RELEASE",
+    "WAITING_FOR_CI",
+    "BLOCKED"
+  ],
+  "scope": {
+    "repository": "sovereign-engineering-os",
+    "target_branch": "main",
+    "release_subject": "mainline_milestone_closure",
+    "operator_review_required": true,
+    "machine_decision_is_advisory_only": true
+  },
+  "forbidden_authority": {
+    "release_automation_authorized": false,
+    "merge_automation_authorized": false,
+    "branch_deletion_authorized": false,
+    "push_to_main_authorized": false,
+    "production_promotion_authorized": false,
+    "runtime_execution_authorized": false,
+    "browser_execution_authorized": false,
+    "network_execution_authorized": false,
+    "provider_api_calls_authorized": false,
+    "credential_storage_authorized": false,
+    "unbounded_daemon_authorized": false,
+    "unbounded_scheduler_authorized": false
+  },
+  "required_milestone_evidence": [
+    {
+      "milestone_id": "A1",
+      "name": "delivery_backlog_v1",
+      "required_evidence": [
+        "open_pr_url",
+        "head_sha",
+        "changed_files",
+        "local_validation_results",
+        "github_actions_pass",
+        "forbidden_surface_confirmation"
+      ]
+    },
+    {
+      "milestone_id": "A2",
+      "name": "milestone_dependency_graph_v1",
+      "required_evidence": [
+        "open_pr_url",
+        "dependency_graph_integrity_test",
+        "github_actions_pass",
+        "independent_mergeability_statement"
+      ]
+    },
+    {
+      "milestone_id": "A3",
+      "name": "pr_factory_and_merge_audit_v1",
+      "required_evidence": [
+        "read_only_merge_recommendation_artifact",
+        "scope_checker_test",
+        "forbidden_surface_scanner_test",
+        "github_actions_pass"
+      ]
+    },
+    {
+      "milestone_id": "B1",
+      "name": "real_local_runner_boundary_v1",
+      "required_evidence": [
+        "command_id_allowlist_evidence",
+        "human_approval_evidence",
+        "receipt_artifact_evidence",
+        "failure_bundle_evidence",
+        "replay_manifest_evidence",
+        "non_production_adapter_state",
+        "github_actions_pass"
+      ]
+    },
+    {
+      "milestone_id": "B2",
+      "name": "capability_token_lifecycle_v1",
+      "required_evidence": [
+        "token_issue_consume_revoke_expiry_evidence",
+        "single_use_enforcement_evidence",
+        "scope_command_revision_binding_evidence",
+        "replay_protection_evidence",
+        "github_actions_pass"
+      ]
+    },
+    {
+      "milestone_id": "B3",
+      "name": "local_job_queue_v1",
+      "required_evidence": [
+        "queue_state_machine_evidence",
+        "append_only_events_evidence",
+        "timeout_retry_policy_evidence",
+        "no_background_daemon_evidence",
+        "github_actions_pass"
+      ]
+    },
+    {
+      "milestone_id": "B4",
+      "name": "replay_engine_v1",
+      "required_evidence": [
+        "receipt_comparison_evidence",
+        "environment_digest_comparison_evidence",
+        "argv_hash_match_evidence",
+        "no_automatic_reexecution_evidence",
+        "github_actions_pass"
+      ]
+    },
+    {
+      "milestone_id": "C1",
+      "name": "artifact_ledger_viewer_v1",
+      "required_evidence": [
+        "read_only_listing_evidence",
+        "receipt_failure_replay_view_evidence",
+        "no_mutation_or_deletion_evidence",
+        "github_actions_pass"
+      ]
+    },
+    {
+      "milestone_id": "C2",
+      "name": "operator_dashboard_model_v1",
+      "required_evidence": [
+        "read_only_dashboard_model_evidence",
+        "job_artifact_pr_failure_approval_views",
+        "no_mutation_merge_or_deletion_evidence",
+        "github_actions_pass"
+      ]
+    },
+    {
+      "milestone_id": "D1",
+      "name": "bounded_worker_registry_v1",
+      "required_evidence": [
+        "worker_type_registry_evidence",
+        "no_live_call_default_evidence",
+        "provider_execution_disabled_evidence",
+        "routing_plan_artifact_evidence",
+        "github_actions_pass"
+      ]
+    },
+    {
+      "milestone_id": "D2",
+      "name": "domain_adapter_foundation_v1",
+      "required_evidence": [
+        "domain_adapter_contract_evidence",
+        "state_proxy_operation_plan_evidence",
+        "asset_hash_output_manifest_evidence",
+        "no_live_dcc_execution_evidence",
+        "github_actions_pass"
+      ]
+    },
+    {
+      "milestone_id": "D3",
+      "name": "comfyui_local_adapter_contract_v1",
+      "required_evidence": [
+        "workflow_descriptor_evidence",
+        "node_allowlist_evidence",
+        "model_input_digest_ref_evidence",
+        "no_live_comfyui_execution_evidence",
+        "github_actions_pass"
+      ]
+    },
+    {
+      "milestone_id": "D4",
+      "name": "dcc_adapter_foundation_v1",
+      "required_evidence": [
+        "dcc_adapter_contract_evidence",
+        "operation_taxonomy_evidence",
+        "asset_io_boundary_evidence",
+        "future_process_launch_gate_evidence",
+        "github_actions_pass"
+      ]
+    },
+    {
+      "milestone_id": "E1",
+      "name": "end_to_end_acceptance_matrix_v1",
+      "required_evidence": [
+        "system_acceptance_coverage_evidence",
+        "machine_readable_acceptance_map",
+        "forbidden_surface_acceptance_evidence",
+        "github_actions_pass"
+      ]
+    }
+  ],
+  "required_ci_evidence": {
+    "all_candidate_prs_have_green_github_actions": true,
+    "required_status_checks": [
+      "canonical-health"
+    ],
+    "missing_or_pending_ci_recommendation": "WAITING_FOR_CI",
+    "failed_ci_recommendation": "DO_NOT_RELEASE"
+  },
+  "forbidden_surface_scan_requirement": {
+    "required": true,
+    "recommendation_when_missing": "BLOCKED",
+    "blocked_surfaces": [
+      "arbitrary_shell_execution",
+      "shell_true",
+      "arbitrary_argv",
+      "arbitrary_command_line",
+      "browser_opening",
+      "playwright_live_execution",
+      "network_access",
+      "live_website_access",
+      "provider_api_live_calls",
+      "credential_storage",
+      "production_autonomy",
+      "unbounded_daemon",
+      "unbounded_scheduler",
+      "source_asset_overwrite",
+      "silent_failure",
+      "test_skipping",
+      "direct_push_to_main",
+      "merge_automation",
+      "branch_deletion"
+    ]
+  },
+  "main_validation_commands": [
+    {
+      "command_id": "full_unittest_discover",
+      "argv": ["python3", "-m", "unittest", "discover", "tests"],
+      "required": true
+    },
+    {
+      "command_id": "make_ci",
+      "argv": ["make", "ci"],
+      "required": true
+    },
+    {
+      "command_id": "diff_check",
+      "argv": ["git", "diff", "--check"],
+      "required": true
+    },
+    {
+      "command_id": "status_short",
+      "argv": ["git", "status", "--short"],
+      "required": true,
+      "expected_output": ""
+    }
+  ],
+  "rollback_recovery_evidence_requirements": {
+    "rollback_plan_required": true,
+    "recovery_route_required": true,
+    "quarantine_route_required": true,
+    "non_destructive_rollback_required": true,
+    "evidence_retention_required": true,
+    "operator_review_required": true,
+    "required_fields": [
+      "rollback_trigger",
+      "rollback_scope",
+      "recovery_entrypoint",
+      "quarantine_entrypoint",
+      "evidence_preservation_plan",
+      "operator_review_owner"
+    ]
+  },
+  "release_recommendation_rules": [
+    {
+      "rule_id": "missing_required_milestone_evidence",
+      "when": "any required milestone evidence is missing",
+      "recommendation": "DO_NOT_RELEASE"
+    },
+    {
+      "rule_id": "ci_pending",
+      "when": "any required GitHub Actions check is pending or missing",
+      "recommendation": "WAITING_FOR_CI"
+    },
+    {
+      "rule_id": "ci_failed",
+      "when": "any required GitHub Actions check failed",
+      "recommendation": "DO_NOT_RELEASE"
+    },
+    {
+      "rule_id": "forbidden_surface_detected",
+      "when": "any forbidden surface is present or unscanned",
+      "recommendation": "BLOCKED"
+    },
+    {
+      "rule_id": "rollback_recovery_missing",
+      "when": "rollback or recovery evidence is missing",
+      "recommendation": "DO_NOT_RELEASE"
+    },
+    {
+      "rule_id": "all_required_evidence_present",
+      "when": "all milestone, CI, validation, forbidden-surface, rollback, and recovery evidence is present",
+      "recommendation": "RELEASE_ALLOWED"
+    }
+  ],
+  "release_recommendation_artifact_contract": {
+    "artifact_type": "mainline_release_recommendation_artifact_v1",
+    "required_fields": [
+      "artifact_type",
+      "version",
+      "target_branch",
+      "base_sha",
+      "evaluated_prs",
+      "validation_results",
+      "forbidden_surface_scan",
+      "rollback_recovery_evidence",
+      "recommendation",
+      "blockers",
+      "operator_review_required"
+    ],
+    "allowed_recommendations": [
+      "RELEASE_ALLOWED",
+      "DO_NOT_RELEASE",
+      "WAITING_FOR_CI",
+      "BLOCKED"
+    ],
+    "writes_release": false,
+    "merges_prs": false,
+    "deletes_branches": false,
+    "pushes_main": false
+  }
+}
