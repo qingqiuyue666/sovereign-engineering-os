@@ -1,0 +1,43 @@
+{
+  "policy_type": "workflow_tool_requirement_binding_v1",
+  "version": "v1",
+  "runtime_admitted": true,
+  "production_admitted": false,
+  "binding_only": true,
+  "advisory_only": true,
+  "uses_workflow_dry_run_plan": true,
+  "uses_tool_manifest_normalizer": true,
+  "automatic_installation_allowed": false,
+  "network_lookup_allowed": false,
+  "execution_allowed": false,
+  "subprocess_allowed": false,
+  "shell_true_allowed": false,
+  "raw_command_allowed": false,
+  "command_line_allowed": false,
+  "payload_argv_allowed": false,
+  "payload_cwd_env_path_executable_timeout_allowed": false,
+  "mcp_execution_allowed": false,
+  "cli_execution_allowed": false,
+  "plugin_execution_allowed": false,
+  "dcc_launch_allowed": false,
+  "comfyui_launch_allowed": false,
+  "browser_allowed": false,
+  "provider_api_allowed": false,
+  "credential_storage_allowed": false,
+  "github_repo_candidates_are_metadata_only": true,
+  "mcp_candidates_are_metadata_only": true,
+  "dcc_candidates_are_metadata_only": true,
+  "comfyui_candidates_are_metadata_only": true,
+  "missing_required_tool_creates_blocker": true,
+  "incompatible_tool_creates_blocker": true,
+  "high_risk_tool_match_requires_approval": true,
+  "binding_hash_excludes": [
+    "observed_at"
+  ],
+  "match_statuses": [
+    "MATCHED",
+    "MISSING",
+    "INCOMPATIBLE",
+    "REQUIRES_APPROVAL"
+  ]
+}
