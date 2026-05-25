@@ -1,0 +1,221 @@
+{
+  "matrix_id": "e2e_acceptance_matrix_v1",
+  "version": "v1",
+  "runtime_behavior_introduced": false,
+  "production_execution_allowed": false,
+  "merge_automation_allowed": false,
+  "release_automation_allowed": false,
+  "global_validation_commands": [
+    "focused milestone tests",
+    "python3 -m unittest discover tests",
+    "make ci",
+    "git diff --check",
+    "GitHub Actions"
+  ],
+  "waiting_states": [
+    "WAITING_FOR_PREVIOUS_PR_MERGE",
+    "WAITING_FOR_DOMAIN_ADAPTER_FOUNDATION_MERGE",
+    "BLOCKED"
+  ],
+  "acceptance_items": [
+    {
+      "id": "metadata_chain",
+      "area": "metadata chain",
+      "required_evidence": [
+        "metadata receipts",
+        "preflight verifier",
+        "artifact index",
+        "task graph visibility"
+      ],
+      "merge_readiness_signal": "metadata-only paths preserve no runner, no command materialization, no browser, no network, and no production promotion"
+    },
+    {
+      "id": "real_local_runner",
+      "area": "real local runner",
+      "required_evidence": [
+        "command_id allowlist",
+        "human approval artifact",
+        "shell false receipt",
+        "timeout enforcement",
+        "stdout stderr capture",
+        "failure bundle",
+        "replay manifest"
+      ],
+      "merge_readiness_signal": "only allowlisted repo validation commands execute"
+    },
+    {
+      "id": "token_lifecycle",
+      "area": "token lifecycle",
+      "required_evidence": [
+        "issue",
+        "consume",
+        "revoke",
+        "expiry",
+        "single use",
+        "scope binding",
+        "command_id binding",
+        "approval binding",
+        "revision binding",
+        "replay protection"
+      ],
+      "merge_readiness_signal": "tokens cannot grant shell, network, browser, secrets, provider calls, or production autonomy"
+    },
+    {
+      "id": "job_queue",
+      "area": "job queue",
+      "required_evidence": [
+        "descriptor",
+        "enqueue",
+        "lease",
+        "heartbeat",
+        "complete",
+        "fail",
+        "cancel",
+        "retry policy",
+        "timeout policy",
+        "append-only events",
+        "crash recovery classification"
+      ],
+      "merge_readiness_signal": "no background daemon by default and no autonomous production execution"
+    },
+    {
+      "id": "replay",
+      "area": "replay",
+      "required_evidence": [
+        "receipt comparison",
+        "environment digest comparison",
+        "command_id match",
+        "argv hash match",
+        "output digest comparison",
+        "failure classification",
+        "replay report"
+      ],
+      "merge_readiness_signal": "replay verification does not automatically re-execute unless separately admitted"
+    },
+    {
+      "id": "worker_registry",
+      "area": "worker registry",
+      "required_evidence": [
+        "worker type declarations",
+        "input output contracts",
+        "timeout metadata",
+        "budget metadata",
+        "no-live-call defaults",
+        "routing plan artifact"
+      ],
+      "merge_readiness_signal": "provider execution disabled by default with no credentials or live calls"
+    },
+    {
+      "id": "pr_audit",
+      "area": "PR audit",
+      "required_evidence": [
+        "changed-file scope checker",
+        "forbidden-surface scanner",
+        "required-test checklist",
+        "PR body contract",
+        "fixture-only CI reader",
+        "recommendation artifact",
+        "audit packet generator"
+      ],
+      "merge_readiness_signal": "tooling recommends only and never merges, deletes branches, or pushes main"
+    },
+    {
+      "id": "artifact_ledger",
+      "area": "artifact ledger",
+      "required_evidence": [
+        "read-only listing",
+        "filters",
+        "receipt view",
+        "failure bundle view",
+        "replay manifest view",
+        "summary output",
+        "secret redaction"
+      ],
+      "merge_readiness_signal": "viewer never mutates, deletes, executes, or displays raw secrets"
+    },
+    {
+      "id": "dashboard_model",
+      "area": "dashboard model",
+      "required_evidence": [
+        "job view",
+        "PR readiness view",
+        "artifact view",
+        "receipt view",
+        "failure view",
+        "approval view",
+        "milestone view"
+      ],
+      "merge_readiness_signal": "model never mutates, merges, deletes, executes, or calls networks"
+    },
+    {
+      "id": "domain_adapter_foundation",
+      "area": "domain adapter foundation",
+      "required_evidence": [
+        "state proxy",
+        "operation plan",
+        "asset hash binding",
+        "output manifest",
+        "provenance policy",
+        "replay policy",
+        "admission rules"
+      ],
+      "merge_readiness_signal": "no live DCC execution, external network, source overwrite, or process launch"
+    },
+    {
+      "id": "forbidden_surfaces",
+      "area": "forbidden surfaces",
+      "required_evidence": [
+        "shell scan",
+        "argv scan",
+        "command-line scan",
+        "browser scan",
+        "network scan",
+        "provider scan",
+        "credential scan",
+        "daemon scheduler scan",
+        "merge automation scan"
+      ],
+      "merge_readiness_signal": "any forbidden surface makes the milestone blocked or not review-ready"
+    },
+    {
+      "id": "mainline_release_readiness",
+      "area": "mainline release readiness",
+      "required_evidence": [
+        "required PR evidence list",
+        "CI green requirement",
+        "forbidden-surface scan",
+        "main validation command list",
+        "rollback recovery evidence",
+        "release recommendation artifact"
+      ],
+      "merge_readiness_signal": "recommendation only with no auto release, auto merge, branch deletion, or production promotion"
+    }
+  ],
+  "forbidden_surface_rules": [
+    "arbitrary shell execution",
+    "shell=True",
+    "arbitrary argv",
+    "arbitrary command_line",
+    "browser opening",
+    "Playwright live execution",
+    "network access",
+    "live website access",
+    "account workflows",
+    "registration",
+    "payment",
+    "scraping",
+    "bypass",
+    "CAPTCHA",
+    "credential storage",
+    "provider API live calls",
+    "source asset overwrite",
+    "unbounded daemon",
+    "unbounded scheduler",
+    "direct push to main",
+    "auto-merge",
+    "PR merge",
+    "branch deletion",
+    "release automation",
+    "production autonomy"
+  ]
+}
