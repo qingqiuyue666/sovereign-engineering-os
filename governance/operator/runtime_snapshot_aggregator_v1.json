@@ -1,0 +1,52 @@
+{
+  "policy_type": "runtime_snapshot_aggregator_v1",
+  "aggregation_only": true,
+  "read_only": true,
+  "ui_implementation_allowed": false,
+  "journal_mutation_allowed": false,
+  "raw_payload_persistence_allowed": false,
+  "credential_material_allowed": false,
+  "execution_allowed": false,
+  "subprocess_allowed": false,
+  "shell_true_allowed": false,
+  "raw_command_allowed": false,
+  "payload_argv_allowed": false,
+  "command_line_allowed": false,
+  "payload_cwd_env_path_executable_timeout_allowed": false,
+  "network_allowed": false,
+  "browser_allowed": false,
+  "provider_api_allowed": false,
+  "dcc_launch_allowed": false,
+  "comfyui_launch_allowed": false,
+  "mcp_execution_allowed": false,
+  "cli_execution_allowed": false,
+  "plugin_execution_allowed": false,
+  "production_autonomy_allowed": false,
+  "snapshot_hash_excludes": [
+    "generated_at"
+  ],
+  "allowed_next_actions": [
+    "review_risk_assessment",
+    "issue_scoped_approval",
+    "run_dry_run_plan",
+    "inspect_asset_inventory",
+    "inspect_quarantine",
+    "fix_manifest",
+    "reject_tool_candidate"
+  ],
+  "forbidden_next_actions": [
+    "execute_raw_command",
+    "launch_dcc",
+    "run_comfyui",
+    "call_provider",
+    "open_browser",
+    "access_network",
+    "delete_files",
+    "mutate_assets"
+  ],
+  "operator_console_contract": {
+    "snapshot_is_read_model": true,
+    "next_actions_are_advisory": true,
+    "ui_runtime_present": false
+  }
+}
