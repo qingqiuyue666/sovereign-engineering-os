@@ -1,0 +1,50 @@
+{
+  "policy_type": "sqlite_wal_execution_journal_v1",
+  "version": "v1",
+  "runtime_admitted": true,
+  "production_admitted": false,
+  "storage": "local_sqlite",
+  "sqlite_standard_library_only": true,
+  "wal_mode_required": true,
+  "append_only": true,
+  "default_artifacts_path": null,
+  "writes_to_real_artifacts_by_default": false,
+  "executes_commands": false,
+  "network_allowed": false,
+  "browser_allowed": false,
+  "provider_api_allowed": false,
+  "credential_storage_allowed": false,
+  "tables": [
+    "admission_events",
+    "quarantine_events",
+    "execution_receipts"
+  ],
+  "required_row_fields": [
+    "event_id",
+    "run_id",
+    "event_type",
+    "command_id",
+    "policy_id",
+    "token_id",
+    "approval_id",
+    "content_hash",
+    "previous_hash",
+    "created_at"
+  ],
+  "deterministic_content_hash_excludes": [
+    "created_at"
+  ],
+  "public_append_methods": [
+    "append_admission",
+    "append_quarantine",
+    "append_receipt"
+  ],
+  "public_read_methods": [
+    "list_events",
+    "verify_chain"
+  ],
+  "mutation_apis_allowed": false,
+  "dependency": {
+    "command_envelope_admission_router_v1": "stacked_unmerged_pr_a"
+  }
+}
