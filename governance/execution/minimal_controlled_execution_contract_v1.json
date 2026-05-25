@@ -1,0 +1,265 @@
+{
+  "object_type": "MinimalControlledExecutionContract",
+  "contract_id": "minimal_controlled_execution_contract_v1",
+  "status": "CONTRACT_ONLY",
+  "policy_version": "minimal_controlled_execution_contract_only_v1",
+  "registry_version": "minimal_controlled_execution_registry_v1",
+  "command_registry_hash": "sha256:bea1061fa34c6a3c1b905be7ee47d4c89e7956ecee981242c443835ac835b066",
+  "implementation_allowed_in_this_pr": false,
+  "runner_implemented": false,
+  "subprocess_implemented": false,
+  "cli_entrypoint_added": false,
+  "scheduler_or_daemon_added": false,
+  "command_payload_rule": "Payloads may reference command_id only. Payloads must not supply argv, command, command_line, shell, cwd, env, path, executable, timeout, network, provider, browser, plugin, dcc, comfyui, or mcp fields.",
+  "contract_objects": {
+    "ExecutionCommandRegistryEntry": {
+      "purpose": "Defines immutable command-id registry entries.",
+      "required_fields": [
+        "command_id",
+        "argv",
+        "command_class",
+        "read_only_expectation",
+        "allowed_verifier",
+        "registry_version",
+        "cwd_policy",
+        "env_policy",
+        "executable_policy",
+        "timeout_ms",
+        "output_limit_bytes",
+        "allowed_exit_codes",
+        "risk_class",
+        "requires_human_approval",
+        "requires_clean_worktree",
+        "network_policy",
+        "mutation_policy",
+        "command_semantics",
+        "registry_entry_hash"
+      ]
+    },
+    "ExecutionRequest": {
+      "purpose": "Future request object for one command-id invocation.",
+      "required_fields": [
+        "request_id",
+        "task_id",
+        "run_id",
+        "command_id",
+        "approval_token_id",
+        "requested_at",
+        "requester",
+        "policy_version",
+        "use_case_ids",
+        "snapshot_ref",
+        "caller_intent",
+        "request_hash"
+      ],
+      "forbidden_fields": [
+        "argv",
+        "command",
+        "command_line",
+        "shell",
+        "cwd",
+        "env",
+        "executable",
+        "path",
+        "timeout",
+        "network",
+        "provider",
+        "browser",
+        "plugin",
+        "dcc",
+        "comfyui",
+        "mcp"
+      ]
+    },
+    "ExecutionPolicyDecision": {
+      "purpose": "Pure deterministic admission result.",
+      "required_fields": [
+        "decision_id",
+        "request_id",
+        "command_id",
+        "accepted",
+        "rejection_reasons",
+        "required_approval_token_id",
+        "registry_entry_hash",
+        "policy_version",
+        "registry_version",
+        "registry_hash",
+        "forbidden_surface_flags",
+        "execution_performed",
+        "decided_at",
+        "decision_hash"
+      ]
+    },
+    "ExecutionReceipt": {
+      "purpose": "Future post-execution receipt shape. Contract only.",
+      "required_fields": [
+        "receipt_id",
+        "request_id",
+        "command_id",
+        "receipt_status",
+        "started_at",
+        "finished_at",
+        "exit_code",
+        "stdout_digest",
+        "stderr_digest",
+        "stdout_truncated",
+        "stderr_truncated",
+        "output_limit_bytes",
+        "pre_snapshot_hash",
+        "post_snapshot_hash",
+        "registry_entry_hash",
+        "policy_decision_hash",
+        "execution_performed",
+        "receipt_hash"
+      ],
+      "raw_output_storage_allowed": false
+    },
+    "ExecutionFailureBundle": {
+      "purpose": "Future failure evidence bundle.",
+      "required_fields": [
+        "failure_bundle_id",
+        "request_id",
+        "command_id",
+        "failure_type",
+        "failure_reasons",
+        "policy_decision_hash",
+        "registry_entry_hash",
+        "pre_snapshot_hash",
+        "post_snapshot_hash",
+        "execution_performed",
+        "failure_bundle_hash"
+      ],
+      "failure_types": [
+        "POLICY_REJECTED",
+        "APPROVAL_MISSING",
+        "UNKNOWN_COMMAND_ID",
+        "DEFERRED_COMMAND_ID",
+        "FORBIDDEN_REQUEST_FIELD",
+        "WORKTREE_NOT_CLEAN",
+        "EXECUTION_TIMEOUT",
+        "NONZERO_EXIT",
+        "OUTPUT_LIMIT_EXCEEDED",
+        "SNAPSHOT_DRIFT",
+        "RECEIPT_VERIFICATION_FAILED",
+        "WAL_APPEND_FAILED",
+        "EXECUTION_NOT_ATTEMPTED"
+      ]
+    },
+    "ExecutionSnapshotRef": {
+      "purpose": "Contract reference to pre/post state snapshots.",
+      "required_fields": [
+        "snapshot_id",
+        "task_id",
+        "run_id",
+        "command_id",
+        "snapshot_type",
+        "root_hash",
+        "captured_at",
+        "execution_performed",
+        "snapshot_hash"
+      ],
+      "snapshot_types": [
+        "PRE",
+        "POST"
+      ]
+    },
+    "ExecutionVerifierInput": {
+      "purpose": "Contract input for future verifier.",
+      "required_fields": [
+        "verifier_input_id",
+        "request_hash",
+        "decision_hash",
+        "registry_entry_hash",
+        "receipt_hash",
+        "pre_snapshot_hash",
+        "post_snapshot_hash",
+        "verifier_policy_version",
+        "execution_performed",
+        "verifier_input_hash"
+      ]
+    }
+  },
+  "initial_registry": [
+    {
+      "command_id": "git_status_short",
+      "argv": [
+        "git",
+        "status",
+        "--short"
+      ],
+      "command_class": "REPOSITORY_READ_ONLY_CHECK",
+      "read_only_expectation": true,
+      "allowed_verifier": "git_status_short_contract_verifier",
+      "registry_version": "minimal_controlled_execution_registry_v1",
+      "cwd_policy": "REPOSITORY_ROOT_ONLY",
+      "env_policy": "NO_PAYLOAD_ENV",
+      "executable_policy": "ALLOWLISTED_EXECUTABLE_NAME_ONLY",
+      "timeout_ms": 30000,
+      "output_limit_bytes": 65536,
+      "allowed_exit_codes": [
+        0
+      ],
+      "risk_class": "READ_ONLY_REPOSITORY_CHECK",
+      "requires_human_approval": false,
+      "requires_clean_worktree": false,
+      "network_policy": "NETWORK_FORBIDDEN",
+      "mutation_policy": "READ_ONLY_NO_MUTATION",
+      "command_semantics": "read-only working tree status check",
+      "registry_entry_hash": "sha256:3b354baa46942d57e55b275a920c8996bace458f43ac53c850b1fca812d6cf78"
+    },
+    {
+      "command_id": "git_diff_check",
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "command_class": "REPOSITORY_READ_ONLY_CHECK",
+      "read_only_expectation": true,
+      "allowed_verifier": "git_diff_check_contract_verifier",
+      "registry_version": "minimal_controlled_execution_registry_v1",
+      "cwd_policy": "REPOSITORY_ROOT_ONLY",
+      "env_policy": "NO_PAYLOAD_ENV",
+      "executable_policy": "ALLOWLISTED_EXECUTABLE_NAME_ONLY",
+      "timeout_ms": 30000,
+      "output_limit_bytes": 65536,
+      "allowed_exit_codes": [
+        0
+      ],
+      "risk_class": "READ_ONLY_REPOSITORY_CHECK",
+      "requires_human_approval": false,
+      "requires_clean_worktree": false,
+      "network_policy": "NETWORK_FORBIDDEN",
+      "mutation_policy": "READ_ONLY_NO_MUTATION",
+      "command_semantics": "read-only whitespace/error diff check",
+      "registry_entry_hash": "sha256:a37537915b242536b1bdb755c1a9ca4d025fa23f1dec165d7c0bd029786c4aaa"
+    }
+  ],
+  "deferred_command_ids": [
+    {
+      "command_id": "unittest_discover_tests",
+      "reason": "Unit tests execute repo-owned code and require a later sandbox, pinned target, and stricter verification phase."
+    },
+    {
+      "command_id": "make_ci",
+      "reason": "Make targets execute repo-owned code and require a later sandbox, pinned target, and stricter verification phase."
+    }
+  ],
+  "forbidden_surfaces": [
+    "subprocess_implementation",
+    "runner",
+    "shell_command_execution",
+    "payload_provided_argv",
+    "payload_provided_cwd_env_path_executable_timeout",
+    "network_execution",
+    "provider_api",
+    "browser_control",
+    "plugin_execution",
+    "dcc_launch",
+    "comfyui_launch",
+    "mcp_execution",
+    "scheduler",
+    "daemon",
+    "asset_mutation"
+  ]
+}

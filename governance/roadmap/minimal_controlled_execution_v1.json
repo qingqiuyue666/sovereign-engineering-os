@@ -4,21 +4,51 @@
   "status": "ROADMAP_ONLY",
   "next_target_state": "MINIMAL_CONTROLLED_EXECUTION_READY",
   "implementation_allowed_in_this_pr": false,
+  "contract_only_marker": "MINIMAL_CONTROLLED_EXECUTION_CONTRACT_ONLY_V1",
+  "execution_performed": false,
   "runner_implemented": false,
   "allowlisted_runner_implemented": false,
   "allowed_command_set": [
-    "git status --short",
-    "git diff --check",
-    "python3 -m unittest discover tests",
-    "make ci"
+    "git_status_short",
+    "git_diff_check"
+  ],
+  "registry_entries": {
+    "git_status_short": {
+      "fixed_argv": ["git", "status", "--short"],
+      "command_class": "REPOSITORY_READ_ONLY_CHECK",
+      "read_only_expectation": true,
+      "allowed_verifier": "git_status_short_contract_verifier",
+      "registry_version": "minimal_controlled_execution_registry_v1"
+    },
+    "git_diff_check": {
+      "fixed_argv": ["git", "diff", "--check"],
+      "command_class": "REPOSITORY_READ_ONLY_CHECK",
+      "read_only_expectation": true,
+      "allowed_verifier": "git_diff_check_contract_verifier",
+      "registry_version": "minimal_controlled_execution_registry_v1"
+    }
+  },
+  "deferred_future_command_ids": [
+    "unittest_discover_tests",
+    "make_ci"
   ],
   "explicit_forbidden_commands": [
     "arbitrary shell",
     "arbitrary argv",
+    "arbitrary cwd/env/path/executable/timeout",
     "command_line",
+    "command",
     "payload-provided executable",
     "payload-provided cwd/env/path",
     "payload-provided timeout",
+    "subprocess",
+    "runner",
+    "launcher",
+    "CLI entrypoint",
+    "daemon",
+    "scheduler",
+    "task graph execution",
+    "auto re-execution",
     "network calls",
     "browser control",
     "provider API",
@@ -30,6 +60,14 @@
     "package install",
     "file deletion",
     "asset mutation"
+  ],
+  "contract_only_allowed_types": [
+    "ExecutionRequest",
+    "ExecutionPolicyDecision",
+    "ExecutionReceipt",
+    "ExecutionFailureBundle",
+    "ExecutionSnapshotRef",
+    "ExecutionVerifierInput"
   ],
   "required_execution_closure_components": [
     "TaskIntent",
@@ -57,7 +95,8 @@
     "working_tree_after",
     "verifier_result",
     "journal_entry_id",
-    "receipt_hash"
+    "receipt_hash",
+    "execution_performed=false"
   ],
   "failure_bundle_requirements": [
     "failure_id",
@@ -68,7 +107,8 @@
     "verifier_failure",
     "rollback_required",
     "human_review_required",
-    "evidence_refs"
+    "evidence_refs",
+    "execution_performed=false"
   ],
   "non_goals": [
     "no general shell",
@@ -78,11 +118,15 @@
     "no browser automation",
     "no package install",
     "no GUI",
-    "no autonomous production action"
+    "no autonomous production action",
+    "no dry-run abstraction layer"
   ],
   "admission_criteria": [
     "Commands must be selected by command_id from the allowlist.",
     "Payloads must not supply executable, argv, cwd, env, path, or timeout.",
+    "Contract-only V1 must reject unittest_discover_tests and make_ci as deferred future command IDs.",
+    "Policy decisions must carry policy version, registry version/hash, rejection reasons, and forbidden-surface flags set false.",
+    "Receipts, failures, snapshots, and verifier inputs must carry execution_performed=false.",
     "Outputs must be recorded by digest with truncation policy.",
     "Verifier result and journal entry ID are required before closure.",
     "Failures must produce a FailureBundle with human review status."

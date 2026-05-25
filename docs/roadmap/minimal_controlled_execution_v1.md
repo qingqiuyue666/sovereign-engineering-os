@@ -8,23 +8,42 @@ commands. This PR does not implement execution, a runner, subprocess behavior,
 MCP execution, CLI plugin execution, browser automation, provider calls, GUI
 surfaces, or production autonomy.
 
-## First Allowed Command Set
+## Contract-Only V1 Registry
 
-- `git status --short`
-- `git diff --check`
-- `python3 -m unittest discover tests`
-- `make ci`
+The contract-only V1 registry contains exactly these command IDs:
 
-No other command is admitted by this roadmap.
+- `git_status_short`: fixed argv `git status --short`
+- `git_diff_check`: fixed argv `git diff --check`
+
+Each registry entry is immutable metadata only: command ID, fixed argv,
+command class, read-only expectation, allowed verifier, registry version, and
+registry entry hash.
+
+No other command ID is admitted by the contract-only V1 registry.
+
+Deferred future-only command IDs, not V1 registry entries:
+
+- `unittest_discover_tests`
+- `make_ci`
 
 ## Explicitly Forbidden
 
 - arbitrary shell
 - arbitrary argv
+- arbitrary cwd/env/path/executable/timeout
 - `command_line`
+- `command`
 - payload-provided executable
 - payload-provided cwd/env/path
 - payload-provided timeout
+- subprocess
+- runner
+- launcher
+- CLI entrypoint
+- daemon
+- scheduler
+- task graph execution
+- auto re-execution
 - network calls
 - browser control
 - provider API
@@ -52,7 +71,8 @@ No other command is admitted by this roadmap.
 - `OperatorTaskSnapshot`
 
 These are roadmap admission criteria for the next phase, not implementation in
-this PR.
+this PR. The contract-only slice may define request, policy decision, receipt,
+failure bundle, snapshot ref, verifier input, and registry schemas only.
 
 ## Receipt Requirements
 
@@ -69,6 +89,7 @@ this PR.
 - `verifier_result`
 - `journal_entry_id`
 - `receipt_hash`
+- `execution_performed=false`
 
 ## Failure Bundle Requirements
 
@@ -81,6 +102,7 @@ this PR.
 - `rollback_required`
 - `human_review_required`
 - `evidence_refs`
+- `execution_performed=false`
 
 ## Non-Goals
 
@@ -92,6 +114,9 @@ this PR.
 - no package install
 - no GUI
 - no autonomous production action
+- no dry-run abstraction layer
 
 The roadmap is intentionally narrow: it closes toward local repository
-self-check receipts only.
+self-check contracts only. It does not implement subprocess execution, a
+runner, a launcher, a CLI, a scheduler, a daemon, provider/browser/plugin/DCC/
+ComfyUI/MCP execution, or another dry-run abstraction layer.
