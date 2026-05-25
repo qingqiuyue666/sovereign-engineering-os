@@ -1,0 +1,104 @@
+{
+  "policy_type": "command_envelope_admission_router_v1",
+  "version": "v1",
+  "runtime_admitted": true,
+  "production_admitted": false,
+  "execution_disabled_by_default": true,
+  "command_model": "command_id_only",
+  "xml_parser": "python_standard_library_xml_etree_elementtree",
+  "payload_argv_allowed": false,
+  "payload_command_line_allowed": false,
+  "payload_cwd_env_path_allowed": false,
+  "shell_allowed": false,
+  "shell_false_required": true,
+  "network_allowed": false,
+  "browser_allowed": false,
+  "provider_api_allowed": false,
+  "credential_storage_allowed": false,
+  "production_autonomy_allowed": false,
+  "allowed_status_values": [
+    "PASS",
+    "BLOCKED",
+    "FATAL"
+  ],
+  "allowed_envelope_fields": [
+    "STATUS",
+    "COMMAND_ID",
+    "TOKEN_ID",
+    "APPROVAL_ID",
+    "POLICY_ID",
+    "RUN_ID",
+    "REASON"
+  ],
+  "forbidden_payload_fields": [
+    "COMMAND",
+    "RAW_COMMAND",
+    "COMMAND_LINE",
+    "ARGV",
+    "ARGS",
+    "SHELL",
+    "SCRIPT",
+    "BASH",
+    "PYTHON_CODE",
+    "EXECUTABLE",
+    "EXECUTABLE_PATH",
+    "WORKDIR",
+    "CWD",
+    "ENV",
+    "ENVIRONMENT",
+    "PATH",
+    "PATH_OVERRIDE",
+    "URL",
+    "NETWORK",
+    "BROWSER",
+    "PROVIDER",
+    "CREDENTIAL",
+    "SECRET",
+    "TOKEN_VALUE",
+    "FILE_WRITE_PATH",
+    "DELETE_PATH",
+    "HOME_PATH"
+  ],
+  "allowed_execution_levels": [
+    "LEVEL_0_VERIFY_ONLY",
+    "LEVEL_1_FIXTURE_ONLY",
+    "LEVEL_2_ALLOWLISTED_LOCAL_COMMAND"
+  ],
+  "registry_entries": [
+    {
+      "command_id": "focused_replay_engine_test",
+      "policy_id": "command_envelope_admission_router_v1",
+      "risk_class": "LOW_RISK",
+      "execution_level": "LEVEL_1_FIXTURE_ONLY",
+      "approval_required": true,
+      "token_required": true
+    },
+    {
+      "command_id": "focused_external_pattern_test",
+      "policy_id": "command_envelope_admission_router_v1",
+      "risk_class": "LOW_RISK",
+      "execution_level": "LEVEL_1_FIXTURE_ONLY",
+      "approval_required": false,
+      "token_required": false
+    },
+    {
+      "command_id": "diff_check",
+      "policy_id": "command_envelope_admission_router_v1",
+      "risk_class": "LOW_RISK",
+      "execution_level": "LEVEL_2_ALLOWLISTED_LOCAL_COMMAND",
+      "approval_required": false,
+      "token_required": false
+    }
+  ],
+  "admission_requires": [
+    "parsed_xml_envelope",
+    "no_forbidden_fields",
+    "status_pass",
+    "known_command_id",
+    "policy_id_match",
+    "token_id_when_required",
+    "approval_id_when_required",
+    "risk_class_not_high_risk",
+    "allowed_execution_level"
+  ]
+}
