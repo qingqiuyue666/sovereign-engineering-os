@@ -1,0 +1,54 @@
+{
+  "policy_type": "capability_token_lifecycle_v1",
+  "version": "v1",
+  "status": "standalone_contract_model",
+  "integration_dependency": {
+    "real_local_runner_boundary_v1": "semantic_dependency",
+    "uses_unmerged_runner_code": false,
+    "runner_integration_deferred_until_runner_boundary_merge": true
+  },
+  "allowed_command_ids": [
+    "focused_runner_chain_tests",
+    "full_unittest_discover",
+    "make_ci",
+    "diff_check"
+  ],
+  "required_bindings": [
+    "scope",
+    "command_id",
+    "approval_artifact_id",
+    "approval_artifact_digest",
+    "repo_revision",
+    "expires_at",
+    "issue_nonce",
+    "consume_nonce"
+  ],
+  "lifecycle_events": [
+    "token_issued",
+    "token_consumed",
+    "token_revoked",
+    "token_rejected"
+  ],
+  "single_use_enforced": true,
+  "expiry_enforced": true,
+  "revocation_enforced": true,
+  "replay_protection": {
+    "issue_nonce_replay_rejected": true,
+    "consume_nonce_replay_rejected": true,
+    "consumed_token_replay_rejected": true
+  },
+  "audit_receipt_required": true,
+  "forbidden_authority": {
+    "arbitrary_shell_authorized": false,
+    "shell_true_authorized": false,
+    "arbitrary_argv_authorized": false,
+    "arbitrary_command_line_authorized": false,
+    "network_authorized": false,
+    "browser_authorized": false,
+    "provider_api_authorized": false,
+    "credential_storage_authorized": false,
+    "production_autonomy_authorized": false,
+    "unbounded_daemon_authorized": false,
+    "unbounded_scheduler_authorized": false
+  }
+}
