@@ -14,6 +14,7 @@ import json
 from typing import Mapping, Sequence
 
 from kernel.runtime._strict_validation import strict_nonempty_string
+from kernel.runtime.real_local_runner_boundary import REAL_LOCAL_RUNNER_COMMAND_ALLOWLIST
 
 __all__ = [
     "JOB_STATES",
@@ -29,9 +30,29 @@ __all__ = [
 
 _POLICY_VERSION = "local-job-queue-v1"
 _CODE_VERSION = "0.1.0"
+REAL_LOCAL_RUNNER_BOUNDARY_POLICY_ID = "real_local_runner_boundary_v1"
+TOKEN_INTEGRATION_STATUS_WAITING = "WAITING_FOR_TOKEN_MERGE"
+ALLOWED_LOCAL_RUNNER_COMMAND_IDS: tuple[str, ...] = tuple(
+    REAL_LOCAL_RUNNER_COMMAND_ALLOWLIST.keys()
+)
 
 JOB_STATES: tuple[str, ...] = ("queued", "leased", "completed", "failed", "canceled")
 TERMINAL_JOB_STATES: tuple[str, ...] = ("completed", "failed", "canceled")
+_FORBIDDEN_DESCRIPTOR_FIELDS = frozenset(
+    {
+        "args",
+        "argv",
+        "browser",
+        "command",
+        "command_line",
+        "command_text",
+        "network",
+        "provider_api",
+        "shell",
+        "shell_command",
+        "url",
+    }
+)
 
 
 @dataclass(frozen=True)
@@ -46,11 +67,19 @@ class JobDescriptor:
     max_attempts: int
     lease_timeout_seconds: int
     created_at: str
+    run_id: str = ""
+    approval_artifact_ref: str = ""
+    token_id: str = ""
+    token_receipt_ref: str = ""
+    runner_receipt_ref: str = ""
+    runner_policy_id: str = REAL_LOCAL_RUNNER_BOUNDARY_POLICY_ID
+    token_integration_status: str = TOKEN_INTEGRATION_STATUS_WAITING
     policy_version: str = _POLICY_VERSION
     code_version: str = _CODE_VERSION
 
     def as_dict(self) -> dict[str, object]:
         return {
+            "approval_artifact_ref": self.approval_artifact_ref,
             "code_version": self.code_version,
             "command_id": self.command_id,
             "created_at": self.created_at,
@@ -59,8 +88,14 @@ class JobDescriptor:
             "max_attempts": self.max_attempts,
             "policy_version": self.policy_version,
             "priority": self.priority,
+            "run_id": self.run_id,
+            "runner_policy_id": self.runner_policy_id,
+            "runner_receipt_ref": self.runner_receipt_ref,
             "scope": self.scope,
             "task_id": self.task_id,
+            "token_id": self.token_id,
+            "token_integration_status": self.token_integration_status,
+            "token_receipt_ref": self.token_receipt_ref,
         }
 
 
@@ -182,6 +217,13 @@ class LocalJobQueue:
         priority: int = 100,
         max_attempts: int = 1,
         lease_timeout_seconds: int = 60,
+        run_id: str = "",
+        approval_artifact_ref: str = "",
+        token_id: str = "",
+        token_receipt_ref: str = "",
+        runner_receipt_ref: str = "",
+        runner_policy_id: str = REAL_LOCAL_RUNNER_BOUNDARY_POLICY_ID,
+        token_integration_status: str = TOKEN_INTEGRATION_STATUS_WAITING,
         created_at: str | None = None,
     ) -> JobRecord:
         if job_id in self._jobs:
@@ -195,6 +237,13 @@ class LocalJobQueue:
             max_attempts=max_attempts,
             lease_timeout_seconds=lease_timeout_seconds,
             created_at=_timestamp(created_at),
+            run_id=run_id,
+            approval_artifact_ref=approval_artifact_ref,
+            token_id=token_id,
+            token_receipt_ref=token_receipt_ref,
+            runner_receipt_ref=runner_receipt_ref,
+            runner_policy_id=runner_policy_id,
+            token_integration_status=token_integration_status,
         )
         _validate_descriptor(descriptor)
         record = JobRecord(descriptor=descriptor, state="queued", attempts=0)
@@ -209,6 +258,46 @@ class LocalJobQueue:
             observed_at=descriptor.created_at,
         )
         return record
+
+    def enqueue_from_mapping(self, payload: Mapping[str, object]) -> JobRecord:
+        """Enqueue from a descriptor mapping while rejecting execution surfaces."""
+
+        if not isinstance(payload, Mapping):
+            raise ValueError("job_descriptor_must_be_mapping")
+        forbidden = sorted(
+            field for field in payload if str(field) in _FORBIDDEN_DESCRIPTOR_FIELDS
+        )
+        if forbidden:
+            raise ValueError("job_descriptor_forbidden_fields:" + ",".join(forbidden))
+        return self.enqueue(
+            job_id=_required_string(payload, "job_id"),
+            task_id=_required_string(payload, "task_id"),
+            command_id=_required_string(payload, "command_id"),
+            scope=_required_string(payload, "scope"),
+            priority=_optional_int(payload, "priority", 100),
+            max_attempts=_optional_int(payload, "max_attempts", 1),
+            lease_timeout_seconds=_optional_int(
+                payload,
+                "lease_timeout_seconds",
+                60,
+            ),
+            run_id=_optional_string(payload, "run_id"),
+            approval_artifact_ref=_optional_string(payload, "approval_artifact_ref"),
+            token_id=_optional_string(payload, "token_id"),
+            token_receipt_ref=_optional_string(payload, "token_receipt_ref"),
+            runner_receipt_ref=_optional_string(payload, "runner_receipt_ref"),
+            runner_policy_id=_optional_string(
+                payload,
+                "runner_policy_id",
+                REAL_LOCAL_RUNNER_BOUNDARY_POLICY_ID,
+            ),
+            token_integration_status=_optional_string(
+                payload,
+                "token_integration_status",
+                TOKEN_INTEGRATION_STATUS_WAITING,
+            ),
+            created_at=_optional_string(payload, "created_at") or None,
+        )
 
     def lease_next(
         self,
@@ -488,7 +577,53 @@ def _validate_descriptor(descriptor: JobDescriptor) -> None:
         raise ValueError("max_attempts_must_be_positive_int")
     if not isinstance(descriptor.lease_timeout_seconds, int) or descriptor.lease_timeout_seconds < 1:
         raise ValueError("lease_timeout_seconds_must_be_positive_int")
+    if descriptor.command_id not in ALLOWED_LOCAL_RUNNER_COMMAND_IDS:
+        raise ValueError("command_id_not_allowlisted")
+    for field, value in (
+        ("run_id", descriptor.run_id),
+        ("approval_artifact_ref", descriptor.approval_artifact_ref),
+        ("token_id", descriptor.token_id),
+        ("token_receipt_ref", descriptor.token_receipt_ref),
+        ("runner_receipt_ref", descriptor.runner_receipt_ref),
+    ):
+        if value and not strict_nonempty_string(value):
+            raise ValueError(f"{field}_must_be_nonempty_string")
+    if descriptor.runner_policy_id != REAL_LOCAL_RUNNER_BOUNDARY_POLICY_ID:
+        raise ValueError("runner_policy_id_mismatch")
+    if descriptor.token_integration_status != TOKEN_INTEGRATION_STATUS_WAITING:
+        raise ValueError("token_integration_status_must_wait_for_token_merge")
     _parse_time(descriptor.created_at)
+
+
+def _required_string(payload: Mapping[str, object], field_name: str) -> str:
+    value = payload.get(field_name)
+    if not strict_nonempty_string(value):
+        raise ValueError(field_name + "_required")
+    return str(value)
+
+
+def _optional_string(
+    payload: Mapping[str, object],
+    field_name: str,
+    default: str = "",
+) -> str:
+    value = payload.get(field_name, default)
+    if value is None:
+        return default
+    if not isinstance(value, str):
+        raise ValueError(field_name + "_must_be_string")
+    return value
+
+
+def _optional_int(
+    payload: Mapping[str, object],
+    field_name: str,
+    default: int,
+) -> int:
+    value = payload.get(field_name, default)
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise ValueError(field_name + "_must_be_int")
+    return value
 
 
 def _lease_id(job_id: str, worker_id: str, attempt: int, leased_at: str) -> str:

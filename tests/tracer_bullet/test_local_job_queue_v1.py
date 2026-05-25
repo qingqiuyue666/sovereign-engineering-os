@@ -8,7 +8,12 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from kernel.runtime.local_job_queue import LocalJobQueue, summarize_job_event_records
+from kernel.runtime.local_job_queue import (
+    TOKEN_INTEGRATION_STATUS_WAITING,
+    LocalJobQueue,
+    summarize_job_event_records,
+)
+from kernel.runtime.real_local_runner_boundary import REAL_LOCAL_RUNNER_COMMAND_ALLOWLIST
 from tools.local_job_queue_viewer import main as queue_viewer_main
 
 
@@ -30,6 +35,11 @@ def enqueue(queue: LocalJobQueue, job_id: str = "job-001", **overrides):
         "task_id": f"task-{job_id}",
         "command_id": "make_ci",
         "scope": "local_runner_validation",
+        "run_id": "run-job-001",
+        "approval_artifact_ref": "approval-001",
+        "token_id": "cap-local-runner-token-001",
+        "token_receipt_ref": "token-receipt-001",
+        "runner_receipt_ref": "runner-receipt-001",
         "priority": 10,
         "max_attempts": 2,
         "lease_timeout_seconds": 60,
@@ -45,6 +55,17 @@ class LocalJobQueueV1Tests(unittest.TestCase):
         enqueued = enqueue(queue)
         self.assertEqual(enqueued.state, "queued")
         self.assertEqual(queue.events[0].event_type, "enqueued")
+        descriptor = enqueued.descriptor.as_dict()
+        self.assertIn(descriptor["command_id"], REAL_LOCAL_RUNNER_COMMAND_ALLOWLIST)
+        self.assertEqual(descriptor["run_id"], "run-job-001")
+        self.assertEqual(descriptor["approval_artifact_ref"], "approval-001")
+        self.assertEqual(descriptor["token_id"], "cap-local-runner-token-001")
+        self.assertEqual(descriptor["token_receipt_ref"], "token-receipt-001")
+        self.assertEqual(descriptor["runner_receipt_ref"], "runner-receipt-001")
+        self.assertEqual(
+            descriptor["token_integration_status"],
+            TOKEN_INTEGRATION_STATUS_WAITING,
+        )
 
         leased = queue.lease_next(worker_id="worker-001", leased_at=LEASED_AT)
         self.assertEqual(leased.state, "leased")
@@ -118,6 +139,50 @@ class LocalJobQueueV1Tests(unittest.TestCase):
         self.assertEqual(len(queue.events), before_event_count)
         self.assertEqual(queue._get_job(leased.descriptor.job_id).state, "leased")
 
+    def test_descriptor_rejects_command_line_argv_and_unknown_command(self) -> None:
+        queue = LocalJobQueue(queue_id="queue-001")
+        base = {
+            "job_id": "job-001",
+            "task_id": "task-001",
+            "command_id": "make_ci",
+            "scope": "local_runner_validation",
+            "run_id": "run-job-001",
+            "approval_artifact_ref": "approval-001",
+            "created_at": CREATED_AT,
+        }
+        for forbidden_field in ("command_line", "argv", "shell"):
+            payload = dict(base)
+            payload[forbidden_field] = "nope"
+            with self.assertRaisesRegex(ValueError, "job_descriptor_forbidden_fields"):
+                queue.enqueue_from_mapping(payload)
+
+        with self.assertRaisesRegex(ValueError, "command_id_not_allowlisted"):
+            queue.enqueue_from_mapping({**base, "command_id": "npm_install"})
+        with self.assertRaisesRegex(
+            ValueError,
+            "token_integration_status_must_wait_for_token_merge",
+        ):
+            queue.enqueue_from_mapping(
+                {
+                    **base,
+                    "job_id": "job-002",
+                    "token_integration_status": "TOKEN_RUNTIME_READY",
+                }
+            )
+
+    def test_semantic_runner_and_token_refs_are_inert_metadata_only(self) -> None:
+        queue = LocalJobQueue(queue_id="queue-001")
+        enqueued = enqueue(queue)
+        before_events = tuple(queue.events)
+        descriptor = enqueued.descriptor.as_dict()
+
+        self.assertEqual(queue.summary()["state_counts"]["queued"], 1)
+        self.assertEqual(tuple(queue.events), before_events)
+        self.assertEqual(descriptor["runner_policy_id"], "real_local_runner_boundary_v1")
+        self.assertEqual(descriptor["runner_receipt_ref"], "runner-receipt-001")
+        self.assertEqual(descriptor["token_receipt_ref"], "token-receipt-001")
+        self.assertEqual(descriptor["token_integration_status"], "WAITING_FOR_TOKEN_MERGE")
+
     def test_append_only_events_and_read_only_summary(self) -> None:
         queue = LocalJobQueue(queue_id="queue-001")
         enqueue(queue)
@@ -157,12 +222,16 @@ class LocalJobQueueV1Tests(unittest.TestCase):
             '"browser_authorized": false',
             '"provider_api_authorized": false',
             '"arbitrary_shell_authorized": false',
+            '"job_descriptor_forbids_command_line": true',
+            '"token_integration_status": "WAITING_FOR_TOKEN_MERGE"',
         ):
             self.assertIn(fragment, policy_text)
         for phrase in (
             "does not execute jobs",
             "starts no background daemon",
             "owns no unbounded scheduler",
+            "does not launch the runner",
+            "waiting_for_token_merge",
             "calls no provider api",
             "integration with runner execution or token consumption must wait",
         ):

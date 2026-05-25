@@ -3,11 +3,26 @@
   "version": "v1",
   "status": "standalone_state_machine",
   "integration_dependency": {
-    "real_local_runner_boundary_v1": "semantic_dependency",
+    "real_local_runner_boundary_v1": "merged_contract_reference",
     "capability_token_lifecycle_v1": "semantic_dependency",
     "uses_unmerged_runner_or_token_code": false,
-    "execution_integration_deferred": true
+    "imports_unmerged_token_code": false,
+    "execution_integration_deferred": true,
+    "token_integration_status": "WAITING_FOR_TOKEN_MERGE"
   },
+  "runner_policy_id": "real_local_runner_boundary_v1",
+  "job_descriptor_metadata_refs": [
+    "command_id",
+    "run_id",
+    "approval_artifact_ref",
+    "token_id",
+    "token_receipt_ref",
+    "runner_receipt_ref"
+  ],
+  "job_descriptor_forbids_command_line": true,
+  "job_descriptor_forbids_arbitrary_argv": true,
+  "runner_references_are_inert_metadata": true,
+  "token_references_are_inert_metadata_until_token_merge": true,
   "states": ["queued", "leased", "completed", "failed", "canceled"],
   "terminal_states": ["completed", "failed", "canceled"],
   "operations": [
