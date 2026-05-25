@@ -3,12 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, replace
-from datetime import datetime, timezone
-import hashlib
-import json
-from pathlib import Path
 import subprocess
-from types import MappingProxyType
 from typing import Callable, Mapping
 
 from kernel.execution.minimal_controlled_execution_admission_wal_verifier import (
@@ -35,6 +30,15 @@ from kernel.execution.minimal_controlled_execution_contract import (
     snapshot_hash,
     verifier_input_hash,
 )
+from kernel.execution.minimal_controlled_runner_shared import (
+    REPOSITORY_ROOT,
+    bounded_output_metadata,
+    canonical_json,
+    deterministic_git_safe_env,
+    git_head_ref,
+    sha256_text,
+    utc_now,
+)
 
 __all__ = [
     "EXECUTABLE_COMMAND_IDS",
@@ -51,25 +55,12 @@ __all__ = [
     "verify_minimal_controlled_git_diff_check_result",
 ]
 
-REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 EXECUTABLE_COMMAND_IDS = ("git_diff_check",)
 RUNNER_FAILURE_TYPES = frozenset(
     set(EXECUTION_FAILURE_TYPES) | {"COMMAND_NOT_EXECUTABLE_IN_THIS_SLICE"}
 )
 _COMMAND_ID = "git_diff_check"
-_MINIMAL_ENV = MappingProxyType(
-    {
-        "GIT_CONFIG_GLOBAL": "/dev/null",
-        "GIT_CONFIG_NOSYSTEM": "1",
-        "GIT_OPTIONAL_LOCKS": "0",
-        "GIT_TERMINAL_PROMPT": "0",
-        "HOME": str(REPOSITORY_ROOT),
-        "LANG": "C",
-        "LC_ALL": "C",
-        "PATH": "/usr/bin:/bin:/usr/sbin:/sbin",
-        "TZ": "UTC",
-    }
-)
+_MINIMAL_ENV = deterministic_git_safe_env(REPOSITORY_ROOT)
 
 
 class _DictMixin:
@@ -210,14 +201,14 @@ def run_minimal_controlled_git_diff_check(
     decision = decide_execution_request(
         normalized,
         decision_id="decision-" + normalized.request_id,
-        decided_at=_utc_now(),
+        decided_at=utc_now(),
     )
     admission = build_execution_admission_record(
         normalized,
         admission_record_id="admission-" + normalized.request_id,
         decision_id=decision.decision_id,
         decided_at=decision.decided_at,
-        created_at=_utc_now(),
+        created_at=utc_now(),
     )
     pre_snapshot = _snapshot(normalized, "PRE")
     wal_records: list[ExecutionWalRecord] = []
@@ -302,7 +293,7 @@ def run_minimal_controlled_git_diff_check(
         timeout_ms=entry.timeout_ms,
         env_keys=tuple(sorted(_MINIMAL_ENV)),
     )
-    started_at = _utc_now()
+    started_at = utc_now()
     try:
         completed = subprocess.run(
             list(entry.argv),
@@ -337,15 +328,15 @@ def run_minimal_controlled_git_diff_check(
         )
 
     post_snapshot = _snapshot(normalized, "POST")
-    stdout_meta = _output_meta(completed.stdout, entry.output_limit_bytes)
-    stderr_meta = _output_meta(completed.stderr, entry.output_limit_bytes)
+    stdout_meta = bounded_output_metadata(completed.stdout, entry.output_limit_bytes)
+    stderr_meta = bounded_output_metadata(completed.stderr, entry.output_limit_bytes)
     receipt = MinimalControlledExecutionReceipt(
         receipt_id="receipt-" + normalized.request_id,
         request_id=normalized.request_id,
         command_id=normalized.command_id,
         receipt_status="EXECUTION_COMPLETED",
         started_at=started_at,
-        finished_at=_utc_now(),
+        finished_at=utc_now(),
         exit_code=completed.returncode,
         stdout_digest=stdout_meta["digest"],
         stderr_digest=stderr_meta["digest"],
@@ -546,7 +537,7 @@ def _append_admission_wal(
         {
             "admission_record_hash": admission.admission_record_hash,
             "command_id": request.command_id,
-            "created_at": _utc_now(),
+            "created_at": utc_now(),
             "decision_hash": decision.decision_hash,
             "execution_performed": False,
             "failure_bundle_hash": "",
@@ -679,10 +670,10 @@ def _verifier_binding(
 
 
 def _snapshot(request: ExecutionRequest, snapshot_type: str) -> ExecutionSnapshotRef:
-    root_hash = "sha256:" + _sha256_text(
-        _canonical_json(
+    root_hash = "sha256:" + sha256_text(
+        canonical_json(
             {
-                "git_head": _git_head_ref(),
+                "git_head": git_head_ref(REPOSITORY_ROOT),
                 "registry_hash": command_registry_hash(),
                 "repository_root": str(REPOSITORY_ROOT),
             }
@@ -695,39 +686,9 @@ def _snapshot(request: ExecutionRequest, snapshot_type: str) -> ExecutionSnapsho
         command_id=request.command_id,
         snapshot_type=snapshot_type,
         root_hash=root_hash,
-        captured_at=_utc_now(),
+        captured_at=utc_now(),
         execution_performed=False,
     )
-
-
-def _git_head_ref() -> str:
-    git_dir = REPOSITORY_ROOT / ".git"
-    try:
-        head = (git_dir / "HEAD").read_text(encoding="utf-8").strip()
-    except OSError:
-        return "HEAD:unavailable"
-    if not head.startswith("ref: "):
-        return "HEAD:" + head
-    ref_name = head[5:]
-    try:
-        ref_value = (git_dir / ref_name).read_text(encoding="utf-8").strip()
-    except OSError:
-        ref_value = "unavailable"
-    return "HEAD:" + ref_name + ":" + ref_value
-
-
-def _output_meta(value: object, limit: int) -> dict[str, object]:
-    if value is None:
-        raw = b""
-    elif isinstance(value, bytes):
-        raw = value
-    else:
-        raw = str(value).encode("utf-8", errors="replace")
-    bounded = raw[:limit]
-    return {
-        "digest": "sha256:" + hashlib.sha256(bounded).hexdigest(),
-        "truncated": len(raw) > limit,
-    }
 
 
 def _install_hash(target: object, field_name: str, hash_fn: object) -> None:
@@ -743,21 +704,9 @@ def _verifier_binding_hash(
 ) -> str:
     data = binding.as_dict() if isinstance(binding, MinimalControlledExecutionVerifierBinding) else dict(binding)
     data.pop("verifier_binding_hash", None)
-    return "sha256:" + _sha256_text(_canonical_json(data))
+    return "sha256:" + sha256_text(canonical_json(data))
 
 
 def _check(condition: bool, failures: list[str], reason: str) -> None:
     if not condition:
         failures.append(reason)
-
-
-def _canonical_json(payload: Mapping[str, object]) -> str:
-    return json.dumps(payload, sort_keys=True, separators=(",", ":"))
-
-
-def _sha256_text(value: str) -> str:
-    return hashlib.sha256(value.encode("utf-8")).hexdigest()
-
-
-def _utc_now() -> str:
-    return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
