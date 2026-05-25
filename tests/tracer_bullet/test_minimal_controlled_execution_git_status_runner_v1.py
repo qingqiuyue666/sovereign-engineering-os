@@ -74,6 +74,17 @@ class MinimalControlledExecutionGitStatusRunnerV1Tests(unittest.TestCase):
         )
         self.assertEqual(result.attempt.argv, ("git", "status", "--short"))
 
+    def test_subprocess_receives_required_git_safe_env(self):
+        with mock.patch.object(runner.subprocess, "run", return_value=_completed()) as run:
+            runner.run_minimal_controlled_git_status(_request_payload())
+
+        env = run.call_args.kwargs["env"]
+        self.assertEqual(env["GIT_OPTIONAL_LOCKS"], "0")
+        self.assertEqual(env["GIT_TERMINAL_PROMPT"], "0")
+        self.assertEqual(env["LANG"], "C")
+        self.assertEqual(env["LC_ALL"], "C")
+        self.assertEqual(env["TZ"], "UTC")
+
     def test_shell_false_is_enforced(self):
         with mock.patch.object(runner.subprocess, "run", return_value=_completed()) as run:
             result = runner.run_minimal_controlled_git_status(_request_payload())
@@ -296,8 +307,10 @@ class MinimalControlledExecutionGitStatusRunnerV1Tests(unittest.TestCase):
             "kernel.runtime.sqlite_wal_execution_journal",
             "kernel.runtime.router_wal_binding",
             "kernel.runtime.command_envelope_admission_router",
+            "kernel.runtime.",
             "local_execution_kernel",
             "local_job_runner",
+            "tools.local_execution_kernel.",
         ):
             self.assertFalse(
                 any(forbidden_import in imported for imported in imported_modules),
@@ -329,7 +342,9 @@ class MinimalControlledExecutionGitStatusRunnerV1Tests(unittest.TestCase):
             "kernel.runtime.sqlite_wal_execution_journal",
             "kernel.runtime.router_wal_binding",
             "kernel.runtime.command_envelope_admission_router",
+            "kernel.runtime.",
             "kernel.os_engine.local_job_runner",
+            "tools.local_execution_kernel.",
         ):
             self.assertNotIn(marker, source)
 

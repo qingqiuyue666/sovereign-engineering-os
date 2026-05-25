@@ -62,6 +62,8 @@ _MINIMAL_ENV = MappingProxyType(
     {
         "GIT_CONFIG_GLOBAL": "/dev/null",
         "GIT_CONFIG_NOSYSTEM": "1",
+        "GIT_OPTIONAL_LOCKS": "0",
+        "GIT_TERMINAL_PROMPT": "0",
         "HOME": str(REPOSITORY_ROOT),
         "LANG": "C",
         "LC_ALL": "C",
