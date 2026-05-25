@@ -7,7 +7,13 @@ from pathlib import Path
 
 from kernel.runtime.capability_token_lifecycle import (
     ALLOWED_LOCAL_RUNNER_COMMAND_IDS,
+    CAPABILITY_TOKEN_SCOPE,
     CapabilityTokenLifecycle,
+    REAL_LOCAL_RUNNER_BOUNDARY_POLICY_ID,
+)
+from kernel.runtime.real_local_runner_boundary import (
+    REAL_LOCAL_RUNNER_COMMAND_ALLOWLIST,
+    REAL_LOCAL_RUNNER_EXECUTABLE_RESOLUTION_POLICY_ID,
 )
 
 
@@ -20,6 +26,8 @@ APPROVAL_DIGEST = "sha256:" + "a" * 64
 OTHER_APPROVAL_DIGEST = "sha256:" + "b" * 64
 REVISION = "46f536dd31572ab67d0775263acd1456dc625765"
 OTHER_REVISION = "56f536dd31572ab67d0775263acd1456dc625766"
+RUN_ID = "run-token-001"
+OTHER_RUN_ID = "run-token-002"
 ISSUED_AT = "2026-05-25T00:00:00+00:00"
 EXPIRES_AT = "2026-05-25T01:00:00+00:00"
 NOW = "2026-05-25T00:10:00+00:00"
@@ -28,10 +36,15 @@ NOW = "2026-05-25T00:10:00+00:00"
 def issue_token(lifecycle: CapabilityTokenLifecycle, **overrides):
     payload = {
         "command_id": "make_ci",
-        "scope": "local_runner_validation",
+        "scope": CAPABILITY_TOKEN_SCOPE,
+        "run_id": RUN_ID,
         "approval_artifact_id": "approval-001",
         "approval_artifact_digest": APPROVAL_DIGEST,
         "repo_revision": REVISION,
+        "runner_policy_id": REAL_LOCAL_RUNNER_BOUNDARY_POLICY_ID,
+        "executable_resolution_policy_id": (
+            REAL_LOCAL_RUNNER_EXECUTABLE_RESOLUTION_POLICY_ID
+        ),
         "expires_at": EXPIRES_AT,
         "issue_nonce": "issue-001",
         "issued_at": ISSUED_AT,
@@ -45,10 +58,15 @@ def consume_token(lifecycle: CapabilityTokenLifecycle, token_id: str, **override
     payload = {
         "token_id": token_id,
         "command_id": "make_ci",
-        "scope": "local_runner_validation",
+        "scope": CAPABILITY_TOKEN_SCOPE,
+        "run_id": RUN_ID,
         "approval_artifact_id": "approval-001",
         "approval_artifact_digest": APPROVAL_DIGEST,
         "repo_revision": REVISION,
+        "runner_policy_id": REAL_LOCAL_RUNNER_BOUNDARY_POLICY_ID,
+        "executable_resolution_policy_id": (
+            REAL_LOCAL_RUNNER_EXECUTABLE_RESOLUTION_POLICY_ID
+        ),
         "consume_nonce": "consume-001",
         "now": NOW,
         "observed_at": NOW,
@@ -65,6 +83,20 @@ class CapabilityTokenLifecycleV1Tests(unittest.TestCase):
         self.assertIsNotNone(issued.token)
         self.assertTrue(issued.token.single_use)
         self.assertIn(issued.token.command_id, ALLOWED_LOCAL_RUNNER_COMMAND_IDS)
+        self.assertEqual(
+            tuple(REAL_LOCAL_RUNNER_COMMAND_ALLOWLIST),
+            ALLOWED_LOCAL_RUNNER_COMMAND_IDS,
+        )
+        self.assertEqual(issued.token.run_id, RUN_ID)
+        self.assertEqual(
+            issued.token.runner_policy_id,
+            REAL_LOCAL_RUNNER_BOUNDARY_POLICY_ID,
+        )
+        self.assertEqual(
+            issued.token.executable_resolution_policy_id,
+            REAL_LOCAL_RUNNER_EXECUTABLE_RESOLUTION_POLICY_ID,
+        )
+        self.assertFalse(issued.token.production_admitted)
         self.assertTrue(issued.receipt.accepted)
         self.assertEqual(issued.receipt.event_type, "token_issued")
 
@@ -74,6 +106,23 @@ class CapabilityTokenLifecycleV1Tests(unittest.TestCase):
         self.assertEqual(consumed.token.consumed_at, NOW)
         self.assertTrue(consumed.receipt.accepted)
         self.assertEqual(consumed.receipt.event_type, "token_consumed")
+
+    def test_token_command_id_binding_accepts_only_runner_allowlist(self) -> None:
+        for index, command_id in enumerate(ALLOWED_LOCAL_RUNNER_COMMAND_IDS):
+            lifecycle = CapabilityTokenLifecycle()
+            issued = issue_token(
+                lifecycle,
+                command_id=command_id,
+                issue_nonce=f"issue-{index}",
+            )
+            self.assertTrue(issued.accepted, command_id)
+            consumed = consume_token(
+                lifecycle,
+                issued.token.token_id,
+                command_id=command_id,
+                consume_nonce=f"consume-{index}",
+            )
+            self.assertTrue(consumed.accepted, command_id)
 
     def test_unknown_command_and_bad_binding_are_rejected(self) -> None:
         lifecycle = CapabilityTokenLifecycle()
@@ -133,16 +182,26 @@ class CapabilityTokenLifecycleV1Tests(unittest.TestCase):
             issued.token.token_id,
             command_id="diff_check",
             scope="other_scope",
+            run_id=OTHER_RUN_ID,
             approval_artifact_id="approval-002",
             approval_artifact_digest=OTHER_APPROVAL_DIGEST,
             repo_revision=OTHER_REVISION,
+            runner_policy_id="other_runner_policy",
+            executable_resolution_policy_id="other_resolution_policy",
         )
         self.assertFalse(result.accepted)
         self.assertIn("command_id_mismatch", result.receipt.failures)
         self.assertIn("scope_mismatch", result.receipt.failures)
+        self.assertIn("scope_not_allowed", result.receipt.failures)
+        self.assertIn("run_id_mismatch", result.receipt.failures)
         self.assertIn("approval_artifact_id_mismatch", result.receipt.failures)
         self.assertIn("approval_artifact_digest_mismatch", result.receipt.failures)
         self.assertIn("repo_revision_mismatch", result.receipt.failures)
+        self.assertIn("runner_policy_id_mismatch", result.receipt.failures)
+        self.assertIn(
+            "executable_resolution_policy_id_mismatch",
+            result.receipt.failures,
+        )
 
     def test_replay_protection_rejects_reused_issue_and_consume_nonces(self) -> None:
         lifecycle = CapabilityTokenLifecycle()
@@ -178,8 +237,18 @@ class CapabilityTokenLifecycleV1Tests(unittest.TestCase):
         self.assertEqual(first.token.token_id, second.token.token_id)
         self.assertEqual(first.receipt.receipt_hash, second.receipt.receipt_hash)
         token_dict = first.token.as_dict()
+        receipt_dict = first.receipt.as_dict()
         self.assertNotIn("issue-001", str(token_dict))
         self.assertIn("issue_nonce_digest", token_dict)
+        for payload in (token_dict, receipt_dict):
+            self.assertFalse(payload["shell_authorized"])
+            self.assertFalse(payload["arbitrary_argv_authorized"])
+            self.assertFalse(payload["command_line_authorized"])
+            self.assertFalse(payload["network_authorized"])
+            self.assertFalse(payload["browser_authorized"])
+            self.assertFalse(payload["provider_api_authorized"])
+            self.assertFalse(payload["production_autonomy_authorized"])
+            self.assertFalse(payload["production_admitted"])
 
     def test_policy_and_doc_record_no_forbidden_authority(self) -> None:
         policy_text = POLICY_PATH.read_text(encoding="utf-8")
@@ -192,15 +261,19 @@ class CapabilityTokenLifecycleV1Tests(unittest.TestCase):
             '"provider_api_authorized": false',
             '"credential_storage_authorized": false',
             '"production_autonomy_authorized": false',
+            '"real_local_runner_boundary_policy_id": "real_local_runner_boundary_v1"',
+            '"executable_resolution_policy_id": "real_local_runner_system_brew_repo_executable_resolution_v1"',
         ):
             self.assertIn(fragment, policy_text)
         for phrase in (
             "does not execute commands",
             "does not grant arbitrary shell",
+            "real local runner boundary v1 is merged",
+            "executable resolution policy",
             "provider api calls",
             "credential storage",
             "production autonomy",
-            "runner integration remains deferred",
+            "does not launch the runner",
         ):
             self.assertIn(phrase, doc_text)
 

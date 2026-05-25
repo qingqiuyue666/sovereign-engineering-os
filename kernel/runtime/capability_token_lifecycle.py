@@ -13,6 +13,10 @@ import hashlib
 import json
 
 from kernel.runtime._strict_validation import strict_digest, strict_nonempty_string
+from kernel.runtime.real_local_runner_boundary import (
+    REAL_LOCAL_RUNNER_COMMAND_ALLOWLIST,
+    REAL_LOCAL_RUNNER_EXECUTABLE_RESOLUTION_POLICY_ID,
+)
 
 __all__ = [
     "ALLOWED_LOCAL_RUNNER_COMMAND_IDS",
@@ -24,12 +28,11 @@ __all__ = [
 
 _POLICY_VERSION = "capability-token-lifecycle-v1"
 _CODE_VERSION = "0.1.0"
+REAL_LOCAL_RUNNER_BOUNDARY_POLICY_ID = "real_local_runner_boundary_v1"
+CAPABILITY_TOKEN_SCOPE = "local_runner_validation"
 
-ALLOWED_LOCAL_RUNNER_COMMAND_IDS: tuple[str, ...] = (
-    "focused_runner_chain_tests",
-    "full_unittest_discover",
-    "make_ci",
-    "diff_check",
+ALLOWED_LOCAL_RUNNER_COMMAND_IDS: tuple[str, ...] = tuple(
+    REAL_LOCAL_RUNNER_COMMAND_ALLOWLIST.keys()
 )
 
 
@@ -40,9 +43,12 @@ class CapabilityToken:
     token_id: str
     command_id: str
     scope: str
+    run_id: str
     approval_artifact_id: str
     approval_artifact_digest: str
     repo_revision: str
+    runner_policy_id: str
+    executable_resolution_policy_id: str
     issued_at: str
     expires_at: str
     issue_nonce_digest: str
@@ -53,23 +59,44 @@ class CapabilityToken:
     revocation_reason: str | None = None
     policy_version: str = _POLICY_VERSION
     code_version: str = _CODE_VERSION
+    shell_authorized: bool = False
+    arbitrary_argv_authorized: bool = False
+    command_line_authorized: bool = False
+    network_authorized: bool = False
+    browser_authorized: bool = False
+    provider_api_authorized: bool = False
+    production_autonomy_authorized: bool = False
+    production_admitted: bool = False
 
     def as_dict(self) -> dict[str, object]:
         return {
+            "arbitrary_argv_authorized": self.arbitrary_argv_authorized,
             "approval_artifact_digest": self.approval_artifact_digest,
             "approval_artifact_id": self.approval_artifact_id,
+            "browser_authorized": self.browser_authorized,
             "code_version": self.code_version,
+            "command_line_authorized": self.command_line_authorized,
             "command_id": self.command_id,
             "consumed_at": self.consumed_at,
             "consumed_nonce_digest": self.consumed_nonce_digest,
             "expires_at": self.expires_at,
+            "executable_resolution_policy_id": (
+                self.executable_resolution_policy_id
+            ),
             "issue_nonce_digest": self.issue_nonce_digest,
             "issued_at": self.issued_at,
+            "network_authorized": self.network_authorized,
             "policy_version": self.policy_version,
+            "production_admitted": self.production_admitted,
+            "production_autonomy_authorized": self.production_autonomy_authorized,
+            "provider_api_authorized": self.provider_api_authorized,
             "repo_revision": self.repo_revision,
             "revocation_reason": self.revocation_reason,
             "revoked_at": self.revoked_at,
+            "run_id": self.run_id,
+            "runner_policy_id": self.runner_policy_id,
             "scope": self.scope,
+            "shell_authorized": self.shell_authorized,
             "single_use": self.single_use,
             "token_id": self.token_id,
         }
@@ -85,9 +112,12 @@ class TokenLifecycleReceipt:
     failures: tuple[str, ...]
     command_id: str
     scope: str
+    run_id: str
     approval_artifact_id: str
     approval_artifact_digest: str
     repo_revision: str
+    runner_policy_id: str
+    executable_resolution_policy_id: str
     receipt_hash: str
     observed_at: str
     policy_version: str = _POLICY_VERSION
@@ -101,17 +131,30 @@ class TokenLifecycleReceipt:
             "code_version": self.code_version,
             "command_id": self.command_id,
             "event_type": self.event_type,
+            "executable_resolution_policy_id": (
+                self.executable_resolution_policy_id
+            ),
             "failures": list(self.failures),
             "policy_version": self.policy_version,
             "repo_revision": self.repo_revision,
+            "run_id": self.run_id,
+            "runner_policy_id": self.runner_policy_id,
             "scope": self.scope,
             "token_id": self.token_id,
         }
 
     def as_dict(self) -> dict[str, object]:
         payload = self.deterministic_material()
+        payload["arbitrary_argv_authorized"] = False
+        payload["browser_authorized"] = False
+        payload["command_line_authorized"] = False
+        payload["network_authorized"] = False
         payload["observed_at"] = self.observed_at
+        payload["production_admitted"] = False
+        payload["production_autonomy_authorized"] = False
+        payload["provider_api_authorized"] = False
         payload["receipt_hash"] = self.receipt_hash
+        payload["shell_authorized"] = False
         return payload
 
 
@@ -134,7 +177,9 @@ class CapabilityTokenLifecycle:
         *,
         allowed_command_ids: tuple[str, ...] = ALLOWED_LOCAL_RUNNER_COMMAND_IDS,
     ) -> None:
-        if not allowed_command_ids or not all(strict_nonempty_string(item) for item in allowed_command_ids):
+        if not allowed_command_ids or not all(
+            strict_nonempty_string(item) for item in allowed_command_ids
+        ):
             raise ValueError("allowed_command_ids_must_be_nonempty_strings")
         self._allowed_command_ids = tuple(allowed_command_ids)
         self._tokens: dict[str, CapabilityToken] = {}
@@ -150,9 +195,14 @@ class CapabilityTokenLifecycle:
         *,
         command_id: str,
         scope: str,
+        run_id: str,
         approval_artifact_id: str,
         approval_artifact_digest: str,
         repo_revision: str,
+        runner_policy_id: str = REAL_LOCAL_RUNNER_BOUNDARY_POLICY_ID,
+        executable_resolution_policy_id: str = (
+            REAL_LOCAL_RUNNER_EXECUTABLE_RESOLUTION_POLICY_ID
+        ),
         expires_at: str,
         issue_nonce: str,
         issued_at: str | None = None,
@@ -165,9 +215,13 @@ class CapabilityTokenLifecycle:
         failures = _validate_common_binding(
             command_id=command_id,
             scope=scope,
+            run_id=run_id,
             approval_artifact_id=approval_artifact_id,
             approval_artifact_digest=approval_artifact_digest,
             repo_revision=repo_revision,
+            runner_policy_id=runner_policy_id,
+            executable_resolution_policy_id=executable_resolution_policy_id,
+            allowed_command_ids=self._allowed_command_ids,
         )
         if not strict_nonempty_string(issue_nonce):
             failures.append("issue_nonce_required")
@@ -189,6 +243,9 @@ class CapabilityTokenLifecycle:
                 approval_artifact_id=approval_artifact_id,
                 approval_artifact_digest=approval_artifact_digest,
                 repo_revision=repo_revision,
+                run_id=run_id,
+                runner_policy_id=runner_policy_id,
+                executable_resolution_policy_id=executable_resolution_policy_id,
                 issued_at=issued,
                 expires_at=expires_at,
                 issue_nonce_digest=issue_nonce_digest,
@@ -197,9 +254,12 @@ class CapabilityTokenLifecycle:
                 token_id=token_id,
                 command_id=command_id,
                 scope=scope,
+                run_id=run_id,
                 approval_artifact_id=approval_artifact_id,
                 approval_artifact_digest=approval_artifact_digest,
                 repo_revision=repo_revision,
+                runner_policy_id=runner_policy_id,
+                executable_resolution_policy_id=executable_resolution_policy_id,
                 issued_at=issued,
                 expires_at=expires_at,
                 issue_nonce_digest=issue_nonce_digest,
@@ -214,9 +274,12 @@ class CapabilityTokenLifecycle:
             failures=failures,
             command_id=command_id,
             scope=scope,
+            run_id=run_id,
             approval_artifact_id=approval_artifact_id,
             approval_artifact_digest=approval_artifact_digest,
             repo_revision=repo_revision,
+            runner_policy_id=runner_policy_id,
+            executable_resolution_policy_id=executable_resolution_policy_id,
             observed_at=observed_at,
         )
         return TokenLifecycleResult(not failures, token, receipt)
@@ -227,9 +290,14 @@ class CapabilityTokenLifecycle:
         token_id: str,
         command_id: str,
         scope: str,
+        run_id: str,
         approval_artifact_id: str,
         approval_artifact_digest: str,
         repo_revision: str,
+        runner_policy_id: str = REAL_LOCAL_RUNNER_BOUNDARY_POLICY_ID,
+        executable_resolution_policy_id: str = (
+            REAL_LOCAL_RUNNER_EXECUTABLE_RESOLUTION_POLICY_ID
+        ),
         consume_nonce: str,
         now: str | None = None,
         observed_at: str | None = None,
@@ -241,9 +309,13 @@ class CapabilityTokenLifecycle:
         failures = _validate_common_binding(
             command_id=command_id,
             scope=scope,
+            run_id=run_id,
             approval_artifact_id=approval_artifact_id,
             approval_artifact_digest=approval_artifact_digest,
             repo_revision=repo_revision,
+            runner_policy_id=runner_policy_id,
+            executable_resolution_policy_id=executable_resolution_policy_id,
+            allowed_command_ids=self._allowed_command_ids,
         )
         if not strict_nonempty_string(token_id):
             failures.append("token_id_required")
@@ -260,9 +332,12 @@ class CapabilityTokenLifecycle:
                 token,
                 command_id=command_id,
                 scope=scope,
+                run_id=run_id,
                 approval_artifact_id=approval_artifact_id,
                 approval_artifact_digest=approval_artifact_digest,
                 repo_revision=repo_revision,
+                runner_policy_id=runner_policy_id,
+                executable_resolution_policy_id=executable_resolution_policy_id,
                 failures=failures,
             )
             expiry = _parse_time(token.expires_at)
@@ -290,9 +365,12 @@ class CapabilityTokenLifecycle:
             failures=failures,
             command_id=command_id,
             scope=scope,
+            run_id=run_id,
             approval_artifact_id=approval_artifact_id,
             approval_artifact_digest=approval_artifact_digest,
             repo_revision=repo_revision,
+            runner_policy_id=runner_policy_id,
+            executable_resolution_policy_id=executable_resolution_policy_id,
             observed_at=observed_at,
         )
         return TokenLifecycleResult(not failures, updated_token if not failures else token, receipt)
@@ -326,9 +404,16 @@ class CapabilityTokenLifecycle:
                 failures.append("token_already_revoked")
             command_id = token.command_id
             scope = token.scope
+            run_id = token.run_id
             approval_artifact_id = token.approval_artifact_id
             approval_artifact_digest = token.approval_artifact_digest
             repo_revision = token.repo_revision
+            runner_policy_id = token.runner_policy_id
+            executable_resolution_policy_id = token.executable_resolution_policy_id
+        if token is None:
+            run_id = ""
+            runner_policy_id = ""
+            executable_resolution_policy_id = ""
 
         updated_token = token
         if token is not None and not failures:
@@ -346,9 +431,12 @@ class CapabilityTokenLifecycle:
             failures=failures,
             command_id=command_id,
             scope=scope,
+            run_id=run_id,
             approval_artifact_id=approval_artifact_id,
             approval_artifact_digest=approval_artifact_digest,
             repo_revision=repo_revision,
+            runner_policy_id=runner_policy_id,
+            executable_resolution_policy_id=executable_resolution_policy_id,
             observed_at=observed_at,
         )
         return TokenLifecycleResult(not failures, updated_token, receipt)
@@ -361,21 +449,34 @@ def _validate_common_binding(
     *,
     command_id: str,
     scope: str,
+    run_id: str,
     approval_artifact_id: str,
     approval_artifact_digest: str,
     repo_revision: str,
+    runner_policy_id: str,
+    executable_resolution_policy_id: str,
+    allowed_command_ids: tuple[str, ...],
 ) -> list[str]:
     failures: list[str] = []
     for field, value in (
         ("command_id", command_id),
         ("scope", scope),
+        ("run_id", run_id),
         ("approval_artifact_id", approval_artifact_id),
         ("repo_revision", repo_revision),
+        ("runner_policy_id", runner_policy_id),
+        ("executable_resolution_policy_id", executable_resolution_policy_id),
     ):
         if not strict_nonempty_string(value):
             failures.append(f"{field}_required")
-    if command_id and command_id not in ALLOWED_LOCAL_RUNNER_COMMAND_IDS:
+    if command_id and command_id not in allowed_command_ids:
         failures.append("command_id_not_allowlisted")
+    if scope != CAPABILITY_TOKEN_SCOPE:
+        failures.append("scope_not_allowed")
+    if runner_policy_id != REAL_LOCAL_RUNNER_BOUNDARY_POLICY_ID:
+        failures.append("runner_policy_id_mismatch")
+    if executable_resolution_policy_id != REAL_LOCAL_RUNNER_EXECUTABLE_RESOLUTION_POLICY_ID:
+        failures.append("executable_resolution_policy_id_mismatch")
     if not strict_digest(approval_artifact_digest):
         failures.append("approval_artifact_digest_required")
     return failures
@@ -386,21 +487,30 @@ def _validate_token_matches_request(
     *,
     command_id: str,
     scope: str,
+    run_id: str,
     approval_artifact_id: str,
     approval_artifact_digest: str,
     repo_revision: str,
+    runner_policy_id: str,
+    executable_resolution_policy_id: str,
     failures: list[str],
 ) -> None:
     if token.command_id != command_id:
         failures.append("command_id_mismatch")
     if token.scope != scope:
         failures.append("scope_mismatch")
+    if token.run_id != run_id:
+        failures.append("run_id_mismatch")
     if token.approval_artifact_id != approval_artifact_id:
         failures.append("approval_artifact_id_mismatch")
     if token.approval_artifact_digest != approval_artifact_digest:
         failures.append("approval_artifact_digest_mismatch")
     if token.repo_revision != repo_revision:
         failures.append("repo_revision_mismatch")
+    if token.runner_policy_id != runner_policy_id:
+        failures.append("runner_policy_id_mismatch")
+    if token.executable_resolution_policy_id != executable_resolution_policy_id:
+        failures.append("executable_resolution_policy_id_mismatch")
 
 
 def _timestamp(value: str | None) -> str:
@@ -430,6 +540,9 @@ def _token_id(
     approval_artifact_id: str,
     approval_artifact_digest: str,
     repo_revision: str,
+    run_id: str,
+    runner_policy_id: str,
+    executable_resolution_policy_id: str,
     issued_at: str,
     expires_at: str,
     issue_nonce_digest: str,
@@ -439,9 +552,12 @@ def _token_id(
         "approval_artifact_id": approval_artifact_id,
         "command_id": command_id,
         "expires_at": expires_at,
+        "executable_resolution_policy_id": executable_resolution_policy_id,
         "issue_nonce_digest": issue_nonce_digest,
         "issued_at": issued_at,
         "repo_revision": repo_revision,
+        "run_id": run_id,
+        "runner_policy_id": runner_policy_id,
         "scope": scope,
     }
     return "cap_local_runner_" + _digest_payload(payload).split(":", 1)[1][:32]
@@ -455,9 +571,12 @@ def _receipt(
     failures: list[str],
     command_id: str,
     scope: str,
+    run_id: str,
     approval_artifact_id: str,
     approval_artifact_digest: str,
     repo_revision: str,
+    runner_policy_id: str,
+    executable_resolution_policy_id: str,
     observed_at: str | None,
 ) -> TokenLifecycleReceipt:
     normalized_failures = tuple(sorted(set(failures)))
@@ -468,9 +587,12 @@ def _receipt(
         "code_version": _CODE_VERSION,
         "command_id": command_id,
         "event_type": event_type,
+        "executable_resolution_policy_id": executable_resolution_policy_id,
         "failures": list(normalized_failures),
         "policy_version": _POLICY_VERSION,
         "repo_revision": repo_revision,
+        "run_id": run_id,
+        "runner_policy_id": runner_policy_id,
         "scope": scope,
         "token_id": token_id,
     }
@@ -481,9 +603,12 @@ def _receipt(
         failures=normalized_failures,
         command_id=command_id,
         scope=scope,
+        run_id=run_id,
         approval_artifact_id=approval_artifact_id,
         approval_artifact_digest=approval_artifact_digest,
         repo_revision=repo_revision,
+        runner_policy_id=runner_policy_id,
+        executable_resolution_policy_id=executable_resolution_policy_id,
         receipt_hash=_digest_payload(material),
         observed_at=_timestamp(observed_at),
     )

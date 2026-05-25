@@ -3,10 +3,14 @@
   "version": "v1",
   "status": "standalone_contract_model",
   "integration_dependency": {
-    "real_local_runner_boundary_v1": "semantic_dependency",
+    "real_local_runner_boundary_v1": "merged_contract_dependency",
     "uses_unmerged_runner_code": false,
-    "runner_integration_deferred_until_runner_boundary_merge": true
+    "runner_boundary_merged_in_main": true,
+    "imports_merged_runner_allowlist": true,
+    "does_not_launch_runner": true
   },
+  "real_local_runner_boundary_policy_id": "real_local_runner_boundary_v1",
+  "executable_resolution_policy_id": "real_local_runner_system_brew_repo_executable_resolution_v1",
   "allowed_command_ids": [
     "focused_runner_chain_tests",
     "full_unittest_discover",
@@ -16,9 +20,12 @@
   "required_bindings": [
     "scope",
     "command_id",
+    "run_id",
     "approval_artifact_id",
     "approval_artifact_digest",
     "repo_revision",
+    "real_local_runner_boundary_policy_id",
+    "executable_resolution_policy_id",
     "expires_at",
     "issue_nonce",
     "consume_nonce"
