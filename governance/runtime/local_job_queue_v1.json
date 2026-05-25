@@ -1,0 +1,74 @@
+{
+  "policy_type": "local_job_queue_v1",
+  "version": "v1",
+  "status": "standalone_state_machine",
+  "integration_dependency": {
+    "real_local_runner_boundary_v1": "merged_contract_reference",
+    "capability_token_lifecycle_v1": "semantic_dependency",
+    "uses_unmerged_runner_or_token_code": false,
+    "imports_unmerged_token_code": false,
+    "execution_integration_deferred": true,
+    "token_integration_status": "WAITING_FOR_TOKEN_MERGE"
+  },
+  "runner_policy_id": "real_local_runner_boundary_v1",
+  "job_descriptor_metadata_refs": [
+    "command_id",
+    "run_id",
+    "approval_artifact_ref",
+    "token_id",
+    "token_receipt_ref",
+    "runner_receipt_ref"
+  ],
+  "job_descriptor_forbids_command_line": true,
+  "job_descriptor_forbids_arbitrary_argv": true,
+  "runner_references_are_inert_metadata": true,
+  "token_references_are_inert_metadata_until_token_merge": true,
+  "states": ["queued", "leased", "completed", "failed", "canceled"],
+  "terminal_states": ["completed", "failed", "canceled"],
+  "operations": [
+    "enqueue",
+    "lease",
+    "heartbeat",
+    "complete",
+    "fail",
+    "cancel",
+    "classify_expired_leases",
+    "read_only_summary"
+  ],
+  "retry_policy": {
+    "max_attempts_required": true,
+    "failed_attempt_before_max_returns_to_queued": true,
+    "failed_attempt_at_max_moves_to_failed": true
+  },
+  "timeout_policy": {
+    "lease_timeout_seconds_required": true,
+    "heartbeat_extends_lease": true,
+    "expired_lease_classification_only": true,
+    "background_timeout_worker_authorized": false
+  },
+  "events": {
+    "append_only": true,
+    "event_hash_required": true,
+    "event_sequence_required": true
+  },
+  "cli_visibility": {
+    "read_only": true,
+    "summary_command": "tools/local_job_queue_viewer.py --events <events.json>",
+    "mutates_queue": false,
+    "executes_jobs": false
+  },
+  "forbidden_authority": {
+    "job_execution_authorized": false,
+    "background_daemon_authorized": false,
+    "unbounded_scheduler_authorized": false,
+    "network_authorized": false,
+    "browser_authorized": false,
+    "provider_api_authorized": false,
+    "credential_storage_authorized": false,
+    "production_autonomy_authorized": false,
+    "arbitrary_shell_authorized": false,
+    "shell_true_authorized": false,
+    "arbitrary_argv_authorized": false,
+    "arbitrary_command_line_authorized": false
+  }
+}
