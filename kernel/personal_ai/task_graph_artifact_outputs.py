@@ -162,6 +162,8 @@ _LOCAL_FIXTURE_RUNNER_RECEIPT_METADATA_ARTIFACT_ADAPTER_ID = (
 _LOCAL_FIXTURE_RUNNER_RECEIPT_METADATA_ARTIFACT_CAPABILITY = (
     "launch_local_fixture_runner_receipt_metadata_artifact"
 )
+_REAL_LOCAL_RUNNER_BOUNDARY_ADAPTER_ID = "real_local_runner_boundary"
+_REAL_LOCAL_RUNNER_BOUNDARY_CAPABILITY = "launch_real_local_runner_boundary"
 _DELIVERY_ADAPTER_ID = "runtime_delivery_package"
 _DELIVERY_CAPABILITY = "validate_runtime_delivery"
 
@@ -1010,6 +1012,16 @@ _LOCAL_FIXTURE_RUNNER_RECEIPT_METADATA_ARTIFACT_DIRECT_PATH_FIELDS = (
     ("artifact_index_manifest", "artifact_index_manifest_path"),
 )
 
+_REAL_LOCAL_RUNNER_BOUNDARY_DIRECT_PATH_FIELDS = (
+    ("real_local_runner_receipt", "real_local_runner_receipt_path"),
+    ("real_local_runner_stdout", "real_local_runner_stdout_path"),
+    ("real_local_runner_stderr", "real_local_runner_stderr_path"),
+    ("real_local_runner_replay_manifest", "real_local_runner_replay_manifest_path"),
+    ("real_local_runner_failure_bundle", "real_local_runner_failure_bundle_path"),
+    ("real_local_runner_artifact_binding", "real_local_runner_artifact_binding_path"),
+    ("real_local_runner_summary", "real_local_runner_summary_path"),
+)
+
 _DELIVERY_PATH_FIELDS = (
     ("runtime_delivery_manifest", "runtime_delivery_manifest_path"),
     ("runtime_delivery_validation", "runtime_delivery_validation_path"),
@@ -1093,6 +1105,9 @@ _ROLE_ARTIFACT_TYPES = {
     "local_fixture_runner_receipt_preflight_verifier_checklist": "markdown",
     "local_fixture_runner_receipt_metadata_artifact_summary": "markdown",
     "local_fixture_runner_receipt_metadata_artifact_checklist": "markdown",
+    "real_local_runner_stdout": "text",
+    "real_local_runner_stderr": "text",
+    "real_local_runner_summary": "markdown",
     "embedded_playwright_local_fixture_sandbox_smoke_summary": "markdown",
     "embedded_playwright_local_fixture_sandbox_smoke_checklist": "markdown",
     "embedded_playwright_local_fixture_sandbox_smoke_screenshot": "png",
@@ -1505,6 +1520,11 @@ def _node_artifact_candidates(node, output_dir):
             node,
             output_dir,
         )
+    if (
+        node["adapter_id"] == _REAL_LOCAL_RUNNER_BOUNDARY_ADAPTER_ID
+        and node["capability"] == _REAL_LOCAL_RUNNER_BOUNDARY_CAPABILITY
+    ):
+        return _real_local_runner_boundary_artifact_candidates(node, output_dir)
     if (
         node["adapter_id"] == _DELIVERY_ADAPTER_ID
         and node["capability"] == _DELIVERY_CAPABILITY
@@ -2233,6 +2253,25 @@ def _local_asset_next_bounded_smoke_cycle_contract_human_review_from_run_promoti
     for role, field_name in (
         _LOCAL_ASSET_NEXT_BOUNDED_SMOKE_CYCLE_CONTRACT_HUMAN_REVIEW_FROM_RUN_PROMOTION_GATE_DIRECT_PATH_FIELDS
     ):
+        _add_role_path(role_paths, seen_roles, role, node.get(field_name))
+    return [
+        _artifact_record(
+            node_id=node["node_id"],
+            adapter_id=node["adapter_id"],
+            capability=node["capability"],
+            node_status=node["status"],
+            artifact_role=role,
+            path_value=path_value,
+            output_dir=output_dir,
+        )
+        for role, path_value in role_paths
+    ]
+
+
+def _real_local_runner_boundary_artifact_candidates(node, output_dir):
+    role_paths = []
+    seen_roles = set()
+    for role, field_name in _REAL_LOCAL_RUNNER_BOUNDARY_DIRECT_PATH_FIELDS:
         _add_role_path(role_paths, seen_roles, role, node.get(field_name))
     return [
         _artifact_record(

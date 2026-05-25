@@ -170,6 +170,9 @@ from kernel.capabilities.local_fixture_runner_receipt_metadata_artifact import (
     LOCAL_FIXTURE_RUNNER_RECEIPT_METADATA_ARTIFACT_SUMMARY_FILE,
     run_local_fixture_runner_receipt_metadata_artifact_launcher as run_local_fixture_runner_receipt_metadata_artifact_capability,
 )
+from kernel.runtime.real_local_runner_boundary import (
+    run_real_local_runner_boundary_launcher as run_real_local_runner_boundary_capability,
+)
 from kernel.personal_ai.artifact_index import build_artifact_index
 from kernel.personal_ai.asset_scan_operational_control import (
     ASSET_SCAN_FAILURE_BUNDLE_FILE,
@@ -263,6 +266,7 @@ __all__ = [
     "run_local_fixture_runner_receipt_contract_draft_launcher",
     "run_local_fixture_runner_receipt_preflight_verifier_launcher",
     "run_local_fixture_runner_receipt_metadata_artifact_launcher",
+    "run_real_local_runner_boundary_launcher",
     "run_local_office_launcher",
     "run_model_fixture_launcher",
     "run_model_provider_dry_run_launcher",
@@ -2594,6 +2598,41 @@ def run_local_fixture_runner_receipt_metadata_artifact_launcher(
         if result.summary_path is not None
         else output_path
         / LOCAL_FIXTURE_RUNNER_RECEIPT_METADATA_ARTIFACT_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_real_local_runner_boundary_launcher(
+    command_id: str,
+    output_dir: Path,
+    approval_artifact_path: Path,
+    run_id: str,
+    *,
+    timeout_seconds: float,
+    repo_root: Path | None = None,
+    repo_revision: str = "not_provided",
+) -> LauncherWorkflowResult:
+    result = run_real_local_runner_boundary_capability(
+        command_id,
+        Path(output_dir),
+        Path(approval_artifact_path),
+        run_id,
+        timeout_seconds=timeout_seconds,
+        repo_root=repo_root,
+        repo_revision=repo_revision,
+    )
+    payload = result.to_cli_payload()
+    payload["input_mutation_performed"] = False
+    payload["network_access_performed"] = False
+    payload["browser_open_performed"] = False
+    payload["provider_api_called"] = False
+    payload["production_autonomy_enabled"] = False
+    return LauncherWorkflowResult(
+        workflow="real_local_runner_boundary_workflow",
+        output_dir=result.output_dir,
+        complete=result.complete,
+        payload=payload,
+        summary_path=result.summary_path,
         required_human_approval=True,
     )
 

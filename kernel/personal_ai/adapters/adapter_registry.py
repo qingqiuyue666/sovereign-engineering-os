@@ -853,6 +853,47 @@ def build_default_adapter_registry() -> tuple[AdapterRegistryEntry, ...]:
             ),
         ),
         AdapterRegistryEntry(
+            adapter_id="real_local_runner_boundary",
+            adapter_name="Real Local Runner Boundary",
+            mode=AdapterMode.LOCAL_FIXTURE,
+            risk_class=AdapterRiskClass.SUBPROCESS_TOOL,
+            admission_status=AdapterAdmissionStatus.CANDIDATE,
+            capabilities=("launch_real_local_runner_boundary",),
+            required_controls=_REQUIRED_CONTROLS
+            + (
+                "command_id_only",
+                "immutable_allowlist",
+                "no_command_line",
+                "no_argv_override",
+                "shell_false",
+                "timeout_required",
+                "output_sandbox_required",
+                "stdout_stderr_capture",
+                "receipt_artifact",
+                "failure_bundle_on_failure",
+                "replay_manifest",
+                "no_network_access",
+                "no_browser_opening",
+                "no_provider_api",
+                "not_production_admitted",
+                "human_review_required",
+            ),
+            boundary=AdapterExecutionBoundary(
+                subprocess_allowed=True,
+                output_write_allowed=True,
+            ),
+            output_policy=_approved_output_policy(),
+            notes=(
+                "Candidate-only controlled local validation runner. It resolves "
+                "argv from immutable repo-owned command IDs, requires a human "
+                "approval artifact, forces shell false, captures stdout/stderr, "
+                "and writes receipt, failure, replay, and artifact binding "
+                "evidence. It is not production admitted and does not allow "
+                "network, browser, provider, arbitrary command-line, or argv "
+                "override behavior."
+            ),
+        ),
+        AdapterRegistryEntry(
             adapter_id="real_browser_runtime_boundary",
             adapter_name="Real Browser Runtime Boundary",
             mode=AdapterMode.FUTURE_EXTERNAL,
