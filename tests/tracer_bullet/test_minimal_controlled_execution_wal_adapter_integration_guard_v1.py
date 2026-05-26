@@ -17,6 +17,7 @@ from kernel.execution.minimal_controlled_execution_contract import (
 
 EXECUTION_ROOT = Path("kernel/execution")
 WAL_ADAPTER_CONTRACT_PATH = EXECUTION_ROOT / "minimal_controlled_wal_adapter_contract.py"
+WAL_ADAPTER_INTEGRATION_PATH = EXECUTION_ROOT / "minimal_controlled_wal_adapter_integration.py"
 WAL_ADAPTER_MODULE = "kernel.execution.minimal_controlled_wal_adapter_contract"
 MINIMAL_CONTROLLED_SOURCE_PATHS = tuple(sorted(EXECUTION_ROOT.glob("minimal_controlled_*.py")))
 CURRENT_INTEGRATION_TARGETS = (
@@ -30,12 +31,20 @@ ADAPTER_FACING_SOURCE_PATHS = (
     EXECUTION_ROOT / "minimal_controlled_execution_admission_wal_verifier.py",
     *CURRENT_INTEGRATION_TARGETS,
 )
-FUTURE_INTEGRATION_MARKERS = (
-    "run_minimal_controlled_preflight_with_wal_adapter",
+ALLOWED_DELIBERATE_INTEGRATION_MARKERS = (
     "append_minimal_controlled_wal_adapter_record",
     "map_receipt_to_wal_adapter_record",
     "map_failure_to_wal_adapter_record",
     "map_preflight_result_to_wal_adapter_record",
+)
+
+RESERVED_FUTURE_WRAPPER_MARKERS = (
+    "run_minimal_controlled_preflight_with_wal_adapter",
+)
+
+FUTURE_INTEGRATION_MARKERS = (
+    *RESERVED_FUTURE_WRAPPER_MARKERS,
+    *ALLOWED_DELIBERATE_INTEGRATION_MARKERS,
 )
 FUTURE_INTEGRATION_FAILURE = (
     "Future WAL adapter integration was detected; update this guard alongside "
@@ -277,12 +286,25 @@ class MinimalControlledExecutionWalAdapterIntegrationGuardV1Tests(unittest.TestC
                 )
 
     def test_future_integration_marker_names_are_reserved_and_absent(self) -> None:
-        for marker in FUTURE_INTEGRATION_MARKERS:
+        for marker in ALLOWED_DELIBERATE_INTEGRATION_MARKERS:
+            with self.subTest(marker=marker):
+                self.assertEqual(
+                    _source_paths_containing(marker, (WAL_ADAPTER_INTEGRATION_PATH,)),
+                    (str(WAL_ADAPTER_INTEGRATION_PATH),),
+                    "Deliberate WAL adapter integration marker must exist only in the narrow integration module.",
+                )
+                self.assertEqual(
+                    _source_paths_containing(marker, CURRENT_INTEGRATION_TARGETS),
+                    (),
+                    FUTURE_INTEGRATION_FAILURE + " Unexpected runner/preflight marker: " + marker,
+                )
+
+        for marker in RESERVED_FUTURE_WRAPPER_MARKERS:
             with self.subTest(marker=marker):
                 self.assertEqual(
                     _source_paths_containing(marker, MINIMAL_CONTROLLED_SOURCE_PATHS),
                     (),
-                    FUTURE_INTEGRATION_FAILURE + " Unexpected marker: " + marker,
+                    FUTURE_INTEGRATION_FAILURE + " Unexpected reserved wrapper marker: " + marker,
                 )
 
     def test_no_accidental_partial_integration_occurred(self) -> None:
@@ -411,19 +433,26 @@ class MinimalControlledExecutionWalAdapterIntegrationGuardV1Tests(unittest.TestC
             _assert_future_preflight_integration_order(records)
 
     def test_append_failure_blocks_execution_capability_is_not_claimed_yet(self) -> None:
-        unavailable_claims = (
+        runner_forbidden_claims = (
             "wal_adapter_append_failure_blocks_execution",
             "WAL_ADAPTER_APPEND_FAILED",
             "execution_performed=true",
         )
-        for marker in unavailable_claims:
+        for marker in runner_forbidden_claims:
             with self.subTest(marker=marker):
                 self.assertEqual(
-                    _source_paths_containing(marker, MINIMAL_CONTROLLED_SOURCE_PATHS),
+                    _source_paths_containing(marker, CURRENT_INTEGRATION_TARGETS),
                     (),
                     FUTURE_INTEGRATION_FAILURE,
                 )
-        for marker in FUTURE_INTEGRATION_MARKERS:
+
+        self.assertEqual(
+            _source_paths_containing("WAL_ADAPTER_APPEND_FAILED", (WAL_ADAPTER_INTEGRATION_PATH,)),
+            (str(WAL_ADAPTER_INTEGRATION_PATH),),
+            "Deliberate integration module must expose WAL append failure evidence without wiring runners yet.",
+        )
+
+        for marker in RESERVED_FUTURE_WRAPPER_MARKERS:
             self.assertFalse(hasattr(contract, marker), FUTURE_INTEGRATION_FAILURE)
 
     def test_command_ids_remain_exactly_current_boundary(self) -> None:
@@ -494,8 +523,25 @@ class MinimalControlledExecutionWalAdapterIntegrationGuardV1Tests(unittest.TestC
 
     def test_next_integration_api_names_are_absent_until_deliberate_pr(self) -> None:
         exported_names = set(getattr(contract, "__all__", ()))
-        for marker in FUTURE_INTEGRATION_MARKERS:
+        for marker in ALLOWED_DELIBERATE_INTEGRATION_MARKERS:
             with self.subTest(marker=marker):
+                self.assertNotIn(
+                    marker,
+                    exported_names,
+                    "WAL adapter contract must remain contract-only; integration names belong in the integration module.",
+                )
+                self.assertFalse(
+                    hasattr(contract, marker),
+                    "WAL adapter contract must not export integration functions.",
+                )
+
+        for marker in RESERVED_FUTURE_WRAPPER_MARKERS:
+            with self.subTest(marker=marker):
+                self.assertEqual(
+                    _source_paths_containing(marker, MINIMAL_CONTROLLED_SOURCE_PATHS),
+                    (),
+                    FUTURE_INTEGRATION_FAILURE,
+                )
                 self.assertNotIn(marker, exported_names, FUTURE_INTEGRATION_FAILURE)
                 self.assertFalse(hasattr(contract, marker), FUTURE_INTEGRATION_FAILURE)
 
