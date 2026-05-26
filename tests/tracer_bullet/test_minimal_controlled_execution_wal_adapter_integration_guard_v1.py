@@ -18,7 +18,13 @@ from kernel.execution.minimal_controlled_execution_contract import (
 EXECUTION_ROOT = Path("kernel/execution")
 WAL_ADAPTER_CONTRACT_PATH = EXECUTION_ROOT / "minimal_controlled_wal_adapter_contract.py"
 WAL_ADAPTER_INTEGRATION_PATH = EXECUTION_ROOT / "minimal_controlled_wal_adapter_integration.py"
+WAL_GATED_PREFLIGHT_WRAPPER_PATH = (
+    EXECUTION_ROOT / "minimal_controlled_wal_gated_preflight_wrapper.py"
+)
 WAL_ADAPTER_MODULE = "kernel.execution.minimal_controlled_wal_adapter_contract"
+WAL_GATED_PREFLIGHT_WRAPPER_MODULE = (
+    "kernel.execution.minimal_controlled_wal_gated_preflight_wrapper"
+)
 MINIMAL_CONTROLLED_SOURCE_PATHS = tuple(sorted(EXECUTION_ROOT.glob("minimal_controlled_*.py")))
 CURRENT_INTEGRATION_TARGETS = (
     EXECUTION_ROOT / "minimal_controlled_git_status_runner.py",
@@ -28,6 +34,7 @@ CURRENT_INTEGRATION_TARGETS = (
 )
 ADAPTER_FACING_SOURCE_PATHS = (
     WAL_ADAPTER_CONTRACT_PATH,
+    WAL_GATED_PREFLIGHT_WRAPPER_PATH,
     EXECUTION_ROOT / "minimal_controlled_execution_admission_wal_verifier.py",
     *CURRENT_INTEGRATION_TARGETS,
 )
@@ -314,6 +321,23 @@ class MinimalControlledExecutionWalAdapterIntegrationGuardV1Tests(unittest.TestC
                 self.assertNotIn("minimal_controlled_wal_adapter_contract", source)
                 self.assertNotIn("WalAdapter", source)
                 self.assertNotIn("wal_adapter_record", source)
+                self.assertFalse(
+                    _imports_wal_gated_preflight_wrapper(path),
+                    FUTURE_INTEGRATION_FAILURE,
+                )
+
+    def test_existing_preflight_and_runners_do_not_import_wal_gated_wrapper(self) -> None:
+        for path in CURRENT_INTEGRATION_TARGETS:
+            with self.subTest(path=str(path)):
+                self.assertFalse(
+                    _imports_wal_gated_preflight_wrapper(path),
+                    FUTURE_INTEGRATION_FAILURE,
+                )
+                self.assertNotIn(
+                    "minimal_controlled_wal_gated_preflight_wrapper",
+                    _source(path),
+                    FUTURE_INTEGRATION_FAILURE,
+                )
 
     def test_minimal_controlled_sources_have_no_real_wal_or_runtime_coupling(self) -> None:
         for path in MINIMAL_CONTROLLED_SOURCE_PATHS:
@@ -591,6 +615,22 @@ def _imports_wal_adapter_contract(path: Path) -> bool:
                 return True
             if node.module == "kernel.execution" and any(
                 alias.name == "minimal_controlled_wal_adapter_contract"
+                for alias in node.names
+            ):
+                return True
+    return False
+
+
+def _imports_wal_gated_preflight_wrapper(path: Path) -> bool:
+    for node in ast.walk(_tree(path)):
+        if isinstance(node, ast.Import):
+            if any(alias.name == WAL_GATED_PREFLIGHT_WRAPPER_MODULE for alias in node.names):
+                return True
+        elif isinstance(node, ast.ImportFrom):
+            if node.module == WAL_GATED_PREFLIGHT_WRAPPER_MODULE:
+                return True
+            if node.module == "kernel.execution" and any(
+                alias.name == "minimal_controlled_wal_gated_preflight_wrapper"
                 for alias in node.names
             ):
                 return True
