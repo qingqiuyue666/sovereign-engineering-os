@@ -10,15 +10,25 @@ from kernel.personal_ai.adapters.adapter_contract import (
     AdapterRegistryEntry,
     AdapterRiskClass,
 )
+from kernel.personal_ai.adapters.creative_adapter_contract import (
+    CreativeAdapterPolicy,
+    build_creative_adapter_policies,
+    validate_creative_adapter_policy,
+)
 
 __all__ = [
+    "DCC_MEDIA_POLICY_CAPABILITY",
     "DEFAULT_ADAPTER_REGISTRY",
     "admit_adapter_capability",
+    "build_dcc_media_policy_registry_entries",
     "build_default_adapter_registry",
     "find_adapter_entry",
+    "validate_dcc_media_policy_registry_binding",
     "validate_adapter_registry_entry",
 ]
 
+_DCC_MEDIA_POLICY_CAPABILITY = "record_dcc_media_adapter_controls"
+DCC_MEDIA_POLICY_CAPABILITY = _DCC_MEDIA_POLICY_CAPABILITY
 _REQUIRED_CONTROLS = (
     "human_approval",
     "capability_token",
@@ -35,6 +45,67 @@ def _approved_output_boundary() -> AdapterExecutionBoundary:
 
 def _approved_output_policy() -> AdapterOutputPolicy:
     return AdapterOutputPolicy(output_write_allowed=True)
+
+
+def build_dcc_media_policy_registry_entries() -> tuple[AdapterRegistryEntry, ...]:
+    entries = []
+    for policy in build_creative_adapter_policies():
+        failures = validate_creative_adapter_policy(policy)
+        if failures:
+            raise ValueError(
+                "dcc media creative adapter policy is invalid: "
+                + ",".join(failures)
+            )
+        entries.append(
+            AdapterRegistryEntry(
+                adapter_id=policy.proposed_adapter,
+                adapter_name=_dcc_media_adapter_name(policy),
+                mode=AdapterMode.POLICY_ONLY,
+                risk_class=AdapterRiskClass.CREATIVE_EXTERNAL_TOOL,
+                admission_status=AdapterAdmissionStatus.DEFERRED,
+                capabilities=(_DCC_MEDIA_POLICY_CAPABILITY,),
+                required_controls=_dcc_media_required_controls(policy),
+                boundary=AdapterExecutionBoundary(
+                    external_tool_control_allowed=True
+                ),
+                notes=(
+                    "DCC/media policy boundary only for "
+                    + policy.family
+                    + "; no real creative software runtime, subprocess, "
+                    "network endpoint, source asset overwrite, or media "
+                    "generation is admitted."
+                ),
+            )
+        )
+    return tuple(entries)
+
+
+def _dcc_media_adapter_name(policy: CreativeAdapterPolicy) -> str:
+    return "DCC/Media Policy Boundary - " + policy.family.replace("_", " ").title()
+
+
+def _dcc_media_required_controls(
+    policy: CreativeAdapterPolicy,
+) -> tuple[str, ...]:
+    controls = list(_REQUIRED_CONTROLS)
+    controls.extend(
+        (
+            "future_admission",
+            "explicit_adapter_admission",
+            "dcc_media_runtime_deferred",
+            "external_tool_control_not_admitted",
+            "source_asset_overwrite_forbidden",
+        )
+    )
+    if policy.output_manifest_required:
+        controls.append("output_manifest")
+    if policy.preview_render_evidence_required:
+        controls.append("preview_render_evidence")
+    if policy.operation_allowlist_required:
+        controls.append("operation_allowlist")
+    if policy.logs_required:
+        controls.append("logs_required")
+    return tuple(dict.fromkeys(controls))
 
 
 def build_default_adapter_registry() -> tuple[AdapterRegistryEntry, ...]:
@@ -986,6 +1057,7 @@ def build_default_adapter_registry() -> tuple[AdapterRegistryEntry, ...]:
             ),
             notes="Disabled-by-default Blender runtime boundary; no subprocess launch admitted.",
         ),
+        *build_dcc_media_policy_registry_entries(),
         AdapterRegistryEntry(
             adapter_id="creative_handoff_package",
             adapter_name="Creative Handoff Package Builder",
@@ -1026,6 +1098,57 @@ def build_default_adapter_registry() -> tuple[AdapterRegistryEntry, ...]:
 
 
 DEFAULT_ADAPTER_REGISTRY = build_default_adapter_registry()
+
+
+def validate_dcc_media_policy_registry_binding(
+    registry: tuple[AdapterRegistryEntry, ...] | None = None,
+) -> tuple[str, ...]:
+    active_registry = DEFAULT_ADAPTER_REGISTRY if registry is None else registry
+    failures: list[str] = []
+    entries_by_id: dict[str, AdapterRegistryEntry] = {}
+    for entry in active_registry:
+        if entry.adapter_id in entries_by_id:
+            failures.append("duplicate_adapter_id:" + entry.adapter_id)
+        entries_by_id[entry.adapter_id] = entry
+
+    for policy in build_creative_adapter_policies():
+        for failure in validate_creative_adapter_policy(policy):
+            failures.append(policy.family + ":policy_invalid:" + failure)
+        entry = entries_by_id.get(policy.proposed_adapter)
+        if entry is None:
+            failures.append(policy.family + ":registry_entry_missing")
+            continue
+        _validate_dcc_media_policy_entry(policy, entry, failures)
+    return tuple(sorted(set(failures)))
+
+
+def _validate_dcc_media_policy_entry(
+    policy: CreativeAdapterPolicy,
+    entry: AdapterRegistryEntry,
+    failures: list[str],
+) -> None:
+    prefix = policy.family + ":"
+    if entry.mode != AdapterMode.POLICY_ONLY:
+        failures.append(prefix + "mode_mismatch")
+    if entry.risk_class != AdapterRiskClass.CREATIVE_EXTERNAL_TOOL:
+        failures.append(prefix + "risk_class_mismatch")
+    if entry.admission_status != AdapterAdmissionStatus.DEFERRED:
+        failures.append(prefix + "must_remain_deferred")
+    if _DCC_MEDIA_POLICY_CAPABILITY not in entry.capabilities:
+        failures.append(prefix + "capability_missing")
+    for control in _dcc_media_required_controls(policy):
+        if control not in entry.required_controls:
+            failures.append(prefix + "control_missing:" + control)
+    if entry.boundary.external_tool_control_allowed is not True:
+        failures.append(prefix + "external_tool_control_boundary_missing")
+    if not entry.boundary.requires_explicit_future_admission():
+        failures.append(prefix + "future_admission_boundary_missing")
+    if entry.boundary.output_write_allowed:
+        failures.append(prefix + "output_write_must_not_be_admitted")
+    if entry.boundary.input_mutation_allowed:
+        failures.append(prefix + "input_mutation_must_not_be_admitted")
+    if entry.boundary.overwrite_existing_allowed:
+        failures.append(prefix + "overwrite_must_not_be_admitted")
 
 
 def validate_adapter_registry_entry(entry: AdapterRegistryEntry) -> tuple[str, ...]:
