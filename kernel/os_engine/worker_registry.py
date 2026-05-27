@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 import shlex
 import sys
-import json
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Protocol, Sequence, runtime_checkable
@@ -42,6 +43,35 @@ class WorkerCapabilityReport:
 
     def to_json(self) -> str:
         return json.dumps(asdict(self), sort_keys=True, separators=(",", ":"))
+
+
+@dataclass(frozen=True, slots=True)
+class WorkerAdmissionDecision:
+    worker_type: str
+    adapter_name: str
+    accepted: bool
+    reason_codes: tuple[str, ...]
+    capabilities: tuple[str, ...]
+    safety_boundary: str
+    can_create_large_artifacts: bool
+    human_review_required: bool
+    content_hash: str = ""
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "accepted": self.accepted,
+            "adapter_name": self.adapter_name,
+            "can_create_large_artifacts": self.can_create_large_artifacts,
+            "capabilities": list(self.capabilities),
+            "content_hash": self.content_hash,
+            "human_review_required": self.human_review_required,
+            "reason_codes": list(self.reason_codes),
+            "safety_boundary": self.safety_boundary,
+            "worker_type": self.worker_type,
+        }
+
+    def to_json(self) -> str:
+        return json.dumps(self.to_dict(), sort_keys=True, separators=(",", ":"))
 
 
 @dataclass(frozen=True, slots=True)
@@ -129,13 +159,23 @@ class WorkerAdapter(Protocol):
 class WorkerRegistry:
     def __init__(self) -> None:
         self._adapters: dict[str, WorkerAdapter] = {}
+        self._admission_decisions: dict[str, WorkerAdmissionDecision] = {}
 
     def register(self, job_type: str, adapter: WorkerAdapter) -> None:
-        normalized = self._normalize(job_type)
-        if normalized in self._adapters:
-            raise ValueError(f"worker type already registered: {job_type}")
-        self._validate_adapter(adapter)
+        decision = evaluate_worker_admission(
+            job_type,
+            adapter,
+            registered_types=tuple(self._adapters),
+        )
+        if not decision.accepted:
+            if "duplicate_worker_type" in decision.reason_codes:
+                raise ValueError(f"worker type already registered: {job_type}")
+            raise WorkerAdmissionError(
+                "worker admission rejected: " + ",".join(decision.reason_codes)
+            )
+        normalized = decision.worker_type
         self._adapters[normalized] = adapter
+        self._admission_decisions[normalized] = decision
 
     def has_type(self, job_type: str) -> bool:
         return self._normalize(job_type) in self._adapters
@@ -158,6 +198,15 @@ class WorkerRegistry:
 
     def capability_report_json(self) -> str:
         return json.dumps(self.capability_report(), sort_keys=True, separators=(",", ":"))
+
+    def admission_report(self) -> list[dict[str, object]]:
+        return [
+            self._admission_decisions[job_type].to_dict()
+            for job_type in sorted(self._admission_decisions)
+        ]
+
+    def admission_report_json(self) -> str:
+        return json.dumps(self.admission_report(), sort_keys=True, separators=(",", ":"))
 
     @staticmethod
     def _normalize(job_type: str) -> str:
@@ -193,6 +242,105 @@ class WorkerRegistry:
         ):
             if not callable(getattr(adapter, method, None)):
                 raise WorkerAdmissionError(f"worker must implement {method}()")
+
+
+def evaluate_worker_admission(
+    job_type: str,
+    adapter: object,
+    *,
+    registered_types: Sequence[str] = (),
+) -> WorkerAdmissionDecision:
+    reason_codes: list[str] = []
+    normalized = str(job_type).strip()
+    if not normalized:
+        reason_codes.append("worker_type_required")
+    existing = {str(item).strip() for item in registered_types if str(item).strip()}
+    if normalized and normalized in existing:
+        reason_codes.append("duplicate_worker_type")
+
+    missing = []
+    for attribute in (
+        "name",
+        "capabilities",
+        "safety_boundary",
+        "can_create_large_artifacts",
+        "human_review_required",
+    ):
+        if not hasattr(adapter, attribute):
+            missing.append(attribute)
+    reason_codes.extend("missing_" + attribute for attribute in missing)
+
+    adapter_name = str(getattr(adapter, "name", "")).strip()
+    if not adapter_name:
+        reason_codes.append("worker_name_required")
+    capabilities = _capabilities_for_admission(adapter, reason_codes)
+    unknown = set(capabilities).difference(SUPPORTED_CAPABILITIES)
+    reason_codes.extend("unsupported_capability:" + item for item in sorted(unknown))
+    safety_boundary = str(getattr(adapter, "safety_boundary", "")).strip()
+    if not safety_boundary:
+        reason_codes.append("safety_boundary_required")
+    for method in (
+        "preflight",
+        "admit",
+        "run",
+        "collect_artifacts",
+        "validate_outputs",
+        "quarantine_failure",
+        "summarize",
+    ):
+        if not callable(getattr(adapter, method, None)):
+            reason_codes.append("missing_method:" + method)
+
+    material = {
+        "accepted": not reason_codes,
+        "adapter_name": adapter_name,
+        "can_create_large_artifacts": bool(
+            getattr(adapter, "can_create_large_artifacts", False)
+        ),
+        "capabilities": capabilities,
+        "human_review_required": bool(
+            getattr(adapter, "human_review_required", False)
+        ),
+        "reason_codes": tuple(sorted(set(reason_codes))),
+        "safety_boundary": safety_boundary,
+        "worker_type": normalized,
+    }
+    return WorkerAdmissionDecision(
+        worker_type=normalized,
+        adapter_name=adapter_name,
+        accepted=bool(material["accepted"]),
+        reason_codes=material["reason_codes"],
+        capabilities=capabilities,
+        safety_boundary=safety_boundary,
+        can_create_large_artifacts=bool(material["can_create_large_artifacts"]),
+        human_review_required=bool(material["human_review_required"]),
+        content_hash=_stable_worker_admission_hash(material),
+    )
+
+
+def _capabilities_for_admission(
+    adapter: object,
+    reason_codes: list[str],
+) -> tuple[str, ...]:
+    raw = getattr(adapter, "capabilities", ())
+    if isinstance(raw, str):
+        reason_codes.append("capabilities_must_be_iterable")
+        return ()
+    try:
+        capabilities = tuple(sorted(str(item) for item in raw))
+    except TypeError:
+        reason_codes.append("capabilities_must_be_iterable")
+        return ()
+    if not capabilities:
+        reason_codes.append("capabilities_required")
+    return capabilities
+
+
+def _stable_worker_admission_hash(payload: dict[str, object]) -> str:
+    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode(
+        "utf-8"
+    )
+    return "sha256:" + hashlib.sha256(encoded).hexdigest()
 
 
 class BaseWorker:

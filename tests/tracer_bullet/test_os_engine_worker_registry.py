@@ -13,11 +13,13 @@ from kernel.os_engine.job_queue import Job, JobStatus, JobValidationError, Unkno
 from kernel.os_engine.worker_registry import (
     BaseWorker,
     GitWorker,
+    WorkerAdmissionDecision,
     WorkerAdmissionError,
     WorkerContext,
     WorkerRegistry,
     WorkerRunResult,
     build_default_worker_registry,
+    evaluate_worker_admission,
 )
 
 
@@ -68,6 +70,23 @@ class OsEngineWorkerRegistryTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(worker.safety_boundary)
         self.assertFalse(worker.can_create_large_artifacts)
         self.assertFalse(worker.human_review_required)
+
+    def test_worker_admission_decision_records_rejections_without_mutation(self) -> None:
+        accepted = evaluate_worker_admission("git", GitWorker())
+        rejected = evaluate_worker_admission("bad", UnsupportedCapabilityWorker())
+        duplicate = evaluate_worker_admission(
+            "git",
+            GitWorker(),
+            registered_types=("git",),
+        )
+
+        self.assertIsInstance(accepted, WorkerAdmissionDecision)
+        self.assertTrue(accepted.accepted)
+        self.assertTrue(accepted.content_hash.startswith("sha256:"))
+        self.assertFalse(rejected.accepted)
+        self.assertIn("unsupported_capability:teleport", rejected.reason_codes)
+        self.assertFalse(duplicate.accepted)
+        self.assertIn("duplicate_worker_type", duplicate.reason_codes)
 
     async def test_worker_must_not_run_without_job_id(self) -> None:
         worker = GitWorker()
@@ -127,6 +146,18 @@ class OsEngineWorkerRegistryTests(unittest.IsolatedAsyncioTestCase):
         report = json.loads(once)
         self.assertTrue(any(item["name"] == "GitWorker" for item in report))
         self.assertTrue(any(item["human_review_required"] for item in report))
+
+    def test_registry_serializes_deterministic_admission_reports(self) -> None:
+        registry = build_default_worker_registry()
+        once = registry.admission_report_json()
+        twice = registry.admission_report_json()
+
+        self.assertEqual(once, twice)
+        report = json.loads(once)
+        git_entries = [item for item in report if item["worker_type"] == "git"]
+        self.assertEqual(len(git_entries), 1)
+        self.assertTrue(git_entries[0]["accepted"])
+        self.assertTrue(git_entries[0]["content_hash"].startswith("sha256:"))
 
 
 if __name__ == "__main__":
