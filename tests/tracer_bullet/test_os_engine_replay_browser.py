@@ -56,7 +56,9 @@ class OSEngineReplayBrowserTests(unittest.TestCase):
         return artifact_path.as_posix()
 
     def _db_counts(self) -> dict[str, int]:
-        with sqlite3.connect(self.root / self.db_name) as connection:
+        with contextlib.closing(
+            sqlite3.connect(self.root / self.db_name)
+        ) as connection:
             return {
                 table: int(connection.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0])
                 for table in ("jobs", "job_events", "artifacts")
@@ -106,11 +108,14 @@ class OSEngineReplayBrowserTests(unittest.TestCase):
 
     def test_tampered_event_hash_rejects_trace(self) -> None:
         self._record_successful_job()
-        with sqlite3.connect(self.root / self.db_name) as connection:
+        with contextlib.closing(
+            sqlite3.connect(self.root / self.db_name)
+        ) as connection:
             connection.execute(
                 "UPDATE job_events SET content_hash = ? WHERE job_id = ? AND sequence = 2",
                 ("0" * 64, "job_replay_browser"),
             )
+            connection.commit()
 
         summary = browse_os_engine_replay(
             self.root,
@@ -125,11 +130,14 @@ class OSEngineReplayBrowserTests(unittest.TestCase):
 
     def test_malformed_event_payload_rejects_summary_without_raw_display(self) -> None:
         self._record_successful_job()
-        with sqlite3.connect(self.root / self.db_name) as connection:
+        with contextlib.closing(
+            sqlite3.connect(self.root / self.db_name)
+        ) as connection:
             connection.execute(
                 "UPDATE job_events SET payload_json = ? WHERE job_id = ? AND sequence = 1",
                 ("[]", "job_replay_browser"),
             )
+            connection.commit()
 
         summary = browse_os_engine_replay(
             self.root,

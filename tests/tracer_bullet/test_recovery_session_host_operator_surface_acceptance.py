@@ -9,6 +9,7 @@ commands, no restore path, and no production helpers.
 from __future__ import annotations
 
 import json
+import re
 import tempfile
 import unittest
 from pathlib import Path
@@ -54,6 +55,38 @@ FORBIDDEN_OPERATOR_COMMANDS = {
     "apply",
     "repair",
 }
+
+_QT_FONT_ALIAS_WARNING_RE = re.compile(
+    r"^qt\.qpa\.fonts: Populating font family aliases took [0-9]+ ms\."
+    r'(?: ?Replace uses of missing font family "[^"\n]+" with one that '
+    r"exists to avoid this cost\.)?$"
+)
+_QT_PLATFORM_GUI_WARNING_LINES = {
+    "This plugin does not support propagateSizeHints()",
+    "This plugin does not support raise()",
+}
+
+
+def _assert_no_unexpected_operator_surface_stderr(
+    testcase: unittest.TestCase, stderr: str
+) -> None:
+    unexpected_lines = []
+    for raw_line in stderr.splitlines():
+        line = raw_line.rstrip(" \t\r")
+        if line in _QT_PLATFORM_GUI_WARNING_LINES:
+            continue
+        if _QT_FONT_ALIAS_WARNING_RE.fullmatch(line):
+            continue
+        unexpected_lines.append(raw_line)
+
+    testcase.assertEqual(
+        unexpected_lines,
+        [],
+        msg=(
+            "stderr contained content outside the known Qt/platform GUI "
+            f"warning allowlist: {stderr!r}"
+        ),
+    )
 
 
 class TestRecoverySessionHostOperatorSurfaceAcceptance(unittest.TestCase):
@@ -262,10 +295,18 @@ class TestRecoverySessionHostOperatorSurfaceAcceptance(unittest.TestCase):
         self.assertEqual(evaluate_success_code, EXIT_OK)
         self.assertEqual(factory_missing_code, EXIT_FACTORY_ERROR)
         self.assertEqual(evaluate_missing_code, EXIT_FACTORY_ERROR)
-        self.assertEqual(factory_success_stderr, "")
-        self.assertEqual(evaluate_success_stderr, "")
-        self.assertEqual(factory_missing_stderr, "")
-        self.assertEqual(evaluate_missing_stderr, "")
+        _assert_no_unexpected_operator_surface_stderr(
+            self, factory_success_stderr
+        )
+        _assert_no_unexpected_operator_surface_stderr(
+            self, evaluate_success_stderr
+        )
+        _assert_no_unexpected_operator_surface_stderr(
+            self, factory_missing_stderr
+        )
+        _assert_no_unexpected_operator_surface_stderr(
+            self, evaluate_missing_stderr
+        )
 
         payloads = [
             session_host_cli_contract_manifest(),
