@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import platform
 import resource
 import sqlite3
 import time
 from contextlib import contextmanager
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Iterator
 
@@ -143,6 +144,98 @@ class RuntimeSnapshot:
         )
 
 
+@dataclass(frozen=True, slots=True)
+class OperatorConsoleProjection:
+    projection_type: str
+    captured_at_ms: int
+    report_status: str
+    runtime_status: str
+    wal_status: str
+    queue_depth: int
+    active_jobs: int
+    failed_jobs: int
+    quarantined_jobs: int
+    review_required_jobs: int
+    warning_count: int
+    artifact_count: int
+    database_available: bool
+    runtime_available: bool
+    sync_stale: bool
+    next_required_action: str
+    latest_job_ids: tuple[str, ...]
+    latest_event_types: tuple[str, ...]
+    read_only: bool = True
+    write_actions_allowed: bool = False
+    content_hash: str = ""
+
+    def to_dict(self) -> dict[str, object]:
+        payload = dict(sorted(asdict(self).items()))
+        payload["latest_job_ids"] = list(self.latest_job_ids)
+        payload["latest_event_types"] = list(self.latest_event_types)
+        return payload
+
+
+def project_operator_console_snapshot(
+    snapshot: RuntimeSnapshot,
+) -> OperatorConsoleProjection:
+    review_required_jobs = sum(
+        1
+        for job in snapshot.latest_jobs
+        if job.human_review_required or job.status == "Requires Human Review"
+    )
+    report_status = _operator_console_report_status(
+        snapshot,
+        review_required_jobs=review_required_jobs,
+    )
+    material = {
+        "active_jobs": snapshot.active_jobs,
+        "artifact_count": snapshot.latest_artifacts_count,
+        "captured_at_ms": snapshot.captured_at_ms,
+        "database_available": snapshot.database_available,
+        "failed_jobs": snapshot.failed_jobs,
+        "latest_event_types": tuple(
+            event.event_type for event in snapshot.latest_events[:10]
+        ),
+        "latest_job_ids": tuple(job.job_id for job in snapshot.latest_jobs[:20]),
+        "next_required_action": snapshot.next_required_action,
+        "projection_type": "operator_console_projection_v1",
+        "quarantined_jobs": snapshot.quarantined_jobs,
+        "queue_depth": snapshot.queue_depth,
+        "read_only": True,
+        "report_status": report_status,
+        "review_required_jobs": review_required_jobs,
+        "runtime_available": snapshot.runtime_available,
+        "runtime_status": snapshot.runtime_status,
+        "sync_stale": snapshot.sync_stale,
+        "wal_status": snapshot.wal_status,
+        "warning_count": snapshot.warning_count,
+        "write_actions_allowed": False,
+    }
+    return OperatorConsoleProjection(
+        projection_type="operator_console_projection_v1",
+        captured_at_ms=snapshot.captured_at_ms,
+        report_status=report_status,
+        runtime_status=snapshot.runtime_status,
+        wal_status=snapshot.wal_status,
+        queue_depth=snapshot.queue_depth,
+        active_jobs=snapshot.active_jobs,
+        failed_jobs=snapshot.failed_jobs,
+        quarantined_jobs=snapshot.quarantined_jobs,
+        review_required_jobs=review_required_jobs,
+        warning_count=snapshot.warning_count,
+        artifact_count=snapshot.latest_artifacts_count,
+        database_available=snapshot.database_available,
+        runtime_available=snapshot.runtime_available,
+        sync_stale=snapshot.sync_stale,
+        next_required_action=snapshot.next_required_action,
+        latest_job_ids=material["latest_job_ids"],
+        latest_event_types=material["latest_event_types"],
+        read_only=True,
+        write_actions_allowed=False,
+        content_hash=_stable_projection_hash(material),
+    )
+
+
 class ReadModelProvider:
     """Read-only provider for small SQLite snapshots."""
 
@@ -249,6 +342,9 @@ class ReadModelProvider:
             )
         except sqlite3.Error:
             return _unavailable_snapshot(captured_at_ms, database_available=False)
+
+    def operator_console_projection(self) -> OperatorConsoleProjection:
+        return project_operator_console_snapshot(self.snapshot_runtime_status())
 
     @contextmanager
     def _readonly_connection(self) -> Iterator[sqlite3.Connection]:
@@ -617,3 +713,31 @@ def _next_required_action(*, warning_count: int, queue_depth: int) -> str:
     if queue_depth:
         return "Monitor queued work"
     return "Observe runtime"
+
+
+def _operator_console_report_status(
+    snapshot: RuntimeSnapshot,
+    *,
+    review_required_jobs: int,
+) -> str:
+    if not snapshot.runtime_available or not snapshot.database_available:
+        return "unavailable"
+    if snapshot.sync_stale:
+        return "sync_stale"
+    if (
+        snapshot.warning_count
+        or snapshot.failed_jobs
+        or snapshot.quarantined_jobs
+        or review_required_jobs
+    ):
+        return "action_required"
+    if snapshot.queue_depth or snapshot.active_jobs:
+        return "monitor"
+    return "healthy"
+
+
+def _stable_projection_hash(payload: dict[str, object]) -> str:
+    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode(
+        "utf-8"
+    )
+    return "sha256:" + hashlib.sha256(encoded).hexdigest()
