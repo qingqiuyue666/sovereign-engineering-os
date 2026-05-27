@@ -102,19 +102,30 @@ class WorkerRunResult:
         artifact_paths: Sequence[Path] = (),
         metadata: dict[str, JsonValue] | None = None,
     ) -> "WorkerRunResult":
+        recorded_paths = list(artifact_paths)
+        if process.watchdog_receipt_path is not None:
+            recorded_paths.append(process.watchdog_receipt_path)
+        result_metadata = metadata or {
+            "termination_reason": process.termination_reason,
+            "partial_outputs_policy": process.partial_outputs_policy,
+        }
+        if process.watchdog_receipt_path is not None:
+            result_metadata = dict(result_metadata)
+            result_metadata["watchdog_receipt_path"] = str(
+                process.watchdog_receipt_path
+            )
+            result_metadata["watchdog_receipt_type"] = (
+                "os_engine_process_watchdog_receipt_v1"
+            )
         return cls(
             succeeded=process.ok,
             quarantined=process.quarantined,
             exit_code=process.returncode,
             stdout=process.stdout,
             stderr=process.stderr,
-            artifact_paths=tuple(artifact_paths),
+            artifact_paths=tuple(recorded_paths),
             diagnostic_path=process.diagnostic_path,
-            metadata=metadata
-            or {
-                "termination_reason": process.termination_reason,
-                "partial_outputs_policy": process.partial_outputs_policy,
-            },
+            metadata=result_metadata,
         )
 
 
@@ -428,7 +439,10 @@ class CommandWorker(BaseWorker):
     async def run(self, job: Job, context: WorkerContext) -> WorkerRunResult:
         command = self._command(job)
         artifact_paths = tuple(_artifact_paths_from_inputs(job, context))
-        supervisor = ProcessSupervisor(crash_dir=context.crash_dir)
+        supervisor = ProcessSupervisor(
+            crash_dir=context.crash_dir,
+            receipt_dir=context.artifact_root / "watchdog_receipts",
+        )
         process = await supervisor.run(
             command,
             cwd=context.repo_root,

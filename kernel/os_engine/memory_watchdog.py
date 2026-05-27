@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json
 import math
 import os
@@ -47,6 +48,15 @@ class ProcessLimits:
         if self.kill_grace_seconds <= 0:
             raise ProcessSupervisorError("kill_grace_seconds must be positive")
 
+    def to_dict(self) -> dict[str, int | float]:
+        return {
+            "kill_grace_seconds": self.kill_grace_seconds,
+            "max_runtime_seconds": self.max_runtime_seconds,
+            "memory_limit_mb": self.memory_limit_mb,
+            "stderr_limit_bytes": self.stderr_limit_bytes,
+            "stdout_limit_bytes": self.stdout_limit_bytes,
+        }
+
 
 @dataclass(frozen=True, slots=True)
 class ProcessResult:
@@ -64,6 +74,7 @@ class ProcessResult:
     diagnostic_path: Path | None
     termination_reason: str
     partial_outputs_policy: str
+    watchdog_receipt_path: Path | None = None
 
     @property
     def ok(self) -> bool:
@@ -79,9 +90,13 @@ class ProcessSupervisor:
         self,
         *,
         crash_dir: Path = DEFAULT_CRASH_DIR,
+        receipt_dir: Path | None = None,
         poll_interval_seconds: float = 0.5,
     ) -> None:
         self.crash_dir = crash_dir.expanduser().resolve()
+        self.receipt_dir = (
+            receipt_dir.expanduser().resolve() if receipt_dir is not None else None
+        )
         self.poll_interval_seconds = poll_interval_seconds
 
     async def run(
@@ -197,6 +212,22 @@ class ProcessSupervisor:
                 stdout=stdout_buffer.decode("utf-8", errors="replace"),
                 stderr=stderr_buffer.decode("utf-8", errors="replace"),
             )
+        receipt_path: Path | None = None
+        if self.receipt_dir is not None:
+            receipt_path = await self._write_receipt(
+                command=command_tuple,
+                limits=limits,
+                returncode=returncode,
+                duration_seconds=duration,
+                max_rss_mb=max_rss_mb,
+                timed_out=timed_out,
+                memory_exceeded=memory_exceeded,
+                stdout_overflow=stdout_overflow,
+                stderr_overflow=stderr_overflow,
+                quarantined=quarantined,
+                diagnostic_path=diagnostic_path,
+                termination_reason=termination_reason,
+            )
         return ProcessResult(
             command=command_tuple,
             returncode=returncode,
@@ -212,6 +243,7 @@ class ProcessSupervisor:
             diagnostic_path=diagnostic_path,
             termination_reason=termination_reason,
             partial_outputs_policy="preserve_in_crash_bundle_when_available" if diagnostic_path else "no_partial_outputs",
+            watchdog_receipt_path=receipt_path,
         )
 
     async def _kill_process(self, process: asyncio.subprocess.Process) -> None:
@@ -254,6 +286,68 @@ class ProcessSupervisor:
         }
         await asyncio.to_thread(path.write_text, json.dumps(payload, indent=2, sort_keys=True) + "\n", "utf-8")
         return path
+
+    async def _write_receipt(
+        self,
+        *,
+        command: Sequence[str],
+        limits: ProcessLimits,
+        returncode: int | None,
+        duration_seconds: float,
+        max_rss_mb: float,
+        timed_out: bool,
+        memory_exceeded: bool,
+        stdout_overflow: bool,
+        stderr_overflow: bool,
+        quarantined: bool,
+        diagnostic_path: Path | None,
+        termination_reason: str,
+    ) -> Path:
+        if self.receipt_dir is None:
+            raise ProcessSupervisorError("receipt_dir is not configured")
+        self.receipt_dir.mkdir(parents=True, exist_ok=True)
+        receipt_id = uuid.uuid4().hex
+        created_at = datetime.now(UTC).isoformat(timespec="seconds")
+        payload: dict[str, object] = {
+            "receipt_type": "os_engine_process_watchdog_receipt_v1",
+            "receipt_id": receipt_id,
+            "created_at": created_at,
+            "command_sha256": _stable_hash({"command": list(command)}),
+            "limits": limits.to_dict(),
+            "returncode": returncode,
+            "duration_seconds": duration_seconds,
+            "max_rss_mb": max_rss_mb,
+            "timed_out": timed_out,
+            "memory_exceeded": memory_exceeded,
+            "stdout_overflow": stdout_overflow,
+            "stderr_overflow": stderr_overflow,
+            "quarantined": quarantined,
+            "diagnostic_path": str(diagnostic_path) if diagnostic_path else None,
+            "termination_reason": termination_reason,
+            "raw_stdout_stored": False,
+            "raw_stderr_stored": False,
+            "retry_attempts": RETRY_POLICY_MAX_ATTEMPTS,
+        }
+        hash_material = dict(payload)
+        hash_material.pop("created_at", None)
+        payload["content_hash"] = _stable_hash(hash_material)
+        path = (
+            self.receipt_dir
+            / f"watchdog_receipt_{created_at.replace(':', '')}_{receipt_id}.json"
+        )
+        await asyncio.to_thread(
+            path.write_text,
+            json.dumps(payload, indent=2, sort_keys=True) + "\n",
+            "utf-8",
+        )
+        return path
+
+
+def _stable_hash(payload: object) -> str:
+    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode(
+        "utf-8"
+    )
+    return "sha256:" + hashlib.sha256(encoded).hexdigest()
 
 
 async def _rss_mb(pid: int) -> float:
