@@ -94,6 +94,26 @@ class OsEngineWorkerRegistryTests(unittest.IsolatedAsyncioTestCase):
         with self.assertRaises(WorkerAdmissionError):
             await worker.validate_outputs(_job(), bad, context)
 
+    async def test_command_worker_records_watchdog_receipt_artifact(self) -> None:
+        worker = GitWorker()
+        context = WorkerContext(
+            repo_root=Path.cwd(),
+            artifact_root=Path(tempfile.mkdtemp()),
+            crash_dir=Path(tempfile.mkdtemp()),
+        )
+
+        result = await worker.run(_job(), context)
+
+        self.assertTrue(result.succeeded)
+        receipt_path = Path(str(result.metadata["watchdog_receipt_path"]))
+        self.assertTrue(receipt_path.exists())
+        self.assertTrue(receipt_path.is_relative_to(context.artifact_root.resolve()))
+        self.assertIn(receipt_path, result.artifact_paths)
+        self.assertEqual(
+            result.metadata["watchdog_receipt_type"],
+            "os_engine_process_watchdog_receipt_v1",
+        )
+
     async def test_worker_failure_quarantines_and_cannot_bypass_queue_semantics(self) -> None:
         worker = GitWorker()
         context = WorkerContext(

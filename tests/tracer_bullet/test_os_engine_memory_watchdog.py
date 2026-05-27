@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import ast
 import asyncio
+import json
 import sys
 import tempfile
 import unittest
@@ -21,6 +22,7 @@ from kernel.os_engine.memory_watchdog import (
 class OsEngineMemoryWatchdogTests(unittest.IsolatedAsyncioTestCase):
     def setUp(self) -> None:
         self.crash_dir = Path(tempfile.mkdtemp(prefix="seos-crashes-"))
+        self.receipt_dir = Path(tempfile.mkdtemp(prefix="seos-watchdog-receipts-"))
         self.supervisor = ProcessSupervisor(crash_dir=self.crash_dir, poll_interval_seconds=0.05)
 
     async def test_timeout_budget_is_enforced_and_failure_bundle_is_generated(self) -> None:
@@ -59,6 +61,55 @@ class OsEngineMemoryWatchdogTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("nonzero", result.termination_reason)
         self.assertIsNotNone(result.diagnostic_path)
         self.assertEqual(result.partial_outputs_policy, "preserve_in_crash_bundle_when_available")
+
+    async def test_watchdog_receipt_is_written_without_raw_stream_payloads(self) -> None:
+        supervisor = ProcessSupervisor(
+            crash_dir=self.crash_dir,
+            receipt_dir=self.receipt_dir,
+            poll_interval_seconds=0.05,
+        )
+
+        result = await supervisor.run(
+            [sys.executable, "-c", "print('receipt ok')"],
+            limits=ProcessLimits(max_runtime_seconds=5, memory_limit_mb=256),
+        )
+
+        self.assertTrue(result.ok)
+        self.assertIsNotNone(result.watchdog_receipt_path)
+        self.assertTrue(
+            result.watchdog_receipt_path and result.watchdog_receipt_path.exists()
+        )
+        receipt = json.loads(result.watchdog_receipt_path.read_text(encoding="utf-8"))
+        self.assertEqual(
+            receipt["receipt_type"],
+            "os_engine_process_watchdog_receipt_v1",
+        )
+        self.assertTrue(receipt["content_hash"].startswith("sha256:"))
+        self.assertTrue(receipt["command_sha256"].startswith("sha256:"))
+        self.assertFalse(receipt["raw_stdout_stored"])
+        self.assertFalse(receipt["raw_stderr_stored"])
+        self.assertNotIn("stdout", receipt)
+        self.assertNotIn("stderr", receipt)
+
+    async def test_watchdog_timeout_receipt_binds_diagnostic_path(self) -> None:
+        supervisor = ProcessSupervisor(
+            crash_dir=self.crash_dir,
+            receipt_dir=self.receipt_dir,
+            poll_interval_seconds=0.05,
+        )
+
+        result = await supervisor.run(
+            [sys.executable, "-c", "import time; time.sleep(5)"],
+            limits=ProcessLimits(max_runtime_seconds=0.2, memory_limit_mb=256),
+        )
+
+        self.assertTrue(result.timed_out)
+        self.assertIsNotNone(result.diagnostic_path)
+        self.assertIsNotNone(result.watchdog_receipt_path)
+        receipt = json.loads(result.watchdog_receipt_path.read_text(encoding="utf-8"))
+        self.assertTrue(receipt["timed_out"])
+        self.assertTrue(receipt["quarantined"])
+        self.assertEqual(receipt["diagnostic_path"], str(result.diagnostic_path))
 
     def test_budget_policy_exists_and_invalid_budgets_fail_closed(self) -> None:
         for kwargs in (
