@@ -9,6 +9,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from kernel.stores.artifact_store_contract import artifact_manifest_from_ingest
 from kernel.stores.artifact_store_persistence import (
     REAL_WAL_BINDING_STATUS,
     ArtifactStorePersistenceError,
@@ -131,6 +132,60 @@ class ArtifactStorePersistenceImplementationV1Tests(unittest.TestCase):
 
         self.assertFalse(replay.accepted)
         self.assertIn("content_sha256_mismatch", replay.rejection_reasons)
+
+    def test_append_after_existing_corruption_is_rejected_without_mutation(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            root = Path(tempdir) / "artifact-store"
+            store = FileBackedArtifactStore(root)
+            first = store.write_json_artifact(
+                artifact_type="audit_json",
+                task_id="task-001",
+                run_id="run-001",
+                payload={"status": "ok"},
+                provenance_hash=_hash("provenance"),
+                created_at="2026-05-28T00:00:00+00:00",
+            )
+            second_content = b'{"status":"probe"}'
+            second_manifest = artifact_manifest_from_ingest(
+                {
+                    "artifact_type": "operator_report",
+                    "content_sha256": "sha256:" + hashlib.sha256(second_content).hexdigest(),
+                    "created_at": "2026-05-28T00:00:01+00:00",
+                    "provenance_hash": _hash("provenance-probe"),
+                    "run_id": "run-probe",
+                    "size_bytes": len(second_content),
+                    "task_id": "task-probe",
+                    "wal_record_hash": "sha256:" + ("0" * 64),
+                }
+            )
+            second_artifact_path = root / second_manifest.storage_relpath
+            manifest_log_path = root / "artifact-manifests.jsonl"
+            wal_path = root / "artifact-store.real-wal.jsonl"
+            Path(first.artifact_path).write_text('{"status":"tampered"}', encoding="utf-8")
+            before_manifest = manifest_log_path.read_text(encoding="utf-8")
+            before_wal = wal_path.read_text(encoding="utf-8")
+
+            with self.assertRaisesRegex(
+                ArtifactStoreReplayError, "stored_artifact_replay_rejected"
+            ):
+                store.write_json_artifact(
+                    artifact_type="operator_report",
+                    task_id="task-probe",
+                    run_id="run-probe",
+                    payload={"status": "probe"},
+                    provenance_hash=_hash("provenance-probe"),
+                    created_at="2026-05-28T00:00:01+00:00",
+                )
+
+            after_manifest = manifest_log_path.read_text(encoding="utf-8")
+            after_wal = wal_path.read_text(encoding="utf-8")
+            second_artifact_exists = second_artifact_path.exists()
+
+        self.assertEqual(after_manifest, before_manifest)
+        self.assertEqual(after_wal, before_wal)
+        self.assertEqual(after_manifest.count("\n"), 1)
+        self.assertEqual(after_wal.count("\n"), 1)
+        self.assertFalse(second_artifact_exists)
 
     def test_tampered_real_wal_binding_blocks_replay(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:

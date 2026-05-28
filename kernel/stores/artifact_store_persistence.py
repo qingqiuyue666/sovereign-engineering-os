@@ -311,7 +311,12 @@ class FileBackedArtifactStore:
             try:
                 handle.seek(0)
                 records = _records_from_text(handle.read(), store_id=self.store_id)
-                self._verify_records(records)
+                replay = self._verify_records(records)
+                if not replay.accepted:
+                    raise ArtifactStoreReplayError(
+                        "stored_artifact_replay_rejected:"
+                        + ",".join(replay.rejection_reasons)
+                    )
                 preflight_manifest = artifact_manifest_from_ingest(
                     {
                         "artifact_type": artifact_type,
