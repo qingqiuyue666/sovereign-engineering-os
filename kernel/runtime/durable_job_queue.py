@@ -1,8 +1,9 @@
 """Durable local job queue implementation V1.
 
 The queue is an append-only JSONL store over the V1 durable queue contract. It
-does not execute jobs, start worker loops, open network surfaces, or bind to the
-unmerged real WAL storage backend from PR #514.
+does not execute jobs, start worker loops, or open network surfaces. Every
+queue event is bound to the local real WAL storage backend before the queue
+record is appended.
 """
 
 from __future__ import annotations
@@ -26,10 +27,14 @@ from kernel.runtime.durable_job_queue_contract import (
     project_durable_queue_events,
     validate_durable_queue_event,
 )
+from kernel.stores.real_wal_storage import (
+    FileBackedRealWalStorage,
+    RealWalStorageError,
+)
 
 __all__ = [
     "DURABLE_JOB_QUEUE_IMPLEMENTATION_VERSION",
-    "REAL_WAL_BINDING_BLOCKER",
+    "REAL_WAL_BINDING_STATUS",
     "DurableJobQueue",
     "DurableJobQueueError",
     "DurableJobQueueDuplicateError",
@@ -41,9 +46,10 @@ __all__ = [
 ]
 
 DURABLE_JOB_QUEUE_IMPLEMENTATION_VERSION = "durable_job_queue_implementation_v1"
-REAL_WAL_BINDING_BLOCKER = "real_wal_storage_backend_v1_unmerged_pr_514"
+REAL_WAL_BINDING_STATUS = "real_wal_storage_backend_v1_bound"
 
 _QUEUE_RECORD_VERSION = "durable_job_queue_record_v1"
+_PREFLIGHT_WAL_RECORD_HASH = "sha256:" + ("0" * 64)
 _QUEUE_RECORD_KEYS = frozenset(
     {
         "event",
@@ -112,8 +118,8 @@ class DurableJobQueueDuplicateError(DurableJobQueueError):
 class RealWalBindingStatus:
     available: bool
     blocker: str
-    pr_number: int
     binding_mode: str
+    wal_path: str
 
     def as_dict(self) -> dict[str, object]:
         return asdict(self)
@@ -138,7 +144,7 @@ class DurableJobQueueRecord:
         object.__setattr__(self, "payload", payload)
         if _sha256_json(payload) != self.event.payload_hash:
             raise DurableJobQueueReplayError("payload_hash_mismatch")
-        if self.real_wal_binding_status != REAL_WAL_BINDING_BLOCKER:
+        if self.real_wal_binding_status != REAL_WAL_BINDING_STATUS:
             raise DurableJobQueueReplayError("real_wal_binding_status_invalid")
         if self.record_hash:
             _require_sha256(self.record_hash, "record_hash")
@@ -172,10 +178,21 @@ class _JobMetadata:
 class DurableJobQueue:
     """Append-only durable queue with explicit, human-invoked transitions."""
 
-    def __init__(self, *, path: str | Path, queue_id: str) -> None:
+    def __init__(
+        self,
+        *,
+        path: str | Path,
+        queue_id: str,
+        wal_path: str | Path | None = None,
+    ) -> None:
         if not _nonempty_string(queue_id):
             raise DurableJobQueueError("queue_id_required")
         self.path = _validate_store_path(Path(path))
+        self.wal_path = _validate_store_path(
+            Path(wal_path) if wal_path is not None else _default_wal_path(self.path)
+        )
+        if self.wal_path == self.path:
+            raise DurableJobQueueError("wal_path_must_be_distinct_from_queue_path")
         self.queue_id = queue_id
         self._records: tuple[DurableJobQueueRecord, ...] = ()
         self._projection = DurableQueueProjection(
@@ -205,10 +222,10 @@ class DurableJobQueue:
 
     def wal_binding_status(self) -> RealWalBindingStatus:
         return RealWalBindingStatus(
-            available=False,
-            blocker=REAL_WAL_BINDING_BLOCKER,
-            pr_number=514,
-            binding_mode="unbound_local_queue_record_hash_until_real_wal_backend_merges",
+            available=True,
+            blocker="",
+            binding_mode="file_backed_real_wal_storage_queue_event_binding_v1",
+            wal_path=str(self.wal_path),
         )
 
     def submit_job(
@@ -549,7 +566,8 @@ class DurableJobQueue:
             "event_count": len(self._records),
             "job_count": len(self._projection.projected_jobs),
             "queue_id": self.queue_id,
-            "real_wal_binding_status": REAL_WAL_BINDING_BLOCKER,
+            "real_wal_binding_status": REAL_WAL_BINDING_STATUS,
+            "real_wal_path": str(self.wal_path),
             "state_counts": dict(sorted(counts.items())),
         }
 
@@ -588,20 +606,73 @@ class DurableJobQueue:
                         "stored_queue_replay_rejected:"
                         + ",".join(projection.rejection_reasons)
                     )
+                _verify_real_wal_bindings(
+                    records,
+                    wal_path=self.wal_path,
+                    queue_id=self.queue_id,
+                )
                 sequence = len(records) + 1
                 previous_hash = records[-1].event.event_hash if records else None
                 payload_hash = _sha256_json(safe_payload)
-                wal_record_hash = _pending_wal_hash(
+                preflight_event = _build_queue_event(
                     queue_id=self.queue_id,
                     sequence=sequence,
                     previous_event_hash=previous_hash,
                     event_type=event_type,
                     job_id=job_id,
+                    task_id=task_id,
+                    run_id=run_id,
+                    worker_id=worker_id,
+                    idempotency_key_hash=idempotency_key_hash,
                     payload_hash=payload_hash,
+                    attempt=attempt,
+                    max_attempts=max_attempts,
+                    lease_id=lease_id,
+                    lease_expires_at=lease_expires_at,
+                    retry_after=retry_after,
+                    cancellation_requested=cancellation_requested,
+                    dead_letter_reason=dead_letter_reason,
+                    wal_record_hash=_PREFLIGHT_WAL_RECORD_HASH,
+                    occurred_at=occurred,
                 )
-                event = DurableQueueEvent(
-                    queue_event_id=f"{self.queue_id}:{sequence:06d}:{job_id}:{event_type}",
-                    queue_contract_version=DURABLE_JOB_QUEUE_CONTRACT_VERSION,
+                preflight_candidate = DurableJobQueueRecord(
+                    queue_record_version=_QUEUE_RECORD_VERSION,
+                    queue_id=self.queue_id,
+                    event=preflight_event,
+                    payload=dict(safe_payload),
+                    real_wal_binding_status=REAL_WAL_BINDING_STATUS,
+                )
+                candidate_projection = project_durable_queue_events(
+                    tuple(record.event for record in (*records, preflight_candidate))
+                )
+                if not candidate_projection.accepted:
+                    raise DurableJobQueueTransitionError(
+                        "queue_transition_rejected:"
+                        + ",".join(candidate_projection.rejection_reasons)
+                    )
+                _metadata_from_records((*records, preflight_candidate))
+                wal_record_hash = self._append_real_wal_event(
+                    queue_id=self.queue_id,
+                    sequence=sequence,
+                    previous_event_hash=previous_hash,
+                    event_type=event_type,
+                    job_id=job_id,
+                    task_id=task_id,
+                    run_id=run_id,
+                    worker_id=worker_id,
+                    idempotency_key_hash=idempotency_key_hash,
+                    payload_hash=payload_hash,
+                    attempt=attempt,
+                    max_attempts=max_attempts,
+                    lease_id=lease_id,
+                    lease_expires_at=lease_expires_at,
+                    retry_after=retry_after,
+                    cancellation_requested=cancellation_requested,
+                    dead_letter_reason=dead_letter_reason,
+                    occurred_at=occurred,
+                )
+                event = _build_queue_event(
+                    queue_id=self.queue_id,
                     sequence=sequence,
                     previous_event_hash=previous_hash,
                     event_type=event_type,
@@ -619,7 +690,6 @@ class DurableJobQueue:
                     cancellation_requested=cancellation_requested,
                     dead_letter_reason=dead_letter_reason,
                     wal_record_hash=wal_record_hash,
-                    human_invoked=True,
                     occurred_at=occurred,
                 )
                 candidate = DurableJobQueueRecord(
@@ -627,7 +697,7 @@ class DurableJobQueue:
                     queue_id=self.queue_id,
                     event=event,
                     payload=dict(safe_payload),
-                    real_wal_binding_status=REAL_WAL_BINDING_BLOCKER,
+                    real_wal_binding_status=REAL_WAL_BINDING_STATUS,
                 )
                 candidate_projection = project_durable_queue_events(
                     tuple(record.event for record in (*records, candidate))
@@ -648,6 +718,71 @@ class DurableJobQueue:
         self._reload()
         return candidate
 
+    def _append_real_wal_event(
+        self,
+        *,
+        queue_id: str,
+        sequence: int,
+        previous_event_hash: str | None,
+        event_type: str,
+        job_id: str,
+        task_id: str,
+        run_id: str,
+        worker_id: str,
+        idempotency_key_hash: str,
+        payload_hash: str,
+        attempt: int,
+        max_attempts: int,
+        lease_id: str,
+        lease_expires_at: str,
+        retry_after: str,
+        cancellation_requested: bool,
+        dead_letter_reason: str,
+        occurred_at: str,
+    ) -> str:
+        self.wal_path.parent.mkdir(parents=True, exist_ok=True)
+        material_hash = _queue_event_material_hash(
+            queue_id=queue_id,
+            sequence=sequence,
+            previous_event_hash=previous_event_hash,
+            event_type=event_type,
+            job_id=job_id,
+            task_id=task_id,
+            run_id=run_id,
+            worker_id=worker_id,
+            idempotency_key_hash=idempotency_key_hash,
+            payload_hash=payload_hash,
+            attempt=attempt,
+            max_attempts=max_attempts,
+            lease_id=lease_id,
+            lease_expires_at=lease_expires_at,
+            retry_after=retry_after,
+            cancellation_requested=cancellation_requested,
+            dead_letter_reason=dead_letter_reason,
+        )
+        digest_bindings = {
+            "queue_event_material_hash": material_hash,
+            "queue_event_type_hash": _sha256_text("event_type:" + event_type),
+            "queue_id_hash": _sha256_text("queue_id:" + queue_id),
+            "queue_job_hash": _sha256_text("job_id:" + job_id),
+        }
+        if previous_event_hash is not None:
+            digest_bindings["queue_previous_event_hash"] = previous_event_hash
+        try:
+            receipt = FileBackedRealWalStorage(self.wal_path).append(
+                record_type="QUEUE_EVENT",
+                task_id=task_id,
+                run_id=run_id,
+                payload_hash=payload_hash,
+                digest_bindings=digest_bindings,
+                created_at=occurred_at,
+            )
+        except RealWalStorageError as exc:
+            raise DurableJobQueueReplayError(
+                "real_wal_append_failed:" + str(exc)
+            ) from exc
+        return receipt.record_hash
+
     def _reload(self) -> None:
         records = _load_records(self.path, queue_id=self.queue_id)
         projection = project_durable_queue_events(tuple(record.event for record in records))
@@ -655,6 +790,7 @@ class DurableJobQueue:
             raise DurableJobQueueReplayError(
                 "stored_queue_replay_rejected:" + ",".join(projection.rejection_reasons)
             )
+        _verify_real_wal_bindings(records, wal_path=self.wal_path, queue_id=self.queue_id)
         metadata_by_job, idempotency_index = _metadata_from_records(records)
         self._records = records
         self._projection = projection
@@ -717,6 +853,161 @@ def compute_record_hash(record: DurableJobQueueRecord | Mapping[str, object]) ->
         payload = dict(record)
         payload.pop("record_hash", None)
     return _sha256_json(payload)
+
+
+def _build_queue_event(
+    *,
+    queue_id: str,
+    sequence: int,
+    previous_event_hash: str | None,
+    event_type: str,
+    job_id: str,
+    task_id: str,
+    run_id: str,
+    worker_id: str,
+    idempotency_key_hash: str,
+    payload_hash: str,
+    attempt: int,
+    max_attempts: int,
+    lease_id: str,
+    lease_expires_at: str,
+    retry_after: str,
+    cancellation_requested: bool,
+    dead_letter_reason: str,
+    wal_record_hash: str,
+    occurred_at: str,
+) -> DurableQueueEvent:
+    return DurableQueueEvent(
+        queue_event_id=f"{queue_id}:{sequence:06d}:{job_id}:{event_type}",
+        queue_contract_version=DURABLE_JOB_QUEUE_CONTRACT_VERSION,
+        sequence=sequence,
+        previous_event_hash=previous_event_hash,
+        event_type=event_type,
+        job_id=job_id,
+        task_id=task_id,
+        run_id=run_id,
+        worker_id=worker_id,
+        idempotency_key_hash=idempotency_key_hash,
+        payload_hash=payload_hash,
+        attempt=attempt,
+        max_attempts=max_attempts,
+        lease_id=lease_id,
+        lease_expires_at=lease_expires_at,
+        retry_after=retry_after,
+        cancellation_requested=cancellation_requested,
+        dead_letter_reason=dead_letter_reason,
+        wal_record_hash=wal_record_hash,
+        human_invoked=True,
+        occurred_at=occurred_at,
+    )
+
+
+def _verify_real_wal_bindings(
+    records: Sequence[DurableJobQueueRecord],
+    *,
+    wal_path: Path,
+    queue_id: str,
+) -> None:
+    if not records:
+        return
+    if not wal_path.exists():
+        raise DurableJobQueueReplayError("real_wal_file_missing")
+    if wal_path.is_symlink():
+        raise DurableJobQueueReplayError("real_wal_path_is_symlink")
+    try:
+        wal_records = FileBackedRealWalStorage(wal_path).read_records()
+    except RealWalStorageError as exc:
+        raise DurableJobQueueReplayError("real_wal_replay_failed:" + str(exc)) from exc
+    wal_by_hash = {record.record_hash: record for record in wal_records}
+    for queue_record in records:
+        event = queue_record.event
+        wal_record = wal_by_hash.get(event.wal_record_hash)
+        if wal_record is None:
+            raise DurableJobQueueReplayError("real_wal_record_missing")
+        if wal_record.record_type != "QUEUE_EVENT":
+            raise DurableJobQueueReplayError("real_wal_record_type_mismatch")
+        if wal_record.task_id != event.task_id or wal_record.run_id != event.run_id:
+            raise DurableJobQueueReplayError("real_wal_identity_mismatch")
+        if wal_record.payload_hash != event.payload_hash:
+            raise DurableJobQueueReplayError("real_wal_payload_hash_mismatch")
+        digest_bindings = dict(wal_record.digest_bindings)
+        expected_material_hash = _queue_event_material_hash_from_event(
+            event,
+            queue_id=queue_id,
+        )
+        if digest_bindings.get("queue_event_material_hash") != expected_material_hash:
+            raise DurableJobQueueReplayError("real_wal_material_hash_mismatch")
+
+
+def _queue_event_material_hash_from_event(
+    event: DurableQueueEvent,
+    *,
+    queue_id: str,
+) -> str:
+    return _queue_event_material_hash(
+        queue_id=queue_id,
+        sequence=event.sequence,
+        previous_event_hash=event.previous_event_hash,
+        event_type=event.event_type,
+        job_id=event.job_id,
+        task_id=event.task_id,
+        run_id=event.run_id,
+        worker_id=event.worker_id,
+        idempotency_key_hash=event.idempotency_key_hash,
+        payload_hash=event.payload_hash,
+        attempt=event.attempt,
+        max_attempts=event.max_attempts,
+        lease_id=event.lease_id,
+        lease_expires_at=event.lease_expires_at,
+        retry_after=event.retry_after,
+        cancellation_requested=event.cancellation_requested,
+        dead_letter_reason=event.dead_letter_reason,
+    )
+
+
+def _queue_event_material_hash(
+    *,
+    queue_id: str,
+    sequence: int,
+    previous_event_hash: str | None,
+    event_type: str,
+    job_id: str,
+    task_id: str,
+    run_id: str,
+    worker_id: str,
+    idempotency_key_hash: str,
+    payload_hash: str,
+    attempt: int,
+    max_attempts: int,
+    lease_id: str,
+    lease_expires_at: str,
+    retry_after: str,
+    cancellation_requested: bool,
+    dead_letter_reason: str,
+) -> str:
+    return _sha256_json(
+        {
+            "attempt": attempt,
+            "cancellation_requested": cancellation_requested,
+            "dead_letter_reason": dead_letter_reason,
+            "event_type": event_type,
+            "human_invoked": True,
+            "idempotency_key_hash": idempotency_key_hash,
+            "job_id": job_id,
+            "lease_expires_at": lease_expires_at,
+            "lease_id": lease_id,
+            "max_attempts": max_attempts,
+            "payload_hash": payload_hash,
+            "previous_event_hash": previous_event_hash,
+            "queue_contract_version": DURABLE_JOB_QUEUE_CONTRACT_VERSION,
+            "queue_id": queue_id,
+            "retry_after": retry_after,
+            "run_id": run_id,
+            "sequence": sequence,
+            "task_id": task_id,
+            "worker_id": worker_id,
+        }
+    )
 
 
 def _load_records(path: Path, *, queue_id: str) -> tuple[DurableJobQueueRecord, ...]:
@@ -858,28 +1149,6 @@ def _payload_int(payload: Mapping[str, object], field_name: str) -> int:
     return value
 
 
-def _pending_wal_hash(
-    *,
-    queue_id: str,
-    sequence: int,
-    previous_event_hash: str | None,
-    event_type: str,
-    job_id: str,
-    payload_hash: str,
-) -> str:
-    return _sha256_json(
-        {
-            "binding_status": REAL_WAL_BINDING_BLOCKER,
-            "event_type": event_type,
-            "job_id": job_id,
-            "payload_hash": payload_hash,
-            "previous_event_hash": previous_event_hash,
-            "queue_id": queue_id,
-            "sequence": sequence,
-        }
-    )
-
-
 def _lease_id(job_id: str, worker_id: str, attempt: int, leased_at: str) -> str:
     return "lease_" + _sha256_json(
         {
@@ -889,6 +1158,10 @@ def _lease_id(job_id: str, worker_id: str, attempt: int, leased_at: str) -> str:
             "worker_id": worker_id,
         }
     ).split(":", 1)[1][:24]
+
+
+def _default_wal_path(path: Path) -> Path:
+    return path.with_name(path.name + ".real-wal.jsonl")
 
 
 def _validate_store_path(path: Path) -> Path:

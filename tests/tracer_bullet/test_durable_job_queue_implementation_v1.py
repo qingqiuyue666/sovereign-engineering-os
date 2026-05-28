@@ -9,13 +9,14 @@ import unittest
 from pathlib import Path
 
 from kernel.runtime.durable_job_queue import (
-    REAL_WAL_BINDING_BLOCKER,
+    REAL_WAL_BINDING_STATUS,
     DurableJobQueue,
     DurableJobQueueDuplicateError,
     DurableJobQueueError,
     DurableJobQueueReplayError,
     DurableJobQueueTransitionError,
 )
+from kernel.stores.real_wal_storage import FileBackedRealWalStorage
 
 
 SOURCE_PATH = Path("kernel/runtime/durable_job_queue.py")
@@ -48,14 +49,24 @@ class DurableJobQueueImplementationV1Tests(unittest.TestCase):
             )
 
             reopened = DurableJobQueue(path=path, queue_id="queue-001")
+            wal_records = FileBackedRealWalStorage(reopened.wal_path).read_records()
 
             self.assertEqual(succeeded.state, "succeeded")
             self.assertTrue(reopened.projection.accepted)
             self.assertEqual(reopened.get_job_state("job-001").state, "succeeded")
             self.assertEqual(len(reopened.events), 4)
             self.assertEqual(len(path.read_text(encoding="utf-8").splitlines()), 4)
-            self.assertFalse(reopened.wal_binding_status().available)
-            self.assertEqual(reopened.wal_binding_status().blocker, REAL_WAL_BINDING_BLOCKER)
+            self.assertEqual(len(wal_records), 4)
+            self.assertEqual(
+                [event.wal_record_hash for event in reopened.events],
+                [record.record_hash for record in wal_records],
+            )
+            self.assertTrue(reopened.wal_binding_status().available)
+            self.assertEqual(reopened.wal_binding_status().blocker, "")
+            self.assertEqual(
+                reopened.summary()["real_wal_binding_status"],
+                REAL_WAL_BINDING_STATUS,
+            )
 
     def test_event_hashes_are_deterministic_for_supplied_material(self) -> None:
         event_hashes: list[str] = []
@@ -204,7 +215,30 @@ class DurableJobQueueImplementationV1Tests(unittest.TestCase):
             with self.assertRaises(DurableJobQueueReplayError):
                 DurableJobQueue(path=path, queue_id="queue-001")
 
-    def test_source_has_no_runtime_autonomy_or_pr514_import(self) -> None:
+    def test_tampered_real_wal_fails_closed_on_replay(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "queue.jsonl"
+            queue = DurableJobQueue(path=path, queue_id="queue-001")
+            queue.submit_job(
+                job_id="job-001",
+                task_id="task-001",
+                run_id="run-001",
+                payload={"kind": "wal_guard"},
+                idempotency_key="idem-001",
+            )
+            wal_text = queue.wal_path.read_text(encoding="utf-8")
+            queue.wal_path.write_text(
+                wal_text.replace("QUEUE_EVENT", "ARTIFACT_EVENT", 1),
+                encoding="utf-8",
+            )
+
+            with self.assertRaisesRegex(
+                DurableJobQueueReplayError,
+                "real_wal_replay_failed",
+            ):
+                DurableJobQueue(path=path, queue_id="queue-001")
+
+    def test_source_has_no_runtime_autonomy_or_stale_wal_blocker(self) -> None:
         source = SOURCE_PATH.read_text(encoding="utf-8")
         tree = ast.parse(source)
         imported_roots: set[str] = set()
@@ -232,7 +266,9 @@ class DurableJobQueueImplementationV1Tests(unittest.TestCase):
                 }
             )
         )
-        self.assertNotIn("kernel.stores.real_wal_storage", source)
+        stale_marker = "real_wal_storage_backend_v1_unmerged_" + "pr_" + "514"
+        self.assertIn("kernel.stores.real_wal_storage", source)
+        self.assertNotIn(stale_marker, source)
         self.assertNotIn("while True", source)
 
 

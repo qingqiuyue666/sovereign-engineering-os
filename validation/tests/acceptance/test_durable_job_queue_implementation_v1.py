@@ -7,13 +7,14 @@ import unittest
 from pathlib import Path
 
 from kernel.runtime.durable_job_queue import (
-    REAL_WAL_BINDING_BLOCKER,
+    REAL_WAL_BINDING_STATUS,
     DurableJobQueue,
 )
+from kernel.stores.real_wal_storage import FileBackedRealWalStorage
 
 
 class DurableJobQueueImplementationAcceptanceV1Tests(unittest.TestCase):
-    def test_queue_replays_durable_lifecycle_and_records_wal_blocker(self) -> None:
+    def test_queue_replays_durable_lifecycle_and_records_real_wal_binding(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "durable-queue.jsonl"
             queue = DurableJobQueue(path=path, queue_id="acceptance-queue")
@@ -54,14 +55,20 @@ class DurableJobQueueImplementationAcceptanceV1Tests(unittest.TestCase):
             reopened = DurableJobQueue(path=path, queue_id="acceptance-queue")
             state = reopened.get_job_state("job-acceptance")
             summary = reopened.summary()
+            wal_records = FileBackedRealWalStorage(reopened.wal_path).read_records()
 
             self.assertTrue(reopened.projection.accepted)
             self.assertEqual(state.state, "succeeded")
             self.assertEqual(state.attempt, 2)
             self.assertEqual(summary["event_count"], 6)
-            self.assertEqual(summary["real_wal_binding_status"], REAL_WAL_BINDING_BLOCKER)
-            self.assertFalse(reopened.wal_binding_status().available)
-            self.assertEqual(reopened.wal_binding_status().pr_number, 514)
+            self.assertEqual(summary["real_wal_binding_status"], REAL_WAL_BINDING_STATUS)
+            self.assertEqual(len(wal_records), 6)
+            self.assertEqual(
+                [event.wal_record_hash for event in reopened.events],
+                [record.record_hash for record in wal_records],
+            )
+            self.assertTrue(reopened.wal_binding_status().available)
+            self.assertEqual(reopened.wal_binding_status().blocker, "")
 
 
 if __name__ == "__main__":
