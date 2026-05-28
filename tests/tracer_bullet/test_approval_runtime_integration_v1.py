@@ -274,17 +274,18 @@ class ApprovalRuntimeIntegrationV1Tests(unittest.TestCase):
                 lambda record: None,
                 observed_at="2026-05-28T00:02:00+00:00",
             )
-            with self.assertRaisesRegex(ApprovalRuntimeIntegrationError, "approval_scope_mismatch"):
-                run_approval_gated_minimal_controlled_wal_preflight(
-                    _gated_payload(approval.approval_admission_hash, approval_scope="broad"),
-                    store,
-                    lambda record: None,
-                    observed_at="2026-05-28T00:03:00+00:00",
-                )
+            scope_mismatch = run_approval_gated_minimal_controlled_wal_preflight(
+                _gated_payload(approval.approval_admission_hash, approval_scope="broad"),
+                store,
+                lambda record: None,
+                observed_at="2026-05-28T00:03:00+00:00",
+            )
 
         self.assertTrue(accepted.accepted)
         self.assertFalse(reused.accepted)
         self.assertIn("approval_reused", reused.rejection_reasons)
+        self.assertFalse(scope_mismatch.accepted)
+        self.assertIn("approval_scope_mismatch", scope_mismatch.rejection_reasons)
 
     def test_approval_bypass_and_caller_supplied_auto_approval_fail_before_append(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:

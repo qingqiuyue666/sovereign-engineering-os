@@ -773,8 +773,7 @@ def _validated_gated_payload(payload: Mapping[str, object]) -> dict[str, object]
         if field_name not in data:
             raise ApprovalRuntimeIntegrationError(field_name + "_required")
     _require_sha256(data["approval_admission_hash"], "approval_admission_hash")
-    if data["approval_scope"] != APPROVAL_RUNTIME_EXECUTION_SCOPE:
-        raise ApprovalRuntimeIntegrationError("approval_scope_mismatch")
+    _require_nonempty_string(data["approval_scope"], "approval_scope")
     if set(data).intersection(_CALLER_APPROVAL_FIELDS):
         raise ApprovalRuntimeIntegrationError("caller_supplied_approval_flag_forbidden")
     for field_name in ("human_invoked", "single_run_scope"):
