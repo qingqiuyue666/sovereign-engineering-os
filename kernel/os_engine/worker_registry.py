@@ -488,6 +488,12 @@ class GitWorker(CommandWorker):
         }
     )
 
+    def _command(self, job: Job) -> tuple[str, ...]:
+        command = super()._command(job)
+        if len(command) >= 2 and command[1] == "status" and not _has_untracked_status_mode(command):
+            return (*command, "--untracked-files=no")
+        return command
+
     def _validate_command(self, command: Sequence[str], job: Job, context: WorkerContext) -> None:
         _ = (job, context)
         if len(command) < 2 or command[1] not in self._allowed_subcommands:
@@ -616,6 +622,16 @@ def _validate_artifact_paths(job: Job, context: WorkerContext) -> None:
 def _validate_job_identity(job: Job) -> None:
     if not getattr(job, "id", None):
         raise JobValidationError("worker cannot run without job_id")
+
+
+def _has_untracked_status_mode(command: Sequence[str]) -> bool:
+    return any(
+        part == "-uno"
+        or part == "-unormal"
+        or part == "-uall"
+        or part.startswith("--untracked-files")
+        for part in command[2:]
+    )
 
 
 async def _register_artifact_async(
