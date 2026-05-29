@@ -133,6 +133,26 @@ class OsEngineWorkerRegistryTests(unittest.IsolatedAsyncioTestCase):
             "os_engine_process_watchdog_receipt_v1",
         )
 
+    def test_git_status_worker_bounds_untracked_output_by_default(self) -> None:
+        worker = GitWorker()
+
+        bounded = worker._command(_job())
+        explicit = worker._command(
+            Job(
+                id="job_worker_explicit_untracked",
+                type="git",
+                status=JobStatus.CREATED,
+                inputs={"command": ["git", "status", "--short", "--untracked-files=all"]},
+                created_at=datetime(2026, 1, 1, tzinfo=UTC),
+                updated_at=datetime(2026, 1, 1, tzinfo=UTC),
+                max_runtime=5,
+                memory_limit_mb=128,
+            )
+        )
+
+        self.assertEqual(bounded, ("git", "status", "--short", "--untracked-files=no"))
+        self.assertEqual(explicit, ("git", "status", "--short", "--untracked-files=all"))
+
     async def test_worker_failure_quarantines_and_cannot_bypass_queue_semantics(self) -> None:
         worker = GitWorker()
         context = WorkerContext(
