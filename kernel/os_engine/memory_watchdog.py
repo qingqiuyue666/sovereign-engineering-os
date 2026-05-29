@@ -189,7 +189,17 @@ class ProcessSupervisor:
             read_stream(process.stderr, stderr_buffer, limits.stderr_limit_bytes, "stderr")
         )
         monitor_task = asyncio.create_task(monitor())
-        returncode = await process.wait()
+        try:
+            returncode = await asyncio.wait_for(
+                process.wait(),
+                timeout=limits.max_runtime_seconds,
+            )
+        except asyncio.TimeoutError:
+            timed_out = True
+            await request_kill(
+                f"runtime limit exceeded: {limits.max_runtime_seconds:.1f}s"
+            )
+            returncode = await process.wait()
         monitor_task.cancel()
         await asyncio.gather(monitor_task, return_exceptions=True)
         stdout_overflow, stderr_overflow = await asyncio.gather(stdout_task, stderr_task)
