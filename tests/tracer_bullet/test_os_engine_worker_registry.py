@@ -23,7 +23,7 @@ from kernel.os_engine.worker_registry import (
 )
 
 
-def _job(job_id: str = "job_worker_001") -> Job:
+def _job(job_id: str = "job_worker_001", *, memory_limit_mb: int = 256) -> Job:
     return Job(
         id=job_id,
         type="git",
@@ -32,7 +32,7 @@ def _job(job_id: str = "job_worker_001") -> Job:
         created_at=datetime(2026, 1, 1, tzinfo=UTC),
         updated_at=datetime(2026, 1, 1, tzinfo=UTC),
         max_runtime=5,
-        memory_limit_mb=128,
+        memory_limit_mb=memory_limit_mb,
     )
 
 
