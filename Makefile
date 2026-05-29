@@ -1,4 +1,4 @@
-.PHONY: ci test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-real-runtime-provider-transport-execution test-production-autonomy-final-gate test-runtime-sealed-receipt test-generic-payload-shadow test-protected-evidence-storage test-protected-evidence-storage-implementation test-real-hmac-policy-realization test-real-merkle-proof-realization test-generic-payload-full-enforcement test-schemas test-tracer-bullet test-acceptance diff-check health
+.PHONY: ci test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-real-runtime-provider-transport-execution test-production-autonomy-final-gate test-runtime-sealed-receipt test-generic-payload-shadow test-protected-evidence-storage test-protected-evidence-storage-implementation test-real-hmac-policy-realization test-real-merkle-proof-realization test-generic-payload-full-enforcement test-schemas test-tracer-bullet test-acceptance diff-check health local-bootstrap local-smoke local-stop local-reset
 .PHONY: test-runtime-execution-descriptor test-dry-run-orchestrator test-runtime-integration-trace test-completion-audit test-runtime-integration-hardening
 .PHONY: test-security-classification test-secret-scanner test-environment-sanitizer test-anti-exfiltration-gate test-ai-context-firewall test-repository-hygiene test-leak-prevention-foundation
 .PHONY: test-wal-integrity-guard test-taint-propagation test-artifact-provenance test-wal-integrity-contract test-capability-token-policy test-security-truth-substrate
@@ -19,6 +19,18 @@
 .PHONY: test-v12-foundation-progress-audit test-v12-foundation
 
 PYTHON ?= python3
+
+local-bootstrap:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) tools/local_runtime_setup.py bootstrap . --apply
+
+local-smoke:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) tools/local_runtime_setup.py smoke . --apply
+
+local-stop:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) tools/local_runtime_setup.py stop . --apply
+
+local-reset:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) tools/local_runtime_setup.py reset . --apply
 
 ci: health
 
