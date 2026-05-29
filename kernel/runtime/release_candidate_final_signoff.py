@@ -182,16 +182,6 @@ class ReleaseCandidateFinalSignoffReceipt:
             "observed_at",
         ):
             _require_nonempty_string(getattr(self, field_name), field_name)
-        if self.final_verdict != _FINAL_VERDICT:
-            raise ReleaseCandidateFinalSignoffError("final_verdict_invalid")
-        if not _RELEASE_TAG_PATTERN.match(self.release_tag_proposal):
-            raise ReleaseCandidateFinalSignoffError("release_tag_proposal_invalid")
-        if self.rollback_recovery_link != _REQUIRED_DOC_LINKS["rollback_recovery_link"]:
-            raise ReleaseCandidateFinalSignoffError("rollback_recovery_link_invalid")
-        if self.e2e_acceptance_link != _REQUIRED_DOC_LINKS["e2e_acceptance_link"]:
-            raise ReleaseCandidateFinalSignoffError("e2e_acceptance_link_invalid")
-        if self.security_hardening_link != _REQUIRED_DOC_LINKS["security_hardening_link"]:
-            raise ReleaseCandidateFinalSignoffError("security_hardening_link_invalid")
         for field_name in (
             "version_tuple_hash",
             "schema_freeze_hash",
@@ -214,6 +204,17 @@ class ReleaseCandidateFinalSignoffReceipt:
         )
         if self.accepted != expected_acceptance:
             raise ReleaseCandidateFinalSignoffError("accepted_must_match_gate_evidence")
+        if self.accepted:
+            if self.final_verdict != _FINAL_VERDICT:
+                raise ReleaseCandidateFinalSignoffError("final_verdict_invalid")
+            if not _RELEASE_TAG_PATTERN.match(self.release_tag_proposal):
+                raise ReleaseCandidateFinalSignoffError("release_tag_proposal_invalid")
+            if self.rollback_recovery_link != _REQUIRED_DOC_LINKS["rollback_recovery_link"]:
+                raise ReleaseCandidateFinalSignoffError("rollback_recovery_link_invalid")
+            if self.e2e_acceptance_link != _REQUIRED_DOC_LINKS["e2e_acceptance_link"]:
+                raise ReleaseCandidateFinalSignoffError("e2e_acceptance_link_invalid")
+            if self.security_hardening_link != _REQUIRED_DOC_LINKS["security_hardening_link"]:
+                raise ReleaseCandidateFinalSignoffError("security_hardening_link_invalid")
         _install_or_verify_hash(
             self,
             "receipt_hash",

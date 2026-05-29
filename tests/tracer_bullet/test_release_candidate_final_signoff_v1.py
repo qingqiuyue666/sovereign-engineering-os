@@ -229,6 +229,31 @@ class ReleaseCandidateFinalSignoffV1Tests(unittest.TestCase):
                 self.assertFalse(receipt.accepted)
                 self.assertIn(expected_failure, receipt.failures)
 
+    def test_rejects_contradictory_verdict_tag_and_links_without_raising(self) -> None:
+        cases = (
+            ("verdict", {"final_verdict": "DO_NOT_MERGE"}, "final_verdict_ready_required"),
+            ("tag", {"release_tag_proposal": "latest"}, "release_tag_proposal_invalid"),
+            (
+                "link",
+                {"security_hardening_link": "docs/runbooks/missing.md"},
+                "security_hardening_link_invalid",
+            ),
+        )
+        for label, patch, expected_failure in cases:
+            with self.subTest(label=label):
+                evidence = _complete_evidence()
+                evidence.update(patch)
+
+                with tempfile.TemporaryDirectory() as tempdir:
+                    receipt = FileBackedReleaseCandidateFinalSignoff(runtime_root=tempdir).close(
+                        evidence,
+                        observed_at=OBSERVED_AT,
+                    )
+
+                self.assertFalse(receipt.accepted)
+                self.assertIn(expected_failure, receipt.failures)
+                self.assertNotEqual(receipt.wal_record_hash, ZERO_HASH)
+
     def test_source_has_no_external_authority_imports_and_docs_are_linked(self) -> None:
         source = SOURCE_PATH.read_text(encoding="utf-8")
         tree = ast.parse(source)
