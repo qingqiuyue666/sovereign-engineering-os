@@ -212,6 +212,21 @@ FAILURE_BUNDLE_CRITICAL_KINDS: dict[str, _CriticalFailureSpec] = {
         quarantine_required=False,
         required_contexts=("worker_failure_context_hash", "watchdog_failure_context_hash"),
     ),
+    "execution_boundary_failure": _CriticalFailureSpec(
+        failure_stage="execution_boundary",
+        failure_code="controlled_execution_boundary_failed",
+        failure_class="execution_failure",
+        severity="policy_blocked",
+        retry_decision="manual_review_required",
+        quarantine_required=True,
+        required_contexts=(
+            "task_context_hash",
+            "job_context_hash",
+            "run_context_hash",
+            "wal_pointer_hash",
+            "artifact_ids_hash",
+        ),
+    ),
     "watchdog_resource_breach": _CriticalFailureSpec(
         failure_stage="watchdog",
         failure_code="watchdog_resource_breach",
