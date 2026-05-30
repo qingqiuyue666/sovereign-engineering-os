@@ -3,7 +3,7 @@
 Repository URL: https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os
 
 Canonical local repository path:
-`/Users/qqy/Documents/GitHub/sovereign-engineering-os`
+`<repo-root>`
 
 Branch: `feat/task-graph-local-asset-scan-node-v1`
 

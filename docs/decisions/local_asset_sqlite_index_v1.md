@@ -4,7 +4,7 @@ Verdict: `APPROVE_NARROW_LOCAL_ASSET_SQLITE_INDEX_V1`
 
 Repository: `https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os`
 
-Canonical local repository: `/Users/qqy/Documents/GitHub/sovereign-engineering-os`
+Canonical local repository: `<repo-root>`
 
 Branch: `feat/local-asset-sqlite-index-v1`
 

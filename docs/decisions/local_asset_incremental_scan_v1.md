@@ -2,7 +2,7 @@
 
 Repository: `https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os`
 
-Canonical local repository: `/Users/qqy/Documents/GitHub/sovereign-engineering-os`
+Canonical local repository: `<repo-root>`
 
 Branch: `feat/local-asset-incremental-scan-v1`
 

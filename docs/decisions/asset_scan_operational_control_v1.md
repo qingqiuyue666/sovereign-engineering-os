@@ -5,7 +5,7 @@ Verdict: `APPROVE_NARROW_ASSET_SCAN_OPERATIONAL_CONTROL_V1`
 ## Repository
 
 - URL: `https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os`
-- Canonical local repository: `/Users/qqy/Documents/GitHub/sovereign-engineering-os`
+- Canonical local repository: `<repo-root>`
 - Branch: `feat/asset-scan-operational-control-v1`
 
 ## Objective
