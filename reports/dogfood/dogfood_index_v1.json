@@ -1,0 +1,55 @@
+{
+  "schema_version": "dogfood_index_v1",
+  "external_review_required": true,
+  "global_recognition_claimed": false,
+  "historical_evidence_source": "merged GitHub pull requests and repository commits",
+  "required_categories": [
+    "repository_maturity_readme_docs_hardening",
+    "failure_path_hardening",
+    "installability_reproducibility_hardening",
+    "ai_admission_safety_hardening",
+    "security_supply_chain_threat_model_hardening"
+  ],
+  "records": [
+    {
+      "record_id": "DOGFOOD-REPO-MATURITY-001",
+      "category": "repository_maturity_readme_docs_hardening",
+      "json_path": "reports/dogfood/repository_maturity_readme_docs_hardening_v1.json",
+      "markdown_path": "reports/dogfood/repository_maturity_readme_docs_hardening_v1.md",
+      "pr_url": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/pull/540",
+      "merge_commit": "cc55f3699890c33fce469b0fa776f24e5dd455b7"
+    },
+    {
+      "record_id": "DOGFOOD-FAILURE-PATH-002",
+      "category": "failure_path_hardening",
+      "json_path": "reports/dogfood/failure_path_hardening_v1.json",
+      "markdown_path": "reports/dogfood/failure_path_hardening_v1.md",
+      "pr_url": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/pull/543",
+      "merge_commit": "1809326b68d3a1b2befe14d306be6f027d1acbfa"
+    },
+    {
+      "record_id": "DOGFOOD-INSTALLABILITY-003",
+      "category": "installability_reproducibility_hardening",
+      "json_path": "reports/dogfood/installability_reproducibility_hardening_v1.json",
+      "markdown_path": "reports/dogfood/installability_reproducibility_hardening_v1.md",
+      "pr_url": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/pull/541",
+      "merge_commit": "bbbe7a688f579c807bbd0ee5716f9a82c77adab8"
+    },
+    {
+      "record_id": "DOGFOOD-AI-ADMISSION-004",
+      "category": "ai_admission_safety_hardening",
+      "json_path": "reports/dogfood/ai_admission_safety_hardening_v1.json",
+      "markdown_path": "reports/dogfood/ai_admission_safety_hardening_v1.md",
+      "pr_url": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/pull/545",
+      "merge_commit": "eb57085b9c1c2bd1a5feffef91feef8b605c0ba4"
+    },
+    {
+      "record_id": "DOGFOOD-SECURITY-SUPPLY-005",
+      "category": "security_supply_chain_threat_model_hardening",
+      "json_path": "reports/dogfood/security_supply_chain_threat_model_hardening_v1.json",
+      "markdown_path": "reports/dogfood/security_supply_chain_threat_model_hardening_v1.md",
+      "pr_url": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/pull/544",
+      "merge_commit": "d6c5da73f4914baa69b58a8638999caa0224ddc6"
+    }
+  ]
+}

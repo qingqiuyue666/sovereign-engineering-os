@@ -1,0 +1,67 @@
+{
+  "schema_version": "dogfood_record_v1",
+  "record_id": "DOGFOOD-INSTALLABILITY-003",
+  "category": "installability_reproducibility_hardening",
+  "historical_evidence_available": true,
+  "task_contract": {
+    "summary": "Add clean-clone, fresh-venv, package-build, and static installability evidence.",
+    "source_refs": [
+      "scripts/clean_clone_observation_smoke_v1.sh",
+      "scripts/fresh_venv_install_smoke_v1.sh",
+      "scripts/package_build_smoke_v1.sh",
+      "scripts/installability_check_v1.py",
+      "tests/tracer_bullet/test_installability_v1.py"
+    ]
+  },
+  "approval_receipt": {
+    "receipt_id": "DOGFOOD-INSTALLABILITY-003-APPROVAL",
+    "approval_boundary": "merge_after_required_checks",
+    "repository_evidence": "Pull request 541 was merged after canonical health validation.",
+    "separate_historical_approval_artifact_available": false
+  },
+  "dry_run_execution_receipt": {
+    "receipt_id": "DOGFOOD-INSTALLABILITY-003-EXECUTION",
+    "dry_run_first": true,
+    "execution_scope": "local reproducibility and packaging smoke evidence",
+    "runtime_expansion_performed": false
+  },
+  "evidence_trace": [
+    "scripts/clean_clone_observation_smoke_v1.sh",
+    "scripts/fresh_venv_install_smoke_v1.sh",
+    "scripts/package_build_smoke_v1.sh",
+    "scripts/installability_check_v1.py",
+    "tests/tracer_bullet/test_installability_v1.py"
+  ],
+  "replay_explain": {
+    "commands": [
+      "python3 scripts/installability_check_v1.py",
+      "bash scripts/package_build_smoke_v1.sh",
+      "make verify",
+      "make ci"
+    ],
+    "expected_result": "pass"
+  },
+  "pr_link_or_commit_reference": {
+    "pr_url": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/pull/541",
+    "merge_commit": "bbbe7a688f579c807bbd0ee5716f9a82c77adab8",
+    "merged_at": "2026-05-30T08:32:50Z"
+  },
+  "validation_result": {
+    "status": "passed",
+    "commands": [
+      "python3 scripts/installability_check_v1.py",
+      "make verify",
+      "make ci"
+    ]
+  },
+  "post_merge_validation": {
+    "status": "passed",
+    "main_commit": "bbbe7a688f579c807bbd0ee5716f9a82c77adab8",
+    "github_actions_run": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/actions/runs/26679329717"
+  },
+  "outcome": "merged_to_main",
+  "residual_risk": [
+    "Smoke coverage is local and not a platform matrix."
+  ],
+  "fabrication_guard": "Record is based on merged PR and commit evidence; unavailable private approval artifacts are not invented."
+}

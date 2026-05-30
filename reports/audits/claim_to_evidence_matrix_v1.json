@@ -237,6 +237,36 @@
         "globally recognized",
         "externally certified"
       ]
+    },
+    {
+      "claim_id": "CLAIM-SEOS-DOGFOOD-010",
+      "claim": "Real repository-maintenance dogfood records cover five readiness categories.",
+      "allowed_public_wording": "SEOS includes dogfood records for real merged repository-maintenance tasks across five readiness categories.",
+      "evidence_refs": [
+        "reports/dogfood/dogfood_index_v1.json",
+        "reports/dogfood/dogfood_index_v1.md",
+        "reports/dogfood/repository_maturity_readme_docs_hardening_v1.json",
+        "reports/dogfood/failure_path_hardening_v1.json",
+        "reports/dogfood/installability_reproducibility_hardening_v1.json",
+        "reports/dogfood/ai_admission_safety_hardening_v1.json",
+        "reports/dogfood/security_supply_chain_threat_model_hardening_v1.json",
+        "scripts/dogfood_evidence_check_v1.py",
+        "tests/tracer_bullet/test_dogfood_evidence_v1.py"
+      ],
+      "validation_refs": [
+        "python3 scripts/dogfood_evidence_check_v1.py",
+        "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.tracer_bullet.test_dogfood_evidence_v1"
+      ],
+      "status": "supported_by_repository_evidence",
+      "limitations": [
+        "Dogfood records are based on merged PR and commit evidence.",
+        "They do not invent unavailable separate approval artifacts."
+      ],
+      "forbidden_wording": [
+        "global recognition confirmed",
+        "globally recognized",
+        "externally certified"
+      ]
     }
   ]
 }
