@@ -1,0 +1,7 @@
+{
+  "dry_run_default": true,
+  "id": "TEMPLATE_ZBRUSH_SCULPT_HANDOFF",
+  "private_payload_required": false,
+  "schema_version": "seos_creative_pipeline_v3",
+  "template": "zbrush_sculpt_handoff"
+}

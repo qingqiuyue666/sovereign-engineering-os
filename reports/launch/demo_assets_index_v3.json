@@ -1,0 +1,7 @@
+{
+  "assets": [
+    "examples/public_demo_assets/demo_asset_manifest.json"
+  ],
+  "schema_version": "seos_creative_pipeline_v3",
+  "status": "ready"
+}

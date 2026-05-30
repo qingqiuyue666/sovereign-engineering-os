@@ -129,6 +129,27 @@ seos ai repo-map --workspace .seos-workspace
 seos ai token-roi TASK_ID --workspace .seos-workspace
 ```
 
+## SEOS Creative Pipeline
+
+SEOS Creative Pipeline is a local-first AI/VFX/3D/video workflow control plane.
+It tracks assets, shots, DCC adapters, AI generations, render jobs, approvals,
+evidence, and replay across ComfyUI, Blender, Houdini, ZBrush, Unreal Engine,
+DaVinci Resolve, and After Effects.
+
+Fixture-backed creative quickstart:
+
+```bash
+python3 seos.py creative health --json
+python3 seos.py creative scan-assets --json
+python3 seos.py creative adapter list --json
+python3 seos.py creative dashboard build --json
+```
+
+The creative pipeline defaults to read-only scans, dry-run adapter plans,
+fixture demos, and public/private separation. Real DCC execution, paid assets,
+and external adoption signals require real local evidence or verified external
+URLs; this repository does not claim external adoption.
+
 ## Validation
 
 Baseline validation:
@@ -136,6 +157,7 @@ Baseline validation:
 ```bash
 python3 scripts/observation_check_v1.py
 python3 scripts/identity_boundary_check_v1.py
+python3 scripts/creative_total_check_v3.py
 PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.tracer_bullet.test_identity_boundary_v1
 make ci
 ```

@@ -1,0 +1,74 @@
+{
+  "compatibility": "v3 schemas are additive and fixture-backed; future migrations must preserve public/private flags.",
+  "deprecation_policy": "Do not remove v3 fields without a migration note.",
+  "generated_at": "2026-05-31T00:00:00Z",
+  "schema_freeze_policy": "Public release candidates freeze required fields.",
+  "schema_version": "seos_creative_pipeline_v3",
+  "schemas": [
+    {
+      "id_prefix": "SHOT",
+      "name": "shot_contract_v3",
+      "path": "creative/schemas/shot_contract_v3.json"
+    },
+    {
+      "id_prefix": "AST",
+      "name": "asset_contract_v3",
+      "path": "creative/schemas/asset_contract_v3.json"
+    },
+    {
+      "id_prefix": "ARC",
+      "name": "archive_group_contract_v3",
+      "path": "creative/schemas/archive_group_contract_v3.json"
+    },
+    {
+      "id_prefix": "RDR",
+      "name": "render_job_contract_v3",
+      "path": "creative/schemas/render_job_contract_v3.json"
+    },
+    {
+      "id_prefix": "SIM",
+      "name": "sim_job_contract_v3",
+      "path": "creative/schemas/sim_job_contract_v3.json"
+    },
+    {
+      "id_prefix": "SCP",
+      "name": "sculpt_job_contract_v3",
+      "path": "creative/schemas/sculpt_job_contract_v3.json"
+    },
+    {
+      "id_prefix": "AIG",
+      "name": "ai_generation_job_contract_v3",
+      "path": "creative/schemas/ai_generation_job_contract_v3.json"
+    },
+    {
+      "id_prefix": "ADP",
+      "name": "dcc_adapter_contract_v3",
+      "path": "creative/schemas/dcc_adapter_contract_v3.json"
+    },
+    {
+      "id_prefix": "ADP",
+      "name": "adapter_result_contract_v3",
+      "path": "creative/schemas/adapter_result_contract_v3.json"
+    },
+    {
+      "id_prefix": "EVD",
+      "name": "creative_evidence_contract_v3",
+      "path": "creative/schemas/creative_evidence_contract_v3.json"
+    },
+    {
+      "id_prefix": "ADP",
+      "name": "software_discovery_contract_v3",
+      "path": "creative/schemas/software_discovery_contract_v3.json"
+    },
+    {
+      "id_prefix": "AST",
+      "name": "license_metadata_contract_v3",
+      "path": "creative/schemas/license_metadata_contract_v3.json"
+    },
+    {
+      "id_prefix": "EXTSIG",
+      "name": "external_adoption_signal_contract_v3",
+      "path": "creative/schemas/external_adoption_signal_contract_v3.json"
+    }
+  ]
+}

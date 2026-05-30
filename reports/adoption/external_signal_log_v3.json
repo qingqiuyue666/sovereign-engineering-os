@@ -1,0 +1,7 @@
+{
+  "external_adoption_confirmed": false,
+  "schema_version": "seos_creative_pipeline_v3",
+  "signals": [],
+  "status": "ready_for_real_signals",
+  "terminal_state": "EXTERNAL_ADOPTION_LOOP_ACTIVE_WAITING_FOR_REAL_USERS"
+}
