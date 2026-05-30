@@ -206,6 +206,37 @@
         "globally recognized",
         "externally certified"
       ]
+    },
+    {
+      "claim_id": "CLAIM-SEOS-AIADMISSION-009",
+      "claim": "AI-provider admission boundaries are documented without enabling live execution.",
+      "allowed_public_wording": "SEOS includes documented AI-provider admission boundaries for external review input.",
+      "evidence_refs": [
+        "docs/ai_admission/ai_provider_admission_policy_v1.md",
+        "docs/ai_admission/proposal_first_policy_v1.md",
+        "docs/ai_admission/provider_secret_ref_policy_v1.md",
+        "docs/ai_admission/context_redaction_policy_v1.md",
+        "docs/ai_admission/token_budget_policy_v1.md",
+        "docs/ai_admission/model_output_artifact_policy_v1.md",
+        "docs/ai_admission/human_approval_before_patch_policy_v1.md",
+        "docs/ai_admission/provider_failure_policy_v1.md",
+        "scripts/ai_admission_check_v1.py",
+        "tests/tracer_bullet/test_ai_provider_admission_safety_v1.py"
+      ],
+      "validation_refs": [
+        "python3 scripts/ai_admission_check_v1.py",
+        "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.tracer_bullet.test_ai_provider_admission_safety_v1"
+      ],
+      "status": "supported_by_repository_evidence",
+      "limitations": [
+        "Admission policy is repository-local review evidence.",
+        "It does not authorize live provider execution or AI-applied patches."
+      ],
+      "forbidden_wording": [
+        "global recognition confirmed",
+        "globally recognized",
+        "externally certified"
+      ]
     }
   ]
 }
