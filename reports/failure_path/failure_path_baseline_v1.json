@@ -1,0 +1,108 @@
+{
+  "schema_version": "failure_path_baseline_v1",
+  "global_recognition_claimed": false,
+  "status": "fail_closed_adversarial_baseline_recorded",
+  "cases": [
+    {
+      "case_id": "missing_task",
+      "risk": "missing task reference",
+      "expected_safe_result": "nonzero exit and no execution receipt"
+    },
+    {
+      "case_id": "bad_workspace",
+      "risk": "uninitialized workspace",
+      "expected_safe_result": "nonzero exit with workspace error"
+    },
+    {
+      "case_id": "duplicate_task_id",
+      "risk": "duplicate task id",
+      "expected_safe_result": "second create fails closed and does not overwrite"
+    },
+    {
+      "case_id": "missing_approval",
+      "risk": "run before approval",
+      "expected_safe_result": "nonzero exit with approval required"
+    },
+    {
+      "case_id": "rejected_task_cannot_run",
+      "risk": "rejected task run attempt",
+      "expected_safe_result": "nonzero exit with task rejected"
+    },
+    {
+      "case_id": "corrupted_receipt",
+      "risk": "malformed receipt JSON",
+      "expected_safe_result": "receipt read fails closed"
+    },
+    {
+      "case_id": "corrupted_observation_json",
+      "risk": "malformed observation JSON",
+      "expected_safe_result": "JSON parse fails closed"
+    },
+    {
+      "case_id": "missing_evidence",
+      "risk": "missing evidence reference",
+      "expected_safe_result": "evidence command exits nonzero"
+    },
+    {
+      "case_id": "replay_impossible_not_reconstructable",
+      "risk": "incomplete replay",
+      "expected_safe_result": "replay does not claim reconstructable"
+    },
+    {
+      "case_id": "tag_mismatch",
+      "risk": "wrong expected tag target",
+      "expected_safe_result": "mismatch is detectable without moving the tag"
+    },
+    {
+      "case_id": "network_failure_no_pass",
+      "risk": "failed network-like command",
+      "expected_safe_result": "failed command cannot print PASSED"
+    },
+    {
+      "case_id": "interrupted_script_no_success_marker",
+      "risk": "interrupted script",
+      "expected_safe_result": "success marker is absent after interruption"
+    },
+    {
+      "case_id": "invalid_cli_args",
+      "risk": "bad CLI arguments",
+      "expected_safe_result": "CLI exits nonzero"
+    },
+    {
+      "case_id": "fake_pass_log_rejected",
+      "risk": "fake PASS log",
+      "expected_safe_result": "failed command log is not accepted as success"
+    },
+    {
+      "case_id": "path_leak",
+      "risk": "evidence path outside workspace",
+      "expected_safe_result": "path is rejected"
+    },
+    {
+      "case_id": "shell_metacharacters",
+      "risk": "metacharacters in identifier",
+      "expected_safe_result": "identifier is rejected"
+    },
+    {
+      "case_id": "path_traversal",
+      "risk": "traversal in identifier",
+      "expected_safe_result": "identifier is rejected"
+    },
+    {
+      "case_id": "unicode_emoji_long_fields",
+      "risk": "Unicode, emoji, and long objective fields",
+      "expected_safe_result": "data remains data and does not grant execution"
+    },
+    {
+      "case_id": "prompt_injection_no_authority",
+      "risk": "objective asks to bypass approval",
+      "expected_safe_result": "text does not become executable authority"
+    }
+  ],
+  "validation_commands": [
+    "bash scripts/failure_path_smoke_v1.sh",
+    "python3 scripts/adversarial_smoke_v1.py",
+    "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.tracer_bullet.test_failure_path_hardening_v1",
+    "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/adversarial"
+  ]
+}
