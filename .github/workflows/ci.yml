@@ -50,6 +50,8 @@ jobs:
         run: python scripts/reliability_benchmark_v1.py
       - name: Run schema compatibility static check
         run: python scripts/schema_compatibility_check_v1.py
+      - name: Run external audit packet static check
+        run: python scripts/external_audit_packet_check_v1.py
       - name: Run failure path smoke
         run: bash scripts/failure_path_smoke_v1.sh
       - name: Run adversarial smoke
