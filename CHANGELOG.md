@@ -15,6 +15,9 @@ external recognition or final signoff.
 - Control-plane architecture document for task, approval, receipt, evidence,
   replay, failure, and release-check objects.
 - `scripts/identity_boundary_check_v1.py` and matching tracer-bullet tests.
+- Reproducibility and installability smoke scripts for clean clone, fresh venv,
+  and packaging entrypoint checks.
+- `scripts/installability_check_v1.py` and matching tracer-bullet tests.
 
 ### Changed
 
