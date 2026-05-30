@@ -267,6 +267,41 @@
         "globally recognized",
         "externally certified"
       ]
+    },
+    {
+      "claim_id": "CLAIM-SEOS-RELIABILITY-011",
+      "claim": "Repository-local reliability and operations evidence covers the Wave 8 baseline.",
+      "allowed_public_wording": "SEOS includes repository-local reliability, operations, and schema compatibility evidence for external review input.",
+      "evidence_refs": [
+        "reports/reliability/reliability_benchmark_v1.json",
+        "docs/reliability/reliability_baseline_v1.md",
+        "docs/operations/incident_response_v1.md",
+        "docs/operations/rollback_runbook_v1.md",
+        "docs/operations/maintenance_policy_v1.md",
+        "docs/operations/workspace_cleanup_policy_v1.md",
+        "docs/operations/interrupted_run_policy_v1.md",
+        "docs/compatibility/schema_versioning_policy_v1.md",
+        "scripts/reliability_benchmark_v1.py",
+        "scripts/schema_compatibility_check_v1.py",
+        "tests/tracer_bullet/test_operational_stability_v1.py",
+        "tests/tracer_bullet/test_schema_compatibility_policy_v1.py"
+      ],
+      "validation_refs": [
+        "python3 scripts/reliability_benchmark_v1.py",
+        "python3 scripts/schema_compatibility_check_v1.py",
+        "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.tracer_bullet.test_operational_stability_v1",
+        "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.tracer_bullet.test_schema_compatibility_policy_v1"
+      ],
+      "status": "supported_by_repository_evidence",
+      "limitations": [
+        "The baseline is repository-local engineering evidence.",
+        "It does not replace independent review or long-duration operating evidence."
+      ],
+      "forbidden_wording": [
+        "global recognition confirmed",
+        "globally recognized",
+        "externally certified"
+      ]
     }
   ]
 }
