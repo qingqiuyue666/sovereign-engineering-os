@@ -18,7 +18,7 @@ jobs:
         with:
           python-version: "3.14"
       - name: Install Python dependencies
-        run: python -m pip install "openpyxl>=3.1,<4"
+        run: python -m pip install "openpyxl>=3.1,<4" "setuptools>=69"
       - name: Show Python version
         run: python --version
       - name: Run observation invariant check
