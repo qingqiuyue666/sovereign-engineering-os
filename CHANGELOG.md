@@ -31,6 +31,12 @@ external recognition or final signoff.
   prompt-injection text.
 - `scripts/failure_path_smoke_v1.sh`, `scripts/adversarial_smoke_v1.py`, and
   failure-path baseline reports.
+- Security and supply-chain evidence docs covering threat model, abuse cases,
+  security controls, secret/context safety, operator review, dependency policy,
+  GitHub Actions policy, provenance/checksum policy, and SBOM strategy.
+- `scripts/security_control_check_v1.py`, `scripts/supply_chain_check_v1.py`,
+  `scripts/secret_context_safety_check_v1.py`, `scripts/release_invariant_check_v1.py`,
+  and matching tracer-bullet tests.
 
 ### Changed
 
@@ -48,6 +54,7 @@ external recognition or final signoff.
 - No autonomous AI patching.
 - No commercial SaaS surface.
 - No public GitHub Release publication.
+- No change to the immutable `v0.1.0-rc3` tag.
 
 ## v0.1.0-rc3
 

@@ -177,6 +177,35 @@
         "globally recognized",
         "externally certified"
       ]
+    },
+    {
+      "claim_id": "CLAIM-SEOS-SUPPLY-008",
+      "claim": "Security and supply-chain evidence is documented for external audit input.",
+      "allowed_public_wording": "SEOS includes documented security and supply-chain controls for external review input.",
+      "evidence_refs": [
+        "docs/security/security_control_matrix_v1.md",
+        "docs/security/threat_model_v1.md",
+        "docs/supply_chain/supply_chain_integrity_policy_v1.md",
+        "docs/supply_chain/dependency_policy_v1.md",
+        "scripts/security_control_check_v1.py",
+        "scripts/supply_chain_check_v1.py"
+      ],
+      "validation_refs": [
+        "python3 scripts/security_control_check_v1.py",
+        "python3 scripts/supply_chain_check_v1.py",
+        "python3 scripts/secret_context_safety_check_v1.py",
+        "python3 scripts/release_invariant_check_v1.py"
+      ],
+      "status": "supported_by_repository_evidence",
+      "limitations": [
+        "Policies are repository-local review evidence.",
+        "They do not replace independent security or supply-chain audit."
+      ],
+      "forbidden_wording": [
+        "global recognition confirmed",
+        "globally recognized",
+        "externally certified"
+      ]
     }
   ]
 }

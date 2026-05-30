@@ -6,6 +6,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   canonical-health:
     runs-on: ubuntu-latest
@@ -31,6 +34,14 @@ jobs:
         run: python scripts/contract_check_v1.py
       - name: Run claim-to-evidence static check
         run: python scripts/claim_to_evidence_check_v1.py
+      - name: Run security control static check
+        run: python scripts/security_control_check_v1.py
+      - name: Run supply-chain static check
+        run: python scripts/supply_chain_check_v1.py
+      - name: Run secret/context safety static check
+        run: python scripts/secret_context_safety_check_v1.py
+      - name: Run release invariant static check
+        run: python scripts/release_invariant_check_v1.py
       - name: Run failure path smoke
         run: bash scripts/failure_path_smoke_v1.sh
       - name: Run adversarial smoke

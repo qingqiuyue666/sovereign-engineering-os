@@ -17,7 +17,7 @@
 .PHONY: test-source-reliability test-osint-task-contract test-macro-regime-contract test-asset-mapping-contract test-domain-pipeline-contracts
 .PHONY: test-dashboard-model test-run-summary-model test-security-status-model test-dashboard-contracts
 .PHONY: test-v12-foundation-progress-audit test-v12-foundation
-.PHONY: installability-check test-installability package-build-smoke clean-clone-smoke install-smoke contract-check claim-to-evidence-check test-contracts test-claim-to-evidence failure-path-smoke adversarial-smoke test-failure-path-hardening test-adversarial smoke verify final-audit-check
+.PHONY: installability-check test-installability package-build-smoke clean-clone-smoke install-smoke contract-check claim-to-evidence-check test-contracts test-claim-to-evidence failure-path-smoke adversarial-smoke test-failure-path-hardening test-adversarial security-control-check supply-chain-check secret-context-safety-check release-invariant-check test-security-control-matrix test-supply-chain-integrity test-secret-context-safety test-release-invariant smoke verify final-audit-check
 
 PYTHON ?= python3
 
@@ -81,7 +81,31 @@ test-failure-path-hardening:
 test-adversarial:
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest discover -s tests/adversarial -v
 
-smoke: public-grade-check installability-check package-build-smoke test-installability contract-check claim-to-evidence-check test-contracts test-claim-to-evidence failure-path-smoke adversarial-smoke test-failure-path-hardening test-adversarial
+security-control-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/security_control_check_v1.py
+
+supply-chain-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/supply_chain_check_v1.py
+
+secret-context-safety-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/secret_context_safety_check_v1.py
+
+release-invariant-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/release_invariant_check_v1.py
+
+test-security-control-matrix:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_security_control_matrix_v1 -v
+
+test-supply-chain-integrity:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_supply_chain_integrity_v1 -v
+
+test-secret-context-safety:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_secret_context_safety_v1 -v
+
+test-release-invariant:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_release_invariant_v1 -v
+
+smoke: public-grade-check installability-check package-build-smoke test-installability contract-check claim-to-evidence-check test-contracts test-claim-to-evidence failure-path-smoke adversarial-smoke test-failure-path-hardening test-adversarial security-control-check supply-chain-check secret-context-safety-check release-invariant-check test-security-control-matrix test-supply-chain-integrity test-secret-context-safety test-release-invariant
 
 verify: smoke
 
