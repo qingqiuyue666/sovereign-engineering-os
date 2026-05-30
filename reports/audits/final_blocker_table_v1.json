@@ -1,0 +1,24 @@
+{
+  "schema_version": "final_blocker_table_v1",
+  "external_review_required": true,
+  "global_recognition_claimed": false,
+  "final_verdict": "GLOBAL_RECOGNITION_READINESS_READY_FOR_EXTERNAL_REVIEW",
+  "blockers_for_external_review_packet": [],
+  "blockers_for_final_recognition_analysis": [
+    {
+      "blocker_id": "FB-001",
+      "title": "External verification is still required",
+      "status": "open"
+    },
+    {
+      "blocker_id": "FB-002",
+      "title": "Real-world 30-90 day operation evidence is still required for global recognition",
+      "status": "open"
+    },
+    {
+      "blocker_id": "FB-003",
+      "title": "Independent security and supply-chain review are still required",
+      "status": "open"
+    }
+  ]
+}

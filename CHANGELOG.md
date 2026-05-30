@@ -55,6 +55,10 @@ external recognition or final signoff.
   changes.
 - `scripts/reliability_benchmark_v1.py`,
   `scripts/schema_compatibility_check_v1.py`, and matching tracer-bullet tests.
+- External audit packet, independent verification runbook, red-team checklist,
+  accepted risk register, residual risk register, and final blocker table for
+  external review handoff.
+- `scripts/external_audit_packet_check_v1.py` and matching tracer-bullet tests.
 
 ### Changed
 

@@ -302,6 +302,39 @@
         "globally recognized",
         "externally certified"
       ]
+    },
+    {
+      "claim_id": "CLAIM-SEOS-AUDITPACKET-012",
+      "claim": "The external review packet assembles bounded readiness evidence and retained caveats.",
+      "allowed_public_wording": "SEOS includes an external review packet that assembles bounded repository evidence and retained caveats.",
+      "evidence_refs": [
+        "docs/audits/external_audit_packet_v1.md",
+        "reports/audits/external_audit_packet_v1.json",
+        "docs/audits/independent_verification_runbook_v1.md",
+        "docs/audits/red_team_checklist_v1.md",
+        "docs/audits/accepted_risk_register_v1.md",
+        "reports/audits/accepted_risk_register_v1.json",
+        "docs/audits/residual_risk_register_v1.md",
+        "reports/audits/residual_risk_register_v1.json",
+        "docs/audits/final_blocker_table_v1.md",
+        "reports/audits/final_blocker_table_v1.json",
+        "scripts/external_audit_packet_check_v1.py",
+        "tests/tracer_bullet/test_external_audit_packet_v1.py"
+      ],
+      "validation_refs": [
+        "python3 scripts/external_audit_packet_check_v1.py",
+        "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.tracer_bullet.test_external_audit_packet_v1"
+      ],
+      "status": "requires_external_review",
+      "limitations": [
+        "The packet is a handoff artifact for independent review.",
+        "It does not confirm external recognition or final signoff."
+      ],
+      "forbidden_wording": [
+        "global recognition confirmed",
+        "globally recognized",
+        "externally certified"
+      ]
     }
   ]
 }

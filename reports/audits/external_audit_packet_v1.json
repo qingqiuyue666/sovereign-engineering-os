@@ -1,0 +1,176 @@
+{
+  "schema_version": "external_audit_packet_v1",
+  "packet_id": "seos_external_review_packet_v1",
+  "packet_status": "ready_for_external_review_packet",
+  "external_review_required": true,
+  "global_recognition_claimed": false,
+  "external_recognition_confirmed": false,
+  "external_verification_required": true,
+  "real_world_30_90_day_operation_evidence_required_for_global_recognition": true,
+  "codex_self_certifying_final_signoff": false,
+  "current_main_head_at_packet_generation": "260f05b2956d0158cee49472c815c04aa0fb7bbc",
+  "release_candidate_tag": {
+    "name": "v0.1.0-rc3",
+    "target_commit": "9a363f95b85602ffc598db463dc6181a9bbbdf3c",
+    "moved_or_recreated_by_packet": false
+  },
+  "wave_0_preflight": {
+    "pr_required": false,
+    "status": "completed_as_preflight"
+  },
+  "wave_prs": [
+    {
+      "wave": 1,
+      "pr_number": 540,
+      "pr_url": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/pull/540",
+      "merge_commit": "cc55f3699890c33fce469b0fa776f24e5dd455b7",
+      "purpose": "identity and repository maturity"
+    },
+    {
+      "wave": 2,
+      "pr_number": 541,
+      "pr_url": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/pull/541",
+      "merge_commit": "bbbe7a688f579c807bbd0ee5716f9a82c77adab8",
+      "purpose": "reproducibility and installability"
+    },
+    {
+      "wave": 3,
+      "pr_number": 542,
+      "pr_url": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/pull/542",
+      "merge_commit": "c502c402b0a63e1cd408eb38a7dc81ca427211bd",
+      "purpose": "governance contracts and claim matrix"
+    },
+    {
+      "wave": 4,
+      "pr_number": 543,
+      "pr_url": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/pull/543",
+      "merge_commit": "1809326b68d3a1b2befe14d306be6f027d1acbfa",
+      "purpose": "fail-closed and adversarial evidence"
+    },
+    {
+      "wave": 5,
+      "pr_number": 544,
+      "pr_url": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/pull/544",
+      "merge_commit": "d6c5da73f4914baa69b58a8638999caa0224ddc6",
+      "purpose": "security and supply-chain evidence"
+    },
+    {
+      "wave": 6,
+      "pr_number": 545,
+      "pr_url": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/pull/545",
+      "merge_commit": "eb57085b9c1c2bd1a5feffef91feef8b605c0ba4",
+      "purpose": "AI admission safety evidence"
+    },
+    {
+      "wave": 7,
+      "pr_number": 546,
+      "pr_url": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/pull/546",
+      "merge_commit": "68c7b2741e5b779bff600ce584dcb0ac9d3b5ba7",
+      "purpose": "dogfood evidence"
+    },
+    {
+      "wave": 8,
+      "pr_number": 547,
+      "pr_url": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/pull/547",
+      "merge_commit": "260f05b2956d0158cee49472c815c04aa0fb7bbc",
+      "purpose": "reliability and operations evidence"
+    },
+    {
+      "wave": 9,
+      "pr_number": 548,
+      "pr_url": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/pull/548",
+      "merge_commit": "assigned_after_merge",
+      "purpose": "external audit dossier"
+    }
+  ],
+  "validation_commands": [
+    "git rev-parse HEAD",
+    "git rev-parse 'v0.1.0-rc3^{}'",
+    "python3 scripts/observation_check_v1.py",
+    "python3 scripts/identity_boundary_check_v1.py",
+    "python3 scripts/installability_check_v1.py",
+    "python3 scripts/contract_check_v1.py",
+    "python3 scripts/claim_to_evidence_check_v1.py",
+    "python3 scripts/security_control_check_v1.py",
+    "python3 scripts/supply_chain_check_v1.py",
+    "python3 scripts/secret_context_safety_check_v1.py",
+    "python3 scripts/release_invariant_check_v1.py",
+    "python3 scripts/ai_admission_check_v1.py",
+    "python3 scripts/dogfood_evidence_check_v1.py",
+    "python3 scripts/reliability_benchmark_v1.py",
+    "python3 scripts/schema_compatibility_check_v1.py",
+    "python3 scripts/external_audit_packet_check_v1.py",
+    "make verify",
+    "make ci"
+  ],
+  "claim_to_evidence_matrix_ref": "reports/audits/claim_to_evidence_matrix_v1.json",
+  "evidence_groups": {
+    "engineering_evidence": [
+      "README.md",
+      "docs/contracts/task_contract_v1.md",
+      "scripts/installability_check_v1.py",
+      "scripts/contract_check_v1.py",
+      "scripts/failure_path_smoke_v1.sh"
+    ],
+    "security_evidence": [
+      "SECURITY.md",
+      "docs/security/security_control_matrix_v1.md",
+      "docs/security/threat_model_v1.md",
+      "scripts/security_control_check_v1.py",
+      "scripts/secret_context_safety_check_v1.py"
+    ],
+    "supply_chain_evidence": [
+      "docs/supply_chain/supply_chain_integrity_policy_v1.md",
+      "docs/supply_chain/dependency_policy_v1.md",
+      "docs/supply_chain/github_actions_policy_v1.md",
+      "scripts/supply_chain_check_v1.py",
+      "scripts/release_invariant_check_v1.py"
+    ],
+    "reliability_evidence": [
+      "reports/reliability/reliability_benchmark_v1.json",
+      "docs/reliability/reliability_baseline_v1.md",
+      "scripts/reliability_benchmark_v1.py",
+      "docs/operations/incident_response_v1.md"
+    ],
+    "dogfooding_evidence": [
+      "reports/dogfood/dogfood_index_v1.json",
+      "reports/dogfood/dogfood_index_v1.md",
+      "scripts/dogfood_evidence_check_v1.py"
+    ],
+    "ai_governance_evidence": [
+      "docs/ai_admission/ai_provider_admission_policy_v1.md",
+      "docs/ai_admission/proposal_first_policy_v1.md",
+      "docs/ai_admission/provider_secret_ref_policy_v1.md",
+      "scripts/ai_admission_check_v1.py"
+    ]
+  },
+  "review_refs": {
+    "accepted_risk_register": "reports/audits/accepted_risk_register_v1.json",
+    "residual_risk_register": "reports/audits/residual_risk_register_v1.json",
+    "final_blocker_table": "reports/audits/final_blocker_table_v1.json",
+    "red_team_checklist": "docs/audits/red_team_checklist_v1.md",
+    "independent_verification_runbook": "docs/audits/independent_verification_runbook_v1.md"
+  },
+  "known_limitations": [
+    "Repository-local evidence still requires independent external review.",
+    "Real-world 30-90 day operation evidence is still required for global recognition.",
+    "No live AI provider execution is admitted by this packet.",
+    "No OS sandbox, RPA, or computer-control claim is made.",
+    "No public GitHub Release is published by this packet."
+  ],
+  "non_goals": [
+    "OS-level sandboxing",
+    "RPA or computer-control automation",
+    "live AI provider execution",
+    "secret custody",
+    "public release publication",
+    "recognition certification"
+  ],
+  "explicit_statements": [
+    "External recognition has not yet been confirmed.",
+    "External verification is still required.",
+    "Real-world 30-90 day operation evidence is still required for global recognition.",
+    "Codex is not self-certifying final signoff."
+  ],
+  "final_verdict": "GLOBAL_RECOGNITION_READINESS_READY_FOR_EXTERNAL_REVIEW"
+}
