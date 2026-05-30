@@ -17,7 +17,7 @@
 .PHONY: test-source-reliability test-osint-task-contract test-macro-regime-contract test-asset-mapping-contract test-domain-pipeline-contracts
 .PHONY: test-dashboard-model test-run-summary-model test-security-status-model test-dashboard-contracts
 .PHONY: test-v12-foundation-progress-audit test-v12-foundation
-.PHONY: installability-check test-installability package-build-smoke clean-clone-smoke install-smoke contract-check claim-to-evidence-check test-contracts test-claim-to-evidence failure-path-smoke adversarial-smoke test-failure-path-hardening test-adversarial security-control-check security-check supply-chain-check secret-context-safety-check release-invariant-check test-security-control-matrix test-supply-chain-integrity test-secret-context-safety test-release-invariant ai-admission-check test-ai-provider-admission-safety dogfood-evidence-check dogfood-check test-dogfood-evidence reliability-benchmark schema-compatibility-check test-schema-compatibility-policy test-operational-stability external-audit-check test-external-audit-packet smoke verify final-audit-check
+.PHONY: installability-check test-installability package-build-smoke clean-clone-smoke install-smoke contract-check claim-to-evidence-check test-contracts test-claim-to-evidence failure-path-smoke adversarial-smoke test-failure-path-hardening test-adversarial security-control-check security-check supply-chain-check secret-context-safety-check release-invariant-check test-security-control-matrix test-supply-chain-integrity test-secret-context-safety test-release-invariant ai-admission-check test-ai-provider-admission-safety dogfood-evidence-check dogfood-check test-dogfood-evidence reliability-benchmark schema-compatibility-check test-schema-compatibility-policy test-operational-stability external-audit-check test-external-audit-packet independent-verification-check test-independent-verification-execution smoke verify final-audit-check
 
 PYTHON ?= python3
 
@@ -139,11 +139,17 @@ external-audit-check:
 test-external-audit-packet:
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_external_audit_packet_v1 -v
 
+independent-verification-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/independent_verification_report_check_v1.py
+
+test-independent-verification-execution:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_independent_verification_execution_v1 -v
+
 smoke: public-grade-check installability-check package-build-smoke test-installability contract-check claim-to-evidence-check test-contracts test-claim-to-evidence failure-path-smoke adversarial-smoke test-failure-path-hardening test-adversarial security-control-check security-check supply-chain-check secret-context-safety-check release-invariant-check test-security-control-matrix test-supply-chain-integrity test-secret-context-safety test-release-invariant ai-admission-check test-ai-provider-admission-safety dogfood-evidence-check dogfood-check test-dogfood-evidence reliability-benchmark schema-compatibility-check test-schema-compatibility-policy test-operational-stability external-audit-check test-external-audit-packet
 
 verify: smoke
 
-final-audit-check: verify external-audit-check test-external-audit-packet
+final-audit-check: verify external-audit-check test-external-audit-packet independent-verification-check test-independent-verification-execution
 
 test-root-integrity:
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_root_integrity_verifier -v
