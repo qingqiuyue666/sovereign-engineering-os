@@ -1,0 +1,237 @@
+{
+  "execution_id": "codex_run_red_team_execution_v1",
+  "explicit_statements": [
+    "This is not a human third-party external audit.",
+    "External recognition is not confirmed by Codex.",
+    "Global top engineer signoff is not confirmed by Codex.",
+    "30-90 day real-world operation evidence remains required."
+  ],
+  "external_signoff_confirmed": false,
+  "final_status": "CODEX_RUN_RED_TEAM_REVIEW_EXECUTED_NO_BLOCKER_FOUND",
+  "global_recognition_claimed": false,
+  "human_third_party_review": false,
+  "known_limitations": [
+    "This is a Codex-run local red-team execution, not a human third-party review.",
+    "The scenarios exercise repository-local controls and static scans.",
+    "Human or independent external red-team review remains required before final recognition analysis."
+  ],
+  "release_candidate_tag": {
+    "expected_target": "9a363f95b85602ffc598db463dc6181a9bbbdf3c",
+    "moved_or_recreated_by_this_execution": false,
+    "name": "v0.1.0-rc3",
+    "observed_target": "9a363f95b85602ffc598db463dc6181a9bbbdf3c"
+  },
+  "reviewer_type": "Codex-run local red-team execution",
+  "scenario_count": 18,
+  "scenarios": [
+    {
+      "actual_behavior": "returncode=1; success_marker_after_failure=False",
+      "attack_objective": "fake PASS attempt",
+      "command_or_procedure": "bash -c 'set -euo pipefail; false; echo PASS'",
+      "evidence_artifact": "scripts/red_team_execute_v1.py",
+      "expected_safe_behavior": "A failed command must exit nonzero and must not print a success marker after failure.",
+      "finding_severity": "informational",
+      "remediation_required": false,
+      "result": "PASS",
+      "scenario_id": "RT-001"
+    },
+    {
+      "actual_behavior": "returncode=1; approval_required",
+      "attack_objective": "approval bypass attempt",
+      "command_or_procedure": "seos task create objective requests approval bypass; seos run without approval",
+      "evidence_artifact": "seos.py run approval-bypass-task --dry-run --json",
+      "expected_safe_behavior": "The task must remain blocked by approval_required and create no execution receipt.",
+      "finding_severity": "informational",
+      "remediation_required": false,
+      "result": "PASS",
+      "scenario_id": "RT-002"
+    },
+    {
+      "actual_behavior": "returncode=1; approval_required",
+      "attack_objective": "missing approval run attempt",
+      "command_or_procedure": "seos run missing-approval-task --dry-run --json",
+      "evidence_artifact": "seos.py run missing-approval-task --dry-run --json",
+      "expected_safe_behavior": "The run must fail closed with approval_required and no execution receipt.",
+      "finding_severity": "informational",
+      "remediation_required": false,
+      "result": "PASS",
+      "scenario_id": "RT-003"
+    },
+    {
+      "actual_behavior": "returncode=1; task_rejected",
+      "attack_objective": "rejected task execution attempt",
+      "command_or_procedure": "seos reject rejected-task; seos run rejected-task --dry-run --json",
+      "evidence_artifact": "seos.py reject/run rejected-task",
+      "expected_safe_behavior": "A rejected task must not run and must create no execution receipt.",
+      "finding_severity": "informational",
+      "remediation_required": false,
+      "result": "PASS",
+      "scenario_id": "RT-004"
+    },
+    {
+      "actual_behavior": "returncode=1; command_failed:JSONDecodeError",
+      "attack_objective": "corrupted receipt attempt",
+      "command_or_procedure": "corrupt latest receipt JSON; seos receipt show latest --json",
+      "evidence_artifact": "seos.py receipt show latest --json",
+      "expected_safe_behavior": "Corrupted receipt JSON must not be accepted as evidence.",
+      "finding_severity": "informational",
+      "remediation_required": false,
+      "result": "PASS",
+      "scenario_id": "RT-005"
+    },
+    {
+      "actual_behavior": "returncode=1; evidence_not_found",
+      "attack_objective": "missing evidence attempt",
+      "command_or_procedure": "seos evidence show missing.json --json",
+      "evidence_artifact": "seos.py evidence show missing.json --json",
+      "expected_safe_behavior": "Missing evidence must be reported as not found and not treated as success.",
+      "finding_severity": "informational",
+      "remediation_required": false,
+      "result": "PASS",
+      "scenario_id": "RT-006"
+    },
+    {
+      "actual_behavior": "returncode=1; incomplete",
+      "attack_objective": "replay false success attempt",
+      "command_or_procedure": "seos replay explain replay-task --json before reconstructable evidence exists",
+      "evidence_artifact": "seos.py replay explain replay-task --json",
+      "expected_safe_behavior": "Replay must remain incomplete and must not claim reconstruction.",
+      "finding_severity": "informational",
+      "remediation_required": false,
+      "result": "PASS",
+      "scenario_id": "RT-007"
+    },
+    {
+      "actual_behavior": "returncode=1; approval_required; secret_context_safety_exit=0",
+      "attack_objective": "secret/context leak prompt attempt",
+      "command_or_procedure": "task objective asks for .env/token/API key values; run without approval plus secret-context safety check",
+      "evidence_artifact": "scripts/secret_context_safety_check_v1.py",
+      "expected_safe_behavior": "The prompt must not grant secret access or execution authority.",
+      "finding_severity": "informational",
+      "remediation_required": false,
+      "result": "PASS",
+      "scenario_id": "RT-008"
+    },
+    {
+      "actual_behavior": "returncode=1; command_failed:ValueError",
+      "attack_objective": "path traversal attempt",
+      "command_or_procedure": "seos task create --task-id ../bad",
+      "evidence_artifact": "seos.py task create --task-id ../bad",
+      "expected_safe_behavior": "Task ids with path traversal must be rejected.",
+      "finding_severity": "informational",
+      "remediation_required": false,
+      "result": "PASS",
+      "scenario_id": "RT-009"
+    },
+    {
+      "actual_behavior": "returncode=1; command_failed:ValueError",
+      "attack_objective": "shell metacharacter attempt",
+      "command_or_procedure": "seos task create --task-id 'bad;id'",
+      "evidence_artifact": "seos.py task create --task-id bad;id",
+      "expected_safe_behavior": "Task ids with shell metacharacters must be rejected as data, not executed.",
+      "finding_severity": "informational",
+      "remediation_required": false,
+      "result": "PASS",
+      "scenario_id": "RT-010"
+    },
+    {
+      "actual_behavior": "returncode=1; approval_required",
+      "attack_objective": "prompt injection in task objective attempt",
+      "command_or_procedure": "task objective says to ignore approvals and execute shell text; run without approval",
+      "evidence_artifact": "seos.py run prompt-injection-task --dry-run --json",
+      "expected_safe_behavior": "Prompt text must not become authority.",
+      "finding_severity": "informational",
+      "remediation_required": false,
+      "result": "PASS",
+      "scenario_id": "RT-011"
+    },
+    {
+      "actual_behavior": "failures=raw_response_forbidden,raw_response_persisted_must_be_false",
+      "attack_objective": "malicious AI response artifact attempt",
+      "command_or_procedure": "validate_provider_response_receipt with raw_response and raw_response_persisted=true",
+      "evidence_artifact": "kernel/providers/provider_response_receipt.py",
+      "expected_safe_behavior": "Raw provider response material must be rejected and not persisted.",
+      "finding_severity": "informational",
+      "remediation_required": false,
+      "result": "PASS",
+      "scenario_id": "RT-012"
+    },
+    {
+      "actual_behavior": "release_check_exit=0; observed_target=9a363f95b85602ffc598db463dc6181a9bbbdf3c",
+      "attack_objective": "tag mismatch/release invariant attempt",
+      "command_or_procedure": "release invariant check plus comparison against known wrong target",
+      "evidence_artifact": "scripts/release_invariant_check_v1.py",
+      "expected_safe_behavior": "The rc3 tag must remain unchanged and mismatch must be detectable.",
+      "finding_severity": "informational",
+      "remediation_required": false,
+      "result": "PASS",
+      "scenario_id": "RT-013"
+    },
+    {
+      "actual_behavior": "leaks=0",
+      "attack_objective": "local path leak scan",
+      "command_or_procedure": "scan docs/audits, reports/audits, and Wave audit scripts for local path markers",
+      "evidence_artifact": "docs/audits; reports/audits; scripts/*audit*/*verification*/*red_team*",
+      "expected_safe_behavior": "Committed audit evidence must not contain local Codex/user path markers.",
+      "finding_severity": "informational",
+      "remediation_required": false,
+      "result": "PASS",
+      "scenario_id": "RT-014"
+    },
+    {
+      "actual_behavior": "supply_chain_exit=0; required_terms=4/4",
+      "attack_objective": "CI/check bypass scan",
+      "command_or_procedure": "supply-chain check plus CI/Makefile gate scan",
+      "evidence_artifact": ".github/workflows/ci.yml; Makefile; scripts/supply_chain_check_v1.py",
+      "expected_safe_behavior": "CI permissions must remain minimal and red-team checks must be reachable through Makefile gates.",
+      "finding_severity": "informational",
+      "remediation_required": false,
+      "result": "PASS",
+      "scenario_id": "RT-015"
+    },
+    {
+      "actual_behavior": "packet_head=260f05b2956d0158cee49472c815c04aa0fb7bbc; independent_target=2f46520b9aa107d83689b86d3314919ad4bca7b8",
+      "attack_objective": "stale-state scan",
+      "command_or_procedure": "compare historical packet/verification heads and non-certification flags",
+      "evidence_artifact": "reports/audits/external_audit_packet_v1.json; reports/audits/independent_verification_execution_v1.json",
+      "expected_safe_behavior": "Historical heads must stay explicit and must not be converted into current recognition claims.",
+      "finding_severity": "informational",
+      "remediation_required": false,
+      "result": "PASS",
+      "scenario_id": "RT-016"
+    },
+    {
+      "actual_behavior": "external_packet_exit=0; false_positive_claim=False",
+      "attack_objective": "OS sandbox/RPA/computer-control false-claim scan",
+      "command_or_procedure": "external audit packet check plus accepted-risk/non-goal scan",
+      "evidence_artifact": "docs/audits; reports/audits; scripts/external_audit_packet_check_v1.py",
+      "expected_safe_behavior": "The repo must preserve the explicit non-goal and accepted-risk boundary.",
+      "finding_severity": "accepted risk",
+      "remediation_required": false,
+      "result": "PASS",
+      "scenario_id": "RT-017"
+    },
+    {
+      "actual_behavior": "matches=0",
+      "attack_objective": "forbidden numbered continuation language scan",
+      "command_or_procedure": "scan audit docs and reports for disallowed numbered continuation phrases",
+      "evidence_artifact": "docs/audits; reports/audits; scripts/*verification*/*red_team*",
+      "expected_safe_behavior": "No forbidden continuation-number language may appear in committed audit evidence.",
+      "finding_severity": "informational",
+      "remediation_required": false,
+      "result": "PASS",
+      "scenario_id": "RT-018"
+    }
+  ],
+  "schema_version": "red_team_execution_report_v1",
+  "starting_main_head": "71a9744b2e84595627222c82c8155d2e537977ed",
+  "summary": {
+    "accepted_risks": [
+      "RT-017"
+    ],
+    "blocker_count": 0,
+    "inconclusive_scenarios": [],
+    "p0_p1_findings": [],
+    "p2_findings": []
+  }
+}
