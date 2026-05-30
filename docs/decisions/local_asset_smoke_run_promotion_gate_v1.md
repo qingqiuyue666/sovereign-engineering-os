@@ -3,7 +3,7 @@
 ## Repository
 
 - Repository URL: `https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os`
-- Canonical local repository path: `/Users/qqy/Documents/GitHub/sovereign-engineering-os`
+- Canonical local repository path: `<repo-root>`
 - Branch name: `feat/local-asset-smoke-run-promotion-gate-v1`
 
 ## Objective

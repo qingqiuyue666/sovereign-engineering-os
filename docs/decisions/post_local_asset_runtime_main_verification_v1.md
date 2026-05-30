@@ -3,7 +3,7 @@
 ## Verification Anchor
 
 - Repository URL: `https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os`
-- Canonical local repository path: `/Users/qqy/Documents/GitHub/sovereign-engineering-os`
+- Canonical local repository path: `<repo-root>`
 - Branch: `feat/post-local-asset-runtime-main-verification-v1`
 - Current `main` / branch head before verification document: `49fb89169612623a3ddbe10c225bb2e551ea0741`
 - Verification date: `2026-05-21`

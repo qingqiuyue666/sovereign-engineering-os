@@ -11,7 +11,7 @@ The local agent may help write code on a feature branch, but it must not merge t
 Run the local agent only inside the repository root:
 
 ```bash
-cd /Users/qqy/Documents/GitHub/sovereign-engineering-os
+cd <repo-root>
 ```
 
 The agent must not modify files outside this repository.
