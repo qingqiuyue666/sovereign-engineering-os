@@ -46,6 +46,10 @@ jobs:
         run: python scripts/ai_admission_check_v1.py
       - name: Run dogfood evidence static check
         run: python scripts/dogfood_evidence_check_v1.py
+      - name: Run reliability benchmark static check
+        run: python scripts/reliability_benchmark_v1.py
+      - name: Run schema compatibility static check
+        run: python scripts/schema_compatibility_check_v1.py
       - name: Run failure path smoke
         run: bash scripts/failure_path_smoke_v1.sh
       - name: Run adversarial smoke

@@ -17,7 +17,7 @@
 .PHONY: test-source-reliability test-osint-task-contract test-macro-regime-contract test-asset-mapping-contract test-domain-pipeline-contracts
 .PHONY: test-dashboard-model test-run-summary-model test-security-status-model test-dashboard-contracts
 .PHONY: test-v12-foundation-progress-audit test-v12-foundation
-.PHONY: installability-check test-installability package-build-smoke clean-clone-smoke install-smoke contract-check claim-to-evidence-check test-contracts test-claim-to-evidence failure-path-smoke adversarial-smoke test-failure-path-hardening test-adversarial security-control-check supply-chain-check secret-context-safety-check release-invariant-check test-security-control-matrix test-supply-chain-integrity test-secret-context-safety test-release-invariant ai-admission-check test-ai-provider-admission-safety dogfood-evidence-check test-dogfood-evidence smoke verify final-audit-check
+.PHONY: installability-check test-installability package-build-smoke clean-clone-smoke install-smoke contract-check claim-to-evidence-check test-contracts test-claim-to-evidence failure-path-smoke adversarial-smoke test-failure-path-hardening test-adversarial security-control-check supply-chain-check secret-context-safety-check release-invariant-check test-security-control-matrix test-supply-chain-integrity test-secret-context-safety test-release-invariant ai-admission-check test-ai-provider-admission-safety dogfood-evidence-check test-dogfood-evidence reliability-benchmark schema-compatibility-check test-schema-compatibility-policy test-operational-stability smoke verify final-audit-check
 
 PYTHON ?= python3
 
@@ -117,7 +117,19 @@ dogfood-evidence-check:
 test-dogfood-evidence:
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_dogfood_evidence_v1 -v
 
-smoke: public-grade-check installability-check package-build-smoke test-installability contract-check claim-to-evidence-check test-contracts test-claim-to-evidence failure-path-smoke adversarial-smoke test-failure-path-hardening test-adversarial security-control-check supply-chain-check secret-context-safety-check release-invariant-check test-security-control-matrix test-supply-chain-integrity test-secret-context-safety test-release-invariant ai-admission-check test-ai-provider-admission-safety dogfood-evidence-check test-dogfood-evidence
+reliability-benchmark:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/reliability_benchmark_v1.py
+
+schema-compatibility-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/schema_compatibility_check_v1.py
+
+test-schema-compatibility-policy:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_schema_compatibility_policy_v1 -v
+
+test-operational-stability:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_operational_stability_v1 -v
+
+smoke: public-grade-check installability-check package-build-smoke test-installability contract-check claim-to-evidence-check test-contracts test-claim-to-evidence failure-path-smoke adversarial-smoke test-failure-path-hardening test-adversarial security-control-check supply-chain-check secret-context-safety-check release-invariant-check test-security-control-matrix test-supply-chain-integrity test-secret-context-safety test-release-invariant ai-admission-check test-ai-provider-admission-safety dogfood-evidence-check test-dogfood-evidence reliability-benchmark schema-compatibility-check test-schema-compatibility-policy test-operational-stability
 
 verify: smoke
 

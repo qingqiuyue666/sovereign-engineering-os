@@ -46,6 +46,15 @@ external recognition or final signoff.
   tasks covering identity/docs, installability, fail-closed behavior, AI
   admission safety, and security/supply-chain hardening.
 - `scripts/dogfood_evidence_check_v1.py` and matching tracer-bullet tests.
+- Reliability baseline report covering repeated smoke, multi-task,
+  multi-workspace, approval/reject/run, evidence/replay, failure-path, elapsed
+  time, and flake-rate checks.
+- Operational runbooks for incident response, rollback, maintenance,
+  workspace cleanup, and interrupted runs.
+- Schema versioning compatibility policy for contract and frozen schema
+  changes.
+- `scripts/reliability_benchmark_v1.py`,
+  `scripts/schema_compatibility_check_v1.py`, and matching tracer-bullet tests.
 
 ### Changed
 
