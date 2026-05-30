@@ -14,9 +14,9 @@
   },
   "created_at": "2026-05-29T20:36:53Z",
   "evidence": {
-    "clean_clone": "/Users/qqy/Documents/Codex/2026-05-30/files-mentioned-by-the-user-codex/work/landing_ready_v1/clean_clone_reproducibility_receipt.json",
-    "real_use_cases": "/Users/qqy/Documents/Codex/2026-05-30/files-mentioned-by-the-user-codex/work/landing_ready_v1/real_use_cases_summary.json",
-    "release_readiness_decision": "/Users/qqy/Documents/GitHub/sovereign-engineering-os/reports/landing_ready_v1/release_readiness_decision.json"
+    "clean_clone": "external local review artifact not committed: clean_clone_reproducibility_receipt.json",
+    "real_use_cases": "external local review artifact not committed: real_use_cases_summary.json",
+    "release_readiness_decision": "reports/landing_ready_v1/release_readiness_decision.json"
   },
   "head": "bc9b6c55f76cbbbc74584f7148f133a80c375e7e",
   "passed": true,

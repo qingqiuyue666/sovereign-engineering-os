@@ -67,11 +67,11 @@ def _phase_a(repo: Path, evidence_dir: Path) -> dict[str, object]:
         "item_7_allowed": verdict == "RELEASE_ALLOWED",
         "blockers": blockers,
         "evidence": {
-            "clean_clone": (evidence_dir / "clean_clone_reproducibility_receipt.json").as_posix(),
-            "test_quality_audit": (evidence_dir / "test_quality_audit.json").as_posix(),
-            "real_use_cases": (evidence_dir / "real_use_cases_summary.json").as_posix(),
-            "security_boundary": (repo / "README.md").as_posix(),
-            "anti_bloat_gate": (repo / "governance/policy/anti_bloat_governance_gate_v1.json").as_posix(),
+            "clean_clone": "external local review artifact not committed: clean_clone_reproducibility_receipt.json",
+            "test_quality_audit": "external local review artifact not committed: test_quality_audit.json",
+            "real_use_cases": "external local review artifact not committed: real_use_cases_summary.json",
+            "security_boundary": "README.md",
+            "anti_bloat_gate": "governance/policy/anti_bloat_governance_gate_v1.json",
         },
         "summary": {
             "clean_clone_passed": clean.get("passed"),
@@ -113,9 +113,9 @@ def _post_27(repo: Path, evidence_dir: Path) -> dict[str, object]:
         "checks": checks,
         "blockers": blockers,
         "evidence": {
-            "release_readiness_decision": (repo / "reports/landing_ready_v1/release_readiness_decision.json").as_posix(),
-            "clean_clone": (evidence_dir / "clean_clone_reproducibility_receipt.json").as_posix(),
-            "real_use_cases": (evidence_dir / "real_use_cases_summary.json").as_posix(),
+            "release_readiness_decision": "reports/landing_ready_v1/release_readiness_decision.json",
+            "clean_clone": "external local review artifact not committed: clean_clone_reproducibility_receipt.json",
+            "real_use_cases": "external local review artifact not committed: real_use_cases_summary.json",
         },
     }
 

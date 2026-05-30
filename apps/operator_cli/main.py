@@ -7,6 +7,12 @@ import json
 import os
 import sys
 
+if __package__ in {None, ""}:
+    repo_root = Path(__file__).resolve().parents[2]
+    repo_root_text = repo_root.as_posix()
+    if repo_root_text not in sys.path:
+        sys.path.insert(0, repo_root_text)
+
 from kernel.cli.commands import dispatch as legacy_dispatch
 from kernel.landing_ready import (
     approve_task,
@@ -43,6 +49,27 @@ _LEGACY_COMMANDS = {
     "version",
 }
 
+_HELP_TEXT = """SEOS operator CLI
+
+Usage:
+  python3 apps/operator_cli/main.py <command> [options]
+  python3 -m apps.operator_cli.main <command> [options]
+
+Commands:
+  init --workspace PATH
+  status --workspace PATH [--json|--human]
+  task create|list|show|validate
+  approve TASK_ID --workspace PATH
+  reject TASK_ID --workspace PATH
+  run TASK_ID --workspace PATH --dry-run
+  release check --workspace PATH
+  evidence trace|show
+  receipt list|show
+  replay explain
+  failure compress|explain
+  ai bundle|repo-map|token-roi
+"""
+
 
 def main(argv: list[str] | None = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
@@ -50,6 +77,9 @@ def main(argv: list[str] | None = None) -> int:
         return legacy_dispatch(args)
     command = args[0]
     try:
+        if command in {"--help", "-h", "help"}:
+            print(_HELP_TEXT)
+            return 0
         if command in _LEGACY_COMMANDS:
             return legacy_dispatch(args)
         if command == "health":
@@ -520,3 +550,7 @@ def _format_repo_map(payload: dict[str, object]) -> str:
 def _format_token_roi(payload: dict[str, object]) -> str:
     report = payload.get("token_roi_report", {})
     return f"Token ROI bundles={report.get('bundle_count')} estimated_input={report.get('total_estimated_input_tokens')}"
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

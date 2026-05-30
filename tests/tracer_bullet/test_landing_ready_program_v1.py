@@ -178,6 +178,26 @@ class LandingReadyProgramV1Tests(unittest.TestCase):
         self.assertFalse(payload["release_ready"])
         self.assertIn("release_readiness_evidence_missing", payload["blockers"])
 
+    def test_operator_cli_supports_direct_and_module_help(self):
+        direct = subprocess.run(
+            [sys.executable, "apps/operator_cli/main.py", "--help"],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        module = subprocess.run(
+            [sys.executable, "-m", "apps.operator_cli.main", "--help"],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertEqual(direct.returncode, 0, direct.stderr)
+        self.assertIn("SEOS operator CLI", direct.stdout)
+        self.assertEqual(module.returncode, 0, module.stderr)
+        self.assertIn("SEOS operator CLI", module.stdout)
+        self.assertNotIn("RuntimeWarning", module.stderr)
+
     def test_boundary_and_anti_bloat_gate_are_operator_visible(self):
         readme = Path("README.md").read_text(encoding="utf-8")
         policy = Path("governance/policy/anti_bloat_governance_gate_v1.json").read_text(encoding="utf-8")
