@@ -18,6 +18,13 @@ external recognition or final signoff.
 - Reproducibility and installability smoke scripts for clean clone, fresh venv,
   and packaging entrypoint checks.
 - `scripts/installability_check_v1.py` and matching tracer-bullet tests.
+- V1 contract documents for core task, approval, rejection, execution,
+  evidence, replay, failure, observation, AI context, token ROI, provider,
+  release-check, and audit-packet objects.
+- Claim-to-evidence matrix artifacts for bounded public claims and external
+  review handoff.
+- `scripts/contract_check_v1.py`, `scripts/claim_to_evidence_check_v1.py`, and
+  matching tracer-bullet tests.
 
 ### Changed
 

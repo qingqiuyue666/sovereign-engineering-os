@@ -17,7 +17,7 @@
 .PHONY: test-source-reliability test-osint-task-contract test-macro-regime-contract test-asset-mapping-contract test-domain-pipeline-contracts
 .PHONY: test-dashboard-model test-run-summary-model test-security-status-model test-dashboard-contracts
 .PHONY: test-v12-foundation-progress-audit test-v12-foundation
-.PHONY: installability-check test-installability package-build-smoke clean-clone-smoke install-smoke smoke verify final-audit-check
+.PHONY: installability-check test-installability package-build-smoke clean-clone-smoke install-smoke contract-check claim-to-evidence-check test-contracts test-claim-to-evidence smoke verify final-audit-check
 
 PYTHON ?= python3
 
@@ -57,7 +57,19 @@ clean-clone-smoke:
 install-smoke:
 	bash scripts/fresh_venv_install_smoke_v1.sh
 
-smoke: public-grade-check installability-check package-build-smoke test-installability
+contract-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/contract_check_v1.py
+
+claim-to-evidence-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/claim_to_evidence_check_v1.py
+
+test-contracts:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_contracts_v1 -v
+
+test-claim-to-evidence:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_claim_to_evidence_matrix_v1 -v
+
+smoke: public-grade-check installability-check package-build-smoke test-installability contract-check claim-to-evidence-check test-contracts test-claim-to-evidence
 
 verify: smoke
 
