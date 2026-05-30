@@ -37,6 +37,11 @@ external recognition or final signoff.
 - `scripts/security_control_check_v1.py`, `scripts/supply_chain_check_v1.py`,
   `scripts/secret_context_safety_check_v1.py`, `scripts/release_invariant_check_v1.py`,
   and matching tracer-bullet tests.
+- AI-provider admission safety docs covering provider admission,
+  proposal-first flow, secret references, context redaction, token budgets,
+  model output artifacts, human approval before patch, and provider failure
+  handling.
+- `scripts/ai_admission_check_v1.py` and matching tracer-bullet tests.
 
 ### Changed
 
@@ -51,6 +56,7 @@ external recognition or final signoff.
 - No OS-level sandboxing.
 - No RPA or computer-control capability.
 - No live AI provider execution.
+- No direct AI execution or AI-applied patching.
 - No autonomous AI patching.
 - No commercial SaaS surface.
 - No public GitHub Release publication.

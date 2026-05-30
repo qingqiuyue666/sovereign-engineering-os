@@ -17,7 +17,7 @@
 .PHONY: test-source-reliability test-osint-task-contract test-macro-regime-contract test-asset-mapping-contract test-domain-pipeline-contracts
 .PHONY: test-dashboard-model test-run-summary-model test-security-status-model test-dashboard-contracts
 .PHONY: test-v12-foundation-progress-audit test-v12-foundation
-.PHONY: installability-check test-installability package-build-smoke clean-clone-smoke install-smoke contract-check claim-to-evidence-check test-contracts test-claim-to-evidence failure-path-smoke adversarial-smoke test-failure-path-hardening test-adversarial security-control-check supply-chain-check secret-context-safety-check release-invariant-check test-security-control-matrix test-supply-chain-integrity test-secret-context-safety test-release-invariant smoke verify final-audit-check
+.PHONY: installability-check test-installability package-build-smoke clean-clone-smoke install-smoke contract-check claim-to-evidence-check test-contracts test-claim-to-evidence failure-path-smoke adversarial-smoke test-failure-path-hardening test-adversarial security-control-check supply-chain-check secret-context-safety-check release-invariant-check test-security-control-matrix test-supply-chain-integrity test-secret-context-safety test-release-invariant ai-admission-check test-ai-provider-admission-safety smoke verify final-audit-check
 
 PYTHON ?= python3
 
@@ -105,7 +105,13 @@ test-secret-context-safety:
 test-release-invariant:
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_release_invariant_v1 -v
 
-smoke: public-grade-check installability-check package-build-smoke test-installability contract-check claim-to-evidence-check test-contracts test-claim-to-evidence failure-path-smoke adversarial-smoke test-failure-path-hardening test-adversarial security-control-check supply-chain-check secret-context-safety-check release-invariant-check test-security-control-matrix test-supply-chain-integrity test-secret-context-safety test-release-invariant
+ai-admission-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/ai_admission_check_v1.py
+
+test-ai-provider-admission-safety:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_ai_provider_admission_safety_v1 -v
+
+smoke: public-grade-check installability-check package-build-smoke test-installability contract-check claim-to-evidence-check test-contracts test-claim-to-evidence failure-path-smoke adversarial-smoke test-failure-path-hardening test-adversarial security-control-check supply-chain-check secret-context-safety-check release-invariant-check test-security-control-matrix test-supply-chain-integrity test-secret-context-safety test-release-invariant ai-admission-check test-ai-provider-admission-safety
 
 verify: smoke
 
