@@ -1,0 +1,25 @@
+{
+  "blockers": [],
+  "checks": {
+    "ai_context_token_path_not_wasteful": true,
+    "anti_bloat_gate_active": true,
+    "clean_clone_still_passes": true,
+    "cli_main_path_usable": true,
+    "evidence_trace_human_readable": true,
+    "no_known_hard_evidence_blocker": true,
+    "receipts_discoverable": true,
+    "replay_failure_explanation_usable": true,
+    "security_boundary_clear": true,
+    "three_real_use_cases_evidenced": true
+  },
+  "created_at": "2026-05-29T20:36:53Z",
+  "evidence": {
+    "clean_clone": "external local review artifact not committed: clean_clone_reproducibility_receipt.json",
+    "real_use_cases": "external local review artifact not committed: real_use_cases_summary.json",
+    "release_readiness_decision": "reports/landing_ready_v1/release_readiness_decision.json"
+  },
+  "head": "bc9b6c55f76cbbbc74584f7148f133a80c375e7e",
+  "passed": true,
+  "schema": "landing_ready_post_27_operation_check_v1",
+  "terminal_state": "LANDING_READY_NO_FURTHER_STAGE_REQUIRED"
+}

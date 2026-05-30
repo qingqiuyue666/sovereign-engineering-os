@@ -2,6 +2,13 @@
 
 Sovereign Engineering OS is an AI execution control kernel and local-first governance kernel.
 
+Boundary statement: SEOS is a local-first, audit-first, human-gated AI
+engineering governance control plane. It is not an OS-level sandbox, not a computer-control framework, not RPA, and not a replacement for containers, VMs,
+macOS sandboxing, EDR, filesystem permissions, or secret managers. Operators
+must assume the host process keeps the privileges granted by the host OS; SEOS
+governs approvals, receipts, evidence, and policy boundaries, not kernel-level
+isolation or credential custody.
+
 Current phase/state: Personal AI Execution OS final product-completion
 candidate under local-first safety boundaries.
 

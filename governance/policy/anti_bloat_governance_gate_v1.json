@@ -1,0 +1,30 @@
+{
+  "schema": "anti_bloat_governance_gate_v1",
+  "default_decision": "REJECT_NEW_RUNTIME_MODULE",
+  "required_evidence": [
+    "real_external_use_case",
+    "existing_module_fit_check",
+    "lower_complexity_than_alternatives",
+    "local_first_compatibility",
+    "human_approval_gate_preserved",
+    "ai_token_cost_risk_considered",
+    "no_heavy_external_dependency",
+    "no_os_sandbox_or_rpa_claim",
+    "smallest_hard_evidence_repair"
+  ],
+  "forbidden_without_human_decision": [
+    "cloud_first_dependency",
+    "kubernetes",
+    "temporal",
+    "foundationdb",
+    "dbos",
+    "rekor",
+    "opa",
+    "spicedb",
+    "os_level_sandbox_claim",
+    "computer_control_framework_claim",
+    "multi_agent_swarm",
+    "speculative_runtime_subsystem"
+  ],
+  "missing_evidence_decision": "ANTI_BLOAT_GATE_BLOCKED"
+}
