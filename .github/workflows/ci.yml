@@ -25,5 +25,11 @@ jobs:
         run: python scripts/observation_check_v1.py
       - name: Run public identity boundary check
         run: python scripts/identity_boundary_check_v1.py
+      - name: Run installability static check
+        run: python scripts/installability_check_v1.py
+      - name: Run packaging smoke
+        run: bash scripts/package_build_smoke_v1.sh
+      - name: Run fresh venv install smoke
+        run: bash scripts/fresh_venv_install_smoke_v1.sh
       - name: Run canonical health gate
         run: make ci

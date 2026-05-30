@@ -17,6 +17,7 @@
 .PHONY: test-source-reliability test-osint-task-contract test-macro-regime-contract test-asset-mapping-contract test-domain-pipeline-contracts
 .PHONY: test-dashboard-model test-run-summary-model test-security-status-model test-dashboard-contracts
 .PHONY: test-v12-foundation-progress-audit test-v12-foundation
+.PHONY: installability-check test-installability package-build-smoke clean-clone-smoke install-smoke smoke verify final-audit-check
 
 PYTHON ?= python3
 
@@ -40,6 +41,27 @@ identity-check:
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/identity_boundary_check_v1.py
 
 public-grade-check: identity-check
+
+installability-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/installability_check_v1.py
+
+test-installability:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_installability_v1 -v
+
+package-build-smoke:
+	bash scripts/package_build_smoke_v1.sh
+
+clean-clone-smoke:
+	bash scripts/clean_clone_observation_smoke_v1.sh
+
+install-smoke:
+	bash scripts/fresh_venv_install_smoke_v1.sh
+
+smoke: public-grade-check installability-check package-build-smoke test-installability
+
+verify: smoke
+
+final-audit-check: verify
 
 test-root-integrity:
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_root_integrity_verifier -v
