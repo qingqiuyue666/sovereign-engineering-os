@@ -1,0 +1,130 @@
+{
+  "schema_version": "findings_register_v1",
+  "execution_id": "codex_run_findings_remediation_closure_v1",
+  "reviewer_type": "Codex-run local findings remediation closure",
+  "human_third_party_review": false,
+  "external_signoff_confirmed": false,
+  "global_recognition_claimed": false,
+  "final_recognition_claimed": false,
+  "starting_main_head": "33032ef069830b4023bc994c722d86a087179268",
+  "release_candidate_tag": {
+    "name": "v0.1.0-rc3",
+    "expected_target": "9a363f95b85602ffc598db463dc6181a9bbbdf3c",
+    "observed_target": "9a363f95b85602ffc598db463dc6181a9bbbdf3c",
+    "moved_or_recreated_by_this_execution": false
+  },
+  "source_reports": [
+    {
+      "source": "independent_verification",
+      "artifact": "reports/audits/independent_verification_execution_v1.json",
+      "final_status": "CODEX_RUN_INDEPENDENT_VERIFICATION_EXECUTED",
+      "findings_count": 0,
+      "p0_p1_count": 0,
+      "p2_count": 0,
+      "accepted_risk_ids": []
+    },
+    {
+      "source": "red_team_execution",
+      "artifact": "reports/audits/red_team_execution_report_v1.json",
+      "final_status": "CODEX_RUN_RED_TEAM_REVIEW_EXECUTED_NO_BLOCKER_FOUND",
+      "scenario_count": 18,
+      "p0_p1_count": 0,
+      "p2_count": 0,
+      "inconclusive_count": 0,
+      "accepted_risk_ids": [
+        "RT-017"
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "finding_id": "FND-IV-001",
+      "source": "independent_verification",
+      "severity": "informational",
+      "title": "Codex-run independent verification produced no machine-discovered blocker finding",
+      "description": "The Wave 1 report records all required commands as PASS and an empty findings array. This is a Codex-run local result only.",
+      "evidence": [
+        "reports/audits/independent_verification_execution_v1.json",
+        "reports/audits/independent_verification_execution_v1.md",
+        "scripts/independent_verification_report_check_v1.py"
+      ],
+      "affected_files": [
+        "reports/audits/independent_verification_execution_v1.json",
+        "reports/audits/independent_verification_execution_v1.md"
+      ],
+      "remediation_pr": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/pull/549",
+      "validation_command": "python3 scripts/independent_verification_report_check_v1.py",
+      "status": "fixed",
+      "residual_risk": "Human or independent external review remains required."
+    },
+    {
+      "finding_id": "FND-RT-001",
+      "source": "red_team_execution",
+      "severity": "informational",
+      "title": "Codex-run red-team execution produced no P0, P1, P2, or inconclusive scenario",
+      "description": "The Wave 2 report records 18 scenarios as PASS, with no P0/P1 findings, no P2 findings, and no inconclusive scenarios.",
+      "evidence": [
+        "reports/audits/red_team_execution_report_v1.json",
+        "reports/audits/red_team_execution_report_v1.md",
+        "scripts/red_team_report_check_v1.py"
+      ],
+      "affected_files": [
+        "reports/audits/red_team_execution_report_v1.json",
+        "reports/audits/red_team_execution_report_v1.md"
+      ],
+      "remediation_pr": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/pull/550",
+      "validation_command": "python3 scripts/red_team_report_check_v1.py",
+      "status": "fixed",
+      "residual_risk": "Human or independent external red-team review remains required."
+    },
+    {
+      "finding_id": "FND-RT-017",
+      "source": "red_team_execution",
+      "severity": "accepted_risk",
+      "title": "OS sandbox, RPA, and computer-control remain explicit non-goals",
+      "description": "Red-team scenario RT-017 preserves the boundary that SEOS does not provide OS-level isolation, RPA, browser control, computer-control, or secret custody.",
+      "evidence": [
+        "reports/audits/red_team_execution_report_v1.json#RT-017",
+        "reports/audits/accepted_risk_register_v1.json#AR-004",
+        "docs/audits/accepted_risk_register_v1.md#AR-004"
+      ],
+      "affected_files": [
+        "reports/audits/red_team_execution_report_v1.json",
+        "reports/audits/accepted_risk_register_v1.json",
+        "docs/audits/accepted_risk_register_v1.md"
+      ],
+      "remediation_pr": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/pull/550",
+      "validation_command": "python3 scripts/red_team_report_check_v1.py",
+      "status": "accepted",
+      "acceptance_rationale": "The boundary is an intentional non-goal, not a missed implementation requirement for this evidence program.",
+      "residual_risk": "Reviewers needing OS isolation, RPA, browser control, computer-control, or secret custody must treat that as out of scope for this artifact set."
+    }
+  ],
+  "summary": {
+    "terminal_status": "FINDINGS_REMEDIATION_CLOSED_FOR_CODEX_RUN_VERIFICATION",
+    "p0_p1_open": [],
+    "p2_open": [],
+    "fixed_findings": [
+      "FND-IV-001",
+      "FND-RT-001"
+    ],
+    "accepted_risks": [
+      "FND-RT-017"
+    ],
+    "deferred_requires_human": [],
+    "blocker_findings_requiring_repair_pr": []
+  },
+  "explicit_statements": [
+    "This findings register is based on Codex-run local verification and red-team execution.",
+    "External recognition is not confirmed by Codex.",
+    "Global top engineer signoff is not confirmed by Codex.",
+    "No future external or human findings are claimed closed.",
+    "Human or independent external review remains required.",
+    "30-90 day real-world operation evidence remains required."
+  ],
+  "known_limitations": [
+    "This register closes only machine-discovered findings from Wave 1 and Wave 2 reports.",
+    "No human third-party audit findings are present in the repository for this register to close.",
+    "External review, independent human red-team review, and elapsed-time operation evidence remain outside this closure."
+  ]
+}

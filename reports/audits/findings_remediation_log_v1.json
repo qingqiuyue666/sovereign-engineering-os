@@ -1,0 +1,75 @@
+{
+  "schema_version": "findings_remediation_log_v1",
+  "execution_id": "codex_run_findings_remediation_closure_v1",
+  "terminal_status": "FINDINGS_REMEDIATION_CLOSED_FOR_CODEX_RUN_VERIFICATION",
+  "global_recognition_claimed": false,
+  "external_signoff_confirmed": false,
+  "human_third_party_review": false,
+  "source_register": "reports/audits/findings_register_v1.json",
+  "fixes_required": false,
+  "minimal_repair_prs_created": [],
+  "entries": [
+    {
+      "entry_id": "FRL-001",
+      "finding_id": "FND-IV-001",
+      "action": "closed_without_code_repair",
+      "reason": "The independent verification execution report records zero findings and all required commands passed.",
+      "evidence": [
+        "reports/audits/independent_verification_execution_v1.json",
+        "reports/audits/independent_verification_execution_v1.md"
+      ],
+      "remediation_pr": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/pull/549",
+      "validation_commands": [
+        "python3 scripts/independent_verification_report_check_v1.py"
+      ],
+      "result": "closed_for_codex_run_scope"
+    },
+    {
+      "entry_id": "FRL-002",
+      "finding_id": "FND-RT-001",
+      "action": "closed_without_code_repair",
+      "reason": "The red-team execution report records 18 passing scenarios with no P0/P1/P2 or inconclusive scenario.",
+      "evidence": [
+        "reports/audits/red_team_execution_report_v1.json",
+        "reports/audits/red_team_execution_report_v1.md"
+      ],
+      "remediation_pr": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/pull/550",
+      "validation_commands": [
+        "python3 scripts/red_team_report_check_v1.py"
+      ],
+      "result": "closed_for_codex_run_scope"
+    },
+    {
+      "entry_id": "FRL-003",
+      "finding_id": "FND-RT-017",
+      "action": "accepted_as_boundary",
+      "reason": "The OS sandbox, RPA, browser control, computer-control, and secret custody boundary is an explicit non-goal for this artifact set.",
+      "evidence": [
+        "reports/audits/red_team_execution_report_v1.json#RT-017",
+        "reports/audits/accepted_risk_register_v1.json#AR-004"
+      ],
+      "remediation_pr": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/pull/550",
+      "validation_commands": [
+        "python3 scripts/red_team_report_check_v1.py"
+      ],
+      "result": "accepted_risk_recorded"
+    }
+  ],
+  "required_wave_validation": [
+    "python3 scripts/findings_register_check_v1.py",
+    "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.tracer_bullet.test_findings_register_v1",
+    "python3 scripts/independent_verification_report_check_v1.py",
+    "python3 scripts/red_team_report_check_v1.py",
+    "make verify",
+    "make ci",
+    "git diff --check",
+    "git status --short"
+  ],
+  "explicit_statements": [
+    "No blocker findings from the Codex-run reports require a repair PR.",
+    "No human third-party findings are claimed closed.",
+    "External recognition is not confirmed by Codex.",
+    "Human or independent external review remains required.",
+    "30-90 day real-world operation evidence remains required."
+  ]
+}
