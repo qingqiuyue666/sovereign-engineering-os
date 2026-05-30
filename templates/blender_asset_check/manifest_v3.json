@@ -1,0 +1,7 @@
+{
+  "dry_run_default": true,
+  "id": "TEMPLATE_BLENDER_ASSET_CHECK",
+  "private_payload_required": false,
+  "schema_version": "seos_creative_pipeline_v3",
+  "template": "blender_asset_check"
+}

@@ -1,0 +1,1 @@
+# Creative Project Template\n\nFixture-safe template for SEOS Creative Pipeline V3.\n

@@ -1,0 +1,8 @@
+{
+  "metrics": {
+    "docs_completeness": "ready",
+    "private_asset_safety_check_status": "ready"
+  },
+  "schema_version": "seos_creative_pipeline_v3",
+  "status": "ready"
+}

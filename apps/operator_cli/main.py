@@ -68,6 +68,7 @@ Commands:
   replay explain
   failure compress|explain
   ai bundle|repo-map|token-roi
+  creative init|scan-assets|archive-check|asset|shot|adapter|comfyui|blender|evidence|dashboard|doctor|launch-check|health|adoption-status
 """
 
 
@@ -109,6 +110,10 @@ def main(argv: list[str] | None = None) -> int:
             return _failure(args[1:])
         if command == "ai":
             return _ai(args[1:])
+        if command == "creative":
+            from creative.cli import main as creative_main
+
+            return creative_main(args[1:])
         if command == "run-ledger":
             return _run_ledger(args[1:])
         if command == "audit":

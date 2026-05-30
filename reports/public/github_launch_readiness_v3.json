@@ -1,0 +1,8 @@
+{
+  "checks": [
+    "creative_public_release_check_v3"
+  ],
+  "external_adoption_claimed": false,
+  "schema_version": "seos_creative_pipeline_v3",
+  "status": "ready"
+}

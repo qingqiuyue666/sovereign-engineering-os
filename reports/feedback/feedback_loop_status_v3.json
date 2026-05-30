@@ -1,0 +1,5 @@
+{
+  "loop": "issue -> classification -> fix/decline -> evidence -> release note -> regression test",
+  "schema_version": "seos_creative_pipeline_v3",
+  "status": "ready"
+}

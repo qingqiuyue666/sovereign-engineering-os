@@ -1,0 +1,13 @@
+{
+  "adapters": [
+    "comfyui",
+    "blender",
+    "houdini",
+    "zbrush",
+    "unreal",
+    "davinci",
+    "after_effects"
+  ],
+  "schema_version": "seos_creative_pipeline_v3",
+  "status": "ready"
+}

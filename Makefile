@@ -177,6 +177,28 @@ verify: smoke
 
 final-audit-check: verify external-audit-check test-external-audit-packet independent-verification-check test-independent-verification-execution red-team-check test-red-team-execution findings-check test-findings-register operation-evidence-check test-real-world-operation-evidence-program global-signoff-dossier-check test-global-signoff-dossier external-verification-program-check
 
+.PHONY: creative-check creative-doctor creative-asset-scan-check creative-archive-check creative-dashboard-build creative-public-release-check creative-total-check
+
+creative-check: creative-total-check
+
+creative-doctor:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/creative_doctor_v3.py
+
+creative-asset-scan-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/creative_asset_scan_v3.py
+
+creative-archive-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/creative_archive_check_v3.py
+
+creative-dashboard-build:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/creative_dashboard_build_v3.py
+
+creative-public-release-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/creative_public_release_check_v3.py
+
+creative-total-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/creative_total_check_v3.py
+
 test-root-integrity:
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_root_integrity_verifier -v
 

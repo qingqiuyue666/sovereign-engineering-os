@@ -1,0 +1,60 @@
+{
+  "$id": "urn:seos:creative:v3:creative_evidence_contract_v3",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "created_at": {
+      "type": "string"
+    },
+    "evidence": {
+      "type": "array"
+    },
+    "id": {
+      "pattern": "^EVD_[A-Z0-9_:-]+$",
+      "type": "string"
+    },
+    "private": {
+      "type": "boolean"
+    },
+    "public": {
+      "type": "boolean"
+    },
+    "residual_risk": {
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "seos_creative_pipeline_v3"
+    },
+    "scope": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "updated_at": {
+      "type": "string"
+    },
+    "validation": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "schema_version",
+    "id",
+    "created_at",
+    "updated_at",
+    "source",
+    "scope",
+    "status",
+    "validation",
+    "evidence",
+    "residual_risk",
+    "public",
+    "private"
+  ],
+  "title": "Creative Evidence Contract V3",
+  "type": "object"
+}

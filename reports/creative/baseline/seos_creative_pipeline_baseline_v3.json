@@ -1,0 +1,12 @@
+{
+  "main_head_at_baseline": "e5b6c591f4211578211416a8b68ea0f9d5912a19",
+  "protected_tag": "v0.1.0-rc3",
+  "protected_tag_sha": "9a363f95b85602ffc598db463dc6181a9bbbdf3c",
+  "schema_version": "seos_creative_pipeline_v3",
+  "stage": "A00_REPO_BASELINE_LOCKED",
+  "status": "complete",
+  "verification_commands": [
+    "make verify",
+    "make ci"
+  ]
+}
