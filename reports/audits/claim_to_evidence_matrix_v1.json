@@ -150,6 +150,33 @@
         "globally recognized",
         "externally certified"
       ]
+    },
+    {
+      "claim_id": "CLAIM-SEOS-FAILCLOSED-007",
+      "claim": "Failure-path and adversarial smoke coverage proves bad states do not produce fake success.",
+      "allowed_public_wording": "SEOS includes local fail-closed and adversarial smoke evidence for bad inputs and bad states.",
+      "evidence_refs": [
+        "scripts/failure_path_smoke_v1.sh",
+        "scripts/adversarial_smoke_v1.py",
+        "reports/failure_path/failure_path_baseline_v1.json",
+        "tests/tracer_bullet/test_failure_path_hardening_v1.py",
+        "tests/adversarial/test_adversarial_inputs_v1.py"
+      ],
+      "validation_refs": [
+        "bash scripts/failure_path_smoke_v1.sh",
+        "python3 scripts/adversarial_smoke_v1.py",
+        "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/adversarial"
+      ],
+      "status": "supported_by_repository_evidence",
+      "limitations": [
+        "Coverage is local fail-closed evidence.",
+        "This is not an external penetration test or independent certification."
+      ],
+      "forbidden_wording": [
+        "global recognition confirmed",
+        "globally recognized",
+        "externally certified"
+      ]
     }
   ]
 }

@@ -31,6 +31,10 @@ jobs:
         run: python scripts/contract_check_v1.py
       - name: Run claim-to-evidence static check
         run: python scripts/claim_to_evidence_check_v1.py
+      - name: Run failure path smoke
+        run: bash scripts/failure_path_smoke_v1.sh
+      - name: Run adversarial smoke
+        run: python scripts/adversarial_smoke_v1.py
       - name: Run packaging smoke
         run: bash scripts/package_build_smoke_v1.sh
       - name: Run fresh venv install smoke

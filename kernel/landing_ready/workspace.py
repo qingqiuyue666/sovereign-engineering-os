@@ -178,8 +178,7 @@ def create_task(
     resolved_task_id = str(intake.envelope["task_id"])
     path = _task_path(root, resolved_task_id)
     if path.exists():
-        task = _read_json(path)
-        return {"ok": True, "created": False, "task": task, "task_path": path.as_posix()}
+        return {"ok": False, "error": "duplicate_task_id", "task_id": resolved_task_id}
     task = {
         "schema": "seos_task_contract_v1",
         "task_id": resolved_task_id,
@@ -244,6 +243,9 @@ def run_task(workspace: Path, task_id: str, *, dry_run: bool = True, command: st
         return task_result
     if not dry_run:
         return {"ok": False, "error": "real_execution_not_enabled", "task_id": task_id}
+    rejected = _latest_decision(root, task_id, approved=False)
+    if rejected is not None:
+        return {"ok": False, "error": "task_rejected", "task_id": task_id}
     approved = _latest_decision(root, task_id, approved=True)
     if approved is None:
         return {"ok": False, "error": "approval_required", "task_id": task_id}
@@ -639,9 +641,10 @@ def _receipt_files_for_task(seos_root: Path, task_id: str) -> list[Path]:
 
 def _latest_decision(seos_root: Path, task_id: str, *, approved: bool) -> dict[str, object] | None:
     matches = []
+    receipt_type = "approval" if approved else "rejection"
     for path in _receipt_files_for_task(seos_root, task_id):
         payload = _read_json(path)
-        if payload.get("receipt_type") == "approval" and payload.get("approved") is approved:
+        if payload.get("receipt_type") == receipt_type and payload.get("approved") is approved:
             matches.append(payload)
     return matches[-1] if matches else None
 

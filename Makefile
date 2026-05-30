@@ -17,7 +17,7 @@
 .PHONY: test-source-reliability test-osint-task-contract test-macro-regime-contract test-asset-mapping-contract test-domain-pipeline-contracts
 .PHONY: test-dashboard-model test-run-summary-model test-security-status-model test-dashboard-contracts
 .PHONY: test-v12-foundation-progress-audit test-v12-foundation
-.PHONY: installability-check test-installability package-build-smoke clean-clone-smoke install-smoke contract-check claim-to-evidence-check test-contracts test-claim-to-evidence smoke verify final-audit-check
+.PHONY: installability-check test-installability package-build-smoke clean-clone-smoke install-smoke contract-check claim-to-evidence-check test-contracts test-claim-to-evidence failure-path-smoke adversarial-smoke test-failure-path-hardening test-adversarial smoke verify final-audit-check
 
 PYTHON ?= python3
 
@@ -69,7 +69,19 @@ test-contracts:
 test-claim-to-evidence:
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_claim_to_evidence_matrix_v1 -v
 
-smoke: public-grade-check installability-check package-build-smoke test-installability contract-check claim-to-evidence-check test-contracts test-claim-to-evidence
+failure-path-smoke:
+	bash scripts/failure_path_smoke_v1.sh
+
+adversarial-smoke:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/adversarial_smoke_v1.py
+
+test-failure-path-hardening:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_failure_path_hardening_v1 -v
+
+test-adversarial:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest discover -s tests/adversarial -v
+
+smoke: public-grade-check installability-check package-build-smoke test-installability contract-check claim-to-evidence-check test-contracts test-claim-to-evidence failure-path-smoke adversarial-smoke test-failure-path-hardening test-adversarial
 
 verify: smoke
 

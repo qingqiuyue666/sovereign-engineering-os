@@ -25,6 +25,12 @@ external recognition or final signoff.
   review handoff.
 - `scripts/contract_check_v1.py`, `scripts/claim_to_evidence_check_v1.py`, and
   matching tracer-bullet tests.
+- Fail-closed and adversarial smoke coverage for missing tasks, bad workspaces,
+  duplicate task ids, rejected tasks, corrupted evidence, tag mismatch, fake
+  PASS logs, path traversal, shell metacharacters, Unicode/long fields, and
+  prompt-injection text.
+- `scripts/failure_path_smoke_v1.sh`, `scripts/adversarial_smoke_v1.py`, and
+  failure-path baseline reports.
 
 ### Changed
 
