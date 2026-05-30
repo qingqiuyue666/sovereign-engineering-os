@@ -42,6 +42,10 @@ external recognition or final signoff.
   model output artifacts, human approval before patch, and provider failure
   handling.
 - `scripts/ai_admission_check_v1.py` and matching tracer-bullet tests.
+- Dogfooding evidence index and records for real merged repository-maintenance
+  tasks covering identity/docs, installability, fail-closed behavior, AI
+  admission safety, and security/supply-chain hardening.
+- `scripts/dogfood_evidence_check_v1.py` and matching tracer-bullet tests.
 
 ### Changed
 
