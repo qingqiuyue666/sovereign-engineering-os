@@ -1,4 +1,4 @@
-.PHONY: ci test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-real-runtime-provider-transport-execution test-production-autonomy-final-gate test-runtime-sealed-receipt test-generic-payload-shadow test-protected-evidence-storage test-protected-evidence-storage-implementation test-real-hmac-policy-realization test-real-merkle-proof-realization test-generic-payload-full-enforcement test-schemas test-tracer-bullet test-acceptance diff-check health local-bootstrap local-smoke local-stop local-reset identity-check public-grade-check
+.PHONY: ci test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-real-runtime-provider-transport-execution test-production-autonomy-final-gate test-runtime-sealed-receipt test-generic-payload-shadow test-protected-evidence-storage test-protected-evidence-storage-implementation test-real-hmac-policy-realization test-real-merkle-proof-realization test-generic-payload-full-enforcement test-schemas test-tracer-bullet test-acceptance diff-check health local-bootstrap local-smoke local-stop local-reset identity-check public-grade-check execution-permit-check test-execution-permit controlled-executor-smoke test-controlled-executor creative-real-execution-evidence-check
 .PHONY: test-runtime-execution-descriptor test-dry-run-orchestrator test-runtime-integration-trace test-completion-audit test-runtime-integration-hardening
 .PHONY: test-security-classification test-secret-scanner test-environment-sanitizer test-anti-exfiltration-gate test-ai-context-firewall test-repository-hygiene test-leak-prevention-foundation
 .PHONY: test-wal-integrity-guard test-taint-propagation test-artifact-provenance test-wal-integrity-contract test-capability-token-policy test-security-truth-substrate
@@ -198,6 +198,24 @@ creative-public-release-check:
 
 creative-total-check:
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/creative_total_check_v3.py
+
+execution-permit-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/execution_permit_check_v1.py
+
+test-execution-permit:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_execution_permit_v1 -v
+
+controlled-executor-smoke:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/controlled_executor_smoke_v1.py
+
+test-controlled-executor:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_controlled_process_runner_v1 -v
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_fake_dcc_adapter_v1 -v
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_execution_evidence_integration_v1 -v
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_houdini_adapter_contract_v1 -v
+
+creative-real-execution-evidence-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/creative_real_execution_evidence_check_v1.py
 
 test-root-integrity:
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_root_integrity_verifier -v
