@@ -14,6 +14,7 @@ from creative.assets.duplicate_candidate_detector import detect_duplicate_candid
 from creative.assets.local_asset_library import build_asset_library_scan, write_asset_library_outputs
 from creative.assets.missing_part_detector import detect_missing_parts
 from creative.reports.dashboard import build_dashboard
+from creative.reports.local_production_dashboard import build_local_production_dashboard
 from creative.shots.shot_report import build_shot_report
 from creative.shots.shot_workspace import create_shot_workspace
 from creative.software.doctor import run_doctor
@@ -23,7 +24,7 @@ from creative.common import ADAPTER_NAMES, repo_root
 def main(argv: list[str] | None = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     if not args or args[0] in {"--help", "-h", "help"}:
-        print("seos creative init|scan-assets|search-assets|archive-check|asset|shot|adapter|comfyui|blender|evidence|dashboard|doctor|launch-check|health|adoption-status")
+        print("seos creative init|scan-assets|search-assets|archive-check|asset|shot|adapter|comfyui|blender|evidence|dashboard|production-dashboard|doctor|launch-check|health|adoption-status")
         return 0
     command = args[0]
     rest = args[1:]
@@ -58,6 +59,8 @@ def main(argv: list[str] | None = None) -> int:
             )
         if command == "search-assets":
             return _search_assets(rest)
+        if command == "production-dashboard":
+            return _production_dashboard(rest)
         if command == "archive-check":
             records = build_registry(Path(_option(rest, "--root", "tests/fixtures/creative/archives")))
             groups = detect_archive_groups(records)
@@ -91,6 +94,8 @@ def main(argv: list[str] | None = None) -> int:
             return _emit({"ok": True, "ledger": path.relative_to(repo_root()).as_posix() if path.exists() else "missing", "row_count": len(rows)})
         if command == "dashboard" and rest[:1] == ["build"]:
             return _emit(build_dashboard(repo_root() / "reports/creative/dashboard"))
+        if command == "dashboard" and rest[:1] == ["production"]:
+            return _production_dashboard(rest[1:])
         if command == "doctor":
             return _emit(run_doctor())
         if command in {"launch-check", "health"}:
@@ -133,6 +138,23 @@ def _search_assets(rest: list[str]) -> int:
         limit=_option_int(rest, "--limit", 50),
     )
     return _emit(result)
+
+def _production_dashboard(rest: list[str]) -> int:
+    mode = _option(rest, "--mode", "public")
+    registry_value = _option(rest, "--registry-json")
+    root_value = _option(rest, "--root")
+    report = build_or_load_report(
+        registry_json=Path(registry_value) if registry_value else None,
+        root=Path(root_value) if root_value else None,
+        mode=mode,
+        max_depth=_option_int(rest, "--max-depth", 12),
+    )
+    dashboard = build_local_production_dashboard(
+        report,
+        output_markdown=Path(_option(rest, "--output-md")) if _option(rest, "--output-md") else None,
+        output_html=Path(_option(rest, "--output-html")) if _option(rest, "--output-html") else None,
+    )
+    return _emit(dashboard)
 
 def _option(args: list[str], name: str, default: str = "") -> str:
     if name not in args:

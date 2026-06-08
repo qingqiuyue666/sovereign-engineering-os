@@ -92,11 +92,27 @@ python3 seos.py creative search-assets \
 Public mode strips local absolute paths from returned items. Local mode should
 stay operator-private.
 
+## Build A Local Production Dashboard
+
+Create a single operator dashboard from the generated asset report:
+
+```bash
+python3 seos.py creative production-dashboard \
+  --registry-json reports/creative/assets/local_asset_library.public.json \
+  --output-md reports/creative/assets/local_production_dashboard.md \
+  --output-html reports/creative/assets/local_production_dashboard.html
+```
+
+The dashboard shows asset category counts, largest folders, duplicate groups,
+empty folders, missing archive warnings, texture and pack status, production
+readiness by tool category, cleanup recommendations, and next actions.
+
 ## Validation
 
 ```bash
 make creative-real-asset-scanner-check
 make creative-asset-search-check
+make creative-production-dashboard-check
 python3 scripts/creative_asset_scan_v3.py --mode public
 git diff --check
 ```

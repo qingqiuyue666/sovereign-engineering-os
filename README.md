@@ -187,6 +187,15 @@ python3 seos.py creative search-assets \
   --query missing-texture-sets
 ```
 
+Build a local production dashboard:
+
+```bash
+python3 seos.py creative production-dashboard \
+  --registry-json reports/creative/assets/local_asset_library.public.json \
+  --output-md reports/creative/assets/local_production_dashboard.md \
+  --output-html reports/creative/assets/local_production_dashboard.html
+```
+
 The creative pipeline defaults to read-only scans, dry-run adapter plans,
 fixture demos, and public/private separation. Real DCC execution, paid assets,
 and external adoption signals require real local evidence or verified external

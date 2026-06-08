@@ -76,11 +76,18 @@ python3 seos.py creative search-assets --registry-json reports/creative/assets/a
 
 ## Step 3: Local Production Dashboard
 
-Next after search.
+Status: implemented by the Step 3A slice.
 
 Turn scan, search, and tool-health results into one operator dashboard with
 category counts, largest folders, duplicate groups, archive warnings, texture
 set status, likely incomplete packs, and next actions.
+
+Validation:
+
+```bash
+make creative-production-dashboard-check
+python3 seos.py creative production-dashboard --registry-json reports/creative/assets/asset_library_report_v1.json --output-md reports/creative/assets/local_production_dashboard_v1.md --output-html reports/creative/assets/local_production_dashboard_v1.html
+```
 
 ## Step 4: Real Local Tool Execution
 
