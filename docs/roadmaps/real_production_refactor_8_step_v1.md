@@ -285,6 +285,29 @@ Improve failure repair suggestions, output packaging, runtime reliability,
 private path sanitization, output size limits, scan speed, and repeated-use
 operator experience.
 
+Status: implemented in `creative hardening-plan`.
+
+This step consumes a pressure-test report and writes a read-only hardening plan
+that:
+
+- turns pressure findings into prioritized repair actions;
+- checks a bounded report package manifest;
+- records per-artifact existence, size, digest, and local-path-leak status;
+- blocks public package readiness if local path markers are found;
+- reports missing or oversized outputs as package repair blockers;
+- keeps repeated-use next actions tied to rerunning pressure tests after
+  repairs.
+
+Validation:
+
+```bash
+make creative-production-hardening-check
+python3 seos.py creative hardening-plan \
+  --pressure-json reports/creative/pressure/real_project_pressure_test_v1.json \
+  --output-json reports/creative/hardening/production_hardening_plan_v1.json \
+  --output-md reports/creative/hardening/production_hardening_plan_v1.md
+```
+
 ## Step 8: Real Works Operation
 
 Use SEOS on repeated energy impact, smoke/dust, portal/lightning, asset-library,

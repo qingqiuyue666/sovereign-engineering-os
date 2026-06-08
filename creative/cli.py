@@ -14,6 +14,7 @@ from creative.assets.asset_search import build_or_load_report, search_asset_libr
 from creative.assets.duplicate_candidate_detector import detect_duplicate_candidates
 from creative.assets.local_asset_library import build_asset_library_scan, write_asset_library_outputs
 from creative.assets.missing_part_detector import detect_missing_parts
+from creative.hardening.production import build_production_hardening_plan
 from creative.reports.dashboard import build_dashboard
 from creative.reports.local_production_dashboard import build_local_production_dashboard
 from creative.reports.local_tool_health_dashboard import build_local_tool_health_dashboard
@@ -38,7 +39,7 @@ from creative.common import ADAPTER_NAMES, repo_root
 def main(argv: list[str] | None = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     if not args or args[0] in {"--help", "-h", "help"}:
-        print("seos creative init|scan-assets|search-assets|pressure-test|archive-check|asset|shot|adapter|comfyui|blender|houdini|evidence|dashboard|production-dashboard|tool-health-dashboard|houdini-smoke|comfyui-smoke|optional-adapter-contracts|doctor|launch-check|health|adoption-status")
+        print("seos creative init|scan-assets|search-assets|pressure-test|hardening-plan|archive-check|asset|shot|adapter|comfyui|blender|houdini|evidence|dashboard|production-dashboard|tool-health-dashboard|houdini-smoke|comfyui-smoke|optional-adapter-contracts|doctor|launch-check|health|adoption-status")
         return 0
     command = args[0]
     rest = args[1:]
@@ -75,6 +76,8 @@ def main(argv: list[str] | None = None) -> int:
             return _search_assets(rest)
         if command == "pressure-test":
             return _pressure_test(rest)
+        if command == "hardening-plan":
+            return _hardening_plan(rest)
         if command == "production-dashboard":
             return _production_dashboard(rest)
         if command == "tool-health-dashboard":
@@ -109,6 +112,10 @@ def main(argv: list[str] | None = None) -> int:
             return _pressure_test(rest[1:])
         if command == "pressure" and rest[:1] == ["test"]:
             return _pressure_test(rest[1:])
+        if command == "hardening" and rest[:1] == ["plan"]:
+            return _hardening_plan(rest[1:])
+        if command == "production" and rest[:1] == ["hardening-plan"]:
+            return _hardening_plan(rest[1:])
         if command == "adapter" and rest[:1] == ["list"]:
             return _emit({"ok": True, "adapters": list(ADAPTER_NAMES)})
         if command == "adapter" and rest[:1] == ["detect"]:
@@ -314,6 +321,19 @@ def _pressure_test(rest: list[str]) -> int:
     )
     return _emit(report)
 
+def _hardening_plan(rest: list[str]) -> int:
+    pressure_json = Path(_option(rest, "--pressure-json", "reports/creative/pressure/real_project_pressure_test_v1.json"))
+    pressure_report = json.loads(pressure_json.read_text(encoding="utf-8"))
+    report = build_production_hardening_plan(
+        pressure_report,
+        package_paths=_options(rest, "--package-path") or None,
+        max_artifact_bytes=_option_int(rest, "--max-artifact-bytes", 1_000_000),
+        max_total_bytes=_option_int(rest, "--max-total-bytes", 5_000_000),
+        output_json=Path(_option(rest, "--output-json")) if _option(rest, "--output-json") else None,
+        output_markdown=Path(_option(rest, "--output-md")) if _option(rest, "--output-md") else None,
+    )
+    return _emit(report)
+
 def _option(args: list[str], name: str, default: str = "") -> str:
     if name not in args:
         return default
@@ -329,6 +349,13 @@ def _option_int(args: list[str], name: str, default: int) -> int:
 def _option_optional_int(args: list[str], name: str) -> int | None:
     value = _option(args, name, "")
     return int(value) if value else None
+
+def _options(args: list[str], name: str) -> list[str]:
+    values = []
+    for index, item in enumerate(args):
+        if item == name and index + 1 < len(args):
+            values.append(args[index + 1])
+    return values
 
 def _positional(args: list[str]) -> str:
     skip = False

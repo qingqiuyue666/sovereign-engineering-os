@@ -290,6 +290,20 @@ real blockers or repair work such as missing archive parts, duplicate review,
 incomplete packs, missing required shot assets, and unavailable optional local
 runners. It does not launch tools or submit jobs.
 
+Turn pressure findings into a production hardening plan:
+
+```bash
+python3 seos.py creative hardening-plan \
+  --pressure-json reports/creative/pressure/real_project_pressure_test_v1.json \
+  --output-json reports/creative/hardening/production_hardening_plan_v1.json \
+  --output-md reports/creative/hardening/production_hardening_plan_v1.md
+```
+
+The hardening plan creates prioritized repair actions and a manifest of public
+production reports with existence, size, digest, and local-path-leak checks. It
+does not copy files, build archives, mutate assets, launch tools, or submit
+jobs.
+
 The creative pipeline defaults to read-only scans, dry-run adapter plans,
 fixture demos, and public/private separation. Real DCC execution, paid assets,
 and external adoption signals require real local evidence or verified external

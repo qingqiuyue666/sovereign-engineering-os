@@ -1,0 +1,283 @@
+{
+  "action_summary": {
+    "P0": 0,
+    "P1": 5,
+    "P2": 2,
+    "P3": 1,
+    "total_actions": 8
+  },
+  "destructive_actions_performed": false,
+  "execution_performed": false,
+  "hardening_status": "NEEDS_REPAIR_BEFORE_EXECUTION",
+  "kind": "production_hardening_plan_v1",
+  "next_actions": [
+    "Review duplicate groups manually before deleting, archiving, or packaging anything.",
+    "Restore missing archive parts before extraction or production use.",
+    "Decide whether empty directories are intentional placeholders or stale clutter.",
+    "Fill missing texture maps or mark the lookdev set as intentionally partial.",
+    "Resolve incomplete model/material/texture packs before binding them to shots.",
+    "Resolve local tool health for houdini_hython_smoke (NOT_FOUND) before using the optional runner.",
+    "Resolve local tool health for comfyui_workflow_smoke (CONFIG_REQUIRED) before using the optional runner.",
+    "Treat optional adapters as contract-only until adapter-specific local proof exists.",
+    "Rerun creative pressure-test after repairs and compare the new hardening plan.",
+    "Keep final creative and production approval human-owned."
+  ],
+  "ok": true,
+  "output_package_manifest_only": true,
+  "outputs": {
+    "json": "reports/creative/hardening/production_hardening_plan_v1.json",
+    "markdown": "reports/creative/hardening/production_hardening_plan_v1.md"
+  },
+  "package_manifest": [
+    {
+      "exists": true,
+      "local_path_leak_detected": false,
+      "partial_sha256": "sha256:af8b84e3c058b77f96b69cfb38c0038df89a53ef5e6343a5a396b66a9d60c293",
+      "path": "reports/creative/assets/asset_library_report_v1.json",
+      "size_bytes": 25323,
+      "status": "READY",
+      "within_size_limit": true
+    },
+    {
+      "exists": true,
+      "local_path_leak_detected": false,
+      "partial_sha256": "sha256:9819c7e8a9fca053f02f5a84bbbc7d6a3f73fb24547691c8f7e1c9cd74903d65",
+      "path": "reports/creative/assets/asset_library_report_v1.md",
+      "size_bytes": 2535,
+      "status": "READY",
+      "within_size_limit": true
+    },
+    {
+      "exists": true,
+      "local_path_leak_detected": false,
+      "partial_sha256": "sha256:5e47a9a9dc1d0b0a8ce6710a763b0e3d4f5de13cc77d329b960404e2de642a78",
+      "path": "reports/creative/assets/local_production_dashboard_v1.md",
+      "size_bytes": 3371,
+      "status": "READY",
+      "within_size_limit": true
+    },
+    {
+      "exists": true,
+      "local_path_leak_detected": false,
+      "partial_sha256": "sha256:2ebe2c54844fa30fb57ee28249b49bb3c5023f70b8253a3b7654cc641a606e43",
+      "path": "reports/creative/assets/local_production_dashboard_v1.html",
+      "size_bytes": 5310,
+      "status": "READY",
+      "within_size_limit": true
+    },
+    {
+      "exists": true,
+      "local_path_leak_detected": false,
+      "partial_sha256": "sha256:5b738210906462a91860227cd2333a772e1abb7d2343cfad56dc5599cec9adec",
+      "path": "reports/creative/tool_health/local_tool_health_dashboard_v1.json",
+      "size_bytes": 6803,
+      "status": "READY",
+      "within_size_limit": true
+    },
+    {
+      "exists": true,
+      "local_path_leak_detected": false,
+      "partial_sha256": "sha256:80bd83afda03a4e56aedaa14bebbe287aa612d69aea3b6808c88eb4d744c59ef",
+      "path": "reports/creative/tool_health/local_tool_health_dashboard_v1.md",
+      "size_bytes": 3510,
+      "status": "READY",
+      "within_size_limit": true
+    },
+    {
+      "exists": true,
+      "local_path_leak_detected": false,
+      "partial_sha256": "sha256:12d6c7bca43800466ba7cd2ea9e7dbefa22d5880570820435825f2109e0d8a37",
+      "path": "reports/creative/adapters/optional_adapter_contracts_v1.json",
+      "size_bytes": 11214,
+      "status": "READY",
+      "within_size_limit": true
+    },
+    {
+      "exists": true,
+      "local_path_leak_detected": false,
+      "partial_sha256": "sha256:325e28714683a9f210ee31fd95f4a9df5de1375af44f6e6f644b22862300a2bb",
+      "path": "reports/creative/adapters/optional_adapter_contracts_v1.md",
+      "size_bytes": 4847,
+      "status": "READY",
+      "within_size_limit": true
+    },
+    {
+      "exists": true,
+      "local_path_leak_detected": false,
+      "partial_sha256": "sha256:7b688714c20e1a369d175a7550c77b55c947f1e693edfcf6ad0e0867aecb352e",
+      "path": "reports/creative/shots/shot_plan_energy_impact_v1.json",
+      "size_bytes": 7122,
+      "status": "READY",
+      "within_size_limit": true
+    },
+    {
+      "exists": true,
+      "local_path_leak_detected": false,
+      "partial_sha256": "sha256:9acb839e242f1fa4e554e358085c48ef22f5c9b71ee8d1a730513eed1a57f247",
+      "path": "reports/creative/shots/shot_plan_energy_impact_v1.md",
+      "size_bytes": 1383,
+      "status": "READY",
+      "within_size_limit": true
+    },
+    {
+      "exists": true,
+      "local_path_leak_detected": false,
+      "partial_sha256": "sha256:36c7c923f6dd230aed88728ae23ff1793355dc270ac5a717376f9190612604e6",
+      "path": "reports/creative/pressure/real_project_pressure_test_v1.json",
+      "size_bytes": 15007,
+      "status": "READY",
+      "within_size_limit": true
+    },
+    {
+      "exists": true,
+      "local_path_leak_detected": false,
+      "partial_sha256": "sha256:24461e07fc08c8a265576c67df47dbf9910a2a4e93524287fdf6422b0c4c1ee1",
+      "path": "reports/creative/pressure/real_project_pressure_test_v1.md",
+      "size_bytes": 3649,
+      "status": "READY",
+      "within_size_limit": true
+    }
+  ],
+  "package_summary": {
+    "artifact_count": 12,
+    "local_path_leak_count": 0,
+    "max_artifact_bytes": 1000000,
+    "max_total_bytes": 5000000,
+    "missing_count": 0,
+    "oversized_count": 0,
+    "package_status": "READY_FOR_HANDOFF",
+    "total_size_bytes": 90074,
+    "within_total_size_limit": true
+  },
+  "pressure_report": {
+    "kind": "real_project_pressure_test_v1",
+    "pressure_status": "USABLE_WITH_MANUAL_REPAIR",
+    "scenario": {
+      "asset_report_kind": "real_local_asset_library_scan_v1",
+      "asset_root": "<asset-root>",
+      "asset_root_name": "assets",
+      "id": "PROJECT_PRESSURE_ENERGY_IMPACT_FIXTURE",
+      "label": "Energy impact fixture pressure test",
+      "scenario_digest": "PRESSURE_4AEFEC158E85",
+      "shot_id": "SHOT_PRESSURE_ENERGY_IMPACT_FIXTURE",
+      "template": "energy_impact"
+    },
+    "source_outputs": {
+      "json": "reports/creative/pressure/real_project_pressure_test_v1.json",
+      "markdown": "reports/creative/pressure/real_project_pressure_test_v1.md"
+    }
+  },
+  "read_only": true,
+  "repair_actions": [
+    {
+      "command": "python3 seos.py creative search-assets --registry-json reports/creative/assets/asset_library_report_v1.json --query duplicate-video-audio",
+      "done_when": "Document the keep/remove decision outside the public fixture report, then rescan.",
+      "evidence": {},
+      "id": "HARDEN_F339336F50F0",
+      "operator_action": "Review duplicate groups manually before deleting, archiving, or packaging anything.",
+      "priority": "P2",
+      "severity": "WARNING",
+      "source_finding_code": "DUPLICATES_REQUIRE_REVIEW",
+      "workstream": "asset_cleanup"
+    },
+    {
+      "command": "python3 seos.py creative search-assets --registry-json reports/creative/assets/asset_library_report_v1.json --query incomplete-archives",
+      "done_when": "Rerun the incomplete archive search and confirm result_count is 0 for production-critical packs.",
+      "evidence": {},
+      "id": "HARDEN_C7FBB86A732A",
+      "operator_action": "Restore missing archive parts before extraction or production use.",
+      "priority": "P1",
+      "severity": "WARNING",
+      "source_finding_code": "ARCHIVE_PART_MISSING",
+      "workstream": "asset_repair"
+    },
+    {
+      "command": "python3 seos.py creative search-assets --registry-json reports/creative/assets/asset_library_report_v1.json --query empty-directories",
+      "done_when": "Rerun the empty-directory search and review remaining paths.",
+      "evidence": {},
+      "id": "HARDEN_A5AA60F6EB0E",
+      "operator_action": "Decide whether empty directories are intentional placeholders or stale clutter.",
+      "priority": "P3",
+      "severity": "INFO",
+      "source_finding_code": "EMPTY_DIRECTORIES_PRESENT",
+      "workstream": "asset_cleanup"
+    },
+    {
+      "command": "python3 seos.py creative search-assets --registry-json reports/creative/assets/asset_library_report_v1.json --query missing-texture-sets",
+      "done_when": "Rerun the missing texture-set search and review remaining results.",
+      "evidence": {},
+      "id": "HARDEN_0D49158A916F",
+      "operator_action": "Fill missing texture maps or mark the lookdev set as intentionally partial.",
+      "priority": "P1",
+      "severity": "WARNING",
+      "source_finding_code": "INCOMPLETE_TEXTURE_SETS",
+      "workstream": "lookdev_repair"
+    },
+    {
+      "command": "python3 seos.py creative search-assets --registry-json reports/creative/assets/asset_library_report_v1.json --query incomplete-packs",
+      "done_when": "Rerun the incomplete pack search and review remaining results.",
+      "evidence": {},
+      "id": "HARDEN_33B196606E61",
+      "operator_action": "Resolve incomplete model/material/texture packs before binding them to shots.",
+      "priority": "P1",
+      "severity": "WARNING",
+      "source_finding_code": "INCOMPLETE_PRODUCTION_PACKS",
+      "workstream": "asset_repair"
+    },
+    {
+      "command": "python3 seos.py creative tool-health-dashboard --mode public",
+      "done_when": "Rerun the tool-health dashboard and confirm the runner status is no longer NOT_FOUND or CONFIG_REQUIRED.",
+      "evidence": {
+        "readiness": "NOT_FOUND",
+        "runner_id": "houdini_hython_smoke"
+      },
+      "id": "HARDEN_88A6BE2D822C",
+      "operator_action": "Resolve local tool health for houdini_hython_smoke (NOT_FOUND) before using the optional runner.",
+      "priority": "P1",
+      "severity": "WARNING",
+      "source_finding_code": "LOCAL_RUNNER_NOT_READY",
+      "workstream": "local_runner_readiness"
+    },
+    {
+      "command": "python3 seos.py creative tool-health-dashboard --mode public",
+      "done_when": "Rerun the tool-health dashboard and confirm the runner status is no longer NOT_FOUND or CONFIG_REQUIRED.",
+      "evidence": {
+        "readiness": "CONFIG_REQUIRED",
+        "runner_id": "comfyui_workflow_smoke"
+      },
+      "id": "HARDEN_07B1128BA62E",
+      "operator_action": "Resolve local tool health for comfyui_workflow_smoke (CONFIG_REQUIRED) before using the optional runner.",
+      "priority": "P1",
+      "severity": "WARNING",
+      "source_finding_code": "LOCAL_RUNNER_NOT_READY",
+      "workstream": "local_runner_readiness"
+    },
+    {
+      "command": "python3 seos.py creative optional-adapter-contracts --mode public",
+      "done_when": "Open adapter-specific proof PRs before changing supports_execute to true.",
+      "evidence": {
+        "adapters": [
+          "blender",
+          "after_effects",
+          "davinci",
+          "unreal",
+          "zbrush"
+        ]
+      },
+      "id": "HARDEN_A992EE7D44F9",
+      "operator_action": "Treat optional adapters as contract-only until adapter-specific local proof exists.",
+      "priority": "P2",
+      "severity": "INFO",
+      "source_finding_code": "ADAPTERS_CONTRACT_ONLY",
+      "workstream": "adapter_proof"
+    }
+  ],
+  "safety": {
+    "asset_mutation": false,
+    "dcc_or_ai_execution": false,
+    "file_copy_or_archive_creation": false,
+    "local_path_leak_blocks_public_package": true,
+    "package_manifest_only": true
+  },
+  "schema_version": "seos_creative_pipeline_v3"
+}
