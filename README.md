@@ -245,6 +245,18 @@ returns `ENV_NOT_FOUND`; if local ComfyUI is not answering on loopback, it
 returns `SERVICE_UNAVAILABLE`; if approval is missing, it does not post to
 `/prompt`.
 
+Build optional adapter contracts for the remaining creative tools:
+
+```bash
+python3 seos.py creative optional-adapter-contracts \
+  --mode public \
+  --output-json reports/creative/adapters/optional_adapter_contracts.json \
+  --output-md reports/creative/adapters/optional_adapter_contracts.md
+```
+
+This reports Blender, After Effects, DaVinci Resolve, Unreal Engine, and ZBrush
+contract readiness without launching those tools or claiming execution support.
+
 The creative pipeline defaults to read-only scans, dry-run adapter plans,
 fixture demos, and public/private separation. Real DCC execution, paid assets,
 and external adoption signals require real local evidence or verified external

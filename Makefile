@@ -177,7 +177,7 @@ verify: smoke
 
 final-audit-check: verify external-audit-check test-external-audit-packet independent-verification-check test-independent-verification-execution red-team-check test-red-team-execution findings-check test-findings-register operation-evidence-check test-real-world-operation-evidence-program global-signoff-dossier-check test-global-signoff-dossier external-verification-program-check
 
-.PHONY: creative-check creative-doctor creative-asset-scan-check creative-real-asset-scanner-check creative-asset-search-check creative-production-dashboard-check creative-tool-health-dashboard-check creative-houdini-runner-check creative-comfyui-runner-check creative-archive-check creative-dashboard-build creative-public-release-check creative-total-check
+.PHONY: creative-check creative-doctor creative-asset-scan-check creative-real-asset-scanner-check creative-asset-search-check creative-production-dashboard-check creative-tool-health-dashboard-check creative-houdini-runner-check creative-comfyui-runner-check creative-optional-adapter-contracts-check creative-archive-check creative-dashboard-build creative-public-release-check creative-total-check
 
 creative-check: creative-total-check
 
@@ -210,6 +210,10 @@ creative-houdini-runner-check:
 creative-comfyui-runner-check:
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest discover -s tests/creative -p 'test_comfyui_local_runner_v1.py' -v
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/creative_comfyui_workflow_smoke_v1.py --workflow-json tests/fixtures/creative/comfyui/api_workflow_fixture_v1.json --output-root work/creative_runs/comfyui_service_unavailable --observed-at 2026-06-08T00:00:00Z --fixture-service-unavailable --result-json reports/creative/comfyui/comfyui_smoke_service_unavailable_v1.json --materialization-json reports/creative/comfyui/comfyui_smoke_materialization_v1.json
+
+creative-optional-adapter-contracts-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest discover -s tests/creative -p 'test_optional_adapter_contracts_v1.py' -v
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) seos.py creative optional-adapter-contracts --mode public --doctor-json tests/fixtures/creative/software_discovery/local_tool_health_doctor_fixture_v1.json --output-json reports/creative/adapters/optional_adapter_contracts_v1.json --output-md reports/creative/adapters/optional_adapter_contracts_v1.md
 
 creative-archive-check:
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/creative_archive_check_v3.py

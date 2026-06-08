@@ -182,9 +182,33 @@ Residual boundaries:
 
 ## Step 4C: Optional Adapter Contracts V1
 
-Add truthful extension contracts for Blender, After Effects, DaVinci Resolve,
-Unreal Engine, and ZBrush without requiring proprietary tools in default CI or
-claiming execution support before real local evidence exists.
+Status: implemented by the Step 4C slice.
+
+Operator value:
+
+- publish JSON and Markdown optional adapter contracts for Blender, After
+  Effects, DaVinci Resolve, Unreal Engine, and ZBrush;
+- report current discovery status from the tool-health doctor;
+- list exact allowed and disallowed actions for each adapter;
+- preserve `supports_execute: false` for every optional adapter until a
+  separate approval-gated runner exists;
+- identify the next local proof required before each adapter can advance;
+- avoid requiring proprietary tools in default CI through fixture-backed tests.
+
+Validation:
+
+```bash
+make creative-optional-adapter-contracts-check
+python3 seos.py creative optional-adapter-contracts --mode public --doctor-json tests/fixtures/creative/software_discovery/local_tool_health_doctor_fixture_v1.json --output-json reports/creative/adapters/optional_adapter_contracts_v1.json --output-md reports/creative/adapters/optional_adapter_contracts_v1.md
+```
+
+Residual boundaries:
+
+- these contracts do not launch Blender, After Effects, DaVinci Resolve, Unreal
+  Engine, or ZBrush;
+- these contracts do not submit render, import, export, commandlet, or GUI jobs;
+- future real runners must land as separate slices with local evidence;
+- ZBrush remains manual handoff/registry-only by default.
 
 ## Step 5: Shot Assistant and Templates
 

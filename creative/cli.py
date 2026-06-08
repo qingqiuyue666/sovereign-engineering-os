@@ -6,6 +6,7 @@ from pathlib import Path
 import json
 import sys
 
+from creative.adapters.optional_contracts import build_optional_adapter_contracts
 from creative.adapters.base.contract import build_adapter_contract
 from creative.assets.asset_registry_builder import build_registry
 from creative.assets.archive_group_detector import detect_archive_groups
@@ -35,7 +36,7 @@ from creative.common import ADAPTER_NAMES, repo_root
 def main(argv: list[str] | None = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     if not args or args[0] in {"--help", "-h", "help"}:
-        print("seos creative init|scan-assets|search-assets|archive-check|asset|shot|adapter|comfyui|blender|houdini|evidence|dashboard|production-dashboard|tool-health-dashboard|houdini-smoke|comfyui-smoke|doctor|launch-check|health|adoption-status")
+        print("seos creative init|scan-assets|search-assets|archive-check|asset|shot|adapter|comfyui|blender|houdini|evidence|dashboard|production-dashboard|tool-health-dashboard|houdini-smoke|comfyui-smoke|optional-adapter-contracts|doctor|launch-check|health|adoption-status")
         return 0
     command = args[0]
     rest = args[1:]
@@ -78,6 +79,8 @@ def main(argv: list[str] | None = None) -> int:
             return _houdini_smoke(rest)
         if command == "comfyui-smoke":
             return _comfyui_smoke(rest)
+        if command == "optional-adapter-contracts":
+            return _optional_adapter_contracts(rest)
         if command == "archive-check":
             records = build_registry(Path(_option(rest, "--root", "tests/fixtures/creative/archives")))
             groups = detect_archive_groups(records)
@@ -101,6 +104,8 @@ def main(argv: list[str] | None = None) -> int:
         if command == "adapter" and rest[:1] == ["dry-run"]:
             adapter = _option(rest, "--adapter", _positional(rest[1:]) or "comfyui")
             return _emit(build_adapter_contract(adapter).dry_run({"id": "JOB_CLI_DRY_RUN"}).as_dict() | {"ok": True})
+        if command == "adapter" and rest[:1] == ["contracts"]:
+            return _optional_adapter_contracts(rest[1:])
         if command == "comfyui" and rest[:1] == ["plan"]:
             return _emit(build_adapter_contract("comfyui").dry_run({"id": "AIG_CLI_PLAN"}).as_dict() | {"ok": True})
         if command == "comfyui" and rest[:1] == ["smoke"]:
@@ -231,6 +236,17 @@ def _comfyui_smoke(rest: list[str]) -> int:
         materialization_json=Path(_option(rest, "--materialization-json")) if _option(rest, "--materialization-json") else None,
     )
     return _emit(result | {"ok": True, "outputs": outputs})
+
+def _optional_adapter_contracts(rest: list[str]) -> int:
+    doctor_json = _option(rest, "--doctor-json")
+    doctor_report = json.loads(Path(doctor_json).read_text(encoding="utf-8")) if doctor_json else None
+    report = build_optional_adapter_contracts(
+        doctor_report,
+        mode=_option(rest, "--mode", "public"),
+        output_json=Path(_option(rest, "--output-json")) if _option(rest, "--output-json") else None,
+        output_markdown=Path(_option(rest, "--output-md")) if _option(rest, "--output-md") else None,
+    )
+    return _emit(report)
 
 def _option(args: list[str], name: str, default: str = "") -> str:
     if name not in args:
