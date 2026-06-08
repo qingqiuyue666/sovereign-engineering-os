@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "asset_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "kind": {
+      "enum": [
+        "fake_dcc_output",
+        "houdini_geometry",
+        "houdini_vdb",
+        "image_sequence",
+        "movie"
+      ],
+      "type": "string"
+    },
+    "lineage": {
+      "additionalProperties": false,
+      "properties": {
+        "adapter": {
+          "type": "string"
+        },
+        "source_inputs": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "task_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "task_id",
+        "adapter",
+        "source_inputs"
+      ],
+      "type": "object"
+    },
+    "permit_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "relative_path": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "run_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "seos_creative_materialization_v1",
+      "type": "string"
+    },
+    "sha256": {
+      "minLength": 71,
+      "type": "string"
+    },
+    "size_bytes": {
+      "minimum": 0,
+      "type": "integer"
+    }
+  },
+  "required": [
+    "schema_version",
+    "asset_id",
+    "run_id",
+    "permit_id",
+    "kind",
+    "created_at",
+    "relative_path",
+    "size_bytes",
+    "sha256",
+    "lineage"
+  ],
+  "title": "SEOS Creative Materialization V1",
+  "type": "object"
+}
+

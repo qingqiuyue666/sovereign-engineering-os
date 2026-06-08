@@ -1,0 +1,27 @@
+{
+  "allowed_action": "smoke_generate_file",
+  "allowed_adapter": "fake_dcc",
+  "allowed_input_roots": [],
+  "allowed_output_root": "work/execution_plane_fixture_output",
+  "created_at": "2026-06-08T00:00:00Z",
+  "destructive_action_allowed": false,
+  "evidence_required": true,
+  "expires_at": "2099-01-01T00:00:00Z",
+  "max_files": 100,
+  "max_output_bytes": 104857600,
+  "max_runtime_seconds": 60,
+  "network_allowed": false,
+  "operator_approval_id": "RCPT_FIXTURE_APPROVAL",
+  "permit_digest": "sha256:cd66e7de180ee545d4307f1b2a7596d812e1cfda101f2a14066defe5c54320bd",
+  "permit_id": "PERMIT_FIXTURE_VALID",
+  "policy_version": "seos_execution_policy_v1",
+  "required_outputs": [
+    {
+      "kind": "manifest",
+      "path": "manifest.json"
+    }
+  ],
+  "schema_version": "seos_execution_permit_v1",
+  "task_id": "TASK_FIXTURE",
+  "write_scope": "single_output_directory"
+}

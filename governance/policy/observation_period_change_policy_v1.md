@@ -10,6 +10,14 @@ A change may proceed during observation only as a blocker-only exception. The ex
 
 New runtime modules are not allowed during observation unless a real blocker proves necessity and no smaller fix exists.
 
+A narrow controlled-execution evidence program is allowed only when it is
+framed as closing a hard evidence blocker: the system currently cannot prove
+real local creative execution because no controlled execution plane exists.
+This exception must preserve fail-closed behavior, human approval, permit
+gating, bounded paths, resource budgets, timeout limits, and evidence return.
+It does not authorize uncontrolled runtime expansion, RPA, desktop control,
+browser control, cloud-first dependencies, or autonomous execution authority.
+
 ## Hard Evidence Requirement
 
 Real operation evidence must identify an actual blocker, such as clean clone breakage, CLI fatal bug, evidence trace failure, replay failure, receipt corruption, release or tag metadata inconsistency, security boundary wording error, token or context budget gate failure, real use case blocker, operator runbook failure, or AI worker approval-boundary bypass.

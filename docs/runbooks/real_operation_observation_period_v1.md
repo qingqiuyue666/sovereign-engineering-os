@@ -31,6 +31,14 @@ Only blocker fixes are allowed by default, and each blocker fix must be justifie
 - The proposed fix is the smallest local-first change that resolves the blocker.
 - The PR does not mutate tags, publish a public release, or introduce a new development stage.
 
+Narrow controlled-execution evidence program exception: a bounded execution
+plane may be added only to close the hard evidence blocker that SEOS cannot
+prove real local creative execution with dry-run evidence alone. The exception
+must remain permit-gated, local-first, path-bounded, timeout-bounded,
+network-denied by default, destructive-action-denied by default, and evidence
+returning. It does not authorize RPA, desktop control, browser control,
+cloud-first dependencies, or general runtime expansion.
+
 Hard evidence blocker examples include:
 
 - clean clone breakage

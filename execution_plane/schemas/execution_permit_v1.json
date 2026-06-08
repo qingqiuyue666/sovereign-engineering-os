@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "allowed_action": {
+      "enum": [
+        "smoke_generate_file",
+        "houdini_generate_geometry_cache"
+      ],
+      "type": "string"
+    },
+    "allowed_adapter": {
+      "enum": [
+        "fake_dcc",
+        "houdini_hython"
+      ],
+      "type": "string"
+    },
+    "allowed_input_roots": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "allowed_output_root": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "destructive_action_allowed": {
+      "const": false,
+      "type": "boolean"
+    },
+    "evidence_required": {
+      "const": true,
+      "type": "boolean"
+    },
+    "expires_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "max_files": {
+      "minimum": 1,
+      "type": "integer"
+    },
+    "max_output_bytes": {
+      "minimum": 1,
+      "type": "integer"
+    },
+    "max_runtime_seconds": {
+      "minimum": 1,
+      "type": "integer"
+    },
+    "network_allowed": {
+      "const": false,
+      "type": "boolean"
+    },
+    "operator_approval_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "permit_digest": {
+      "minLength": 71,
+      "type": "string"
+    },
+    "permit_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "policy_version": {
+      "const": "seos_execution_policy_v1",
+      "type": "string"
+    },
+    "required_outputs": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "path": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "path"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "seos_execution_permit_v1",
+      "type": "string"
+    },
+    "task_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "write_scope": {
+      "const": "single_output_directory",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "permit_id",
+    "task_id",
+    "operator_approval_id",
+    "created_at",
+    "expires_at",
+    "allowed_adapter",
+    "allowed_action",
+    "allowed_input_roots",
+    "allowed_output_root",
+    "write_scope",
+    "network_allowed",
+    "destructive_action_allowed",
+    "max_runtime_seconds",
+    "max_output_bytes",
+    "max_files",
+    "required_outputs",
+    "evidence_required",
+    "policy_version",
+    "permit_digest"
+  ],
+  "title": "SEOS Execution Permit V1",
+  "type": "object"
+}
+
