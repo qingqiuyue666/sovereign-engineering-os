@@ -107,12 +107,30 @@ The dashboard shows asset category counts, largest folders, duplicate groups,
 empty folders, missing archive warnings, texture and pack status, production
 readiness by tool category, cleanup recommendations, and next actions.
 
+## Build A Local Tool Health Dashboard
+
+Check local workstation readiness separately from asset status:
+
+```bash
+python3 seos.py creative tool-health-dashboard \
+  --mode public \
+  --output-json reports/creative/tool_health/local_tool_health_dashboard.json \
+  --output-md reports/creative/tool_health/local_tool_health_dashboard.md \
+  --output-html reports/creative/tool_health/local_tool_health_dashboard.html
+```
+
+This report shows Python, Python dependencies, Git, FFmpeg, Houdini/hython,
+ComfyUI, Blender, After Effects, DaVinci Resolve, Unreal Engine, and ZBrush
+availability. It does not launch DCC or AI tools and does not check out
+licenses.
+
 ## Validation
 
 ```bash
 make creative-real-asset-scanner-check
 make creative-asset-search-check
 make creative-production-dashboard-check
+make creative-tool-health-dashboard-check
 python3 scripts/creative_asset_scan_v3.py --mode public
 git diff --check
 ```

@@ -196,6 +196,21 @@ python3 seos.py creative production-dashboard \
   --output-html reports/creative/assets/local_production_dashboard.html
 ```
 
+Build a local tool-health dashboard:
+
+```bash
+python3 seos.py creative tool-health-dashboard \
+  --mode public \
+  --output-json reports/creative/tool_health/local_tool_health_dashboard.json \
+  --output-md reports/creative/tool_health/local_tool_health_dashboard.md \
+  --output-html reports/creative/tool_health/local_tool_health_dashboard.html
+```
+
+The tool-health dashboard reports Python, Python dependencies, Git, FFmpeg,
+Houdini/hython, ComfyUI, Blender, After Effects, DaVinci Resolve, Unreal Engine,
+and ZBrush availability without launching DCC or AI tools or requiring
+proprietary tools in default CI.
+
 The creative pipeline defaults to read-only scans, dry-run adapter plans,
 fixture demos, and public/private separation. Real DCC execution, paid assets,
 and external adoption signals require real local evidence or verified external

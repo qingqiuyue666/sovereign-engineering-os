@@ -1,0 +1,76 @@
+{
+  "destructive_actions_performed": false,
+  "ok": true,
+  "schema_version": "seos_creative_pipeline_v3",
+  "software": {
+    "after_effects": {
+      "path": "",
+      "status": "CONFIG_REQUIRED"
+    },
+    "apple_silicon": {
+      "status": "FOUND_AND_SMOKE_PASSED"
+    },
+    "blender": {
+      "path": "/opt/creative/Blender.app",
+      "status": "FOUND_BUT_REQUIRES_USER_LAUNCH"
+    },
+    "comfyui": {
+      "path": "",
+      "status": "CONFIG_REQUIRED"
+    },
+    "davinci": {
+      "path": "",
+      "status": "CONFIG_REQUIRED"
+    },
+    "ffmpeg": {
+      "path": "/opt/tools/ffmpeg",
+      "status": "FOUND_BUT_UNTESTED"
+    },
+    "git": {
+      "path": "/opt/tools/git",
+      "status": "FOUND_BUT_UNTESTED"
+    },
+    "houdini": {
+      "path": "",
+      "status": "NOT_FOUND"
+    },
+    "macos": {
+      "status": "FOUND_AND_SMOKE_PASSED",
+      "version": "macOS-fixture"
+    },
+    "python": {
+      "path": "/opt/seos/bin/python",
+      "status": "FOUND_AND_SMOKE_PASSED",
+      "version": "3.13.0"
+    },
+    "python_dependencies": {
+      "path": "",
+      "status": "FOUND_AND_SMOKE_PASSED",
+      "version": "present 1/1"
+    },
+    "unreal": {
+      "path": "",
+      "status": "CONFIG_REQUIRED"
+    },
+    "zbrush": {
+      "path": "",
+      "status": "NOT_FOUND"
+    }
+  },
+  "python_dependency_details": [
+    {
+      "name": "openpyxl",
+      "status": "FOUND",
+      "version": "3.1-fixture"
+    }
+  ],
+  "summary": "Fixture-backed checks can run without DCC licenses; live DCC smoke tests require local installation.",
+  "warnings": [
+    "houdini",
+    "comfyui",
+    "after_effects",
+    "davinci",
+    "unreal",
+    "zbrush"
+  ]
+}

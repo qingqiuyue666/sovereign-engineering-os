@@ -15,6 +15,7 @@ from creative.assets.local_asset_library import build_asset_library_scan, write_
 from creative.assets.missing_part_detector import detect_missing_parts
 from creative.reports.dashboard import build_dashboard
 from creative.reports.local_production_dashboard import build_local_production_dashboard
+from creative.reports.local_tool_health_dashboard import build_local_tool_health_dashboard
 from creative.shots.shot_report import build_shot_report
 from creative.shots.shot_workspace import create_shot_workspace
 from creative.software.doctor import run_doctor
@@ -24,7 +25,7 @@ from creative.common import ADAPTER_NAMES, repo_root
 def main(argv: list[str] | None = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     if not args or args[0] in {"--help", "-h", "help"}:
-        print("seos creative init|scan-assets|search-assets|archive-check|asset|shot|adapter|comfyui|blender|evidence|dashboard|production-dashboard|doctor|launch-check|health|adoption-status")
+        print("seos creative init|scan-assets|search-assets|archive-check|asset|shot|adapter|comfyui|blender|evidence|dashboard|production-dashboard|tool-health-dashboard|doctor|launch-check|health|adoption-status")
         return 0
     command = args[0]
     rest = args[1:]
@@ -61,6 +62,8 @@ def main(argv: list[str] | None = None) -> int:
             return _search_assets(rest)
         if command == "production-dashboard":
             return _production_dashboard(rest)
+        if command == "tool-health-dashboard":
+            return _tool_health_dashboard(rest)
         if command == "archive-check":
             records = build_registry(Path(_option(rest, "--root", "tests/fixtures/creative/archives")))
             groups = detect_archive_groups(records)
@@ -96,6 +99,8 @@ def main(argv: list[str] | None = None) -> int:
             return _emit(build_dashboard(repo_root() / "reports/creative/dashboard"))
         if command == "dashboard" and rest[:1] == ["production"]:
             return _production_dashboard(rest[1:])
+        if command == "dashboard" and rest[:1] == ["tool-health"]:
+            return _tool_health_dashboard(rest[1:])
         if command == "doctor":
             return _emit(run_doctor())
         if command in {"launch-check", "health"}:
@@ -151,6 +156,18 @@ def _production_dashboard(rest: list[str]) -> int:
     )
     dashboard = build_local_production_dashboard(
         report,
+        output_markdown=Path(_option(rest, "--output-md")) if _option(rest, "--output-md") else None,
+        output_html=Path(_option(rest, "--output-html")) if _option(rest, "--output-html") else None,
+    )
+    return _emit(dashboard)
+
+def _tool_health_dashboard(rest: list[str]) -> int:
+    doctor_json = _option(rest, "--doctor-json")
+    doctor_report = json.loads(Path(doctor_json).read_text(encoding="utf-8")) if doctor_json else None
+    dashboard = build_local_tool_health_dashboard(
+        doctor_report,
+        mode=_option(rest, "--mode", "public"),
+        output_json=Path(_option(rest, "--output-json")) if _option(rest, "--output-json") else None,
         output_markdown=Path(_option(rest, "--output-md")) if _option(rest, "--output-md") else None,
         output_html=Path(_option(rest, "--output-html")) if _option(rest, "--output-html") else None,
     )

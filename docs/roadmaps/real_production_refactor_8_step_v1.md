@@ -74,19 +74,45 @@ make creative-asset-search-check
 python3 seos.py creative search-assets --registry-json reports/creative/assets/asset_library_report_v1.json --query missing-texture-sets
 ```
 
-## Step 3: Local Production Dashboard
+## Step 3A: Local Production Dashboard V1
 
 Status: implemented by the Step 3A slice.
 
 Turn scan, search, and tool-health results into one operator dashboard with
 category counts, largest folders, duplicate groups, archive warnings, texture
-set status, likely incomplete packs, and next actions.
+set status, likely incomplete packs, and next actions. The Step 3A dashboard is
+truthful about tool readiness: it reports assets by tool category but does not
+pretend tool-health smoke checks have been run.
 
 Validation:
 
 ```bash
 make creative-production-dashboard-check
 python3 seos.py creative production-dashboard --registry-json reports/creative/assets/asset_library_report_v1.json --output-md reports/creative/assets/local_production_dashboard_v1.md --output-html reports/creative/assets/local_production_dashboard_v1.html
+```
+
+## Step 3B: Local Tool Health Dashboard V1
+
+Status: implemented by the Step 3B slice.
+
+Operator value:
+
+- report local availability for Python, Python dependencies, Git, FFmpeg,
+  Houdini/hython, ComfyUI, Blender, After Effects, DaVinci Resolve, Unreal
+  Engine, and ZBrush;
+- show found/missing/config-required status;
+- show versions and sanitized configured paths where detectable;
+- distinguish smoke-passed, path-detected, app-detected, config-required,
+  environment-not-found, and license-blocked style evidence;
+- produce JSON, Markdown, and HTML reports;
+- avoid launching DCC or AI tools and avoid checking out licenses;
+- keep proprietary tools optional for default CI.
+
+Validation:
+
+```bash
+make creative-tool-health-dashboard-check
+python3 seos.py creative tool-health-dashboard --mode public --doctor-json tests/fixtures/creative/software_discovery/local_tool_health_doctor_fixture_v1.json --output-json reports/creative/tool_health/local_tool_health_dashboard_v1.json --output-md reports/creative/tool_health/local_tool_health_dashboard_v1.md --output-html reports/creative/tool_health/local_tool_health_dashboard_v1.html
 ```
 
 ## Step 4: Real Local Tool Execution

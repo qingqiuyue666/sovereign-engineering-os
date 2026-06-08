@@ -68,7 +68,7 @@ Commands:
   replay explain
   failure compress|explain
   ai bundle|repo-map|token-roi
-  creative init|scan-assets|archive-check|asset|shot|adapter|comfyui|blender|evidence|dashboard|doctor|launch-check|health|adoption-status
+  creative init|scan-assets|search-assets|archive-check|asset|shot|adapter|comfyui|blender|evidence|dashboard|production-dashboard|tool-health-dashboard|doctor|launch-check|health|adoption-status
 """
 
 
