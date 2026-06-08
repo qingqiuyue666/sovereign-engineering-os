@@ -249,6 +249,36 @@ Run the asset scan, search, shot planner, and optional local adapters against a
 realistic production task. Convert repo-side failures into fixes and regression
 tests.
 
+Status: implemented in `creative pressure-test`.
+
+This step adds a read-only pressure report that:
+
+- scans or loads a realistic asset root;
+- runs practical search probes for Houdini assets, VDB/cache, duplicate media,
+  incomplete archives, empty directories, incomplete packs, and missing texture
+  sets;
+- builds the production dashboard summary;
+- builds a shot plan for a named template and shot ID;
+- includes local tool health and optional adapter contract context when
+  provided;
+- reports blockers and warnings instead of claiming a perfect project;
+- keeps optional local runners approval-gated and does not execute DCC or AI
+  jobs.
+
+Validation:
+
+```bash
+make creative-real-project-pressure-test-check
+python3 seos.py creative pressure-test \
+  --root tests/fixtures/creative/assets \
+  --template energy-impact \
+  --shot-id SHOT_PRESSURE_ENERGY_IMPACT_FIXTURE \
+  --tool-health-json tests/fixtures/creative/software_discovery/local_tool_health_doctor_fixture_v1.json \
+  --adapter-contracts-json reports/creative/adapters/optional_adapter_contracts_v1.json \
+  --output-json reports/creative/pressure/real_project_pressure_test_v1.json \
+  --output-md reports/creative/pressure/real_project_pressure_test_v1.md
+```
+
 ## Step 7: Production Hardening
 
 Improve failure repair suggestions, output packaging, runtime reliability,

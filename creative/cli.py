@@ -17,6 +17,7 @@ from creative.assets.missing_part_detector import detect_missing_parts
 from creative.reports.dashboard import build_dashboard
 from creative.reports.local_production_dashboard import build_local_production_dashboard
 from creative.reports.local_tool_health_dashboard import build_local_tool_health_dashboard
+from creative.pressure.real_project import build_real_project_pressure_test
 from creative.runners.comfyui_local_runner import (
     ComfyUIWorkflowRequest,
     run_comfyui_workflow_smoke,
@@ -37,7 +38,7 @@ from creative.common import ADAPTER_NAMES, repo_root
 def main(argv: list[str] | None = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     if not args or args[0] in {"--help", "-h", "help"}:
-        print("seos creative init|scan-assets|search-assets|archive-check|asset|shot|adapter|comfyui|blender|houdini|evidence|dashboard|production-dashboard|tool-health-dashboard|houdini-smoke|comfyui-smoke|optional-adapter-contracts|doctor|launch-check|health|adoption-status")
+        print("seos creative init|scan-assets|search-assets|pressure-test|archive-check|asset|shot|adapter|comfyui|blender|houdini|evidence|dashboard|production-dashboard|tool-health-dashboard|houdini-smoke|comfyui-smoke|optional-adapter-contracts|doctor|launch-check|health|adoption-status")
         return 0
     command = args[0]
     rest = args[1:]
@@ -72,6 +73,8 @@ def main(argv: list[str] | None = None) -> int:
             )
         if command == "search-assets":
             return _search_assets(rest)
+        if command == "pressure-test":
+            return _pressure_test(rest)
         if command == "production-dashboard":
             return _production_dashboard(rest)
         if command == "tool-health-dashboard":
@@ -102,6 +105,10 @@ def main(argv: list[str] | None = None) -> int:
             return _shot_plan(rest[1:])
         if command == "shot" and rest[:1] == ["report"]:
             return _emit(build_shot_report(Path(_option(rest, "--shot-root", "work/creative_shots/SHOT_DEMO"))))
+        if command == "project" and rest[:1] == ["pressure-test"]:
+            return _pressure_test(rest[1:])
+        if command == "pressure" and rest[:1] == ["test"]:
+            return _pressure_test(rest[1:])
         if command == "adapter" and rest[:1] == ["list"]:
             return _emit({"ok": True, "adapters": list(ADAPTER_NAMES)})
         if command == "adapter" and rest[:1] == ["detect"]:
@@ -278,6 +285,34 @@ def _shot_plan(rest: list[str]) -> int:
         output_markdown=Path(_option(rest, "--output-md")) if _option(rest, "--output-md") else None,
     )
     return _emit(plan)
+
+def _pressure_test(rest: list[str]) -> int:
+    mode = _option(rest, "--mode", "public")
+    registry_value = _option(rest, "--registry-json")
+    root_value = _option(rest, "--root")
+    tool_health_json = _option(rest, "--tool-health-json")
+    adapter_contracts_json = _option(rest, "--adapter-contracts-json")
+    asset_report = build_or_load_report(
+        registry_json=Path(registry_value) if registry_value else None,
+        root=Path(root_value) if root_value else None,
+        mode=mode,
+        max_depth=_option_int(rest, "--max-depth", 12),
+    )
+    tool_health_report = json.loads(Path(tool_health_json).read_text(encoding="utf-8")) if tool_health_json else None
+    adapter_contracts_report = json.loads(Path(adapter_contracts_json).read_text(encoding="utf-8")) if adapter_contracts_json else None
+    report = build_real_project_pressure_test(
+        asset_report,
+        template_name=_option(rest, "--template", "energy-impact"),
+        shot_id=_option(rest, "--shot-id", "SHOT_PRESSURE_ENERGY_IMPACT_FIXTURE"),
+        mode=mode,
+        scenario_id=_option(rest, "--scenario-id", "PROJECT_PRESSURE_ENERGY_IMPACT_FIXTURE"),
+        scenario_label=_option(rest, "--scenario-label", "Energy impact fixture pressure test"),
+        tool_health_report=tool_health_report,
+        adapter_contracts_report=adapter_contracts_report,
+        output_json=Path(_option(rest, "--output-json")) if _option(rest, "--output-json") else None,
+        output_markdown=Path(_option(rest, "--output-md")) if _option(rest, "--output-md") else None,
+    )
+    return _emit(report)
 
 def _option(args: list[str], name: str, default: str = "") -> str:
     if name not in args:

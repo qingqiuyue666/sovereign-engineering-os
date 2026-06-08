@@ -272,6 +272,24 @@ Shot templates report available candidates, missing required assets, manual
 steps, and optional approval-gated runner commands without rendering or
 launching creative tools.
 
+Pressure-test the practical project path:
+
+```bash
+python3 seos.py creative pressure-test \
+  --root tests/fixtures/creative/assets \
+  --template energy-impact \
+  --shot-id SHOT_PRESSURE_ENERGY_IMPACT_FIXTURE \
+  --tool-health-json tests/fixtures/creative/software_discovery/local_tool_health_doctor_fixture_v1.json \
+  --adapter-contracts-json reports/creative/adapters/optional_adapter_contracts_v1.json \
+  --output-json reports/creative/pressure/real_project_pressure_test_v1.json \
+  --output-md reports/creative/pressure/real_project_pressure_test_v1.md
+```
+
+The pressure test runs the scan/search/dashboard/shot-planner path and reports
+real blockers or repair work such as missing archive parts, duplicate review,
+incomplete packs, missing required shot assets, and unavailable optional local
+runners. It does not launch tools or submit jobs.
+
 The creative pipeline defaults to read-only scans, dry-run adapter plans,
 fixture demos, and public/private separation. Real DCC execution, paid assets,
 and external adoption signals require real local evidence or verified external
