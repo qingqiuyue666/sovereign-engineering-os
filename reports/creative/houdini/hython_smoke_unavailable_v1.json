@@ -1,0 +1,64 @@
+{
+  "approval": {
+    "approval_id": "",
+    "approved": false,
+    "required": true
+  },
+  "complete": false,
+  "destructive_actions_performed": false,
+  "error_code": "ENV_NOT_FOUND",
+  "execution_attempted": false,
+  "hython": {
+    "checked_candidates": [
+      "tests/fixtures/creative/software_discovery/missing_hython"
+    ],
+    "path": "",
+    "source": "not_found",
+    "status": "NOT_FOUND"
+  },
+  "kind": "houdini_hython_smoke_result_v1",
+  "materialization": {
+    "kind": "houdini_hython_smoke_materialization_v1",
+    "reasons": [
+      "hython executable unavailable"
+    ],
+    "status": "blocked_resource_missing",
+    "target": {
+      "artifact_type": "houdini_hython_smoke_output",
+      "relative_path": "hython_smoke_output_v1.json",
+      "sha256": ""
+    },
+    "target_root": "<local-path:houdini_unavailable>"
+  },
+  "mode": "public",
+  "next_actions": [
+    "Install Houdini/hython, add hython to PATH, or set SEOS_HYTHON_PATH."
+  ],
+  "observed_at": "2026-06-08T00:00:00Z",
+  "ok": true,
+  "output": {
+    "exists": false,
+    "path": "<local-path:hython_smoke_output_v1.json>",
+    "relative_path": "hython_smoke_output_v1.json",
+    "sha256": "",
+    "size_bytes": 0
+  },
+  "output_root": "<local-path:houdini_unavailable>",
+  "planned_output": "hython_smoke_output_v1.json",
+  "process": {
+    "duration_seconds": 0.0,
+    "returncode": null,
+    "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "timed_out": false
+  },
+  "safety": {
+    "arbitrary_command_allowed": false,
+    "dcc_execution_requires_approval": true,
+    "license_checkout_possible_when_executed": true,
+    "network_required_by_seos": false,
+    "shell": false
+  },
+  "schema_version": "seos_houdini_local_runner_v1",
+  "status": "ENV_NOT_FOUND"
+}

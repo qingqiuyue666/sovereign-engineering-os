@@ -211,6 +211,21 @@ Houdini/hython, ComfyUI, Blender, After Effects, DaVinci Resolve, Unreal Engine,
 and ZBrush availability without launching DCC or AI tools or requiring
 proprietary tools in default CI.
 
+Run an approved local Houdini/hython smoke when available:
+
+```bash
+python3 seos.py creative houdini-smoke \
+  --mode public \
+  --output-root work/creative_runs/houdini_smoke \
+  --approve-local-execution \
+  --approval-id approval-houdini-smoke-local-001 \
+  --result-json reports/creative/houdini/hython_smoke_result.local.json \
+  --materialization-json reports/creative/houdini/hython_smoke_materialization.local.json
+```
+
+Without Houdini, the same runner returns truthful `ENV_NOT_FOUND` evidence. If
+Houdini licensing blocks startup, it returns `LICENSE_BLOCKED` evidence.
+
 The creative pipeline defaults to read-only scans, dry-run adapter plans,
 fixture demos, and public/private separation. Real DCC execution, paid assets,
 and external adoption signals require real local evidence or verified external

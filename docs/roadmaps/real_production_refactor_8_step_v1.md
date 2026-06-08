@@ -115,11 +115,49 @@ make creative-tool-health-dashboard-check
 python3 seos.py creative tool-health-dashboard --mode public --doctor-json tests/fixtures/creative/software_discovery/local_tool_health_doctor_fixture_v1.json --output-json reports/creative/tool_health/local_tool_health_dashboard_v1.json --output-md reports/creative/tool_health/local_tool_health_dashboard_v1.md --output-html reports/creative/tool_health/local_tool_health_dashboard_v1.html
 ```
 
-## Step 4: Real Local Tool Execution
+## Step 4A: Houdini Real Local Runner V1
 
-Add only truthful optional adapters. Houdini and ComfyUI should produce real
-evidence where available and unavailable/license-blocked evidence otherwise.
-Default CI must use mocks or unavailable behavior.
+Status: implemented by the Step 4A slice.
+
+Operator value:
+
+- detect `hython` from explicit `--hython`, `SEOS_HYTHON_PATH`, PATH, or common
+  install locations;
+- require explicit operator approval before launching `hython`;
+- run a fixed minimal SEOS smoke driver, not a user-supplied raw command;
+- write one smoke output JSON under the allowed output root;
+- hash the output and record a materialization result;
+- return `ENV_NOT_FOUND`, `USER_APPROVAL_REQUIRED`, `LICENSE_BLOCKED`,
+  `LONG_TASK_BLOCKED`, or `EXECUTION_FAILED` truthfully when execution cannot
+  complete;
+- avoid requiring Houdini in default CI through mocked tests and deterministic
+  unavailable evidence.
+
+Validation:
+
+```bash
+make creative-houdini-runner-check
+python3 scripts/creative_houdini_hython_smoke_v1.py --hython tests/fixtures/creative/software_discovery/missing_hython --output-root work/creative_runs/houdini_unavailable --observed-at 2026-06-08T00:00:00Z --result-json reports/creative/houdini/hython_smoke_unavailable_v1.json --materialization-json reports/creative/houdini/hython_smoke_materialization_v1.json
+```
+
+Residual boundaries:
+
+- real Houdini render execution remains outside this smoke runner;
+- license checkout can still fail locally and is reported as `LICENSE_BLOCKED`;
+- no default CI path requires proprietary SideFX software.
+
+## Step 4B: ComfyUI Real Local Runner V1
+
+Submit a minimal workflow to a running local ComfyUI service when explicitly
+approved, collect output evidence where available, and return
+`SERVICE_UNAVAILABLE` or `ENV_NOT_FOUND` truthfully otherwise. Default CI must
+use mocked service responses or unavailable behavior.
+
+## Step 4C: Optional Adapter Contracts V1
+
+Add truthful extension contracts for Blender, After Effects, DaVinci Resolve,
+Unreal Engine, and ZBrush without requiring proprietary tools in default CI or
+claiming execution support before real local evidence exists.
 
 ## Step 5: Shot Assistant and Templates
 

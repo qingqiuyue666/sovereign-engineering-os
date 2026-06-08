@@ -8,6 +8,7 @@ import platform
 import shutil
 import sys
 from creative.common import SCHEMA_VERSION, sanitize_path
+from creative.runners.houdini_local_runner import discover_hython
 
 def _which(name: str) -> str:
     found = shutil.which(name)
@@ -33,7 +34,8 @@ def discover_software() -> dict[str, object]:
     ffmpeg_path = _which("ffmpeg")
     blender_path = _which("blender") or _macos_app_path("Blender.app")
     blender_requires_launch = bool(blender_path and not _which("blender"))
-    houdini_path = _which("hython")
+    houdini = discover_hython()
+    houdini_path = houdini.path
     zbrush_path = _macos_app_path("ZBrush*.app", "Maxon ZBrush*.app")
     after_effects_path = _macos_app_path("Adobe After Effects */Adobe After Effects *.app")
     davinci_path = _macos_app_path("DaVinci Resolve.app", "DaVinci Resolve/DaVinci Resolve.app")
@@ -46,7 +48,7 @@ def discover_software() -> dict[str, object]:
         "ffmpeg": {"status": _status_for_path(ffmpeg_path), "path": ffmpeg_path},
         "comfyui": {"status": "CONFIG_REQUIRED" if not os.environ.get("COMFYUI_PATH") else "FOUND_BUT_REQUIRES_USER_LAUNCH", "path": sanitize_path(os.environ.get("COMFYUI_PATH", ""))},
         "blender": {"status": _status_for_path(blender_path, app_requires_launch=blender_requires_launch), "path": blender_path},
-        "houdini": {"status": _status_for_path(houdini_path), "path": houdini_path},
+        "houdini": {"status": houdini.status, "path": sanitize_path(houdini_path)},
         "zbrush": {"status": _status_for_path(zbrush_path, app_requires_launch=True), "path": zbrush_path},
         "unreal": {"status": _status_for_path(unreal_path, app_requires_launch=True) if unreal_path else "CONFIG_REQUIRED", "path": unreal_path},
         "davinci": {"status": _status_for_path(davinci_path, app_requires_launch=True) if davinci_path else "CONFIG_REQUIRED", "path": davinci_path},

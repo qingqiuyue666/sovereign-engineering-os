@@ -16,6 +16,11 @@ from creative.assets.missing_part_detector import detect_missing_parts
 from creative.reports.dashboard import build_dashboard
 from creative.reports.local_production_dashboard import build_local_production_dashboard
 from creative.reports.local_tool_health_dashboard import build_local_tool_health_dashboard
+from creative.runners.houdini_local_runner import (
+    HoudiniSmokeRequest,
+    run_houdini_hython_smoke,
+    write_houdini_smoke_reports,
+)
 from creative.shots.shot_report import build_shot_report
 from creative.shots.shot_workspace import create_shot_workspace
 from creative.software.doctor import run_doctor
@@ -25,7 +30,7 @@ from creative.common import ADAPTER_NAMES, repo_root
 def main(argv: list[str] | None = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     if not args or args[0] in {"--help", "-h", "help"}:
-        print("seos creative init|scan-assets|search-assets|archive-check|asset|shot|adapter|comfyui|blender|evidence|dashboard|production-dashboard|tool-health-dashboard|doctor|launch-check|health|adoption-status")
+        print("seos creative init|scan-assets|search-assets|archive-check|asset|shot|adapter|comfyui|blender|houdini|evidence|dashboard|production-dashboard|tool-health-dashboard|houdini-smoke|doctor|launch-check|health|adoption-status")
         return 0
     command = args[0]
     rest = args[1:]
@@ -64,6 +69,8 @@ def main(argv: list[str] | None = None) -> int:
             return _production_dashboard(rest)
         if command == "tool-health-dashboard":
             return _tool_health_dashboard(rest)
+        if command == "houdini-smoke":
+            return _houdini_smoke(rest)
         if command == "archive-check":
             records = build_registry(Path(_option(rest, "--root", "tests/fixtures/creative/archives")))
             groups = detect_archive_groups(records)
@@ -91,6 +98,8 @@ def main(argv: list[str] | None = None) -> int:
             return _emit(build_adapter_contract("comfyui").dry_run({"id": "AIG_CLI_PLAN"}).as_dict() | {"ok": True})
         if command == "blender" and rest[:1] == ["check"]:
             return _emit(build_adapter_contract("blender", "LEVEL_2_SMOKE_TEST").dry_run({"id": "RDR_CLI_PREVIEW"}).as_dict() | {"ok": True})
+        if command == "houdini" and rest[:1] == ["smoke"]:
+            return _houdini_smoke(rest[1:])
         if command == "evidence" and rest[:1] == ["show"]:
             path = repo_root() / _option(rest, "--ledger", "reports/creative/evidence/creative_evidence_ledger.jsonl")
             rows = path.read_text(encoding="utf-8").splitlines() if path.exists() else []
@@ -172,6 +181,24 @@ def _tool_health_dashboard(rest: list[str]) -> int:
         output_html=Path(_option(rest, "--output-html")) if _option(rest, "--output-html") else None,
     )
     return _emit(dashboard)
+
+def _houdini_smoke(rest: list[str]) -> int:
+    request = HoudiniSmokeRequest(
+        output_root=Path(_option(rest, "--output-root", "work/creative_runs/houdini_smoke")),
+        hython_executable=_option(rest, "--hython") or None,
+        mode=_option(rest, "--mode", "public"),
+        approved="--approve-local-execution" in rest,
+        approval_id=_option(rest, "--approval-id", ""),
+        timeout_seconds=float(_option(rest, "--timeout-seconds", "30")),
+        observed_at=_option(rest, "--observed-at") or None,
+    )
+    result = run_houdini_hython_smoke(request)
+    outputs = write_houdini_smoke_reports(
+        result,
+        result_json=Path(_option(rest, "--result-json")) if _option(rest, "--result-json") else None,
+        materialization_json=Path(_option(rest, "--materialization-json")) if _option(rest, "--materialization-json") else None,
+    )
+    return _emit(result | {"ok": True, "outputs": outputs})
 
 def _option(args: list[str], name: str, default: str = "") -> str:
     if name not in args:
