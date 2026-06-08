@@ -27,6 +27,7 @@ from creative.runners.houdini_local_runner import (
     run_houdini_hython_smoke,
     write_houdini_smoke_reports,
 )
+from creative.shots.shot_planner import build_shot_plan, list_shot_templates
 from creative.shots.shot_report import build_shot_report
 from creative.shots.shot_workspace import create_shot_workspace
 from creative.software.doctor import run_doctor
@@ -95,6 +96,10 @@ def main(argv: list[str] | None = None) -> int:
             return _search_assets(rest[1:])
         if command == "shot" and rest[:1] == ["create"]:
             return _emit(create_shot_workspace(Path(_option(rest, "--root", "work/creative_shots")), _option(rest, "--shot-id", "SHOT_DEMO")))
+        if command == "shot" and rest[:1] == ["templates"]:
+            return _emit(list_shot_templates())
+        if command == "shot" and rest[:1] == ["plan"]:
+            return _shot_plan(rest[1:])
         if command == "shot" and rest[:1] == ["report"]:
             return _emit(build_shot_report(Path(_option(rest, "--shot-root", "work/creative_shots/SHOT_DEMO"))))
         if command == "adapter" and rest[:1] == ["list"]:
@@ -247,6 +252,32 @@ def _optional_adapter_contracts(rest: list[str]) -> int:
         output_markdown=Path(_option(rest, "--output-md")) if _option(rest, "--output-md") else None,
     )
     return _emit(report)
+
+def _shot_plan(rest: list[str]) -> int:
+    mode = _option(rest, "--mode", "public")
+    registry_value = _option(rest, "--registry-json")
+    root_value = _option(rest, "--root")
+    tool_health_json = _option(rest, "--tool-health-json")
+    adapter_contracts_json = _option(rest, "--adapter-contracts-json")
+    asset_report = build_or_load_report(
+        registry_json=Path(registry_value) if registry_value else None,
+        root=Path(root_value) if root_value else None,
+        mode=mode,
+        max_depth=_option_int(rest, "--max-depth", 12),
+    )
+    tool_health_report = json.loads(Path(tool_health_json).read_text(encoding="utf-8")) if tool_health_json else None
+    adapter_contracts_report = json.loads(Path(adapter_contracts_json).read_text(encoding="utf-8")) if adapter_contracts_json else None
+    plan = build_shot_plan(
+        asset_report,
+        template_name=_option(rest, "--template", "energy-impact"),
+        shot_id=_option(rest, "--shot-id", "SHOT_DEMO"),
+        mode=mode,
+        tool_health_report=tool_health_report,
+        adapter_contracts_report=adapter_contracts_report,
+        output_json=Path(_option(rest, "--output-json")) if _option(rest, "--output-json") else None,
+        output_markdown=Path(_option(rest, "--output-md")) if _option(rest, "--output-md") else None,
+    )
+    return _emit(plan)
 
 def _option(args: list[str], name: str, default: str = "") -> str:
     if name not in args:

@@ -257,6 +257,21 @@ python3 seos.py creative optional-adapter-contracts \
 This reports Blender, After Effects, DaVinci Resolve, Unreal Engine, and ZBrush
 contract readiness without launching those tools or claiming execution support.
 
+Build a practical shot plan from scanned assets:
+
+```bash
+python3 seos.py creative shot plan \
+  --template energy-impact \
+  --shot-id SHOT_ENERGY_IMPACT_001 \
+  --registry-json reports/creative/assets/asset_library_report_v1.json \
+  --output-json reports/creative/shots/shot_plan_energy_impact.json \
+  --output-md reports/creative/shots/shot_plan_energy_impact.md
+```
+
+Shot templates report available candidates, missing required assets, manual
+steps, and optional approval-gated runner commands without rendering or
+launching creative tools.
+
 The creative pipeline defaults to read-only scans, dry-run adapter plans,
 fixture demos, and public/private separation. Real DCC execution, paid assets,
 and external adoption signals require real local evidence or verified external

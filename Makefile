@@ -177,7 +177,7 @@ verify: smoke
 
 final-audit-check: verify external-audit-check test-external-audit-packet independent-verification-check test-independent-verification-execution red-team-check test-red-team-execution findings-check test-findings-register operation-evidence-check test-real-world-operation-evidence-program global-signoff-dossier-check test-global-signoff-dossier external-verification-program-check
 
-.PHONY: creative-check creative-doctor creative-asset-scan-check creative-real-asset-scanner-check creative-asset-search-check creative-production-dashboard-check creative-tool-health-dashboard-check creative-houdini-runner-check creative-comfyui-runner-check creative-optional-adapter-contracts-check creative-archive-check creative-dashboard-build creative-public-release-check creative-total-check
+.PHONY: creative-check creative-doctor creative-asset-scan-check creative-real-asset-scanner-check creative-asset-search-check creative-production-dashboard-check creative-tool-health-dashboard-check creative-houdini-runner-check creative-comfyui-runner-check creative-optional-adapter-contracts-check creative-shot-planner-check creative-archive-check creative-dashboard-build creative-public-release-check creative-total-check
 
 creative-check: creative-total-check
 
@@ -214,6 +214,10 @@ creative-comfyui-runner-check:
 creative-optional-adapter-contracts-check:
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest discover -s tests/creative -p 'test_optional_adapter_contracts_v1.py' -v
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) seos.py creative optional-adapter-contracts --mode public --doctor-json tests/fixtures/creative/software_discovery/local_tool_health_doctor_fixture_v1.json --output-json reports/creative/adapters/optional_adapter_contracts_v1.json --output-md reports/creative/adapters/optional_adapter_contracts_v1.md
+
+creative-shot-planner-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest discover -s tests/creative -p 'test_shot_planner_v1.py' -v
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) seos.py creative shot plan --template energy-impact --shot-id SHOT_ENERGY_IMPACT_FIXTURE --registry-json reports/creative/assets/asset_library_report_v1.json --tool-health-json tests/fixtures/creative/software_discovery/local_tool_health_doctor_fixture_v1.json --adapter-contracts-json reports/creative/adapters/optional_adapter_contracts_v1.json --output-json reports/creative/shots/shot_plan_energy_impact_v1.json --output-md reports/creative/shots/shot_plan_energy_impact_v1.md
 
 creative-archive-check:
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/creative_archive_check_v3.py

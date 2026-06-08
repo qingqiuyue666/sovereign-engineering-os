@@ -212,8 +212,36 @@ Residual boundaries:
 
 ## Step 5: Shot Assistant and Templates
 
-Create shot templates and a planner that binds available scanned assets,
-reports missing assets, and emits practical manual and optional execution plans.
+Status: implemented by the Step 5 slice.
+
+Operator value:
+
+- list practical shot templates for energy impact, smoke/dust, portal/lightning,
+  and editorial handoff;
+- build a shot plan from a scanned asset-library report;
+- bind candidate assets to required and optional requirements;
+- report missing required assets without claiming completion;
+- include manual production steps and optional approval-gated runner command
+  templates;
+- incorporate tool-health and optional-adapter-contract report summaries when
+  supplied;
+- write JSON and Markdown shot plans without rendering, generating, launching
+  tools, or mutating the asset library.
+
+Validation:
+
+```bash
+make creative-shot-planner-check
+python3 seos.py creative shot plan --template energy-impact --shot-id SHOT_ENERGY_IMPACT_FIXTURE --registry-json reports/creative/assets/asset_library_report_v1.json --tool-health-json tests/fixtures/creative/software_discovery/local_tool_health_doctor_fixture_v1.json --adapter-contracts-json reports/creative/adapters/optional_adapter_contracts_v1.json --output-json reports/creative/shots/shot_plan_energy_impact_v1.json --output-md reports/creative/shots/shot_plan_energy_impact_v1.md
+```
+
+Residual boundaries:
+
+- shot plans are planning artifacts only;
+- optional runner commands still require separate local approval;
+- no render, simulation, generation, comp, export, archive, or editorial
+  delivery job is submitted by the planner;
+- final creative approval remains human-owned.
 
 ## Step 6: Real Project Pressure Testing
 
