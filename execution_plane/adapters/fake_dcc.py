@@ -6,6 +6,7 @@ from collections.abc import Mapping
 from typing import Any
 
 from creative.common import write_json
+from execution_plane.adapters.base import AdapterContract, FAKE_DCC_ADAPTER, ProvisionResult
 from execution_plane.permits.builder import stable_id
 from execution_plane.permits.validator import validate_execution_permit
 from execution_plane.runner.path_guard import (
@@ -19,6 +20,7 @@ from execution_plane.runner.result_envelope import (
     collect_output_records,
     utc_now,
 )
+from execution_plane.runtime.state_ledger import state_event
 
 
 def run_fake_dcc(
@@ -35,6 +37,10 @@ def run_fake_dcc(
     output_root = resolve_output_root(str(checked["allowed_output_root"]))
     output_root.mkdir(parents=True, exist_ok=True)
     run_id = stable_id("RUN", checked["permit_id"], started_at, "fake_dcc")
+    transitions = [
+        state_event(run_id=run_id, adapter=FAKE_DCC_ADAPTER, state="PREFLIGHTING"),
+        state_event(run_id=run_id, adapter=FAKE_DCC_ADAPTER, state="RUNNING"),
+    ]
     job_data = dict(job or {})
     output_relpath = str(job_data.get("output_path", "output.txt"))
     content = str(job_data.get("content", "SEOS fake DCC materialized output\n"))
@@ -56,6 +62,15 @@ def run_fake_dcc(
             failure_summary="path_guard_blocked",
             policy_blocks=[str(exc)],
             evidence_manifest_path=None,
+            state_transitions=[
+                *transitions,
+                state_event(
+                    run_id=run_id,
+                    adapter=FAKE_DCC_ADAPTER,
+                    state="FAILED",
+                    detail={"failure_code": "OUTPUT_INVALID"},
+                ),
+            ],
         )
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -89,5 +104,31 @@ def run_fake_dcc(
         failure_summary=None,
         policy_blocks=[],
         evidence_manifest_path="manifest.json",
+        state_transitions=[
+            *transitions,
+            state_event(run_id=run_id, adapter=FAKE_DCC_ADAPTER, state="COLLECTING"),
+            state_event(run_id=run_id, adapter=FAKE_DCC_ADAPTER, state="SUCCEEDED"),
+        ],
     )
 
+
+class FakeDccAdapter(AdapterContract):
+    name = FAKE_DCC_ADAPTER
+    actions = frozenset({"smoke_generate_file"})
+
+    def detect(self) -> dict[str, Any]:
+        return {"adapter": self.name, "available": True, "status": "READY"}
+
+    def preflight(self, action: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return {
+            "adapter": self.name,
+            "action": action,
+            "status": "READY" if action in self.actions else "BLOCKED",
+            "failure_code": None if action in self.actions else "METHOD_NOT_ALLOWED",
+        }
+
+    def auto_provision(self, intent: Mapping[str, Any], policy: Mapping[str, Any]) -> ProvisionResult:
+        return ProvisionResult(adapter=self.name, status="SKIPPED", method="not_required")
+
+    def execute(self, permit: Mapping[str, Any], payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return run_fake_dcc(permit, job=payload)

@@ -1,0 +1,8 @@
+{
+  "adapter": "comfyui_local",
+  "base_url": "http://127.0.0.1:8188",
+  "heartbeat_path": "/system_stats",
+  "launch_command": [],
+  "startup_timeout_seconds": 90,
+  "working_dir": ""
+}

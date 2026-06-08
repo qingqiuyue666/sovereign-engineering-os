@@ -67,6 +67,7 @@ Commands:
   receipt list|show
   replay explain
   failure compress|explain
+  rpc invoke TEMPLATE.json [--json]
   ai bundle|repo-map|token-roi
   creative init|scan-assets|archive-check|asset|shot|adapter|comfyui|blender|evidence|dashboard|doctor|launch-check|health|adoption-status
 """
@@ -108,6 +109,8 @@ def main(argv: list[str] | None = None) -> int:
             return _replay(args[1:])
         if command == "failure":
             return _failure(args[1:])
+        if command == "rpc":
+            return _rpc(args[1:])
         if command == "ai":
             return _ai(args[1:])
         if command == "creative":
@@ -350,6 +353,27 @@ def _ai(args: list[str]) -> int:
         return _output(payload, _json_requested(rest), _format_token_roi)
     _emit({"ok": False, "error": "unknown_ai_subcommand", "subcommand": subcommand})
     return 2
+
+
+def _rpc(args: list[str]) -> int:
+    if not args or args[0] != "invoke":
+        _emit({"ok": False, "error": "rpc_invoke_required"})
+        return 2
+    path = _positional(args[1:], skip_values_for=set())
+    if not path:
+        _emit({"ok": False, "error": "rpc_invoke_requires_path"})
+        return 2
+    from execution_plane.rpc_gateway import invoke_rpc_file
+
+    response = invoke_rpc_file(Path(path))
+    ok = "error" not in response
+    payload = {"ok": ok, "response": response}
+    if _json_requested(args):
+        _emit(payload)
+    else:
+        result = response.get("result", {}) if isinstance(response.get("result"), dict) else {}
+        print(f"RPC invoke: {result.get('terminal_status', 'UNKNOWN')}")
+    return 0 if ok else 1
 
 
 def _run_ledger(args: list[str]) -> int:

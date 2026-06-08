@@ -9,6 +9,7 @@ import hashlib
 import re
 
 from execution_plane.permits.digest import attach_permit_digest
+from execution_plane.runtime.token_policy import default_runtime_policy, normalize_runtime_policy
 
 EXECUTION_PERMIT_SCHEMA_VERSION = "seos_execution_permit_v1"
 EXECUTION_POLICY_VERSION = "seos_execution_policy_v1"
@@ -49,6 +50,10 @@ def create_execution_permit(
     required_outputs: Sequence[Mapping[str, str]] | None = None,
     network_allowed: bool = False,
     destructive_action_allowed: bool = False,
+    auto_provision: Mapping[str, Any] | None = None,
+    concurrency: Mapping[str, Any] | None = None,
+    retry: Mapping[str, Any] | None = None,
+    patch_repair: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Create a digest-bound permit from approved task metadata."""
 
@@ -69,6 +74,16 @@ def create_execution_permit(
         output_root,
         issued_at,
     )
+    runtime_policy = default_runtime_policy()
+    for key, value in (
+        ("auto_provision", auto_provision),
+        ("concurrency", concurrency),
+        ("retry", retry),
+        ("patch_repair", patch_repair),
+    ):
+        if value is not None:
+            runtime_policy[key].update(dict(value))
+    runtime_policy = normalize_runtime_policy(runtime_policy)
     permit = {
         "schema_version": EXECUTION_PERMIT_SCHEMA_VERSION,
         "permit_id": permit_id,
@@ -89,6 +104,10 @@ def create_execution_permit(
         "required_outputs": required,
         "evidence_required": True,
         "policy_version": EXECUTION_POLICY_VERSION,
+        "auto_provision": runtime_policy["auto_provision"],
+        "concurrency": runtime_policy["concurrency"],
+        "retry": runtime_policy["retry"],
+        "patch_repair": runtime_policy["patch_repair"],
     }
     return attach_permit_digest(permit)
 
@@ -111,4 +130,3 @@ def create_permit_from_task_metadata(
         allowed_output_root=allowed_output_root,
         allowed_input_roots=allowed_input_roots,
     )
-
