@@ -38,7 +38,7 @@
       "role": "model_provider_manual_smoke_planner"
     },
     {
-      "git_blob_sha1": "467bdaac8607306e4f4b0e135c53b4fa064d08fd",
+      "git_blob_sha1": "07d286394af20a0145738be5a76002486aa1fd7c",
       "path": "Makefile",
       "role": "canonical_ci_gate"
     },

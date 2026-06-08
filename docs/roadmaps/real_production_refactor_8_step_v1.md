@@ -314,6 +314,34 @@ Use SEOS on repeated energy impact, smoke/dust, portal/lightning, asset-library,
 and editorial handoff workflows. Continue development only where real project
 needs or failure logs justify it.
 
+Status: implemented in `creative works-operation`.
+
+This step writes a read-only repeated-operation report that:
+
+- builds shot plans for energy impact, smoke/dust, portal/lightning, and
+  editorial handoff workflows, plus an asset-library maintenance workflow;
+- reads pressure-test and hardening status;
+- reports repeatability metrics and optional runner readiness;
+- derives development needs from hardening actions, pressure findings, and
+  workflow blockers;
+- records the practical operation loop commands for repeated local use;
+- keeps new development tied to a real workflow blocker, pressure finding,
+  hardening action, or project need.
+
+Validation:
+
+```bash
+make creative-real-works-operation-check
+python3 seos.py creative works-operation \
+  --registry-json reports/creative/assets/asset_library_report_v1.json \
+  --tool-health-json tests/fixtures/creative/software_discovery/local_tool_health_doctor_fixture_v1.json \
+  --adapter-contracts-json reports/creative/adapters/optional_adapter_contracts_v1.json \
+  --pressure-json reports/creative/pressure/real_project_pressure_test_v1.json \
+  --hardening-json reports/creative/hardening/production_hardening_plan_v1.json \
+  --output-json reports/creative/operation/real_works_operation_v1.json \
+  --output-md reports/creative/operation/real_works_operation_v1.md
+```
+
 ## External References Used For Direction
 
 - OpenAssetIO frames asset systems around host tools and managed references.

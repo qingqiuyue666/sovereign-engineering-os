@@ -304,6 +304,24 @@ production reports with existence, size, digest, and local-path-leak checks. It
 does not copy files, build archives, mutate assets, launch tools, or submit
 jobs.
 
+Run the repeated real-works operation report:
+
+```bash
+python3 seos.py creative works-operation \
+  --registry-json reports/creative/assets/asset_library_report_v1.json \
+  --tool-health-json tests/fixtures/creative/software_discovery/local_tool_health_doctor_fixture_v1.json \
+  --adapter-contracts-json reports/creative/adapters/optional_adapter_contracts_v1.json \
+  --pressure-json reports/creative/pressure/real_project_pressure_test_v1.json \
+  --hardening-json reports/creative/hardening/production_hardening_plan_v1.json \
+  --output-json reports/creative/operation/real_works_operation_v1.json \
+  --output-md reports/creative/operation/real_works_operation_v1.md
+```
+
+The operation report checks repeated energy impact, smoke/dust,
+portal/lightning, asset-library, and editorial handoff workflows and keeps
+future development tied to workflow blockers, pressure findings, hardening
+actions, or real project needs.
+
 The creative pipeline defaults to read-only scans, dry-run adapter plans,
 fixture demos, and public/private separation. Real DCC execution, paid assets,
 and external adoption signals require real local evidence or verified external

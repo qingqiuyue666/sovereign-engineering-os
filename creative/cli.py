@@ -15,6 +15,7 @@ from creative.assets.duplicate_candidate_detector import detect_duplicate_candid
 from creative.assets.local_asset_library import build_asset_library_scan, write_asset_library_outputs
 from creative.assets.missing_part_detector import detect_missing_parts
 from creative.hardening.production import build_production_hardening_plan
+from creative.operation.real_works import build_real_works_operation_report
 from creative.reports.dashboard import build_dashboard
 from creative.reports.local_production_dashboard import build_local_production_dashboard
 from creative.reports.local_tool_health_dashboard import build_local_tool_health_dashboard
@@ -39,7 +40,7 @@ from creative.common import ADAPTER_NAMES, repo_root
 def main(argv: list[str] | None = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     if not args or args[0] in {"--help", "-h", "help"}:
-        print("seos creative init|scan-assets|search-assets|pressure-test|hardening-plan|archive-check|asset|shot|adapter|comfyui|blender|houdini|evidence|dashboard|production-dashboard|tool-health-dashboard|houdini-smoke|comfyui-smoke|optional-adapter-contracts|doctor|launch-check|health|adoption-status")
+        print("seos creative init|scan-assets|search-assets|pressure-test|hardening-plan|works-operation|archive-check|asset|shot|adapter|comfyui|blender|houdini|evidence|dashboard|production-dashboard|tool-health-dashboard|houdini-smoke|comfyui-smoke|optional-adapter-contracts|doctor|launch-check|health|adoption-status")
         return 0
     command = args[0]
     rest = args[1:]
@@ -78,6 +79,8 @@ def main(argv: list[str] | None = None) -> int:
             return _pressure_test(rest)
         if command == "hardening-plan":
             return _hardening_plan(rest)
+        if command == "works-operation":
+            return _works_operation(rest)
         if command == "production-dashboard":
             return _production_dashboard(rest)
         if command == "tool-health-dashboard":
@@ -116,6 +119,10 @@ def main(argv: list[str] | None = None) -> int:
             return _hardening_plan(rest[1:])
         if command == "production" and rest[:1] == ["hardening-plan"]:
             return _hardening_plan(rest[1:])
+        if command == "works" and rest[:1] == ["operation"]:
+            return _works_operation(rest[1:])
+        if command == "operation" and rest[:1] == ["report"]:
+            return _works_operation(rest[1:])
         if command == "adapter" and rest[:1] == ["list"]:
             return _emit({"ok": True, "adapters": list(ADAPTER_NAMES)})
         if command == "adapter" and rest[:1] == ["detect"]:
@@ -329,6 +336,36 @@ def _hardening_plan(rest: list[str]) -> int:
         package_paths=_options(rest, "--package-path") or None,
         max_artifact_bytes=_option_int(rest, "--max-artifact-bytes", 1_000_000),
         max_total_bytes=_option_int(rest, "--max-total-bytes", 5_000_000),
+        output_json=Path(_option(rest, "--output-json")) if _option(rest, "--output-json") else None,
+        output_markdown=Path(_option(rest, "--output-md")) if _option(rest, "--output-md") else None,
+    )
+    return _emit(report)
+
+def _works_operation(rest: list[str]) -> int:
+    mode = _option(rest, "--mode", "public")
+    registry_value = _option(rest, "--registry-json")
+    root_value = _option(rest, "--root")
+    tool_health_json = _option(rest, "--tool-health-json")
+    adapter_contracts_json = _option(rest, "--adapter-contracts-json")
+    pressure_json = _option(rest, "--pressure-json", "reports/creative/pressure/real_project_pressure_test_v1.json")
+    hardening_json = _option(rest, "--hardening-json", "reports/creative/hardening/production_hardening_plan_v1.json")
+    asset_report = build_or_load_report(
+        registry_json=Path(registry_value) if registry_value else None,
+        root=Path(root_value) if root_value else None,
+        mode=mode,
+        max_depth=_option_int(rest, "--max-depth", 12),
+    )
+    tool_health_report = json.loads(Path(tool_health_json).read_text(encoding="utf-8")) if tool_health_json else None
+    adapter_contracts_report = json.loads(Path(adapter_contracts_json).read_text(encoding="utf-8")) if adapter_contracts_json else None
+    pressure_report = json.loads(Path(pressure_json).read_text(encoding="utf-8")) if pressure_json and Path(pressure_json).exists() else None
+    hardening_plan = json.loads(Path(hardening_json).read_text(encoding="utf-8")) if hardening_json and Path(hardening_json).exists() else None
+    report = build_real_works_operation_report(
+        asset_report,
+        mode=mode,
+        tool_health_report=tool_health_report,
+        adapter_contracts_report=adapter_contracts_report,
+        pressure_report=pressure_report,
+        hardening_plan=hardening_plan,
         output_json=Path(_option(rest, "--output-json")) if _option(rest, "--output-json") else None,
         output_markdown=Path(_option(rest, "--output-md")) if _option(rest, "--output-md") else None,
     )
