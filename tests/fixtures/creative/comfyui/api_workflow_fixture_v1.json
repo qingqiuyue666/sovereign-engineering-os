@@ -1,0 +1,27 @@
+{
+  "1": {
+    "_meta": {
+      "title": "SEOS Empty Image"
+    },
+    "class_type": "EmptyImage",
+    "inputs": {
+      "batch_size": 1,
+      "color": 3158064,
+      "height": 64,
+      "width": 64
+    }
+  },
+  "2": {
+    "_meta": {
+      "title": "SEOS Save Image"
+    },
+    "class_type": "SaveImage",
+    "inputs": {
+      "filename_prefix": "seos_comfyui_smoke",
+      "images": [
+        "1",
+        0
+      ]
+    }
+  }
+}

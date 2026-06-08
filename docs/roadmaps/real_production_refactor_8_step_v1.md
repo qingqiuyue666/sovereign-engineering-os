@@ -148,10 +148,37 @@ Residual boundaries:
 
 ## Step 4B: ComfyUI Real Local Runner V1
 
-Submit a minimal workflow to a running local ComfyUI service when explicitly
-approved, collect output evidence where available, and return
-`SERVICE_UNAVAILABLE` or `ENV_NOT_FOUND` truthfully otherwise. Default CI must
-use mocked service responses or unavailable behavior.
+Status: implemented by the Step 4B slice.
+
+Operator value:
+
+- validate API-format ComfyUI workflow JSON without persisting raw prompt
+  payloads;
+- preflight a loopback-only local ComfyUI service through `/system_stats`;
+- require explicit operator approval before submitting to `/prompt`;
+- submit a default no-model `EmptyImage` to `SaveImage` API workflow or an
+  operator-provided exported API workflow;
+- poll `/history/{prompt_id}` for completion evidence;
+- download bounded `/view` output artifacts when available;
+- write prompt/history summaries, hashes, and materialization evidence;
+- return `ENV_NOT_FOUND`, `SERVICE_UNAVAILABLE`, `USER_APPROVAL_REQUIRED`,
+  `EXECUTED`, `LONG_TASK_BLOCKED`, or `EXECUTION_FAILED` truthfully;
+- avoid requiring ComfyUI in default CI through mocked service responses and
+  deterministic unavailable evidence.
+
+Validation:
+
+```bash
+make creative-comfyui-runner-check
+python3 scripts/creative_comfyui_workflow_smoke_v1.py --workflow-json tests/fixtures/creative/comfyui/api_workflow_fixture_v1.json --output-root work/creative_runs/comfyui_service_unavailable --observed-at 2026-06-08T00:00:00Z --fixture-service-unavailable --result-json reports/creative/comfyui/comfyui_smoke_service_unavailable_v1.json --materialization-json reports/creative/comfyui/comfyui_smoke_materialization_v1.json
+```
+
+Residual boundaries:
+
+- SEOS does not start or install ComfyUI;
+- SEOS cannot prove arbitrary installed custom nodes are harmless;
+- raw ComfyUI history is hashed and summarized, not persisted in public reports;
+- no default CI path requires a running ComfyUI service.
 
 ## Step 4C: Optional Adapter Contracts V1
 
@@ -188,7 +215,11 @@ needs or failure logs justify it.
 - MaterialX reinforces material and texture metadata as production-relevant
   data rather than decorative file listings.
 - OpenUSD asset resolution reinforces the need for portable asset references.
+- ComfyUI official server/API docs reinforce loopback server usage, API-format
+  workflows, `/prompt`, `/history/{prompt_id}`, `/view`, and `/system_stats`
+  as the practical integration surface for local workflow execution.
 
-SEOS does not claim to implement these standards in this step. The scanner uses
-their practical direction: relative asset references, explicit traits, and
-truthful boundaries.
+SEOS does not claim to implement the production data standards in this step.
+The scanner uses their practical direction: relative asset references, explicit
+traits, and truthful boundaries. The ComfyUI runner uses official local API
+behavior only for bounded loopback smoke execution.

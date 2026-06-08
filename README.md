@@ -226,6 +226,25 @@ python3 seos.py creative houdini-smoke \
 Without Houdini, the same runner returns truthful `ENV_NOT_FOUND` evidence. If
 Houdini licensing blocks startup, it returns `LICENSE_BLOCKED` evidence.
 
+Run an approved local ComfyUI workflow smoke against a running loopback service:
+
+```bash
+python3 seos.py creative comfyui-smoke \
+  --workflow-json tests/fixtures/creative/comfyui/api_workflow_fixture_v1.json \
+  --endpoint http://127.0.0.1:8188 \
+  --output-root work/creative_runs/comfyui_smoke \
+  --approve-local-execution \
+  --approval-id approval-comfyui-smoke-local-001 \
+  --result-json reports/creative/comfyui/comfyui_smoke_result.local.json \
+  --materialization-json reports/creative/comfyui/comfyui_smoke_materialization.local.json
+```
+
+The default fixture is an API-format `EmptyImage` to `SaveImage` smoke that
+does not require model downloads. If no workflow is available, the runner
+returns `ENV_NOT_FOUND`; if local ComfyUI is not answering on loopback, it
+returns `SERVICE_UNAVAILABLE`; if approval is missing, it does not post to
+`/prompt`.
+
 The creative pipeline defaults to read-only scans, dry-run adapter plans,
 fixture demos, and public/private separation. Real DCC execution, paid assets,
 and external adoption signals require real local evidence or verified external

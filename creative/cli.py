@@ -16,6 +16,11 @@ from creative.assets.missing_part_detector import detect_missing_parts
 from creative.reports.dashboard import build_dashboard
 from creative.reports.local_production_dashboard import build_local_production_dashboard
 from creative.reports.local_tool_health_dashboard import build_local_tool_health_dashboard
+from creative.runners.comfyui_local_runner import (
+    ComfyUIWorkflowRequest,
+    run_comfyui_workflow_smoke,
+    write_comfyui_smoke_reports,
+)
 from creative.runners.houdini_local_runner import (
     HoudiniSmokeRequest,
     run_houdini_hython_smoke,
@@ -30,7 +35,7 @@ from creative.common import ADAPTER_NAMES, repo_root
 def main(argv: list[str] | None = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     if not args or args[0] in {"--help", "-h", "help"}:
-        print("seos creative init|scan-assets|search-assets|archive-check|asset|shot|adapter|comfyui|blender|houdini|evidence|dashboard|production-dashboard|tool-health-dashboard|houdini-smoke|doctor|launch-check|health|adoption-status")
+        print("seos creative init|scan-assets|search-assets|archive-check|asset|shot|adapter|comfyui|blender|houdini|evidence|dashboard|production-dashboard|tool-health-dashboard|houdini-smoke|comfyui-smoke|doctor|launch-check|health|adoption-status")
         return 0
     command = args[0]
     rest = args[1:]
@@ -71,6 +76,8 @@ def main(argv: list[str] | None = None) -> int:
             return _tool_health_dashboard(rest)
         if command == "houdini-smoke":
             return _houdini_smoke(rest)
+        if command == "comfyui-smoke":
+            return _comfyui_smoke(rest)
         if command == "archive-check":
             records = build_registry(Path(_option(rest, "--root", "tests/fixtures/creative/archives")))
             groups = detect_archive_groups(records)
@@ -96,6 +103,8 @@ def main(argv: list[str] | None = None) -> int:
             return _emit(build_adapter_contract(adapter).dry_run({"id": "JOB_CLI_DRY_RUN"}).as_dict() | {"ok": True})
         if command == "comfyui" and rest[:1] == ["plan"]:
             return _emit(build_adapter_contract("comfyui").dry_run({"id": "AIG_CLI_PLAN"}).as_dict() | {"ok": True})
+        if command == "comfyui" and rest[:1] == ["smoke"]:
+            return _comfyui_smoke(rest[1:])
         if command == "blender" and rest[:1] == ["check"]:
             return _emit(build_adapter_contract("blender", "LEVEL_2_SMOKE_TEST").dry_run({"id": "RDR_CLI_PREVIEW"}).as_dict() | {"ok": True})
         if command == "houdini" and rest[:1] == ["smoke"]:
@@ -194,6 +203,29 @@ def _houdini_smoke(rest: list[str]) -> int:
     )
     result = run_houdini_hython_smoke(request)
     outputs = write_houdini_smoke_reports(
+        result,
+        result_json=Path(_option(rest, "--result-json")) if _option(rest, "--result-json") else None,
+        materialization_json=Path(_option(rest, "--materialization-json")) if _option(rest, "--materialization-json") else None,
+    )
+    return _emit(result | {"ok": True, "outputs": outputs})
+
+def _comfyui_smoke(rest: list[str]) -> int:
+    request = ComfyUIWorkflowRequest(
+        workflow_json=Path(_option(rest, "--workflow-json", "tests/fixtures/creative/comfyui/api_workflow_fixture_v1.json")),
+        output_root=Path(_option(rest, "--output-root", "work/creative_runs/comfyui_smoke")),
+        endpoint_url=_option(rest, "--endpoint", "http://127.0.0.1:8188"),
+        mode=_option(rest, "--mode", "public"),
+        approved="--approve-local-execution" in rest,
+        approval_id=_option(rest, "--approval-id", ""),
+        timeout_seconds=float(_option(rest, "--timeout-seconds", "60")),
+        poll_interval_seconds=float(_option(rest, "--poll-interval-seconds", "1")),
+        download_outputs="--no-download-outputs" not in rest,
+        max_output_artifacts=_option_int(rest, "--max-output-artifacts", 12),
+        max_artifact_bytes=_option_int(rest, "--max-artifact-bytes", 26214400),
+        observed_at=_option(rest, "--observed-at") or None,
+    )
+    result = run_comfyui_workflow_smoke(request)
+    outputs = write_comfyui_smoke_reports(
         result,
         result_json=Path(_option(rest, "--result-json")) if _option(rest, "--result-json") else None,
         materialization_json=Path(_option(rest, "--materialization-json")) if _option(rest, "--materialization-json") else None,
