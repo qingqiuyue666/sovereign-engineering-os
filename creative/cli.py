@@ -10,6 +10,7 @@ from creative.adapters.base.contract import build_adapter_contract
 from creative.assets.asset_registry_builder import build_registry
 from creative.assets.archive_group_detector import detect_archive_groups
 from creative.assets.duplicate_candidate_detector import detect_duplicate_candidates
+from creative.assets.local_asset_library import build_asset_library_scan, write_asset_library_outputs
 from creative.assets.missing_part_detector import detect_missing_parts
 from creative.reports.dashboard import build_dashboard
 from creative.shots.shot_report import build_shot_report
@@ -33,8 +34,27 @@ def main(argv: list[str] | None = None) -> int:
             return _emit({"ok": True, "workspace": root.as_posix(), "dry_run_defaults": True})
         if command == "scan-assets":
             root = Path(_option(rest, "--root", "tests/fixtures/creative/assets"))
-            records = build_registry(root)
-            return _emit({"ok": True, "asset_count": len(records), "assets": records[:10]})
+            mode = _option(rest, "--mode", "public")
+            max_depth = _option_int(rest, "--max-depth", 12)
+            scan = build_asset_library_scan(root, mode=mode, max_depth=max_depth)
+            outputs = write_asset_library_outputs(
+                scan,
+                root=root,
+                output_json=Path(_option(rest, "--output-json")) if _option(rest, "--output-json") else None,
+                output_markdown=Path(_option(rest, "--output-md")) if _option(rest, "--output-md") else None,
+            )
+            return _emit(
+                {
+                    "ok": True,
+                    "asset_count": scan["summary"]["total_assets"],
+                    "summary": scan["summary"],
+                    "outputs": outputs,
+                    "duplicate_group_count": scan["summary"]["duplicate_group_count"],
+                    "archive_warning_count": scan["summary"]["archive_warning_count"],
+                    "next_actions": scan["next_actions"],
+                    "assets": scan["assets"][:10],
+                }
+            )
         if command == "archive-check":
             records = build_registry(Path(_option(rest, "--root", "tests/fixtures/creative/archives")))
             groups = detect_archive_groups(records)
@@ -87,6 +107,12 @@ def _option(args: list[str], name: str, default: str = "") -> str:
         return default
     index = args.index(name)
     return args[index + 1] if index + 1 < len(args) else default
+
+def _option_int(args: list[str], name: str, default: int) -> int:
+    value = _option(args, name, "")
+    if not value:
+        return default
+    return int(value)
 
 def _positional(args: list[str]) -> str:
     skip = False

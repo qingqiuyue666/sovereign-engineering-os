@@ -1,24 +1,41 @@
 # Sovereign Engineering OS
 
-Sovereign Engineering OS (SEOS) is a local-first, audit-first, human-gated
-engineering governance control plane for AI-assisted repository work.
+Sovereign Engineering OS (SEOS) is being refocused into a local-first AI/VFX
+production assistant and controlled execution/evidence system. Its practical
+job is to help an operator scan local assets, classify what exists, detect
+broken or duplicated production inputs, plan shots, inspect local tool
+availability, run approved local tools where available, and record useful
+outputs or truthful failure reports.
 
-SEOS records task intent, approval state, dry-run execution receipts, evidence
-traces, replay explanations, failure bundles, and release checks so an operator
-or reviewer can inspect what was proposed, what was approved, what ran, and
-what evidence supports the result.
+SEOS still records task intent, approval state, dry-run execution receipts,
+evidence traces, replay explanations, failure bundles, and release checks. Those
+controls now serve the production workflow rather than replacing it.
 
-SEOS is not an OS-level sandbox, not RPA, not a computer-control framework, not
-an autonomous AI executor, not a commercial SaaS platform, and not a secret
-manager. Host operating-system permissions, process isolation, credential
-custody, EDR, containers, VMs, and cloud controls remain outside the SEOS
-boundary.
+Product boundary:
+
+- SEOS is a local-first AI/VFX production assistant and controlled
+  execution/evidence system.
+- SEOS is not an operating-system sandbox and not an OS-level sandbox.
+- SEOS is not uncontrolled RPA, desktop automation, or computer control.
+- SEOS is not RPA.
+- SEOS is not a computer-control framework.
+- SEOS is not a cloud production platform.
+- SEOS is not a commercial SaaS platform.
+- SEOS is not externally certified.
+- Host permissions, process isolation, credential custody, EDR, containers,
+  VMs, and cloud controls remain outside the SEOS boundary.
 
 ## Current Status
 
-The repository is in `REAL_OPERATION_OBSERVATION_PERIOD_ACTIVE` mode.
+The repository contains a large amount of historical governance and readiness
+work. Active development should now be judged by real production usefulness:
+asset scans, readable reports, adapter truthfulness, shot plans, local outputs,
+hashes, materialization evidence, and actionable failure records.
 
-Current validated facts:
+The repository still preserves `REAL_OPERATION_OBSERVATION_PERIOD_ACTIVE`
+artifacts as historical evidence.
+
+Historical validated facts recorded in the repository:
 
 - `SYSTEM_LANDED`
 - `REAL_OPERATION_OBSERVATION_PERIOD_ACTIVE`
@@ -44,8 +61,9 @@ objects explicit:
 - replay explanations state what can and cannot be reconstructed
 - failure bundles preserve bounded, digest-oriented failure context
 
-The design goal is not to let AI do more by default. The goal is to make local
-engineering work more reviewable, reproducible, and fail-closed.
+The design goal is not to let AI do more by default. The goal is to reduce
+manual production work while keeping local engineering and creative workflows
+reviewable, reproducible, and fail-closed.
 
 ## What SEOS Is Not
 
@@ -144,6 +162,22 @@ python3 seos.py creative scan-assets --json
 python3 seos.py creative adapter list --json
 python3 seos.py creative dashboard build --json
 ```
+
+Real local asset-library scan:
+
+```bash
+ASSET_ROOT=./local_asset_library
+python3 seos.py creative scan-assets \
+  --root "$ASSET_ROOT" \
+  --mode public \
+  --output-json reports/creative/assets/local_asset_library.public.json \
+  --output-md reports/creative/assets/local_asset_library.public.md
+```
+
+Use `--mode public` for sanitized artifacts that use relative asset references.
+Use `--mode local` only for operator-local reports that may include local
+absolute paths. The scan is read-only for the asset root and never moves,
+renames, deletes, deduplicates, extracts archives, or executes DCC tools.
 
 The creative pipeline defaults to read-only scans, dry-run adapter plans,
 fixture demos, and public/private separation. Real DCC execution, paid assets,
