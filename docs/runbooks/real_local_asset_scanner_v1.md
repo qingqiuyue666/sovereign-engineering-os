@@ -60,10 +60,43 @@ Local mode:
 - may include absolute paths for the local operator;
 - should not be committed or shared publicly.
 
+## Search Existing Registry
+
+After a scan writes `reports/creative/assets/local_asset_library.public.json`,
+query it without rescanning:
+
+```bash
+python3 seos.py creative search-assets \
+  --registry-json reports/creative/assets/local_asset_library.public.json \
+  --query missing-texture-sets
+```
+
+Useful query presets:
+
+- `houdini-fx-assets`
+- `vdb-cache-assets`
+- `missing-texture-sets`
+- `duplicate-video-audio`
+- `incomplete-archives`
+- `empty-directories`
+- `incomplete-packs`
+
+Generic filters:
+
+```bash
+python3 seos.py creative search-assets \
+  --registry-json reports/creative/assets/local_asset_library.public.json \
+  --category vdb_cache
+```
+
+Public mode strips local absolute paths from returned items. Local mode should
+stay operator-private.
+
 ## Validation
 
 ```bash
 make creative-real-asset-scanner-check
+make creative-asset-search-check
 python3 scripts/creative_asset_scan_v3.py --mode public
 git diff --check
 ```

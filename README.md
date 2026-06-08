@@ -179,6 +179,14 @@ Use `--mode local` only for operator-local reports that may include local
 absolute paths. The scan is read-only for the asset root and never moves,
 renames, deletes, deduplicates, extracts archives, or executes DCC tools.
 
+Search a generated registry:
+
+```bash
+python3 seos.py creative search-assets \
+  --registry-json reports/creative/assets/local_asset_library.public.json \
+  --query missing-texture-sets
+```
+
 The creative pipeline defaults to read-only scans, dry-run adapter plans,
 fixture demos, and public/private separation. Real DCC execution, paid assets,
 and external adoption signals require real local evidence or verified external

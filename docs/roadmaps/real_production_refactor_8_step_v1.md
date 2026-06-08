@@ -56,9 +56,9 @@ git diff --check
 
 ## Step 2B: Asset Search / Retrieval CLI V1
 
-Next PR.
+Status: implemented by the Step 2B slice.
 
-Add queries over the generated registry:
+Queries over the generated registry:
 
 - find usable Houdini FX assets;
 - find VDB/cache assets;
@@ -66,6 +66,13 @@ Add queries over the generated registry:
 - find duplicate video/audio groups;
 - find incomplete archives;
 - find empty directories.
+
+Validation:
+
+```bash
+make creative-asset-search-check
+python3 seos.py creative search-assets --registry-json reports/creative/assets/asset_library_report_v1.json --query missing-texture-sets
+```
 
 ## Step 3: Local Production Dashboard
 

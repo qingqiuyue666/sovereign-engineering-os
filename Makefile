@@ -177,7 +177,7 @@ verify: smoke
 
 final-audit-check: verify external-audit-check test-external-audit-packet independent-verification-check test-independent-verification-execution red-team-check test-red-team-execution findings-check test-findings-register operation-evidence-check test-real-world-operation-evidence-program global-signoff-dossier-check test-global-signoff-dossier external-verification-program-check
 
-.PHONY: creative-check creative-doctor creative-asset-scan-check creative-real-asset-scanner-check creative-archive-check creative-dashboard-build creative-public-release-check creative-total-check
+.PHONY: creative-check creative-doctor creative-asset-scan-check creative-real-asset-scanner-check creative-asset-search-check creative-archive-check creative-dashboard-build creative-public-release-check creative-total-check
 
 creative-check: creative-total-check
 
@@ -190,6 +190,10 @@ creative-asset-scan-check:
 creative-real-asset-scanner-check:
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest discover -s tests/creative -p 'test_real_local_asset_scanner_v1.py' -v
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/creative_asset_scan_v3.py --mode public
+
+creative-asset-search-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest discover -s tests/creative -p 'test_asset_search_cli_v1.py' -v
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) seos.py creative search-assets --registry-json reports/creative/assets/asset_library_report_v1.json --query missing-texture-sets
 
 creative-archive-check:
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/creative_archive_check_v3.py
