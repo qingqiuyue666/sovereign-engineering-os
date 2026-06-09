@@ -9,8 +9,8 @@
 
 ## Local DCC Paths
 
-- ComfyUI working directory: `/Users/qqy/ComfyUI`
-- ComfyUI launch command: `/Users/qqy/ComfyUI/venv/bin/python main.py --listen 127.0.0.1 --port 8188 --disable-auto-launch`
+- ComfyUI working directory: `~/ComfyUI`
+- ComfyUI launch command: `~/ComfyUI/venv/bin/python main.py --listen 127.0.0.1 --port 8188 --disable-auto-launch`
 - Houdini hython: `/Applications/Houdini/Houdini20.5.487/Frameworks/Houdini.framework/Versions/20.5/Resources/bin/hython`
 - DaVinci Resolve app: `/Applications/DaVinci Resolve/DaVinci Resolve.app`
 - DaVinci Python module path: `/Library/Application Support/Blackmagic Design/DaVinci Resolve/Developer/Scripting/Modules`
