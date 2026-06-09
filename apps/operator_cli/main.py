@@ -75,6 +75,7 @@ Commands:
   package run|shot
   dashboard build
   skill list|show
+  review create
   ai bundle|repo-map|token-roi
   creative init|scan-assets|archive-check|asset|shot|adapter|comfyui|blender|evidence|dashboard|doctor|launch-check|health|adoption-status
 """
@@ -134,6 +135,8 @@ def main(argv: list[str] | None = None) -> int:
             return _dashboard(args[1:])
         if command == "skill":
             return _skill(args[1:])
+        if command == "review":
+            return _review(args[1:])
         if command == "ai":
             return _ai(args[1:])
         if command == "creative":
@@ -609,6 +612,27 @@ def _skill(args: list[str]) -> int:
         _emit({"ok": False, "error": "skill_show_requires_name"})
         return 2
     _emit({"ok": True, "skill": get_skill(name, root)})
+    return 0
+
+
+def _review(args: list[str]) -> int:
+    if args[:1] != ["create"]:
+        _emit({"ok": False, "error": "review_create_required"})
+        return 2
+    from execution_plane.review_artifacts import create_review_artifact
+
+    rest = args[1:]
+    subject_id = _positional(rest, skip_values_for={"--runtime-root", "--package-root", "--output-root"})
+    if not subject_id:
+        _emit({"ok": False, "error": "review_create_requires_subject_id"})
+        return 2
+    payload = create_review_artifact(
+        subject_id,
+        runtime_root=_option(rest, "--runtime-root", "work/production_runtime"),
+        package_root=_option(rest, "--package-root", "work/packages"),
+        output_root=_option(rest, "--output-root", "work/review_artifacts"),
+    )
+    _emit(payload)
     return 0
 
 
