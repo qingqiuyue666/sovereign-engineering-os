@@ -97,6 +97,8 @@ def main(argv: list[str] | None = None) -> int:
             return _approve(args[1:])
         if command == "reject":
             return _reject(args[1:])
+        if command == "run" and len(args) > 1 and args[1] in {"list", "inspect", "cancel", "worker-once"}:
+            return _run_queue(args[1:])
         if command == "run":
             return _run(args[1:])
         if command == "release":
@@ -356,13 +358,19 @@ def _ai(args: list[str]) -> int:
 
 
 def _rpc(args: list[str]) -> int:
-    if not args or args[0] != "invoke":
+    if not args or args[0] not in {"invoke", "enqueue"}:
         _emit({"ok": False, "error": "rpc_invoke_required"})
         return 2
     path = _positional(args[1:], skip_values_for=set())
     if not path:
         _emit({"ok": False, "error": "rpc_invoke_requires_path"})
         return 2
+    if args[0] == "enqueue":
+        from execution_plane.runtime.run_queue import FileRunQueue
+
+        run = FileRunQueue().enqueue_rpc_template(Path(path))
+        _emit({"ok": True, "run_id": run["run_id"], "status": run["status"], "run": run})
+        return 0
     from execution_plane.rpc_gateway import invoke_rpc_file
 
     response = invoke_rpc_file(Path(path))
@@ -374,6 +382,45 @@ def _rpc(args: list[str]) -> int:
         result = response.get("result", {}) if isinstance(response.get("result"), dict) else {}
         print(f"RPC invoke: {result.get('terminal_status', 'UNKNOWN')}")
     return 0 if ok else 1
+
+
+def _run_queue(args: list[str]) -> int:
+    from execution_plane.runtime.run_queue import FileRunQueue
+
+    queue = FileRunQueue()
+    subcommand = args[0]
+    if subcommand == "list":
+        _emit({"ok": True, "runs": queue.list_runs()})
+        return 0
+    if subcommand == "inspect":
+        run_id = _positional(args[1:], skip_values_for=set())
+        if not run_id:
+            _emit({"ok": False, "error": "run_inspect_requires_run_id"})
+            return 2
+        try:
+            _emit({"ok": True, "run": queue.inspect(run_id)})
+            return 0
+        except KeyError:
+            _emit({"ok": False, "error": "run_not_found", "run_id": run_id})
+            return 1
+    if subcommand == "cancel":
+        run_id = _positional(args[1:], skip_values_for=set())
+        if not run_id:
+            _emit({"ok": False, "error": "run_cancel_requires_run_id"})
+            return 2
+        try:
+            run = queue.cancel(run_id)
+            _emit({"ok": True, "run_id": run_id, "status": run["status"], "run": run})
+            return 0
+        except KeyError:
+            _emit({"ok": False, "error": "run_not_found", "run_id": run_id})
+            return 1
+    if subcommand == "worker-once":
+        run = queue.process_next()
+        _emit({"ok": True, "run": run})
+        return 0
+    _emit({"ok": False, "error": "unknown_run_subcommand", "subcommand": subcommand})
+    return 2
 
 
 def _run_ledger(args: list[str]) -> int:

@@ -19,6 +19,8 @@ CANONICAL_STATES = (
     "COLLECTING",
     "SUCCEEDED",
     "FAILED",
+    "TIMED_OUT",
+    "CANCELED",
     "RETRYING",
     "PATCHING",
     "RERUNNING",
