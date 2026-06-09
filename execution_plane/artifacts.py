@@ -46,6 +46,10 @@ def build_artifact_refs(
 def media_type_for_path(relative_path: str) -> str:
     suffix = relative_path.rsplit(".", 1)[-1].lower() if "." in relative_path else ""
     return {
+        "png": "image/png",
+        "jpg": "image/jpeg",
+        "jpeg": "image/jpeg",
+        "webp": "image/webp",
         "json": "application/json",
         "txt": "text/plain",
         "log": "text/plain",
