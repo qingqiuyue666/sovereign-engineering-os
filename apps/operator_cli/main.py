@@ -69,6 +69,9 @@ Commands:
   failure compress|explain
   rpc invoke TEMPLATE.json [--json]
   repair create|invoke|apply|ledger
+  project create NAME
+  asset scan ROOT
+  shot create|attach-workflow|run
   ai bundle|repo-map|token-roi
   creative init|scan-assets|archive-check|asset|shot|adapter|comfyui|blender|evidence|dashboard|doctor|launch-check|health|adoption-status
 """
@@ -116,6 +119,12 @@ def main(argv: list[str] | None = None) -> int:
             return _rpc(args[1:])
         if command == "repair":
             return _repair(args[1:])
+        if command == "project":
+            return _project(args[1:])
+        if command == "asset":
+            return _asset(args[1:])
+        if command == "shot":
+            return _shot(args[1:])
         if command == "ai":
             return _ai(args[1:])
         if command == "creative":
@@ -472,6 +481,70 @@ def _repair(args: list[str]) -> int:
     return 2
 
 
+def _project(args: list[str]) -> int:
+    if not args or args[0] != "create":
+        _emit({"ok": False, "error": "project_create_required"})
+        return 2
+    from execution_plane.production_runtime import ProductionRuntime
+
+    rest = args[1:]
+    name = _positional(rest, skip_values_for={"--runtime-root"})
+    if not name:
+        _emit({"ok": False, "error": "project_create_requires_name"})
+        return 2
+    runtime = ProductionRuntime(_option(rest, "--runtime-root", "work/production_runtime"))
+    _emit(runtime.create_project(name))
+    return 0
+
+
+def _asset(args: list[str]) -> int:
+    if not args or args[0] != "scan":
+        _emit({"ok": False, "error": "asset_scan_required"})
+        return 2
+    from execution_plane.production_runtime import ProductionRuntime
+
+    rest = args[1:]
+    scan_root = _positional(rest, skip_values_for={"--runtime-root", "--project-id"})
+    if not scan_root:
+        _emit({"ok": False, "error": "asset_scan_requires_root"})
+        return 2
+    runtime = ProductionRuntime(_option(rest, "--runtime-root", "work/production_runtime"))
+    _emit(runtime.scan_assets(scan_root, project_id=_option(rest, "--project-id") or None))
+    return 0
+
+
+def _shot(args: list[str]) -> int:
+    if not args:
+        _emit({"ok": False, "error": "shot_subcommand_required"})
+        return 2
+    from execution_plane.production_runtime import ProductionRuntime
+
+    subcommand = args[0]
+    rest = args[1:]
+    runtime = ProductionRuntime(_option(rest, "--runtime-root", "work/production_runtime"))
+    values = _positionals(rest, skip_values_for={"--runtime-root"})
+    if subcommand == "create":
+        if len(values) < 2:
+            _emit({"ok": False, "error": "shot_create_requires_project_and_name"})
+            return 2
+        _emit(runtime.create_shot(values[0], values[1]))
+        return 0
+    if subcommand == "attach-workflow":
+        if len(values) < 2:
+            _emit({"ok": False, "error": "shot_attach_workflow_requires_shot_and_workflow"})
+            return 2
+        _emit(runtime.attach_workflow(values[0], values[1]))
+        return 0
+    if subcommand == "run":
+        if not values:
+            _emit({"ok": False, "error": "shot_run_requires_shot_id"})
+            return 2
+        _emit(runtime.run_shot(values[0]))
+        return 0
+    _emit({"ok": False, "error": "unknown_shot_subcommand", "subcommand": subcommand})
+    return 2
+
+
 def _run_ledger(args: list[str]) -> int:
     if args != ["create", "--dry-run"]:
         _emit({"ok": False, "error": "run_ledger_create_is_dry_run_only"})
@@ -550,6 +623,24 @@ def _positional(args: list[str], *, skip_values_for: set[str]) -> str:
             continue
         return item
     return ""
+
+
+def _positionals(args: list[str], *, skip_values_for: set[str]) -> list[str]:
+    values: list[str] = []
+    skip_next = False
+    for item in args:
+        if skip_next:
+            skip_next = False
+            continue
+        if item in {"--json", "--human", "--dry-run"}:
+            continue
+        if item in skip_values_for:
+            skip_next = True
+            continue
+        if item.startswith("--"):
+            continue
+        values.append(item)
+    return values
 
 
 def _json_requested(args: list[str]) -> bool:
