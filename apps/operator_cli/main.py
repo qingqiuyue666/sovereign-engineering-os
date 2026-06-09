@@ -74,6 +74,7 @@ Commands:
   shot create|attach-workflow|run
   package run|shot
   dashboard build
+  skill list|show
   ai bundle|repo-map|token-roi
   creative init|scan-assets|archive-check|asset|shot|adapter|comfyui|blender|evidence|dashboard|doctor|launch-check|health|adoption-status
 """
@@ -131,6 +132,8 @@ def main(argv: list[str] | None = None) -> int:
             return _package(args[1:])
         if command == "dashboard":
             return _dashboard(args[1:])
+        if command == "skill":
+            return _skill(args[1:])
         if command == "ai":
             return _ai(args[1:])
         if command == "creative":
@@ -587,6 +590,25 @@ def _dashboard(args: list[str]) -> int:
         output_root=_option(rest, "--output-root", "work/operator_dashboard"),
     )
     _emit(payload)
+    return 0
+
+
+def _skill(args: list[str]) -> int:
+    if not args or args[0] not in {"list", "show"}:
+        _emit({"ok": False, "error": "skill_list_or_show_required"})
+        return 2
+    from execution_plane.skill_system import get_skill, load_skill_registry
+
+    root = _option(args[1:], "--skills-root", "skills")
+    if args[0] == "list":
+        registry = load_skill_registry(root)
+        _emit({"ok": True, "registry": registry})
+        return 0
+    name = _positional(args[1:], skip_values_for={"--skills-root"})
+    if not name:
+        _emit({"ok": False, "error": "skill_show_requires_name"})
+        return 2
+    _emit({"ok": True, "skill": get_skill(name, root)})
     return 0
 
 

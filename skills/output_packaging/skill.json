@@ -1,0 +1,10 @@
+{
+  "commands": [
+    "python3 seos.py package run <run_id> --json",
+    "python3 seos.py package shot <shot_id> --json"
+  ],
+  "description": "Package shot and run receipts with ArtifactRef-only manifests.",
+  "name": "output_packaging",
+  "runbook": "docs/runbooks/output_packaging.md",
+  "schema_version": "seos.skill.v1"
+}
