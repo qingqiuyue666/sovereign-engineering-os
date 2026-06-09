@@ -1,0 +1,18 @@
+{
+  "id": "houdini_smoke_cache_test_v1",
+  "jsonrpc": "2.0",
+  "method": "adapter.execute",
+  "params": {
+    "action": "smoke_cache_test",
+    "adapter": "houdini_hython",
+    "output_root": "work/rpc/houdini_smoke_cache_test",
+    "runtime_token": {
+      "expires_at": "2099-01-01T00:00:00Z",
+      "max_files": 100,
+      "max_output_bytes": 104857600,
+      "max_runtime_seconds": 60,
+      "operator_approval_id": "RCPT_HOUDINI_SMOKE_CACHE_TEST",
+      "task_id": "TASK_HOUDINI_SMOKE_CACHE_TEST"
+    }
+  }
+}
