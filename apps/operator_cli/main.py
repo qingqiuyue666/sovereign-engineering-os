@@ -76,6 +76,7 @@ Commands:
   dashboard build
   skill list|show
   review create
+  pattern report
   ai bundle|repo-map|token-roi
   creative init|scan-assets|archive-check|asset|shot|adapter|comfyui|blender|evidence|dashboard|doctor|launch-check|health|adoption-status
 """
@@ -137,6 +138,8 @@ def main(argv: list[str] | None = None) -> int:
             return _skill(args[1:])
         if command == "review":
             return _review(args[1:])
+        if command == "pattern":
+            return _pattern(args[1:])
         if command == "ai":
             return _ai(args[1:])
         if command == "creative":
@@ -631,6 +634,24 @@ def _review(args: list[str]) -> int:
         runtime_root=_option(rest, "--runtime-root", "work/production_runtime"),
         package_root=_option(rest, "--package-root", "work/packages"),
         output_root=_option(rest, "--output-root", "work/review_artifacts"),
+    )
+    _emit(payload)
+    return 0
+
+
+def _pattern(args: list[str]) -> int:
+    if args[:1] != ["report"]:
+        _emit({"ok": False, "error": "pattern_report_required"})
+        return 2
+    from execution_plane.pattern_assimilator import generate_pattern_report
+
+    rest = args[1:]
+    payload = generate_pattern_report(
+        runtime_root=_option(rest, "--runtime-root", "work/production_runtime"),
+        package_root=_option(rest, "--package-root", "work/packages"),
+        review_root=_option(rest, "--review-root", "work/review_artifacts"),
+        repair_root=_option(rest, "--repair-root", "work/repair_jobs"),
+        output_root=_option(rest, "--output-root", "work/pattern_assimilator"),
     )
     _emit(payload)
     return 0
