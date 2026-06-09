@@ -68,6 +68,7 @@ Commands:
   replay explain
   failure compress|explain
   rpc invoke TEMPLATE.json [--json]
+  repair create|invoke|apply|ledger
   ai bundle|repo-map|token-roi
   creative init|scan-assets|archive-check|asset|shot|adapter|comfyui|blender|evidence|dashboard|doctor|launch-check|health|adoption-status
 """
@@ -113,6 +114,8 @@ def main(argv: list[str] | None = None) -> int:
             return _failure(args[1:])
         if command == "rpc":
             return _rpc(args[1:])
+        if command == "repair":
+            return _repair(args[1:])
         if command == "ai":
             return _ai(args[1:])
         if command == "creative":
@@ -420,6 +423,52 @@ def _run_queue(args: list[str]) -> int:
         _emit({"ok": True, "run": run})
         return 0
     _emit({"ok": False, "error": "unknown_run_subcommand", "subcommand": subcommand})
+    return 2
+
+
+def _repair(args: list[str]) -> int:
+    if not args:
+        _emit({"ok": False, "error": "repair_subcommand_required"})
+        return 2
+    subcommand = args[0]
+    rest = args[1:]
+    output_root = _option(rest, "--output-root", "work/repair_jobs")
+    if subcommand == "create":
+        from execution_plane.repair.writer import create_patch_repair_job
+
+        bundle_path = _positional(rest, skip_values_for={"--output-root"})
+        if not bundle_path:
+            _emit({"ok": False, "error": "repair_create_requires_failure_bundle"})
+            return 2
+        payload = create_patch_repair_job(bundle_path, output_root=output_root)
+        _emit(payload)
+        return 0 if payload.get("ok") else 1
+    if subcommand == "invoke":
+        from execution_plane.repair.local_model_bridge import invoke_local_patch_tool
+
+        job_path = _positional(rest, skip_values_for={"--output-root"})
+        if not job_path:
+            _emit({"ok": False, "error": "repair_invoke_requires_job_path"})
+            return 2
+        payload = invoke_local_patch_tool(job_path, output_root=output_root)
+        _emit(payload)
+        return 0 if payload.get("ok") else 1
+    if subcommand == "apply":
+        from execution_plane.repair.patch_apply import apply_patch_for_job
+
+        positionals = [item for item in rest if not item.startswith("--") and item not in {"--json"}]
+        if len(positionals) < 2:
+            _emit({"ok": False, "error": "repair_apply_requires_job_and_patch"})
+            return 2
+        payload = apply_patch_for_job(positionals[0], positionals[1], output_root=output_root)
+        _emit(payload)
+        return 0 if payload.get("ok") else 1
+    if subcommand == "ledger":
+        from execution_plane.repair.repair_ledger import read_repair_ledger
+
+        _emit({"ok": True, "events": read_repair_ledger(output_root)})
+        return 0
+    _emit({"ok": False, "error": "unknown_repair_subcommand", "subcommand": subcommand})
     return 2
 
 
