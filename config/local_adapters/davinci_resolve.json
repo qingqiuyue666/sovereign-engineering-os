@@ -2,6 +2,10 @@
   "adapter": "davinci_resolve",
   "api_probe_script": "execution_plane/adapters/scripts/probe_davinci_api.py",
   "app_name": "DaVinci Resolve",
-  "startup_command": [],
+  "startup_command": [
+    "open",
+    "-a",
+    "DaVinci Resolve"
+  ],
   "startup_timeout_seconds": 120
 }
