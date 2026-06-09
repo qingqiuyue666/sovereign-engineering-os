@@ -72,6 +72,7 @@ Commands:
   project create NAME
   asset scan ROOT
   shot create|attach-workflow|run
+  package run|shot
   ai bundle|repo-map|token-roi
   creative init|scan-assets|archive-check|asset|shot|adapter|comfyui|blender|evidence|dashboard|doctor|launch-check|health|adoption-status
 """
@@ -125,6 +126,8 @@ def main(argv: list[str] | None = None) -> int:
             return _asset(args[1:])
         if command == "shot":
             return _shot(args[1:])
+        if command == "package":
+            return _package(args[1:])
         if command == "ai":
             return _ai(args[1:])
         if command == "creative":
@@ -543,6 +546,28 @@ def _shot(args: list[str]) -> int:
         return 0
     _emit({"ok": False, "error": "unknown_shot_subcommand", "subcommand": subcommand})
     return 2
+
+
+def _package(args: list[str]) -> int:
+    if not args or args[0] not in {"run", "shot"}:
+        _emit({"ok": False, "error": "package_run_or_shot_required"})
+        return 2
+    from execution_plane.packaging import package_run, package_shot
+
+    rest = args[1:]
+    values = _positionals(rest, skip_values_for={"--runtime-root", "--package-root"})
+    if not values:
+        _emit({"ok": False, "error": "package_requires_id"})
+        return 2
+    runtime_root = _option(rest, "--runtime-root", "work/production_runtime")
+    package_root = _option(rest, "--package-root", "work/packages")
+    payload = (
+        package_run(values[0], runtime_root=runtime_root, package_root=package_root)
+        if args[0] == "run"
+        else package_shot(values[0], runtime_root=runtime_root, package_root=package_root)
+    )
+    _emit(payload)
+    return 0
 
 
 def _run_ledger(args: list[str]) -> int:
