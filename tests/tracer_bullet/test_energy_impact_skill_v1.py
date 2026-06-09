@@ -26,9 +26,11 @@ class EnergyImpactSkillV1Tests(unittest.TestCase):
         metadata = (REPO_ROOT / "skills/energy_impact/skill.yaml").read_text(encoding="utf-8")
 
         for required in (
+            "purpose: first reusable Houdini + ComfyUI + DaVinci production shot template",
             "houdini_hython",
             "comfyui_local",
             "davinci_resolve",
+            "required_configs:",
             "config/local_adapters/comfyui_local.json",
             "config/local_adapters/davinci_resolve.json",
             "config/local_adapters/houdini_hython.json",
@@ -37,11 +39,14 @@ class EnergyImpactSkillV1Tests(unittest.TestCase):
             "DaVinci project/version probe artifact",
             "SEOS package manifest",
             "review artifact",
+            "runtime_output_policy:",
+            "path refs only",
+            "do not commit generated media",
         ):
             self.assertIn(required, metadata)
 
     def test_workflow_template_uses_expected_dcc_chain(self) -> None:
-        workflow = json.loads((REPO_ROOT / "skills/energy_impact/workflows/energy_impact_001.json").read_text(encoding="utf-8"))
+        workflow = json.loads((REPO_ROOT / "skills/energy_impact/workflows/energy_impact_workflow_v1.json").read_text(encoding="utf-8"))
         adapters = [node["adapter"] for node in workflow["nodes"]]
         actions = [node["action"] for node in workflow["nodes"]]
 
@@ -49,6 +54,8 @@ class EnergyImpactSkillV1Tests(unittest.TestCase):
         self.assertEqual(actions, ["smoke_cache_test", "submit_workflow", "project_probe"])
         self.assertEqual(workflow["edges"][0]["mode"], "artifact_refs")
         self.assertEqual(workflow["edges"][1]["mode"], "artifact_refs")
+        for node in workflow["nodes"]:
+            self.assertTrue((REPO_ROOT / node["rpc_template"]).exists(), node["rpc_template"])
 
     def test_rpc_chain_points_to_existing_rpc_templates(self) -> None:
         chain = json.loads((REPO_ROOT / "skills/energy_impact/rpc_templates/energy_impact_rpc_chain.json").read_text(encoding="utf-8"))
@@ -57,6 +64,21 @@ class EnergyImpactSkillV1Tests(unittest.TestCase):
         self.assertEqual([step["adapter"] for step in chain["steps"]], ["houdini_hython", "comfyui_local", "davinci_resolve"])
         for step in chain["steps"]:
             self.assertTrue((REPO_ROOT / step["template_path"]).exists(), step["template_path"])
+
+    def test_directive_named_templates_exist_and_reference_examples(self) -> None:
+        expected_refs = {
+            "skills/energy_impact/rpc_templates/houdini_smoke_cache_test.json": "examples/rpc/houdini_smoke_cache_test.json",
+            "skills/energy_impact/rpc_templates/comfyui_submit_workflow.json": "examples/rpc/comfyui_submit_workflow.json",
+            "skills/energy_impact/rpc_templates/davinci_project_probe.json": "examples/rpc/davinci_project_probe.json",
+        }
+        for template_path, target_path in expected_refs.items():
+            template = json.loads((REPO_ROOT / template_path).read_text(encoding="utf-8"))
+            self.assertEqual(template["schema_version"], "seos.energy_impact.rpc_template_ref.v1")
+            self.assertEqual(template["template_path"], target_path)
+            self.assertTrue((REPO_ROOT / template["template_path"]).exists(), template["template_path"])
+
+        self.assertTrue((REPO_ROOT / "skills/energy_impact/workflows/energy_impact_workflow_v1.json").exists())
+        self.assertTrue((REPO_ROOT / "skills/energy_impact/prompts/energy_impact_prompt_v1.md").exists())
 
 
 if __name__ == "__main__":

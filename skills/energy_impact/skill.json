@@ -16,12 +16,18 @@
     "examples/shots/energy_impact_001/shot.json",
     "examples/shots/energy_impact_001/workflow.json",
     "skills/energy_impact/skill.yaml",
+    "skills/energy_impact/rpc_templates/houdini_smoke_cache_test.json",
+    "skills/energy_impact/rpc_templates/comfyui_submit_workflow.json",
+    "skills/energy_impact/rpc_templates/davinci_project_probe.json",
     "skills/energy_impact/rpc_templates/energy_impact_rpc_chain.json",
     "skills/energy_impact/workflows/energy_impact_001.json",
-    "skills/energy_impact/prompts/energy_impact_concept_prompt.txt"
+    "skills/energy_impact/workflows/energy_impact_workflow_v1.json",
+    "skills/energy_impact/prompts/energy_impact_concept_prompt.txt",
+    "skills/energy_impact/prompts/energy_impact_prompt_v1.md"
   ],
   "workflow_examples": [
     "examples/shots/energy_impact_001/workflow.json",
-    "skills/energy_impact/workflows/energy_impact_001.json"
+    "skills/energy_impact/workflows/energy_impact_001.json",
+    "skills/energy_impact/workflows/energy_impact_workflow_v1.json"
   ]
 }

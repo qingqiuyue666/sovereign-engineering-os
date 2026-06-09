@@ -2,14 +2,15 @@
 
 ## Source State
 
-- Main HEAD at report generation: `0219195b0a59877222157bfe806394f153a17348`
+- Final main HEAD: verified by the final regression and push step after this committed report update. The exact pushed SHA is recorded in the final operator report because this committed file cannot self-reference the commit SHA that contains its own final edits.
+- Local main HEAD before this report correction: `da84b82dabf476c2259c5943bd520cab0bb2f684`
 - Merge commit SHA: `e9dd84ee5de69a456e77b571e4ce6502138a46fd`
 - Remote feature branch deletion: completed for `execution-plane/controlled-dcc-worker-v1`
 
 ## Local DCC Paths
 
-- ComfyUI working directory: `~/ComfyUI`
-- ComfyUI launch command: `~/ComfyUI/venv/bin/python main.py --listen 127.0.0.1 --port 8188 --disable-auto-launch`
+- ComfyUI working directory: `/Users/qqy/ComfyUI`
+- ComfyUI launch command: `/Users/qqy/ComfyUI/venv/bin/python main.py --listen 127.0.0.1 --port 8188 --disable-auto-launch`
 - Houdini hython: `/Applications/Houdini/Houdini20.5.487/Frameworks/Houdini.framework/Versions/20.5/Resources/bin/hython`
 - DaVinci Resolve app: `/Applications/DaVinci Resolve/DaVinci Resolve.app`
 - DaVinci Python module path: `/Library/Application Support/Blackmagic Design/DaVinci Resolve/Developer/Scripting/Modules`
@@ -97,10 +98,16 @@
 - DaVinci integration currently verifies scripting availability and project/version probe evidence; direct timeline media transfer is not claimed.
 - Energy impact media handoff is ArtifactRef metadata, not a direct editorial timeline handoff.
 - Local asset library integration is documented as path refs; full live-library scan remains an operator-controlled runtime action.
-- The committed report uses home-relative notation for user-home paths to preserve public identity boundary checks.
+
+## Remaining Blockers
+
+- No Phase 1 closure blocker is known after the local DCC and production-shot runs.
+- Direct DaVinci timeline media handoff remains an explicit limitation, not a blocker, because the verified Phase 1 closure uses scripting probes and ArtifactRefs truthfully.
 
 ## Next Recommended Production Shots
 
+- `sword_slash_001`: Houdini arc/spark cache plus ComfyUI keyframe concept and review packet.
+- `smoke_burst_001`: focused Houdini smoke variant with ComfyUI image output and package/review evidence.
+- `portal_lightning_001`: portal-light concept image plus procedural energy cache and DaVinci project probe evidence.
+- `impact_debris_001`: debris-impact cache proof with package manifest and review artifact.
 - `energy_impact_002`: add explicit selected local asset refs from the asset library.
-- `portal_arrival_001`: exercise Houdini cache plus ComfyUI concept image with a separate review packet.
-- `sound_sync_001`: add audio asset refs and validate review audio slots.

@@ -1,10 +1,15 @@
 schema_version: seos.skill.metadata.v1
 name: energy_impact
+purpose: first reusable Houdini + ComfyUI + DaVinci production shot template
 description: Reusable local energy-impact production shot template.
 required_adapters:
   - houdini_hython
   - comfyui_local
   - davinci_resolve
+required_configs:
+  - config/local_adapters/comfyui_local.json
+  - config/local_adapters/davinci_resolve.json
+  - config/local_adapters/houdini_hython.json
 required_local_configs:
   - config/local_adapters/comfyui_local.json
   - config/local_adapters/davinci_resolve.json
@@ -19,7 +24,16 @@ templates:
   project: examples/projects/energy_impact_project_v1.json
   shot: examples/shots/energy_impact_001/shot.json
   workflow: examples/shots/energy_impact_001/workflow.json
+  reusable_workflow: skills/energy_impact/workflows/energy_impact_workflow_v1.json
+  prompt: skills/energy_impact/prompts/energy_impact_prompt_v1.md
+  rpc_templates:
+    - skills/energy_impact/rpc_templates/houdini_smoke_cache_test.json
+    - skills/energy_impact/rpc_templates/comfyui_submit_workflow.json
+    - skills/energy_impact/rpc_templates/davinci_project_probe.json
 runtime_policy:
   output_root: work/energy_impact_001
   copy_policy: artifact_refs_only
   commit_runtime_outputs: false
+runtime_output_policy:
+  - path refs only
+  - do not commit generated media
