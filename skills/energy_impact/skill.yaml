@@ -1,0 +1,25 @@
+schema_version: seos.skill.metadata.v1
+name: energy_impact
+description: Reusable local energy-impact production shot template.
+required_adapters:
+  - houdini_hython
+  - comfyui_local
+  - davinci_resolve
+required_local_configs:
+  - config/local_adapters/comfyui_local.json
+  - config/local_adapters/davinci_resolve.json
+  - config/local_adapters/houdini_hython.json
+expected_outputs:
+  - Houdini cache/preview
+  - ComfyUI image output
+  - DaVinci project/version probe artifact
+  - SEOS package manifest
+  - review artifact
+templates:
+  project: examples/projects/energy_impact_project_v1.json
+  shot: examples/shots/energy_impact_001/shot.json
+  workflow: examples/shots/energy_impact_001/workflow.json
+runtime_policy:
+  output_root: work/energy_impact_001
+  copy_policy: artifact_refs_only
+  commit_runtime_outputs: false
