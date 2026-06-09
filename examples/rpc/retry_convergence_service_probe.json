@@ -1,0 +1,40 @@
+{
+  "id": "retry_convergence_service_probe_v1",
+  "jsonrpc": "2.0",
+  "method": "adapter.execute",
+  "params": {
+    "action": "service_probe",
+    "adapter": "comfyui_local",
+    "output_root": "work/rpc/retry_convergence_service_probe",
+    "runtime_token": {
+      "auto_provision": {
+        "allowed_adapters": [
+          "comfyui_local"
+        ],
+        "enabled": true,
+        "heartbeat_interval_seconds": 1,
+        "max_wait_seconds": 1
+      },
+      "expires_at": "2099-01-01T00:00:00Z",
+      "max_files": 100,
+      "max_output_bytes": 104857600,
+      "max_runtime_seconds": 60,
+      "operator_approval_id": "RCPT_RETRY_CONVERGENCE_SERVICE_PROBE",
+      "patch_repair": {
+        "allowed_tools": [
+          "cline",
+          "aider"
+        ],
+        "auto_apply": false,
+        "enabled": true,
+        "mode": "generate_patch_then_test"
+      },
+      "retry": {
+        "backoff_seconds": 1,
+        "enabled": true,
+        "max_attempts": 2
+      },
+      "task_id": "TASK_RETRY_CONVERGENCE_SERVICE_PROBE"
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "id": "comfyui_submit_workflow_v1",
+  "jsonrpc": "2.0",
+  "method": "adapter.execute",
+  "params": {
+    "action": "submit_workflow",
+    "adapter": "comfyui_local",
+    "output_root": "work/rpc/comfyui_submit_workflow",
+    "payload": {
+      "history_timeout_seconds": 30,
+      "poll_interval_seconds": 1,
+      "workflow_path": "examples/comfyui/workflows/minimal_save_image.json"
+    },
+    "runtime_token": {
+      "auto_provision": {
+        "allowed_adapters": [
+          "comfyui_local"
+        ],
+        "enabled": true,
+        "heartbeat_interval_seconds": 1,
+        "max_wait_seconds": 90
+      },
+      "expires_at": "2099-01-01T00:00:00Z",
+      "max_files": 100,
+      "max_output_bytes": 104857600,
+      "max_runtime_seconds": 120,
+      "operator_approval_id": "RCPT_COMFYUI_SUBMIT_WORKFLOW",
+      "task_id": "TASK_COMFYUI_SUBMIT_WORKFLOW"
+    }
+  }
+}

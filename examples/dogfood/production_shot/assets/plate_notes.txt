@@ -1,0 +1,3 @@
+Plate: dogfood_shot_001
+Purpose: CI-safe production dogfood plate notes.
+Expected delivery: text summary plus JSON handoff manifest.

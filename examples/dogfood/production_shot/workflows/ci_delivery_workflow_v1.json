@@ -1,0 +1,35 @@
+{
+  "edges": [
+    {
+      "from": "write_shot_summary",
+      "mode": "artifact_refs",
+      "to": "write_handoff_manifest"
+    }
+  ],
+  "failure_policy": {
+    "rerun_from_failed_node": true,
+    "stop_downstream_on_failure": true
+  },
+  "nodes": [
+    {
+      "action": "smoke_generate_file",
+      "adapter": "fake_dcc",
+      "node_id": "write_shot_summary",
+      "payload": {
+        "content": "Shot dogfood_shot_001 completed through the CI-safe production dogfood workflow.\n",
+        "output_path": "delivery/shot_summary.txt"
+      }
+    },
+    {
+      "action": "smoke_generate_file",
+      "adapter": "fake_dcc",
+      "node_id": "write_handoff_manifest",
+      "payload": {
+        "content": "{\"shot\":\"dogfood_shot_001\",\"status\":\"ready_for_review\",\"source\":\"production_dogfood_fixture_v1\"}\n",
+        "output_path": "delivery/handoff_manifest.json"
+      }
+    }
+  ],
+  "schema_version": "seos.cross_software_workflow.v1",
+  "workflow_id": "production_dogfood_ci_delivery_v1"
+}

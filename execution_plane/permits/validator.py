@@ -7,13 +7,10 @@ from datetime import datetime, timezone
 from pathlib import PurePosixPath
 from typing import Any
 
+from execution_plane.adapters.base import SUPPORTED_ADAPTER_ACTIONS
 from execution_plane.permits.builder import EXECUTION_PERMIT_SCHEMA_VERSION, parse_utc
 from execution_plane.permits.digest import compute_permit_digest
-
-SUPPORTED_ADAPTER_ACTIONS = {
-    "fake_dcc": frozenset({"smoke_generate_file"}),
-    "houdini_hython": frozenset({"houdini_generate_geometry_cache"}),
-}
+from execution_plane.runtime.token_policy import RuntimePolicyError, normalize_runtime_policy
 
 REQUIRED_FIELDS = (
     "schema_version",
@@ -123,6 +120,16 @@ def validate_execution_permit_errors(
         errors.append("destructive_action_must_default_false")
     if permit.get("evidence_required") is not True:
         errors.append("evidence_required_must_be_true")
+    runtime_policy = {
+        key: permit[key]
+        for key in ("auto_provision", "concurrency", "retry", "patch_repair")
+        if key in permit
+    }
+    if runtime_policy:
+        try:
+            normalize_runtime_policy(runtime_policy)
+        except RuntimePolicyError as exc:
+            errors.extend(exc.errors)
 
     input_roots = permit.get("allowed_input_roots")
     if not isinstance(input_roots, list):
@@ -193,4 +200,3 @@ def _require_positive_int(permit: Mapping[str, Any], field: str, errors: list[st
 def _has_path_traversal(value: str) -> bool:
     normalized = value.replace("\\", "/")
     return ".." in PurePosixPath(normalized).parts
-

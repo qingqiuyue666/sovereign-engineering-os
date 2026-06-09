@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, Mapping
 import hashlib
 
+from execution_plane.artifacts import build_artifact_refs
 from execution_plane.runner.path_guard import public_output_root_label
 
 EXECUTION_RESULT_SCHEMA_VERSION = "seos_execution_result_v1"
@@ -62,7 +63,10 @@ def build_execution_result(
     failure_summary: str | None,
     policy_blocks: list[str] | None = None,
     evidence_manifest_path: str | None = None,
+    state_transitions: list[dict[str, Any]] | None = None,
+    provision_result: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
+    node_id = str(permit.get("allowed_action", "adapter_action"))
     return {
         "schema_version": EXECUTION_RESULT_SCHEMA_VERSION,
         "permit_id": str(permit["permit_id"]),
@@ -74,10 +78,12 @@ def build_execution_result(
         "status": status,
         "output_root": public_output_root_label(output_root),
         "outputs": outputs,
+        "artifact_refs": build_artifact_refs(run_id=run_id, node_id=node_id, output_records=outputs),
         "stdout_digest": sha256_bytes(stdout.encode("utf-8", errors="replace")),
         "stderr_digest": sha256_bytes(stderr.encode("utf-8", errors="replace")),
         "failure_summary": failure_summary,
         "policy_blocks": list(policy_blocks or []),
         "evidence_manifest_path": evidence_manifest_path,
+        "state_transitions": list(state_transitions or []),
+        "provision_result": dict(provision_result or {}),
     }
-

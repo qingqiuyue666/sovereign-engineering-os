@@ -8,8 +8,8 @@ import json
 import sys
 
 from creative.common import load_json, write_json
-from execution_plane.adapters.fake_dcc import run_fake_dcc
-from execution_plane.adapters.houdini_hython import run_houdini_hython_smoke
+from execution_plane.adapters.base import SUPPORTED_ADAPTER_ACTIONS
+from execution_plane.adapters.registry import dispatch_adapter
 from execution_plane.permits.builder import create_execution_permit
 from execution_plane.permits.validator import ExecutionPermitValidationError
 
@@ -29,7 +29,7 @@ def main(argv: list[str] | None = None) -> int:
     create_parser = permit_subparsers.add_parser("create", help="create a digest-bound execution permit")
     create_parser.add_argument("--task-id", required=True)
     create_parser.add_argument("--approval-id", required=True)
-    create_parser.add_argument("--adapter", default="fake_dcc", choices=("fake_dcc", "houdini_hython"))
+    create_parser.add_argument("--adapter", default="fake_dcc", choices=tuple(SUPPORTED_ADAPTER_ACTIONS))
     create_parser.add_argument("--action", default="smoke_generate_file")
     create_parser.add_argument("--input-root", action="append", default=[])
     create_parser.add_argument("--output-root", required=True)
@@ -91,13 +91,7 @@ def _permit_create(args: argparse.Namespace) -> int:
 def _run(args: argparse.Namespace) -> int:
     permit = load_json(Path(args.permit))
     job = load_json(Path(args.job)) if args.job else None
-    adapter = permit.get("allowed_adapter")
-    if adapter == "fake_dcc":
-        result = run_fake_dcc(permit, job=job)
-    elif adapter == "houdini_hython":
-        result = run_houdini_hython_smoke(permit)
-    else:
-        return _emit({"ok": False, "error": "unsupported_adapter", "adapter": adapter}, json_mode=True, code=1)
+    result = dispatch_adapter(permit, job)
     result_out = Path(args.result_out) if args.result_out else Path(str(permit["allowed_output_root"])) / "execution_result.json"
     write_json(result_out, result)
     return _emit(
@@ -139,4 +133,3 @@ def _emit(payload: dict[str, object], *, json_mode: bool, code: int | None = Non
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

@@ -5,14 +5,27 @@
     "allowed_action": {
       "enum": [
         "smoke_generate_file",
-        "houdini_generate_geometry_cache"
+        "version_probe",
+        "smoke_cache_test",
+        "geometry_cache_test",
+        "hip_open_validate",
+        "houdini_generate_geometry_cache",
+        "service_probe",
+        "submit_workflow",
+        "poll_history",
+        "collect_outputs",
+        "project_probe",
+        "timeline_export_probe",
+        "render_preset_test"
       ],
       "type": "string"
     },
     "allowed_adapter": {
       "enum": [
         "fake_dcc",
-        "houdini_hython"
+        "houdini_hython",
+        "comfyui_local",
+        "davinci_resolve"
       ],
       "type": "string"
     },
@@ -25,6 +38,70 @@
     "allowed_output_root": {
       "minLength": 1,
       "type": "string"
+    },
+    "auto_provision": {
+      "additionalProperties": false,
+      "properties": {
+        "allowed_adapters": {
+          "items": {
+            "enum": [
+              "fake_dcc",
+              "houdini_hython",
+              "comfyui_local",
+              "davinci_resolve"
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "heartbeat_interval_seconds": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "max_wait_seconds": {
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "enabled",
+        "allowed_adapters",
+        "max_wait_seconds",
+        "heartbeat_interval_seconds"
+      ],
+      "type": "object"
+    },
+    "concurrency": {
+      "additionalProperties": false,
+      "properties": {
+        "max_global_jobs": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "max_per_adapter_jobs": {
+          "additionalProperties": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "propertyNames": {
+            "enum": [
+              "fake_dcc",
+              "houdini_hython",
+              "comfyui_local",
+              "davinci_resolve"
+            ]
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "max_global_jobs",
+        "max_per_adapter_jobs"
+      ],
+      "type": "object"
     },
     "created_at": {
       "format": "date-time",
@@ -62,6 +139,42 @@
       "minLength": 1,
       "type": "string"
     },
+    "patch_repair": {
+      "additionalProperties": false,
+      "properties": {
+        "allowed_tools": {
+          "items": {
+            "enum": [
+              "cline",
+              "aider"
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "auto_apply": {
+          "const": false,
+          "type": "boolean"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "mode": {
+          "enum": [
+            "report_only",
+            "generate_patch_then_test"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "enabled",
+        "mode",
+        "allowed_tools",
+        "auto_apply"
+      ],
+      "type": "object"
+    },
     "permit_digest": {
       "minLength": 71,
       "type": "string"
@@ -95,6 +208,28 @@
       },
       "minItems": 1,
       "type": "array"
+    },
+    "retry": {
+      "additionalProperties": false,
+      "properties": {
+        "backoff_seconds": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "max_attempts": {
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "enabled",
+        "max_attempts",
+        "backoff_seconds"
+      ],
+      "type": "object"
     },
     "schema_version": {
       "const": "seos_execution_permit_v1",
@@ -134,4 +269,3 @@
   "title": "SEOS Execution Permit V1",
   "type": "object"
 }
-
