@@ -6,11 +6,10 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
-from creative.common import load_json, write_json
+from creative.common import load_json
 from execution_plane.adapters.registry import dispatch_adapter
-from execution_plane.permits.builder import create_execution_permit, stable_id
-from execution_plane.runner.result_envelope import utc_now
-from execution_plane.runtime.worker_pool import run_bounded_jobs
+from execution_plane.permits.builder import create_execution_permit
+from execution_plane.workflows.runner import run_workflow
 
 
 def invoke_rpc_file(path: Path) -> dict[str, Any]:
@@ -55,73 +54,7 @@ def _invoke_single(params: Mapping[str, Any]) -> dict[str, Any]:
 
 
 def _invoke_workflow(params: Mapping[str, Any]) -> dict[str, Any]:
-    output_root = Path(str(params.get("output_root", "work/rpc/workflow")))
-    workflow_id = str(params.get("workflow_id", stable_id("WORKFLOW", utc_now())))
-    token = params.get("runtime_token") if isinstance(params.get("runtime_token"), Mapping) else {}
-    nodes = params.get("nodes")
-    if not isinstance(nodes, list) or not nodes:
-        return {
-            "workflow_id": workflow_id,
-            "terminal_status": "TERMINAL_FAILED",
-            "failure_code": "SCHEMA_INVALID",
-            "node_results": [],
-        }
-    jobs = []
-    for index, raw_node in enumerate(nodes):
-        node = raw_node if isinstance(raw_node, Mapping) else {}
-        node_id = str(node.get("node_id", f"n{index + 1}"))
-        adapter = str(node.get("adapter", ""))
-        action = str(node.get("action", ""))
-        permit = _permit_for_node(
-            adapter=adapter,
-            action=action,
-            output_root=output_root / node_id,
-            token=token,
-            node_id=node_id,
-        )
-        jobs.append(
-            {
-                "node_id": node_id,
-                "adapter": adapter,
-                "action": action,
-                "permit": permit,
-                "payload": node.get("payload") if isinstance(node.get("payload"), Mapping) else {},
-            }
-        )
-
-    def dispatch(job: Mapping[str, Any]) -> dict[str, Any]:
-        try:
-            result = dispatch_adapter(job["permit"], job.get("payload"))
-            return {"node_id": job["node_id"], "result": result}
-        except Exception as exc:
-            return {
-                "node_id": job.get("node_id"),
-                "result": {
-                    "schema_version": "seos_execution_result_v1",
-                    "status": "BLOCKED",
-                    "adapter": job.get("adapter"),
-                    "failure_summary": f"{exc.__class__.__name__}: {exc}",
-                    "policy_blocks": ["EXECUTION_FAILED"],
-                    "outputs": [],
-                    "artifact_refs": [],
-                },
-            }
-
-    node_results = run_bounded_jobs(jobs, {**dict(token), **jobs[0]["permit"]}, dispatch)
-    terminal_status = (
-        "TERMINAL_SUCCEEDED"
-        if all(item.get("result", {}).get("status") == "SUCCEEDED" for item in node_results)
-        else "TERMINAL_FAILED"
-    )
-    receipt = {
-        "schema_version": "seos.workflow_receipt.v1",
-        "workflow_id": workflow_id,
-        "terminal_status": terminal_status,
-        "node_results": sorted(node_results, key=lambda item: str(item.get("node_id"))),
-    }
-    output_root.mkdir(parents=True, exist_ok=True)
-    write_json(output_root / "workflow_receipt.json", receipt)
-    return receipt
+    return run_workflow(params)
 
 
 def _permit_for_node(
