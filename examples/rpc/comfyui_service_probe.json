@@ -13,7 +13,7 @@
         ],
         "enabled": true,
         "heartbeat_interval_seconds": 1,
-        "max_wait_seconds": 3
+        "max_wait_seconds": 90
       },
       "expires_at": "2099-01-01T00:00:00Z",
       "max_files": 100,

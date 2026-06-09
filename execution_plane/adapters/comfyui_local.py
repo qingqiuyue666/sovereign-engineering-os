@@ -338,7 +338,13 @@ class ComfyUILocalAdapter(AdapterContract):
                 details={"failure_code": "AUTO_PROVISION_FAILED", "reason": "working_dir_missing"},
             )
         started = monotonic()
-        process = subprocess.Popen([str(part) for part in launch_command], cwd=cwd)
+        process = subprocess.Popen(
+            [str(part) for part in launch_command],
+            cwd=cwd,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            start_new_session=True,
+        )
         runtime_policy = normalize_runtime_policy(token)
         wait_seconds = int(runtime_policy["auto_provision"]["max_wait_seconds"]) or int(
             cfg.get("startup_timeout_seconds", 90)

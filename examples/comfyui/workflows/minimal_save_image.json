@@ -1,76 +1,11 @@
 {
-  "3": {
-    "class_type": "KSampler",
-    "inputs": {
-      "cfg": 8,
-      "denoise": 1,
-      "latent_image": [
-        "5",
-        0
-      ],
-      "model": [
-        "4",
-        0
-      ],
-      "negative": [
-        "7",
-        0
-      ],
-      "positive": [
-        "6",
-        0
-      ],
-      "sampler_name": "euler",
-      "scheduler": "normal",
-      "seed": 1,
-      "steps": 4
-    }
-  },
-  "4": {
-    "class_type": "CheckpointLoaderSimple",
-    "inputs": {
-      "ckpt_name": "model.safetensors"
-    }
-  },
   "5": {
-    "class_type": "EmptyLatentImage",
+    "class_type": "EmptyImage",
     "inputs": {
       "batch_size": 1,
+      "color": 8421504,
       "height": 64,
       "width": 64
-    }
-  },
-  "6": {
-    "class_type": "CLIPTextEncode",
-    "inputs": {
-      "clip": [
-        "4",
-        1
-      ],
-      "text": "plain gray square test image"
-    }
-  },
-  "7": {
-    "class_type": "CLIPTextEncode",
-    "inputs": {
-      "clip": [
-        "4",
-        1
-      ],
-      "text": ""
-    }
-  },
-  "8": {
-    "class_type": "VAEDecode",
-    "inputs": {
-      "samples": [
-        "3",
-        0
-      ],
-      "vae": [
-        "4",
-        2
-      ]
     }
   },
   "9": {
@@ -78,7 +13,7 @@
     "inputs": {
       "filename_prefix": "seos_minimal",
       "images": [
-        "8",
+        "5",
         0
       ]
     }
