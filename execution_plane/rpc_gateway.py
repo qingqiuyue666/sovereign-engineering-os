@@ -9,6 +9,7 @@ from typing import Any
 from creative.common import load_json
 from execution_plane.adapters.registry import dispatch_adapter
 from execution_plane.permits.builder import create_execution_permit
+from execution_plane.runtime.error_convergence import execute_with_retry
 from execution_plane.workflows.runner import run_workflow
 
 
@@ -46,7 +47,11 @@ def _invoke_single(params: Mapping[str, Any]) -> dict[str, Any]:
         token=token,
         node_id="single",
     )
-    result = dispatch_adapter(permit, params.get("payload") if isinstance(params.get("payload"), Mapping) else None)
+    result = execute_with_retry(
+        permit=permit,
+        payload=params.get("payload") if isinstance(params.get("payload"), Mapping) else None,
+        dispatch=dispatch_adapter,
+    )
     return {
         "terminal_status": "TERMINAL_SUCCEEDED" if result.get("status") == "SUCCEEDED" else "TERMINAL_FAILED",
         "node_results": [{"node_id": "single", "result": result}],

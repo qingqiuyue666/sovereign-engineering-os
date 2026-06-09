@@ -10,6 +10,7 @@ from creative.common import write_json
 from execution_plane.adapters.registry import dispatch_adapter
 from execution_plane.permits.builder import create_execution_permit, stable_id
 from execution_plane.runner.result_envelope import utc_now
+from execution_plane.runtime.error_convergence import execute_with_retry
 from execution_plane.runtime.state_ledger import append_state_events, state_event
 from execution_plane.runtime.worker_pool import run_bounded_jobs
 from execution_plane.workflows.artifact_router import routed_payload_for_node
@@ -132,7 +133,7 @@ def _dispatch_node(
     node_dir = output_root / node.node_id
     node_dir.mkdir(parents=True, exist_ok=True)
     try:
-        result = dispatcher(permit, payload)
+        result = execute_with_retry(permit=permit, payload=payload, dispatch=dispatcher)
     except Exception as exc:
         result = _exception_node_result(node, permit, exc)
     write_json(node_dir / "node_input_payload.json", payload)
@@ -248,6 +249,8 @@ def _write_node_receipt(output_root: Path, node: WorkflowNode, result: Mapping[s
         "action": node.action,
         "status": result.get("status"),
         "run_id": result.get("run_id"),
+        "attempt_count": result.get("attempt_count", 1),
+        "convergence_decision": result.get("convergence_decision", {}),
         "artifact_refs": [dict(ref) for ref in result.get("artifact_refs", []) if isinstance(ref, Mapping)],
         "failure_summary": result.get("failure_summary"),
         "payload_artifact_refs": [
