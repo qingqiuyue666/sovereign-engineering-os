@@ -77,6 +77,7 @@ Commands:
   skill list|show
   review create
   pattern report
+  dogfood run
   ai bundle|repo-map|token-roi
   creative init|scan-assets|archive-check|asset|shot|adapter|comfyui|blender|evidence|dashboard|doctor|launch-check|health|adoption-status
 """
@@ -140,6 +141,8 @@ def main(argv: list[str] | None = None) -> int:
             return _review(args[1:])
         if command == "pattern":
             return _pattern(args[1:])
+        if command == "dogfood":
+            return _dogfood(args[1:])
         if command == "ai":
             return _ai(args[1:])
         if command == "creative":
@@ -655,6 +658,28 @@ def _pattern(args: list[str]) -> int:
     )
     _emit(payload)
     return 0
+
+
+def _dogfood(args: list[str]) -> int:
+    if args[:1] != ["run"]:
+        _emit({"ok": False, "error": "dogfood_run_required"})
+        return 2
+    from execution_plane.production_dogfood import run_production_dogfood_fixture
+
+    rest = args[1:]
+    fixture_path = _positional(rest, skip_values_for={"--runtime-root", "--package-root", "--output-root", "--review-root"})
+    if not fixture_path:
+        _emit({"ok": False, "error": "dogfood_run_requires_fixture"})
+        return 2
+    payload = run_production_dogfood_fixture(
+        fixture_path,
+        runtime_root=_option(rest, "--runtime-root", "work/production_dogfood/runtime"),
+        package_root=_option(rest, "--package-root", "work/production_dogfood/packages"),
+        output_root=_option(rest, "--output-root", "work/production_dogfood/runs"),
+        review_root=_option(rest, "--review-root", "work/production_dogfood/review_artifacts"),
+    )
+    _emit(payload)
+    return 0 if payload.get("ok") else 1
 
 
 def _run_ledger(args: list[str]) -> int:

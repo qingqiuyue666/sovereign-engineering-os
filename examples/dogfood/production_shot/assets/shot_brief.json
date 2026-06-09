@@ -1,0 +1,9 @@
+{
+  "deliverables": [
+    "delivery/shot_summary.txt",
+    "delivery/handoff_manifest.json"
+  ],
+  "fixture": "production_shot_dogfood_v1",
+  "shot": "dogfood_shot_001",
+  "status": "ready"
+}
