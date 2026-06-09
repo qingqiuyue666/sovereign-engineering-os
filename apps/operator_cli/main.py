@@ -73,6 +73,7 @@ Commands:
   asset scan ROOT
   shot create|attach-workflow|run
   package run|shot
+  dashboard build
   ai bundle|repo-map|token-roi
   creative init|scan-assets|archive-check|asset|shot|adapter|comfyui|blender|evidence|dashboard|doctor|launch-check|health|adoption-status
 """
@@ -128,6 +129,8 @@ def main(argv: list[str] | None = None) -> int:
             return _shot(args[1:])
         if command == "package":
             return _package(args[1:])
+        if command == "dashboard":
+            return _dashboard(args[1:])
         if command == "ai":
             return _ai(args[1:])
         if command == "creative":
@@ -565,6 +568,23 @@ def _package(args: list[str]) -> int:
         package_run(values[0], runtime_root=runtime_root, package_root=package_root)
         if args[0] == "run"
         else package_shot(values[0], runtime_root=runtime_root, package_root=package_root)
+    )
+    _emit(payload)
+    return 0
+
+
+def _dashboard(args: list[str]) -> int:
+    if args[:1] != ["build"]:
+        _emit({"ok": False, "error": "dashboard_build_required"})
+        return 2
+    from apps.operator_dashboard.build import build_dashboard
+
+    rest = args[1:]
+    payload = build_dashboard(
+        runtime_root=_option(rest, "--runtime-root", "work/production_runtime"),
+        package_root=_option(rest, "--package-root", "work/packages"),
+        repair_root=_option(rest, "--repair-root", "work/repair_jobs"),
+        output_root=_option(rest, "--output-root", "work/operator_dashboard"),
     )
     _emit(payload)
     return 0
