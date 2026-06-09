@@ -2,10 +2,12 @@
   "adapter": "davinci_resolve",
   "api_probe_script": "execution_plane/adapters/scripts/probe_davinci_api.py",
   "app_name": "DaVinci Resolve",
+  "app_path": "/Applications/DaVinci Resolve/DaVinci Resolve.app",
+  "fusion_script_library_path": "/Applications/DaVinci Resolve/DaVinci Resolve.app/Contents/Libraries/Fusion",
+  "python_module_path": "/Library/Application Support/Blackmagic Design/DaVinci Resolve/Developer/Scripting/Modules",
   "startup_command": [
     "open",
-    "-a",
-    "DaVinci Resolve"
+    "/Applications/DaVinci Resolve/DaVinci Resolve.app"
   ],
   "startup_timeout_seconds": 120
 }

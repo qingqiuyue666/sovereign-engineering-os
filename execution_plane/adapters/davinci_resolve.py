@@ -7,7 +7,9 @@ from pathlib import Path
 from time import monotonic, sleep
 from typing import Any
 import importlib
+import os
 import subprocess
+import sys
 
 from creative.common import load_json, write_json
 from execution_plane.adapters.base import AdapterContract, DAVINCI_RESOLVE_ADAPTER, ProvisionResult
@@ -37,9 +39,12 @@ def load_davinci_config(config_path: Path | None = None) -> dict[str, Any]:
         return {
             "adapter": DAVINCI_RESOLVE_ADAPTER,
             "app_name": "DaVinci Resolve",
+            "app_path": "/Applications/DaVinci Resolve/DaVinci Resolve.app",
             "startup_command": ["open", "-a", "DaVinci Resolve"],
             "startup_timeout_seconds": 120,
             "api_probe_script": "execution_plane/adapters/scripts/probe_davinci_api.py",
+            "python_module_path": "/Library/Application Support/Blackmagic Design/DaVinci Resolve/Developer/Scripting/Modules",
+            "fusion_script_library_path": "/Applications/DaVinci Resolve/DaVinci Resolve.app/Contents/Libraries/Fusion",
         }
     return dict(load_json(path))
 
@@ -62,7 +67,7 @@ def attach_davinci_api(config: Mapping[str, Any] | None = None) -> dict[str, Any
 
     cfg = dict(config or load_davinci_config())
     probe_script = Path(str(cfg.get("api_probe_script", "")))
-    module = _load_resolve_script_module()
+    module = _load_resolve_script_module(cfg)
     if module is None:
         return {
             "status": "DEPENDENCY_BLOCKED",
@@ -103,7 +108,17 @@ def attach_davinci_api(config: Mapping[str, Any] | None = None) -> dict[str, Any
     }
 
 
-def _load_resolve_script_module() -> Any | None:
+def _load_resolve_script_module(config: Mapping[str, Any] | None = None) -> Any | None:
+    cfg = dict(config or {})
+    module_path = str(cfg.get("python_module_path", "")).strip()
+    if module_path and Path(module_path).is_dir() and module_path not in sys.path:
+        sys.path.insert(0, module_path)
+    library_path = str(cfg.get("fusion_script_library_path", "")).strip()
+    if library_path:
+        library = Path(library_path)
+        resolve_script_lib = library / "fusionscript.so" if library.is_dir() else library
+        if resolve_script_lib.is_file():
+            os.environ.setdefault("RESOLVE_SCRIPT_LIB", resolve_script_lib.as_posix())
     try:
         return importlib.import_module("DaVinciResolveScript")
     except Exception:
