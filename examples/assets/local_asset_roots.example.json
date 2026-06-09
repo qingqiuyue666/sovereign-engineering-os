@@ -1,0 +1,42 @@
+{
+  "copy_policy": "path_refs_only",
+  "description": "Example path-ref manifest for the operator's local asset library. This file contains no asset payloads.",
+  "large_assets_committed": false,
+  "root": {
+    "path": "/Users/qqy/Desktop/资产",
+    "storage_mode": "local_path_ref"
+  },
+  "schema_version": "seos.local_asset_roots.example.v1",
+  "subareas": [
+    {
+      "id": "general_materials",
+      "path": "/Users/qqy/Desktop/资产/通用素材库",
+      "storage_mode": "local_path_ref"
+    },
+    {
+      "id": "houdini_assets",
+      "path": "/Users/qqy/Desktop/资产/胡迪尼资产",
+      "storage_mode": "local_path_ref"
+    },
+    {
+      "id": "unreal_assets",
+      "path": "/Users/qqy/Desktop/资产/虚幻资产",
+      "storage_mode": "local_path_ref"
+    },
+    {
+      "id": "blender_assets",
+      "path": "/Users/qqy/Desktop/资产/Blender资产",
+      "storage_mode": "local_path_ref"
+    },
+    {
+      "id": "sound_effects",
+      "path": "/Users/qqy/Desktop/资产/音效库",
+      "storage_mode": "local_path_ref"
+    }
+  ],
+  "write_policy": {
+    "commit_runtime_registries": false,
+    "delete_assets": false,
+    "move_assets": false
+  }
+}
