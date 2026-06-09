@@ -8,6 +8,7 @@ from typing import Any
 import shutil
 import subprocess
 
+from creative.common import load_json
 from execution_plane.adapters.base import AdapterContract, HOUDINI_HYTHON_ADAPTER, ProvisionResult
 from execution_plane.artifacts import build_artifact_refs
 from execution_plane.permits.builder import stable_id
@@ -17,13 +18,32 @@ from execution_plane.runner.result_envelope import build_execution_result, colle
 from execution_plane.runtime.state_ledger import state_event
 
 HOUDINI_SCRIPT_PATH = Path("execution_plane/adapters/houdini_scripts/smoke_cache_test.py")
+DEFAULT_CONFIG_PATH = Path("config/local_adapters/houdini_hython.json")
 
 
-def detect_hython() -> str | None:
+def load_houdini_config(config_path: Path | None = None) -> dict[str, Any]:
+    path = config_path or DEFAULT_CONFIG_PATH
+    if not path.exists():
+        return {"adapter": HOUDINI_HYTHON_ADAPTER, "hython_path": ""}
+    return dict(load_json(path))
+
+
+def detect_hython(config: Mapping[str, Any] | None = None) -> str | None:
+    cfg = dict(config or load_houdini_config())
+    configured = str(cfg.get("hython_path", "")).strip()
+    if configured:
+        path = Path(configured)
+        if path.is_file():
+            return path.as_posix()
     return shutil.which("hython")
 
 
-def run_houdini_hython_smoke(permit: Mapping[str, Any], payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+def run_houdini_hython_smoke(
+    permit: Mapping[str, Any],
+    payload: Mapping[str, Any] | None = None,
+    *,
+    config_path: Path | None = None,
+) -> dict[str, Any]:
     checked = validate_execution_permit(
         permit,
         expected_adapter="houdini_hython",
@@ -33,7 +53,7 @@ def run_houdini_hython_smoke(permit: Mapping[str, Any], payload: Mapping[str, An
     output_root = resolve_output_root(str(checked["allowed_output_root"]))
     output_root.mkdir(parents=True, exist_ok=True)
     transitions = [state_event(run_id="PENDING", adapter=HOUDINI_HYTHON_ADAPTER, state="PREFLIGHTING")]
-    hython = detect_hython()
+    hython = detect_hython(load_houdini_config(config_path))
     run_id = stable_id("RUN", checked["permit_id"], started_at, action)
     transitions = [state_event(run_id=run_id, adapter=HOUDINI_HYTHON_ADAPTER, state="PREFLIGHTING")]
     if not hython:
@@ -344,8 +364,11 @@ class HoudiniHythonAdapter(AdapterContract):
         }
     )
 
+    def __init__(self, config_path: Path | None = None) -> None:
+        self.config_path = config_path
+
     def detect(self) -> dict[str, Any]:
-        hython = detect_hython()
+        hython = detect_hython(load_houdini_config(self.config_path))
         return {
             "adapter": self.name,
             "available": hython is not None,
@@ -375,4 +398,4 @@ class HoudiniHythonAdapter(AdapterContract):
         )
 
     def execute(self, permit: Mapping[str, Any], payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
-        return run_houdini_hython_smoke(permit, payload=payload)
+        return run_houdini_hython_smoke(permit, payload=payload, config_path=self.config_path)
