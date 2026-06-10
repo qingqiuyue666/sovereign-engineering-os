@@ -1,0 +1,13 @@
+{
+  "kind": "houdini_hython_smoke_materialization_v1",
+  "reasons": [
+    "hython executable unavailable"
+  ],
+  "status": "blocked_resource_missing",
+  "target": {
+    "artifact_type": "houdini_hython_smoke_output",
+    "relative_path": "hython_smoke_output_v1.json",
+    "sha256": ""
+  },
+  "target_root": "<local-path:houdini_unavailable>"
+}

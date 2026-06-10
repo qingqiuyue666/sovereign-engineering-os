@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "sovereign-engineering-os"
 version = "0.0.0"
-description = "Local-first AI execution governance kernel."
+description = "Local-first AI/VFX production assistant with controlled execution evidence."
 requires-python = ">=3.13"
 dependencies = [
   "openpyxl>=3.1,<4",

@@ -1,24 +1,41 @@
 # Sovereign Engineering OS
 
-Sovereign Engineering OS (SEOS) is a local-first, audit-first, human-gated
-engineering governance control plane for AI-assisted repository work.
+Sovereign Engineering OS (SEOS) is being refocused into a local-first AI/VFX
+production assistant and controlled execution/evidence system. Its practical
+job is to help an operator scan local assets, classify what exists, detect
+broken or duplicated production inputs, plan shots, inspect local tool
+availability, run approved local tools where available, and record useful
+outputs or truthful failure reports.
 
-SEOS records task intent, approval state, dry-run execution receipts, evidence
-traces, replay explanations, failure bundles, and release checks so an operator
-or reviewer can inspect what was proposed, what was approved, what ran, and
-what evidence supports the result.
+SEOS still records task intent, approval state, dry-run execution receipts,
+evidence traces, replay explanations, failure bundles, and release checks. Those
+controls now serve the production workflow rather than replacing it.
 
-SEOS is not an OS-level sandbox, not RPA, not a computer-control framework, not
-an autonomous AI executor, not a commercial SaaS platform, and not a secret
-manager. Host operating-system permissions, process isolation, credential
-custody, EDR, containers, VMs, and cloud controls remain outside the SEOS
-boundary.
+Product boundary:
+
+- SEOS is a local-first AI/VFX production assistant and controlled
+  execution/evidence system.
+- SEOS is not an operating-system sandbox and not an OS-level sandbox.
+- SEOS is not uncontrolled RPA, desktop automation, or computer control.
+- SEOS is not RPA.
+- SEOS is not a computer-control framework.
+- SEOS is not a cloud production platform.
+- SEOS is not a commercial SaaS platform.
+- SEOS is not externally certified.
+- Host permissions, process isolation, credential custody, EDR, containers,
+  VMs, and cloud controls remain outside the SEOS boundary.
 
 ## Current Status
 
-The repository is in `REAL_OPERATION_OBSERVATION_PERIOD_ACTIVE` mode.
+The repository contains a large amount of historical governance and readiness
+work. Active development should now be judged by real production usefulness:
+asset scans, readable reports, adapter truthfulness, shot plans, local outputs,
+hashes, materialization evidence, and actionable failure records.
 
-Current validated facts:
+The repository still preserves `REAL_OPERATION_OBSERVATION_PERIOD_ACTIVE`
+artifacts as historical evidence.
+
+Historical validated facts recorded in the repository:
 
 - `SYSTEM_LANDED`
 - `REAL_OPERATION_OBSERVATION_PERIOD_ACTIVE`
@@ -44,8 +61,9 @@ objects explicit:
 - replay explanations state what can and cannot be reconstructed
 - failure bundles preserve bounded, digest-oriented failure context
 
-The design goal is not to let AI do more by default. The goal is to make local
-engineering work more reviewable, reproducible, and fail-closed.
+The design goal is not to let AI do more by default. The goal is to reduce
+manual production work while keeping local engineering and creative workflows
+reviewable, reproducible, and fail-closed.
 
 ## What SEOS Is Not
 
@@ -144,6 +162,165 @@ python3 seos.py creative scan-assets --json
 python3 seos.py creative adapter list --json
 python3 seos.py creative dashboard build --json
 ```
+
+Real local asset-library scan:
+
+```bash
+ASSET_ROOT=./local_asset_library
+python3 seos.py creative scan-assets \
+  --root "$ASSET_ROOT" \
+  --mode public \
+  --output-json reports/creative/assets/local_asset_library.public.json \
+  --output-md reports/creative/assets/local_asset_library.public.md
+```
+
+Use `--mode public` for sanitized artifacts that use relative asset references.
+Use `--mode local` only for operator-local reports that may include local
+absolute paths. The scan is read-only for the asset root and never moves,
+renames, deletes, deduplicates, extracts archives, or executes DCC tools.
+
+Search a generated registry:
+
+```bash
+python3 seos.py creative search-assets \
+  --registry-json reports/creative/assets/local_asset_library.public.json \
+  --query missing-texture-sets
+```
+
+Build a local production dashboard:
+
+```bash
+python3 seos.py creative production-dashboard \
+  --registry-json reports/creative/assets/local_asset_library.public.json \
+  --output-md reports/creative/assets/local_production_dashboard.md \
+  --output-html reports/creative/assets/local_production_dashboard.html
+```
+
+Build a local tool-health dashboard:
+
+```bash
+python3 seos.py creative tool-health-dashboard \
+  --mode public \
+  --output-json reports/creative/tool_health/local_tool_health_dashboard.json \
+  --output-md reports/creative/tool_health/local_tool_health_dashboard.md \
+  --output-html reports/creative/tool_health/local_tool_health_dashboard.html
+```
+
+The tool-health dashboard reports Python, Python dependencies, Git, FFmpeg,
+Houdini/hython, ComfyUI, Blender, After Effects, DaVinci Resolve, Unreal Engine,
+and ZBrush availability without launching DCC or AI tools or requiring
+proprietary tools in default CI.
+
+Run an approved local Houdini/hython smoke when available:
+
+```bash
+python3 seos.py creative houdini-smoke \
+  --mode public \
+  --output-root work/creative_runs/houdini_smoke \
+  --approve-local-execution \
+  --approval-id approval-houdini-smoke-local-001 \
+  --result-json reports/creative/houdini/hython_smoke_result.local.json \
+  --materialization-json reports/creative/houdini/hython_smoke_materialization.local.json
+```
+
+Without Houdini, the same runner returns truthful `ENV_NOT_FOUND` evidence. If
+Houdini licensing blocks startup, it returns `LICENSE_BLOCKED` evidence.
+
+Run an approved local ComfyUI workflow smoke against a running loopback service:
+
+```bash
+python3 seos.py creative comfyui-smoke \
+  --workflow-json tests/fixtures/creative/comfyui/api_workflow_fixture_v1.json \
+  --endpoint http://127.0.0.1:8188 \
+  --output-root work/creative_runs/comfyui_smoke \
+  --approve-local-execution \
+  --approval-id approval-comfyui-smoke-local-001 \
+  --result-json reports/creative/comfyui/comfyui_smoke_result.local.json \
+  --materialization-json reports/creative/comfyui/comfyui_smoke_materialization.local.json
+```
+
+The default fixture is an API-format `EmptyImage` to `SaveImage` smoke that
+does not require model downloads. If no workflow is available, the runner
+returns `ENV_NOT_FOUND`; if local ComfyUI is not answering on loopback, it
+returns `SERVICE_UNAVAILABLE`; if approval is missing, it does not post to
+`/prompt`.
+
+Build optional adapter contracts for the remaining creative tools:
+
+```bash
+python3 seos.py creative optional-adapter-contracts \
+  --mode public \
+  --output-json reports/creative/adapters/optional_adapter_contracts.json \
+  --output-md reports/creative/adapters/optional_adapter_contracts.md
+```
+
+This reports Blender, After Effects, DaVinci Resolve, Unreal Engine, and ZBrush
+contract readiness without launching those tools or claiming execution support.
+
+Build a practical shot plan from scanned assets:
+
+```bash
+python3 seos.py creative shot plan \
+  --template energy-impact \
+  --shot-id SHOT_ENERGY_IMPACT_001 \
+  --registry-json reports/creative/assets/asset_library_report_v1.json \
+  --output-json reports/creative/shots/shot_plan_energy_impact.json \
+  --output-md reports/creative/shots/shot_plan_energy_impact.md
+```
+
+Shot templates report available candidates, missing required assets, manual
+steps, and optional approval-gated runner commands without rendering or
+launching creative tools.
+
+Pressure-test the practical project path:
+
+```bash
+python3 seos.py creative pressure-test \
+  --root tests/fixtures/creative/assets \
+  --template energy-impact \
+  --shot-id SHOT_PRESSURE_ENERGY_IMPACT_FIXTURE \
+  --tool-health-json tests/fixtures/creative/software_discovery/local_tool_health_doctor_fixture_v1.json \
+  --adapter-contracts-json reports/creative/adapters/optional_adapter_contracts_v1.json \
+  --output-json reports/creative/pressure/real_project_pressure_test_v1.json \
+  --output-md reports/creative/pressure/real_project_pressure_test_v1.md
+```
+
+The pressure test runs the scan/search/dashboard/shot-planner path and reports
+real blockers or repair work such as missing archive parts, duplicate review,
+incomplete packs, missing required shot assets, and unavailable optional local
+runners. It does not launch tools or submit jobs.
+
+Turn pressure findings into a production hardening plan:
+
+```bash
+python3 seos.py creative hardening-plan \
+  --pressure-json reports/creative/pressure/real_project_pressure_test_v1.json \
+  --output-json reports/creative/hardening/production_hardening_plan_v1.json \
+  --output-md reports/creative/hardening/production_hardening_plan_v1.md
+```
+
+The hardening plan creates prioritized repair actions and a manifest of public
+production reports with existence, size, digest, and local-path-leak checks. It
+does not copy files, build archives, mutate assets, launch tools, or submit
+jobs.
+
+Run the repeated real-works operation report:
+
+```bash
+python3 seos.py creative works-operation \
+  --registry-json reports/creative/assets/asset_library_report_v1.json \
+  --tool-health-json tests/fixtures/creative/software_discovery/local_tool_health_doctor_fixture_v1.json \
+  --adapter-contracts-json reports/creative/adapters/optional_adapter_contracts_v1.json \
+  --pressure-json reports/creative/pressure/real_project_pressure_test_v1.json \
+  --hardening-json reports/creative/hardening/production_hardening_plan_v1.json \
+  --output-json reports/creative/operation/real_works_operation_v1.json \
+  --output-md reports/creative/operation/real_works_operation_v1.md
+```
+
+The operation report checks repeated energy impact, smoke/dust,
+portal/lightning, asset-library, and editorial handoff workflows and keeps
+future development tied to workflow blockers, pressure findings, hardening
+actions, or real project needs.
 
 The creative pipeline defaults to read-only scans, dry-run adapter plans,
 fixture demos, and public/private separation. Real DCC execution, paid assets,

@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>SEOS Local Tool Health Dashboard</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; max-width: 1100px; line-height: 1.45; }
+    p { margin: .25rem 0; }
+    code { background: #f1f3f5; padding: .1rem .25rem; }
+  </style>
+</head>
+<body>
+  <p># SEOS Local Tool Health Dashboard</p>
+
+<p>- Mode: `public`</p>
+<p>- Read-only: `True`</p>
+<p>- DCC or AI tools launched: `False`</p>
+<p>- Proprietary tools required for default CI: `[]`</p>
+
+<p>## Summary</p>
+
+<p>| Metric | Value |</p>
+<p>| --- | ---: |</p>
+<p>| tool_count | 13 |</p>
+<p>| ready_or_detected_count | 7 |</p>
+<p>| smoke_passed_count | 4 |</p>
+<p>| available_but_untested_count | 2 |</p>
+<p>| requires_user_launch_count | 1 |</p>
+<p>| config_required_count | 4 |</p>
+<p>| missing_count | 2 |</p>
+<p>| blocked_count | 6 |</p>
+
+<p>## Tool Health</p>
+
+<p>| Tool | Status | Version | Configured path | Smoke capability | Next fix action |</p>
+<p>| --- | --- | --- | --- | --- | --- |</p>
+<p>| Python runtime | `FOUND_AND_SMOKE_PASSED` | `3.13.0` | `&lt;local-path:python&gt;` | SMOKE_PASSED_BY_DISCOVERY | Ready for gated local production use. |</p>
+<p>| Python dependencies | `FOUND_AND_SMOKE_PASSED` | `present 1/1` | `-` | SMOKE_PASSED_BY_DISCOVERY | Ready for gated local production use. |</p>
+<p>| macOS host | `FOUND_AND_SMOKE_PASSED` | `macOS-fixture` | `-` | SMOKE_PASSED_BY_DISCOVERY | Ready for gated local production use. |</p>
+<p>| Apple Silicon | `FOUND_AND_SMOKE_PASSED` | `-` | `-` | SMOKE_PASSED_BY_DISCOVERY | Ready for gated local production use. |</p>
+<p>| Git CLI | `FOUND_BUT_UNTESTED` | `-` | `&lt;local-path:git&gt;` | PATH_DETECTED_NO_SMOKE_RUN | Run an operator-approved smoke check before production execution. |</p>
+<p>| FFmpeg CLI | `FOUND_BUT_UNTESTED` | `-` | `&lt;local-path:ffmpeg&gt;` | PATH_DETECTED_NO_SMOKE_RUN | Run an operator-approved smoke check before production execution. |</p>
+<p>| Houdini / hython | `NOT_FOUND` | `-` | `-` | NOT_RUN_ENV_NOT_FOUND | Install the tool, add it to PATH, or configure an explicit local path. |</p>
+<p>| ComfyUI | `CONFIG_REQUIRED` | `-` | `-` | NOT_RUN_CONFIG_REQUIRED | Configure ComfyUI path or service settings before running ComfyUI jobs. |</p>
+<p>| Blender | `FOUND_BUT_REQUIRES_USER_LAUNCH` | `-` | `&lt;local-path:Blender.app&gt;` | CONFIG_DETECTED_APP_NOT_LAUNCHED | Launch or configure the app, then rerun the doctor before execution. |</p>
+<p>| After Effects | `CONFIG_REQUIRED` | `-` | `-` | NOT_RUN_CONFIG_REQUIRED | Configure the local install or scripting path before adapter smoke tests. |</p>
+<p>| DaVinci Resolve | `CONFIG_REQUIRED` | `-` | `-` | NOT_RUN_CONFIG_REQUIRED | Configure the local install or scripting path before adapter smoke tests. |</p>
+<p>| Unreal Engine | `CONFIG_REQUIRED` | `-` | `-` | NOT_RUN_CONFIG_REQUIRED | Configure the local install or scripting path before adapter smoke tests. |</p>
+<p>| ZBrush | `NOT_FOUND` | `-` | `-` | NOT_RUN_ENV_NOT_FOUND | Install the tool, add it to PATH, or configure an explicit local path. |</p>
+
+<p>## Python Dependency Details</p>
+
+<p>| Package | Status | Version |</p>
+<p>| --- | --- | --- |</p>
+<p>| `openpyxl` | `FOUND` | `3.1-fixture` |</p>
+
+<p>## Next Actions</p>
+
+<p>- Houdini / hython: Install the tool, add it to PATH, or configure an explicit local path.</p>
+<p>- ComfyUI: Configure ComfyUI path or service settings before running ComfyUI jobs.</p>
+<p>- After Effects: Configure the local install or scripting path before adapter smoke tests.</p>
+<p>- DaVinci Resolve: Configure the local install or scripting path before adapter smoke tests.</p>
+<p>- Unreal Engine: Configure the local install or scripting path before adapter smoke tests.</p>
+<p>- ZBrush: Install the tool, add it to PATH, or configure an explicit local path.</p>
+
+<p>## Safety</p>
+
+<p>- Tool-health dashboard generation does not launch DCC or AI tools.</p>
+<p>- Tool-health dashboard generation does not check out licenses.</p>
+<p>- Missing tools remain unavailable evidence, not failures hidden as success.</p>
+<p>- Default CI does not require Houdini, Blender, Unreal, DaVinci Resolve, After Effects, ZBrush, or ComfyUI.</p>
+  <script type="application/json" id="seos-tool-health-summary">{&quot;available_but_untested_count&quot;: 2, &quot;blocked_count&quot;: 6, &quot;config_required_count&quot;: 4, &quot;missing_count&quot;: 2, &quot;ready_or_detected_count&quot;: 7, &quot;requires_user_launch_count&quot;: 1, &quot;smoke_passed_count&quot;: 4, &quot;tool_count&quot;: 13}</script>
+</body>
+</html>

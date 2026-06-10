@@ -1,6 +1,9 @@
 # Supported Software Matrix V3
 
-The supported surface is contract-first: ComfyUI and Blender have fixture-backed dry-run MVPs, while Houdini, ZBrush, Unreal Engine, DaVinci Resolve, and After Effects expose discovery, manifest, and handoff contracts.
+The supported surface is contract-first. Houdini and ComfyUI now have optional
+approval-gated local smoke runners. Blender, After Effects, DaVinci Resolve,
+Unreal Engine, and ZBrush are covered by optional adapter contracts that report
+readiness and next proof requirements without claiming execution support.
 
 ## Operating Boundary
 
@@ -11,7 +14,9 @@ The supported surface is contract-first: ComfyUI and Blender have fixture-backed
 
 ## Validation
 
-Run `python3 scripts/creative_total_check_v3.py` and the narrower gate for this area before public release.
+Run `python3 scripts/creative_total_check_v3.py`, `make creative-comfyui-runner-check`,
+`make creative-houdini-runner-check`, and
+`make creative-optional-adapter-contracts-check` before public release.
 
 ## Evidence
 

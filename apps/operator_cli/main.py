@@ -79,7 +79,7 @@ Commands:
   pattern report
   dogfood run
   ai bundle|repo-map|token-roi
-  creative init|scan-assets|archive-check|asset|shot|adapter|comfyui|blender|evidence|dashboard|doctor|launch-check|health|adoption-status
+  creative init|scan-assets|search-assets|pressure-test|hardening-plan|works-operation|archive-check|asset|shot|adapter|comfyui|blender|houdini|evidence|dashboard|production-dashboard|tool-health-dashboard|houdini-smoke|comfyui-smoke|optional-adapter-contracts|doctor|launch-check|health|adoption-status
 """
 
 

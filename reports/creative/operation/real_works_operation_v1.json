@@ -1,0 +1,276 @@
+{
+  "destructive_actions_performed": false,
+  "development_needs": [
+    {
+      "need": "Review duplicate groups manually before deleting, archiving, or packaging anything.",
+      "priority": "P2",
+      "source": "DUPLICATES_REQUIRE_REVIEW",
+      "workstream": "asset_cleanup"
+    },
+    {
+      "need": "Restore missing archive parts before extraction or production use.",
+      "priority": "P1",
+      "source": "ARCHIVE_PART_MISSING",
+      "workstream": "asset_repair"
+    },
+    {
+      "need": "Decide whether empty directories are intentional placeholders or stale clutter.",
+      "priority": "P3",
+      "source": "EMPTY_DIRECTORIES_PRESENT",
+      "workstream": "asset_cleanup"
+    },
+    {
+      "need": "Fill missing texture maps or mark the lookdev set as intentionally partial.",
+      "priority": "P1",
+      "source": "INCOMPLETE_TEXTURE_SETS",
+      "workstream": "lookdev_repair"
+    },
+    {
+      "need": "Resolve incomplete model/material/texture packs before binding them to shots.",
+      "priority": "P1",
+      "source": "INCOMPLETE_PRODUCTION_PACKS",
+      "workstream": "asset_repair"
+    },
+    {
+      "need": "Resolve local tool health for houdini_hython_smoke (NOT_FOUND) before using the optional runner.",
+      "priority": "P1",
+      "source": "LOCAL_RUNNER_NOT_READY",
+      "workstream": "local_runner_readiness"
+    },
+    {
+      "need": "Resolve local tool health for comfyui_workflow_smoke (CONFIG_REQUIRED) before using the optional runner.",
+      "priority": "P1",
+      "source": "LOCAL_RUNNER_NOT_READY",
+      "workstream": "local_runner_readiness"
+    },
+    {
+      "need": "Treat optional adapters as contract-only until adapter-specific local proof exists.",
+      "priority": "P2",
+      "source": "ADAPTERS_CONTRACT_ONLY",
+      "workstream": "adapter_proof"
+    }
+  ],
+  "execution_performed": false,
+  "hardening_status": "NEEDS_REPAIR_BEFORE_EXECUTION",
+  "kind": "real_works_operation_v1",
+  "mode": "public",
+  "next_actions": [
+    "Review duplicate groups manually before deleting, archiving, or packaging anything.",
+    "Restore missing archive parts before extraction or production use.",
+    "Decide whether empty directories are intentional placeholders or stale clutter.",
+    "Fill missing texture maps or mark the lookdev set as intentionally partial.",
+    "Resolve incomplete model/material/texture packs before binding them to shots.",
+    "Resolve local tool health for houdini_hython_smoke (NOT_FOUND) before using the optional runner.",
+    "Resolve local tool health for comfyui_workflow_smoke (CONFIG_REQUIRED) before using the optional runner.",
+    "Treat optional adapters as contract-only until adapter-specific local proof exists.",
+    "Rerun creative pressure-test after repairs and compare the new hardening plan.",
+    "Keep final creative and production approval human-owned.",
+    "Run the operation report again after repairs to confirm repeatability improved.",
+    "Keep new development tied to a workflow blocker, pressure finding, hardening action, or real project need."
+  ],
+  "ok": true,
+  "operation_loop": [
+    {
+      "command": "python3 seos.py creative scan-assets --root ASSET_ROOT --mode public --output-json REGISTRY_JSON --output-md REPORT_MD",
+      "order": 1
+    },
+    {
+      "command": "python3 seos.py creative production-dashboard --registry-json REGISTRY_JSON --output-md DASHBOARD_MD --output-html DASHBOARD_HTML",
+      "order": 2
+    },
+    {
+      "command": "python3 seos.py creative shot plan --template TEMPLATE --shot-id SHOT_ID --registry-json REGISTRY_JSON",
+      "order": 3
+    },
+    {
+      "command": "python3 seos.py creative pressure-test --registry-json REGISTRY_JSON --template TEMPLATE --shot-id SHOT_ID",
+      "order": 4
+    },
+    {
+      "command": "python3 seos.py creative hardening-plan --pressure-json PRESSURE_JSON",
+      "order": 5
+    },
+    {
+      "command": "Use optional runner commands only after explicit approval and tool-health readiness.",
+      "order": 6
+    }
+  ],
+  "operation_status": "ACTIVE_REPAIR_LOOP",
+  "outputs": {
+    "json": "reports/creative/operation/real_works_operation_v1.json",
+    "markdown": "reports/creative/operation/real_works_operation_v1.md"
+  },
+  "pressure_status": "USABLE_WITH_MANUAL_REPAIR",
+  "read_only": true,
+  "repeatability_summary": {
+    "blocked_workflow_count": 0,
+    "complete_workflow_count": 5,
+    "nonready_optional_runner_count": 5,
+    "optional_runner_count": 5,
+    "workflow_count": 5
+  },
+  "safety": {
+    "asset_mutation": false,
+    "dcc_or_ai_execution": false,
+    "duplicate_deletion": false,
+    "package_creation": false,
+    "requires_separate_approval_for_optional_runners": true
+  },
+  "schema_version": "seos_creative_pipeline_v3",
+  "workflows": [
+    {
+      "id": "energy_impact",
+      "label": "Energy Impact",
+      "next_actions": [
+        "Create the shot workspace and bind the selected candidate assets.",
+        "Resolve Houdini hython smoke tool health before using that optional runner.",
+        "Resolve ComfyUI workflow smoke tool health before using that optional runner.",
+        "Keep final creative approval human-owned."
+      ],
+      "optional_runner_steps": [
+        {
+          "command_template": "python3 seos.py creative houdini-smoke --approve-local-execution --approval-id APPROVAL_ID",
+          "label": "Houdini hython smoke",
+          "purpose": "Verify local hython before any Houdini render/sim work.",
+          "readiness": "NOT_FOUND",
+          "requires_approval": true,
+          "runner_id": "houdini_hython_smoke",
+          "tool_status": "NOT_FOUND"
+        },
+        {
+          "command_template": "python3 seos.py creative comfyui-smoke --approve-local-execution --approval-id APPROVAL_ID",
+          "label": "ComfyUI workflow smoke",
+          "purpose": "Verify local ComfyUI service before any AI repair/generation work.",
+          "readiness": "CONFIG_REQUIRED",
+          "requires_approval": true,
+          "runner_id": "comfyui_workflow_smoke",
+          "tool_status": "CONFIG_REQUIRED"
+        }
+      ],
+      "purpose": "Impact VFX with plate, FX source, lookdev, comp, and optional local runner checks.",
+      "shot_id": "SHOT_WORKS_ENERGY_IMPACT",
+      "status": "READY_FOR_MANUAL_PLANNING",
+      "summary": {
+        "missing_required_count": 0,
+        "optional_ready_count": 2,
+        "required_ready_count": 4,
+        "template": "energy_impact",
+        "total_candidate_count": 12
+      },
+      "template": "energy-impact"
+    },
+    {
+      "id": "smoke_dust",
+      "label": "Smoke / Dust",
+      "next_actions": [
+        "Create the shot workspace and bind the selected candidate assets.",
+        "Resolve Houdini hython smoke tool health before using that optional runner.",
+        "Keep final creative approval human-owned."
+      ],
+      "optional_runner_steps": [
+        {
+          "command_template": "python3 seos.py creative houdini-smoke --approve-local-execution --approval-id APPROVAL_ID",
+          "label": "Houdini hython smoke",
+          "purpose": "Verify local hython before any Houdini render/sim work.",
+          "readiness": "NOT_FOUND",
+          "requires_approval": true,
+          "runner_id": "houdini_hython_smoke",
+          "tool_status": "NOT_FOUND"
+        }
+      ],
+      "purpose": "Cache-focused smoke or dust shot with plate, VDB/cache, and lookdev handoff.",
+      "shot_id": "SHOT_WORKS_SMOKE_DUST",
+      "status": "READY_FOR_MANUAL_PLANNING",
+      "summary": {
+        "missing_required_count": 0,
+        "optional_ready_count": 2,
+        "required_ready_count": 3,
+        "template": "smoke_dust",
+        "total_candidate_count": 10
+      },
+      "template": "smoke-dust"
+    },
+    {
+      "id": "portal_lightning",
+      "label": "Portal / Lightning",
+      "next_actions": [
+        "Create the shot workspace and bind the selected candidate assets.",
+        "Resolve Houdini hython smoke tool health before using that optional runner.",
+        "Resolve ComfyUI workflow smoke tool health before using that optional runner.",
+        "Keep final creative approval human-owned."
+      ],
+      "optional_runner_steps": [
+        {
+          "command_template": "python3 seos.py creative houdini-smoke --approve-local-execution --approval-id APPROVAL_ID",
+          "label": "Houdini hython smoke",
+          "purpose": "Verify local hython before any Houdini render/sim work.",
+          "readiness": "NOT_FOUND",
+          "requires_approval": true,
+          "runner_id": "houdini_hython_smoke",
+          "tool_status": "NOT_FOUND"
+        },
+        {
+          "command_template": "python3 seos.py creative comfyui-smoke --approve-local-execution --approval-id APPROVAL_ID",
+          "label": "ComfyUI workflow smoke",
+          "purpose": "Verify local ComfyUI service before any AI repair/generation work.",
+          "readiness": "CONFIG_REQUIRED",
+          "requires_approval": true,
+          "runner_id": "comfyui_workflow_smoke",
+          "tool_status": "CONFIG_REQUIRED"
+        }
+      ],
+      "purpose": "Stylized FX shot with DCC source, energy lookdev, comp, and optional repair workflow.",
+      "shot_id": "SHOT_WORKS_PORTAL_LIGHTNING",
+      "status": "READY_FOR_MANUAL_PLANNING",
+      "summary": {
+        "missing_required_count": 0,
+        "optional_ready_count": 2,
+        "required_ready_count": 4,
+        "template": "portal_lightning",
+        "total_candidate_count": 11
+      },
+      "template": "portal-lightning"
+    },
+    {
+      "id": "editorial_handoff",
+      "label": "Editorial Handoff",
+      "next_actions": [
+        "Create the shot workspace and bind the selected candidate assets.",
+        "Keep final creative approval human-owned."
+      ],
+      "optional_runner_steps": [],
+      "purpose": "Editorial package with media, audio, LUT, and finishing handoff.",
+      "shot_id": "SHOT_WORKS_EDITORIAL_HANDOFF",
+      "status": "READY_FOR_MANUAL_PLANNING",
+      "summary": {
+        "missing_required_count": 0,
+        "optional_ready_count": 1,
+        "required_ready_count": 4,
+        "template": "editorial_handoff",
+        "total_candidate_count": 7
+      },
+      "template": "editorial-handoff"
+    },
+    {
+      "id": "asset_library",
+      "label": "Asset Library",
+      "next_actions": [
+        "Restore missing archive parts before production extraction.",
+        "Review duplicate asset groups before cleanup.",
+        "Repair or explicitly accept incomplete texture sets."
+      ],
+      "optional_runner_steps": [],
+      "purpose": "Repeated scan, cleanup, package-readiness, and report-handoff workflow for the local asset library.",
+      "shot_id": "",
+      "status": "READY_FOR_MANUAL_PLANNING",
+      "summary": {
+        "missing_required_count": 0,
+        "optional_ready_count": 0,
+        "required_ready_count": 1,
+        "template": "asset_library",
+        "total_candidate_count": 23
+      },
+      "template": "asset-library"
+    }
+  ]
+}

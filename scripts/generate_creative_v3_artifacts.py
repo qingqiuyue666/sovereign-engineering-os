@@ -88,6 +88,7 @@ SCHEMA_FILES = (
 
 ERROR_CODES = (
     "ENV_NOT_FOUND",
+    "SERVICE_UNAVAILABLE",
     "LICENSE_BLOCKED",
     "FILE_MISSING",
     "ARCHIVE_PART_MISSING",
@@ -285,6 +286,7 @@ def generate_code() -> None:
         )
         ERROR_CODES = (
             "ENV_NOT_FOUND",
+            "SERVICE_UNAVAILABLE",
             "LICENSE_BLOCKED",
             "FILE_MISSING",
             "ARCHIVE_PART_MISSING",

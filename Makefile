@@ -177,7 +177,7 @@ verify: smoke
 
 final-audit-check: verify external-audit-check test-external-audit-packet independent-verification-check test-independent-verification-execution red-team-check test-red-team-execution findings-check test-findings-register operation-evidence-check test-real-world-operation-evidence-program global-signoff-dossier-check test-global-signoff-dossier external-verification-program-check
 
-.PHONY: creative-check creative-doctor creative-asset-scan-check creative-archive-check creative-dashboard-build creative-public-release-check creative-total-check
+.PHONY: creative-check creative-doctor creative-asset-scan-check creative-real-asset-scanner-check creative-asset-search-check creative-production-dashboard-check creative-tool-health-dashboard-check creative-houdini-runner-check creative-comfyui-runner-check creative-optional-adapter-contracts-check creative-shot-planner-check creative-real-project-pressure-test-check creative-production-hardening-check creative-real-works-operation-check creative-archive-check creative-dashboard-build creative-public-release-check creative-total-check
 
 creative-check: creative-total-check
 
@@ -186,6 +186,50 @@ creative-doctor:
 
 creative-asset-scan-check:
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/creative_asset_scan_v3.py
+
+creative-real-asset-scanner-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest discover -s tests/creative -p 'test_real_local_asset_scanner_v1.py' -v
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/creative_asset_scan_v3.py --mode public
+
+creative-asset-search-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest discover -s tests/creative -p 'test_asset_search_cli_v1.py' -v
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) seos.py creative search-assets --registry-json reports/creative/assets/asset_library_report_v1.json --query missing-texture-sets
+
+creative-production-dashboard-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest discover -s tests/creative -p 'test_local_production_dashboard_v1.py' -v
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) seos.py creative production-dashboard --registry-json reports/creative/assets/asset_library_report_v1.json --output-md reports/creative/assets/local_production_dashboard_v1.md --output-html reports/creative/assets/local_production_dashboard_v1.html
+
+creative-tool-health-dashboard-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest discover -s tests/creative -p 'test_local_tool_health_dashboard_v1.py' -v
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) seos.py creative tool-health-dashboard --mode public --doctor-json tests/fixtures/creative/software_discovery/local_tool_health_doctor_fixture_v1.json --output-json reports/creative/tool_health/local_tool_health_dashboard_v1.json --output-md reports/creative/tool_health/local_tool_health_dashboard_v1.md --output-html reports/creative/tool_health/local_tool_health_dashboard_v1.html
+
+creative-houdini-runner-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest discover -s tests/creative -p 'test_houdini_local_runner_v1.py' -v
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/creative_houdini_hython_smoke_v1.py --hython tests/fixtures/creative/software_discovery/missing_hython --output-root work/creative_runs/houdini_unavailable --observed-at 2026-06-08T00:00:00Z --result-json reports/creative/houdini/hython_smoke_unavailable_v1.json --materialization-json reports/creative/houdini/hython_smoke_materialization_v1.json
+
+creative-comfyui-runner-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest discover -s tests/creative -p 'test_comfyui_local_runner_v1.py' -v
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/creative_comfyui_workflow_smoke_v1.py --workflow-json tests/fixtures/creative/comfyui/api_workflow_fixture_v1.json --output-root work/creative_runs/comfyui_service_unavailable --observed-at 2026-06-08T00:00:00Z --fixture-service-unavailable --result-json reports/creative/comfyui/comfyui_smoke_service_unavailable_v1.json --materialization-json reports/creative/comfyui/comfyui_smoke_materialization_v1.json
+
+creative-optional-adapter-contracts-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest discover -s tests/creative -p 'test_optional_adapter_contracts_v1.py' -v
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) seos.py creative optional-adapter-contracts --mode public --doctor-json tests/fixtures/creative/software_discovery/local_tool_health_doctor_fixture_v1.json --output-json reports/creative/adapters/optional_adapter_contracts_v1.json --output-md reports/creative/adapters/optional_adapter_contracts_v1.md
+
+creative-shot-planner-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest discover -s tests/creative -p 'test_shot_planner_v1.py' -v
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) seos.py creative shot plan --template energy-impact --shot-id SHOT_ENERGY_IMPACT_FIXTURE --registry-json reports/creative/assets/asset_library_report_v1.json --tool-health-json tests/fixtures/creative/software_discovery/local_tool_health_doctor_fixture_v1.json --adapter-contracts-json reports/creative/adapters/optional_adapter_contracts_v1.json --output-json reports/creative/shots/shot_plan_energy_impact_v1.json --output-md reports/creative/shots/shot_plan_energy_impact_v1.md
+
+creative-real-project-pressure-test-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest discover -s tests/creative -p 'test_real_project_pressure_test_v1.py' -v
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) seos.py creative pressure-test --root tests/fixtures/creative/assets --template energy-impact --shot-id SHOT_PRESSURE_ENERGY_IMPACT_FIXTURE --tool-health-json tests/fixtures/creative/software_discovery/local_tool_health_doctor_fixture_v1.json --adapter-contracts-json reports/creative/adapters/optional_adapter_contracts_v1.json --output-json reports/creative/pressure/real_project_pressure_test_v1.json --output-md reports/creative/pressure/real_project_pressure_test_v1.md
+
+creative-production-hardening-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest discover -s tests/creative -p 'test_production_hardening_v1.py' -v
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) seos.py creative hardening-plan --pressure-json reports/creative/pressure/real_project_pressure_test_v1.json --output-json reports/creative/hardening/production_hardening_plan_v1.json --output-md reports/creative/hardening/production_hardening_plan_v1.md
+
+creative-real-works-operation-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest discover -s tests/creative -p 'test_real_works_operation_v1.py' -v
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) seos.py creative works-operation --registry-json reports/creative/assets/asset_library_report_v1.json --tool-health-json tests/fixtures/creative/software_discovery/local_tool_health_doctor_fixture_v1.json --adapter-contracts-json reports/creative/adapters/optional_adapter_contracts_v1.json --pressure-json reports/creative/pressure/real_project_pressure_test_v1.json --hardening-json reports/creative/hardening/production_hardening_plan_v1.json --output-json reports/creative/operation/real_works_operation_v1.json --output-md reports/creative/operation/real_works_operation_v1.md
 
 creative-archive-check:
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/creative_archive_check_v3.py
