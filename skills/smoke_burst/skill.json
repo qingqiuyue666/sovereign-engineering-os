@@ -1,0 +1,33 @@
+{
+  "adapters": ["houdini_hython", "comfyui_local", "davinci_resolve"],
+  "commands": [
+    "python3 seos.py rpc invoke examples/rpc/houdini_smoke_cache_test.json --json",
+    "python3 seos.py rpc invoke examples/rpc/comfyui_submit_workflow.json --json",
+    "python3 seos.py rpc invoke examples/rpc/davinci_project_probe.json --json",
+    "python3 seos.py shot run <shot_id> --runtime-root work/phase2/smoke_burst_001/runtime --json",
+    "python3 seos.py package run <run_id> --runtime-root work/phase2/smoke_burst_001/runtime --package-root work/phase2/smoke_burst_001/packages --json",
+    "python3 seos.py package shot <shot_id> --runtime-root work/phase2/smoke_burst_001/runtime --package-root work/phase2/smoke_burst_001/packages --json",
+    "python3 seos.py review create <shot_id> --runtime-root work/phase2/smoke_burst_001/runtime --package-root work/phase2/smoke_burst_001/packages --output-root work/phase2/smoke_burst_001/review_artifacts --json"
+  ],
+  "description": "Phase 2 smoke burst production-prototype skill using verified Houdini cache output, ComfyUI image output, DaVinci probe evidence, packages, and review artifacts.",
+  "expected_outputs": [
+    "Houdini smoke/cache physical output: smoke_cache.bgeo.sc, smoke_cache_preview.exr, metadata, log",
+    "ComfyUI generated PNG output and ArtifactRefs",
+    "DaVinci Resolve version/project probe JSON and ArtifactRefs",
+    "SEOS package manifest",
+    "SEOS review artifact"
+  ],
+  "name": "smoke_burst",
+  "runbook": "skills/smoke_burst/runbook.md",
+  "schema_version": "seos.skill.v1",
+  "template_refs": [
+    "examples/projects/smoke_burst_001_project_v1.json",
+    "examples/shots/smoke_burst_001/shot.json",
+    "examples/shots/smoke_burst_001/workflow.json",
+    "docs/runbooks/smoke_burst_001_real_shot.md",
+    "examples/rpc/houdini_smoke_cache_test.json",
+    "examples/rpc/comfyui_submit_workflow.json",
+    "examples/rpc/davinci_project_probe.json"
+  ],
+  "workflow_examples": ["examples/shots/smoke_burst_001/workflow.json"]
+}

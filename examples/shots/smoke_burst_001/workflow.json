@@ -1,0 +1,14 @@
+{
+  "edges": [
+    {"from": "houdini_smoke_burst_cache", "mode": "artifact_refs", "to": "comfyui_smoke_burst_image"},
+    {"from": "comfyui_smoke_burst_image", "mode": "artifact_refs", "to": "davinci_smoke_burst_project_probe"}
+  ],
+  "failure_policy": {"rerun_from_failed_node": true, "stop_downstream_on_failure": true},
+  "nodes": [
+    {"action": "smoke_cache_test", "adapter": "houdini_hython", "node_id": "houdini_smoke_burst_cache", "payload": {"cache_name": "smoke_burst_001_cache"}},
+    {"action": "submit_workflow", "adapter": "comfyui_local", "node_id": "comfyui_smoke_burst_image", "payload": {"history_timeout_seconds": 30, "poll_interval_seconds": 1, "workflow_path": "examples/comfyui/workflows/minimal_save_image.json"}},
+    {"action": "project_probe", "adapter": "davinci_resolve", "node_id": "davinci_smoke_burst_project_probe", "payload": {"project_name": ""}}
+  ],
+  "schema_version": "seos.cross_software_workflow.v1",
+  "workflow_id": "smoke_burst_001_real_dcc_workflow_v1"
+}

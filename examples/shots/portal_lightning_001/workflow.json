@@ -1,0 +1,14 @@
+{
+  "edges": [
+    {"from": "houdini_portal_lightning_cache", "mode": "artifact_refs", "to": "comfyui_portal_lightning_image"},
+    {"from": "comfyui_portal_lightning_image", "mode": "artifact_refs", "to": "davinci_portal_lightning_project_probe"}
+  ],
+  "failure_policy": {"rerun_from_failed_node": true, "stop_downstream_on_failure": true},
+  "nodes": [
+    {"action": "smoke_cache_test", "adapter": "houdini_hython", "node_id": "houdini_portal_lightning_cache", "payload": {"cache_name": "portal_lightning_001_energy_cache"}},
+    {"action": "submit_workflow", "adapter": "comfyui_local", "node_id": "comfyui_portal_lightning_image", "payload": {"history_timeout_seconds": 30, "poll_interval_seconds": 1, "workflow_path": "examples/comfyui/workflows/minimal_save_image.json"}},
+    {"action": "project_probe", "adapter": "davinci_resolve", "node_id": "davinci_portal_lightning_project_probe", "payload": {"project_name": ""}}
+  ],
+  "schema_version": "seos.cross_software_workflow.v1",
+  "workflow_id": "portal_lightning_001_real_dcc_workflow_v1"
+}

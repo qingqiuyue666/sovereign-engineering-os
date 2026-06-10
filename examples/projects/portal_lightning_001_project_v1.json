@@ -1,0 +1,19 @@
+{
+  "asset_strategy": {
+    "copy_policy": "path_refs_only",
+    "local_runtime_root": "work/phase2/portal_lightning_001",
+    "large_outputs_committed": false
+  },
+  "dcc_adapters": [
+    "houdini_hython",
+    "comfyui_local",
+    "davinci_resolve"
+  ],
+  "description": "Phase 2 production-prototype project for the portal_lightning_001 shot.",
+  "name": "Portal Lightning Production",
+  "schema_version": "seos.phase2_project_template.v1",
+  "shot_ids": [
+    "portal_lightning_001"
+  ],
+  "template_id": "portal_lightning_001_project_v1"
+}
