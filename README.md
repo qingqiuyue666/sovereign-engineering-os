@@ -327,6 +327,11 @@ fixture demos, and public/private separation. Real DCC execution, paid assets,
 and external adoption signals require real local evidence or verified external
 URLs; this repository does not claim external adoption.
 
+SEOS now includes a controlled local execution-plane foundation with fake-DCC
+CI smoke support and optional real DCC adapter contracts. Real DCC execution
+remains permit-gated, local-only, bounded by path and runtime policy, and does
+not convert SEOS into RPA or desktop automation.
+
 ## Validation
 
 Baseline validation:
@@ -349,6 +354,12 @@ tests, audit reports, and narrow validation checks that improve external
 reviewability. It does not authorize feature expansion, uncontrolled runtime
 execution, live provider execution, browser control, OS automation, or
 unapproved patching.
+
+The controlled execution-plane foundation is admitted only as a narrow evidence
+blocker closure: dry-run creative readiness cannot prove real local execution
+without a bounded worker, execution permit, output hash, result envelope, and
+materialization record. This does not weaken observation mode or authorize
+uncontrolled execution expansion.
 
 The observation record is maintained in:
 

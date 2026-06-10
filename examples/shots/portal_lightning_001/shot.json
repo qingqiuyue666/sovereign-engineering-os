@@ -1,0 +1,18 @@
+{
+  "creative_brief": {
+    "intent": "A portal lightning production-prototype shot that verifies real Houdini cache output, ComfyUI image output, DaVinci probe evidence, package manifests, and review artifacts.",
+    "look_targets": ["circular portal rim", "branching electric arcs", "high-contrast blue-white pulse"],
+    "prototype_limitations": ["Uses the existing Houdini smoke/cache action as the physical portal-energy prototype path; no unsupported lightning solver is claimed."]
+  },
+  "dcc_chain": [
+    {"adapter": "houdini_hython", "expected_outputs": ["smoke_cache.bgeo.sc", "smoke_cache_preview.exr", "smoke_cache_metadata.json", "smoke_cache_execution.log"], "node_id": "houdini_portal_lightning_cache"},
+    {"adapter": "comfyui_local", "expected_outputs": ["comfyui_outputs/*.png"], "node_id": "comfyui_portal_lightning_image"},
+    {"adapter": "davinci_resolve", "expected_outputs": ["davinci_project_probe.json"], "node_id": "davinci_portal_lightning_project_probe"}
+  ],
+  "package_policy": {"copy_policy": "artifact_refs_only", "runtime_outputs_committed": false},
+  "project_template": "examples/projects/portal_lightning_001_project_v1.json",
+  "purpose": "Portal rim / lightning arc / energy pulse shot template for production-prototype compositing.",
+  "schema_version": "seos.phase2_shot_template.v1",
+  "shot_name": "portal_lightning_001",
+  "workflow": "examples/shots/portal_lightning_001/workflow.json"
+}

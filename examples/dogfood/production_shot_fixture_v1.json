@@ -1,0 +1,8 @@
+{
+  "asset_root": "production_shot/assets",
+  "fixture_id": "production_shot_dogfood_v1",
+  "project_name": "SEOS Production Dogfood Demo",
+  "schema_version": "seos.production_dogfood_fixture.v1",
+  "shot_name": "dogfood_shot_001",
+  "workflow_path": "production_shot/workflows/ci_delivery_workflow_v1.json"
+}

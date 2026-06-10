@@ -1,0 +1,28 @@
+{
+  "adapter_module_path": "execution_plane/adapters/comfyui_local.py",
+  "failure_code": "SCHEMA_INVALID",
+  "failure_summary": "SCHEMA_INVALID: workflow_node_inputs_required:12",
+  "log_excerpt": "Traceback (most recent call last):\n  File \"execution_plane/adapters/comfyui_local.py\", line 189, in validate_comfyui_workflow\n    raise ComfyUIAdapterFailure(\"SCHEMA_INVALID\", \"workflow_node_inputs_required:12\")\nComfyUIAdapterFailure: workflow_node_inputs_required:12",
+  "patch_repair_policy": {
+    "allowed_tools": [
+      "cline",
+      "aider"
+    ],
+    "auto_apply": false,
+    "max_iterations": 2,
+    "mode": "generate_patch_then_test"
+  },
+  "reproduction_command": "python3 seos.py rpc invoke examples/rpc/comfyui_submit_workflow.json --json",
+  "schema_version": "seos.failure_bundle.v1",
+  "schema_validation_stack": [
+    "validate_comfyui_workflow",
+    "workflow_node_inputs_required"
+  ],
+  "target_files": [
+    "execution_plane/adapters/comfyui_local.py",
+    "examples/comfyui/workflows/minimal_save_image.json"
+  ],
+  "test_commands": [
+    "python3 -m unittest tests.tracer_bullet.test_comfyui_real_execution_v1 -v"
+  ]
+}

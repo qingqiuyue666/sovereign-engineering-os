@@ -1,0 +1,210 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "adapter": {
+      "enum": [
+        "fake_dcc",
+        "houdini_hython",
+        "comfyui_local",
+        "davinci_resolve"
+      ],
+      "type": "string"
+    },
+    "artifact_refs": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "artifact_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "copy_policy": {
+            "const": "zero_copy_reference",
+            "type": "string"
+          },
+          "lifetime": {
+            "const": "managed_by_run_package",
+            "type": "string"
+          },
+          "media_type": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "producer_node_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "producer_run_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "relative_path": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "seos.artifact_ref.v1",
+            "type": "string"
+          },
+          "sha256": {
+            "minLength": 71,
+            "type": "string"
+          },
+          "size_bytes": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "storage_mode": {
+            "enum": [
+              "path_ref",
+              "memory_mapped_ref",
+              "managed_copy",
+              "external_ref"
+            ],
+            "type": "string"
+          },
+          "uri": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "schema_version",
+          "artifact_id",
+          "producer_run_id",
+          "producer_node_id",
+          "uri",
+          "relative_path",
+          "size_bytes",
+          "sha256",
+          "media_type",
+          "storage_mode",
+          "copy_policy",
+          "lifetime"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "ended_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "evidence_manifest_path": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "exit_code": {
+      "type": "integer"
+    },
+    "failure_summary": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "output_root": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "outputs": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "relative_path": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "sha256": {
+            "minLength": 71,
+            "type": "string"
+          },
+          "size_bytes": {
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "relative_path",
+          "size_bytes",
+          "sha256"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "permit_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "policy_blocks": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "provision_result": {
+      "type": "object"
+    },
+    "run_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "seos_execution_result_v1",
+      "type": "string"
+    },
+    "started_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "state_transitions": {
+      "items": {
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "status": {
+      "enum": [
+        "SUCCEEDED",
+        "FAILED",
+        "TIMED_OUT",
+        "BLOCKED"
+      ],
+      "type": "string"
+    },
+    "stderr_digest": {
+      "minLength": 71,
+      "type": "string"
+    },
+    "stdout_digest": {
+      "minLength": 71,
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "permit_id",
+    "run_id",
+    "adapter",
+    "started_at",
+    "ended_at",
+    "exit_code",
+    "status",
+    "output_root",
+    "outputs",
+    "artifact_refs",
+    "stdout_digest",
+    "stderr_digest",
+    "failure_summary",
+    "policy_blocks",
+    "evidence_manifest_path",
+    "state_transitions",
+    "provision_result"
+  ],
+  "title": "SEOS Execution Result V1",
+  "type": "object"
+}

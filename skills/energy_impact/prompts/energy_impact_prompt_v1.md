@@ -1,0 +1,3 @@
+# Energy Impact Prompt V1
+
+Energy impact concept frame: a compact burst of controlled procedural energy, visible smoke structure, bright core, readable silhouette, production proof image, no final delivery claim.

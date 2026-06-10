@@ -1,0 +1,23 @@
+{
+  "adapter": "comfyui_local",
+  "base_url": "http://127.0.0.1:8188",
+  "client_id": "seos-comfyui-local",
+  "heartbeat_path": "/system_stats",
+  "launch_command": [
+    "/Users/qqy/ComfyUI/venv/bin/python",
+    "main.py",
+    "--listen",
+    "127.0.0.1",
+    "--port",
+    "8188",
+    "--disable-auto-launch"
+  ],
+  "output_directory_mapping": {
+    "input": "comfyui_inputs",
+    "output": "comfyui_outputs",
+    "temp": "comfyui_temp"
+  },
+  "startup_timeout_seconds": 90,
+  "timeout_seconds": 5,
+  "working_dir": "/Users/qqy/ComfyUI"
+}

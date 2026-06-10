@@ -1,0 +1,49 @@
+{
+  "id": "run_cross_dcc_workflow_v1",
+  "jsonrpc": "2.0",
+  "method": "workflow.invoke",
+  "params": {
+    "output_root": "work/rpc/run_cross_dcc_workflow",
+    "runtime_token": {
+      "auto_provision": {
+        "allowed_adapters": [
+          "comfyui_local",
+          "davinci_resolve"
+        ],
+        "enabled": true,
+        "heartbeat_interval_seconds": 1,
+        "max_wait_seconds": 1
+      },
+      "concurrency": {
+        "max_global_jobs": 2,
+        "max_per_adapter_jobs": {
+          "comfyui_local": 1,
+          "davinci_resolve": 1,
+          "fake_dcc": 1,
+          "houdini_hython": 1
+        }
+      },
+      "expires_at": "2099-01-01T00:00:00Z",
+      "max_files": 150,
+      "max_output_bytes": 104857600,
+      "max_runtime_seconds": 60,
+      "operator_approval_id": "RCPT_CROSS_DCC_WORKFLOW",
+      "patch_repair": {
+        "allowed_tools": [
+          "cline",
+          "aider"
+        ],
+        "auto_apply": false,
+        "enabled": true,
+        "mode": "generate_patch_then_test"
+      },
+      "retry": {
+        "backoff_seconds": 1,
+        "enabled": true,
+        "max_attempts": 2
+      },
+      "task_id": "TASK_CROSS_DCC_WORKFLOW"
+    },
+    "workflow_path": "examples/workflows/cross_dcc_workflow_v1.json"
+  }
+}

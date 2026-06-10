@@ -1,0 +1,19 @@
+{
+  "asset_strategy": {
+    "copy_policy": "path_refs_only",
+    "local_runtime_root": "work/energy_impact_001",
+    "large_outputs_committed": false
+  },
+  "dcc_adapters": [
+    "houdini_hython",
+    "comfyui_local",
+    "davinci_resolve"
+  ],
+  "description": "Small real-production proof project for the energy_impact_001 shot.",
+  "name": "Energy Impact Project",
+  "schema_version": "seos.energy_impact_project_template.v1",
+  "shot_ids": [
+    "energy_impact_001"
+  ],
+  "template_id": "energy_impact_project_v1"
+}

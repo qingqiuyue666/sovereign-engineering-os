@@ -67,6 +67,17 @@ Commands:
   receipt list|show
   replay explain
   failure compress|explain
+  rpc invoke TEMPLATE.json [--json]
+  repair create|invoke|apply|ledger
+  project create NAME
+  asset scan ROOT
+  shot create|attach-workflow|run
+  package run|shot
+  dashboard build
+  skill list|show
+  review create
+  pattern report
+  dogfood run
   ai bundle|repo-map|token-roi
   creative init|scan-assets|search-assets|pressure-test|hardening-plan|works-operation|archive-check|asset|shot|adapter|comfyui|blender|houdini|evidence|dashboard|production-dashboard|tool-health-dashboard|houdini-smoke|comfyui-smoke|optional-adapter-contracts|doctor|launch-check|health|adoption-status
 """
@@ -96,6 +107,8 @@ def main(argv: list[str] | None = None) -> int:
             return _approve(args[1:])
         if command == "reject":
             return _reject(args[1:])
+        if command == "run" and len(args) > 1 and args[1] in {"list", "inspect", "cancel", "worker-once"}:
+            return _run_queue(args[1:])
         if command == "run":
             return _run(args[1:])
         if command == "release":
@@ -108,6 +121,28 @@ def main(argv: list[str] | None = None) -> int:
             return _replay(args[1:])
         if command == "failure":
             return _failure(args[1:])
+        if command == "rpc":
+            return _rpc(args[1:])
+        if command == "repair":
+            return _repair(args[1:])
+        if command == "project":
+            return _project(args[1:])
+        if command == "asset":
+            return _asset(args[1:])
+        if command == "shot":
+            return _shot(args[1:])
+        if command == "package":
+            return _package(args[1:])
+        if command == "dashboard":
+            return _dashboard(args[1:])
+        if command == "skill":
+            return _skill(args[1:])
+        if command == "review":
+            return _review(args[1:])
+        if command == "pattern":
+            return _pattern(args[1:])
+        if command == "dogfood":
+            return _dogfood(args[1:])
         if command == "ai":
             return _ai(args[1:])
         if command == "creative":
@@ -352,6 +387,301 @@ def _ai(args: list[str]) -> int:
     return 2
 
 
+def _rpc(args: list[str]) -> int:
+    if not args or args[0] not in {"invoke", "enqueue"}:
+        _emit({"ok": False, "error": "rpc_invoke_required"})
+        return 2
+    path = _positional(args[1:], skip_values_for=set())
+    if not path:
+        _emit({"ok": False, "error": "rpc_invoke_requires_path"})
+        return 2
+    if args[0] == "enqueue":
+        from execution_plane.runtime.run_queue import FileRunQueue
+
+        run = FileRunQueue().enqueue_rpc_template(Path(path))
+        _emit({"ok": True, "run_id": run["run_id"], "status": run["status"], "run": run})
+        return 0
+    from execution_plane.rpc_gateway import invoke_rpc_file
+
+    response = invoke_rpc_file(Path(path))
+    ok = "error" not in response
+    payload = {"ok": ok, "response": response}
+    if _json_requested(args):
+        _emit(payload)
+    else:
+        result = response.get("result", {}) if isinstance(response.get("result"), dict) else {}
+        print(f"RPC invoke: {result.get('terminal_status', 'UNKNOWN')}")
+    return 0 if ok else 1
+
+
+def _run_queue(args: list[str]) -> int:
+    from execution_plane.runtime.run_queue import FileRunQueue
+
+    queue = FileRunQueue()
+    subcommand = args[0]
+    if subcommand == "list":
+        _emit({"ok": True, "runs": queue.list_runs()})
+        return 0
+    if subcommand == "inspect":
+        run_id = _positional(args[1:], skip_values_for=set())
+        if not run_id:
+            _emit({"ok": False, "error": "run_inspect_requires_run_id"})
+            return 2
+        try:
+            _emit({"ok": True, "run": queue.inspect(run_id)})
+            return 0
+        except KeyError:
+            _emit({"ok": False, "error": "run_not_found", "run_id": run_id})
+            return 1
+    if subcommand == "cancel":
+        run_id = _positional(args[1:], skip_values_for=set())
+        if not run_id:
+            _emit({"ok": False, "error": "run_cancel_requires_run_id"})
+            return 2
+        try:
+            run = queue.cancel(run_id)
+            _emit({"ok": True, "run_id": run_id, "status": run["status"], "run": run})
+            return 0
+        except KeyError:
+            _emit({"ok": False, "error": "run_not_found", "run_id": run_id})
+            return 1
+    if subcommand == "worker-once":
+        run = queue.process_next()
+        _emit({"ok": True, "run": run})
+        return 0
+    _emit({"ok": False, "error": "unknown_run_subcommand", "subcommand": subcommand})
+    return 2
+
+
+def _repair(args: list[str]) -> int:
+    if not args:
+        _emit({"ok": False, "error": "repair_subcommand_required"})
+        return 2
+    subcommand = args[0]
+    rest = args[1:]
+    output_root = _option(rest, "--output-root", "work/repair_jobs")
+    if subcommand == "create":
+        from execution_plane.repair.writer import create_patch_repair_job
+
+        bundle_path = _positional(rest, skip_values_for={"--output-root"})
+        if not bundle_path:
+            _emit({"ok": False, "error": "repair_create_requires_failure_bundle"})
+            return 2
+        payload = create_patch_repair_job(bundle_path, output_root=output_root)
+        _emit(payload)
+        return 0 if payload.get("ok") else 1
+    if subcommand == "invoke":
+        from execution_plane.repair.local_model_bridge import invoke_local_patch_tool
+
+        job_path = _positional(rest, skip_values_for={"--output-root"})
+        if not job_path:
+            _emit({"ok": False, "error": "repair_invoke_requires_job_path"})
+            return 2
+        payload = invoke_local_patch_tool(job_path, output_root=output_root)
+        _emit(payload)
+        return 0 if payload.get("ok") else 1
+    if subcommand == "apply":
+        from execution_plane.repair.patch_apply import apply_patch_for_job
+
+        positionals = [item for item in rest if not item.startswith("--") and item not in {"--json"}]
+        if len(positionals) < 2:
+            _emit({"ok": False, "error": "repair_apply_requires_job_and_patch"})
+            return 2
+        payload = apply_patch_for_job(positionals[0], positionals[1], output_root=output_root)
+        _emit(payload)
+        return 0 if payload.get("ok") else 1
+    if subcommand == "ledger":
+        from execution_plane.repair.repair_ledger import read_repair_ledger
+
+        _emit({"ok": True, "events": read_repair_ledger(output_root)})
+        return 0
+    _emit({"ok": False, "error": "unknown_repair_subcommand", "subcommand": subcommand})
+    return 2
+
+
+def _project(args: list[str]) -> int:
+    if not args or args[0] != "create":
+        _emit({"ok": False, "error": "project_create_required"})
+        return 2
+    from execution_plane.production_runtime import ProductionRuntime
+
+    rest = args[1:]
+    name = _positional(rest, skip_values_for={"--runtime-root"})
+    if not name:
+        _emit({"ok": False, "error": "project_create_requires_name"})
+        return 2
+    runtime = ProductionRuntime(_option(rest, "--runtime-root", "work/production_runtime"))
+    _emit(runtime.create_project(name))
+    return 0
+
+
+def _asset(args: list[str]) -> int:
+    if not args or args[0] != "scan":
+        _emit({"ok": False, "error": "asset_scan_required"})
+        return 2
+    from execution_plane.production_runtime import ProductionRuntime
+
+    rest = args[1:]
+    scan_root = _positional(rest, skip_values_for={"--runtime-root", "--project-id"})
+    if not scan_root:
+        _emit({"ok": False, "error": "asset_scan_requires_root"})
+        return 2
+    runtime = ProductionRuntime(_option(rest, "--runtime-root", "work/production_runtime"))
+    _emit(runtime.scan_assets(scan_root, project_id=_option(rest, "--project-id") or None))
+    return 0
+
+
+def _shot(args: list[str]) -> int:
+    if not args:
+        _emit({"ok": False, "error": "shot_subcommand_required"})
+        return 2
+    from execution_plane.production_runtime import ProductionRuntime
+
+    subcommand = args[0]
+    rest = args[1:]
+    runtime = ProductionRuntime(_option(rest, "--runtime-root", "work/production_runtime"))
+    values = _positionals(rest, skip_values_for={"--runtime-root"})
+    if subcommand == "create":
+        if len(values) < 2:
+            _emit({"ok": False, "error": "shot_create_requires_project_and_name"})
+            return 2
+        _emit(runtime.create_shot(values[0], values[1]))
+        return 0
+    if subcommand == "attach-workflow":
+        if len(values) < 2:
+            _emit({"ok": False, "error": "shot_attach_workflow_requires_shot_and_workflow"})
+            return 2
+        _emit(runtime.attach_workflow(values[0], values[1]))
+        return 0
+    if subcommand == "run":
+        if not values:
+            _emit({"ok": False, "error": "shot_run_requires_shot_id"})
+            return 2
+        _emit(runtime.run_shot(values[0]))
+        return 0
+    _emit({"ok": False, "error": "unknown_shot_subcommand", "subcommand": subcommand})
+    return 2
+
+
+def _package(args: list[str]) -> int:
+    if not args or args[0] not in {"run", "shot"}:
+        _emit({"ok": False, "error": "package_run_or_shot_required"})
+        return 2
+    from execution_plane.packaging import package_run, package_shot
+
+    rest = args[1:]
+    values = _positionals(rest, skip_values_for={"--runtime-root", "--package-root"})
+    if not values:
+        _emit({"ok": False, "error": "package_requires_id"})
+        return 2
+    runtime_root = _option(rest, "--runtime-root", "work/production_runtime")
+    package_root = _option(rest, "--package-root", "work/packages")
+    payload = (
+        package_run(values[0], runtime_root=runtime_root, package_root=package_root)
+        if args[0] == "run"
+        else package_shot(values[0], runtime_root=runtime_root, package_root=package_root)
+    )
+    _emit(payload)
+    return 0
+
+
+def _dashboard(args: list[str]) -> int:
+    if args[:1] != ["build"]:
+        _emit({"ok": False, "error": "dashboard_build_required"})
+        return 2
+    from apps.operator_dashboard.build import build_dashboard
+
+    rest = args[1:]
+    payload = build_dashboard(
+        runtime_root=_option(rest, "--runtime-root", "work/production_runtime"),
+        package_root=_option(rest, "--package-root", "work/packages"),
+        repair_root=_option(rest, "--repair-root", "work/repair_jobs"),
+        output_root=_option(rest, "--output-root", "work/operator_dashboard"),
+    )
+    _emit(payload)
+    return 0
+
+
+def _skill(args: list[str]) -> int:
+    if not args or args[0] not in {"list", "show"}:
+        _emit({"ok": False, "error": "skill_list_or_show_required"})
+        return 2
+    from execution_plane.skill_system import get_skill, load_skill_registry
+
+    root = _option(args[1:], "--skills-root", "skills")
+    if args[0] == "list":
+        registry = load_skill_registry(root)
+        _emit({"ok": True, "registry": registry})
+        return 0
+    name = _positional(args[1:], skip_values_for={"--skills-root"})
+    if not name:
+        _emit({"ok": False, "error": "skill_show_requires_name"})
+        return 2
+    _emit({"ok": True, "skill": get_skill(name, root)})
+    return 0
+
+
+def _review(args: list[str]) -> int:
+    if args[:1] != ["create"]:
+        _emit({"ok": False, "error": "review_create_required"})
+        return 2
+    from execution_plane.review_artifacts import create_review_artifact
+
+    rest = args[1:]
+    subject_id = _positional(rest, skip_values_for={"--runtime-root", "--package-root", "--output-root"})
+    if not subject_id:
+        _emit({"ok": False, "error": "review_create_requires_subject_id"})
+        return 2
+    payload = create_review_artifact(
+        subject_id,
+        runtime_root=_option(rest, "--runtime-root", "work/production_runtime"),
+        package_root=_option(rest, "--package-root", "work/packages"),
+        output_root=_option(rest, "--output-root", "work/review_artifacts"),
+    )
+    _emit(payload)
+    return 0
+
+
+def _pattern(args: list[str]) -> int:
+    if args[:1] != ["report"]:
+        _emit({"ok": False, "error": "pattern_report_required"})
+        return 2
+    from execution_plane.pattern_assimilator import generate_pattern_report
+
+    rest = args[1:]
+    payload = generate_pattern_report(
+        runtime_root=_option(rest, "--runtime-root", "work/production_runtime"),
+        package_root=_option(rest, "--package-root", "work/packages"),
+        review_root=_option(rest, "--review-root", "work/review_artifacts"),
+        repair_root=_option(rest, "--repair-root", "work/repair_jobs"),
+        output_root=_option(rest, "--output-root", "work/pattern_assimilator"),
+    )
+    _emit(payload)
+    return 0
+
+
+def _dogfood(args: list[str]) -> int:
+    if args[:1] != ["run"]:
+        _emit({"ok": False, "error": "dogfood_run_required"})
+        return 2
+    from execution_plane.production_dogfood import run_production_dogfood_fixture
+
+    rest = args[1:]
+    fixture_path = _positional(rest, skip_values_for={"--runtime-root", "--package-root", "--output-root", "--review-root"})
+    if not fixture_path:
+        _emit({"ok": False, "error": "dogfood_run_requires_fixture"})
+        return 2
+    payload = run_production_dogfood_fixture(
+        fixture_path,
+        runtime_root=_option(rest, "--runtime-root", "work/production_dogfood/runtime"),
+        package_root=_option(rest, "--package-root", "work/production_dogfood/packages"),
+        output_root=_option(rest, "--output-root", "work/production_dogfood/runs"),
+        review_root=_option(rest, "--review-root", "work/production_dogfood/review_artifacts"),
+    )
+    _emit(payload)
+    return 0 if payload.get("ok") else 1
+
+
 def _run_ledger(args: list[str]) -> int:
     if args != ["create", "--dry-run"]:
         _emit({"ok": False, "error": "run_ledger_create_is_dry_run_only"})
@@ -430,6 +760,24 @@ def _positional(args: list[str], *, skip_values_for: set[str]) -> str:
             continue
         return item
     return ""
+
+
+def _positionals(args: list[str], *, skip_values_for: set[str]) -> list[str]:
+    values: list[str] = []
+    skip_next = False
+    for item in args:
+        if skip_next:
+            skip_next = False
+            continue
+        if item in {"--json", "--human", "--dry-run"}:
+            continue
+        if item in skip_values_for:
+            skip_next = True
+            continue
+        if item.startswith("--"):
+            continue
+        values.append(item)
+    return values
 
 
 def _json_requested(args: list[str]) -> bool:

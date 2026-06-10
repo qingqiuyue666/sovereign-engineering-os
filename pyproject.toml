@@ -17,5 +17,5 @@ seos-local = "kernel.personal_ai.local_mvp_cli:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["apps*", "kernel*", "tools*", "creative*"]
+include = ["apps*", "kernel*", "tools*", "creative*", "execution_plane*"]
 namespaces = true
