@@ -1,0 +1,215 @@
+{
+  "object_type": "MinimalControlledExecutionAdmissionWalVerifierContract",
+  "contract_id": "minimal_controlled_execution_admission_wal_verifier_v1",
+  "status": "CONTRACT_ONLY",
+  "policy_version": "minimal_controlled_execution_contract_only_v1",
+  "registry_version": "minimal_controlled_execution_registry_v1",
+  "source_contract_id": "minimal_controlled_execution_contract_v1",
+  "source_contract_path": "governance/execution/minimal_controlled_execution_contract_v1.json",
+  "source_module": "kernel/execution/minimal_controlled_execution_contract.py",
+  "integration_module": "kernel/execution/minimal_controlled_execution_admission_wal_verifier.py",
+  "implementation_allowed_in_this_pr": false,
+  "runner_implemented": false,
+  "subprocess_implemented": false,
+  "cli_entrypoint_added": false,
+  "scheduler_or_daemon_added": false,
+  "command_payload_rule": "Admission accepts an ExecutionRequest command_id reference only. Request payloads must not supply argv, command, command_line, shell, cwd, env, path, executable, timeout, network, provider, browser, plugin, dcc, comfyui, or mcp fields.",
+  "contract_objects": {
+    "ExecutionAdmissionRecord": {
+      "purpose": "Represents deterministic admission of an ExecutionRequest into governance flow.",
+      "required_fields": [
+        "admission_record_id",
+        "request_id",
+        "task_id",
+        "run_id",
+        "command_id",
+        "request_hash",
+        "registry_entry_hash",
+        "registry_hash",
+        "policy_version",
+        "registry_version",
+        "accepted",
+        "rejection_reasons",
+        "approval_token_id",
+        "execution_performed",
+        "created_at",
+        "admission_record_hash"
+      ],
+      "rules": [
+        "execution_performed must be false",
+        "accepted=false must contain rejection_reasons",
+        "accepted=true must contain no rejection_reasons",
+        "unknown command_id must reject",
+        "deferred command_id must reject",
+        "forbidden request fields must reject before admission",
+        "request payloads must not supply argv, cwd, env, path, executable, or timeout"
+      ]
+    },
+    "ExecutionWalRecord": {
+      "purpose": "Represents append-only WAL-safe evidence for execution admission and rejection.",
+      "required_fields": [
+        "wal_record_id",
+        "wal_record_type",
+        "task_id",
+        "run_id",
+        "command_id",
+        "request_hash",
+        "decision_hash",
+        "admission_record_hash",
+        "failure_bundle_hash",
+        "verifier_input_hash",
+        "registry_entry_hash",
+        "registry_hash",
+        "execution_performed",
+        "sequence",
+        "created_at",
+        "wal_record_hash"
+      ],
+      "allowed_wal_record_type": [
+        "EXECUTION_ADMISSION_ACCEPTED",
+        "EXECUTION_ADMISSION_REJECTED",
+        "EXECUTION_FAILURE_BUNDLE_CREATED",
+        "EXECUTION_VERIFIER_INPUT_CREATED",
+        "EXECUTION_NOT_ATTEMPTED"
+      ],
+      "rules": [
+        "execution_performed must be false",
+        "no raw stdout or stderr",
+        "no command_line",
+        "no argv",
+        "no execution output",
+        "sequence must be integer greater than zero"
+      ]
+    },
+    "ExecutionVerifierBinding": {
+      "purpose": "Represents deterministic verifier binding for contract-only execution evidence.",
+      "required_fields": [
+        "verifier_binding_id",
+        "request_hash",
+        "decision_hash",
+        "admission_record_hash",
+        "receipt_hash",
+        "failure_bundle_hash",
+        "pre_snapshot_hash",
+        "post_snapshot_hash",
+        "registry_entry_hash",
+        "registry_hash",
+        "execution_performed",
+        "verifier_policy_version",
+        "verifier_binding_hash"
+      ],
+      "rules": [
+        "execution_performed must be false",
+        "must bind request, decision, registry, admission, snapshot, and receipt or failure refs",
+        "cannot claim execution success",
+        "can represent EXECUTION_NOT_ATTEMPTED"
+      ]
+    },
+    "ExecutionReplayEvidenceManifest": {
+      "purpose": "Represents replay and evidence closure for this contract-only phase.",
+      "required_fields": [
+        "replay_manifest_id",
+        "task_id",
+        "run_id",
+        "command_id",
+        "request_hash",
+        "decision_hash",
+        "admission_record_hash",
+        "wal_record_hashes",
+        "failure_bundle_hash",
+        "verifier_input_hash",
+        "verifier_binding_hash",
+        "registry_hash",
+        "execution_performed",
+        "manifest_status",
+        "created_at",
+        "replay_manifest_hash"
+      ],
+      "allowed_manifest_status": [
+        "CONTRACT_ONLY_ACCEPTED_NOT_EXECUTED",
+        "CONTRACT_ONLY_REJECTED_NOT_EXECUTED",
+        "CONTRACT_ONLY_FAILURE_NOT_EXECUTED"
+      ],
+      "rules": [
+        "execution_performed must be false",
+        "wal_record_hashes must be ordered and non-empty",
+        "manifest must not include raw stdout or stderr",
+        "manifest must not include command_line or argv"
+      ]
+    }
+  },
+  "required_functions": [
+    "build_execution_admission_record",
+    "build_execution_wal_record",
+    "build_execution_verifier_binding",
+    "build_execution_replay_evidence_manifest",
+    "admission_record_hash",
+    "wal_record_hash",
+    "verifier_binding_hash",
+    "replay_manifest_hash"
+  ],
+  "allowed_source_contract_imports": [
+    "ExecutionRequest",
+    "ExecutionPolicyDecision",
+    "ExecutionFailureBundle",
+    "ExecutionReceipt",
+    "ExecutionSnapshotRef",
+    "ExecutionVerifierInput",
+    "INITIAL_COMMAND_REGISTRY",
+    "DEFERRED_COMMAND_IDS",
+    "POLICY_VERSION",
+    "REGISTRY_VERSION",
+    "command_registry_hash",
+    "request_hash",
+    "decision_hash",
+    "failure_bundle_hash",
+    "receipt_hash",
+    "verifier_input_hash",
+    "decide_execution_request",
+    "build_execution_request"
+  ],
+  "initial_registry_command_ids": [
+    "git_status_short",
+    "git_diff_check"
+  ],
+  "deferred_command_ids": [
+    "unittest_discover_tests",
+    "make_ci"
+  ],
+  "forbidden_surfaces": [
+    "subprocess_implementation",
+    "runner",
+    "shell_command_execution",
+    "payload_provided_argv",
+    "payload_provided_cwd_env_path_executable_timeout",
+    "network_execution",
+    "provider_api",
+    "browser_control",
+    "plugin_execution",
+    "dcc_launch",
+    "comfyui_launch",
+    "mcp_execution",
+    "scheduler_or_daemon",
+    "task_graph_execution",
+    "auto_reexecution"
+  ],
+  "evidence_flow": [
+    "ExecutionRequest",
+    "ExecutionPolicyDecision",
+    "ExecutionAdmissionRecord",
+    "ExecutionWalRecord",
+    "ExecutionFailureBundle",
+    "ExecutionReceipt",
+    "ExecutionSnapshotRef",
+    "ExecutionVerifierInput",
+    "ExecutionVerifierBinding",
+    "ExecutionReplayEvidenceManifest"
+  ],
+  "invariants": {
+    "execution_performed": false,
+    "command_execution_implemented": false,
+    "registry_broadened": false,
+    "raw_output_in_wal": false,
+    "raw_output_in_manifest": false
+  }
+}

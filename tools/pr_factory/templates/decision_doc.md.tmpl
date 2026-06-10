@@ -1,0 +1,54 @@
+# $capability_id Decision
+
+## Scope
+
+METADATA-ONLY SCAFFOLD. This decision record documents a proposed capability
+contract and review boundary only.
+
+## Non-Goals
+
+- No runtime governance semantic changes
+- No token issuance
+- No runner creation
+- No adapter execution
+- No browser opening
+- No network access
+- No production promotion
+- No autonomous execution
+
+## Capability Inputs
+
+- Capability id: `$capability_id`
+- Capability file: `$capability_file_name`
+- Output files:
+$output_file_names
+
+## Result Contract
+
+- Result data is descriptive metadata only.
+- Rejection reasons must be deterministic.
+- Missing metadata-only authority fails closed.
+
+## Manifest Contract
+
+- Manifest entries describe expected artifacts by path, purpose, and authority.
+- Manifest entries must not embed raw input contents, credentials, cookies, or
+  runtime receipts from live systems.
+
+## Artifact Index Contract
+
+- Artifact index entries describe generated scaffold outputs only.
+- Content indexing is out of scope unless separately approved.
+
+## Artifact Index Manifest
+
+- The artifact index manifest binds index metadata, expected file count, and
+  validation notes.
+
+## Forbidden Boundary Checklist
+
+$forbidden_boundaries
+
+## Rejection Reasons
+
+$rejection_reasons

@@ -1,0 +1,64 @@
+{
+  "registry_type": "bounded_worker_registry_v1",
+  "version": "v1",
+  "live_provider_calls_enabled": false,
+  "credential_storage_enabled": false,
+  "tool_execution_enabled": false,
+  "production_autonomy_enabled": false,
+  "routing_plan_only": true,
+  "required_worker_ids": [
+    "codex",
+    "claude",
+    "gemini",
+    "gpt",
+    "deepseek",
+    "local_deterministic_python"
+  ],
+  "required_contract_fields": [
+    "worker_id",
+    "display_name",
+    "provider_family",
+    "task_classes",
+    "input_contract",
+    "output_contract",
+    "timeout_seconds",
+    "budget_units",
+    "evidence_requirements",
+    "hallucination_boundary",
+    "live_provider_calls_enabled",
+    "credential_storage_enabled",
+    "tool_execution_enabled",
+    "production_autonomy_enabled"
+  ],
+  "task_class_declarations": [
+    "code_review",
+    "implementation_plan",
+    "test_design",
+    "documentation_draft",
+    "fixture_validation",
+    "static_contract_check",
+    "artifact_summary"
+  ],
+  "evidence_requirements": [
+    "input_digest_bound",
+    "repo_revision_bound",
+    "output_digest_recorded",
+    "human_review_required_before_action"
+  ],
+  "hallucination_boundary": [
+    "must not claim unobserved files",
+    "must label uncertainty",
+    "must cite evidence refs for claims",
+    "must not invent validation results"
+  ],
+  "forbidden_surfaces": [
+    "live provider API calls",
+    "credential storage",
+    "tool execution",
+    "production autonomy",
+    "browser opening",
+    "network access",
+    "unbounded daemon",
+    "unbounded scheduler"
+  ]
+}

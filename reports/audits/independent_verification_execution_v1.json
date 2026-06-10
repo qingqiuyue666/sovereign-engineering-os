@@ -1,0 +1,251 @@
+{
+  "artifacts_generated": [
+    "reports/audits/independent_verification_execution_v1.json",
+    "reports/audits/independent_verification_execution_v1.md"
+  ],
+  "commands": [
+    {
+      "command": "git clone --quiet <repository-url> <temporary-clean-clone>",
+      "cwd_policy": "temporary_workspace",
+      "exit_code": 0,
+      "id": "git_clone",
+      "required": true,
+      "result": "PASS"
+    },
+    {
+      "command": "git checkout --quiet 2f46520b9aa107d83689b86d3314919ad4bca7b8",
+      "cwd_policy": "clean_clone",
+      "exit_code": 0,
+      "id": "checkout_expected_head",
+      "required": true,
+      "result": "PASS"
+    },
+    {
+      "command": "git rev-parse HEAD",
+      "cwd_policy": "clean_clone",
+      "exit_code": 0,
+      "id": "verify_starting_head",
+      "required": true,
+      "result": "PASS"
+    },
+    {
+      "command": "git rev-parse 'v0.1.0-rc3^{}'",
+      "cwd_policy": "clean_clone",
+      "exit_code": 0,
+      "id": "verify_rc3_tag",
+      "required": true,
+      "result": "PASS"
+    },
+    {
+      "command": "python3 -m venv .venv",
+      "cwd_policy": "clean_clone",
+      "exit_code": 0,
+      "id": "create_fresh_venv",
+      "required": true,
+      "result": "PASS"
+    },
+    {
+      "command": ".venv/bin/python -m pip install .",
+      "cwd_policy": "clean_clone",
+      "exit_code": 0,
+      "id": "install_project",
+      "required": true,
+      "result": "PASS"
+    },
+    {
+      "command": "rm -rf build sovereign_engineering_os.egg-info && git status --short is empty for install artifacts",
+      "cwd_policy": "clean_clone",
+      "exit_code": 0,
+      "id": "clean_install_artifacts_after_install",
+      "required": true,
+      "result": "PASS"
+    },
+    {
+      "command": ".venv/bin/seos --help",
+      "cwd_policy": "clean_clone",
+      "exit_code": 0,
+      "id": "cli_help_seos",
+      "required": true,
+      "result": "PASS"
+    },
+    {
+      "command": ".venv/bin/seos-local --help",
+      "cwd_policy": "clean_clone",
+      "exit_code": 0,
+      "id": "cli_help_seos_local",
+      "required": true,
+      "result": "PASS"
+    },
+    {
+      "command": ".venv/bin/python scripts/external_audit_packet_check_v1.py",
+      "cwd_policy": "clean_clone",
+      "exit_code": 0,
+      "id": "external_audit_packet_check",
+      "required": true,
+      "result": "PASS"
+    },
+    {
+      "command": ".venv/bin/python scripts/claim_to_evidence_check_v1.py",
+      "cwd_policy": "clean_clone",
+      "exit_code": 0,
+      "id": "claim_to_evidence_check",
+      "required": true,
+      "result": "PASS"
+    },
+    {
+      "command": ".venv/bin/python scripts/security_control_check_v1.py",
+      "cwd_policy": "clean_clone",
+      "exit_code": 0,
+      "id": "security_control_check",
+      "required": true,
+      "result": "PASS"
+    },
+    {
+      "command": ".venv/bin/python scripts/supply_chain_check_v1.py",
+      "cwd_policy": "clean_clone",
+      "exit_code": 0,
+      "id": "supply_chain_check",
+      "required": true,
+      "result": "PASS"
+    },
+    {
+      "command": ".venv/bin/python scripts/secret_context_safety_check_v1.py",
+      "cwd_policy": "clean_clone",
+      "exit_code": 0,
+      "id": "secret_context_safety_check",
+      "required": true,
+      "result": "PASS"
+    },
+    {
+      "command": ".venv/bin/python scripts/release_invariant_check_v1.py",
+      "cwd_policy": "clean_clone",
+      "exit_code": 0,
+      "id": "release_invariant_check",
+      "required": true,
+      "result": "PASS"
+    },
+    {
+      "command": ".venv/bin/python scripts/ai_admission_check_v1.py",
+      "cwd_policy": "clean_clone",
+      "exit_code": 0,
+      "id": "ai_admission_check",
+      "required": true,
+      "result": "PASS"
+    },
+    {
+      "command": ".venv/bin/python scripts/dogfood_evidence_check_v1.py",
+      "cwd_policy": "clean_clone",
+      "exit_code": 0,
+      "id": "dogfood_evidence_check",
+      "required": true,
+      "result": "PASS"
+    },
+    {
+      "command": ".venv/bin/python scripts/reliability_benchmark_v1.py",
+      "cwd_policy": "clean_clone",
+      "exit_code": 0,
+      "id": "reliability_benchmark",
+      "required": true,
+      "result": "PASS"
+    },
+    {
+      "command": ".venv/bin/python scripts/schema_compatibility_check_v1.py",
+      "cwd_policy": "clean_clone",
+      "exit_code": 0,
+      "id": "schema_compatibility_check",
+      "required": true,
+      "result": "PASS"
+    },
+    {
+      "command": ".venv/bin/python scripts/observation_check_v1.py",
+      "cwd_policy": "clean_clone",
+      "exit_code": 0,
+      "id": "observation_check",
+      "required": true,
+      "result": "PASS"
+    },
+    {
+      "command": "bash scripts/failure_path_smoke_v1.sh",
+      "cwd_policy": "clean_clone",
+      "exit_code": 0,
+      "id": "failure_path_smoke",
+      "required": true,
+      "result": "PASS"
+    },
+    {
+      "command": ".venv/bin/python scripts/adversarial_smoke_v1.py",
+      "cwd_policy": "clean_clone",
+      "exit_code": 0,
+      "id": "adversarial_smoke",
+      "required": true,
+      "result": "PASS"
+    },
+    {
+      "command": "make PYTHON=.venv/bin/python verify",
+      "cwd_policy": "clean_clone",
+      "exit_code": 0,
+      "id": "make_verify",
+      "required": true,
+      "result": "PASS"
+    },
+    {
+      "command": "rm -rf build sovereign_engineering_os.egg-info && git status --short is empty for install artifacts",
+      "cwd_policy": "clean_clone",
+      "exit_code": 0,
+      "id": "clean_install_artifacts_before_ci",
+      "required": true,
+      "result": "PASS"
+    },
+    {
+      "command": "make PYTHON=.venv/bin/python ci",
+      "cwd_policy": "clean_clone",
+      "exit_code": 0,
+      "id": "make_ci",
+      "required": true,
+      "result": "PASS"
+    }
+  ],
+  "environment_summary": {
+    "clean_clone": true,
+    "fresh_venv": true,
+    "platform": "Darwin",
+    "python_version": "3.14.4",
+    "temp_workspace_cleanup": "deleted after execution",
+    "temp_workspace_path_recorded": false,
+    "temp_workspace_policy": "temporary clean directory outside the working tree; absolute path intentionally omitted"
+  },
+  "execution_id": "codex_run_independent_verification_v1",
+  "explicit_statements": [
+    "This is not a human third-party external audit.",
+    "External recognition is not confirmed by Codex.",
+    "Global top engineer signoff is not confirmed by Codex.",
+    "Human or independent external review remains required."
+  ],
+  "external_signoff_confirmed": false,
+  "final_status": "CODEX_RUN_INDEPENDENT_VERIFICATION_EXECUTED",
+  "findings": [],
+  "global_recognition_claimed": false,
+  "global_recognition_confirmed_by_codex": false,
+  "human_third_party_audit": false,
+  "known_limitations": [
+    "This is a Codex-run local independent verification, not a human third-party audit.",
+    "The execution verifies machine-checkable repository evidence only.",
+    "External human review remains required before any external recognition claim.",
+    "Real-world 30-90 day operation evidence remains required for final recognition analysis."
+  ],
+  "release_candidate_tag": {
+    "expected_target": "9a363f95b85602ffc598db463dc6181a9bbbdf3c",
+    "moved_or_recreated_by_this_execution": false,
+    "name": "v0.1.0-rc3",
+    "observed_target": "9a363f95b85602ffc598db463dc6181a9bbbdf3c"
+  },
+  "repository": {
+    "clone_strategy": "fresh clone into a temporary directory outside the working tree",
+    "name": "qqyqqyqqy666-wq/sovereign-engineering-os",
+    "observed_head": "2f46520b9aa107d83689b86d3314919ad4bca7b8",
+    "origin_url": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os.git",
+    "target_head": "2f46520b9aa107d83689b86d3314919ad4bca7b8"
+  },
+  "reviewer_type": "Codex-run local independent verification",
+  "schema_version": "independent_verification_execution_v1"
+}

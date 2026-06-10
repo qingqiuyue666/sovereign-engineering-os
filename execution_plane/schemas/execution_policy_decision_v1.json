@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "accepted": {
+      "type": "boolean"
+    },
+    "allowed_action": {
+      "type": "string"
+    },
+    "allowed_adapter": {
+      "type": "string"
+    },
+    "decision_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "decided_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "destructive_action_allowed": {
+      "const": false,
+      "type": "boolean"
+    },
+    "network_allowed": {
+      "const": false,
+      "type": "boolean"
+    },
+    "permit_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "policy_blocks": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "policy_version": {
+      "const": "seos_execution_policy_v1",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "seos_execution_policy_decision_v1",
+      "type": "string"
+    },
+    "write_scope": {
+      "const": "single_output_directory",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "decision_id",
+    "permit_id",
+    "accepted",
+    "policy_blocks",
+    "allowed_adapter",
+    "allowed_action",
+    "write_scope",
+    "network_allowed",
+    "destructive_action_allowed",
+    "policy_version",
+    "decided_at"
+  ],
+  "title": "SEOS Execution Policy Decision V1",
+  "type": "object"
+}
+

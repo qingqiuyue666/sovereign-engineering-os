@@ -1,0 +1,11 @@
+{
+  "action": "submit_workflow",
+  "adapter": "comfyui_local",
+  "expected_outputs": [
+    "comfyui_outputs/*.png",
+    "collected_outputs.json",
+    "workflow_submitted.json"
+  ],
+  "schema_version": "seos.energy_impact.rpc_template_ref.v1",
+  "template_path": "examples/rpc/comfyui_submit_workflow.json"
+}

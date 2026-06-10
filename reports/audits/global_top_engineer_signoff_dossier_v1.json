@@ -1,0 +1,121 @@
+{
+  "schema_version": "global_top_engineer_signoff_dossier_v1",
+  "dossier_status": "GLOBAL_TOP_ENGINEER_SIGNOFF_CANDIDATE_FOUNDATION_READY",
+  "final_verdict": "GLOBAL_TOP_ENGINEER_SIGNOFF_CANDIDATE_FOUNDATION_READY",
+  "generated_at_utc": "2026-05-30T14:25:23Z",
+  "final_main_head": "0952722911ca880b75511b7ef7718051a060d2de",
+  "final_main_head_scope": "main after Wave 4 merge and before the Wave 5 dossier PR; final program report records the post-Wave-5 main head",
+  "release_candidate_tag": {
+    "name": "v0.1.0-rc3",
+    "expected_target": "9a363f95b85602ffc598db463dc6181a9bbbdf3c",
+    "observed_target": "9a363f95b85602ffc598db463dc6181a9bbbdf3c",
+    "moved_or_recreated_by_this_execution": false
+  },
+  "global_recognition_confirmed": false,
+  "human_external_signoff_confirmed": false,
+  "codex_self_certifying_final_signoff": false,
+  "human_third_party_review_completed": false,
+  "thirty_to_ninety_day_operation_completed": false,
+  "conditions_for_candidate_foundation": {
+    "codex_run_independent_verification_executed": true,
+    "red_team_execution_completed": true,
+    "p0_p1_findings_fixed_or_none_found": true,
+    "operation_evidence_program_initialized": true,
+    "dossier_check_passes": true,
+    "forbidden_claims_made": false
+  },
+  "prior_wave_1_to_9_readiness_summary": {
+    "terminal_state": "GLOBAL_RECOGNITION_READINESS_READY_FOR_EXTERNAL_REVIEW",
+    "final_prior_pr": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/pull/548",
+    "external_audit_packet": "reports/audits/external_audit_packet_v1.json",
+    "external_audit_packet_markdown": "docs/audits/external_audit_packet_v1.md",
+    "summary": "Prior program assembled an external review packet; it did not confirm external recognition."
+  },
+  "current_program_prs": [
+    {
+      "wave": 1,
+      "title": "Codex-run independent verification execution",
+      "pr_url": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/pull/549",
+      "merge_commit": "71a9744b2e84595627222c82c8155d2e537977ed",
+      "merged_at_utc": "2026-05-30T13:17:29Z",
+      "ci_status": "canonical-health passed",
+      "ci_url": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/actions/runs/26684719892"
+    },
+    {
+      "wave": 2,
+      "title": "Codex-run red-team execution",
+      "pr_url": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/pull/550",
+      "merge_commit": "33032ef069830b4023bc994c722d86a087179268",
+      "merged_at_utc": "2026-05-30T13:46:01Z",
+      "ci_status": "canonical-health passed",
+      "ci_url": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/actions/runs/26685310268"
+    },
+    {
+      "wave": 3,
+      "title": "Findings remediation closure",
+      "pr_url": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/pull/551",
+      "merge_commit": "b7a0dce3f33d0ebb33ec8cacc97f1c4a3151f791",
+      "merged_at_utc": "2026-05-30T14:04:51Z",
+      "ci_status": "canonical-health passed",
+      "ci_url": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/actions/runs/26685697367"
+    },
+    {
+      "wave": 4,
+      "title": "Real-world operation evidence program initialization",
+      "pr_url": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/pull/552",
+      "merge_commit": "0952722911ca880b75511b7ef7718051a060d2de",
+      "merged_at_utc": "2026-05-30T14:21:32Z",
+      "ci_status": "canonical-health passed",
+      "ci_url": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/actions/runs/26686065359"
+    }
+  ],
+  "required_references": {
+    "external_audit_packet": "reports/audits/external_audit_packet_v1.json",
+    "external_audit_packet_markdown": "docs/audits/external_audit_packet_v1.md",
+    "independent_verification_execution_report": "reports/audits/independent_verification_execution_v1.json",
+    "red_team_execution_report": "reports/audits/red_team_execution_report_v1.json",
+    "findings_register": "reports/audits/findings_register_v1.json",
+    "findings_remediation_log": "reports/audits/findings_remediation_log_v1.json",
+    "real_world_operation_evidence_program": "docs/operations/real_world_operation_evidence_program_v1.md",
+    "real_world_operation_evidence_index": "reports/operations/real_world_operation_evidence_index_v1.json",
+    "accepted_risk_register": "reports/audits/accepted_risk_register_v1.json",
+    "residual_risk_register": "reports/audits/residual_risk_register_v1.json",
+    "final_blocker_table": "reports/audits/final_blocker_table_v1.json"
+  },
+  "validation_commands": [
+    "python3 scripts/global_signoff_dossier_check_v1.py",
+    "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.tracer_bullet.test_global_signoff_dossier_v1",
+    "python3 scripts/independent_verification_report_check_v1.py",
+    "python3 scripts/red_team_report_check_v1.py",
+    "python3 scripts/findings_register_check_v1.py",
+    "python3 scripts/real_world_operation_evidence_check_v1.py",
+    "make verify",
+    "make ci",
+    "git diff --check",
+    "git status --short"
+  ],
+  "known_limitations": [
+    "This dossier is Codex-generated and repository-local.",
+    "This is not a human third-party audit.",
+    "This is not final global recognition.",
+    "This is not human external signoff confirmed.",
+    "The operation evidence program is initialized at Day 000; elapsed operation evidence remains missing.",
+    "Human or independent external review remains required."
+  ],
+  "remaining_required_external_steps": [
+    "human or independent external verification",
+    "independent external red-team and security review",
+    "independent supply-chain review",
+    "30-90 day real-world operation evidence collection",
+    "review of residual risks and accepted non-goals",
+    "final human audit before any future recognition claim"
+  ],
+  "explicit_statements": [
+    "This is not final global recognition.",
+    "This is not human external signoff confirmed.",
+    "Human or independent external review remains required.",
+    "30-90 day real-world operation remains required.",
+    "Final recognition requires evidence beyond Codex.",
+    "External recognition is not confirmed by Codex."
+  ]
+}

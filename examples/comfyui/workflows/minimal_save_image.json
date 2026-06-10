@@ -1,0 +1,21 @@
+{
+  "5": {
+    "class_type": "EmptyImage",
+    "inputs": {
+      "batch_size": 1,
+      "color": 8421504,
+      "height": 64,
+      "width": 64
+    }
+  },
+  "9": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "filename_prefix": "seos_minimal",
+      "images": [
+        "5",
+        0
+      ]
+    }
+  }
+}

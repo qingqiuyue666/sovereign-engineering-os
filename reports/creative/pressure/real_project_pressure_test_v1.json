@@ -1,0 +1,465 @@
+{
+  "adapter_contract_summary": {
+    "after_effects": "CONFIG_REQUIRED",
+    "available": true,
+    "blender": "READY_FOR_MANUAL_DRY_RUN",
+    "davinci": "CONFIG_REQUIRED",
+    "unreal": "CONFIG_REQUIRED",
+    "zbrush": "ENV_NOT_FOUND"
+  },
+  "dashboard_summary": {
+    "archive_warning_count": 1,
+    "duplicate_group_count": 2,
+    "empty_directory_count": 1,
+    "incomplete_texture_set_count": 1,
+    "likely_incomplete_pack_count": 1,
+    "total_assets": 23,
+    "total_size_bytes": 704
+  },
+  "destructive_actions_performed": false,
+  "execution_performed": false,
+  "findings": [
+    {
+      "code": "DUPLICATES_REQUIRE_REVIEW",
+      "evidence": {},
+      "message": "Duplicate groups were detected and need human cleanup decisions.",
+      "next_action": "Review duplicate groups manually before deleting or packaging anything.",
+      "severity": "WARNING"
+    },
+    {
+      "code": "ARCHIVE_PART_MISSING",
+      "evidence": {},
+      "message": "Missing archive parts were detected.",
+      "next_action": "Restore missing archive parts before extraction or production use.",
+      "severity": "WARNING"
+    },
+    {
+      "code": "EMPTY_DIRECTORIES_PRESENT",
+      "evidence": {},
+      "message": "Empty directories were detected.",
+      "next_action": "Decide whether empty directories are intentional placeholders or stale clutter.",
+      "severity": "INFO"
+    },
+    {
+      "code": "INCOMPLETE_TEXTURE_SETS",
+      "evidence": {},
+      "message": "Incomplete texture sets were detected.",
+      "next_action": "Fill missing texture maps before lookdev binding.",
+      "severity": "WARNING"
+    },
+    {
+      "code": "INCOMPLETE_PRODUCTION_PACKS",
+      "evidence": {},
+      "message": "Likely incomplete model/material/texture packs were detected.",
+      "next_action": "Resolve incomplete packs before shot planning.",
+      "severity": "WARNING"
+    },
+    {
+      "code": "LOCAL_RUNNER_NOT_READY",
+      "evidence": {
+        "readiness": "NOT_FOUND",
+        "runner_id": "houdini_hython_smoke"
+      },
+      "message": "Houdini hython smoke is not ready: NOT_FOUND.",
+      "next_action": "Resolve local tool health before using that optional runner.",
+      "severity": "WARNING"
+    },
+    {
+      "code": "LOCAL_RUNNER_NOT_READY",
+      "evidence": {
+        "readiness": "CONFIG_REQUIRED",
+        "runner_id": "comfyui_workflow_smoke"
+      },
+      "message": "ComfyUI workflow smoke is not ready: CONFIG_REQUIRED.",
+      "next_action": "Resolve local tool health before using that optional runner.",
+      "severity": "WARNING"
+    },
+    {
+      "code": "ADAPTERS_CONTRACT_ONLY",
+      "evidence": {
+        "adapters": [
+          "blender",
+          "after_effects",
+          "davinci",
+          "unreal",
+          "zbrush"
+        ]
+      },
+      "message": "Some optional adapters are contract-only and cannot execute from this pressure test.",
+      "next_action": "Use adapter-specific local proof PRs before claiming execution support.",
+      "severity": "INFO"
+    }
+  ],
+  "kind": "real_project_pressure_test_v1",
+  "mode": "public",
+  "next_actions": [
+    "Review duplicate groups manually before deleting or packaging anything.",
+    "Restore missing archive parts before extraction or production use.",
+    "Decide whether empty directories are intentional placeholders or stale clutter.",
+    "Fill missing texture maps before lookdev binding.",
+    "Resolve incomplete packs before shot planning.",
+    "Use adapter-specific local proof PRs before claiming execution support.",
+    "Create the shot workspace and bind the selected candidate assets.",
+    "Resolve Houdini hython smoke tool health before using that optional runner.",
+    "Resolve ComfyUI workflow smoke tool health before using that optional runner.",
+    "Keep final creative and production approval human-owned."
+  ],
+  "ok": true,
+  "outputs": {
+    "json": "reports/creative/pressure/real_project_pressure_test_v1.json",
+    "markdown": "reports/creative/pressure/real_project_pressure_test_v1.md"
+  },
+  "pipeline_steps": [
+    {
+      "id": "asset_scan",
+      "status": "COMPLETED",
+      "summary": {
+        "archive_warning_count": 1,
+        "duplicate_group_count": 2,
+        "empty_directory_count": 1,
+        "incomplete_texture_set_count": 1,
+        "likely_incomplete_pack_count": 1,
+        "total_assets": 23,
+        "total_size_bytes": 704
+      }
+    },
+    {
+      "id": "asset_search_probes",
+      "non_empty_probe_count": 7,
+      "probe_count": 7,
+      "status": "COMPLETED"
+    },
+    {
+      "id": "production_dashboard",
+      "recommended_cleanup_action_count": 5,
+      "status": "COMPLETED"
+    },
+    {
+      "id": "shot_planner",
+      "status": "COMPLETE",
+      "summary": {
+        "complete": true,
+        "missing_required_count": 0,
+        "optional_ready_count": 2,
+        "required_ready_count": 4,
+        "template": "energy_impact",
+        "template_label": "Energy Impact",
+        "total_candidate_count": 12
+      }
+    },
+    {
+      "id": "local_tool_health",
+      "status": "REPORT_LOADED"
+    },
+    {
+      "id": "optional_adapter_contracts",
+      "status": "REPORT_LOADED"
+    },
+    {
+      "id": "local_execution",
+      "status": "NOT_RUN_APPROVAL_REQUIRED"
+    }
+  ],
+  "pressure_status": "USABLE_WITH_MANUAL_REPAIR",
+  "read_only": true,
+  "ready_for_execution": false,
+  "ready_for_manual_shot_planning": true,
+  "regression_checks": [
+    {
+      "detail": "The scenario has at least one scanned asset.",
+      "id": "asset_scan_has_assets",
+      "passed": true
+    },
+    {
+      "detail": "All practical asset-search probes returned structured counts.",
+      "id": "search_probes_are_structured",
+      "passed": true
+    },
+    {
+      "detail": "The shot planner returned a report.",
+      "id": "shot_plan_generated",
+      "passed": true
+    },
+    {
+      "detail": "Required shot assets are present for the selected template.",
+      "id": "shot_plan_complete",
+      "passed": true
+    },
+    {
+      "detail": "Optional local runners are represented as approval-gated command templates.",
+      "id": "optional_runners_remain_approval_gated",
+      "passed": true
+    },
+    {
+      "detail": "The pressure test did not launch DCC tools or submit AI jobs.",
+      "id": "local_execution_not_performed",
+      "passed": true
+    }
+  ],
+  "safety": {
+    "archive_extraction": false,
+    "asset_mutation": false,
+    "dcc_or_ai_execution": false,
+    "duplicate_deletion": false,
+    "requires_separate_approval_for_optional_runners": true
+  },
+  "scenario": {
+    "asset_report_kind": "real_local_asset_library_scan_v1",
+    "asset_root": "<asset-root>",
+    "asset_root_name": "assets",
+    "id": "PROJECT_PRESSURE_ENERGY_IMPACT_FIXTURE",
+    "label": "Energy impact fixture pressure test",
+    "scenario_digest": "PRESSURE_4AEFEC158E85",
+    "shot_id": "SHOT_PRESSURE_ENERGY_IMPACT_FIXTURE",
+    "template": "energy_impact"
+  },
+  "schema_version": "seos_creative_pipeline_v3",
+  "search_probes": [
+    {
+      "id": "houdini_fx",
+      "items": [
+        {
+          "category": "houdini",
+          "content_sha256": "sha256:e8c673554ea9e8de6f87bee95675b1ffac0a1a38682b58b5a9986352016f1fd6",
+          "directory": "houdini",
+          "extension": ".hda",
+          "filename": "impact_fx.hda",
+          "id": "AST_CE37CBB9C76F",
+          "license": {
+            "commercial_use": "allowed_for_fixture_demo",
+            "commit_allowed": true,
+            "license_status": "public_fixture",
+            "notes": "Real asset licenses require human verification before publication."
+          },
+          "license_status": "unknown_private_by_default",
+          "likely_tool": "houdini",
+          "partial_sha256": "sha256:229efa36ccb2b9b1e6190ecf536c7b30f0dd9d5dda55cc72bebeedee03b03c20",
+          "public_asset": true,
+          "read_only": true,
+          "relative_path": "houdini/impact_fx.hda",
+          "schema_version": "seos_creative_pipeline_v3",
+          "size_bytes": 34
+        }
+      ],
+      "next_actions": [
+        "Review matched assets, verify licenses, and bind only approved assets to production plans."
+      ],
+      "purpose": "Find Houdini source assets for FX binding.",
+      "query": "houdini-fx-assets",
+      "result_count": 1,
+      "result_type": "assets",
+      "returned_count": 1
+    },
+    {
+      "id": "vdb_cache",
+      "items": [
+        {
+          "category": "vdb_cache",
+          "directory": "cache",
+          "extension": ".vdb",
+          "filename": "smoke.vdb",
+          "id": "AST_D47502EB0F96",
+          "license": {
+            "commercial_use": "allowed_for_fixture_demo",
+            "commit_allowed": true,
+            "license_status": "public_fixture",
+            "notes": "Real asset licenses require human verification before publication."
+          },
+          "license_status": "unknown_private_by_default",
+          "likely_tool": "generic_asset_library",
+          "partial_sha256": "sha256:43e378d11daa0484edab025ffcf5b0c8de3b8dc4476c4f622307fb3f90c58531",
+          "public_asset": true,
+          "read_only": true,
+          "relative_path": "cache/smoke.vdb",
+          "schema_version": "seos_creative_pipeline_v3",
+          "size_bytes": 30
+        }
+      ],
+      "next_actions": [
+        "Review matched assets, verify licenses, and bind only approved assets to production plans."
+      ],
+      "purpose": "Find VDB/cache assets for smoke, dust, or impact elements.",
+      "query": "vdb-cache-assets",
+      "result_count": 1,
+      "result_type": "assets",
+      "returned_count": 1
+    },
+    {
+      "id": "duplicate_media",
+      "items": [
+        {
+          "action": "human_review_only",
+          "asset_count": 2,
+          "asset_ids": [
+            "AST_872F1190DBFC",
+            "AST_A7B9B61D0F18"
+          ],
+          "confidence": "exact_size_and_sha256_match",
+          "content_sha256": "sha256:5df02625db66ebcfba6d94bd771ff4cad227da6a3b5a264c99a8e6dad215f086",
+          "deletion_performed": false,
+          "id": "DUP_81C6626C12C0",
+          "relative_paths": [
+            "media/plate_a.mkv",
+            "media/plate_b.mkv"
+          ],
+          "schema_version": "seos_creative_pipeline_v3",
+          "size_bytes": 32
+        }
+      ],
+      "next_actions": [
+        "Inspect duplicate groups manually before any cleanup; no deletion was performed."
+      ],
+      "purpose": "Expose duplicate video or audio groups before cleanup.",
+      "query": "duplicate-video-audio",
+      "result_count": 1,
+      "result_type": "duplicate_groups",
+      "returned_count": 1
+    },
+    {
+      "id": "incomplete_archives",
+      "items": [
+        {
+          "archive_group_id": "ARC_377C59D0B6ED",
+          "base_name": "fx_pack",
+          "missing_part_numbers": [
+            2
+          ],
+          "recommended_action": "Find the missing archive part before extraction or production use.",
+          "status": "ARCHIVE_PART_MISSING"
+        },
+        {
+          "asset_ids": [
+            "AST_8C32F5D08D7B",
+            "AST_26B1C6AD7660"
+          ],
+          "base_name": "fx_pack",
+          "id": "ARC_377C59D0B6ED",
+          "part_count": 2,
+          "part_numbers": [
+            1,
+            3
+          ],
+          "read_only": true,
+          "relative_paths": [
+            "archives/fx_pack.part1.rar",
+            "archives/fx_pack.part3.rar"
+          ],
+          "schema_version": "seos_creative_pipeline_v3",
+          "status": "ARCHIVE_PART_MISSING"
+        }
+      ],
+      "next_actions": [
+        "Restore missing archive parts before extraction or production use."
+      ],
+      "purpose": "Expose missing archive parts before extraction or shot use.",
+      "query": "incomplete-archives",
+      "result_count": 2,
+      "result_type": "archive_warnings",
+      "returned_count": 2
+    },
+    {
+      "id": "empty_directories",
+      "items": [
+        {
+          "id": "DIR_A6D9F9BB6B5C",
+          "recommended_action": "Review whether this folder is a useful placeholder or stale clutter.",
+          "relative_path": "empty/placeholder",
+          "status": "EMPTY_DIRECTORY"
+        }
+      ],
+      "next_actions": [
+        "Decide whether empty directories are intentional placeholders or stale clutter."
+      ],
+      "purpose": "Expose stale or placeholder folders before packaging.",
+      "query": "empty-directories",
+      "result_count": 1,
+      "result_type": "empty_directories",
+      "returned_count": 1
+    },
+    {
+      "id": "incomplete_packs",
+      "items": [
+        {
+          "asset_count": 4,
+          "asset_ids": [
+            "AST_9FACF321F5EE",
+            "AST_BF7C8A3BA876",
+            "AST_FFCB7B481BC6",
+            "AST_197ACA7641D1"
+          ],
+          "categories": [
+            "hdri",
+            "materials",
+            "textures"
+          ],
+          "directory": "lookdev",
+          "id": "PKG_213B9A19A40C",
+          "missing_components": [
+            "complete_texture_set"
+          ],
+          "recommended_action": "Review missing components before shot binding.",
+          "schema_version": "seos_creative_pipeline_v3",
+          "status": "LIKELY_INCOMPLETE_PACK"
+        }
+      ],
+      "next_actions": [
+        "Review incomplete packs before binding assets to shot plans."
+      ],
+      "purpose": "Expose model/material/texture packs that need repair.",
+      "query": "incomplete-packs",
+      "result_count": 1,
+      "result_type": "production_groups",
+      "returned_count": 1
+    },
+    {
+      "id": "missing_texture_sets",
+      "items": [
+        {
+          "asset_ids": [
+            "AST_BF7C8A3BA876",
+            "AST_FFCB7B481BC6"
+          ],
+          "base_name": "energy",
+          "directory": "lookdev",
+          "id": "TEX_575587F9205F",
+          "map_types": [
+            "base_color",
+            "normal"
+          ],
+          "missing_standard_maps": [
+            "roughness"
+          ],
+          "recommended_action": "Find or generate missing standard maps before final lookdev.",
+          "relative_paths": [
+            "lookdev/energy_BaseColor.png",
+            "lookdev/energy_Normal.png"
+          ],
+          "schema_version": "seos_creative_pipeline_v3",
+          "status": "LIKELY_TEXTURE_SET_INCOMPLETE"
+        }
+      ],
+      "next_actions": [
+        "Review missing texture maps before material/lookdev binding."
+      ],
+      "purpose": "Expose incomplete texture sets before lookdev.",
+      "query": "missing-texture-sets",
+      "result_count": 1,
+      "result_type": "texture_sets",
+      "returned_count": 1
+    }
+  ],
+  "shot_plan_summary": {
+    "complete": true,
+    "missing_required_count": 0,
+    "optional_ready_count": 2,
+    "required_ready_count": 4,
+    "template": "energy_impact",
+    "template_label": "Energy Impact",
+    "total_candidate_count": 12
+  },
+  "tool_health_summary": {
+    "available": true,
+    "comfyui": "CONFIG_REQUIRED",
+    "houdini": "NOT_FOUND"
+  }
+}

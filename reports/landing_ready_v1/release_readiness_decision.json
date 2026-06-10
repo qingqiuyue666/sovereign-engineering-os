@@ -1,0 +1,51 @@
+{
+  "blockers": [],
+  "created_at": "2026-05-29T20:26:44Z",
+  "evidence": {
+    "anti_bloat_gate": "governance/policy/anti_bloat_governance_gate_v1.json",
+    "clean_clone": "external local review artifact not committed: clean_clone_reproducibility_receipt.json",
+    "real_use_cases": "external local review artifact not committed: real_use_cases_summary.json",
+    "security_boundary": "README.md",
+    "test_quality_audit": "external local review artifact not committed: test_quality_audit.json"
+  },
+  "head": "0ebcb3255297033bfd9f4e1f4afed6fc4fb3ef93",
+  "item_7_allowed": true,
+  "passed": true,
+  "schema": "landing_ready_release_readiness_decision_v1",
+  "summary": {
+    "anti_bloat_gate_present": true,
+    "clean_clone_passed": true,
+    "official_release_ceremony_allowed": true,
+    "real_use_cases_passed": true,
+    "security_boundary_statement_present": true,
+    "test_quality_recommendation": "release_allowed_with_explicit_caveats"
+  },
+  "validation_commands": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/tracer_bullet",
+      "result": "passed"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s validation/tests/acceptance",
+      "result": "passed"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover tests",
+      "result": "passed"
+    },
+    {
+      "command": "make ci",
+      "result": "passed"
+    },
+    {
+      "command": "git diff --check",
+      "result": "passed"
+    },
+    {
+      "command": "git status --short",
+      "result": "passed"
+    }
+  ],
+  "validation_result": "passed",
+  "verdict": "RELEASE_ALLOWED"
+}

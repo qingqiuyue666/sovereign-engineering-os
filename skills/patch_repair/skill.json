@@ -1,0 +1,10 @@
+{
+  "commands": [
+    "python3 seos.py repair create examples/repair/schema_invalid_failure_bundle.json --json",
+    "python3 seos.py repair invoke <job_path> --json"
+  ],
+  "description": "Classify code-level failure bundles and create local patch repair jobs.",
+  "name": "patch_repair",
+  "runbook": "docs/runbooks/patch_repair_jobs.md",
+  "schema_version": "seos.skill.v1"
+}

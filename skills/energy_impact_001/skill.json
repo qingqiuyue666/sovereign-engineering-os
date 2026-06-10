@@ -1,0 +1,17 @@
+{
+  "commands": [
+    "python3 seos.py project create \"Energy Impact Project\" --runtime-root work/energy_impact_001/runtime --json",
+    "python3 seos.py shot create <project_id> energy_impact_001 --runtime-root work/energy_impact_001/runtime --json",
+    "python3 seos.py shot attach-workflow <shot_id> examples/shots/energy_impact_001/workflow.json --runtime-root work/energy_impact_001/runtime --json",
+    "python3 seos.py shot run <shot_id> --runtime-root work/energy_impact_001/runtime --json",
+    "python3 seos.py package shot <shot_id> --runtime-root work/energy_impact_001/runtime --package-root work/energy_impact_001/packages --json",
+    "python3 seos.py review create <shot_id> --runtime-root work/energy_impact_001/runtime --package-root work/energy_impact_001/packages --output-root work/energy_impact_001/review_artifacts --json"
+  ],
+  "description": "Run the concrete energy_impact_001 production-proof shot through local Houdini, ComfyUI, DaVinci, package, and review evidence.",
+  "name": "energy_impact_001",
+  "runbook": "docs/runbooks/energy_impact_001_real_shot.md",
+  "schema_version": "seos.skill.v1",
+  "workflow_examples": [
+    "examples/shots/energy_impact_001/workflow.json"
+  ]
+}

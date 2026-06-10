@@ -1,0 +1,248 @@
+{
+  "adapter_contract_summary": {
+    "after_effects": "CONFIG_REQUIRED",
+    "available": true,
+    "blender": "READY_FOR_MANUAL_DRY_RUN",
+    "davinci": "CONFIG_REQUIRED",
+    "unreal": "CONFIG_REQUIRED",
+    "zbrush": "ENV_NOT_FOUND"
+  },
+  "asset_report_kind": "real_local_asset_library_scan_v1",
+  "complete": true,
+  "destructive_actions_performed": false,
+  "execution_plan": {
+    "manual_steps": [
+      "Choose the plate and lock frame range.",
+      "Bind the Houdini/VDB effect source to the shot workspace.",
+      "Assign lookdev maps and HDRI reference.",
+      "Create comp handoff notes and editorial delivery checklist."
+    ],
+    "optional_runner_steps": [
+      {
+        "command_template": "python3 seos.py creative houdini-smoke --approve-local-execution --approval-id APPROVAL_ID",
+        "label": "Houdini hython smoke",
+        "purpose": "Verify local hython before any Houdini render/sim work.",
+        "readiness": "NOT_FOUND",
+        "requires_approval": true,
+        "runner_id": "houdini_hython_smoke",
+        "tool_status": "NOT_FOUND"
+      },
+      {
+        "command_template": "python3 seos.py creative comfyui-smoke --approve-local-execution --approval-id APPROVAL_ID",
+        "label": "ComfyUI workflow smoke",
+        "purpose": "Verify local ComfyUI service before any AI repair/generation work.",
+        "readiness": "CONFIG_REQUIRED",
+        "requires_approval": true,
+        "runner_id": "comfyui_workflow_smoke",
+        "tool_status": "CONFIG_REQUIRED"
+      }
+    ],
+    "requires_human_approval_before_execution": true
+  },
+  "kind": "shot_plan_v1",
+  "mode": "public",
+  "next_actions": [
+    "Create the shot workspace and bind the selected candidate assets.",
+    "Resolve Houdini hython smoke tool health before using that optional runner.",
+    "Resolve ComfyUI workflow smoke tool health before using that optional runner.",
+    "Keep final creative approval human-owned."
+  ],
+  "ok": true,
+  "optional_assets": [
+    {
+      "candidates": [
+        {
+          "category": "audio",
+          "filename": "hit.wav",
+          "id": "AST_A62D8B3A5B49",
+          "likely_tool": "generic_asset_library",
+          "relative_path": "audio/hit.wav",
+          "size_bytes": 26
+        }
+      ],
+      "categories": [
+        "audio"
+      ],
+      "id": "audio",
+      "label": "impact sound",
+      "min_count": 1,
+      "required": false,
+      "status": "READY"
+    },
+    {
+      "candidates": [
+        {
+          "category": "comfyui",
+          "filename": "demo_workflow.json",
+          "id": "AST_36B876783174",
+          "likely_tool": "comfyui",
+          "relative_path": "comfyui/demo_workflow.json",
+          "size_bytes": 13
+        }
+      ],
+      "categories": [
+        "comfyui"
+      ],
+      "id": "ai_repair",
+      "label": "ComfyUI repair workflow",
+      "min_count": 1,
+      "required": false,
+      "status": "READY"
+    }
+  ],
+  "read_only": true,
+  "required_assets": [
+    {
+      "candidates": [
+        {
+          "category": "video",
+          "filename": "plate_a.mkv",
+          "id": "AST_872F1190DBFC",
+          "likely_tool": "generic_asset_library",
+          "relative_path": "media/plate_a.mkv",
+          "size_bytes": 32
+        },
+        {
+          "category": "video",
+          "filename": "plate_b.mkv",
+          "id": "AST_A7B9B61D0F18",
+          "likely_tool": "generic_asset_library",
+          "relative_path": "media/plate_b.mkv",
+          "size_bytes": 32
+        }
+      ],
+      "categories": [
+        "video"
+      ],
+      "id": "plate",
+      "label": "source plate",
+      "min_count": 1,
+      "required": true,
+      "status": "READY"
+    },
+    {
+      "candidates": [
+        {
+          "category": "vdb_cache",
+          "filename": "smoke.vdb",
+          "id": "AST_D47502EB0F96",
+          "likely_tool": "generic_asset_library",
+          "relative_path": "cache/smoke.vdb",
+          "size_bytes": 30
+        },
+        {
+          "category": "houdini",
+          "filename": "impact_fx.hda",
+          "id": "AST_CE37CBB9C76F",
+          "likely_tool": "houdini",
+          "relative_path": "houdini/impact_fx.hda",
+          "size_bytes": 34
+        }
+      ],
+      "categories": [
+        "houdini",
+        "vdb_cache"
+      ],
+      "id": "fx_source",
+      "label": "Houdini or VDB effect source",
+      "min_count": 1,
+      "required": true,
+      "status": "READY"
+    },
+    {
+      "candidates": [
+        {
+          "category": "materials",
+          "filename": "energy.mtlx",
+          "id": "AST_9FACF321F5EE",
+          "likely_tool": "generic_asset_library",
+          "relative_path": "lookdev/energy.mtlx",
+          "size_bytes": 14
+        },
+        {
+          "category": "textures",
+          "filename": "energy_BaseColor.png",
+          "id": "AST_BF7C8A3BA876",
+          "likely_tool": "generic_asset_library",
+          "relative_path": "lookdev/energy_BaseColor.png",
+          "size_bytes": 38
+        },
+        {
+          "category": "textures",
+          "filename": "energy_Normal.png",
+          "id": "AST_FFCB7B481BC6",
+          "likely_tool": "generic_asset_library",
+          "relative_path": "lookdev/energy_Normal.png",
+          "size_bytes": 34
+        },
+        {
+          "category": "hdri",
+          "filename": "studio.hdr",
+          "id": "AST_197ACA7641D1",
+          "likely_tool": "generic_asset_library",
+          "relative_path": "lookdev/studio.hdr",
+          "size_bytes": 25
+        }
+      ],
+      "categories": [
+        "materials",
+        "textures",
+        "hdri"
+      ],
+      "id": "lookdev",
+      "label": "material or texture lookdev",
+      "min_count": 2,
+      "required": true,
+      "status": "READY"
+    },
+    {
+      "candidates": [
+        {
+          "category": "after_effects",
+          "filename": "demo_comp.aep",
+          "id": "AST_B0E87487CAE1",
+          "likely_tool": "after_effects",
+          "relative_path": "after_effects/demo_comp.aep",
+          "size_bytes": 39
+        },
+        {
+          "category": "davinci",
+          "filename": "demo_grade.drp",
+          "id": "AST_F4E039CC337A",
+          "likely_tool": "davinci",
+          "relative_path": "davinci/demo_grade.drp",
+          "size_bytes": 36
+        }
+      ],
+      "categories": [
+        "after_effects",
+        "davinci"
+      ],
+      "id": "comp",
+      "label": "comp or finishing surface",
+      "min_count": 1,
+      "required": true,
+      "status": "READY"
+    }
+  ],
+  "schema_version": "seos_creative_pipeline_v3",
+  "shot_id": "SHOT_ENERGY_IMPACT_FIXTURE",
+  "summary": {
+    "missing_required_count": 0,
+    "optional_ready_count": 2,
+    "required_ready_count": 4,
+    "template": "energy_impact",
+    "template_label": "Energy Impact",
+    "total_candidate_count": 12
+  },
+  "template": {
+    "label": "Energy Impact",
+    "name": "energy_impact",
+    "summary": "A practical VFX impact shot with plate, Houdini/cache, lookdev, comp, and editorial handoff."
+  },
+  "tool_health_summary": {
+    "available": true,
+    "comfyui": "CONFIG_REQUIRED",
+    "houdini": "NOT_FOUND"
+  }
+}

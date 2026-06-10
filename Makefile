@@ -1,4 +1,4 @@
-.PHONY: ci test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-real-runtime-provider-transport-execution test-production-autonomy-final-gate test-runtime-sealed-receipt test-generic-payload-shadow test-protected-evidence-storage test-protected-evidence-storage-implementation test-real-hmac-policy-realization test-real-merkle-proof-realization test-generic-payload-full-enforcement test-schemas test-tracer-bullet test-acceptance diff-check health
+.PHONY: ci test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-real-runtime-provider-transport-execution test-production-autonomy-final-gate test-runtime-sealed-receipt test-generic-payload-shadow test-protected-evidence-storage test-protected-evidence-storage-implementation test-real-hmac-policy-realization test-real-merkle-proof-realization test-generic-payload-full-enforcement test-schemas test-tracer-bullet test-acceptance diff-check health local-bootstrap local-smoke local-stop local-reset identity-check public-grade-check execution-permit-check test-execution-permit controlled-executor-smoke test-controlled-executor creative-real-execution-evidence-check
 .PHONY: test-runtime-execution-descriptor test-dry-run-orchestrator test-runtime-integration-trace test-completion-audit test-runtime-integration-hardening
 .PHONY: test-security-classification test-secret-scanner test-environment-sanitizer test-anti-exfiltration-gate test-ai-context-firewall test-repository-hygiene test-leak-prevention-foundation
 .PHONY: test-wal-integrity-guard test-taint-propagation test-artifact-provenance test-wal-integrity-contract test-capability-token-policy test-security-truth-substrate
@@ -17,12 +17,249 @@
 .PHONY: test-source-reliability test-osint-task-contract test-macro-regime-contract test-asset-mapping-contract test-domain-pipeline-contracts
 .PHONY: test-dashboard-model test-run-summary-model test-security-status-model test-dashboard-contracts
 .PHONY: test-v12-foundation-progress-audit test-v12-foundation
+.PHONY: installability-check test-installability package-build-smoke clean-clone-smoke install-smoke contract-check claim-to-evidence-check test-contracts test-claim-to-evidence failure-path-smoke adversarial-smoke test-failure-path-hardening test-adversarial security-control-check security-check supply-chain-check secret-context-safety-check release-invariant-check test-security-control-matrix test-supply-chain-integrity test-secret-context-safety test-release-invariant ai-admission-check test-ai-provider-admission-safety dogfood-evidence-check dogfood-check test-dogfood-evidence reliability-benchmark schema-compatibility-check test-schema-compatibility-policy test-operational-stability external-audit-check test-external-audit-packet independent-verification-check test-independent-verification-execution red-team-check test-red-team-execution findings-check test-findings-register operation-evidence-check test-real-world-operation-evidence-program global-signoff-dossier-check test-global-signoff-dossier external-verification-program-check smoke verify final-audit-check
 
 PYTHON ?= python3
+
+local-bootstrap:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) tools/local_runtime_setup.py bootstrap . --apply
+
+local-smoke:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) tools/local_runtime_setup.py smoke . --apply
+
+local-stop:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) tools/local_runtime_setup.py stop . --apply
+
+local-reset:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) tools/local_runtime_setup.py reset . --apply
 
 ci: health
 
 health: test-root-integrity test-leak-prevention-foundation test-security-truth-substrate test-operator-task-ledger test-operator-cli test-runtime-runner-event-journal test-failurebundle-replay-foundation test-evidence-vault-boundary-foundation test-provider-execution-plane-boundary test-runtime-integration-hardening test-v12-foundation test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-real-runtime-provider-transport-execution test-production-autonomy-final-gate test-runtime-sealed-receipt test-generic-payload-shadow test-protected-evidence-storage test-protected-evidence-storage-implementation test-real-hmac-policy-realization test-real-merkle-proof-realization test-generic-payload-full-enforcement test-schemas test-tracer-bullet test-acceptance diff-check
+
+identity-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/identity_boundary_check_v1.py
+
+public-grade-check: identity-check
+
+installability-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/installability_check_v1.py
+
+test-installability:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_installability_v1 -v
+
+package-build-smoke:
+	bash scripts/package_build_smoke_v1.sh
+
+clean-clone-smoke:
+	bash scripts/clean_clone_observation_smoke_v1.sh
+
+install-smoke:
+	bash scripts/fresh_venv_install_smoke_v1.sh
+
+contract-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/contract_check_v1.py
+
+claim-to-evidence-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/claim_to_evidence_check_v1.py
+
+test-contracts:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_contracts_v1 -v
+
+test-claim-to-evidence:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_claim_to_evidence_matrix_v1 -v
+
+failure-path-smoke:
+	bash scripts/failure_path_smoke_v1.sh
+
+adversarial-smoke:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/adversarial_smoke_v1.py
+
+test-failure-path-hardening:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_failure_path_hardening_v1 -v
+
+test-adversarial:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest discover -s tests/adversarial -v
+
+security-control-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/security_control_check_v1.py
+
+security-check: security-control-check
+
+supply-chain-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/supply_chain_check_v1.py
+
+secret-context-safety-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/secret_context_safety_check_v1.py
+
+release-invariant-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/release_invariant_check_v1.py
+
+test-security-control-matrix:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_security_control_matrix_v1 -v
+
+test-supply-chain-integrity:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_supply_chain_integrity_v1 -v
+
+test-secret-context-safety:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_secret_context_safety_v1 -v
+
+test-release-invariant:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_release_invariant_v1 -v
+
+ai-admission-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/ai_admission_check_v1.py
+
+test-ai-provider-admission-safety:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_ai_provider_admission_safety_v1 -v
+
+dogfood-evidence-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/dogfood_evidence_check_v1.py
+
+dogfood-check: dogfood-evidence-check
+
+test-dogfood-evidence:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_dogfood_evidence_v1 -v
+
+reliability-benchmark:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/reliability_benchmark_v1.py
+
+schema-compatibility-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/schema_compatibility_check_v1.py
+
+test-schema-compatibility-policy:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_schema_compatibility_policy_v1 -v
+
+test-operational-stability:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_operational_stability_v1 -v
+
+external-audit-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/external_audit_packet_check_v1.py
+
+test-external-audit-packet:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_external_audit_packet_v1 -v
+
+independent-verification-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/independent_verification_report_check_v1.py
+
+test-independent-verification-execution:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_independent_verification_execution_v1 -v
+
+red-team-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/red_team_report_check_v1.py
+
+test-red-team-execution:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.adversarial.test_red_team_execution_v1 -v
+
+findings-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/findings_register_check_v1.py
+
+test-findings-register:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_findings_register_v1 -v
+
+operation-evidence-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/real_world_operation_evidence_check_v1.py
+
+test-real-world-operation-evidence-program:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_real_world_operation_evidence_program_v1 -v
+
+global-signoff-dossier-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/global_signoff_dossier_check_v1.py
+
+test-global-signoff-dossier:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_global_signoff_dossier_v1 -v
+
+external-verification-program-check: external-audit-check independent-verification-check red-team-check findings-check operation-evidence-check global-signoff-dossier-check
+
+smoke: public-grade-check installability-check package-build-smoke test-installability contract-check claim-to-evidence-check test-contracts test-claim-to-evidence failure-path-smoke adversarial-smoke test-failure-path-hardening test-adversarial security-control-check security-check supply-chain-check secret-context-safety-check release-invariant-check test-security-control-matrix test-supply-chain-integrity test-secret-context-safety test-release-invariant ai-admission-check test-ai-provider-admission-safety dogfood-evidence-check dogfood-check test-dogfood-evidence reliability-benchmark schema-compatibility-check test-schema-compatibility-policy test-operational-stability external-audit-check test-external-audit-packet
+
+verify: smoke
+
+final-audit-check: verify external-audit-check test-external-audit-packet independent-verification-check test-independent-verification-execution red-team-check test-red-team-execution findings-check test-findings-register operation-evidence-check test-real-world-operation-evidence-program global-signoff-dossier-check test-global-signoff-dossier external-verification-program-check
+
+.PHONY: creative-check creative-doctor creative-asset-scan-check creative-real-asset-scanner-check creative-asset-search-check creative-production-dashboard-check creative-tool-health-dashboard-check creative-houdini-runner-check creative-comfyui-runner-check creative-optional-adapter-contracts-check creative-shot-planner-check creative-real-project-pressure-test-check creative-production-hardening-check creative-real-works-operation-check creative-archive-check creative-dashboard-build creative-public-release-check creative-total-check
+
+creative-check: creative-total-check
+
+creative-doctor:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/creative_doctor_v3.py
+
+creative-asset-scan-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/creative_asset_scan_v3.py
+
+creative-real-asset-scanner-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest discover -s tests/creative -p 'test_real_local_asset_scanner_v1.py' -v
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/creative_asset_scan_v3.py --mode public
+
+creative-asset-search-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest discover -s tests/creative -p 'test_asset_search_cli_v1.py' -v
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) seos.py creative search-assets --registry-json reports/creative/assets/asset_library_report_v1.json --query missing-texture-sets
+
+creative-production-dashboard-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest discover -s tests/creative -p 'test_local_production_dashboard_v1.py' -v
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) seos.py creative production-dashboard --registry-json reports/creative/assets/asset_library_report_v1.json --output-md reports/creative/assets/local_production_dashboard_v1.md --output-html reports/creative/assets/local_production_dashboard_v1.html
+
+creative-tool-health-dashboard-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest discover -s tests/creative -p 'test_local_tool_health_dashboard_v1.py' -v
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) seos.py creative tool-health-dashboard --mode public --doctor-json tests/fixtures/creative/software_discovery/local_tool_health_doctor_fixture_v1.json --output-json reports/creative/tool_health/local_tool_health_dashboard_v1.json --output-md reports/creative/tool_health/local_tool_health_dashboard_v1.md --output-html reports/creative/tool_health/local_tool_health_dashboard_v1.html
+
+creative-houdini-runner-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest discover -s tests/creative -p 'test_houdini_local_runner_v1.py' -v
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/creative_houdini_hython_smoke_v1.py --hython tests/fixtures/creative/software_discovery/missing_hython --output-root work/creative_runs/houdini_unavailable --observed-at 2026-06-08T00:00:00Z --result-json reports/creative/houdini/hython_smoke_unavailable_v1.json --materialization-json reports/creative/houdini/hython_smoke_materialization_v1.json
+
+creative-comfyui-runner-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest discover -s tests/creative -p 'test_comfyui_local_runner_v1.py' -v
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/creative_comfyui_workflow_smoke_v1.py --workflow-json tests/fixtures/creative/comfyui/api_workflow_fixture_v1.json --output-root work/creative_runs/comfyui_service_unavailable --observed-at 2026-06-08T00:00:00Z --fixture-service-unavailable --result-json reports/creative/comfyui/comfyui_smoke_service_unavailable_v1.json --materialization-json reports/creative/comfyui/comfyui_smoke_materialization_v1.json
+
+creative-optional-adapter-contracts-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest discover -s tests/creative -p 'test_optional_adapter_contracts_v1.py' -v
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) seos.py creative optional-adapter-contracts --mode public --doctor-json tests/fixtures/creative/software_discovery/local_tool_health_doctor_fixture_v1.json --output-json reports/creative/adapters/optional_adapter_contracts_v1.json --output-md reports/creative/adapters/optional_adapter_contracts_v1.md
+
+creative-shot-planner-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest discover -s tests/creative -p 'test_shot_planner_v1.py' -v
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) seos.py creative shot plan --template energy-impact --shot-id SHOT_ENERGY_IMPACT_FIXTURE --registry-json reports/creative/assets/asset_library_report_v1.json --tool-health-json tests/fixtures/creative/software_discovery/local_tool_health_doctor_fixture_v1.json --adapter-contracts-json reports/creative/adapters/optional_adapter_contracts_v1.json --output-json reports/creative/shots/shot_plan_energy_impact_v1.json --output-md reports/creative/shots/shot_plan_energy_impact_v1.md
+
+creative-real-project-pressure-test-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest discover -s tests/creative -p 'test_real_project_pressure_test_v1.py' -v
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) seos.py creative pressure-test --root tests/fixtures/creative/assets --template energy-impact --shot-id SHOT_PRESSURE_ENERGY_IMPACT_FIXTURE --tool-health-json tests/fixtures/creative/software_discovery/local_tool_health_doctor_fixture_v1.json --adapter-contracts-json reports/creative/adapters/optional_adapter_contracts_v1.json --output-json reports/creative/pressure/real_project_pressure_test_v1.json --output-md reports/creative/pressure/real_project_pressure_test_v1.md
+
+creative-production-hardening-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest discover -s tests/creative -p 'test_production_hardening_v1.py' -v
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) seos.py creative hardening-plan --pressure-json reports/creative/pressure/real_project_pressure_test_v1.json --output-json reports/creative/hardening/production_hardening_plan_v1.json --output-md reports/creative/hardening/production_hardening_plan_v1.md
+
+creative-real-works-operation-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest discover -s tests/creative -p 'test_real_works_operation_v1.py' -v
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) seos.py creative works-operation --registry-json reports/creative/assets/asset_library_report_v1.json --tool-health-json tests/fixtures/creative/software_discovery/local_tool_health_doctor_fixture_v1.json --adapter-contracts-json reports/creative/adapters/optional_adapter_contracts_v1.json --pressure-json reports/creative/pressure/real_project_pressure_test_v1.json --hardening-json reports/creative/hardening/production_hardening_plan_v1.json --output-json reports/creative/operation/real_works_operation_v1.json --output-md reports/creative/operation/real_works_operation_v1.md
+
+creative-archive-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/creative_archive_check_v3.py
+
+creative-dashboard-build:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/creative_dashboard_build_v3.py
+
+creative-public-release-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/creative_public_release_check_v3.py
+
+creative-total-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/creative_total_check_v3.py
+
+execution-permit-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/execution_permit_check_v1.py
+
+test-execution-permit:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_execution_permit_v1 -v
+
+controlled-executor-smoke:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/controlled_executor_smoke_v1.py
+
+test-controlled-executor:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_controlled_process_runner_v1 -v
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_fake_dcc_adapter_v1 -v
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_execution_evidence_integration_v1 -v
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_houdini_adapter_contract_v1 -v
+
+creative-real-execution-evidence-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/creative_real_execution_evidence_check_v1.py
 
 test-root-integrity:
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_root_integrity_verifier -v

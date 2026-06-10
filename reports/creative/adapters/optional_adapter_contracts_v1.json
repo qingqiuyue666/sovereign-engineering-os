@@ -1,0 +1,348 @@
+{
+  "adapters": [
+    {
+      "adapter": "blender",
+      "allowed_actions": [
+        "detect_local_configuration",
+        "validate_environment_metadata",
+        "build_dry_run_plan",
+        "build_manual_handoff_checklist",
+        "collect_digest_only_evidence",
+        "write_contract_report"
+      ],
+      "contract_status": "READY_FOR_MANUAL_DRY_RUN",
+      "current_level": "LEVEL_2_SMOKE_TEST",
+      "disallowed_actions": [
+        "launch_dcc_application",
+        "submit_render_or_generation_job",
+        "mutate_project_file",
+        "install_plugins_or_models",
+        "checkout_license_by_default",
+        "use_external_network",
+        "claim_live_execution_without_runner_evidence"
+      ],
+      "discovery": {
+        "configured_path": "<local-path:Blender.app>",
+        "status": "FOUND_BUT_REQUIRES_USER_LAUNCH",
+        "version": ""
+      },
+      "execution_support": "CONTRACT_ONLY",
+      "existing_artifacts": [
+        {
+          "exists": true,
+          "path": "creative/adapters/blender/adapter.py",
+          "role": "contract_or_manifest"
+        },
+        {
+          "exists": true,
+          "path": "creative/adapters/blender/background_runner.py",
+          "role": "contract_or_manifest"
+        },
+        {
+          "exists": true,
+          "path": "creative/adapters/blender/preview_render.py",
+          "role": "contract_or_manifest"
+        },
+        {
+          "exists": true,
+          "path": "creative/adapters/blender/asset_check.py",
+          "role": "contract_or_manifest"
+        }
+      ],
+      "label": "Blender",
+      "next_local_proof": "fixed blender --background smoke script that writes version and scene summary JSON",
+      "required_operator_inputs": [
+        "blender executable path",
+        "blend file or generated fixture scene",
+        "output root"
+      ],
+      "risk_notes": [
+        "addon side effects",
+        "GPU/headless instability",
+        "long render runtime"
+      ],
+      "summary": "Background Python smoke and staged preview contracts only.",
+      "supports_execute": false
+    },
+    {
+      "adapter": "after_effects",
+      "allowed_actions": [
+        "detect_local_configuration",
+        "validate_environment_metadata",
+        "build_dry_run_plan",
+        "build_manual_handoff_checklist",
+        "collect_digest_only_evidence",
+        "write_contract_report"
+      ],
+      "contract_status": "CONFIG_REQUIRED",
+      "current_level": "LEVEL_1_DRY_RUN",
+      "disallowed_actions": [
+        "launch_dcc_application",
+        "submit_render_or_generation_job",
+        "mutate_project_file",
+        "install_plugins_or_models",
+        "checkout_license_by_default",
+        "use_external_network",
+        "claim_live_execution_without_runner_evidence"
+      ],
+      "discovery": {
+        "configured_path": "",
+        "status": "CONFIG_REQUIRED",
+        "version": ""
+      },
+      "execution_support": "CONTRACT_ONLY",
+      "existing_artifacts": [
+        {
+          "exists": true,
+          "path": "creative/adapters/after_effects/adapter.py",
+          "role": "contract_or_manifest"
+        },
+        {
+          "exists": true,
+          "path": "creative/adapters/after_effects/aerender_contract.py",
+          "role": "contract_or_manifest"
+        },
+        {
+          "exists": true,
+          "path": "creative/adapters/after_effects/jsx_contract.py",
+          "role": "contract_or_manifest"
+        },
+        {
+          "exists": true,
+          "path": "creative/adapters/after_effects/plugin_dependency_check.py",
+          "role": "contract_or_manifest"
+        }
+      ],
+      "label": "After Effects",
+      "next_local_proof": "fixed aerender or app-version smoke with no arbitrary JSX and no project mutation",
+      "required_operator_inputs": [
+        "After Effects app path",
+        "approved fixture project",
+        "output root"
+      ],
+      "risk_notes": [
+        "GUI launch side effects",
+        "plugin licensing",
+        "project/plugin compatibility"
+      ],
+      "summary": "Aerender and JSX contract planning only.",
+      "supports_execute": false
+    },
+    {
+      "adapter": "davinci",
+      "allowed_actions": [
+        "detect_local_configuration",
+        "validate_environment_metadata",
+        "build_dry_run_plan",
+        "build_manual_handoff_checklist",
+        "collect_digest_only_evidence",
+        "write_contract_report"
+      ],
+      "contract_status": "CONFIG_REQUIRED",
+      "current_level": "LEVEL_1_DRY_RUN",
+      "disallowed_actions": [
+        "launch_dcc_application",
+        "submit_render_or_generation_job",
+        "mutate_project_file",
+        "install_plugins_or_models",
+        "checkout_license_by_default",
+        "use_external_network",
+        "claim_live_execution_without_runner_evidence"
+      ],
+      "discovery": {
+        "configured_path": "",
+        "status": "CONFIG_REQUIRED",
+        "version": ""
+      },
+      "execution_support": "CONTRACT_ONLY",
+      "existing_artifacts": [
+        {
+          "exists": true,
+          "path": "creative/adapters/davinci/adapter.py",
+          "role": "contract_or_manifest"
+        },
+        {
+          "exists": true,
+          "path": "creative/adapters/davinci/scripting_contract.py",
+          "role": "contract_or_manifest"
+        },
+        {
+          "exists": true,
+          "path": "creative/adapters/davinci/project_manifest.py",
+          "role": "contract_or_manifest"
+        },
+        {
+          "exists": true,
+          "path": "creative/adapters/davinci/render_job_manifest.py",
+          "role": "contract_or_manifest"
+        }
+      ],
+      "label": "DaVinci Resolve",
+      "next_local_proof": "read-only Resolve scripting smoke that reports version and project access without rendering",
+      "required_operator_inputs": [
+        "Resolve scripting availability",
+        "project or timeline manifest",
+        "delivery output root"
+      ],
+      "risk_notes": [
+        "GUI session dependence",
+        "project database mutation",
+        "codec/license availability"
+      ],
+      "summary": "Scripting and render-job manifest contracts only.",
+      "supports_execute": false
+    },
+    {
+      "adapter": "unreal",
+      "allowed_actions": [
+        "detect_local_configuration",
+        "validate_environment_metadata",
+        "build_dry_run_plan",
+        "build_manual_handoff_checklist",
+        "collect_digest_only_evidence",
+        "write_contract_report"
+      ],
+      "contract_status": "CONFIG_REQUIRED",
+      "current_level": "LEVEL_1_DRY_RUN",
+      "disallowed_actions": [
+        "launch_dcc_application",
+        "submit_render_or_generation_job",
+        "mutate_project_file",
+        "install_plugins_or_models",
+        "checkout_license_by_default",
+        "use_external_network",
+        "claim_live_execution_without_runner_evidence"
+      ],
+      "discovery": {
+        "configured_path": "",
+        "status": "CONFIG_REQUIRED",
+        "version": ""
+      },
+      "execution_support": "CONTRACT_ONLY",
+      "existing_artifacts": [
+        {
+          "exists": true,
+          "path": "creative/adapters/unreal/adapter.py",
+          "role": "contract_or_manifest"
+        },
+        {
+          "exists": true,
+          "path": "creative/adapters/unreal/commandlet_contract.py",
+          "role": "contract_or_manifest"
+        },
+        {
+          "exists": true,
+          "path": "creative/adapters/unreal/mrq_manifest.py",
+          "role": "contract_or_manifest"
+        },
+        {
+          "exists": true,
+          "path": "creative/adapters/unreal/sequencer_manifest.py",
+          "role": "contract_or_manifest"
+        }
+      ],
+      "label": "Unreal Engine",
+      "next_local_proof": "fixed UnrealEditor commandlet help/version smoke with no project save",
+      "required_operator_inputs": [
+        "UnrealEditor path",
+        "uproject path",
+        "map or sequence identifier",
+        "output root"
+      ],
+      "risk_notes": [
+        "project upgrade prompts",
+        "shader compilation runtime",
+        "plugin/license mismatch"
+      ],
+      "summary": "Commandlet, Sequencer, and MRQ manifest contracts only.",
+      "supports_execute": false
+    },
+    {
+      "adapter": "zbrush",
+      "allowed_actions": [
+        "detect_local_configuration",
+        "validate_environment_metadata",
+        "build_dry_run_plan",
+        "build_manual_handoff_checklist",
+        "collect_digest_only_evidence",
+        "write_contract_report"
+      ],
+      "contract_status": "ENV_NOT_FOUND",
+      "current_level": "LEVEL_0_REGISTRY_ONLY",
+      "disallowed_actions": [
+        "launch_dcc_application",
+        "submit_render_or_generation_job",
+        "mutate_project_file",
+        "install_plugins_or_models",
+        "checkout_license_by_default",
+        "use_external_network",
+        "claim_live_execution_without_runner_evidence"
+      ],
+      "discovery": {
+        "configured_path": "",
+        "status": "NOT_FOUND",
+        "version": ""
+      },
+      "execution_support": "CONTRACT_ONLY",
+      "existing_artifacts": [
+        {
+          "exists": true,
+          "path": "creative/adapters/zbrush/adapter.py",
+          "role": "contract_or_manifest"
+        },
+        {
+          "exists": true,
+          "path": "creative/adapters/zbrush/sculpt_registry.py",
+          "role": "contract_or_manifest"
+        },
+        {
+          "exists": true,
+          "path": "creative/adapters/zbrush/export_manifest.py",
+          "role": "contract_or_manifest"
+        },
+        {
+          "exists": true,
+          "path": "creative/adapters/zbrush/handoff_checklist.py",
+          "role": "contract_or_manifest"
+        }
+      ],
+      "label": "ZBrush",
+      "next_local_proof": "manual export handoff verification; no default automated ZBrush runner",
+      "required_operator_inputs": [
+        "sculpt registry entry",
+        "export manifest",
+        "manual handoff checklist"
+      ],
+      "risk_notes": [
+        "limited stable headless automation",
+        "manual save/export risk",
+        "license/UI dependence"
+      ],
+      "summary": "Registry, export-manifest, and manual handoff contracts only.",
+      "supports_execute": false
+    }
+  ],
+  "dcc_or_ai_tools_launched": false,
+  "default_ci_requires_proprietary_tools": false,
+  "destructive_actions_performed": false,
+  "kind": "optional_adapter_contracts_v1",
+  "mode": "public",
+  "next_actions": [
+    "Blender: review contract and run only manual dry-run/handoff steps.",
+    "After Effects: configure local path or scripting settings before any smoke runner.",
+    "DaVinci Resolve: configure local path or scripting settings before any smoke runner.",
+    "Unreal Engine: configure local path or scripting settings before any smoke runner.",
+    "ZBrush: install or expose the tool before adapter smoke work."
+  ],
+  "ok": true,
+  "read_only": true,
+  "schema_version": "seos_creative_pipeline_v3",
+  "summary": {
+    "adapter_count": 5,
+    "config_required_count": 3,
+    "contract_only_count": 0,
+    "env_not_found_count": 1,
+    "execution_supported_count": 0,
+    "ready_for_manual_dry_run_count": 1
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "dry_run_default": true,
+  "id": "TEMPLATE_AFTER_EFFECTS_TEMPLATE_MANIFEST",
+  "private_payload_required": false,
+  "schema_version": "seos_creative_pipeline_v3",
+  "template": "after_effects_template_manifest"
+}

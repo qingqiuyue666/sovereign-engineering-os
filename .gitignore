@@ -29,3 +29,27 @@ venv/
 .aider*
 .claude/
 outputs/
+
+# Creative Pipeline private/local runtime outputs
+work/
+staging/
+renders/
+comps/
+ComfyUI/input/
+ComfyUI/output/
+reports/creative/private/*.local.*
+*.blend
+*.hip
+*.hiplc
+*.ztl
+*.ztpr
+*.fbx
+*.obj
+*.vdb
+*.exr
+*.abc
+*.usd
+*.usdz
+*.rar
+*.7z
+*.zip

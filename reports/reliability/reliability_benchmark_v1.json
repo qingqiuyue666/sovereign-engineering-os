@@ -1,0 +1,91 @@
+{
+  "schema_version": "reliability_benchmark_v1",
+  "benchmark_id": "wave8_reliability_baseline_v1",
+  "benchmark_status": "repository_local_baseline",
+  "external_review_required": true,
+  "global_recognition_claimed": false,
+  "runtime_expansion_performed": false,
+  "network_accessed": false,
+  "secret_value_read": false,
+  "targets": {
+    "repeated_smoke_loop": 50,
+    "multi_task_batch": 20,
+    "multi_workspace_checks": 3,
+    "approval_reject_run_mixed_flow": 20,
+    "evidence_replay_batch_validation": 20,
+    "failure_path_batch_validation": 10
+  },
+  "results": {
+    "repeated_smoke_loop": {
+      "target": 50,
+      "completed": 50,
+      "failures": 0,
+      "mode": "repository_reference_smoke_loop"
+    },
+    "multi_task_batch": {
+      "target": 20,
+      "completed": 20,
+      "failures": 0,
+      "mode": "repository_evidence_reference_batch"
+    },
+    "multi_workspace_checks": {
+      "target": 3,
+      "completed": 3,
+      "failures": 0,
+      "mode": "temporary_workspace_manifest_round_trip",
+      "workspace_ids": [
+        "workspace_alpha",
+        "workspace_beta",
+        "workspace_gamma"
+      ]
+    },
+    "approval_reject_run_mixed_flow": {
+      "target": 20,
+      "completed": 20,
+      "failures": 0,
+      "counts": {
+        "approve": 11,
+        "reject": 4,
+        "run": 5
+      }
+    },
+    "evidence_replay_batch_validation": {
+      "target": 20,
+      "completed": 20,
+      "failures": 0,
+      "mode": "claim_matrix_evidence_digest_replay"
+    },
+    "failure_path_batch_validation": {
+      "target": 10,
+      "completed": 10,
+      "failures": 0,
+      "mode": "fail_closed_invalid_payload_batch"
+    }
+  },
+  "elapsed_time_recording": {
+    "recording_mode": "runtime_stdout_and_committed_baseline",
+    "last_committed_elapsed_seconds": 0.005178,
+    "max_expected_seconds": 10.0,
+    "unit": "seconds",
+    "notes": "The script prints current elapsed_seconds on each run and validates this committed ceiling without rewriting tracked files."
+  },
+  "flake_rate_recording": {
+    "sample_count": 123,
+    "observed_flake_count": 0,
+    "observed_flake_rate": 0.0,
+    "calculation": "observed_flake_count / sample_count"
+  },
+  "validation_commands": [
+    "python3 scripts/reliability_benchmark_v1.py",
+    "python3 scripts/schema_compatibility_check_v1.py",
+    "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.tracer_bullet.test_schema_compatibility_policy_v1",
+    "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.tracer_bullet.test_operational_stability_v1",
+    "make verify",
+    "make ci"
+  ],
+  "limitations": [
+    "This is repository-local reliability evidence, not a live-service availability record.",
+    "Longer 30-90 day operating evidence remains a separate external-review input.",
+    "No runtime provider expansion, network access, or secret reading is performed."
+  ]
+}

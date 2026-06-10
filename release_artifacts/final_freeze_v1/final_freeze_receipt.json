@@ -1,0 +1,13 @@
+{
+  "bundle_version": "final_freeze_release_artifact_bundle_v1",
+  "repository": "qqyqqyqqy666-wq/sovereign-engineering-os",
+  "frozen_head": "e08823385c15be421d6d72819226e418786443e3",
+  "expected_head": "e08823385c15be421d6d72819226e418786443e3",
+  "timestamp_utc": "2026-05-29T16:58:17Z",
+  "final_landing_v1": "complete",
+  "post_529_hard_audit_completion": "complete",
+  "local_validation": "passed",
+  "tag_created": false,
+  "tag_pushed": false,
+  "artifact_published": false
+}

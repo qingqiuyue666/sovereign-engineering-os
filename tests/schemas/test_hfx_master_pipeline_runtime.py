@@ -33,6 +33,35 @@ MASTER_OUTPUTS = [
 ]
 
 
+def mutable_runtime_outputs():
+    outputs = [
+        HOUDINI_ROOT / layer_name / "GLOBAL_SEAL_VALIDATION.json"
+        for layer_name in LAYER_NAMES
+    ]
+    outputs.extend(
+        HOUDINI_ROOT / "hfx_master_pipeline_seal" / file_name
+        for file_name in MASTER_OUTPUTS
+    )
+    return outputs
+
+
+def snapshot_outputs(paths):
+    snapshot = {}
+    for path in paths:
+        snapshot[path] = path.read_bytes() if path.exists() else None
+    return snapshot
+
+
+def restore_outputs(snapshot):
+    for path, payload in snapshot.items():
+        if payload is None:
+            if path.exists():
+                path.unlink()
+            continue
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(payload)
+
+
 def read_json(path):
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -62,6 +91,12 @@ def run_master_validator():
 
 
 class HFXMasterPipelineRuntimeTests(unittest.TestCase):
+    def setUp(self):
+        self._output_snapshot = snapshot_outputs(mutable_runtime_outputs())
+
+    def tearDown(self):
+        restore_outputs(self._output_snapshot)
+
     def test_all_twelve_layer_directories_exist(self):
         for layer_name in LAYER_NAMES:
             with self.subTest(layer=layer_name):

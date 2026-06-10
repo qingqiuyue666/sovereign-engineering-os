@@ -1,0 +1,57 @@
+{
+  "active_development_allowed": false,
+  "allowed_change_classes": [
+    "blocker fix supported by hard real operation evidence",
+    "minimal documentation correction for a recorded security boundary wording error",
+    "minimal deterministic test or validation correction for a recorded observation blocker"
+  ],
+  "current_verdict": "NO_HARD_EVIDENCE_BLOCKER_RECORDED",
+  "forbidden_change_classes": [
+    "feature expansion",
+    "item 28+ continuation",
+    "new runtime modules",
+    "speculative V2/V3 planning",
+    "multi-agent expansion",
+    "cloud-first dependency",
+    "OS sandbox misrepresentation",
+    "RPA or computer-control repositioning",
+    "public release publishing",
+    "tag movement or deletion",
+    "speculative top-tier expansion"
+  ],
+  "hard_evidence_blocker_types": [
+    "clean clone breakage",
+    "CLI fatal bug",
+    "evidence trace failure",
+    "replay failure",
+    "receipt corruption",
+    "release, tag, or draft metadata inconsistency",
+    "security boundary wording error",
+    "token or context budget gate failure",
+    "real use case blocker",
+    "operator runbook cannot complete minimal use",
+    "AI worker bypasses approval boundary"
+  ],
+  "main_head": "9a363f95b85602ffc598db463dc6181a9bbbdf3c",
+  "mode": "real_operation_observation",
+  "observation_period_id": "REAL_OPERATION_OBSERVATION_PERIOD_V1",
+  "observations": [
+    {
+      "allowed_action": "no action",
+      "date": "observation start",
+      "evidence": "No hard evidence blocker is currently recorded at observation start.",
+      "result": "Observation mode active.",
+      "severity": "none",
+      "task_or_use_case": "Enter 30-day real operation observation"
+    }
+  ],
+  "release_candidate_tag": "v0.1.0-rc3",
+  "schema_version": "real_operation_observation_log_v1",
+  "start_state": [
+    "LANDING_READY_NO_FURTHER_STAGE_REQUIRED",
+    "MAIN_MERGED",
+    "POST_MERGE_VALIDATED",
+    "FINAL_RC_TAGGED",
+    "DRAFT_RELEASE_CREATED"
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "policy_type": "minimal_asset_inventory_v1",
+  "version": "v1",
+  "runtime_admitted": true,
+  "production_admitted": false,
+  "standard_library_only": true,
+  "explicit_roots_only": true,
+  "home_root_allowed": false,
+  "filesystem_root_allowed": false,
+  "path_traversal_allowed": false,
+  "symlink_escape_allowed": false,
+  "file_mutation_allowed": false,
+  "large_binary_full_read_allowed": false,
+  "streaming_hash_required": true,
+  "embeddings_allowed": false,
+  "thumbnail_generation_allowed": false,
+  "lancedb_allowed": false,
+  "openusd_runtime_allowed": false,
+  "dcc_launch_allowed": false,
+  "comfyui_launch_allowed": false,
+  "network_allowed": false,
+  "browser_allowed": false,
+  "provider_api_allowed": false,
+  "credential_storage_allowed": false,
+  "record_fields": [
+    "asset_id",
+    "root_id",
+    "relative_path",
+    "size_bytes",
+    "sha256",
+    "extension",
+    "media_class",
+    "observed_at",
+    "content_hash"
+  ],
+  "media_classes": [
+    "CODE",
+    "TEXT",
+    "IMAGE",
+    "VIDEO",
+    "AUDIO",
+    "VFX_CACHE",
+    "DCC_SCENE",
+    "ARCHIVE",
+    "UNKNOWN"
+  ],
+  "deterministic_content_hash_excludes": [
+    "observed_at"
+  ]
+}

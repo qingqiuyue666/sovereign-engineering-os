@@ -1,0 +1,207 @@
+{
+  "dcc_or_ai_tools_launched": false,
+  "destructive_actions_performed": false,
+  "kind": "local_tool_health_dashboard_v1",
+  "mode": "public",
+  "next_actions": [
+    "Houdini / hython: Install the tool, add it to PATH, or configure an explicit local path.",
+    "ComfyUI: Configure ComfyUI path or service settings before running ComfyUI jobs.",
+    "After Effects: Configure the local install or scripting path before adapter smoke tests.",
+    "DaVinci Resolve: Configure the local install or scripting path before adapter smoke tests.",
+    "Unreal Engine: Configure the local install or scripting path before adapter smoke tests.",
+    "ZBrush: Install the tool, add it to PATH, or configure an explicit local path."
+  ],
+  "ok": true,
+  "proprietary_tools_required_for_default_ci": [],
+  "python_dependency_details": [
+    {
+      "name": "openpyxl",
+      "status": "FOUND",
+      "version": "3.1-fixture"
+    }
+  ],
+  "read_only": true,
+  "safety": {
+    "ai_service_calls": false,
+    "dcc_execution": false,
+    "default_ci_requires_proprietary_tools": false,
+    "filesystem_mutation": false,
+    "license_checkout": false
+  },
+  "summary": {
+    "available_but_untested_count": 2,
+    "blocked_count": 6,
+    "config_required_count": 4,
+    "missing_count": 2,
+    "ready_or_detected_count": 7,
+    "requires_user_launch_count": 1,
+    "smoke_passed_count": 4,
+    "tool_count": 13
+  },
+  "tool_health": [
+    {
+      "available": true,
+      "configured_path": "<local-path:python>",
+      "default_ci_requirement": "required",
+      "label": "Python runtime",
+      "next_fix_action": "Ready for gated local production use.",
+      "proprietary": false,
+      "smoke_capability": "SMOKE_PASSED_BY_DISCOVERY",
+      "status": "FOUND_AND_SMOKE_PASSED",
+      "tool": "python",
+      "version": "3.13.0"
+    },
+    {
+      "available": true,
+      "configured_path": "",
+      "default_ci_requirement": "required",
+      "label": "Python dependencies",
+      "next_fix_action": "Ready for gated local production use.",
+      "proprietary": false,
+      "smoke_capability": "SMOKE_PASSED_BY_DISCOVERY",
+      "status": "FOUND_AND_SMOKE_PASSED",
+      "tool": "python_dependencies",
+      "version": "present 1/1"
+    },
+    {
+      "available": true,
+      "configured_path": "",
+      "default_ci_requirement": "optional",
+      "label": "macOS host",
+      "next_fix_action": "Ready for gated local production use.",
+      "proprietary": false,
+      "smoke_capability": "SMOKE_PASSED_BY_DISCOVERY",
+      "status": "FOUND_AND_SMOKE_PASSED",
+      "tool": "macos",
+      "version": "macOS-fixture"
+    },
+    {
+      "available": true,
+      "configured_path": "",
+      "default_ci_requirement": "optional",
+      "label": "Apple Silicon",
+      "next_fix_action": "Ready for gated local production use.",
+      "proprietary": false,
+      "smoke_capability": "SMOKE_PASSED_BY_DISCOVERY",
+      "status": "FOUND_AND_SMOKE_PASSED",
+      "tool": "apple_silicon",
+      "version": ""
+    },
+    {
+      "available": true,
+      "configured_path": "<local-path:git>",
+      "default_ci_requirement": "required",
+      "label": "Git CLI",
+      "next_fix_action": "Run an operator-approved smoke check before production execution.",
+      "proprietary": false,
+      "smoke_capability": "PATH_DETECTED_NO_SMOKE_RUN",
+      "status": "FOUND_BUT_UNTESTED",
+      "tool": "git",
+      "version": ""
+    },
+    {
+      "available": true,
+      "configured_path": "<local-path:ffmpeg>",
+      "default_ci_requirement": "optional",
+      "label": "FFmpeg CLI",
+      "next_fix_action": "Run an operator-approved smoke check before production execution.",
+      "proprietary": false,
+      "smoke_capability": "PATH_DETECTED_NO_SMOKE_RUN",
+      "status": "FOUND_BUT_UNTESTED",
+      "tool": "ffmpeg",
+      "version": ""
+    },
+    {
+      "available": false,
+      "configured_path": "",
+      "default_ci_requirement": "optional",
+      "label": "Houdini / hython",
+      "next_fix_action": "Install the tool, add it to PATH, or configure an explicit local path.",
+      "proprietary": true,
+      "smoke_capability": "NOT_RUN_ENV_NOT_FOUND",
+      "status": "NOT_FOUND",
+      "tool": "houdini",
+      "version": ""
+    },
+    {
+      "available": false,
+      "configured_path": "",
+      "default_ci_requirement": "optional",
+      "label": "ComfyUI",
+      "next_fix_action": "Configure ComfyUI path or service settings before running ComfyUI jobs.",
+      "proprietary": false,
+      "smoke_capability": "NOT_RUN_CONFIG_REQUIRED",
+      "status": "CONFIG_REQUIRED",
+      "tool": "comfyui",
+      "version": ""
+    },
+    {
+      "available": true,
+      "configured_path": "<local-path:Blender.app>",
+      "default_ci_requirement": "optional",
+      "label": "Blender",
+      "next_fix_action": "Launch or configure the app, then rerun the doctor before execution.",
+      "proprietary": true,
+      "smoke_capability": "CONFIG_DETECTED_APP_NOT_LAUNCHED",
+      "status": "FOUND_BUT_REQUIRES_USER_LAUNCH",
+      "tool": "blender",
+      "version": ""
+    },
+    {
+      "available": false,
+      "configured_path": "",
+      "default_ci_requirement": "optional",
+      "label": "After Effects",
+      "next_fix_action": "Configure the local install or scripting path before adapter smoke tests.",
+      "proprietary": true,
+      "smoke_capability": "NOT_RUN_CONFIG_REQUIRED",
+      "status": "CONFIG_REQUIRED",
+      "tool": "after_effects",
+      "version": ""
+    },
+    {
+      "available": false,
+      "configured_path": "",
+      "default_ci_requirement": "optional",
+      "label": "DaVinci Resolve",
+      "next_fix_action": "Configure the local install or scripting path before adapter smoke tests.",
+      "proprietary": true,
+      "smoke_capability": "NOT_RUN_CONFIG_REQUIRED",
+      "status": "CONFIG_REQUIRED",
+      "tool": "davinci",
+      "version": ""
+    },
+    {
+      "available": false,
+      "configured_path": "",
+      "default_ci_requirement": "optional",
+      "label": "Unreal Engine",
+      "next_fix_action": "Configure the local install or scripting path before adapter smoke tests.",
+      "proprietary": true,
+      "smoke_capability": "NOT_RUN_CONFIG_REQUIRED",
+      "status": "CONFIG_REQUIRED",
+      "tool": "unreal",
+      "version": ""
+    },
+    {
+      "available": false,
+      "configured_path": "",
+      "default_ci_requirement": "optional",
+      "label": "ZBrush",
+      "next_fix_action": "Install the tool, add it to PATH, or configure an explicit local path.",
+      "proprietary": true,
+      "smoke_capability": "NOT_RUN_ENV_NOT_FOUND",
+      "status": "NOT_FOUND",
+      "tool": "zbrush",
+      "version": ""
+    }
+  ],
+  "warnings": [
+    "houdini",
+    "comfyui",
+    "after_effects",
+    "davinci",
+    "unreal",
+    "zbrush"
+  ]
+}

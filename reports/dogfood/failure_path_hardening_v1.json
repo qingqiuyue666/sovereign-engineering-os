@@ -1,0 +1,69 @@
+{
+  "schema_version": "dogfood_record_v1",
+  "record_id": "DOGFOOD-FAILURE-PATH-002",
+  "category": "failure_path_hardening",
+  "historical_evidence_available": true,
+  "task_contract": {
+    "summary": "Add fail-closed and adversarial smoke coverage for bad states and bad inputs.",
+    "source_refs": [
+      "scripts/failure_path_smoke_v1.sh",
+      "scripts/adversarial_smoke_v1.py",
+      "reports/failure_path/failure_path_baseline_v1.json",
+      "tests/tracer_bullet/test_failure_path_hardening_v1.py",
+      "tests/adversarial/test_adversarial_inputs_v1.py"
+    ]
+  },
+  "approval_receipt": {
+    "receipt_id": "DOGFOOD-FAILURE-PATH-002-APPROVAL",
+    "approval_boundary": "merge_after_required_checks",
+    "repository_evidence": "Pull request 543 was merged after canonical health validation.",
+    "separate_historical_approval_artifact_available": false
+  },
+  "dry_run_execution_receipt": {
+    "receipt_id": "DOGFOOD-FAILURE-PATH-002-EXECUTION",
+    "dry_run_first": true,
+    "execution_scope": "failure-path and adversarial local validation",
+    "runtime_expansion_performed": false
+  },
+  "evidence_trace": [
+    "scripts/failure_path_smoke_v1.sh",
+    "scripts/adversarial_smoke_v1.py",
+    "reports/failure_path/failure_path_baseline_v1.json",
+    "tests/tracer_bullet/test_failure_path_hardening_v1.py",
+    "tests/adversarial/test_adversarial_inputs_v1.py"
+  ],
+  "replay_explain": {
+    "commands": [
+      "bash scripts/failure_path_smoke_v1.sh",
+      "python3 scripts/adversarial_smoke_v1.py",
+      "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/adversarial",
+      "make verify",
+      "make ci"
+    ],
+    "expected_result": "pass"
+  },
+  "pr_link_or_commit_reference": {
+    "pr_url": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/pull/543",
+    "merge_commit": "1809326b68d3a1b2befe14d306be6f027d1acbfa",
+    "merged_at": "2026-05-30T09:17:49Z"
+  },
+  "validation_result": {
+    "status": "passed",
+    "commands": [
+      "bash scripts/failure_path_smoke_v1.sh",
+      "python3 scripts/adversarial_smoke_v1.py",
+      "make verify",
+      "make ci"
+    ]
+  },
+  "post_merge_validation": {
+    "status": "passed",
+    "main_commit": "1809326b68d3a1b2befe14d306be6f027d1acbfa",
+    "github_actions_run": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/actions/runs/26680193343"
+  },
+  "outcome": "merged_to_main",
+  "residual_risk": [
+    "Adversarial coverage is local smoke evidence, not an independent red-team exercise."
+  ],
+  "fabrication_guard": "Record is based on merged PR and commit evidence; unavailable private approval artifacts are not invented."
+}

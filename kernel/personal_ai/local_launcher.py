@@ -3,6 +3,190 @@
 from dataclasses import dataclass
 from pathlib import Path
 
+from kernel.assets.local_asset_incremental_plan import (
+    LOCAL_ASSET_INCREMENTAL_MANIFEST_FILE,
+    LOCAL_ASSET_INCREMENTAL_PLAN_FILE,
+    LOCAL_ASSET_INCREMENTAL_SUMMARY_FILE,
+    build_local_asset_incremental_plan,
+    validate_previous_scan_output_dir,
+)
+from kernel.assets.local_asset_human_smoke import (
+    DEFAULT_MAX_SMOKE_BYTES,
+    DEFAULT_MAX_SMOKE_DEPTH,
+    DEFAULT_MAX_SMOKE_FILES,
+    run_local_asset_human_smoke,
+)
+from kernel.assets.local_asset_bounded_smoke_iteration import (
+    DEFAULT_ITERATION_MAX_SMOKE_BYTES,
+    DEFAULT_ITERATION_MAX_SMOKE_DEPTH,
+    DEFAULT_ITERATION_MAX_SMOKE_FILES,
+    LOCAL_ASSET_BOUNDED_SMOKE_ITERATION_SUMMARY_FILE,
+    run_local_asset_bounded_smoke_iteration,
+)
+from kernel.assets.local_asset_sqlite_index import (
+    LOCAL_ASSET_SQLITE_INDEX_FILE,
+    LOCAL_ASSET_SQLITE_INDEX_MANIFEST_FILE,
+    LOCAL_ASSET_SQLITE_QUERY_SUMMARY_FILE,
+    build_local_asset_sqlite_index,
+)
+from kernel.assets.local_asset_smoke_readiness import (
+    DEFAULT_SMOKE_READINESS_MAX_DEPTH,
+    DEFAULT_SMOKE_READINESS_MAX_ENTRIES,
+    DEFAULT_SMOKE_READINESS_MAX_TOTAL_BYTES,
+    LOCAL_ASSET_SMOKE_READINESS_SUMMARY_FILE,
+    run_local_asset_smoke_readiness,
+)
+from kernel.assets.local_asset_smoke_promotion_gate import (
+    LOCAL_ASSET_SMOKE_PROMOTION_SUMMARY_FILE,
+    build_local_asset_smoke_promotion_gate,
+)
+from kernel.assets.local_asset_smoke_review_packet import (
+    LOCAL_ASSET_SMOKE_REVIEW_SUMMARY_FILE,
+    build_local_asset_smoke_review_packet,
+)
+from kernel.assets.local_asset_smoke_iteration_review_packet import (
+    LOCAL_ASSET_SMOKE_ITERATION_REVIEW_SUMMARY_FILE,
+    build_local_asset_smoke_iteration_review_packet,
+)
+from kernel.assets.local_asset_iteration_promotion_gate import (
+    LOCAL_ASSET_ITERATION_PROMOTION_SUMMARY_FILE,
+    build_local_asset_iteration_promotion_gate,
+)
+from kernel.assets.local_asset_bounded_smoke_cycle_contract import (
+    LOCAL_ASSET_BOUNDED_SMOKE_CYCLE_SUMMARY_FILE,
+    build_local_asset_bounded_smoke_cycle_contract,
+)
+from kernel.assets.local_asset_bounded_smoke_cycle_human_review import (
+    LOCAL_ASSET_BOUNDED_SMOKE_CYCLE_HUMAN_REVIEW_SUMMARY_FILE,
+    build_local_asset_bounded_smoke_cycle_human_review,
+)
+from kernel.assets.local_asset_next_bounded_smoke_iteration_admission import (
+    LOCAL_ASSET_NEXT_BOUNDED_SMOKE_ITERATION_ADMISSION_SUMMARY_FILE,
+    build_local_asset_next_bounded_smoke_iteration_admission,
+)
+from kernel.assets.local_asset_next_bounded_smoke_iteration_execution_request import (
+    LOCAL_ASSET_NEXT_BOUNDED_SMOKE_ITERATION_EXECUTION_REQUEST_SUMMARY_FILE,
+    build_local_asset_next_bounded_smoke_iteration_execution_request,
+)
+from kernel.assets.local_asset_next_bounded_smoke_iteration_runner_admission import (
+    LOCAL_ASSET_NEXT_BOUNDED_SMOKE_ITERATION_RUNNER_ADMISSION_SUMMARY_FILE,
+    build_local_asset_next_bounded_smoke_iteration_runner_admission,
+)
+from kernel.assets.local_asset_next_bounded_smoke_iteration_runner import (
+    LOCAL_ASSET_NEXT_BOUNDED_SMOKE_ITERATION_RUNNER_SUMMARY_FILE,
+    build_local_asset_next_bounded_smoke_iteration_runner,
+)
+from kernel.assets.local_asset_next_bounded_smoke_iteration_run_review_packet import (
+    LOCAL_ASSET_NEXT_BOUNDED_SMOKE_ITERATION_RUN_REVIEW_PACKET_SUMMARY_FILE,
+    build_local_asset_next_bounded_smoke_iteration_run_review_packet,
+)
+from kernel.assets.local_asset_next_bounded_smoke_iteration_run_promotion_gate import (
+    LOCAL_ASSET_NEXT_BOUNDED_SMOKE_ITERATION_RUN_PROMOTION_GATE_SUMMARY_FILE,
+    build_local_asset_next_bounded_smoke_iteration_run_promotion_gate,
+)
+from kernel.assets.local_asset_next_bounded_smoke_cycle_contract_from_run_promotion_gate import (
+    LOCAL_ASSET_NEXT_BOUNDED_SMOKE_CYCLE_CONTRACT_FROM_RUN_PROMOTION_GATE_SUMMARY_FILE,
+    build_local_asset_next_bounded_smoke_cycle_contract_from_run_promotion_gate,
+)
+from kernel.assets.local_asset_next_bounded_smoke_cycle_contract_human_review_from_run_promotion_gate import (
+    LOCAL_ASSET_NEXT_BOUNDED_SMOKE_CYCLE_CONTRACT_HUMAN_REVIEW_FROM_RUN_PROMOTION_GATE_SUMMARY_FILE,
+    build_local_asset_next_bounded_smoke_cycle_contract_human_review_from_run_promotion_gate,
+)
+from kernel.assets.local_asset_runtime import run_local_asset_runtime
+from kernel.assets.local_asset_schema import (
+    ASSET_INDEX_FILE,
+    ASSET_MANIFEST_FILE,
+    AUDIT_LOG_FILE,
+    DUPLICATES_REPORT_FILE,
+    MEDIA_INVENTORY_FILE,
+    QUARANTINE_MANIFEST_FILE,
+    VALIDATION_REPORT_FILE,
+)
+from kernel.capabilities.github_capability_intake_packet import (
+    GITHUB_CAPABILITY_INTAKE_PACKET_SUMMARY_FILE,
+    build_github_capability_intake_packet,
+)
+from kernel.capabilities.playwright_local_fixture_sandbox_smoke import (
+    PLAYWRIGHT_LOCAL_FIXTURE_SANDBOX_SMOKE_SUMMARY_FILE,
+    run_playwright_local_fixture_sandbox_smoke,
+)
+from kernel.capabilities.bounded_playwright_worker_adapter_draft import (
+    BOUNDED_PLAYWRIGHT_WORKER_ADAPTER_DRAFT_SUMMARY_FILE,
+    run_bounded_playwright_worker_adapter_draft,
+)
+from kernel.capabilities.operator_provided_playwright_execution_receipt import (
+    OPERATOR_PROVIDED_PLAYWRIGHT_EXECUTION_RECEIPT_SUMMARY_FILE,
+    run_operator_provided_playwright_execution_receipt_launcher as run_operator_provided_playwright_execution_receipt_capability,
+)
+from kernel.capabilities.local_fixture_playwright_adapter_admission_gate import (
+    LOCAL_FIXTURE_PLAYWRIGHT_ADAPTER_ADMISSION_GATE_SUMMARY_FILE,
+    run_local_fixture_playwright_adapter_admission_gate_launcher as run_local_fixture_playwright_adapter_admission_gate_capability,
+)
+from kernel.capabilities.local_only_playwright_fixture_scenario_suite import (
+    LOCAL_ONLY_PLAYWRIGHT_FIXTURE_SCENARIO_SUITE_SUMMARY_FILE,
+    run_local_only_playwright_fixture_scenario_suite_launcher as run_local_only_playwright_fixture_scenario_suite_capability,
+)
+from kernel.capabilities.playwright_local_admission_receipt_aggregation import (
+    PLAYWRIGHT_LOCAL_ADMISSION_RECEIPT_AGGREGATION_SUMMARY_FILE,
+    run_playwright_local_admission_receipt_aggregation_launcher as run_playwright_local_admission_receipt_aggregation_capability,
+)
+from kernel.capabilities.admission_gated_local_adapter_registry_promotion import (
+    ADMISSION_GATED_LOCAL_ADAPTER_REGISTRY_PROMOTION_SUMMARY_FILE,
+    run_admission_gated_local_adapter_registry_promotion_launcher as run_admission_gated_local_adapter_registry_promotion_capability,
+)
+from kernel.capabilities.local_fixture_adapter_usage_receipt import (
+    LOCAL_FIXTURE_ADAPTER_USAGE_RECEIPT_SUMMARY_FILE,
+    run_local_fixture_adapter_usage_receipt_launcher as run_local_fixture_adapter_usage_receipt_capability,
+)
+from kernel.capabilities.local_fixture_adapter_dry_run_invocation_plan import (
+    LOCAL_FIXTURE_ADAPTER_DRY_RUN_INVOCATION_PLAN_SUMMARY_FILE,
+    run_local_fixture_adapter_dry_run_invocation_plan_launcher as run_local_fixture_adapter_dry_run_invocation_plan_capability,
+)
+from kernel.capabilities.local_fixture_adapter_execution_gate_plan import (
+    LOCAL_FIXTURE_ADAPTER_EXECUTION_GATE_PLAN_SUMMARY_FILE,
+    run_local_fixture_adapter_execution_gate_plan_launcher as run_local_fixture_adapter_execution_gate_plan_capability,
+)
+from kernel.capabilities.local_fixture_human_approval_artifact import (
+    LOCAL_FIXTURE_HUMAN_APPROVAL_ARTIFACT_SUMMARY_FILE,
+    run_local_fixture_human_approval_artifact_launcher as run_local_fixture_human_approval_artifact_capability,
+)
+from kernel.capabilities.local_fixture_runner_contract_draft import (
+    LOCAL_FIXTURE_RUNNER_CONTRACT_DRAFT_SUMMARY_FILE,
+    run_local_fixture_runner_contract_draft_launcher as run_local_fixture_runner_contract_draft_capability,
+)
+from kernel.capabilities.local_fixture_runner_stub_admission_gate import (
+    LOCAL_FIXTURE_RUNNER_STUB_ADMISSION_GATE_SUMMARY_FILE,
+    run_local_fixture_runner_stub_admission_gate_launcher as run_local_fixture_runner_stub_admission_gate_capability,
+)
+from kernel.capabilities.local_fixture_runner_receipt_contract_draft import (
+    LOCAL_FIXTURE_RUNNER_RECEIPT_CONTRACT_DRAFT_SUMMARY_FILE,
+    run_local_fixture_runner_receipt_contract_draft_launcher as run_local_fixture_runner_receipt_contract_draft_capability,
+)
+from kernel.capabilities.local_fixture_runner_receipt_preflight_verifier import (
+    LOCAL_FIXTURE_RUNNER_RECEIPT_PREFLIGHT_VERIFIER_SUMMARY_FILE,
+    run_local_fixture_runner_receipt_preflight_verifier_launcher as run_local_fixture_runner_receipt_preflight_verifier_capability,
+)
+from kernel.capabilities.local_fixture_runner_receipt_metadata_artifact import (
+    LOCAL_FIXTURE_RUNNER_RECEIPT_METADATA_ARTIFACT_SUMMARY_FILE,
+    run_local_fixture_runner_receipt_metadata_artifact_launcher as run_local_fixture_runner_receipt_metadata_artifact_capability,
+)
+from kernel.runtime.real_local_runner_boundary import (
+    run_real_local_runner_boundary_launcher as run_real_local_runner_boundary_capability,
+)
+from kernel.personal_ai.artifact_index import build_artifact_index
+from kernel.personal_ai.asset_scan_operational_control import (
+    ASSET_SCAN_FAILURE_BUNDLE_FILE,
+    ASSET_SCAN_FAILURE_SUMMARY_FILE,
+    ASSET_SCAN_RUN_RECEIPT_FILE,
+    asset_scan_failure_artifact_paths,
+    asset_scan_failure_cli_payload,
+    asset_scan_output_status,
+    asset_scan_run_receipt_path,
+    classify_asset_scan_failure_stage,
+    pre_runtime_collision_stage,
+    write_asset_scan_failure_bundle,
+    write_asset_scan_run_receipt,
+)
 from kernel.personal_ai.adapters.blender_runtime import run_blender_runtime
 from kernel.personal_ai.adapters.blender_runtime_boundary import (
     write_blender_runtime_admission_artifacts,
@@ -47,6 +231,42 @@ __all__ = [
     "run_blender_dry_run_launcher",
     "run_comfyui_dry_run_launcher",
     "run_creative_handoff_launcher",
+    "run_local_asset_human_smoke_launcher",
+    "run_local_asset_bounded_smoke_iteration_launcher",
+    "run_local_asset_scan_launcher",
+    "run_local_asset_smoke_readiness_launcher",
+    "run_local_asset_smoke_promotion_gate_launcher",
+    "run_local_asset_smoke_review_packet_launcher",
+    "run_local_asset_smoke_iteration_review_packet_launcher",
+    "run_local_asset_iteration_promotion_gate_launcher",
+    "run_local_asset_bounded_smoke_cycle_contract_launcher",
+    "run_local_asset_bounded_smoke_cycle_human_review_launcher",
+    "run_local_asset_next_bounded_smoke_iteration_admission_launcher",
+    "run_local_asset_next_bounded_smoke_iteration_execution_request_launcher",
+    "run_local_asset_next_bounded_smoke_iteration_runner_admission_launcher",
+    "run_local_asset_next_bounded_smoke_iteration_runner_launcher",
+    "run_local_asset_next_bounded_smoke_iteration_run_review_packet_launcher",
+    "run_local_asset_next_bounded_smoke_iteration_run_promotion_gate_launcher",
+    "run_local_asset_next_bounded_smoke_cycle_contract_from_run_promotion_gate_launcher",
+    "run_local_asset_next_bounded_smoke_cycle_contract_human_review_from_run_promotion_gate_launcher",
+    "run_github_capability_intake_packet_launcher",
+    "run_playwright_local_fixture_sandbox_smoke_launcher",
+    "run_bounded_playwright_worker_adapter_draft_launcher",
+    "run_operator_provided_playwright_execution_receipt_launcher",
+    "run_local_fixture_playwright_adapter_admission_gate_launcher",
+    "run_local_only_playwright_fixture_scenario_suite_launcher",
+    "run_playwright_local_admission_receipt_aggregation_launcher",
+    "run_admission_gated_local_adapter_registry_promotion_launcher",
+    "run_local_fixture_adapter_usage_receipt_launcher",
+    "run_local_fixture_adapter_dry_run_invocation_plan_launcher",
+    "run_local_fixture_adapter_execution_gate_plan_launcher",
+    "run_local_fixture_human_approval_artifact_launcher",
+    "run_local_fixture_runner_contract_draft_launcher",
+    "run_local_fixture_runner_stub_admission_gate_launcher",
+    "run_local_fixture_runner_receipt_contract_draft_launcher",
+    "run_local_fixture_runner_receipt_preflight_verifier_launcher",
+    "run_local_fixture_runner_receipt_metadata_artifact_launcher",
+    "run_real_local_runner_boundary_launcher",
     "run_local_office_launcher",
     "run_model_fixture_launcher",
     "run_model_provider_dry_run_launcher",
@@ -56,6 +276,8 @@ __all__ = [
 ]
 
 _SUMMARY_FILE = "launcher_summary.md"
+_ARTIFACT_INDEX_FILE = "artifact_index.json"
+_ARTIFACT_INDEX_MANIFEST_FILE = "artifact_index_manifest.json"
 _MODEL_REQUEST_FILE = "model_request.json"
 _MODEL_PROVIDER_REQUEST_FILE = "model_provider_request.json"
 _ADMISSION_DIR = "runtime_admission"
@@ -133,6 +355,1173 @@ def run_local_office_launcher(
         summary_path=summary_path,
         required_human_approval=True,
     )
+
+
+def run_local_asset_scan_launcher(
+    input_dir: Path,
+    output_dir: Path,
+    *,
+    recursive: bool = False,
+    include_hidden: bool = False,
+    project_id: str | None = None,
+    previous_scan_output_dir: Path | None = None,
+) -> LauncherWorkflowResult:
+    input_path = Path(input_dir)
+    output_path = Path(output_dir)
+    previous_scan_path = (
+        None if previous_scan_output_dir is None else Path(previous_scan_output_dir)
+    )
+    if not output_path.exists() or not output_path.is_dir() or output_path.is_symlink():
+        return _asset_scan_failure_result(
+            input_path=input_path,
+            output_path=output_path,
+            recursive=recursive,
+            include_hidden=include_hidden,
+            project_id=project_id,
+            previous_scan_output_dir=previous_scan_path,
+            failure_stage="preflight_output_dir_missing",
+            error_type="ValueError",
+            error_message="output_dir is missing",
+            write_failure_bundle_artifacts=False,
+            output_pollution_detected=False,
+        )
+
+    summary_path = output_path / _SUMMARY_FILE
+    artifact_index_path = output_path / _ARTIFACT_INDEX_FILE
+    artifact_index_manifest_path = output_path / _ARTIFACT_INDEX_MANIFEST_FILE
+    local_asset_sqlite_index_path = output_path / LOCAL_ASSET_SQLITE_INDEX_FILE
+    local_asset_sqlite_index_manifest_path = (
+        output_path / LOCAL_ASSET_SQLITE_INDEX_MANIFEST_FILE
+    )
+    local_asset_sqlite_query_summary_path = (
+        output_path / LOCAL_ASSET_SQLITE_QUERY_SUMMARY_FILE
+    )
+    receipt_path = asset_scan_run_receipt_path(output_path)
+    collision_stage = pre_runtime_collision_stage(output_path)
+    if collision_stage is not None:
+        return _asset_scan_failure_result(
+            input_path=input_path,
+            output_path=output_path,
+            recursive=recursive,
+            include_hidden=include_hidden,
+            project_id=project_id,
+            previous_scan_output_dir=previous_scan_path,
+            failure_stage=collision_stage,
+            error_type="ValueError",
+            error_message=_asset_scan_collision_message(output_path, collision_stage),
+            write_failure_bundle_artifacts=_asset_scan_can_write_failure_artifacts(
+                output_path,
+                input_path,
+            ),
+            output_pollution_detected=True,
+        )
+
+    if previous_scan_path is not None:
+        try:
+            validate_previous_scan_output_dir(output_path, previous_scan_path)
+        except ValueError as error:
+            return _asset_scan_failure_result(
+                input_path=input_path,
+                output_path=output_path,
+                recursive=recursive,
+                include_hidden=include_hidden,
+                project_id=project_id,
+                previous_scan_output_dir=previous_scan_path,
+                failure_stage=classify_asset_scan_failure_stage(str(error)),
+                error_type=error.__class__.__name__,
+                error_message=str(error),
+                write_failure_bundle_artifacts=_asset_scan_can_write_failure_artifacts(
+                    output_path,
+                    input_path,
+                ),
+                output_pollution_detected=False,
+            )
+
+    if not input_path.exists() or not input_path.is_dir() or input_path.is_symlink():
+        return _asset_scan_failure_result(
+            input_path=input_path,
+            output_path=output_path,
+            recursive=recursive,
+            include_hidden=include_hidden,
+            project_id=project_id,
+            previous_scan_output_dir=previous_scan_path,
+            failure_stage="preflight_input_dir_missing",
+            error_type="ValueError",
+            error_message="input_dir is missing",
+            write_failure_bundle_artifacts=_asset_scan_can_write_failure_artifacts(
+                output_path,
+                input_path,
+            ),
+            output_pollution_detected=False,
+        )
+
+    if _path_is_inside(output_path, input_path):
+        return _asset_scan_failure_result(
+            input_path=input_path,
+            output_path=output_path,
+            recursive=recursive,
+            include_hidden=include_hidden,
+            project_id=project_id,
+            previous_scan_output_dir=previous_scan_path,
+            failure_stage="runtime_validation_failure",
+            error_type="ValueError",
+            error_message="output_dir must be outside input_dir",
+            write_failure_bundle_artifacts=False,
+            output_pollution_detected=False,
+        )
+
+    try:
+        result = run_local_asset_runtime(
+            input_path,
+            output_path,
+            recursive=recursive,
+            include_hidden=include_hidden,
+            project_id=project_id,
+        )
+    except ValueError as error:
+        return _asset_scan_failure_result(
+            input_path=input_path,
+            output_path=output_path,
+            recursive=recursive,
+            include_hidden=include_hidden,
+            project_id=project_id,
+            previous_scan_output_dir=previous_scan_path,
+            failure_stage=classify_asset_scan_failure_stage(str(error)),
+            error_type=error.__class__.__name__,
+            error_message=str(error),
+            write_failure_bundle_artifacts=_asset_scan_can_write_failure_artifacts(
+                output_path,
+                input_path,
+            ),
+        )
+
+    payload = {
+        "input_dir": result.input_dir.as_posix(),
+        "asset_manifest_path": result.output_paths[ASSET_MANIFEST_FILE].as_posix(),
+        "asset_index_path": result.output_paths[ASSET_INDEX_FILE].as_posix(),
+        "duplicates_report_path": (
+            result.output_paths[DUPLICATES_REPORT_FILE].as_posix()
+        ),
+        "media_inventory_path": result.output_paths[MEDIA_INVENTORY_FILE].as_posix(),
+        "asset_runtime_audit_log_path": (
+            result.output_paths[AUDIT_LOG_FILE].as_posix()
+        ),
+        "asset_runtime_validation_report_path": (
+            result.output_paths[VALIDATION_REPORT_FILE].as_posix()
+        ),
+        "asset_runtime_quarantine_manifest_path": (
+            result.output_paths[QUARANTINE_MANIFEST_FILE].as_posix()
+        ),
+        "asset_runtime_output_paths": {
+            filename: path.as_posix()
+            for filename, path in sorted(result.output_paths.items())
+        },
+        "files_scanned": result.files_scanned,
+        "bytes_scanned": result.bytes_scanned,
+        "duplicate_groups": result.duplicate_groups,
+        "quarantined_paths": result.quarantined_paths,
+        "recursive": result.recursive,
+        "include_hidden": result.include_hidden,
+        "project_id": result.project_id,
+        "previous_scan_output_dir": None
+        if previous_scan_path is None
+        else previous_scan_path.as_posix(),
+        "read_only_input": True,
+        "cache_execution_performed": False,
+        "automatic_skip_performed": False,
+        "raw_content_copied": False,
+        "content_indexed": False,
+        "incremental_cache_execution_performed": False,
+        "incremental_automatic_skip_performed": False,
+        "input_mutation_performed": False,
+        "file_move_performed": False,
+        "file_rename_performed": False,
+        "file_delete_performed": False,
+        "media_organizer_behavior_performed": False,
+        "output_overwrite_performed": False,
+        "network_access_performed": False,
+        "model_api_called": False,
+        "desktop_ui_added": False,
+        "browser_runtime_invoked": False,
+        "comfyui_runtime_invoked": False,
+        "blender_runtime_invoked": False,
+        "houdini_runtime_invoked": False,
+        "after_effects_runtime_invoked": False,
+        "davinci_runtime_invoked": False,
+        "external_runtime_invoked": False,
+    }
+    try:
+        _write_summary(
+            summary_path,
+            title="Local Asset Scan",
+            lines=[
+                "Status: complete",
+                "Runtime: read-only local asset metadata scan",
+                "Files scanned: " + str(result.files_scanned),
+                "Input mutation performed: false",
+                "File movement performed: false",
+                "File renaming performed: false",
+                "File deletion performed: false",
+                "Network access performed: false",
+                "Model API called: false",
+                "External runtime invoked: false",
+                "Media organizer behavior performed: false",
+                "Next action: human review of local asset reports",
+            ],
+            boundary="read-only local asset scan; human review required.",
+        )
+        receipt_path = write_asset_scan_run_receipt(
+            input_dir=result.input_dir,
+            output_dir=output_path,
+            project_id=result.project_id,
+            recursive=result.recursive,
+            include_hidden=result.include_hidden,
+            files_scanned=result.files_scanned,
+            bytes_scanned=result.bytes_scanned,
+            duplicate_groups=result.duplicate_groups,
+            quarantined_paths=result.quarantined_paths,
+            asset_runtime_output_paths=result.output_paths,
+            launcher_summary_path=summary_path,
+            artifact_index_path=artifact_index_path,
+            artifact_index_manifest_path=artifact_index_manifest_path,
+            local_asset_sqlite_index_path=local_asset_sqlite_index_path,
+            local_asset_sqlite_index_manifest_path=(
+                local_asset_sqlite_index_manifest_path
+            ),
+            local_asset_sqlite_query_summary_path=(
+                local_asset_sqlite_query_summary_path
+            ),
+        )
+    except ValueError as error:
+        return _asset_scan_failure_result(
+            input_path=input_path,
+            output_path=output_path,
+            recursive=recursive,
+            include_hidden=include_hidden,
+            project_id=project_id,
+            previous_scan_output_dir=previous_scan_path,
+            failure_stage=classify_asset_scan_failure_stage(str(error)),
+            error_type=error.__class__.__name__,
+            error_message=str(error),
+            write_failure_bundle_artifacts=_asset_scan_can_write_failure_artifacts(
+                output_path,
+                input_path,
+            ),
+        )
+
+    try:
+        sqlite_index = build_local_asset_sqlite_index(
+            output_path,
+            input_dir=result.input_dir,
+            project_id=result.project_id,
+            recursive=result.recursive,
+            include_hidden=result.include_hidden,
+        )
+    except Exception as error:
+        return _asset_scan_failure_result(
+            input_path=input_path,
+            output_path=output_path,
+            recursive=recursive,
+            include_hidden=include_hidden,
+            project_id=project_id,
+            previous_scan_output_dir=previous_scan_path,
+            failure_stage="sqlite_index_failure",
+            error_type=error.__class__.__name__,
+            error_message=str(error),
+            write_failure_bundle_artifacts=_asset_scan_can_write_failure_artifacts(
+                output_path,
+                input_path,
+            ),
+        )
+
+    try:
+        incremental_plan = build_local_asset_incremental_plan(
+            output_path,
+            previous_scan_output_dir=previous_scan_path,
+            project_id=result.project_id,
+            recursive=result.recursive,
+            include_hidden=result.include_hidden,
+        )
+    except Exception as error:
+        return _asset_scan_failure_result(
+            input_path=input_path,
+            output_path=output_path,
+            recursive=recursive,
+            include_hidden=include_hidden,
+            project_id=project_id,
+            previous_scan_output_dir=previous_scan_path,
+            failure_stage="incremental_plan_failure",
+            error_type=error.__class__.__name__,
+            error_message=str(error),
+            write_failure_bundle_artifacts=_asset_scan_can_write_failure_artifacts(
+                output_path,
+                input_path,
+            ),
+        )
+
+    try:
+        artifact_index = build_artifact_index(output_path)
+    except ValueError as error:
+        return _asset_scan_failure_result(
+            input_path=input_path,
+            output_path=output_path,
+            recursive=recursive,
+            include_hidden=include_hidden,
+            project_id=project_id,
+            previous_scan_output_dir=previous_scan_path,
+            failure_stage="artifact_index_failure",
+            error_type=error.__class__.__name__,
+            error_message=str(error),
+            write_failure_bundle_artifacts=_asset_scan_can_write_failure_artifacts(
+                output_path,
+                input_path,
+            ),
+        )
+
+    payload.update(
+        {
+            "asset_scan_run_receipt_path": receipt_path.as_posix(),
+            "local_asset_sqlite_index_path": (
+                sqlite_index.database_path.as_posix()
+            ),
+            "local_asset_sqlite_index_manifest_path": (
+                sqlite_index.manifest_path.as_posix()
+            ),
+            "local_asset_sqlite_query_summary_path": (
+                sqlite_index.query_summary_path.as_posix()
+            ),
+            "local_asset_sqlite_index_written": True,
+            "local_asset_sqlite_index_authority": "non_authority",
+            "local_asset_sqlite_index_scope": "per_scan_output_dir_only",
+            "local_asset_sqlite_content_indexed": False,
+            "local_asset_sqlite_raw_content_copied": False,
+            "local_asset_incremental_scan_plan_path": (
+                incremental_plan.plan_path.as_posix()
+            ),
+            "local_asset_incremental_scan_manifest_path": (
+                incremental_plan.manifest_path.as_posix()
+            ),
+            "local_asset_incremental_scan_summary_path": (
+                incremental_plan.summary_path.as_posix()
+            ),
+            "local_asset_incremental_plan_written": True,
+            "local_asset_incremental_plan_mode": incremental_plan.plan_mode,
+            "incremental_cache_execution_performed": False,
+            "incremental_automatic_skip_performed": False,
+            "local_asset_incremental_authority": "non_authority",
+            "artifact_index_path": (
+                artifact_index.artifact_index_path.as_posix()
+            ),
+            "artifact_index_manifest_path": (
+                artifact_index.artifact_index_manifest_path.as_posix()
+            ),
+            "indexed_artifacts": artifact_index.indexed_artifacts,
+            "artifact_hashes": dict(artifact_index.artifact_hashes),
+            "artifact_ledger_binding_performed": True,
+            "artifact_ledger_binding_type": "existing_artifact_index",
+            "artifact_index_content_indexed": False,
+            "artifact_index_runtime_authority": "non_authority",
+            "operational_control_receipt_written": True,
+            "failure_bundle_written": False,
+            "safe_to_retry": True,
+            "replay_hint": (
+                "Rerun launch-local-asset-scan with the same input_dir and "
+                "flags using a new empty output_dir; do not reuse this "
+                "output_dir."
+            ),
+        }
+    )
+    return LauncherWorkflowResult(
+        workflow="local_asset_scan_workflow",
+        output_dir=output_path,
+        complete=True,
+        payload=payload,
+        summary_path=summary_path,
+        required_human_approval=True,
+    )
+
+
+def run_local_asset_smoke_readiness_launcher(
+    candidate_input_dir: Path,
+    output_dir: Path,
+    *,
+    recursive: bool = False,
+    include_hidden: bool = False,
+    project_id: str | None = None,
+    max_entries: int = DEFAULT_SMOKE_READINESS_MAX_ENTRIES,
+    max_depth: int = DEFAULT_SMOKE_READINESS_MAX_DEPTH,
+    max_total_bytes: int = DEFAULT_SMOKE_READINESS_MAX_TOTAL_BYTES,
+) -> LauncherWorkflowResult:
+    output_path = Path(output_dir)
+    result = run_local_asset_smoke_readiness(
+        Path(candidate_input_dir),
+        output_path,
+        recursive=recursive,
+        include_hidden=include_hidden,
+        project_id=project_id,
+        max_entries=max_entries,
+        max_depth=max_depth,
+        max_total_bytes=max_total_bytes,
+    )
+    report = result.report
+    artifact_index = result.artifact_index
+    payload = {
+        "local_asset_smoke_readiness_report_path": None
+        if result.report_path is None
+        else result.report_path.as_posix(),
+        "local_asset_smoke_readiness_manifest_path": None
+        if result.manifest_path is None
+        else result.manifest_path.as_posix(),
+        "local_asset_smoke_readiness_summary_path": None
+        if result.summary_path is None
+        else result.summary_path.as_posix(),
+        "artifact_index_path": None
+        if result.artifact_index_path is None
+        else result.artifact_index_path.as_posix(),
+        "artifact_index_manifest_path": None
+        if result.artifact_index_manifest_path is None
+        else result.artifact_index_manifest_path.as_posix(),
+        "readiness_status": result.readiness_status,
+        "readiness_decision": result.readiness_decision,
+        "candidate_input_dir": Path(candidate_input_dir).as_posix(),
+        "output_dir": output_path.as_posix(),
+        "project_id": project_id,
+        "recursive": recursive,
+        "include_hidden": include_hidden,
+        "max_entries": max_entries,
+        "max_depth": max_depth,
+        "max_total_bytes": max_total_bytes,
+        "inspected_entry_count": report.get("inspected_entry_count", 0),
+        "inspected_file_count": report.get("inspected_file_count", 0),
+        "inspected_directory_count": report.get("inspected_directory_count", 0),
+        "estimated_total_size_bytes": report.get("estimated_total_size_bytes", 0),
+        "secret_looking_path_count": report.get("risk_counts", {}).get(
+            "secret_looking_path",
+            0,
+        ),
+        "symlink_count": report.get("risk_counts", {}).get("symlink", 0),
+        "unsafe_directory_count": report.get("risk_counts", {}).get(
+            "unsafe_directory",
+            0,
+        ),
+        "hidden_path_count": report.get("risk_counts", {}).get("hidden_path", 0),
+        "unreadable_entry_count": report.get("risk_counts", {}).get(
+            "unreadable_entry",
+            0,
+        ),
+        "limit_exceeded": report.get("limit_exceeded", False),
+        "artifacts_written": result.artifacts_written,
+        "no_artifacts_written": not result.artifacts_written,
+        "indexed_artifacts": 0
+        if artifact_index is None
+        else artifact_index.indexed_artifacts,
+        "artifact_hashes": {}
+        if artifact_index is None
+        else dict(artifact_index.artifact_hashes),
+        "artifact_ledger_binding_performed": artifact_index is not None,
+        "artifact_ledger_binding_type": "existing_artifact_index"
+        if artifact_index is not None
+        else None,
+        "artifact_index_content_indexed": False,
+        "artifact_index_runtime_authority": "non_authority",
+        "real_scan_performed": False,
+        "file_hashing_performed": False,
+        "raw_content_read": False,
+        "raw_content_copied": False,
+        "thumbnail_generation_performed": False,
+        "preview_generation_performed": False,
+        "input_mutation_performed": False,
+        "file_move_performed": False,
+        "file_rename_performed": False,
+        "file_delete_performed": False,
+        "media_organizer_behavior_performed": False,
+        "output_overwrite_performed": False,
+        "network_access_performed": False,
+        "model_api_called": False,
+        "external_runtime_invoked": False,
+        "required_human_approval": True,
+        "next_allowed_action": "human_review_real_folder_smoke_readiness",
+    }
+    if result.error_type is not None:
+        payload["error_type"] = result.error_type
+    if result.error_message is not None:
+        payload["error_message"] = result.error_message
+        payload["failure_stage"] = "smoke_readiness_preflight_failure"
+        payload["safe_to_retry"] = not result.artifacts_written
+        payload["replay_hint"] = (
+            "Review the readiness preflight failure and rerun with a safe "
+            "candidate_input_dir and a new empty output_dir."
+        )
+    return LauncherWorkflowResult(
+        workflow="local_asset_smoke_readiness_workflow",
+        output_dir=output_path,
+        complete=result.complete,
+        payload=payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else output_path / LOCAL_ASSET_SMOKE_READINESS_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_local_asset_human_smoke_launcher(
+    candidate_input_dir: Path,
+    output_dir: Path,
+    readiness_report: Path,
+    *,
+    human_approval_id: str,
+    human_approval_phrase: str,
+    recursive: bool = False,
+    include_hidden: bool = False,
+    project_id: str | None = None,
+    max_smoke_files: int = DEFAULT_MAX_SMOKE_FILES,
+    max_smoke_bytes: int = DEFAULT_MAX_SMOKE_BYTES,
+    max_smoke_depth: int = DEFAULT_MAX_SMOKE_DEPTH,
+    previous_scan_output_dir: Path | None = None,
+) -> LauncherWorkflowResult:
+    result = run_local_asset_human_smoke(
+        Path(candidate_input_dir),
+        Path(output_dir),
+        Path(readiness_report),
+        human_approval_id=human_approval_id,
+        human_approval_phrase=human_approval_phrase,
+        recursive=recursive,
+        include_hidden=include_hidden,
+        project_id=project_id,
+        max_smoke_files=max_smoke_files,
+        max_smoke_bytes=max_smoke_bytes,
+        max_smoke_depth=max_smoke_depth,
+        previous_scan_output_dir=previous_scan_output_dir,
+    )
+    return LauncherWorkflowResult(
+        workflow="local_asset_human_smoke_run_workflow",
+        output_dir=result.output_dir,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else result.output_dir / "local_asset_human_smoke_run_summary.md",
+        required_human_approval=True,
+    )
+
+
+def run_local_asset_bounded_smoke_iteration_launcher(
+    promotion_output_dir: Path,
+    candidate_input_dir: Path,
+    readiness_report: Path,
+    output_dir: Path,
+    *,
+    human_signoff_id: str,
+    human_signoff_phrase: str,
+    recursive: bool = False,
+    include_hidden: bool = False,
+    project_id: str | None = None,
+    max_smoke_files: int = DEFAULT_ITERATION_MAX_SMOKE_FILES,
+    max_smoke_bytes: int = DEFAULT_ITERATION_MAX_SMOKE_BYTES,
+    max_smoke_depth: int = DEFAULT_ITERATION_MAX_SMOKE_DEPTH,
+    previous_scan_output_dir: Path | None = None,
+) -> LauncherWorkflowResult:
+    result = run_local_asset_bounded_smoke_iteration(
+        Path(promotion_output_dir),
+        Path(candidate_input_dir),
+        Path(readiness_report),
+        Path(output_dir),
+        human_signoff_id=human_signoff_id,
+        human_signoff_phrase=human_signoff_phrase,
+        recursive=recursive,
+        include_hidden=include_hidden,
+        project_id=project_id,
+        max_smoke_files=max_smoke_files,
+        max_smoke_bytes=max_smoke_bytes,
+        max_smoke_depth=max_smoke_depth,
+        previous_scan_output_dir=previous_scan_output_dir,
+    )
+    return LauncherWorkflowResult(
+        workflow="local_asset_bounded_smoke_iteration_workflow",
+        output_dir=result.output_dir,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else result.output_dir / LOCAL_ASSET_BOUNDED_SMOKE_ITERATION_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_local_asset_smoke_review_packet_launcher(
+    smoke_output_dir: Path,
+    output_dir: Path,
+    *,
+    project_id: str | None = None,
+) -> LauncherWorkflowResult:
+    result = build_local_asset_smoke_review_packet(
+        Path(smoke_output_dir),
+        Path(output_dir),
+        project_id=project_id,
+    )
+    return LauncherWorkflowResult(
+        workflow="local_asset_smoke_review_packet_workflow",
+        output_dir=result.output_dir,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else result.output_dir / LOCAL_ASSET_SMOKE_REVIEW_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_local_asset_smoke_iteration_review_packet_launcher(
+    iteration_output_dir: Path,
+    output_dir: Path,
+    *,
+    project_id: str | None = None,
+) -> LauncherWorkflowResult:
+    result = build_local_asset_smoke_iteration_review_packet(
+        Path(iteration_output_dir),
+        Path(output_dir),
+        project_id=project_id,
+    )
+    return LauncherWorkflowResult(
+        workflow="local_asset_smoke_iteration_review_packet_workflow",
+        output_dir=result.output_dir,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else result.output_dir / LOCAL_ASSET_SMOKE_ITERATION_REVIEW_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_local_asset_smoke_promotion_gate_launcher(
+    review_output_dir: Path,
+    output_dir: Path,
+    *,
+    project_id: str | None = None,
+) -> LauncherWorkflowResult:
+    result = build_local_asset_smoke_promotion_gate(
+        Path(review_output_dir),
+        Path(output_dir),
+        project_id=project_id,
+    )
+    return LauncherWorkflowResult(
+        workflow="local_asset_smoke_promotion_gate_workflow",
+        output_dir=result.output_dir,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else result.output_dir / LOCAL_ASSET_SMOKE_PROMOTION_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_local_asset_iteration_promotion_gate_launcher(
+    iteration_review_output_dir: Path,
+    output_dir: Path,
+    *,
+    project_id: str | None = None,
+) -> LauncherWorkflowResult:
+    result = build_local_asset_iteration_promotion_gate(
+        Path(iteration_review_output_dir),
+        Path(output_dir),
+        project_id=project_id,
+    )
+    return LauncherWorkflowResult(
+        workflow="local_asset_iteration_promotion_gate_workflow",
+        output_dir=result.output_dir,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else result.output_dir / LOCAL_ASSET_ITERATION_PROMOTION_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_local_asset_bounded_smoke_cycle_contract_launcher(
+    readiness_output_dir: Path,
+    smoke_output_dir: Path,
+    smoke_review_output_dir: Path,
+    smoke_promotion_output_dir: Path,
+    iteration_output_dir: Path,
+    iteration_review_output_dir: Path,
+    iteration_promotion_output_dir: Path,
+    output_dir: Path,
+    *,
+    project_id: str | None = None,
+) -> LauncherWorkflowResult:
+    result = build_local_asset_bounded_smoke_cycle_contract(
+        Path(readiness_output_dir),
+        Path(smoke_output_dir),
+        Path(smoke_review_output_dir),
+        Path(smoke_promotion_output_dir),
+        Path(iteration_output_dir),
+        Path(iteration_review_output_dir),
+        Path(iteration_promotion_output_dir),
+        Path(output_dir),
+        project_id=project_id,
+    )
+    return LauncherWorkflowResult(
+        workflow="local_asset_bounded_smoke_cycle_contract_workflow",
+        output_dir=result.output_dir,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else result.output_dir / LOCAL_ASSET_BOUNDED_SMOKE_CYCLE_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_local_asset_bounded_smoke_cycle_human_review_launcher(
+    cycle_contract_output_dir: Path,
+    output_dir: Path,
+    *,
+    human_review_id: str,
+    human_reviewer_id: str,
+    human_decision: str,
+    human_signoff_phrase: str,
+    project_id: str | None = None,
+    human_review_notes: str | None = None,
+) -> LauncherWorkflowResult:
+    result = build_local_asset_bounded_smoke_cycle_human_review(
+        Path(cycle_contract_output_dir),
+        Path(output_dir),
+        human_review_id,
+        human_reviewer_id,
+        human_decision,
+        human_signoff_phrase,
+        project_id=project_id,
+        human_review_notes=human_review_notes,
+    )
+    return LauncherWorkflowResult(
+        workflow="local_asset_bounded_smoke_cycle_human_review_workflow",
+        output_dir=result.output_dir,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else result.output_dir
+        / LOCAL_ASSET_BOUNDED_SMOKE_CYCLE_HUMAN_REVIEW_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_local_asset_next_bounded_smoke_iteration_admission_launcher(
+    cycle_human_review_output_dir: Path,
+    output_dir: Path,
+    *,
+    project_id: str | None = None,
+    requested_next_iteration_id: str | None = None,
+    operator_notes: str | None = None,
+) -> LauncherWorkflowResult:
+    result = build_local_asset_next_bounded_smoke_iteration_admission(
+        Path(cycle_human_review_output_dir),
+        Path(output_dir),
+        project_id=project_id,
+        requested_next_iteration_id=requested_next_iteration_id,
+        operator_notes=operator_notes,
+    )
+    return LauncherWorkflowResult(
+        workflow="local_asset_next_bounded_smoke_iteration_admission_workflow",
+        output_dir=result.output_dir,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else result.output_dir
+        / LOCAL_ASSET_NEXT_BOUNDED_SMOKE_ITERATION_ADMISSION_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_local_asset_next_bounded_smoke_iteration_execution_request_launcher(
+    next_admission_output_dir: Path,
+    output_dir: Path,
+    *,
+    requested_next_iteration_id: str,
+    requested_candidate_input_dir: str,
+    requested_next_iteration_output_dir: str,
+    requested_max_files: int,
+    requested_max_total_bytes: int,
+    requested_max_depth: int,
+    project_id: str | None = None,
+    request_id: str | None = None,
+    operator_id: str | None = None,
+    operator_notes: str | None = None,
+    requested_compare_previous_scan_manifest_path: str | None = None,
+    requested_previous_iteration_artifact_index_path: str | None = None,
+) -> LauncherWorkflowResult:
+    result = build_local_asset_next_bounded_smoke_iteration_execution_request(
+        Path(next_admission_output_dir),
+        Path(output_dir),
+        requested_next_iteration_id=requested_next_iteration_id,
+        requested_candidate_input_dir=requested_candidate_input_dir,
+        requested_next_iteration_output_dir=requested_next_iteration_output_dir,
+        requested_max_files=requested_max_files,
+        requested_max_total_bytes=requested_max_total_bytes,
+        requested_max_depth=requested_max_depth,
+        project_id=project_id,
+        request_id=request_id,
+        operator_id=operator_id,
+        operator_notes=operator_notes,
+        requested_compare_previous_scan_manifest_path=(
+            requested_compare_previous_scan_manifest_path
+        ),
+        requested_previous_iteration_artifact_index_path=(
+            requested_previous_iteration_artifact_index_path
+        ),
+    )
+    return LauncherWorkflowResult(
+        workflow="local_asset_next_bounded_smoke_iteration_execution_request_workflow",
+        output_dir=result.output_dir,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else result.output_dir
+        / LOCAL_ASSET_NEXT_BOUNDED_SMOKE_ITERATION_EXECUTION_REQUEST_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_local_asset_next_bounded_smoke_iteration_runner_admission_launcher(
+    execution_request_output_dir: Path,
+    output_dir: Path,
+    *,
+    runner_admission_id: str,
+    runner_operator_id: str,
+    runner_operator_acknowledgement_phrase: str,
+    admitted_runner_id: str,
+    admitted_runner_version: str,
+    admitted_max_files: int,
+    admitted_max_total_bytes: int,
+    admitted_max_depth: int,
+    project_id: str | None = None,
+    operator_notes: str | None = None,
+    runner_environment_label: str | None = None,
+) -> LauncherWorkflowResult:
+    result = build_local_asset_next_bounded_smoke_iteration_runner_admission(
+        Path(execution_request_output_dir),
+        Path(output_dir),
+        runner_admission_id=runner_admission_id,
+        runner_operator_id=runner_operator_id,
+        runner_operator_acknowledgement_phrase=(
+            runner_operator_acknowledgement_phrase
+        ),
+        admitted_runner_id=admitted_runner_id,
+        admitted_runner_version=admitted_runner_version,
+        admitted_max_files=admitted_max_files,
+        admitted_max_total_bytes=admitted_max_total_bytes,
+        admitted_max_depth=admitted_max_depth,
+        project_id=project_id,
+        operator_notes=operator_notes,
+        runner_environment_label=runner_environment_label,
+    )
+    return LauncherWorkflowResult(
+        workflow="local_asset_next_bounded_smoke_iteration_runner_admission_workflow",
+        output_dir=result.output_dir,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else result.output_dir
+        / LOCAL_ASSET_NEXT_BOUNDED_SMOKE_ITERATION_RUNNER_ADMISSION_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_local_asset_next_bounded_smoke_iteration_runner_launcher(
+    runner_admission_output_dir: Path,
+    runner_output_dir: Path,
+    actual_next_iteration_output_dir: Path,
+    *,
+    runner_execution_id: str,
+    runner_operator_id: str,
+    runner_execution_acknowledgement_phrase: str,
+    project_id: str | None = None,
+    operator_notes: str | None = None,
+) -> LauncherWorkflowResult:
+    result = build_local_asset_next_bounded_smoke_iteration_runner(
+        Path(runner_admission_output_dir),
+        Path(runner_output_dir),
+        Path(actual_next_iteration_output_dir),
+        runner_execution_id=runner_execution_id,
+        runner_operator_id=runner_operator_id,
+        runner_execution_acknowledgement_phrase=(
+            runner_execution_acknowledgement_phrase
+        ),
+        project_id=project_id,
+        operator_notes=operator_notes,
+    )
+    return LauncherWorkflowResult(
+        workflow="local_asset_next_bounded_smoke_iteration_runner_workflow",
+        output_dir=result.runner_output_dir,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.runner_summary_path
+        if result.runner_summary_path is not None
+        else result.runner_output_dir
+        / LOCAL_ASSET_NEXT_BOUNDED_SMOKE_ITERATION_RUNNER_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_local_asset_next_bounded_smoke_iteration_run_review_packet_launcher(
+    runner_output_dir: Path,
+    actual_next_iteration_output_dir: Path,
+    output_dir: Path,
+    *,
+    review_packet_id: str,
+    project_id: str | None = None,
+    reviewer_id: str | None = None,
+    operator_notes: str | None = None,
+) -> LauncherWorkflowResult:
+    result = build_local_asset_next_bounded_smoke_iteration_run_review_packet(
+        Path(runner_output_dir),
+        Path(actual_next_iteration_output_dir),
+        Path(output_dir),
+        review_packet_id=review_packet_id,
+        project_id=project_id,
+        reviewer_id=reviewer_id,
+        operator_notes=operator_notes,
+    )
+    return LauncherWorkflowResult(
+        workflow=(
+            "local_asset_next_bounded_smoke_iteration_run_review_packet_workflow"
+        ),
+        output_dir=result.output_dir,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.review_packet_summary_path
+        if result.review_packet_summary_path is not None
+        else result.output_dir
+        / LOCAL_ASSET_NEXT_BOUNDED_SMOKE_ITERATION_RUN_REVIEW_PACKET_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_local_asset_next_bounded_smoke_iteration_run_promotion_gate_launcher(
+    run_review_packet_output_dir: Path,
+    output_dir: Path,
+    *,
+    promotion_gate_id: str,
+    project_id: str | None = None,
+    reviewer_id: str | None = None,
+    operator_notes: str | None = None,
+) -> LauncherWorkflowResult:
+    result = build_local_asset_next_bounded_smoke_iteration_run_promotion_gate(
+        Path(run_review_packet_output_dir),
+        Path(output_dir),
+        promotion_gate_id=promotion_gate_id,
+        project_id=project_id,
+        reviewer_id=reviewer_id,
+        operator_notes=operator_notes,
+    )
+    return LauncherWorkflowResult(
+        workflow=(
+            "local_asset_next_bounded_smoke_iteration_run_promotion_gate_workflow"
+        ),
+        output_dir=result.output_dir,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.promotion_gate_summary_path
+        if result.promotion_gate_summary_path is not None
+        else result.output_dir
+        / LOCAL_ASSET_NEXT_BOUNDED_SMOKE_ITERATION_RUN_PROMOTION_GATE_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_local_asset_next_bounded_smoke_cycle_contract_from_run_promotion_gate_launcher(
+    run_promotion_gate_output_dir: Path,
+    output_dir: Path,
+    *,
+    cycle_contract_id: str,
+    project_id: str | None = None,
+    reviewer_id: str | None = None,
+    operator_notes: str | None = None,
+) -> LauncherWorkflowResult:
+    result = build_local_asset_next_bounded_smoke_cycle_contract_from_run_promotion_gate(
+        Path(run_promotion_gate_output_dir),
+        Path(output_dir),
+        cycle_contract_id=cycle_contract_id,
+        project_id=project_id,
+        reviewer_id=reviewer_id,
+        operator_notes=operator_notes,
+    )
+    return LauncherWorkflowResult(
+        workflow=(
+            "local_asset_next_bounded_smoke_cycle_contract_from_run_promotion_gate_workflow"
+        ),
+        output_dir=result.output_dir,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.cycle_contract_summary_path
+        if result.cycle_contract_summary_path is not None
+        else result.output_dir
+        / LOCAL_ASSET_NEXT_BOUNDED_SMOKE_CYCLE_CONTRACT_FROM_RUN_PROMOTION_GATE_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_local_asset_next_bounded_smoke_cycle_contract_human_review_from_run_promotion_gate_launcher(
+    cycle_contract_output_dir: Path,
+    output_dir: Path,
+    *,
+    human_review_id: str,
+    human_decision: str,
+    human_signoff_phrase: str,
+    project_id: str | None = None,
+    reviewer_id: str | None = None,
+    operator_notes: str | None = None,
+) -> LauncherWorkflowResult:
+    result = (
+        build_local_asset_next_bounded_smoke_cycle_contract_human_review_from_run_promotion_gate(
+            Path(cycle_contract_output_dir),
+            Path(output_dir),
+            human_review_id=human_review_id,
+            human_decision=human_decision,
+            human_signoff_phrase=human_signoff_phrase,
+            project_id=project_id,
+            reviewer_id=reviewer_id,
+            operator_notes=operator_notes,
+        )
+    )
+    return LauncherWorkflowResult(
+        workflow=(
+            "local_asset_next_bounded_smoke_cycle_contract_human_review_from_run_promotion_gate_workflow"
+        ),
+        output_dir=result.output_dir,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.human_review_summary_path
+        if result.human_review_summary_path is not None
+        else result.output_dir
+        / LOCAL_ASSET_NEXT_BOUNDED_SMOKE_CYCLE_CONTRACT_HUMAN_REVIEW_FROM_RUN_PROMOTION_GATE_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def _asset_scan_failure_result(
+    *,
+    input_path: Path,
+    output_path: Path,
+    recursive: bool,
+    include_hidden: bool,
+    project_id: str | None,
+    previous_scan_output_dir: Path | None = None,
+    failure_stage: str,
+    error_type: str,
+    error_message: str,
+    write_failure_bundle_artifacts: bool,
+    output_pollution_detected: bool | None = None,
+) -> LauncherWorkflowResult:
+    failure_summary_path = output_path / ASSET_SCAN_FAILURE_SUMMARY_FILE
+    if write_failure_bundle_artifacts:
+        try:
+            failure_artifacts = write_asset_scan_failure_bundle(
+                input_dir=input_path,
+                output_dir=output_path,
+                project_id=project_id,
+                recursive=recursive,
+                include_hidden=include_hidden,
+                failure_stage=failure_stage,
+                error_type=error_type,
+                error_message=error_message,
+                output_pollution_detected=output_pollution_detected,
+            )
+            payload = failure_artifacts.cli_payload
+            failure_summary_path = failure_artifacts.failure_summary_path
+        except ValueError:
+            payload = asset_scan_failure_cli_payload(
+                input_dir=input_path,
+                output_dir=output_path,
+                project_id=project_id,
+                recursive=recursive,
+                include_hidden=include_hidden,
+                failure_stage=failure_stage,
+                error_type=error_type,
+                error_message=error_message,
+                output_pollution_detected=output_pollution_detected,
+            )
+    else:
+        payload = asset_scan_failure_cli_payload(
+            input_dir=input_path,
+            output_dir=output_path,
+            project_id=project_id,
+            recursive=recursive,
+            include_hidden=include_hidden,
+            failure_stage=failure_stage,
+            error_type=error_type,
+            error_message=error_message,
+            output_pollution_detected=output_pollution_detected,
+        )
+
+    payload["previous_scan_output_dir"] = (
+        None
+        if previous_scan_output_dir is None
+        else Path(previous_scan_output_dir).as_posix()
+    )
+    payload["incremental_cache_execution_performed"] = False
+    payload["incremental_automatic_skip_performed"] = False
+    return LauncherWorkflowResult(
+        workflow="local_asset_scan_workflow",
+        output_dir=output_path,
+        complete=False,
+        payload=payload,
+        summary_path=failure_summary_path,
+        required_human_approval=True,
+    )
+
+
+def _asset_scan_can_write_failure_artifacts(output_path: Path, input_path: Path) -> bool:
+    if not output_path.exists() or not output_path.is_dir() or output_path.is_symlink():
+        return False
+    if input_path.exists() and _path_is_inside(output_path, input_path):
+        return False
+    failure_bundle_path, failure_summary_path = asset_scan_failure_artifact_paths(
+        output_path
+    )
+    if failure_bundle_path.exists() or failure_summary_path.exists():
+        return False
+    return True
+
+
+def _asset_scan_collision_message(output_path: Path, collision_stage: str) -> str:
+    status = asset_scan_output_status(output_path)
+    written = status["partial_outputs_written"]
+    if collision_stage == "preflight_artifact_index_collision":
+        for file_name in (_ARTIFACT_INDEX_FILE, _ARTIFACT_INDEX_MANIFEST_FILE):
+            if file_name in written:
+                return "asset scan artifact index output already exists: " + file_name
+    if collision_stage == "preflight_sqlite_index_collision":
+        for file_name in (
+            LOCAL_ASSET_SQLITE_INDEX_FILE,
+            LOCAL_ASSET_SQLITE_INDEX_MANIFEST_FILE,
+            LOCAL_ASSET_SQLITE_QUERY_SUMMARY_FILE,
+        ):
+            if file_name in written:
+                return "local asset sqlite index output already exists: " + file_name
+    if collision_stage == "preflight_incremental_output_collision":
+        for file_name in (
+            LOCAL_ASSET_INCREMENTAL_PLAN_FILE,
+            LOCAL_ASSET_INCREMENTAL_MANIFEST_FILE,
+            LOCAL_ASSET_INCREMENTAL_SUMMARY_FILE,
+        ):
+            if file_name in written:
+                return "local asset incremental output already exists: " + file_name
+    for file_name in (
+        _SUMMARY_FILE,
+        ASSET_SCAN_RUN_RECEIPT_FILE,
+        ASSET_SCAN_FAILURE_BUNDLE_FILE,
+        ASSET_SCAN_FAILURE_SUMMARY_FILE,
+    ):
+        if file_name in written:
+            return "asset scan launcher output already exists: " + file_name
+    return "asset scan launcher output already exists"
 
 
 def run_model_fixture_launcher(
@@ -573,6 +1962,9 @@ def run_task_graph_launcher(
         "task_graph_replay_manifest_path": None
         if result.replay_manifest_path is None
         else result.replay_manifest_path.as_posix(),
+        "task_graph_artifact_outputs_path": None
+        if result.artifact_outputs_manifest_path is None
+        else result.artifact_outputs_manifest_path.as_posix(),
         "task_graph_failure_bundle_path": None
         if result.failure_bundle_path is None
         else result.failure_bundle_path.as_posix(),
@@ -595,6 +1987,652 @@ def run_task_graph_launcher(
         complete=result.success,
         payload=payload,
         summary_path=summary_path,
+        required_human_approval=True,
+    )
+
+
+def run_github_capability_intake_packet_launcher(
+    candidate_manifest: Path,
+    output_dir: Path,
+    intake_id: str,
+    *,
+    candidate_repo_dir: Path | None = None,
+    project_id: str | None = None,
+    reviewer_id: str | None = None,
+    operator_notes: str | None = None,
+) -> LauncherWorkflowResult:
+    output_path = Path(output_dir)
+    result = build_github_capability_intake_packet(
+        Path(candidate_manifest),
+        output_path,
+        intake_id,
+        candidate_repo_dir=None
+        if candidate_repo_dir is None
+        else Path(candidate_repo_dir),
+        project_id=project_id,
+        reviewer_id=reviewer_id,
+        operator_notes=operator_notes,
+    )
+    return LauncherWorkflowResult(
+        workflow="github_capability_intake_packet_workflow",
+        output_dir=output_path,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else output_path / GITHUB_CAPABILITY_INTAKE_PACKET_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_playwright_local_fixture_sandbox_smoke_launcher(
+    selection_matrix: Path,
+    playwright_candidate_manifest: Path,
+    output_dir: Path,
+    smoke_id: str,
+    *,
+    project_id: str | None = None,
+    reviewer_id: str | None = None,
+    operator_notes: str | None = None,
+    node_command: Path | None = None,
+    runner_script: Path | None = None,
+    execute_local_fixture_smoke: bool = False,
+) -> LauncherWorkflowResult:
+    output_path = Path(output_dir)
+    result = run_playwright_local_fixture_sandbox_smoke(
+        Path(selection_matrix),
+        Path(playwright_candidate_manifest),
+        output_path,
+        smoke_id,
+        project_id=project_id,
+        reviewer_id=reviewer_id,
+        operator_notes=operator_notes,
+        node_command=None if node_command is None else Path(node_command),
+        runner_script=None if runner_script is None else Path(runner_script),
+        execute_local_fixture_smoke=execute_local_fixture_smoke,
+    )
+    return LauncherWorkflowResult(
+        workflow="playwright_local_fixture_sandbox_smoke_workflow",
+        output_dir=output_path,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else output_path / PLAYWRIGHT_LOCAL_FIXTURE_SANDBOX_SMOKE_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_bounded_playwright_worker_adapter_draft_launcher(
+    selection_matrix: Path,
+    playwright_candidate_manifest: Path,
+    output_dir: Path,
+    adapter_draft_id: str,
+    *,
+    project_id: str | None = None,
+    reviewer_id: str | None = None,
+    operator_notes: str | None = None,
+    node_command: Path | None = None,
+    runner_script: Path | None = None,
+    execute_local_fixture_smoke: bool = False,
+) -> LauncherWorkflowResult:
+    output_path = Path(output_dir)
+    result = run_bounded_playwright_worker_adapter_draft(
+        Path(selection_matrix),
+        Path(playwright_candidate_manifest),
+        output_path,
+        adapter_draft_id,
+        project_id=project_id,
+        reviewer_id=reviewer_id,
+        operator_notes=operator_notes,
+        node_command=None if node_command is None else Path(node_command),
+        runner_script=None if runner_script is None else Path(runner_script),
+        execute_local_fixture_smoke=execute_local_fixture_smoke,
+    )
+    return LauncherWorkflowResult(
+        workflow="bounded_playwright_worker_adapter_draft_workflow",
+        output_dir=output_path,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else output_path / BOUNDED_PLAYWRIGHT_WORKER_ADAPTER_DRAFT_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_operator_provided_playwright_execution_receipt_launcher(
+    selection_matrix: Path,
+    playwright_candidate_manifest: Path,
+    output_dir: Path,
+    receipt_id: str,
+    *,
+    node_command: Path | None = None,
+    runner_script: Path | None = None,
+    operator_attestation: str | None = None,
+    project_id: str | None = None,
+    reviewer_id: str | None = None,
+    operator_notes: str | None = None,
+    expected_node_version: str | None = None,
+    expected_playwright_source: str | None = None,
+    plan_only: bool = False,
+) -> LauncherWorkflowResult:
+    output_path = Path(output_dir)
+    result = run_operator_provided_playwright_execution_receipt_capability(
+        Path(selection_matrix),
+        Path(playwright_candidate_manifest),
+        output_path,
+        receipt_id,
+        node_command=None if node_command is None else Path(node_command),
+        runner_script=None if runner_script is None else Path(runner_script),
+        operator_attestation=operator_attestation,
+        project_id=project_id,
+        reviewer_id=reviewer_id,
+        operator_notes=operator_notes,
+        expected_node_version=expected_node_version,
+        expected_playwright_source=expected_playwright_source,
+        plan_only=plan_only,
+    )
+    return LauncherWorkflowResult(
+        workflow="operator_provided_playwright_execution_receipt_workflow",
+        output_dir=output_path,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else output_path / OPERATOR_PROVIDED_PLAYWRIGHT_EXECUTION_RECEIPT_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_local_fixture_playwright_adapter_admission_gate_launcher(
+    receipt_dir: Path,
+    output_dir: Path,
+    gate_id: str,
+    *,
+    review_attestation: str | None = None,
+    project_id: str | None = None,
+    reviewer_id: str | None = None,
+    operator_notes: str | None = None,
+    aggregation_result: Path | None = None,
+    require_aggregation_evidence: bool = False,
+    require_regression_evidence: bool = False,
+    plan_only: bool = False,
+) -> LauncherWorkflowResult:
+    output_path = Path(output_dir)
+    result = run_local_fixture_playwright_adapter_admission_gate_capability(
+        Path(receipt_dir),
+        output_path,
+        gate_id,
+        review_attestation=review_attestation,
+        project_id=project_id,
+        reviewer_id=reviewer_id,
+        operator_notes=operator_notes,
+        aggregation_result=None
+        if aggregation_result is None
+        else Path(aggregation_result),
+        require_aggregation_evidence=require_aggregation_evidence,
+        require_regression_evidence=require_regression_evidence,
+        plan_only=plan_only,
+    )
+    return LauncherWorkflowResult(
+        workflow="local_fixture_playwright_adapter_admission_gate_workflow",
+        output_dir=output_path,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else output_path / LOCAL_FIXTURE_PLAYWRIGHT_ADAPTER_ADMISSION_GATE_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_local_only_playwright_fixture_scenario_suite_launcher(
+    selection_matrix: Path,
+    playwright_candidate_manifest: Path,
+    output_dir: Path,
+    suite_id: str,
+    *,
+    node_command: Path | None = None,
+    runner_script: Path | None = None,
+    operator_attestation: str | None = None,
+    project_id: str | None = None,
+    reviewer_id: str | None = None,
+    operator_notes: str | None = None,
+    expected_node_version: str | None = None,
+    expected_playwright_source: str | None = None,
+    scenario_set: str = "core",
+    plan_only: bool = False,
+) -> LauncherWorkflowResult:
+    output_path = Path(output_dir)
+    result = run_local_only_playwright_fixture_scenario_suite_capability(
+        Path(selection_matrix),
+        Path(playwright_candidate_manifest),
+        output_path,
+        suite_id,
+        node_command=None if node_command is None else Path(node_command),
+        runner_script=None if runner_script is None else Path(runner_script),
+        operator_attestation=operator_attestation,
+        project_id=project_id,
+        reviewer_id=reviewer_id,
+        operator_notes=operator_notes,
+        expected_node_version=expected_node_version,
+        expected_playwright_source=expected_playwright_source,
+        scenario_set=scenario_set,
+        plan_only=plan_only,
+    )
+    return LauncherWorkflowResult(
+        workflow="local_only_playwright_fixture_scenario_suite_workflow",
+        output_dir=output_path,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else output_path / LOCAL_ONLY_PLAYWRIGHT_FIXTURE_SCENARIO_SUITE_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_playwright_local_admission_receipt_aggregation_launcher(
+    suite_run_dirs_manifest: Path,
+    output_dir: Path,
+    aggregation_id: str,
+    *,
+    review_attestation: str | None = None,
+    project_id: str | None = None,
+    reviewer_id: str | None = None,
+    operator_notes: str | None = None,
+    minimum_suite_runs: int = 2,
+    minimum_pass_rate_bps: int = 10000,
+    maximum_flaky_rate_bps: int = 0,
+    maximum_evidence_age_days: int = 30,
+    plan_only: bool = False,
+) -> LauncherWorkflowResult:
+    output_path = Path(output_dir)
+    result = run_playwright_local_admission_receipt_aggregation_capability(
+        Path(suite_run_dirs_manifest),
+        output_path,
+        aggregation_id,
+        review_attestation=review_attestation,
+        project_id=project_id,
+        reviewer_id=reviewer_id,
+        operator_notes=operator_notes,
+        minimum_suite_runs=minimum_suite_runs,
+        minimum_pass_rate_bps=minimum_pass_rate_bps,
+        maximum_flaky_rate_bps=maximum_flaky_rate_bps,
+        maximum_evidence_age_days=maximum_evidence_age_days,
+        plan_only=plan_only,
+    )
+    return LauncherWorkflowResult(
+        workflow="playwright_local_admission_receipt_aggregation_workflow",
+        output_dir=output_path,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else output_path / PLAYWRIGHT_LOCAL_ADMISSION_RECEIPT_AGGREGATION_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_admission_gated_local_adapter_registry_promotion_launcher(
+    admission_gate_decision: Path,
+    output_dir: Path,
+    promotion_id: str,
+    *,
+    review_attestation: str | None = None,
+    project_id: str | None = None,
+    reviewer_id: str | None = None,
+    operator_notes: str | None = None,
+    registry_output: Path | None = None,
+) -> LauncherWorkflowResult:
+    output_path = Path(output_dir)
+    result = run_admission_gated_local_adapter_registry_promotion_capability(
+        Path(admission_gate_decision),
+        output_path,
+        promotion_id,
+        review_attestation=review_attestation,
+        project_id=project_id,
+        reviewer_id=reviewer_id,
+        operator_notes=operator_notes,
+        registry_output=None if registry_output is None else Path(registry_output),
+    )
+    return LauncherWorkflowResult(
+        workflow="admission_gated_local_adapter_registry_promotion_workflow",
+        output_dir=output_path,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else output_path
+        / ADMISSION_GATED_LOCAL_ADAPTER_REGISTRY_PROMOTION_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_local_fixture_adapter_usage_receipt_launcher(
+    promotion_result: Path,
+    output_dir: Path,
+    usage_receipt_id: str,
+    *,
+    review_attestation: str | None = None,
+    local_fixture_reference: str | None = None,
+    project_id: str | None = None,
+    reviewer_id: str | None = None,
+    operator_notes: str | None = None,
+    registry_entry: Path | None = None,
+) -> LauncherWorkflowResult:
+    output_path = Path(output_dir)
+    result = run_local_fixture_adapter_usage_receipt_capability(
+        Path(promotion_result),
+        output_path,
+        usage_receipt_id,
+        review_attestation=review_attestation,
+        local_fixture_reference=local_fixture_reference,
+        project_id=project_id,
+        reviewer_id=reviewer_id,
+        operator_notes=operator_notes,
+        registry_entry=None if registry_entry is None else Path(registry_entry),
+    )
+    return LauncherWorkflowResult(
+        workflow="local_fixture_adapter_usage_receipt_workflow",
+        output_dir=output_path,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else output_path / LOCAL_FIXTURE_ADAPTER_USAGE_RECEIPT_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_local_fixture_adapter_dry_run_invocation_plan_launcher(
+    usage_receipt: Path,
+    output_dir: Path,
+    invocation_plan_id: str,
+    *,
+    review_attestation: str | None = None,
+    project_id: str | None = None,
+    reviewer_id: str | None = None,
+    operator_notes: str | None = None,
+) -> LauncherWorkflowResult:
+    output_path = Path(output_dir)
+    result = run_local_fixture_adapter_dry_run_invocation_plan_capability(
+        Path(usage_receipt),
+        output_path,
+        invocation_plan_id,
+        review_attestation=review_attestation,
+        project_id=project_id,
+        reviewer_id=reviewer_id,
+        operator_notes=operator_notes,
+    )
+    return LauncherWorkflowResult(
+        workflow="local_fixture_adapter_dry_run_invocation_plan_workflow",
+        output_dir=output_path,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else output_path / LOCAL_FIXTURE_ADAPTER_DRY_RUN_INVOCATION_PLAN_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_local_fixture_adapter_execution_gate_plan_launcher(
+    dry_run_plan: Path,
+    output_dir: Path,
+    execution_gate_plan_id: str,
+    *,
+    review_attestation: str | None = None,
+    project_id: str | None = None,
+    reviewer_id: str | None = None,
+    operator_notes: str | None = None,
+) -> LauncherWorkflowResult:
+    output_path = Path(output_dir)
+    result = run_local_fixture_adapter_execution_gate_plan_capability(
+        Path(dry_run_plan),
+        output_path,
+        execution_gate_plan_id,
+        review_attestation=review_attestation,
+        project_id=project_id,
+        reviewer_id=reviewer_id,
+        operator_notes=operator_notes,
+    )
+    return LauncherWorkflowResult(
+        workflow="local_fixture_adapter_execution_gate_plan_workflow",
+        output_dir=output_path,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else output_path / LOCAL_FIXTURE_ADAPTER_EXECUTION_GATE_PLAN_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_local_fixture_human_approval_artifact_launcher(
+    execution_gate_plan: Path,
+    output_dir: Path,
+    approval_artifact_id: str,
+    reviewer_id: str,
+    approval_attestation: str,
+    *,
+    project_id: str | None = None,
+    operator_notes: str | None = None,
+) -> LauncherWorkflowResult:
+    output_path = Path(output_dir)
+    result = run_local_fixture_human_approval_artifact_capability(
+        Path(execution_gate_plan),
+        output_path,
+        approval_artifact_id,
+        reviewer_id,
+        approval_attestation,
+        project_id=project_id,
+        operator_notes=operator_notes,
+    )
+    return LauncherWorkflowResult(
+        workflow="local_fixture_human_approval_artifact_workflow",
+        output_dir=output_path,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else output_path / LOCAL_FIXTURE_HUMAN_APPROVAL_ARTIFACT_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_local_fixture_runner_contract_draft_launcher(
+    output_dir: Path,
+    runner_contract_id: str,
+    *,
+    review_attestation: str | None = None,
+    project_id: str | None = None,
+    reviewer_id: str | None = None,
+    operator_notes: str | None = None,
+) -> LauncherWorkflowResult:
+    output_path = Path(output_dir)
+    result = run_local_fixture_runner_contract_draft_capability(
+        output_path,
+        runner_contract_id,
+        review_attestation=review_attestation,
+        project_id=project_id,
+        reviewer_id=reviewer_id,
+        operator_notes=operator_notes,
+    )
+    return LauncherWorkflowResult(
+        workflow="local_fixture_runner_contract_draft_workflow",
+        output_dir=output_path,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else output_path / LOCAL_FIXTURE_RUNNER_CONTRACT_DRAFT_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_local_fixture_runner_stub_admission_gate_launcher(
+    human_approval_artifact_result: Path,
+    runner_contract_draft_result: Path,
+    output_dir: Path,
+    gate_id: str,
+    reviewer_id: str,
+    review_attestation: str | None,
+) -> LauncherWorkflowResult:
+    output_path = Path(output_dir)
+    result = run_local_fixture_runner_stub_admission_gate_capability(
+        Path(human_approval_artifact_result),
+        Path(runner_contract_draft_result),
+        output_path,
+        gate_id,
+        reviewer_id,
+        review_attestation,
+    )
+    return LauncherWorkflowResult(
+        workflow="local_fixture_runner_stub_admission_gate_workflow",
+        output_dir=output_path,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else output_path / LOCAL_FIXTURE_RUNNER_STUB_ADMISSION_GATE_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_local_fixture_runner_receipt_contract_draft_launcher(
+    output_dir: Path,
+    receipt_contract_id: str,
+    reviewer_id: str,
+    review_attestation: str | None,
+    *,
+    project_id: str | None = None,
+    operator_notes: str | None = None,
+) -> LauncherWorkflowResult:
+    output_path = Path(output_dir)
+    result = run_local_fixture_runner_receipt_contract_draft_capability(
+        output_path,
+        receipt_contract_id,
+        reviewer_id,
+        review_attestation,
+        project_id=project_id,
+        operator_notes=operator_notes,
+    )
+    return LauncherWorkflowResult(
+        workflow="local_fixture_runner_receipt_contract_draft_workflow",
+        output_dir=output_path,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else output_path
+        / LOCAL_FIXTURE_RUNNER_RECEIPT_CONTRACT_DRAFT_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_local_fixture_runner_receipt_preflight_verifier_launcher(
+    runner_stub_admission_gate_result: Path,
+    runner_receipt_contract_draft_result: Path,
+    human_approval_artifact_result: Path,
+    output_dir: Path,
+    preflight_id: str,
+    reviewer_id: str,
+    review_attestation: str | None,
+    *,
+    project_id: str | None = None,
+    operator_notes: str | None = None,
+) -> LauncherWorkflowResult:
+    output_path = Path(output_dir)
+    result = run_local_fixture_runner_receipt_preflight_verifier_capability(
+        Path(runner_stub_admission_gate_result),
+        Path(runner_receipt_contract_draft_result),
+        Path(human_approval_artifact_result),
+        output_path,
+        preflight_id,
+        reviewer_id,
+        review_attestation,
+        project_id=project_id,
+        operator_notes=operator_notes,
+    )
+    return LauncherWorkflowResult(
+        workflow="local_fixture_runner_receipt_preflight_verifier_workflow",
+        output_dir=output_path,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else output_path
+        / LOCAL_FIXTURE_RUNNER_RECEIPT_PREFLIGHT_VERIFIER_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_local_fixture_runner_receipt_metadata_artifact_launcher(
+    runner_receipt_preflight_result: Path,
+    output_dir: Path,
+    runner_receipt_id: str,
+    reviewer_id: str,
+    review_attestation: str | None,
+    *,
+    project_id: str | None = None,
+    operator_notes: str | None = None,
+) -> LauncherWorkflowResult:
+    output_path = Path(output_dir)
+    result = run_local_fixture_runner_receipt_metadata_artifact_capability(
+        Path(runner_receipt_preflight_result),
+        output_path,
+        runner_receipt_id,
+        reviewer_id,
+        review_attestation,
+        project_id=project_id,
+        operator_notes=operator_notes,
+    )
+    return LauncherWorkflowResult(
+        workflow="local_fixture_runner_receipt_metadata_artifact_workflow",
+        output_dir=output_path,
+        complete=result.complete,
+        payload=result.payload,
+        summary_path=result.summary_path
+        if result.summary_path is not None
+        else output_path
+        / LOCAL_FIXTURE_RUNNER_RECEIPT_METADATA_ARTIFACT_SUMMARY_FILE,
+        required_human_approval=True,
+    )
+
+
+def run_real_local_runner_boundary_launcher(
+    command_id: str,
+    output_dir: Path,
+    approval_artifact_path: Path,
+    run_id: str,
+    *,
+    timeout_seconds: float,
+    repo_root: Path | None = None,
+    repo_revision: str = "not_provided",
+) -> LauncherWorkflowResult:
+    result = run_real_local_runner_boundary_capability(
+        command_id,
+        Path(output_dir),
+        Path(approval_artifact_path),
+        run_id,
+        timeout_seconds=timeout_seconds,
+        repo_root=repo_root,
+        repo_revision=repo_revision,
+    )
+    payload = result.to_cli_payload()
+    payload["input_mutation_performed"] = False
+    payload["network_access_performed"] = False
+    payload["browser_open_performed"] = False
+    payload["provider_api_called"] = False
+    payload["production_autonomy_enabled"] = False
+    return LauncherWorkflowResult(
+        workflow="real_local_runner_boundary_workflow",
+        output_dir=result.output_dir,
+        complete=result.complete,
+        payload=payload,
+        summary_path=result.summary_path,
         required_human_approval=True,
     )
 
@@ -677,10 +2715,26 @@ def _require_no_overwrite(path):
         raise ValueError("launcher output already exists")
 
 
-def _write_summary(summary_path, *, title, lines):
+def _write_summary(
+    summary_path,
+    *,
+    title,
+    lines,
+    boundary="local fixture only; human approval required.",
+):
     _require_no_overwrite(summary_path)
     body = ["# " + title, ""]
     body.extend(lines)
     body.append("")
-    body.append("Boundary: local fixture only; human approval required.")
+    body.append("Boundary: " + boundary)
     write_markdown_atomically(summary_path, "\n".join(body))
+
+
+def _path_is_inside(candidate_path: Path, root_path: Path) -> bool:
+    try:
+        Path(candidate_path).resolve(strict=False).relative_to(
+            Path(root_path).resolve(strict=True)
+        )
+    except (OSError, ValueError):
+        return False
+    return True

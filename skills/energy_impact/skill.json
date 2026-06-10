@@ -1,0 +1,33 @@
+{
+  "commands": [
+    "python3 seos.py rpc invoke examples/rpc/houdini_smoke_cache_test.json --json",
+    "python3 seos.py rpc invoke examples/rpc/comfyui_submit_workflow.json --json",
+    "python3 seos.py rpc invoke examples/rpc/davinci_project_probe.json --json",
+    "python3 seos.py shot run <shot_id> --runtime-root work/energy_impact_001/runtime --json",
+    "python3 seos.py package shot <shot_id> --runtime-root work/energy_impact_001/runtime --package-root work/energy_impact_001/packages --json",
+    "python3 seos.py review create <shot_id> --runtime-root work/energy_impact_001/runtime --package-root work/energy_impact_001/packages --output-root work/energy_impact_001/review_artifacts --json"
+  ],
+  "description": "Reusable template for local energy-impact shots using Houdini cache output, ComfyUI image output, DaVinci probe evidence, SEOS packages, and review artifacts.",
+  "name": "energy_impact",
+  "runbook": "skills/energy_impact/runbook.md",
+  "schema_version": "seos.skill.v1",
+  "template_refs": [
+    "examples/projects/energy_impact_project_v1.json",
+    "examples/shots/energy_impact_001/shot.json",
+    "examples/shots/energy_impact_001/workflow.json",
+    "skills/energy_impact/skill.yaml",
+    "skills/energy_impact/rpc_templates/houdini_smoke_cache_test.json",
+    "skills/energy_impact/rpc_templates/comfyui_submit_workflow.json",
+    "skills/energy_impact/rpc_templates/davinci_project_probe.json",
+    "skills/energy_impact/rpc_templates/energy_impact_rpc_chain.json",
+    "skills/energy_impact/workflows/energy_impact_001.json",
+    "skills/energy_impact/workflows/energy_impact_workflow_v1.json",
+    "skills/energy_impact/prompts/energy_impact_concept_prompt.txt",
+    "skills/energy_impact/prompts/energy_impact_prompt_v1.md"
+  ],
+  "workflow_examples": [
+    "examples/shots/energy_impact_001/workflow.json",
+    "skills/energy_impact/workflows/energy_impact_001.json",
+    "skills/energy_impact/workflows/energy_impact_workflow_v1.json"
+  ]
+}

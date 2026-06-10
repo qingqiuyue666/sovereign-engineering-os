@@ -1,0 +1,20 @@
+{
+  "use_case_id": "uc_001_codex_pr_preflight",
+  "output_type": "pr_preflight_review_packet",
+  "execution_allowed": false,
+  "runner_required": false,
+  "network_required": false,
+  "merge_readiness": "review_required",
+  "required_evidence": [
+    "scope_summary",
+    "changed_files",
+    "test_results",
+    "forbidden_surface_confirmation",
+    "blockers"
+  ],
+  "failure_modes": [
+    "missing_test_evidence",
+    "unclear_scope",
+    "forbidden_surface_not_confirmed"
+  ]
+}

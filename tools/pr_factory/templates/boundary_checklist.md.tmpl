@@ -1,0 +1,19 @@
+# $capability_id Forbidden Boundary Checklist
+
+METADATA-ONLY SCAFFOLD. Every item below must remain unchecked unless a future
+approved PR explicitly changes scope.
+
+$forbidden_boundaries
+
+## No Overwrite Policy
+
+- Generated scaffold files must not overwrite existing files by default.
+- Replacement requires an explicit safe overwrite flag and reviewer awareness.
+
+## Tests Checklist
+
+- Generated files contain metadata-only boundary warnings.
+- Generated files do not implement token issuance.
+- Generated files do not implement runner creation.
+- Generated files do not launch browsers.
+- Generated files do not access the network.

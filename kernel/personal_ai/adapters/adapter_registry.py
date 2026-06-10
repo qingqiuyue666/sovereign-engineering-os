@@ -10,15 +10,25 @@ from kernel.personal_ai.adapters.adapter_contract import (
     AdapterRegistryEntry,
     AdapterRiskClass,
 )
+from kernel.personal_ai.adapters.creative_adapter_contract import (
+    CreativeAdapterPolicy,
+    build_creative_adapter_policies,
+    validate_creative_adapter_policy,
+)
 
 __all__ = [
+    "DCC_MEDIA_POLICY_CAPABILITY",
     "DEFAULT_ADAPTER_REGISTRY",
     "admit_adapter_capability",
+    "build_dcc_media_policy_registry_entries",
     "build_default_adapter_registry",
     "find_adapter_entry",
+    "validate_dcc_media_policy_registry_binding",
     "validate_adapter_registry_entry",
 ]
 
+_DCC_MEDIA_POLICY_CAPABILITY = "record_dcc_media_adapter_controls"
+DCC_MEDIA_POLICY_CAPABILITY = _DCC_MEDIA_POLICY_CAPABILITY
 _REQUIRED_CONTROLS = (
     "human_approval",
     "capability_token",
@@ -35,6 +45,67 @@ def _approved_output_boundary() -> AdapterExecutionBoundary:
 
 def _approved_output_policy() -> AdapterOutputPolicy:
     return AdapterOutputPolicy(output_write_allowed=True)
+
+
+def build_dcc_media_policy_registry_entries() -> tuple[AdapterRegistryEntry, ...]:
+    entries = []
+    for policy in build_creative_adapter_policies():
+        failures = validate_creative_adapter_policy(policy)
+        if failures:
+            raise ValueError(
+                "dcc media creative adapter policy is invalid: "
+                + ",".join(failures)
+            )
+        entries.append(
+            AdapterRegistryEntry(
+                adapter_id=policy.proposed_adapter,
+                adapter_name=_dcc_media_adapter_name(policy),
+                mode=AdapterMode.POLICY_ONLY,
+                risk_class=AdapterRiskClass.CREATIVE_EXTERNAL_TOOL,
+                admission_status=AdapterAdmissionStatus.DEFERRED,
+                capabilities=(_DCC_MEDIA_POLICY_CAPABILITY,),
+                required_controls=_dcc_media_required_controls(policy),
+                boundary=AdapterExecutionBoundary(
+                    external_tool_control_allowed=True
+                ),
+                notes=(
+                    "DCC/media policy boundary only for "
+                    + policy.family
+                    + "; no real creative software runtime, subprocess, "
+                    "network endpoint, source asset overwrite, or media "
+                    "generation is admitted."
+                ),
+            )
+        )
+    return tuple(entries)
+
+
+def _dcc_media_adapter_name(policy: CreativeAdapterPolicy) -> str:
+    return "DCC/Media Policy Boundary - " + policy.family.replace("_", " ").title()
+
+
+def _dcc_media_required_controls(
+    policy: CreativeAdapterPolicy,
+) -> tuple[str, ...]:
+    controls = list(_REQUIRED_CONTROLS)
+    controls.extend(
+        (
+            "future_admission",
+            "explicit_adapter_admission",
+            "dcc_media_runtime_deferred",
+            "external_tool_control_not_admitted",
+            "source_asset_overwrite_forbidden",
+        )
+    )
+    if policy.output_manifest_required:
+        controls.append("output_manifest")
+    if policy.preview_render_evidence_required:
+        controls.append("preview_render_evidence")
+    if policy.operation_allowlist_required:
+        controls.append("operation_allowlist")
+    if policy.logs_required:
+        controls.append("logs_required")
+    return tuple(dict.fromkeys(controls))
 
 
 def build_default_adapter_registry() -> tuple[AdapterRegistryEntry, ...]:
@@ -103,6 +174,795 @@ def build_default_adapter_registry() -> tuple[AdapterRegistryEntry, ...]:
             capabilities=("open_local_fixture", "inspect_fixture"),
             required_controls=_REQUIRED_CONTROLS + ("local_fixture_only",),
             notes="Local HTML fixture interpretation only; no external URLs.",
+        ),
+        AdapterRegistryEntry(
+            adapter_id="local_asset_runtime",
+            adapter_name="Local Asset Scan Controlled Launcher",
+            mode=AdapterMode.LOCAL_FIXTURE,
+            risk_class=AdapterRiskClass.LOCAL_READONLY,
+            admission_status=AdapterAdmissionStatus.ADMITTED,
+            capabilities=(
+                "launch_local_asset_scan",
+                "launch_local_asset_bounded_smoke_iteration",
+                "launch_local_asset_bounded_smoke_cycle_contract",
+                "launch_local_asset_bounded_smoke_cycle_human_review",
+                "launch_local_asset_human_smoke_run",
+                "launch_local_asset_iteration_promotion_gate",
+                "launch_local_asset_next_bounded_smoke_iteration_admission",
+                "launch_local_asset_next_bounded_smoke_iteration_execution_request",
+                "launch_local_asset_next_bounded_smoke_iteration_runner",
+                "launch_local_asset_next_bounded_smoke_iteration_runner_admission",
+                "launch_local_asset_next_bounded_smoke_iteration_run_review_packet",
+                "launch_local_asset_next_bounded_smoke_iteration_run_promotion_gate",
+                "launch_local_asset_next_bounded_smoke_cycle_contract_from_run_promotion_gate",
+                "launch_local_asset_next_bounded_smoke_cycle_contract_human_review_from_run_promotion_gate",
+                "launch_local_asset_smoke_iteration_review_packet",
+                "launch_local_asset_smoke_promotion_gate",
+                "launch_local_asset_smoke_review_packet",
+                "launch_local_asset_smoke_readiness",
+            ),
+            required_controls=_REQUIRED_CONTROLS
+            + (
+                "read_only_input",
+                "artifact_index_binding",
+                "operational_receipt",
+                "failure_bundle",
+                "no_external_runtime",
+            ),
+            boundary=_approved_output_boundary(),
+            output_policy=_approved_output_policy(),
+            notes=(
+                "Runs controlled local asset launcher capabilities in fixture "
+                "task graphs; writes approved output artifacts only and never "
+                "mutates input assets."
+            ),
+        ),
+        AdapterRegistryEntry(
+            adapter_id="github_capability_intake_packet",
+            adapter_name="GitHub Capability Intake Packet Builder",
+            mode=AdapterMode.LOCAL_FIXTURE,
+            risk_class=AdapterRiskClass.LOCAL_READONLY,
+            admission_status=AdapterAdmissionStatus.ADMITTED,
+            capabilities=("launch_github_capability_intake_packet",),
+            required_controls=_REQUIRED_CONTROLS
+            + (
+                "local_manifest_only",
+                "bounded_allowlist_evidence",
+                "artifact_index_binding",
+                "no_network",
+                "no_git_clone",
+                "no_third_party_execution",
+                "human_review_required",
+            ),
+            boundary=_approved_output_boundary(),
+            output_policy=_approved_output_policy(),
+            notes=(
+                "Builds local-first GitHub capability intake packets for human "
+                "review; no network search, clone, dependency install, code "
+                "import, or adapter generation."
+            ),
+        ),
+        AdapterRegistryEntry(
+            adapter_id="playwright_local_fixture_sandbox_smoke",
+            adapter_name="Playwright Local Fixture Sandbox Smoke",
+            mode=AdapterMode.LOCAL_FIXTURE,
+            risk_class=AdapterRiskClass.LOCAL_BROWSER_FIXTURE,
+            admission_status=AdapterAdmissionStatus.ADMITTED,
+            capabilities=("launch_playwright_local_fixture_sandbox_smoke",),
+            required_controls=_REQUIRED_CONTROLS
+            + (
+                "local_fixture_only",
+                "explicit_execution_flag",
+                "owned_runner_only",
+                "artifact_index_binding",
+                "no_live_websites",
+                "no_accounts",
+                "no_scraping",
+                "no_bypass",
+                "no_secrets",
+                "no_dependency_install",
+                "no_npm_npx",
+                "human_review_required",
+            ),
+            boundary=_approved_output_boundary(),
+            output_policy=_approved_output_policy(),
+            notes=(
+                "Builds and optionally executes a repository-owned Playwright "
+                "local fixture smoke only; no live websites, package installs, "
+                "browser downloads, candidate code execution, adapter generation, "
+                "or production promotion."
+            ),
+        ),
+        AdapterRegistryEntry(
+            adapter_id="bounded_playwright_worker_adapter_draft",
+            adapter_name="Bounded Playwright Worker Adapter Draft",
+            mode=AdapterMode.LOCAL_FIXTURE,
+            risk_class=AdapterRiskClass.LOCAL_BROWSER_FIXTURE,
+            admission_status=AdapterAdmissionStatus.CANDIDATE,
+            capabilities=("launch_bounded_playwright_worker_adapter_draft",),
+            required_controls=_REQUIRED_CONTROLS
+            + (
+                "adapter_draft_only",
+                "local_fixture_only",
+                "generated_fixture_only",
+                "explicit_execution_flag",
+                "embedded_smoke_wrapper_only",
+                "artifact_index_binding",
+                "no_live_websites",
+                "no_user_supplied_url",
+                "no_accounts",
+                "no_scraping",
+                "no_bypass",
+                "no_captcha",
+                "no_secrets",
+                "no_cookies",
+                "no_external_network",
+                "no_dependency_install",
+                "no_npm_npx",
+                "no_candidate_repo_access",
+                "no_candidate_code_execution",
+                "not_production_admitted",
+                "human_review_required",
+            ),
+            boundary=_approved_output_boundary(),
+            output_policy=_approved_output_policy(),
+            notes=(
+                "Draft only and not production admitted. Wraps the existing "
+                "Playwright local fixture smoke into a worker-adapter-shaped "
+                "contract; local generated file fixture only, no live websites, "
+                "no arbitrary URLs, no accounts, no scraping, and human review "
+                "required."
+            ),
+        ),
+        AdapterRegistryEntry(
+            adapter_id="operator_provided_playwright_execution_receipt",
+            adapter_name="Operator-Provided Playwright Execution Receipt",
+            mode=AdapterMode.LOCAL_FIXTURE,
+            risk_class=AdapterRiskClass.LOCAL_BROWSER_FIXTURE,
+            admission_status=AdapterAdmissionStatus.CANDIDATE,
+            capabilities=("launch_operator_provided_playwright_execution_receipt",),
+            required_controls=_REQUIRED_CONTROLS
+            + (
+                "receipt_generator_only",
+                "operator_provided_runtime_only",
+                "local_fixture_only",
+                "generated_fixture_only",
+                "embedded_adapter_draft_wrapper_only",
+                "artifact_index_binding",
+                "exact_operator_attestation",
+                "no_live_websites",
+                "no_user_supplied_url",
+                "no_accounts",
+                "no_scraping",
+                "no_bypass",
+                "no_captcha",
+                "no_secrets",
+                "no_cookies",
+                "no_external_network",
+                "no_dependency_install",
+                "no_npm_npx",
+                "no_candidate_repo_access",
+                "no_candidate_code_execution",
+                "not_production_admitted",
+                "human_review_required",
+            ),
+            boundary=_approved_output_boundary(),
+            output_policy=_approved_output_policy(),
+            notes=(
+                "Receipt generator only and not production admitted. It records "
+                "operator-provided local executable and runner evidence, then "
+                "delegates to the bounded adapter draft for generated file fixture "
+                "execution only; no live websites, arbitrary URLs, accounts, "
+                "scraping, bypass, candidate code execution, adapter registration, "
+                "or production promotion."
+            ),
+        ),
+        AdapterRegistryEntry(
+            adapter_id="local_fixture_playwright_adapter_admission_gate",
+            adapter_name="Local-Fixture Playwright Adapter Admission Gate",
+            mode=AdapterMode.LOCAL_FIXTURE,
+            risk_class=AdapterRiskClass.LOCAL_READONLY,
+            admission_status=AdapterAdmissionStatus.CANDIDATE,
+            capabilities=("launch_local_fixture_playwright_adapter_admission_gate",),
+            required_controls=_REQUIRED_CONTROLS
+            + (
+                "receipt_evidence_only",
+                "aggregation_evidence_binding",
+                "regression_evidence_binding",
+                "local_fixture_only",
+                "exact_review_attestation",
+                "artifact_index_binding",
+                "hash_verification",
+                "no_new_execution",
+                "no_live_websites",
+                "no_user_supplied_url",
+                "no_accounts",
+                "no_scraping",
+                "no_bypass",
+                "no_captcha",
+                "no_secrets",
+                "no_cookies",
+                "no_external_network",
+                "no_dependency_install",
+                "no_npm_npx",
+                "no_candidate_repo_access",
+                "no_candidate_code_execution",
+                "not_production_admitted",
+                "human_review_required",
+            ),
+            boundary=_approved_output_boundary(),
+            output_policy=_approved_output_policy(),
+            notes=(
+                "Admission/rejection gate only and not a production adapter. It "
+                "reads operator-provided #422 receipt evidence, may grant only "
+                "local-fixture-only admission, and remains blocked from live "
+                "websites, general browser automation, and production promotion."
+            ),
+        ),
+        AdapterRegistryEntry(
+            adapter_id="local_only_playwright_fixture_scenario_suite",
+            adapter_name="Local-Only Playwright Fixture Scenario Suite",
+            mode=AdapterMode.LOCAL_FIXTURE,
+            risk_class=AdapterRiskClass.LOCAL_BROWSER_FIXTURE,
+            admission_status=AdapterAdmissionStatus.CANDIDATE,
+            capabilities=("launch_local_only_playwright_fixture_scenario_suite",),
+            required_controls=_REQUIRED_CONTROLS
+            + (
+                "scenario_suite_only",
+                "operator_provided_receipt_path_only",
+                "local_fixture_only",
+                "generated_fixture_only",
+                "exact_operator_attestation",
+                "artifact_index_binding",
+                "hash_verification",
+                "no_live_websites",
+                "no_user_supplied_url",
+                "no_accounts",
+                "no_scraping",
+                "no_bypass",
+                "no_captcha",
+                "no_secrets",
+                "no_cookies",
+                "no_external_network",
+                "no_dependency_install",
+                "no_npm_npx",
+                "no_candidate_repo_access",
+                "no_candidate_code_execution",
+                "not_production_admitted",
+                "human_review_required",
+            ),
+            boundary=_approved_output_boundary(),
+            output_policy=_approved_output_policy(),
+            notes=(
+                "Local-only fixture scenario suite capability and not a "
+                "production adapter. It delegates each scenario only through "
+                "the operator-provided #422 receipt path and may produce "
+                "local-fixture-only regression confidence evidence. It remains "
+                "blocked from live websites, general browser automation, "
+                "adapter registration, and production promotion."
+            ),
+        ),
+        AdapterRegistryEntry(
+            adapter_id="playwright_local_admission_receipt_aggregation",
+            adapter_name="Playwright Local Admission Receipt Aggregation",
+            mode=AdapterMode.LOCAL_FIXTURE,
+            risk_class=AdapterRiskClass.LOCAL_READONLY,
+            admission_status=AdapterAdmissionStatus.CANDIDATE,
+            capabilities=("launch_playwright_local_admission_receipt_aggregation",),
+            required_controls=_REQUIRED_CONTROLS
+            + (
+                "aggregation_only",
+                "suite_artifact_evidence_only",
+                "local_fixture_only",
+                "exact_review_attestation",
+                "artifact_index_binding",
+                "hash_verification",
+                "no_new_execution",
+                "no_live_websites",
+                "no_user_supplied_url",
+                "no_accounts",
+                "no_scraping",
+                "no_bypass",
+                "no_captcha",
+                "no_secrets",
+                "no_cookies",
+                "no_external_network",
+                "no_dependency_install",
+                "no_npm_npx",
+                "no_candidate_repo_access",
+                "no_candidate_code_execution",
+                "not_production_admitted",
+                "human_review_required",
+            ),
+            boundary=_approved_output_boundary(),
+            output_policy=_approved_output_policy(),
+            notes=(
+                "Aggregation evidence only and not a production adapter. It "
+                "reads existing #424 local fixture scenario suite outputs, "
+                "verifies hashes and boundaries, and remains blocked from live "
+                "websites, general browser automation, adapter registration, "
+                "and production promotion."
+            ),
+        ),
+        AdapterRegistryEntry(
+            adapter_id="admission_gated_local_adapter_registry_promotion",
+            adapter_name="Admission-Gated Local Adapter Registry Promotion",
+            mode=AdapterMode.LOCAL_FIXTURE,
+            risk_class=AdapterRiskClass.LOCAL_READONLY,
+            admission_status=AdapterAdmissionStatus.CANDIDATE,
+            capabilities=(
+                "launch_admission_gated_local_adapter_registry_promotion",
+            ),
+            required_controls=_REQUIRED_CONTROLS
+            + (
+                "admission_gate_decision_evidence_only",
+                "aggregation_bound_gate_pass_required",
+                "regression_bound_gate_pass_required",
+                "local_fixture_only",
+                "exact_review_attestation",
+                "artifact_index_binding",
+                "hash_verification",
+                "no_new_execution",
+                "no_live_websites",
+                "no_user_supplied_url",
+                "no_accounts",
+                "no_scraping",
+                "no_bypass",
+                "no_captcha",
+                "no_secrets",
+                "no_cookies",
+                "no_external_network",
+                "no_dependency_install",
+                "no_npm_npx",
+                "no_candidate_repo_access",
+                "no_candidate_code_execution",
+                "not_production_admitted",
+                "human_review_required",
+            ),
+            boundary=_approved_output_boundary(),
+            output_policy=_approved_output_policy(),
+            notes=(
+                "Promotion evidence only and not a production adapter. It reads "
+                "#427 aggregation-bound local-fixture admission gate decisions "
+                "and writes a restricted local-fixture registry record without "
+                "live websites, general browser automation, arbitrary URLs, "
+                "adapter registration mutation, autonomy, or production "
+                "promotion."
+            ),
+        ),
+        AdapterRegistryEntry(
+            adapter_id="local_fixture_adapter_usage_receipt",
+            adapter_name="Local-Fixture Adapter Usage Receipt",
+            mode=AdapterMode.LOCAL_FIXTURE,
+            risk_class=AdapterRiskClass.LOCAL_READONLY,
+            admission_status=AdapterAdmissionStatus.CANDIDATE,
+            capabilities=("launch_local_fixture_adapter_usage_receipt",),
+            required_controls=_REQUIRED_CONTROLS
+            + (
+                "usage_receipt_evidence_only",
+                "promotion_result_required",
+                "local_fixture_path_hash_only",
+                "one_usage_receipt_only",
+                "aggregation_bound_gate_pass_required",
+                "regression_bound_gate_pass_required",
+                "local_fixture_only",
+                "exact_review_attestation",
+                "artifact_index_binding",
+                "hash_verification",
+                "no_new_execution",
+                "no_live_websites",
+                "no_user_supplied_url",
+                "no_accounts",
+                "no_scraping",
+                "no_bypass",
+                "no_captcha",
+                "no_secrets",
+                "no_cookies",
+                "no_external_network",
+                "no_dependency_install",
+                "no_npm_npx",
+                "no_candidate_repo_access",
+                "no_candidate_code_execution",
+                "not_production_admitted",
+                "human_review_required",
+            ),
+            boundary=_approved_output_boundary(),
+            output_policy=_approved_output_policy(),
+            notes=(
+                "Usage receipt evidence only and not a production adapter. It "
+                "reads a #428 local-fixture registry promotion result, validates "
+                "one local fixture path and hash, and writes one usage receipt "
+                "without executing the adapter, Playwright, a browser, live "
+                "websites, arbitrary URLs, accounts, scraping, bypass, "
+                "autonomy, or production promotion."
+            ),
+        ),
+        AdapterRegistryEntry(
+            adapter_id="local_fixture_adapter_dry_run_invocation_plan",
+            adapter_name="Local-Fixture Adapter Dry-Run Invocation Plan",
+            mode=AdapterMode.LOCAL_FIXTURE,
+            risk_class=AdapterRiskClass.LOCAL_READONLY,
+            admission_status=AdapterAdmissionStatus.CANDIDATE,
+            capabilities=(
+                "launch_local_fixture_adapter_dry_run_invocation_plan",
+            ),
+            required_controls=_REQUIRED_CONTROLS
+            + (
+                "dry_run_plan_only",
+                "usage_receipt_result_required",
+                "local_fixture_path_hash_revalidation",
+                "one_usage_receipt_bound",
+                "aggregation_bound_gate_pass_required",
+                "regression_bound_gate_pass_required",
+                "local_fixture_only",
+                "exact_review_attestation",
+                "artifact_index_binding",
+                "hash_verification",
+                "no_executable_material",
+                "no_new_execution",
+                "no_live_websites",
+                "no_user_supplied_url",
+                "no_accounts",
+                "no_scraping",
+                "no_bypass",
+                "no_captcha",
+                "no_secrets",
+                "no_cookies",
+                "no_external_network",
+                "no_dependency_install",
+                "no_npm_npx",
+                "no_candidate_repo_access",
+                "no_candidate_code_execution",
+                "not_production_admitted",
+                "human_review_required",
+            ),
+            boundary=_approved_output_boundary(),
+            output_policy=_approved_output_policy(),
+            notes=(
+                "Dry-run invocation plan evidence only and not a production "
+                "adapter. It reads a #429 one-use local-fixture usage receipt, "
+                "revalidates the local fixture path and hash, and writes a "
+                "non-executable plan without commands, argv, adapter execution, "
+                "Playwright execution, browser opening, live websites, arbitrary "
+                "URLs, accounts, scraping, bypass, autonomy, or production "
+                "promotion."
+            ),
+        ),
+        AdapterRegistryEntry(
+            adapter_id="local_fixture_adapter_execution_gate_plan",
+            adapter_name="Local-Fixture Adapter Execution Gate Plan",
+            mode=AdapterMode.LOCAL_FIXTURE,
+            risk_class=AdapterRiskClass.LOCAL_READONLY,
+            admission_status=AdapterAdmissionStatus.CANDIDATE,
+            capabilities=(
+                "launch_local_fixture_adapter_execution_gate_plan",
+            ),
+            required_controls=_REQUIRED_CONTROLS
+            + (
+                "execution_gate_plan_only",
+                "dry_run_invocation_plan_result_required",
+                "local_fixture_path_hash_revalidation",
+                "dry_run_plan_bound",
+                "one_usage_receipt_bound",
+                "aggregation_bound_gate_pass_required",
+                "regression_bound_gate_pass_required",
+                "local_fixture_only",
+                "exact_review_attestation",
+                "artifact_index_binding",
+                "hash_verification",
+                "human_approval_request_only",
+                "no_executable_material",
+                "no_execution_runner",
+                "no_approval_token",
+                "no_new_execution",
+                "no_live_websites",
+                "no_user_supplied_url",
+                "no_accounts",
+                "no_scraping",
+                "no_bypass",
+                "no_captcha",
+                "no_secrets",
+                "no_cookies",
+                "no_external_network",
+                "no_dependency_install",
+                "no_npm_npx",
+                "no_candidate_repo_access",
+                "no_candidate_code_execution",
+                "not_production_admitted",
+                "human_review_required",
+            ),
+            boundary=_approved_output_boundary(),
+            output_policy=_approved_output_policy(),
+            notes=(
+                "Execution-gate plan evidence only and not a production "
+                "adapter. It reads a #430 local-fixture dry-run invocation "
+                "plan result, revalidates the local fixture path and hash, "
+                "and writes a non-executable gate plan plus human approval "
+                "request without commands, argv, adapter execution, "
+                "Playwright execution, browser opening, live websites, "
+                "arbitrary URLs, approval tokens, execution runners, "
+                "autonomy, or production promotion."
+            ),
+        ),
+        AdapterRegistryEntry(
+            adapter_id="local_fixture_human_approval_artifact",
+            adapter_name="Local-Fixture Human Approval Artifact",
+            mode=AdapterMode.LOCAL_FIXTURE,
+            risk_class=AdapterRiskClass.LOCAL_READONLY,
+            admission_status=AdapterAdmissionStatus.CANDIDATE,
+            capabilities=("launch_local_fixture_human_approval_artifact",),
+            required_controls=_REQUIRED_CONTROLS
+            + (
+                "human_review_metadata_record_only",
+                "execution_gate_plan_result_required",
+                "exact_approval_attestation",
+                "artifact_index_binding",
+                "hash_verification",
+                "metadata_only",
+                "no_execution_token",
+                "no_approval_token",
+                "no_runner",
+                "no_runnable_job",
+                "no_adapter_execution",
+                "no_playwright_execution",
+                "no_browser_opening",
+                "no_network_access",
+                "no_live_websites",
+                "no_production_promotion",
+                "no_autonomy",
+                "separate_runner_contract_pr_required",
+                "separate_local_fixture_runner_gate_required",
+                "separate_runner_receipt_required",
+            ),
+            boundary=_approved_output_boundary(),
+            output_policy=_approved_output_policy(),
+            notes=(
+                "Human approval artifact metadata only and not a production "
+                "adapter. It reads a #431 local-fixture execution-gate plan "
+                "result and records reviewer approval for a future separate "
+                "runner-contract PR without tokens, runners, adapter "
+                "execution, Playwright execution, browser opening, network "
+                "access, live websites, autonomy, or production promotion."
+            ),
+        ),
+        AdapterRegistryEntry(
+            adapter_id="local_fixture_runner_contract_draft",
+            adapter_name="Local-Fixture Runner Contract Draft",
+            mode=AdapterMode.LOCAL_FIXTURE,
+            risk_class=AdapterRiskClass.LOCAL_READONLY,
+            admission_status=AdapterAdmissionStatus.CANDIDATE,
+            capabilities=("launch_local_fixture_runner_contract_draft",),
+            required_controls=_REQUIRED_CONTROLS
+            + (
+                "contract_draft_only",
+                "metadata_only",
+                "exact_review_attestation",
+                "artifact_index_binding",
+                "hash_verification",
+                "no_runner",
+                "no_runnable_job",
+                "no_approval_token",
+                "no_execution_token",
+                "no_adapter_execution",
+                "no_playwright_execution",
+                "no_browser_opening",
+                "no_network_access",
+                "no_live_websites",
+                "no_production_promotion",
+                "no_autonomy",
+                "future_runner_requires_separate_pr",
+            ),
+            boundary=_approved_output_boundary(),
+            output_policy=_approved_output_policy(),
+            notes=(
+                "Runner contract draft metadata only and not production "
+                "admitted. It records governance metadata for a future separate "
+                "local-fixture runner PR without creating a runner, runnable "
+                "job, token, adapter execution, Playwright execution, browser "
+                "opening, network access, live website access, autonomy, or "
+                "production promotion."
+            ),
+        ),
+        AdapterRegistryEntry(
+            adapter_id="local_fixture_runner_stub_admission_gate",
+            adapter_name="Local-Fixture Runner Stub Admission Gate",
+            mode=AdapterMode.LOCAL_FIXTURE,
+            risk_class=AdapterRiskClass.LOCAL_READONLY,
+            admission_status=AdapterAdmissionStatus.CANDIDATE,
+            capabilities=("launch_local_fixture_runner_stub_admission_gate",),
+            required_controls=_REQUIRED_CONTROLS
+            + (
+                "runner_stub_gate_only",
+                "upstream_human_approval_artifact_required",
+                "runner_contract_draft_result_required",
+                "exact_review_attestation",
+                "artifact_index_binding",
+                "hash_verification",
+                "metadata_only",
+                "no_runner_stub",
+                "no_runner",
+                "no_runnable_job",
+                "no_approval_token",
+                "no_execution_token",
+                "no_adapter_execution",
+                "no_playwright_execution",
+                "no_browser_opening",
+                "no_network_access",
+                "no_live_websites",
+                "no_production_promotion",
+                "no_autonomy",
+                "future_runner_stub_requires_separate_pr",
+            ),
+            boundary=_approved_output_boundary(),
+            output_policy=_approved_output_policy(),
+            notes=(
+                "Runner-stub admission metadata only and not production "
+                "admitted. It reads existing human approval and runner contract "
+                "draft evidence, then records a gate decision without creating "
+                "a stub, runner, runnable job, token, adapter execution, "
+                "Playwright execution, browser opening, network access, live "
+                "website access, autonomy, or production promotion."
+            ),
+        ),
+        AdapterRegistryEntry(
+            adapter_id="local_fixture_runner_receipt_contract_draft",
+            adapter_name="Local-Fixture Runner Receipt Contract Draft",
+            mode=AdapterMode.LOCAL_FIXTURE,
+            risk_class=AdapterRiskClass.LOCAL_READONLY,
+            admission_status=AdapterAdmissionStatus.CANDIDATE,
+            capabilities=("launch_local_fixture_runner_receipt_contract_draft",),
+            required_controls=_REQUIRED_CONTROLS
+            + (
+                "receipt_contract_draft_only",
+                "metadata_only",
+                "exact_review_attestation",
+                "artifact_index_binding",
+                "hash_verification",
+                "no_runner",
+                "no_runnable_job",
+                "no_approval_token",
+                "no_execution_token",
+                "no_adapter_execution",
+                "no_playwright_execution",
+                "no_browser_opening",
+                "no_network_access",
+                "no_live_websites",
+                "no_production_promotion",
+                "no_autonomy",
+                "future_receipt_requires_separate_pr",
+            ),
+            boundary=_approved_output_boundary(),
+            output_policy=_approved_output_policy(),
+            notes=(
+                "Runner receipt contract draft metadata only and not production "
+                "admitted. It records the future receipt schema boundary "
+                "without creating a runner, runnable job, token, adapter "
+                "execution, Playwright execution, browser opening, network "
+                "access, live website access, autonomy, or production "
+                "promotion."
+            ),
+        ),
+        AdapterRegistryEntry(
+            adapter_id="local_fixture_runner_receipt_preflight_verifier",
+            adapter_name="Local-Fixture Runner Receipt Preflight Verifier",
+            mode=AdapterMode.LOCAL_FIXTURE,
+            risk_class=AdapterRiskClass.LOCAL_READONLY,
+            admission_status=AdapterAdmissionStatus.CANDIDATE,
+            capabilities=("launch_local_fixture_runner_receipt_preflight_verifier",),
+            required_controls=_REQUIRED_CONTROLS
+            + (
+                "receipt_preflight_only",
+                "runner_stub_gate_result_required",
+                "runner_receipt_contract_result_required",
+                "human_approval_artifact_required",
+                "exact_review_attestation",
+                "artifact_index_binding",
+                "hash_verification",
+                "metadata_only",
+                "no_runner_stub",
+                "no_runner",
+                "no_runnable_job",
+                "no_approval_token",
+                "no_execution_token",
+                "no_adapter_execution",
+                "no_playwright_execution",
+                "no_browser_opening",
+                "no_network_access",
+                "no_live_websites",
+                "no_production_promotion",
+                "no_autonomy",
+            ),
+            boundary=_approved_output_boundary(),
+            output_policy=_approved_output_policy(),
+            notes=(
+                "Runner receipt preflight verifier metadata only and not "
+                "production admitted. It validates existing runner-stub gate, "
+                "receipt contract, and human approval metadata before any "
+                "future receipt artifact PR without creating a runner, stub, "
+                "runnable job, token, adapter execution, Playwright execution, "
+                "browser opening, network access, live website access, "
+                "autonomy, or production promotion."
+            ),
+        ),
+        AdapterRegistryEntry(
+            adapter_id="local_fixture_runner_receipt_metadata_artifact",
+            adapter_name="Local-Fixture Runner Receipt Metadata Artifact",
+            mode=AdapterMode.LOCAL_FIXTURE,
+            risk_class=AdapterRiskClass.LOCAL_READONLY,
+            admission_status=AdapterAdmissionStatus.CANDIDATE,
+            capabilities=("launch_local_fixture_runner_receipt_metadata_artifact",),
+            required_controls=_REQUIRED_CONTROLS
+            + (
+                "receipt_metadata_artifact_only",
+                "receipt_preflight_result_required",
+                "exact_review_attestation",
+                "artifact_index_binding",
+                "hash_verification",
+                "metadata_only",
+                "no_runner_stub",
+                "no_runner",
+                "no_runnable_job",
+                "no_approval_token",
+                "no_execution_token",
+                "no_adapter_execution",
+                "no_playwright_execution",
+                "no_browser_opening",
+                "no_network_access",
+                "no_live_websites",
+                "no_production_promotion",
+                "no_autonomy",
+            ),
+            boundary=_approved_output_boundary(),
+            output_policy=_approved_output_policy(),
+            notes=(
+                "Runner receipt artifact metadata only and not production "
+                "admitted. It records a non-executable receipt from verified "
+                "preflight metadata without creating a runner, stub, runnable "
+                "job, token, adapter execution, Playwright execution, browser "
+                "opening, network access, live website access, autonomy, or "
+                "production promotion."
+            ),
+        ),
+        AdapterRegistryEntry(
+            adapter_id="real_local_runner_boundary",
+            adapter_name="Real Local Runner Boundary",
+            mode=AdapterMode.LOCAL_FIXTURE,
+            risk_class=AdapterRiskClass.SUBPROCESS_TOOL,
+            admission_status=AdapterAdmissionStatus.CANDIDATE,
+            capabilities=("launch_real_local_runner_boundary",),
+            required_controls=_REQUIRED_CONTROLS
+            + (
+                "command_id_only",
+                "immutable_allowlist",
+                "no_command_line",
+                "no_argv_override",
+                "shell_false",
+                "timeout_required",
+                "output_sandbox_required",
+                "stdout_stderr_capture",
+                "receipt_artifact",
+                "failure_bundle_on_failure",
+                "replay_manifest",
+                "no_network_access",
+                "no_browser_opening",
+                "no_provider_api",
+                "not_production_admitted",
+                "human_review_required",
+            ),
+            boundary=AdapterExecutionBoundary(
+                subprocess_allowed=True,
+                output_write_allowed=True,
+            ),
+            output_policy=_approved_output_policy(),
+            notes=(
+                "Candidate-only controlled local validation runner. It resolves "
+                "argv from immutable repo-owned command IDs, requires a human "
+                "approval artifact, forces shell false, captures stdout/stderr, "
+                "and writes receipt, failure, replay, and artifact binding "
+                "evidence. It is not production admitted and does not allow "
+                "network, browser, provider, arbitrary command-line, or argv "
+                "override behavior."
+            ),
         ),
         AdapterRegistryEntry(
             adapter_id="real_browser_runtime_boundary",
@@ -197,6 +1057,7 @@ def build_default_adapter_registry() -> tuple[AdapterRegistryEntry, ...]:
             ),
             notes="Disabled-by-default Blender runtime boundary; no subprocess launch admitted.",
         ),
+        *build_dcc_media_policy_registry_entries(),
         AdapterRegistryEntry(
             adapter_id="creative_handoff_package",
             adapter_name="Creative Handoff Package Builder",
@@ -237,6 +1098,57 @@ def build_default_adapter_registry() -> tuple[AdapterRegistryEntry, ...]:
 
 
 DEFAULT_ADAPTER_REGISTRY = build_default_adapter_registry()
+
+
+def validate_dcc_media_policy_registry_binding(
+    registry: tuple[AdapterRegistryEntry, ...] | None = None,
+) -> tuple[str, ...]:
+    active_registry = DEFAULT_ADAPTER_REGISTRY if registry is None else registry
+    failures: list[str] = []
+    entries_by_id: dict[str, AdapterRegistryEntry] = {}
+    for entry in active_registry:
+        if entry.adapter_id in entries_by_id:
+            failures.append("duplicate_adapter_id:" + entry.adapter_id)
+        entries_by_id[entry.adapter_id] = entry
+
+    for policy in build_creative_adapter_policies():
+        for failure in validate_creative_adapter_policy(policy):
+            failures.append(policy.family + ":policy_invalid:" + failure)
+        entry = entries_by_id.get(policy.proposed_adapter)
+        if entry is None:
+            failures.append(policy.family + ":registry_entry_missing")
+            continue
+        _validate_dcc_media_policy_entry(policy, entry, failures)
+    return tuple(sorted(set(failures)))
+
+
+def _validate_dcc_media_policy_entry(
+    policy: CreativeAdapterPolicy,
+    entry: AdapterRegistryEntry,
+    failures: list[str],
+) -> None:
+    prefix = policy.family + ":"
+    if entry.mode != AdapterMode.POLICY_ONLY:
+        failures.append(prefix + "mode_mismatch")
+    if entry.risk_class != AdapterRiskClass.CREATIVE_EXTERNAL_TOOL:
+        failures.append(prefix + "risk_class_mismatch")
+    if entry.admission_status != AdapterAdmissionStatus.DEFERRED:
+        failures.append(prefix + "must_remain_deferred")
+    if _DCC_MEDIA_POLICY_CAPABILITY not in entry.capabilities:
+        failures.append(prefix + "capability_missing")
+    for control in _dcc_media_required_controls(policy):
+        if control not in entry.required_controls:
+            failures.append(prefix + "control_missing:" + control)
+    if entry.boundary.external_tool_control_allowed is not True:
+        failures.append(prefix + "external_tool_control_boundary_missing")
+    if not entry.boundary.requires_explicit_future_admission():
+        failures.append(prefix + "future_admission_boundary_missing")
+    if entry.boundary.output_write_allowed:
+        failures.append(prefix + "output_write_must_not_be_admitted")
+    if entry.boundary.input_mutation_allowed:
+        failures.append(prefix + "input_mutation_must_not_be_admitted")
+    if entry.boundary.overwrite_existing_allowed:
+        failures.append(prefix + "overwrite_must_not_be_admitted")
 
 
 def validate_adapter_registry_entry(entry: AdapterRegistryEntry) -> tuple[str, ...]:

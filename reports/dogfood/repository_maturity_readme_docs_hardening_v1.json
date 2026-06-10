@@ -1,0 +1,63 @@
+{
+  "schema_version": "dogfood_record_v1",
+  "record_id": "DOGFOOD-REPO-MATURITY-001",
+  "category": "repository_maturity_readme_docs_hardening",
+  "historical_evidence_available": true,
+  "task_contract": {
+    "summary": "Harden repository identity, README posture, public boundary, and validation evidence.",
+    "source_refs": [
+      "README.md",
+      "docs/identity/system_identity_v1.md",
+      "docs/identity/non_goals_v1.md",
+      "scripts/identity_boundary_check_v1.py"
+    ]
+  },
+  "approval_receipt": {
+    "receipt_id": "DOGFOOD-REPO-MATURITY-001-APPROVAL",
+    "approval_boundary": "merge_after_required_checks",
+    "repository_evidence": "Pull request 540 was merged after canonical health validation.",
+    "separate_historical_approval_artifact_available": false
+  },
+  "dry_run_execution_receipt": {
+    "receipt_id": "DOGFOOD-REPO-MATURITY-001-EXECUTION",
+    "dry_run_first": true,
+    "execution_scope": "repository documentation and validation hardening",
+    "runtime_expansion_performed": false
+  },
+  "evidence_trace": [
+    "README.md",
+    "docs/identity/system_identity_v1.md",
+    "docs/identity/non_goals_v1.md",
+    "scripts/identity_boundary_check_v1.py"
+  ],
+  "replay_explain": {
+    "commands": [
+      "python3 scripts/identity_boundary_check_v1.py",
+      "make verify",
+      "make ci"
+    ],
+    "expected_result": "pass"
+  },
+  "pr_link_or_commit_reference": {
+    "pr_url": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/pull/540",
+    "merge_commit": "cc55f3699890c33fce469b0fa776f24e5dd455b7",
+    "merged_at": "2026-05-30T08:07:04Z"
+  },
+  "validation_result": {
+    "status": "passed",
+    "commands": [
+      "python3 scripts/identity_boundary_check_v1.py",
+      "make ci"
+    ]
+  },
+  "post_merge_validation": {
+    "status": "passed",
+    "main_commit": "cc55f3699890c33fce469b0fa776f24e5dd455b7",
+    "github_actions_run": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/actions/runs/26678832498"
+  },
+  "outcome": "merged_to_main",
+  "residual_risk": [
+    "Repository identity wording is local evidence and still requires external review."
+  ],
+  "fabrication_guard": "Record is based on merged PR and commit evidence; unavailable private approval artifacts are not invented."
+}

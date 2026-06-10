@@ -1,0 +1,54 @@
+{
+  "object_type": "DryRunExpansionFreezePolicy",
+  "policy_id": "dry_run_expansion_freeze_v1",
+  "status": "ACTIVE",
+  "dry_run_layer_status": "COMPLETE",
+  "target_state": "REPO_AUTOPSY_AND_EXECUTION_FREEZE_READY",
+  "baseline_state": "WORKFLOW_DRY_RUN_PLANNING_READY",
+  "no_new_dry_run_abstraction": true,
+  "allowed_pr_classes": [
+    "Execution Closure",
+    "Risk Reduction",
+    "Evidence Strengthening",
+    "Prune / Archive / Simplification",
+    "Use Case Validation"
+  ],
+  "disallowed_pr_classes": [
+    "new dry-run-only abstraction",
+    "new future adapter placeholder",
+    "governance-only vision expansion",
+    "operator snapshot proliferation",
+    "pure naming upgrade",
+    "abstraction without use case mapping",
+    "docs-only roadmap inflation"
+  ],
+  "admission_rule": "Every new abstraction must delete more complexity than it adds, or must close a real execution/evidence/risk gap.",
+  "exception_required_fields": [
+    "use_case_id",
+    "execution_gap",
+    "risk_reduction_claim",
+    "evidence_output",
+    "rollback_or_failure_boundary",
+    "reviewer_reason"
+  ],
+  "admission_questions": [
+    "Which use case requires this abstraction?",
+    "What execution, evidence, or risk gap does this close?",
+    "What complexity is deleted or simplified by this change?",
+    "What evidence output proves the change is useful?",
+    "Where is the rollback or failure boundary?",
+    "Why can the current dry-run layer not express this need?"
+  ],
+  "forbidden_patterns": [
+    "dry_run_only_abstraction_without_execution_closure",
+    "future_adapter_placeholder_without_use_case",
+    "operator_snapshot_proliferation",
+    "docs_only_roadmap_inflation",
+    "renaming_without_behavior_or_evidence_gain",
+    "abstraction_without_complexity_deletion",
+    "governance_vision_expansion_without_receipt"
+  ],
+  "module_mutation_required": false,
+  "content_hash": "sha256:4749476bb856878d3cfd07b926c3327c1d7958e4be0f56ea9ccc46dd3fa102c0",
+  "effective_at": "2026-05-25T00:00:00Z"
+}

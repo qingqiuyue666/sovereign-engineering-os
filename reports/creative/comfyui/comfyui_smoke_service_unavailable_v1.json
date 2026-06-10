@@ -1,0 +1,86 @@
+{
+  "approval": {
+    "approval_id": "",
+    "approved": false,
+    "required": true
+  },
+  "complete": false,
+  "destructive_actions_performed": false,
+  "error_code": "SERVICE_UNAVAILABLE",
+  "execution_attempted": false,
+  "history": {
+    "complete": false,
+    "history_response_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "image_count": 0,
+    "images": [],
+    "kind": "comfyui_history_summary_v1",
+    "prompt_id": "",
+    "raw_history_persisted": false,
+    "status": "NOT_POLLED"
+  },
+  "kind": "comfyui_workflow_smoke_result_v1",
+  "materialization": {
+    "kind": "comfyui_workflow_smoke_materialization_v1",
+    "reasons": [
+      "ComfyUI loopback service did not answer /system_stats"
+    ],
+    "status": "blocked_service_unavailable",
+    "target_root": "<local-path:comfyui_service_unavailable>",
+    "targets": []
+  },
+  "mode": "public",
+  "next_actions": [
+    "Start local ComfyUI on 127.0.0.1:8188 or pass --endpoint with a loopback URL."
+  ],
+  "observed_at": "2026-06-08T00:00:00Z",
+  "ok": true,
+  "output_root": "<local-path:comfyui_service_unavailable>",
+  "outputs": {
+    "artifact_count": 0,
+    "artifacts": [],
+    "download_outputs": false,
+    "skipped": []
+  },
+  "prompt": {
+    "http_status": null,
+    "kind": "comfyui_prompt_response_summary_v1",
+    "prompt_id": "",
+    "prompt_response_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "raw_prompt_persisted": false,
+    "status": "NOT_SUBMITTED"
+  },
+  "safety": {
+    "arbitrary_command_allowed": false,
+    "download_outputs_bounded": true,
+    "external_network_required_by_seos": false,
+    "loopback_only": true,
+    "post_prompt_requires_approval": true,
+    "raw_history_persisted": false,
+    "raw_prompt_persisted": false,
+    "service_must_already_be_running": true,
+    "workflow_custom_node_side_effects_not_controlled_by_seos": true
+  },
+  "schema_version": "seos_comfyui_local_runner_v1",
+  "service": {
+    "duration_seconds": 0.0,
+    "endpoint_url": "http://127.0.0.1:8188",
+    "error": "fixture ComfyUI service unavailable",
+    "http_status": null,
+    "raw_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "status": "SERVICE_UNAVAILABLE",
+    "system": {}
+  },
+  "status": "SERVICE_UNAVAILABLE",
+  "workflow": {
+    "api_format": true,
+    "class_types": [
+      "EmptyImage",
+      "SaveImage"
+    ],
+    "exists": true,
+    "node_count": 2,
+    "path": "tests/fixtures/creative/comfyui/api_workflow_fixture_v1.json",
+    "sha256": "sha256:ac6cc6d0bf4ec625c3e1454c9a47f17323f08827919f38b3ba9b0dd934d3c253",
+    "size_bytes": 430
+  }
+}

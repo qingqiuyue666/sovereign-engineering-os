@@ -1,0 +1,1 @@
+# Blender Asset Demo\n\nPublic fixture demo for SEOS Creative Pipeline V3.\n

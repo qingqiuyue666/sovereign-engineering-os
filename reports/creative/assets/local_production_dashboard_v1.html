@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>SEOS Local Production Dashboard</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; max-width: 1100px; line-height: 1.45; }
+    p { margin: .25rem 0; }
+    code { background: #f1f3f5; padding: .1rem .25rem; }
+  </style>
+</head>
+<body>
+  <p># SEOS Local Production Dashboard</p>
+
+<p>- Asset root: `&lt;asset-root&gt;`</p>
+<p>- Read-only: `True`</p>
+
+<p>## Summary</p>
+
+<p>| Metric | Value |</p>
+<p>| --- | ---: |</p>
+<p>| total_assets | 23 |</p>
+<p>| total_size_bytes | 704 |</p>
+<p>| duplicate_group_count | 2 |</p>
+<p>| archive_warning_count | 1 |</p>
+<p>| empty_directory_count | 1 |</p>
+<p>| texture_set_count | 1 |</p>
+<p>| incomplete_texture_set_count | 1 |</p>
+<p>| production_group_count | 1 |</p>
+<p>| likely_incomplete_pack_count | 1 |</p>
+
+<p>## Assets By Category</p>
+
+<p>| Category | Count |</p>
+<p>| --- | ---: |</p>
+<p>| `after_effects` | 1 |</p>
+<p>| `archives` | 2 |</p>
+<p>| `audio` | 1 |</p>
+<p>| `blender` | 1 |</p>
+<p>| `comfyui` | 1 |</p>
+<p>| `davinci` | 1 |</p>
+<p>| `fbx_obj_usd_alembic` | 1 |</p>
+<p>| `hdri` | 1 |</p>
+<p>| `houdini` | 1 |</p>
+<p>| `lut` | 1 |</p>
+<p>| `materials` | 1 |</p>
+<p>| `scripts` | 1 |</p>
+<p>| `textures` | 2 |</p>
+<p>| `unknown` | 3 |</p>
+<p>| `unreal` | 1 |</p>
+<p>| `vdb_cache` | 1 |</p>
+<p>| `video` | 2 |</p>
+<p>| `zbrush` | 1 |</p>
+
+<p>## Largest Folders</p>
+
+<p>| Folder | Size | Files |</p>
+<p>| --- | ---: | ---: |</p>
+<p>| `.` | 124 | 3 |</p>
+<p>| `lookdev` | 111 | 4 |</p>
+<p>| `archives` | 76 | 2 |</p>
+<p>| `media` | 64 | 2 |</p>
+<p>| `after_effects` | 39 | 1 |</p>
+<p>| `davinci` | 36 | 1 |</p>
+<p>| `blender` | 34 | 1 |</p>
+<p>| `houdini` | 34 | 1 |</p>
+<p>| `zbrush` | 32 | 1 |</p>
+<p>| `cache` | 30 | 1 |</p>
+
+<p>## Duplicate Groups</p>
+
+<p>- `DUP_81C6626C12C0`: 2 files, manual review only</p>
+<p>- `DUP_35689A01AA47`: 2 files, manual review only</p>
+
+<p>## Empty Folders</p>
+
+<p>- `empty/placeholder`</p>
+
+<p>## Archive Warnings</p>
+
+<p>- `fx_pack` missing parts `[2]`</p>
+
+<p>## Texture And Pack Status</p>
+
+<p>- Texture set `energy`: `LIKELY_TEXTURE_SET_INCOMPLETE`, missing `[&#x27;roughness&#x27;]`</p>
+<p>- Pack `lookdev`: `LIKELY_INCOMPLETE_PACK`, missing `[&#x27;complete_texture_set&#x27;]`</p>
+
+<p>## Production Readiness By Tool Category</p>
+
+<p>| Tool | Status | Asset Count | Next Action |</p>
+<p>| --- | --- | ---: | --- |</p>
+<p>| `houdini` | `ASSETS_PRESENT_TOOL_HEALTH_NOT_CHECKED` | 2 | Run local tool doctor before execution. |</p>
+<p>| `unreal` | `ASSETS_PRESENT_TOOL_HEALTH_NOT_CHECKED` | 2 | Run local tool doctor before execution. |</p>
+<p>| `blender` | `ASSETS_PRESENT_TOOL_HEALTH_NOT_CHECKED` | 1 | Run local tool doctor before execution. |</p>
+<p>| `zbrush` | `ASSETS_PRESENT_TOOL_HEALTH_NOT_CHECKED` | 1 | Run local tool doctor before execution. |</p>
+<p>| `after_effects` | `ASSETS_PRESENT_TOOL_HEALTH_NOT_CHECKED` | 1 | Run local tool doctor before execution. |</p>
+<p>| `davinci` | `ASSETS_PRESENT_TOOL_HEALTH_NOT_CHECKED` | 1 | Run local tool doctor before execution. |</p>
+<p>| `comfyui` | `ASSETS_PRESENT_TOOL_HEALTH_NOT_CHECKED` | 1 | Run local tool doctor before execution. |</p>
+
+<p>## Recommended Cleanup Actions</p>
+
+<p>- Review duplicate groups manually before cleanup.</p>
+<p>- Restore missing archive parts before using affected packs.</p>
+<p>- Review empty folders for stale placeholders.</p>
+<p>- Fill missing texture maps before lookdev or shot binding.</p>
+<p>- Resolve incomplete production packs before shot planning.</p>
+
+<p>## Next Actions</p>
+
+<p>- Inspect duplicate groups manually before any cleanup; no deletion was performed.</p>
+<p>- Restore missing multipart archive files before extracting or using those packs.</p>
+<p>- Fill missing base color, normal, or roughness maps before final material/lookdev use.</p>
+<p>- Review incomplete model/material/texture packs before binding them to a shot plan.</p>
+<p>- Review empty directories and decide whether they are intentional placeholders.</p>
+<p>- Verify licenses for real assets before publication, sharing, or commercial production.</p>
+
+<p>## Safety</p>
+
+<p>- Dashboard generation does not mutate input assets.</p>
+<p>- Dashboard generation does not delete duplicates or extract archives.</p>
+<p>- Dashboard generation does not execute DCC or AI tools.</p>
+  <script type="application/json" id="seos-summary">{&quot;archive_warning_count&quot;: 1, &quot;category_counts&quot;: {&quot;after_effects&quot;: 1, &quot;archives&quot;: 2, &quot;audio&quot;: 1, &quot;blender&quot;: 1, &quot;comfyui&quot;: 1, &quot;davinci&quot;: 1, &quot;fbx_obj_usd_alembic&quot;: 1, &quot;hdri&quot;: 1, &quot;houdini&quot;: 1, &quot;lut&quot;: 1, &quot;materials&quot;: 1, &quot;scripts&quot;: 1, &quot;textures&quot;: 2, &quot;unknown&quot;: 3, &quot;unreal&quot;: 1, &quot;vdb_cache&quot;: 1, &quot;video&quot;: 2, &quot;zbrush&quot;: 1}, &quot;duplicate_asset_count&quot;: 4, &quot;duplicate_group_count&quot;: 2, &quot;empty_directory_count&quot;: 1, &quot;incomplete_texture_set_count&quot;: 1, &quot;largest_directory_count&quot;: 10, &quot;likely_incomplete_pack_count&quot;: 1, &quot;production_group_count&quot;: 1, &quot;texture_set_count&quot;: 1, &quot;total_assets&quot;: 23, &quot;total_size_bytes&quot;: 704}</script>
+</body>
+</html>

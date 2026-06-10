@@ -1,0 +1,10 @@
+{
+  "action": "project_probe",
+  "adapter": "davinci_resolve",
+  "expected_outputs": [
+    "davinci_project_probe.json",
+    "davinci_action_result.json"
+  ],
+  "schema_version": "seos.energy_impact.rpc_template_ref.v1",
+  "template_path": "examples/rpc/davinci_project_probe.json"
+}

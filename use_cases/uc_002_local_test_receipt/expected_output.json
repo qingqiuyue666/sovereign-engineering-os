@@ -1,0 +1,17 @@
+{
+  "use_case_id": "uc_002_local_test_receipt",
+  "output_type": "local_test_receipt",
+  "execution_allowed": false,
+  "runner_required": false,
+  "network_required": false,
+  "receipt_fields": [
+    "command_id",
+    "exit_code",
+    "stdout_digest",
+    "stderr_digest",
+    "started_at",
+    "ended_at",
+    "verifier_result"
+  ],
+  "verifier_result": "operator_supplied_result_recorded"
+}

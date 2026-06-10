@@ -1,0 +1,9 @@
+{
+  "kind": "comfyui_workflow_smoke_materialization_v1",
+  "reasons": [
+    "ComfyUI loopback service did not answer /system_stats"
+  ],
+  "status": "blocked_service_unavailable",
+  "target_root": "<local-path:comfyui_service_unavailable>",
+  "targets": []
+}

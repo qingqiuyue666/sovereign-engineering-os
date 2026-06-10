@@ -1,0 +1,12 @@
+{
+  "action": "smoke_cache_test",
+  "adapter": "houdini_hython",
+  "expected_outputs": [
+    "smoke_cache.bgeo.sc",
+    "smoke_cache_preview.exr",
+    "smoke_cache_metadata.json",
+    "smoke_cache_execution.log"
+  ],
+  "schema_version": "seos.energy_impact.rpc_template_ref.v1",
+  "template_path": "examples/rpc/houdini_smoke_cache_test.json"
+}

@@ -1,0 +1,18 @@
+{
+  "use_case_id": "uc_003_github_pr_audit",
+  "input_type": "operator_provided_github_pr_snapshot",
+  "repository": "owner/repository",
+  "pull_request_number": 123,
+  "base_branch": "main",
+  "head_branch": "example/pr-audit",
+  "base_sha": "sha-example-base",
+  "head_sha": "sha-example-head",
+  "changed_files": [
+    "governance/example.json"
+  ],
+  "ci_snapshot": {
+    "state": "SUCCESS",
+    "url": "https://example.invalid/actions/runs/123"
+  },
+  "api_snapshot_supplied": true
+}

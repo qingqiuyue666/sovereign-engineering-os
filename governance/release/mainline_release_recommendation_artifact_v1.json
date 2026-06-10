@@ -1,0 +1,40 @@
+{
+  "artifact_type": "mainline_release_recommendation_artifact_v1",
+  "version": "v1",
+  "target_branch": "main",
+  "base_sha": "pending-main-sha",
+  "evaluated_prs": [],
+  "validation_results": {
+    "python_unittest_discover_tests": "not_evaluated",
+    "make_ci": "not_evaluated",
+    "git_diff_check": "not_evaluated",
+    "git_status_short": "not_evaluated",
+    "github_actions": "not_evaluated"
+  },
+  "forbidden_surface_scan": {
+    "status": "not_evaluated",
+    "blocked_surfaces_detected": [],
+    "scan_required_before_release": true
+  },
+  "rollback_recovery_evidence": {
+    "status": "not_evaluated",
+    "rollback_plan_present": false,
+    "recovery_route_present": false,
+    "quarantine_route_present": false,
+    "evidence_retention_confirmed": false
+  },
+  "recommendation": "DO_NOT_RELEASE",
+  "blockers": [
+    "release_readiness_evidence_not_yet_evaluated"
+  ],
+  "operator_review_required": true,
+  "automation_authority": {
+    "writes_release": false,
+    "merges_prs": false,
+    "deletes_branches": false,
+    "pushes_main": false,
+    "performs_runtime_execution": false,
+    "performs_network_execution": false,
+    "performs_browser_execution": false
+  }
+}

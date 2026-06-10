@@ -1,0 +1,31 @@
+{
+  "policy_type": "tool_manifest_risk_binding_v1",
+  "baseline": "CONTROLLED_DRY_RUN_RUNTIME_READY",
+  "target_state": "TOOL_INGESTION_DRY_RUN_READY",
+  "binding_only": true,
+  "uses_tool_manifest_normalizer": true,
+  "uses_tool_risk_classifier": true,
+  "duplicates_classifier_logic": false,
+  "execution_allowed": false,
+  "subprocess_allowed": false,
+  "network_allowed": false,
+  "browser_allowed": false,
+  "provider_api_allowed": false,
+  "credential_storage_allowed": false,
+  "mcp_execution_allowed": false,
+  "dcc_launch_allowed": false,
+  "comfyui_launch_allowed": false,
+  "production_autonomy_allowed": false,
+  "source_type_bindings": {
+    "MCP_TOOL": "MCP_TOOL",
+    "DCC_APP": "DCC_CONTROL",
+    "COMFYUI_WORKFLOW": "COMFYUI_EXECUTION",
+    "BROWSER_AUTOMATION_TOOL": "BROWSER_CONTROL",
+    "API_ADAPTER": "PROVIDER_API when provider_scope is enabled",
+    "UNKNOWN": "HIGH_RISK"
+  },
+  "content_hash_excludes": [
+    "observed_at"
+  ],
+  "standard_library_only": true
+}

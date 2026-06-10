@@ -1,0 +1,21 @@
+# $capability_id Artifact Index Manifest Contract
+
+## Purpose
+
+Bind artifact index metadata to deterministic validation notes.
+
+## Required Fields
+
+- `artifact_index_manifest_id`
+- `capability_id`
+- `metadata_only`
+- `artifact_index_path`
+- `indexed_artifacts`
+- `validation_commands`
+- `remaining_blockers`
+
+## Rules
+
+- The manifest must point at scaffold artifacts only.
+- The manifest must not assert runtime execution.
+- The manifest must preserve the forbidden boundary checklist.

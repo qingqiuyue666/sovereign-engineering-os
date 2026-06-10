@@ -1,0 +1,340 @@
+{
+  "schema_version": "claim_to_evidence_matrix_v1",
+  "external_review_required": true,
+  "global_recognition_claimed": false,
+  "matrix_status": "ready_for_human_external_review_input",
+  "claims": [
+    {
+      "claim_id": "CLAIM-SEOS-IDENTITY-001",
+      "claim": "SEOS is documented as a local-first AI execution governance kernel.",
+      "allowed_public_wording": "SEOS is a local-first AI execution governance kernel with documented public boundaries.",
+      "evidence_refs": [
+        "README.md",
+        "docs/identity/system_identity_v1.md",
+        "docs/identity/non_goals_v1.md"
+      ],
+      "validation_refs": [
+        "python3 scripts/identity_boundary_check_v1.py"
+      ],
+      "status": "supported_by_repository_evidence",
+      "limitations": [
+        "Not an OS sandbox.",
+        "Not RPA or a computer-control framework.",
+        "Not a commercial SaaS platform or secret manager."
+      ],
+      "forbidden_wording": [
+        "global recognition confirmed",
+        "globally recognized",
+        "externally certified"
+      ]
+    },
+    {
+      "claim_id": "CLAIM-SEOS-OBSERVATION-002",
+      "claim": "The repository records an observation-mode posture with no hard evidence blocker recorded.",
+      "allowed_public_wording": "The repository includes local observation-mode evidence and a no-hard-blocker observation log.",
+      "evidence_refs": [
+        "reports/observation/real_operation_observation_log_v1.json",
+        "scripts/observation_check_v1.py",
+        "docs/current_phase.md"
+      ],
+      "validation_refs": [
+        "python3 scripts/observation_check_v1.py"
+      ],
+      "status": "bounded_by_repository_evidence",
+      "limitations": [
+        "Observation evidence is repository-local.",
+        "Independent external review is still required."
+      ],
+      "forbidden_wording": [
+        "global recognition confirmed",
+        "globally recognized",
+        "externally certified"
+      ]
+    },
+    {
+      "claim_id": "CLAIM-SEOS-REPRO-003",
+      "claim": "Clean-clone and fresh-venv smoke paths exist for reproducibility and installability evidence.",
+      "allowed_public_wording": "SEOS includes local clean-clone, fresh-venv, and packaging smoke evidence.",
+      "evidence_refs": [
+        "scripts/clean_clone_observation_smoke_v1.sh",
+        "scripts/fresh_venv_install_smoke_v1.sh",
+        "scripts/package_build_smoke_v1.sh",
+        "scripts/installability_check_v1.py",
+        "tests/tracer_bullet/test_installability_v1.py"
+      ],
+      "validation_refs": [
+        "python3 scripts/installability_check_v1.py",
+        "make verify"
+      ],
+      "status": "supported_by_repository_evidence",
+      "limitations": [
+        "Smoke coverage is local.",
+        "This is not a public release artifact or cross-platform matrix."
+      ],
+      "forbidden_wording": [
+        "global recognition confirmed",
+        "globally recognized",
+        "externally certified"
+      ]
+    },
+    {
+      "claim_id": "CLAIM-SEOS-CONTRACTS-004",
+      "claim": "Core SEOS objects have documented V1 contract surfaces with examples and fail-closed behavior.",
+      "allowed_public_wording": "Core SEOS objects have documented V1 contract surfaces with static validation.",
+      "evidence_refs": [
+        "docs/contracts/task_contract_v1.md",
+        "docs/contracts/execution_receipt_v1.md",
+        "docs/contracts/evidence_trace_v1.md",
+        "scripts/contract_check_v1.py",
+        "tests/tracer_bullet/test_contracts_v1.py"
+      ],
+      "validation_refs": [
+        "python3 scripts/contract_check_v1.py",
+        "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.tracer_bullet.test_contracts_v1"
+      ],
+      "status": "supported_by_repository_evidence",
+      "limitations": [
+        "Contract documents are not runtime expansion.",
+        "Runtime implementation claims require separate evidence."
+      ],
+      "forbidden_wording": [
+        "global recognition confirmed",
+        "globally recognized",
+        "externally certified"
+      ]
+    },
+    {
+      "claim_id": "CLAIM-SEOS-TAG-005",
+      "claim": "The v0.1.0-rc3 release-candidate tag invariant is tracked as protected evidence.",
+      "allowed_public_wording": "The v0.1.0-rc3 tag invariant is tracked and checked during readiness work.",
+      "evidence_refs": [
+        "reports/observation/real_operation_observation_log_v1.json",
+        "docs/current_phase.md",
+        "CHANGELOG.md"
+      ],
+      "validation_refs": [
+        "git rev-parse 'v0.1.0-rc3^{}'"
+      ],
+      "status": "bounded_by_repository_evidence",
+      "limitations": [
+        "This matrix does not publish a release.",
+        "This matrix does not move or retag v0.1.0-rc3."
+      ],
+      "forbidden_wording": [
+        "global recognition confirmed",
+        "globally recognized",
+        "externally certified"
+      ]
+    },
+    {
+      "claim_id": "CLAIM-SEOS-SECURITY-006",
+      "claim": "The public boundary rejects unsupported security, autonomy, provider, and external-recognition claims.",
+      "allowed_public_wording": "SEOS documents unsupported claims and validates that public wording stays bounded.",
+      "evidence_refs": [
+        "SECURITY.md",
+        "docs/identity/non_goals_v1.md",
+        "scripts/identity_boundary_check_v1.py",
+        "scripts/claim_to_evidence_check_v1.py"
+      ],
+      "validation_refs": [
+        "python3 scripts/identity_boundary_check_v1.py",
+        "python3 scripts/claim_to_evidence_check_v1.py"
+      ],
+      "status": "requires_external_review",
+      "limitations": [
+        "Repository checks reduce claim drift.",
+        "They do not replace independent security or external recognition review."
+      ],
+      "forbidden_wording": [
+        "global recognition confirmed",
+        "globally recognized",
+        "externally certified"
+      ]
+    },
+    {
+      "claim_id": "CLAIM-SEOS-FAILCLOSED-007",
+      "claim": "Failure-path and adversarial smoke coverage proves bad states do not produce fake success.",
+      "allowed_public_wording": "SEOS includes local fail-closed and adversarial smoke evidence for bad inputs and bad states.",
+      "evidence_refs": [
+        "scripts/failure_path_smoke_v1.sh",
+        "scripts/adversarial_smoke_v1.py",
+        "reports/failure_path/failure_path_baseline_v1.json",
+        "tests/tracer_bullet/test_failure_path_hardening_v1.py",
+        "tests/adversarial/test_adversarial_inputs_v1.py"
+      ],
+      "validation_refs": [
+        "bash scripts/failure_path_smoke_v1.sh",
+        "python3 scripts/adversarial_smoke_v1.py",
+        "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/adversarial"
+      ],
+      "status": "supported_by_repository_evidence",
+      "limitations": [
+        "Coverage is local fail-closed evidence.",
+        "This is not an external penetration test or independent certification."
+      ],
+      "forbidden_wording": [
+        "global recognition confirmed",
+        "globally recognized",
+        "externally certified"
+      ]
+    },
+    {
+      "claim_id": "CLAIM-SEOS-SUPPLY-008",
+      "claim": "Security and supply-chain evidence is documented for external audit input.",
+      "allowed_public_wording": "SEOS includes documented security and supply-chain controls for external review input.",
+      "evidence_refs": [
+        "docs/security/security_control_matrix_v1.md",
+        "docs/security/threat_model_v1.md",
+        "docs/supply_chain/supply_chain_integrity_policy_v1.md",
+        "docs/supply_chain/dependency_policy_v1.md",
+        "scripts/security_control_check_v1.py",
+        "scripts/supply_chain_check_v1.py"
+      ],
+      "validation_refs": [
+        "python3 scripts/security_control_check_v1.py",
+        "python3 scripts/supply_chain_check_v1.py",
+        "python3 scripts/secret_context_safety_check_v1.py",
+        "python3 scripts/release_invariant_check_v1.py"
+      ],
+      "status": "supported_by_repository_evidence",
+      "limitations": [
+        "Policies are repository-local review evidence.",
+        "They do not replace independent security or supply-chain audit."
+      ],
+      "forbidden_wording": [
+        "global recognition confirmed",
+        "globally recognized",
+        "externally certified"
+      ]
+    },
+    {
+      "claim_id": "CLAIM-SEOS-AIADMISSION-009",
+      "claim": "AI-provider admission boundaries are documented without enabling live execution.",
+      "allowed_public_wording": "SEOS includes documented AI-provider admission boundaries for external review input.",
+      "evidence_refs": [
+        "docs/ai_admission/ai_provider_admission_policy_v1.md",
+        "docs/ai_admission/proposal_first_policy_v1.md",
+        "docs/ai_admission/provider_secret_ref_policy_v1.md",
+        "docs/ai_admission/context_redaction_policy_v1.md",
+        "docs/ai_admission/token_budget_policy_v1.md",
+        "docs/ai_admission/model_output_artifact_policy_v1.md",
+        "docs/ai_admission/human_approval_before_patch_policy_v1.md",
+        "docs/ai_admission/provider_failure_policy_v1.md",
+        "scripts/ai_admission_check_v1.py",
+        "tests/tracer_bullet/test_ai_provider_admission_safety_v1.py"
+      ],
+      "validation_refs": [
+        "python3 scripts/ai_admission_check_v1.py",
+        "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.tracer_bullet.test_ai_provider_admission_safety_v1"
+      ],
+      "status": "supported_by_repository_evidence",
+      "limitations": [
+        "Admission policy is repository-local review evidence.",
+        "It does not authorize live provider execution or AI-applied patches."
+      ],
+      "forbidden_wording": [
+        "global recognition confirmed",
+        "globally recognized",
+        "externally certified"
+      ]
+    },
+    {
+      "claim_id": "CLAIM-SEOS-DOGFOOD-010",
+      "claim": "Real repository-maintenance dogfood records cover five readiness categories.",
+      "allowed_public_wording": "SEOS includes dogfood records for real merged repository-maintenance tasks across five readiness categories.",
+      "evidence_refs": [
+        "reports/dogfood/dogfood_index_v1.json",
+        "reports/dogfood/dogfood_index_v1.md",
+        "reports/dogfood/repository_maturity_readme_docs_hardening_v1.json",
+        "reports/dogfood/failure_path_hardening_v1.json",
+        "reports/dogfood/installability_reproducibility_hardening_v1.json",
+        "reports/dogfood/ai_admission_safety_hardening_v1.json",
+        "reports/dogfood/security_supply_chain_threat_model_hardening_v1.json",
+        "scripts/dogfood_evidence_check_v1.py",
+        "tests/tracer_bullet/test_dogfood_evidence_v1.py"
+      ],
+      "validation_refs": [
+        "python3 scripts/dogfood_evidence_check_v1.py",
+        "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.tracer_bullet.test_dogfood_evidence_v1"
+      ],
+      "status": "supported_by_repository_evidence",
+      "limitations": [
+        "Dogfood records are based on merged PR and commit evidence.",
+        "They do not invent unavailable separate approval artifacts."
+      ],
+      "forbidden_wording": [
+        "global recognition confirmed",
+        "globally recognized",
+        "externally certified"
+      ]
+    },
+    {
+      "claim_id": "CLAIM-SEOS-RELIABILITY-011",
+      "claim": "Repository-local reliability and operations evidence covers the Wave 8 baseline.",
+      "allowed_public_wording": "SEOS includes repository-local reliability, operations, and schema compatibility evidence for external review input.",
+      "evidence_refs": [
+        "reports/reliability/reliability_benchmark_v1.json",
+        "docs/reliability/reliability_baseline_v1.md",
+        "docs/operations/incident_response_v1.md",
+        "docs/operations/rollback_runbook_v1.md",
+        "docs/operations/maintenance_policy_v1.md",
+        "docs/operations/workspace_cleanup_policy_v1.md",
+        "docs/operations/interrupted_run_policy_v1.md",
+        "docs/compatibility/schema_versioning_policy_v1.md",
+        "scripts/reliability_benchmark_v1.py",
+        "scripts/schema_compatibility_check_v1.py",
+        "tests/tracer_bullet/test_operational_stability_v1.py",
+        "tests/tracer_bullet/test_schema_compatibility_policy_v1.py"
+      ],
+      "validation_refs": [
+        "python3 scripts/reliability_benchmark_v1.py",
+        "python3 scripts/schema_compatibility_check_v1.py",
+        "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.tracer_bullet.test_operational_stability_v1",
+        "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.tracer_bullet.test_schema_compatibility_policy_v1"
+      ],
+      "status": "supported_by_repository_evidence",
+      "limitations": [
+        "The baseline is repository-local engineering evidence.",
+        "It does not replace independent review or long-duration operating evidence."
+      ],
+      "forbidden_wording": [
+        "global recognition confirmed",
+        "globally recognized",
+        "externally certified"
+      ]
+    },
+    {
+      "claim_id": "CLAIM-SEOS-AUDITPACKET-012",
+      "claim": "The external review packet assembles bounded readiness evidence and retained caveats.",
+      "allowed_public_wording": "SEOS includes an external review packet that assembles bounded repository evidence and retained caveats.",
+      "evidence_refs": [
+        "docs/audits/external_audit_packet_v1.md",
+        "reports/audits/external_audit_packet_v1.json",
+        "docs/audits/independent_verification_runbook_v1.md",
+        "docs/audits/red_team_checklist_v1.md",
+        "docs/audits/accepted_risk_register_v1.md",
+        "reports/audits/accepted_risk_register_v1.json",
+        "docs/audits/residual_risk_register_v1.md",
+        "reports/audits/residual_risk_register_v1.json",
+        "docs/audits/final_blocker_table_v1.md",
+        "reports/audits/final_blocker_table_v1.json",
+        "scripts/external_audit_packet_check_v1.py",
+        "tests/tracer_bullet/test_external_audit_packet_v1.py"
+      ],
+      "validation_refs": [
+        "python3 scripts/external_audit_packet_check_v1.py",
+        "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.tracer_bullet.test_external_audit_packet_v1"
+      ],
+      "status": "requires_external_review",
+      "limitations": [
+        "The packet is a handoff artifact for independent review.",
+        "It does not confirm external recognition or final signoff."
+      ],
+      "forbidden_wording": [
+        "global recognition confirmed",
+        "globally recognized",
+        "externally certified"
+      ]
+    }
+  ]
+}

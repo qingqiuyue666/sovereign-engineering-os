@@ -1,0 +1,43 @@
+{
+  "schema_version": "accepted_risk_register_v1",
+  "external_review_required": true,
+  "global_recognition_claimed": false,
+  "acceptance_boundary": "external_review_readiness_only",
+  "risks": [
+    {
+      "risk_id": "AR-001",
+      "title": "Repository-local evidence",
+      "accepted_for_external_review_readiness": true,
+      "mitigation": "Independent verification runbook and PR links are included.",
+      "not_accepted_for_final_recognition": true
+    },
+    {
+      "risk_id": "AR-002",
+      "title": "No long-duration operation evidence",
+      "accepted_for_external_review_readiness": true,
+      "mitigation": "Residual risk register requires 30-90 day operation evidence.",
+      "not_accepted_for_final_recognition": true
+    },
+    {
+      "risk_id": "AR-003",
+      "title": "No live AI provider execution",
+      "accepted_for_external_review_readiness": true,
+      "mitigation": "AI admission policy remains fail-closed for live providers.",
+      "not_accepted_for_final_recognition": true
+    },
+    {
+      "risk_id": "AR-004",
+      "title": "No OS sandbox, RPA, or computer-control boundary",
+      "accepted_for_external_review_readiness": true,
+      "mitigation": "Identity and non-goals docs preserve the boundary.",
+      "not_accepted_for_final_recognition": true
+    },
+    {
+      "risk_id": "AR-005",
+      "title": "No public GitHub Release publication",
+      "accepted_for_external_review_readiness": true,
+      "mitigation": "Release invariant checks preserve the existing tag state.",
+      "not_accepted_for_final_recognition": true
+    }
+  ]
+}

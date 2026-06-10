@@ -1,0 +1,70 @@
+{
+  "schema_version": "dogfood_record_v1",
+  "record_id": "DOGFOOD-SECURITY-SUPPLY-005",
+  "category": "security_supply_chain_threat_model_hardening",
+  "historical_evidence_available": true,
+  "task_contract": {
+    "summary": "Add security, threat-model, operator-safety, and supply-chain review evidence.",
+    "source_refs": [
+      "docs/security/security_control_matrix_v1.md",
+      "docs/security/threat_model_v1.md",
+      "docs/supply_chain/supply_chain_integrity_policy_v1.md",
+      "scripts/security_control_check_v1.py",
+      "scripts/supply_chain_check_v1.py"
+    ]
+  },
+  "approval_receipt": {
+    "receipt_id": "DOGFOOD-SECURITY-SUPPLY-005-APPROVAL",
+    "approval_boundary": "merge_after_required_checks",
+    "repository_evidence": "Pull request 544 was merged after canonical health validation.",
+    "separate_historical_approval_artifact_available": false
+  },
+  "dry_run_execution_receipt": {
+    "receipt_id": "DOGFOOD-SECURITY-SUPPLY-005-EXECUTION",
+    "dry_run_first": true,
+    "execution_scope": "security and supply-chain policy and static validator evidence",
+    "runtime_expansion_performed": false
+  },
+  "evidence_trace": [
+    "docs/security/security_control_matrix_v1.md",
+    "docs/security/threat_model_v1.md",
+    "docs/supply_chain/supply_chain_integrity_policy_v1.md",
+    "scripts/security_control_check_v1.py",
+    "scripts/supply_chain_check_v1.py"
+  ],
+  "replay_explain": {
+    "commands": [
+      "python3 scripts/security_control_check_v1.py",
+      "python3 scripts/supply_chain_check_v1.py",
+      "python3 scripts/secret_context_safety_check_v1.py",
+      "python3 scripts/release_invariant_check_v1.py",
+      "make verify",
+      "make ci"
+    ],
+    "expected_result": "pass"
+  },
+  "pr_link_or_commit_reference": {
+    "pr_url": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/pull/544",
+    "merge_commit": "d6c5da73f4914baa69b58a8638999caa0224ddc6",
+    "merged_at": "2026-05-30T09:42:29Z"
+  },
+  "validation_result": {
+    "status": "passed",
+    "commands": [
+      "python3 scripts/security_control_check_v1.py",
+      "python3 scripts/supply_chain_check_v1.py",
+      "make verify",
+      "make ci"
+    ]
+  },
+  "post_merge_validation": {
+    "status": "passed",
+    "main_commit": "d6c5da73f4914baa69b58a8638999caa0224ddc6",
+    "github_actions_run": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/actions/runs/26680666230"
+  },
+  "outcome": "merged_to_main",
+  "residual_risk": [
+    "Security and supply-chain policies are review evidence and do not replace independent audit."
+  ],
+  "fabrication_guard": "Record is based on merged PR and commit evidence; unavailable private approval artifacts are not invented."
+}

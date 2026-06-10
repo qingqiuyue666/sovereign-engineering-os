@@ -1,0 +1,358 @@
+# Real Production Refactor 8-Step Roadmap v1
+
+## Direction
+
+SEOS must be developed as a useful local AI/VFX production assistant, not as a
+self-certification project. Governance remains valuable only where it protects
+or explains real local production work.
+
+High-priority work must reduce manual operator effort, produce real local
+artifacts, or return truthful failure evidence with clear next actions.
+
+## Product Boundary
+
+- Local-first production assistant and controlled execution/evidence system.
+- Not an operating-system sandbox.
+- Not uncontrolled RPA or desktop automation.
+- Not a cloud production platform.
+- Not externally certified.
+- Proprietary DCC tools are optional and must never be required by default CI.
+- Missing tools and license blocks must produce truthful unavailable evidence.
+
+## Step 1: Refocus Positioning
+
+Status: started.
+
+README and roadmap language now describe SEOS in terms of practical production
+value: local asset scans, useful reports, adapter truthfulness, shot planning,
+local outputs, hashes, evidence, replay, and actionable failure bundles.
+
+## Step 2A: Real Local Asset Scanner V1
+
+Status: implemented by the Step 2A slice.
+
+Operator value:
+
+- scan a configurable local asset root;
+- classify likely Houdini, Unreal, Blender, ZBrush, After Effects, DaVinci,
+  ComfyUI, texture, material, HDRI, cache, model, video, audio, LUT, script,
+  archive, and unknown assets;
+- detect empty directories;
+- detect exact duplicate groups by size and SHA-256;
+- detect missing multipart archive parts;
+- detect likely texture sets and missing standard maps;
+- detect likely model/material/texture production packs;
+- emit sanitized JSON and readable Markdown reports;
+- keep the asset root read-only.
+
+Validation:
+
+```bash
+make creative-real-asset-scanner-check
+python3 scripts/creative_asset_scan_v3.py --mode public
+python3 scripts/creative_total_check_v3.py
+git diff --check
+```
+
+## Step 2B: Asset Search / Retrieval CLI V1
+
+Status: implemented by the Step 2B slice.
+
+Queries over the generated registry:
+
+- find usable Houdini FX assets;
+- find VDB/cache assets;
+- find missing texture sets;
+- find duplicate video/audio groups;
+- find incomplete archives;
+- find empty directories.
+
+Validation:
+
+```bash
+make creative-asset-search-check
+python3 seos.py creative search-assets --registry-json reports/creative/assets/asset_library_report_v1.json --query missing-texture-sets
+```
+
+## Step 3A: Local Production Dashboard V1
+
+Status: implemented by the Step 3A slice.
+
+Turn scan, search, and tool-health results into one operator dashboard with
+category counts, largest folders, duplicate groups, archive warnings, texture
+set status, likely incomplete packs, and next actions. The Step 3A dashboard is
+truthful about tool readiness: it reports assets by tool category but does not
+pretend tool-health smoke checks have been run.
+
+Validation:
+
+```bash
+make creative-production-dashboard-check
+python3 seos.py creative production-dashboard --registry-json reports/creative/assets/asset_library_report_v1.json --output-md reports/creative/assets/local_production_dashboard_v1.md --output-html reports/creative/assets/local_production_dashboard_v1.html
+```
+
+## Step 3B: Local Tool Health Dashboard V1
+
+Status: implemented by the Step 3B slice.
+
+Operator value:
+
+- report local availability for Python, Python dependencies, Git, FFmpeg,
+  Houdini/hython, ComfyUI, Blender, After Effects, DaVinci Resolve, Unreal
+  Engine, and ZBrush;
+- show found/missing/config-required status;
+- show versions and sanitized configured paths where detectable;
+- distinguish smoke-passed, path-detected, app-detected, config-required,
+  environment-not-found, and license-blocked style evidence;
+- produce JSON, Markdown, and HTML reports;
+- avoid launching DCC or AI tools and avoid checking out licenses;
+- keep proprietary tools optional for default CI.
+
+Validation:
+
+```bash
+make creative-tool-health-dashboard-check
+python3 seos.py creative tool-health-dashboard --mode public --doctor-json tests/fixtures/creative/software_discovery/local_tool_health_doctor_fixture_v1.json --output-json reports/creative/tool_health/local_tool_health_dashboard_v1.json --output-md reports/creative/tool_health/local_tool_health_dashboard_v1.md --output-html reports/creative/tool_health/local_tool_health_dashboard_v1.html
+```
+
+## Step 4A: Houdini Real Local Runner V1
+
+Status: implemented by the Step 4A slice.
+
+Operator value:
+
+- detect `hython` from explicit `--hython`, `SEOS_HYTHON_PATH`, PATH, or common
+  install locations;
+- require explicit operator approval before launching `hython`;
+- run a fixed minimal SEOS smoke driver, not a user-supplied raw command;
+- write one smoke output JSON under the allowed output root;
+- hash the output and record a materialization result;
+- return `ENV_NOT_FOUND`, `USER_APPROVAL_REQUIRED`, `LICENSE_BLOCKED`,
+  `LONG_TASK_BLOCKED`, or `EXECUTION_FAILED` truthfully when execution cannot
+  complete;
+- avoid requiring Houdini in default CI through mocked tests and deterministic
+  unavailable evidence.
+
+Validation:
+
+```bash
+make creative-houdini-runner-check
+python3 scripts/creative_houdini_hython_smoke_v1.py --hython tests/fixtures/creative/software_discovery/missing_hython --output-root work/creative_runs/houdini_unavailable --observed-at 2026-06-08T00:00:00Z --result-json reports/creative/houdini/hython_smoke_unavailable_v1.json --materialization-json reports/creative/houdini/hython_smoke_materialization_v1.json
+```
+
+Residual boundaries:
+
+- real Houdini render execution remains outside this smoke runner;
+- license checkout can still fail locally and is reported as `LICENSE_BLOCKED`;
+- no default CI path requires proprietary SideFX software.
+
+## Step 4B: ComfyUI Real Local Runner V1
+
+Status: implemented by the Step 4B slice.
+
+Operator value:
+
+- validate API-format ComfyUI workflow JSON without persisting raw prompt
+  payloads;
+- preflight a loopback-only local ComfyUI service through `/system_stats`;
+- require explicit operator approval before submitting to `/prompt`;
+- submit a default no-model `EmptyImage` to `SaveImage` API workflow or an
+  operator-provided exported API workflow;
+- poll `/history/{prompt_id}` for completion evidence;
+- download bounded `/view` output artifacts when available;
+- write prompt/history summaries, hashes, and materialization evidence;
+- return `ENV_NOT_FOUND`, `SERVICE_UNAVAILABLE`, `USER_APPROVAL_REQUIRED`,
+  `EXECUTED`, `LONG_TASK_BLOCKED`, or `EXECUTION_FAILED` truthfully;
+- avoid requiring ComfyUI in default CI through mocked service responses and
+  deterministic unavailable evidence.
+
+Validation:
+
+```bash
+make creative-comfyui-runner-check
+python3 scripts/creative_comfyui_workflow_smoke_v1.py --workflow-json tests/fixtures/creative/comfyui/api_workflow_fixture_v1.json --output-root work/creative_runs/comfyui_service_unavailable --observed-at 2026-06-08T00:00:00Z --fixture-service-unavailable --result-json reports/creative/comfyui/comfyui_smoke_service_unavailable_v1.json --materialization-json reports/creative/comfyui/comfyui_smoke_materialization_v1.json
+```
+
+Residual boundaries:
+
+- SEOS does not start or install ComfyUI;
+- SEOS cannot prove arbitrary installed custom nodes are harmless;
+- raw ComfyUI history is hashed and summarized, not persisted in public reports;
+- no default CI path requires a running ComfyUI service.
+
+## Step 4C: Optional Adapter Contracts V1
+
+Status: implemented by the Step 4C slice.
+
+Operator value:
+
+- publish JSON and Markdown optional adapter contracts for Blender, After
+  Effects, DaVinci Resolve, Unreal Engine, and ZBrush;
+- report current discovery status from the tool-health doctor;
+- list exact allowed and disallowed actions for each adapter;
+- preserve `supports_execute: false` for every optional adapter until a
+  separate approval-gated runner exists;
+- identify the next local proof required before each adapter can advance;
+- avoid requiring proprietary tools in default CI through fixture-backed tests.
+
+Validation:
+
+```bash
+make creative-optional-adapter-contracts-check
+python3 seos.py creative optional-adapter-contracts --mode public --doctor-json tests/fixtures/creative/software_discovery/local_tool_health_doctor_fixture_v1.json --output-json reports/creative/adapters/optional_adapter_contracts_v1.json --output-md reports/creative/adapters/optional_adapter_contracts_v1.md
+```
+
+Residual boundaries:
+
+- these contracts do not launch Blender, After Effects, DaVinci Resolve, Unreal
+  Engine, or ZBrush;
+- these contracts do not submit render, import, export, commandlet, or GUI jobs;
+- future real runners must land as separate slices with local evidence;
+- ZBrush remains manual handoff/registry-only by default.
+
+## Step 5: Shot Assistant and Templates
+
+Status: implemented by the Step 5 slice.
+
+Operator value:
+
+- list practical shot templates for energy impact, smoke/dust, portal/lightning,
+  and editorial handoff;
+- build a shot plan from a scanned asset-library report;
+- bind candidate assets to required and optional requirements;
+- report missing required assets without claiming completion;
+- include manual production steps and optional approval-gated runner command
+  templates;
+- incorporate tool-health and optional-adapter-contract report summaries when
+  supplied;
+- write JSON and Markdown shot plans without rendering, generating, launching
+  tools, or mutating the asset library.
+
+Validation:
+
+```bash
+make creative-shot-planner-check
+python3 seos.py creative shot plan --template energy-impact --shot-id SHOT_ENERGY_IMPACT_FIXTURE --registry-json reports/creative/assets/asset_library_report_v1.json --tool-health-json tests/fixtures/creative/software_discovery/local_tool_health_doctor_fixture_v1.json --adapter-contracts-json reports/creative/adapters/optional_adapter_contracts_v1.json --output-json reports/creative/shots/shot_plan_energy_impact_v1.json --output-md reports/creative/shots/shot_plan_energy_impact_v1.md
+```
+
+Residual boundaries:
+
+- shot plans are planning artifacts only;
+- optional runner commands still require separate local approval;
+- no render, simulation, generation, comp, export, archive, or editorial
+  delivery job is submitted by the planner;
+- final creative approval remains human-owned.
+
+## Step 6: Real Project Pressure Testing
+
+Run the asset scan, search, shot planner, and optional local adapters against a
+realistic production task. Convert repo-side failures into fixes and regression
+tests.
+
+Status: implemented in `creative pressure-test`.
+
+This step adds a read-only pressure report that:
+
+- scans or loads a realistic asset root;
+- runs practical search probes for Houdini assets, VDB/cache, duplicate media,
+  incomplete archives, empty directories, incomplete packs, and missing texture
+  sets;
+- builds the production dashboard summary;
+- builds a shot plan for a named template and shot ID;
+- includes local tool health and optional adapter contract context when
+  provided;
+- reports blockers and warnings instead of claiming a perfect project;
+- keeps optional local runners approval-gated and does not execute DCC or AI
+  jobs.
+
+Validation:
+
+```bash
+make creative-real-project-pressure-test-check
+python3 seos.py creative pressure-test \
+  --root tests/fixtures/creative/assets \
+  --template energy-impact \
+  --shot-id SHOT_PRESSURE_ENERGY_IMPACT_FIXTURE \
+  --tool-health-json tests/fixtures/creative/software_discovery/local_tool_health_doctor_fixture_v1.json \
+  --adapter-contracts-json reports/creative/adapters/optional_adapter_contracts_v1.json \
+  --output-json reports/creative/pressure/real_project_pressure_test_v1.json \
+  --output-md reports/creative/pressure/real_project_pressure_test_v1.md
+```
+
+## Step 7: Production Hardening
+
+Improve failure repair suggestions, output packaging, runtime reliability,
+private path sanitization, output size limits, scan speed, and repeated-use
+operator experience.
+
+Status: implemented in `creative hardening-plan`.
+
+This step consumes a pressure-test report and writes a read-only hardening plan
+that:
+
+- turns pressure findings into prioritized repair actions;
+- checks a bounded report package manifest;
+- records per-artifact existence, size, digest, and local-path-leak status;
+- blocks public package readiness if local path markers are found;
+- reports missing or oversized outputs as package repair blockers;
+- keeps repeated-use next actions tied to rerunning pressure tests after
+  repairs.
+
+Validation:
+
+```bash
+make creative-production-hardening-check
+python3 seos.py creative hardening-plan \
+  --pressure-json reports/creative/pressure/real_project_pressure_test_v1.json \
+  --output-json reports/creative/hardening/production_hardening_plan_v1.json \
+  --output-md reports/creative/hardening/production_hardening_plan_v1.md
+```
+
+## Step 8: Real Works Operation
+
+Use SEOS on repeated energy impact, smoke/dust, portal/lightning, asset-library,
+and editorial handoff workflows. Continue development only where real project
+needs or failure logs justify it.
+
+Status: implemented in `creative works-operation`.
+
+This step writes a read-only repeated-operation report that:
+
+- builds shot plans for energy impact, smoke/dust, portal/lightning, and
+  editorial handoff workflows, plus an asset-library maintenance workflow;
+- reads pressure-test and hardening status;
+- reports repeatability metrics and optional runner readiness;
+- derives development needs from hardening actions, pressure findings, and
+  workflow blockers;
+- records the practical operation loop commands for repeated local use;
+- keeps new development tied to a real workflow blocker, pressure finding,
+  hardening action, or project need.
+
+Validation:
+
+```bash
+make creative-real-works-operation-check
+python3 seos.py creative works-operation \
+  --registry-json reports/creative/assets/asset_library_report_v1.json \
+  --tool-health-json tests/fixtures/creative/software_discovery/local_tool_health_doctor_fixture_v1.json \
+  --adapter-contracts-json reports/creative/adapters/optional_adapter_contracts_v1.json \
+  --pressure-json reports/creative/pressure/real_project_pressure_test_v1.json \
+  --hardening-json reports/creative/hardening/production_hardening_plan_v1.json \
+  --output-json reports/creative/operation/real_works_operation_v1.json \
+  --output-md reports/creative/operation/real_works_operation_v1.md
+```
+
+## External References Used For Direction
+
+- OpenAssetIO frames asset systems around host tools and managed references.
+- MaterialX reinforces material and texture metadata as production-relevant
+  data rather than decorative file listings.
+- OpenUSD asset resolution reinforces the need for portable asset references.
+- ComfyUI official server/API docs reinforce loopback server usage, API-format
+  workflows, `/prompt`, `/history/{prompt_id}`, `/view`, and `/system_stats`
+  as the practical integration surface for local workflow execution.
+
+SEOS does not claim to implement the production data standards in this step.
+The scanner uses their practical direction: relative asset references, explicit
+traits, and truthful boundaries. The ComfyUI runner uses official local API
+behavior only for bounded loopback smoke execution.

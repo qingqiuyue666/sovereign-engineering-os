@@ -6,16 +6,61 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   canonical-health:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.14"
+      - name: Install Python dependencies
+        run: python -m pip install "openpyxl>=3.1,<4" "setuptools>=69"
       - name: Show Python version
         run: python --version
+      - name: Run observation invariant check
+        run: python scripts/observation_check_v1.py
+      - name: Run public identity boundary check
+        run: python scripts/identity_boundary_check_v1.py
+      - name: Run installability static check
+        run: python scripts/installability_check_v1.py
+      - name: Run contract static check
+        run: python scripts/contract_check_v1.py
+      - name: Run claim-to-evidence static check
+        run: python scripts/claim_to_evidence_check_v1.py
+      - name: Run security control static check
+        run: python scripts/security_control_check_v1.py
+      - name: Run supply-chain static check
+        run: python scripts/supply_chain_check_v1.py
+      - name: Run secret/context safety static check
+        run: python scripts/secret_context_safety_check_v1.py
+      - name: Run release invariant static check
+        run: python scripts/release_invariant_check_v1.py
+      - name: Run AI admission static check
+        run: python scripts/ai_admission_check_v1.py
+      - name: Run dogfood evidence static check
+        run: python scripts/dogfood_evidence_check_v1.py
+      - name: Run reliability benchmark static check
+        run: python scripts/reliability_benchmark_v1.py
+      - name: Run schema compatibility static check
+        run: python scripts/schema_compatibility_check_v1.py
+      - name: Run creative pipeline total check
+        run: python scripts/creative_total_check_v3.py
+      - name: Run external audit packet static check
+        run: python scripts/external_audit_packet_check_v1.py
+      - name: Run failure path smoke
+        run: bash scripts/failure_path_smoke_v1.sh
+      - name: Run adversarial smoke
+        run: python scripts/adversarial_smoke_v1.py
+      - name: Run packaging smoke
+        run: bash scripts/package_build_smoke_v1.sh
+      - name: Run fresh venv install smoke
+        run: bash scripts/fresh_venv_install_smoke_v1.sh
       - name: Run canonical health gate
         run: make ci

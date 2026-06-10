@@ -1,0 +1,46 @@
+{
+  "candidate_id": "github-candidate-ultrafunkamsterdam-nodriver-v1",
+  "candidate_name": "nodriver",
+  "candidate_type": "github_capability_candidate_v1",
+  "capability_domains": [
+    "browser_automation",
+    "terminal_automation"
+  ],
+  "declared_external_services": [
+    "local browser runtime",
+    "live websites if used outside fixtures"
+  ],
+  "declared_file_system_permissions": [
+    "may create or clean browser profiles",
+    "may read/write cookies when configured"
+  ],
+  "declared_install_commands": [
+    "pip install nodriver"
+  ],
+  "declared_license": "AGPL-3.0",
+  "declared_network_requirements": [
+    "live websites require network during automation"
+  ],
+  "declared_risks": [
+    "anti-bot and detection-avoidance orientation",
+    "unsuitable for account creation, captcha bypass, abuse, or terms-of-service evasion workflows",
+    "AGPL license requires legal review before any integration",
+    "network behavior must remain disabled unless separately approved",
+    "not suitable as first external worker adapter"
+  ],
+  "declared_run_commands": [
+    "python browser_automation_script.py"
+  ],
+  "declared_runtime_languages": [
+    "Python"
+  ],
+  "declared_secret_requirements": [],
+  "default_branch": "main",
+  "evidence_notes": "Included as a negative-control/high-risk browser automation candidate. Intake must record it without promoting it.",
+  "integration_hypothesis": "Do not select for first sandbox smoke. Keep as high-risk candidate and require policy/legal/safety review before any runnable integration.",
+  "intended_use": "browser_automation",
+  "repo_full_name": "ultrafunkamsterdam/nodriver",
+  "repo_url": "https://github.com/ultrafunkamsterdam/nodriver",
+  "source_origin": "web_research",
+  "user_value_hypothesis": "nodriver may contain useful low-level browser automation patterns, but should be treated as high-risk reference material only unless safety review approves a narrow use."
+}

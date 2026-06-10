@@ -1,0 +1,46 @@
+{
+  "edges": [
+    {
+      "from": "houdini_smoke_cache",
+      "mode": "artifact_refs",
+      "to": "comfyui_submit"
+    },
+    {
+      "from": "comfyui_submit",
+      "mode": "artifact_refs",
+      "to": "davinci_project_probe"
+    }
+  ],
+  "failure_policy": {
+    "rerun_from_failed_node": true,
+    "stop_downstream_on_failure": true
+  },
+  "nodes": [
+    {
+      "action": "smoke_cache_test",
+      "adapter": "houdini_hython",
+      "node_id": "houdini_smoke_cache",
+      "payload": {
+        "cache_name": "cross_dcc_smoke_cache"
+      }
+    },
+    {
+      "action": "submit_workflow",
+      "adapter": "comfyui_local",
+      "node_id": "comfyui_submit",
+      "payload": {
+        "workflow_path": "examples/comfyui/workflows/minimal_save_image.json"
+      }
+    },
+    {
+      "action": "project_probe",
+      "adapter": "davinci_resolve",
+      "node_id": "davinci_project_probe",
+      "payload": {
+        "project_name": "SEOS Cross DCC Probe"
+      }
+    }
+  ],
+  "schema_version": "seos.cross_software_workflow.v1",
+  "workflow_id": "cross_dcc_workflow_v1"
+}

@@ -1,0 +1,55 @@
+{
+  "adapters": [
+    {
+      "adapter": "comfyui",
+      "evidence": "creative/adapters/comfyui/adapter.py",
+      "execution_default": "dry_run_or_handoff",
+      "level": "LEVEL_1_DRY_RUN",
+      "live_execution_claimed": false
+    },
+    {
+      "adapter": "blender",
+      "evidence": "creative/adapters/blender/adapter.py",
+      "execution_default": "dry_run_or_handoff",
+      "level": "LEVEL_2_SMOKE_TEST",
+      "live_execution_claimed": false
+    },
+    {
+      "adapter": "houdini",
+      "evidence": "creative/adapters/houdini/adapter.py",
+      "execution_default": "dry_run_or_handoff",
+      "level": "LEVEL_1_DRY_RUN",
+      "live_execution_claimed": false
+    },
+    {
+      "adapter": "zbrush",
+      "evidence": "creative/adapters/zbrush/adapter.py",
+      "execution_default": "dry_run_or_handoff",
+      "level": "LEVEL_0_REGISTRY_ONLY",
+      "live_execution_claimed": false
+    },
+    {
+      "adapter": "unreal",
+      "evidence": "creative/adapters/unreal/adapter.py",
+      "execution_default": "dry_run_or_handoff",
+      "level": "LEVEL_1_DRY_RUN",
+      "live_execution_claimed": false
+    },
+    {
+      "adapter": "davinci",
+      "evidence": "creative/adapters/davinci/adapter.py",
+      "execution_default": "dry_run_or_handoff",
+      "level": "LEVEL_1_DRY_RUN",
+      "live_execution_claimed": false
+    },
+    {
+      "adapter": "after_effects",
+      "evidence": "creative/adapters/after_effects/adapter.py",
+      "execution_default": "dry_run_or_handoff",
+      "level": "LEVEL_1_DRY_RUN",
+      "live_execution_claimed": false
+    }
+  ],
+  "generated_at": "2026-05-31T00:00:00Z",
+  "schema_version": "seos_creative_pipeline_v3"
+}

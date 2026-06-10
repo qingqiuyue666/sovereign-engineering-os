@@ -1,892 +1,417 @@
 # Sovereign Engineering OS
 
-Sovereign Engineering OS is an AI execution control kernel and local-first governance kernel.
+Sovereign Engineering OS (SEOS) is being refocused into a local-first AI/VFX
+production assistant and controlled execution/evidence system. Its practical
+job is to help an operator scan local assets, classify what exists, detect
+broken or duplicated production inputs, plan shots, inspect local tool
+availability, run approved local tools where available, and record useful
+outputs or truthful failure reports.
 
-Current phase/state: Personal AI Execution OS final product-completion
-candidate under local-first safety boundaries.
+SEOS still records task intent, approval state, dry-run execution receipts,
+evidence traces, replay explanations, failure bundles, and release checks. Those
+controls now serve the production workflow rather than replacing it.
 
-Current checkpoint:
+Product boundary:
 
-- `personal-ai-execution-os-final-product-completion-v1`
-  - verdict: `FINAL_PRODUCT_COMPLETION_READY_FOR_REVIEW`
-  - decision audit: `docs/decisions/personal_ai_execution_os_final_product_completion_decision_audit_v1.md`
-  - merge readiness audit: `docs/decisions/personal_ai_execution_os_final_product_completion_merge_readiness_audit_v1.md`
-  - usage guide: `docs/usage/personal_ai_execution_os_product_usage_v1.md`
-  - roadmap: `docs/roadmap/personal_ai_execution_os_post_completion_roadmap_v1.md`
-  - product surfaces: office/data runtime, model runtime boundary, browser runtime boundary, ComfyUI runtime boundary, Blender runtime boundary, creative handoff, unified task graph, local launcher, product health, and final E2E battery
-  - product health scope: static structural report only; it does not execute full launcher workflows, and full runtime correctness is supported by tests plus human review
-  - real runtime posture: live model providers, real browsers, Playwright/Selenium, ComfyUI endpoints, Blender, creative software, unrestricted network, and arbitrary subprocess execution remain disabled by default and require future explicit admission
-  - runtime authority: still not introduced
-  - input mutation and existing output overwrite: still forbidden
-- `personal-ai-execution-os-full-landing-autonomous-v1`
-  - verdict: `PARTIAL_LANDING_READY_WITH_DEFERRED_ITEMS`
-  - decision audit: `docs/decisions/personal_ai_execution_os_full_landing_decision_audit_v1.md`
-  - merge readiness audit: `docs/decisions/personal_ai_execution_os_full_landing_merge_readiness_audit_v1.md`
-  - deferred items: `docs/decisions/full_landing_autonomous_deferred_items.md`
-  - roadmap: `docs/roadmap/personal_ai_execution_os_next_roadmap_v1.md`
-  - completed landing surfaces: hardened XLSX runtime, hardened runtime delivery package, typed-schema model adapter foundation, controlled browser fixture, ComfyUI fixture, Blender fixture, creative software policy layer, unified task graph, local launcher, and end-to-end task battery
-  - redacted sheet-name mode: emits no raw sheet names or stable sheet-name hashes
-  - delivery validation: scans generated XLSX artifacts for dynamic sentinel leakage
-  - local launcher usage: `docs/usage/personal_ai_execution_os_local_launcher.md`
-  - real runtime posture: live model providers, real browsers, Playwright/Selenium, ComfyUI endpoints, Blender, creative software, OS automation, unrestricted network, and arbitrary subprocess execution remain disabled by default and deferred
-  - runtime authority: still not introduced
-  - input mutation and existing output overwrite: still forbidden
-- `personal-ai-execution-os-v2-system-longrun-v1`
-  - verdict: `APPROVE_PERSONAL_AI_EXECUTION_OS_V2_SYSTEM_LONGRUN_FOUNDATION`
-  - decision audit: `docs/decisions/personal_ai_execution_os_v2_system_longrun_decision_audit_v1.md`
-  - adapter core foundation: introduced under `kernel/personal_ai/adapters/`
-  - runtime tool admission register: introduced at `governance/integration/runtime_tool_admission_register.yaml`
-  - XLSX readonly runtime: introduced with bounded metadata inspection only
-  - approved XLSX output writer: introduced for new hash-bound derived summary workbooks
-  - mock typed-schema model runtime: introduced as deterministic local fixture only
-  - browser local fixture runtime: introduced as deterministic HTML fixture interpreter only
-  - creative adapter policy layer: introduced as deferred policy only
-  - runtime delivery package: introduced for hash-bound runtime artifact delivery
-  - end-to-end local demo: introduced at `examples/personal_ai_execution_os_v2_demo/`
-  - dependency additions: `openpyxl>=3.1,<4`
-  - vendored external source code: none
-  - runtime authority: still not introduced
-  - unrestricted arbitrary execution: not introduced
-  - external network/browser/model/creative runtime: not introduced
-  - input mutation: still forbidden
-  - raw value copying into audit artifacts: still forbidden
-  - spreadsheet output writing: approved new output files only, outside input directories, after explicit reviewer approval with no default or implicit approval
-- `oss-top-repo-integration-autonomous-sprint`
-  - OSS intake audit: introduced at `docs/decisions/oss_top_repo_integration_intake_audit_v1.md`
-  - OSS integration plan: introduced at `docs/design/oss_integration_plan_v1.md`
-  - repositories reviewed: 42
-  - strong candidates shortlisted: 17
-  - selected safe integrations: 7
-  - dependency additions: none
-  - vendored external source code: none
-  - local artifact index: introduced
-  - job package validator: introduced
-  - approved output validator: introduced
-  - snapshot/golden normalization helper: introduced
-  - safe CLI subcommands: introduced while preserving the legacy CLI invocation
-  - static OSS integration registry: introduced
-  - runtime authority / external tool control / API: still absent
-  - input mutation: still forbidden
-  - raw cell value copying: not introduced
-  - spreadsheet output write: not introduced
-  - kernel/adapters: unchanged
-- `approval-provenance-hash-chain-sprint`
-  - approval provenance: introduced
-  - approval decision: hash-bound to approval_request and generated artifacts
-  - approved output package: includes `provenance_chain.json` and `approved_output_validation.json`
-  - cryptographic private-key signing: not introduced
-  - secrets / credentials: not introduced
-  - runtime authority / external tool control / API: still absent
-  - input mutation: still forbidden
-  - raw cell value copying: not introduced
-  - spreadsheet output write: not introduced
-- `personal-ai-local-v1-approval-gated-output-package-sprint`
-  - Phase 2 selected lane: Personal AI Execution OS
-  - Local MVP v1 status: productionized local-only MVP
-  - safe local CLI: introduced via `python3 -m kernel.personal_ai.local_mvp_cli`
-  - function runner: retained via `run_personal_ai_local_mvp`
-  - approval gate: introduced
-  - approved output package: introduced
-  - output package writes: allowed only outside input directory after explicit approval decision
-  - failure quarantine: introduced for CLI failures only
-  - Markdown atomic writer: introduced for generated Markdown artifacts
-  - local usage doc: `docs/usage/personal_ai_local_v1_usage.md`
-  - final local MVP artifacts:
-    - `input_snapshot.json`
-    - `intake_ledger.jsonl`
-    - `artifact_profile.json`
-    - `work_order_proposal.json`
-    - `review_packet.json`
-    - `pipeline_manifest.json`
-    - `task_route.json`
-    - `spreadsheet_processor_plan.json`
-    - `spreadsheet_readonly_inspection.json`
-    - `spreadsheet_report_plan.json`
-    - `spreadsheet_structural_report.json`
-    - `spreadsheet_structural_report.md`
-    - `artifact_index.json`
-    - `artifact_index_manifest.json`
-    - `final_job_manifest.json`
-    - `job_summary.json`
-    - `human_next_steps.md`
-    - `job_package_validation.json`
-  - route output: route_type + recommended_processor_lane + non-executing
-    action plan
-  - spreadsheet planning output: plan_status + selected_spreadsheet_artifacts
-    + non-executing spreadsheet plan
-  - spreadsheet inspection output: structural CSV/TSV metrics only; no raw cell values copied
-  - report generation: structural report generation introduced, based only on existing inspection metrics
-  - supported routes:
-    - `spreadsheet_route`
-    - `document_route`
-    - `media_inventory_route`
-    - `code_inventory_route`
-    - `archive_inventory_route`
-    - `mixed_inventory_route`
-    - `unknown_inventory_route`
-  - supported readonly extensions:
-    - `.csv`
-    - `.tsv`
-  - unsupported spreadsheet extensions in this package; no XLSX/XLSM/XLS reading:
-    - `.xlsx`
-    - `.xlsm`
-    - `.xls`
-  - physical contact type: local filesystem read + SHA-256 hash + bounded read-only CSV/TSV structural inspection + deterministic JSONL/JSON/Markdown output outside input directory
-  - spreadsheet content read: bounded CSV/TSV structural inspection only
-  - issue severity assignment: not introduced
-  - semantic/business interpretation: not introduced
-  - raw cell value copying: not introduced
-  - spreadsheet output write: not introduced
-  - input mutation: still forbidden
-  - spreadsheet cleaning/transformation: not introduced
-  - authority status: non-authority
-  - execution status: no arbitrary execution capability
-  - runtime status: no runtime authority
-  - external tool control: not introduced
-  - network: not introduced
-  - API calls: not introduced
-  - API/LLM runtime: still absent
-  - browser automation: not introduced
-  - adapter implementation: not introduced
-  - AI classification: not introduced
-  - semantic classification: not introduced
-  - pandas/openpyxl/xlrd/pyarrow: not introduced
-  - kernel/adapters: unchanged
-  - destructive file operations: not introduced
-  - input files: never modified / moved / deleted / renamed
-  - input file contents: raw contents not copied into job package
-  - output: deterministic local job package artifacts
-  - required human approval: true
-  - next recommendation: high-level production readiness review only
-  - Business Delivery OS: not started
-  - Creative Production OS: not started
-  - Research Decision OS: not started
-  - full external-tool Personal AI Execution OS: not implemented
-- `final-stop-state-consolidation-batch-v1`
-  - final stop-state consolidation: completed
-  - final repository trajectory: STOP_ONLY
-  - final default next posture: stop/consolidation by default
-  - completed closed lines:
-    - narrow kernel baseline line
-    - checkpoint/release line
-    - release refresh line
-    - public overview alignment line
-    - adapter non-authority classification line
-    - non-runtime adapter skeleton code design line
-    - controlled demo / replay / dry-run manifest evidence line
-    - current phase / README consistency line
-  - current public overview:
-    [SEOS narrow kernel public overview](docs/overview/seos_narrow_kernel_public_overview_v1.md)
-  - current checkpoint tag: `seos-narrow-kernel-post-skeleton-code-design-v1`
-  - current draft release: `321576116`
-  - release state: draft, unpublished, assets 0
-  - prior checkpoint/release: preserved
-  - Python skeleton code: rejected for current phase
-  - adapter implementation: not eligible by default
-  - direct adapter implementation: rejected
-  - runtime authority: not eligible
-  - execution capability: not eligible
-  - external tool control: not eligible
-  - Business / Personal / Creative / Research OS: not eligible
+- SEOS is a local-first AI/VFX production assistant and controlled
+  execution/evidence system.
+- SEOS is not an operating-system sandbox and not an OS-level sandbox.
+- SEOS is not uncontrolled RPA, desktop automation, or computer control.
+- SEOS is not RPA.
+- SEOS is not a computer-control framework.
+- SEOS is not a cloud production platform.
+- SEOS is not a commercial SaaS platform.
+- SEOS is not externally certified.
+- Host permissions, process isolation, credential custody, EDR, containers,
+  VMs, and cloud controls remain outside the SEOS boundary.
 
-Completed milestones:
+## Current Status
 
-- `repo-ci-canonical-health-gate-v1`
-- `single-file-real-patch-lifecycle-foundation-v1`
-- `single-file-lifecycle-hardening-smoke-v1`
-- `single-file-lifecycle-current-phase-update-v1`
-- `single-file-lifecycle-replay-verifier-v1`
-- `single-file-lifecycle-controlled-demo-decision-audit-v1`
-- `single-file-lifecycle-controlled-demo-fixture-v1`
-- `single-file-lifecycle-demo-current-phase-update-v1`
-- `single-file-lifecycle-demo-usage-doc-decision-audit-v1`
-- `single-file-lifecycle-demo-usage-doc-v1`
-- `single-file-lifecycle-demo-hardening-decision-audit-v1`
-- `single-file-lifecycle-demo-hardening-v1`
-- `single-file-lifecycle-narrow-adapter-decision-audit-v1`
-- `single-file-lifecycle-narrow-adapter-design-v1`
-- `update-current-phase-after-narrow-adapter-design-v1`
-- `single-file-lifecycle-post-adapter-design-consolidation-audit-v1`
-- `single-file-lifecycle-dry-run-manifest-fixture-decision-audit-v1`
-- `single-file-lifecycle-dry-run-manifest-fixture-v1`
-- `single-file-lifecycle-dry-run-manifest-fixture-usage-doc-decision-audit-v1`
-- `single-file-lifecycle-dry-run-manifest-fixture-usage-doc-v1`
-- `single-file-lifecycle-dry-run-manifest-line-consolidation-audit-v1`
-- `repository-trajectory-audit-after-dry-run-manifest-line-closure-v1`
-- `seos-narrow-kernel-release-checkpoint-consolidation-audit-v1`
-- `public-overview-alignment-decision-audit-v1`
-- `seos-narrow-kernel-public-overview-alignment-v1`
-- `README-public-overview-link-decision-audit-v1`
-- `readme-public-overview-link-v1`
-- `checkpoint-tag-v1`
-- `github-release-v1`
-- `non-runtime-adapter-skeleton-code-decision-audit-v1`
-- `non-runtime-adapter-skeleton-code-design-audit-v1`
-- `non-runtime-adapter-skeleton-code-design-spec-v1`
-- `skeleton-code-design-consolidation-audit-v1`
-- `checkpoint-refresh-after-skeleton-code-design-line-v1`
-- `release-refresh-after-post-skeleton-checkpoint-v1`
-- `release-refresh-consolidation-audit-v1`
-- `public-overview-alignment-after-release-refresh-compound-v1`
-- `final-stop-state-consolidation-batch-v1`
-- `personal-ai-execution-os-local-foundation-mvp-v1`
-- `personal-ai-local-pipeline-mvp-v1`
-- `personal-ai-local-job-package-mvp-v1`
-- `personal-ai-local-task-router-mvp-v1`
-- `local-spreadsheet-processor-planning-mvp-v1`
-- `local-spreadsheet-readonly-inspector-mvp-v1`
-- `personal-ai-local-mvp-completion-sprint-v1`
-- `personal-ai-local-v1-productionization-sprint`
-- `personal-ai-local-v1-approval-gated-output-package-sprint`
+The repository contains a large amount of historical governance and readiness
+work. Active development should now be judged by real production usefulness:
+asset scans, readable reports, adapter truthfulness, shot plans, local outputs,
+hashes, materialization evidence, and actionable failure records.
 
-Current capability:
+The repository still preserves `REAL_OPERATION_OBSERVATION_PERIOD_ACTIVE`
+artifacts as historical evidence.
 
-- canonical `make ci`
-- GitHub Actions CI
-- controlled single-file lifecycle
-- explicit approval mapping
-- preimage capture
-- patch body persistence
-- local artifacts
-- validation callable
-- rollback on validation failure or exception
-- final seal
-- bounded replay summary
-- read-only replay verifier
-- controlled demo fixture
-- demo usage documentation
-- demo hardening
-- docs/design-only narrow adapter concept
-- post-adapter-design consolidation audit
-- docs-only dry-run manifest fixture decision audit
-- bounded non-executing dry-run manifest fixture
-- hard-false authority manifest posture
-- dry-run manifest acceptance smoke
-- dry-run manifest fixture usage documentation
-- dry-run manifest line consolidation audit
-- repository trajectory audit after dry-run manifest line closure
-- SEOS narrow kernel release/checkpoint consolidation audit
-- public overview alignment decision audit
-- SEOS narrow kernel public overview
-- README public overview link
-- annotated checkpoint tag
-- draft GitHub Release
-- non-runtime adapter skeleton code decision audit
-- non-runtime adapter skeleton code design audit
-- docs-only non-runtime adapter skeleton code design
-- skeleton code design consolidation audit
-- checkpoint refresh after skeleton-code-design line
-- refreshed annotated checkpoint tag
-- release refresh after post-skeleton checkpoint
-- release refresh consolidation audit
-- public overview alignment after release refresh
-- acceptance smoke
-- Personal AI local intake ledger
-- Personal AI artifact profiler
-- Personal AI non-executing work-order proposal
-- Personal AI human review packet
-- Personal AI end-to-end local review pipeline
-- Personal AI pipeline manifest
-- Personal AI deterministic local job package builder
-- Personal AI input snapshot, job summary, and human next steps artifacts
-- Personal AI deterministic local task router
-- Personal AI task route JSON artifact
-- Personal AI deterministic local spreadsheet processor planner
-- Personal AI spreadsheet processor plan JSON artifact
-- Personal AI deterministic local CSV/TSV spreadsheet readonly inspector
-- Personal AI spreadsheet readonly inspection JSON artifact
-- Personal AI deterministic spreadsheet report planner
-- Personal AI spreadsheet report plan JSON artifact
-- Personal AI deterministic spreadsheet structural report generator
-- Personal AI spreadsheet structural report JSON and Markdown artifacts
-- Personal AI function-level local MVP runner
-- Personal AI safe local CLI
-- Personal AI final job manifest
-- Personal AI metadata-only artifact index and artifact index manifest
-- Personal AI job package validation report
-- Personal AI approved output validation report
-- Personal AI snapshot/golden normalization helper
-- Personal AI static OSS integration registry
-- Personal AI CLI failure quarantine
-- Personal AI atomic Markdown artifact writer
-- Personal AI local v1 usage documentation
-- Personal AI approval-gated output package approval gate
-- Personal AI approved output package manifest, delivery summary, and approval receipt
+Historical validated facts recorded in the repository:
 
-Controlled demo proves:
+- `SYSTEM_LANDED`
+- `REAL_OPERATION_OBSERVATION_PERIOD_ACTIVE`
+- `LOCAL_REAL_USE_VALIDATED`
+- `APPROVAL_GATE_VALIDATED`
+- `CLEAN_CLONE_VALIDATED`
+- `NO_HARD_EVIDENCE_BLOCKER_RECORDED`
 
-- successful apply path
-- validation-failure rollback path
-- replay verifier success
-- existing lifecycle and existing verifier operate together
+Release candidate `v0.1.0-rc3` is preserved as an audit checkpoint. External
+recognition has not been confirmed, and external verification is still
+required.
 
-Narrow adapter design:
+## What SEOS Solves
 
-- docs/design-only
-- dry-run/manifest-only concept
-- non-executable
-- non-authorizing
-- not adapter implementation
+AI-assisted engineering often leaves a gap between a human request and a
+reviewable engineering record. SEOS narrows that gap by making the governance
+objects explicit:
 
-Adapter implementation remains not authorized by default.
+- task contracts describe requested work without granting hidden authority
+- approval and rejection receipts make human decisions inspectable
+- dry-run execution receipts bind outcomes to policy, inputs, and code state
+- evidence traces connect claims to artifacts and validation commands
+- replay explanations state what can and cannot be reconstructed
+- failure bundles preserve bounded, digest-oriented failure context
 
-Post-adapter-design consolidation audit:
+The design goal is not to let AI do more by default. The goal is to reduce
+manual production work while keeping local engineering and creative workflows
+reviewable, reproducible, and fail-closed.
 
-- verdict: `STOP_BEFORE_ADAPTER_IMPLEMENTATION`
-- adapter implementation remains not authorized by default
-- current narrow adapter design does not authorize implementation
-- current completed chain proves only controlled single-file lifecycle capability, replay verification, controlled demo fixture, demo usage documentation, demo hardening, docs/design-only narrow adapter concept, post-adapter-design consolidation audit, docs-only dry-run manifest fixture decision audit, bounded non-executing dry-run manifest fixture output, and dry-run manifest fixture usage documentation
-- current completed chain does not prove general runtime, service runtime, DB/UoW runtime, executor runtime, multi-file lifecycle, broad physical I/O, autonomous agent runtime, production automation platform readiness, or Business / Personal / Creative / Research OS readiness
+## What SEOS Is Not
 
-Dry-run manifest fixture:
+SEOS must not be interpreted as any of the following:
 
-- fixture: `single-file-lifecycle-dry-run-manifest-fixture-v1`
-- examples-level plus acceptance-smoke coverage only
-- returns bounded JSON-safe manifest output
-- preserves hard-false authority posture
-- preserves `STOP_BEFORE_ADAPTER_IMPLEMENTATION`
-- preserves `APPROVE_DRY_RUN_MANIFEST_FIXTURE_NEXT`
-- direct adapter implementation remains rejected
-- adapter implementation remains not authorized by default
-- non-executing and manifest-only
-- does not introduce adapter code, CLI, service calls, DB/repository/UoW, evidence/audit append, executor dispatch, subprocess, network, tool execution, multi-file lifecycle, broad physical I/O, durable writes, irreversible actions, or new governance boundary family
+- an operating-system sandbox or isolation layer
+- a filesystem permission system
+- an EDR, VM, container, or secret custody system
+- RPA, browser automation, desktop automation, or computer control
+- a live-provider AI execution runtime
+- not an autonomous AI executor
+- not a secret manager
+- a way for AI to patch files without human-gated proposal, approval, and
+  validation
+- a commercial SaaS or hosted production service
+- proof that global recognition or external signoff has happened
 
-Dry-run manifest fixture usage documentation:
+## Install
 
-- usage doc: `single-file-lifecycle-dry-run-manifest-fixture-usage-doc-v1`
-- target file: `examples/dry_run_manifest_fixture_usage.md`
-- documentation-only
-- human-readable usage document for the existing dry-run manifest fixture
-- explains safe import/read usage
-- explains what the fixture proves
-- explains what the fixture does not prove
-- preserves `STOP_BEFORE_ADAPTER_IMPLEMENTATION`
-- preserves `APPROVE_DRY_RUN_MANIFEST_FIXTURE_NEXT`
-- preserves `APPROVE_DRY_RUN_MANIFEST_FIXTURE_USAGE_DOC_NEXT`
-- adapter implementation remains not authorized by default
-- direct adapter implementation remains rejected
-- fixture remains non-executing and manifest-only
-- usage doc does not introduce adapter code, CLI, service calls, DB/repository/UoW, evidence/audit append, executor dispatch, subprocess, network, tool execution, multi-file lifecycle, broad physical I/O, durable writes, irreversible actions, or new governance boundary family
+Requirements:
 
-Dry-run manifest line consolidation:
+- Python `>=3.13`
+- `openpyxl>=3.1,<4`
+- Git
 
-- consolidation audit: `single-file-lifecycle-dry-run-manifest-line-consolidation-audit-v1`
-- verdict: `DRY_RUN_MANIFEST_LINE_COMPLETE_STOP_BEFORE_ADAPTER_IMPLEMENTATION`
-- dry-run manifest fixture line is complete for the current bounded non-executing manifest-only scope
-- completed line proves only:
-  - bounded manifest shape
-  - hard-false authority posture
-  - non-execution claim
-  - JSON-safe fixture output
-  - dry-run manifest wording
-  - human-readable usage documentation for the existing fixture
-- completed line does not prove:
-  - adapter implementation readiness
-  - adapter runtime readiness
-  - general runtime readiness
-  - service runtime readiness
-  - executor runtime readiness
-  - autonomous agent runtime readiness
-  - production automation platform readiness
-  - multi-file lifecycle readiness
-- no concrete usage doc defect identified
-- no concrete fixture defect identified
-- future usage doc or fixture hardening requires concrete defects
-- adapter implementation remains not authorized by default
-- direct adapter implementation remains rejected
-- any future adapter implementation decision audit must remain decision-only and should expect rejection unless concrete hard blockers are proven
-- any future adapter implementation decision audit may not implement adapter code
+Local editable install:
 
-Repository trajectory audit after dry-run manifest line closure:
+```bash
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install -e .
+seos --help
+```
 
-- trajectory audit: `repository-trajectory-audit-after-dry-run-manifest-line-closure-v1`
-- verdict: `RECOMMEND_RELEASE_CHECKPOINT_CONSOLIDATION_NEXT`
-- repository maturity is narrow controlled execution kernel with replay verification, controlled demo proof, bounded dry-run manifest fixture, usage documentation, CI health gate, annotated checkpoint tag, draft GitHub Release, and strict stop rules
-- release/checkpoint consolidation was recommended before adapter implementation
-- adapter implementation remains not authorized by default
-- direct adapter implementation remains rejected
+Without installing, the module entrypoint is available from the repository
+root:
 
-SEOS narrow kernel checkpoint consolidation:
+```bash
+python3 -m apps.operator_cli.main --help
+```
 
-- consolidation audit: `seos-narrow-kernel-release-checkpoint-consolidation-audit-v1`
-- verdict: `SEOS_NARROW_KERNEL_CHECKPOINT_CONSOLIDATED_STOP_BEFORE_ADAPTER_IMPLEMENTATION`
-- checkpoint candidate: `seos-narrow-kernel-checkpoint-v1-candidate`
-- repository maturity classification: narrow controlled execution kernel with replay verification, controlled demo proof, bounded dry-run manifest fixture, usage documentation, CI health gate, annotated checkpoint tag, draft GitHub Release, and strict stop rules
-- checkpoint is documentation/checkpoint purposes only
-- no git tag was created
-- no GitHub release was created
-- checkpoint does not create a release artifact
-- checkpoint does not authorize runtime authority
-- checkpoint does not authorize adapter implementation
-- checkpoint does not authorize adapter runtime
-- checkpoint does not authorize service runtime
-- checkpoint does not authorize DB/repository/UoW runtime
-- checkpoint does not authorize evidence/audit append runtime
-- checkpoint does not authorize executor runtime
-- checkpoint does not authorize restore runtime
-- checkpoint does not authorize CLI/tool execution
-- checkpoint does not authorize shell/subprocess execution
-- checkpoint does not authorize network execution
-- checkpoint does not authorize multi-file lifecycle
-- checkpoint does not authorize broad physical I/O
-- checkpoint does not authorize durable writes
-- checkpoint does not authorize irreversible actions
-- checkpoint does not authorize autonomous agent runtime
-- checkpoint does not authorize production automation platform
-- checkpoint does not authorize Business Delivery OS, Personal AI Execution OS, Creative Production OS, or Research Decision OS
-- adapter implementation remains not authorized by default
-- direct adapter implementation remains rejected
-- no concrete repository defect blocks checkpoint consolidation
+## Quickstart
 
-Public overview:
+Create a local workspace:
 
-- public overview: `seos-narrow-kernel-public-overview-alignment-v1`
-- target file: [SEOS narrow kernel public overview](docs/overview/seos_narrow_kernel_public_overview_v1.md)
-- overview status: documentation only
-- checkpoint candidate: `seos-narrow-kernel-checkpoint-v1-candidate`
-- repository maturity classification: narrow controlled execution kernel with replay verification, controlled demo proof, bounded dry-run manifest fixture, usage documentation, CI health gate, annotated checkpoint tag, draft GitHub Release, and strict stop rules
-- overview explains what has been proven
-- overview explains what has not been proven
-- overview states repository is not a general runtime platform
-- overview states repository is not adapter implementation ready
-- overview states no git tag was created
-- overview states no GitHub release was created
-- overview states no runtime authority was created
-- overview states no adapter implementation was authorized
-- overview states no execution capability was created
-- adapter implementation remains not authorized by default
-- direct adapter implementation remains rejected
+```bash
+seos init --workspace .seos-workspace
+seos status --workspace .seos-workspace --human
+```
 
-README public overview link:
+Create a governed task:
 
-- link milestone: `readme-public-overview-link-v1`
-- link target: `docs/overview/seos_narrow_kernel_public_overview_v1.md`
-- link label: `SEOS narrow kernel public overview`
-- README link status: documentation only
-- README now links to the existing public overview
-- public overview document was not modified
-- docs/current_phase.md alignment is handled by this package only as current-phase documentation alignment
-- no git tag was created
-- no GitHub release was created
-- no runtime authority was created
-- no execution capability was created
-- no adapter implementation was authorized
-- adapter implementation remains not authorized by default
-- direct adapter implementation remains rejected
+```bash
+seos task create \
+  --workspace .seos-workspace \
+  --title "review local validation" \
+  --objective "Run the local validation plan and record evidence"
+```
 
-Checkpoint tag:
+Approve and dry-run the task:
 
-- tag milestone: `checkpoint-tag-v1`
-- tag name: `seos-narrow-kernel-checkpoint-v1`
-- tag type: annotated
-- tagged commit: `bb9e6f6bfe79d1d5a6aa14810b3a517fb6af6e58`
-- tag status: created and pushed
-- tag purpose: checkpoint marker only
-- tag does not create a GitHub release
-- tag does not authorize runtime authority
-- tag does not authorize execution capability
-- tag does not authorize adapter implementation
-- tag does not authorize adapter runtime
-- tag does not authorize service runtime
-- tag does not authorize DB/repository/UoW runtime
-- tag does not authorize evidence/audit append runtime
-- tag does not authorize executor runtime
-- tag does not authorize restore runtime
-- tag does not authorize CLI/tool execution
-- tag does not authorize subprocess execution
-- tag does not authorize network execution
-- tag does not authorize multi-file lifecycle
-- tag does not authorize broad physical I/O
-- tag does not authorize durable writes
-- tag does not authorize irreversible actions
-- tag does not authorize autonomous agent runtime
-- tag does not authorize production automation platform
-- tag does not authorize Business Delivery OS
-- tag does not authorize Personal AI Execution OS
-- tag does not authorize Creative Production OS
-- tag does not authorize Research Decision OS
-- adapter implementation remains not authorized by default
-- direct adapter implementation remains rejected
+```bash
+seos approve TASK_ID --workspace .seos-workspace --reason "operator approved"
+seos run TASK_ID --workspace .seos-workspace --dry-run
+```
 
-GitHub Release:
+Inspect evidence and replay context:
 
-- release milestone: `github-release-v1`
-- release id: `320261350`
-- release title: `SEOS narrow kernel checkpoint v1`
-- release target tag: `seos-narrow-kernel-checkpoint-v1`
-- release state: draft
-- release latest status: not latest by draft state / API did not expose make_latest
-- release assets: none
-- release purpose: checkpoint marker only
-- release does not create or move a git tag
-- release does not authorize runtime authority
-- release does not authorize execution capability
-- release does not authorize adapter implementation
-- release does not authorize adapter runtime
-- release does not authorize service runtime
-- release does not authorize DB/repository/UoW runtime
-- release does not authorize evidence/audit append runtime
-- release does not authorize executor runtime
-- release does not authorize restore runtime
-- release does not authorize CLI/tool execution
-- release does not authorize subprocess execution
-- release does not authorize network execution
-- release does not authorize external tool control
-- release does not authorize multi-file lifecycle
-- release does not authorize broad physical I/O
-- release does not authorize durable writes
-- release does not authorize irreversible actions
-- release does not authorize autonomous agent runtime
-- release does not authorize production automation platform
-- release does not authorize Business Delivery OS
-- release does not authorize Personal AI Execution OS
-- release does not authorize Creative Production OS
-- release does not authorize Research Decision OS
-- adapter implementation remains not authorized by default
-- direct adapter implementation remains rejected
+```bash
+seos evidence trace TASK_ID --workspace .seos-workspace
+seos replay explain TASK_ID --workspace .seos-workspace
+seos receipt list --workspace .seos-workspace
+```
 
-Non-runtime adapter skeleton code design line:
+Generate deterministic AI-governance support artifacts without calling a live
+provider:
 
-- skeleton-code-design checkpoint: `skeleton-code-design-consolidation-audit-v1`
-- completed line: non-runtime adapter skeleton code design line
-- completed artifacts:
-  - `docs/decisions/non_runtime_adapter_skeleton_code_decision_audit_v1.md`
-  - `docs/decisions/non_runtime_adapter_skeleton_code_design_audit_v1.md`
-  - `docs/design/non_runtime_adapter_skeleton_code_design_v1.md`
-  - `docs/decisions/skeleton_code_design_consolidation_audit_v1.md`
-- consolidation verdict: `SKELETON_CODE_DESIGN_LINE_COMPLETE_STOP_BEFORE_IMPLEMENTATION`
-- current safe shape: Docs-only contracts, designs, and relocated marker artifacts.
-- Python skeleton code: rejected for current phase
-- adapter implementation: not eligible by default
-- runtime authority: not eligible
-- execution capability: not eligible
-- external tool control: not eligible
-- Business / Personal / Creative / Research OS: not eligible
-- existing adapter baseline: `PRE_EXISTING_PHASE1_REAL_MODEL_IGNITION_ADAPTER_LANE`
-- relocated marker root: `docs/markers/adapters/narrow/`
-- non-runtime adapter skeleton code design target: `docs/design/non_runtime_adapter_skeleton_code_design_v1.md`
-- existing adapter files remain unchanged:
-  - `kernel/adapters/__init__.py`
-  - `kernel/adapters/anthropic_adapter.py`
-- relocated marker files remain unchanged
-- direct Python skeleton implementation remains rejected
-- direct adapter implementation remains rejected
-- external tool control remains rejected
-- release refresh consolidation is recorded separately below
+```bash
+seos ai bundle TASK_ID --workspace .seos-workspace
+seos ai repo-map --workspace .seos-workspace
+seos ai token-roi TASK_ID --workspace .seos-workspace
+```
 
-Checkpoint refresh after skeleton-code-design line:
+## SEOS Creative Pipeline
 
-- current checkpoint: `checkpoint-refresh-after-skeleton-code-design-line-v1`
-- checkpoint refresh decision audit: `docs/decisions/checkpoint_refresh_decision_audit_after_skeleton_code_design_line_v1.md`
-- checkpoint refresh decision verdict: `APPROVE_CHECKPOINT_REFRESH_NEXT`
-- refreshed checkpoint tag: `seos-narrow-kernel-post-skeleton-code-design-v1`
-- refreshed checkpoint tag type: annotated
-- refreshed checkpoint tag target: `3e94fb89b68b8c9e739b987aa2eeeec5c0b79ce2`
-- prior checkpoint tag preserved: `seos-narrow-kernel-checkpoint-v1`
-- prior checkpoint tag target: `bb9e6f6bfe79d1d5a6aa14810b3a517fb6af6e58`
-- prior GitHub Release unchanged:
-  - release id: `320261350`
-  - release title: `SEOS narrow kernel checkpoint v1`
-  - release target tag: `seos-narrow-kernel-checkpoint-v1`
-  - release state: draft
-  - release assets: none
-- completed line: non-runtime adapter skeleton code design line
-- consolidation verdict: `SKELETON_CODE_DESIGN_LINE_COMPLETE_STOP_BEFORE_IMPLEMENTATION`
-- current safe shape: Docs-only contracts, designs, and relocated marker artifacts.
-- Python skeleton code: rejected for current phase
-- adapter implementation: not eligible by default
-- direct adapter implementation: rejected
-- runtime authority: not eligible
-- execution capability: not eligible
-- external tool control: not eligible
-- Business / Personal / Creative / Research OS: not eligible
-- existing adapter baseline: `PRE_EXISTING_PHASE1_REAL_MODEL_IGNITION_ADAPTER_LANE`
-- relocated marker root: `docs/markers/adapters/narrow/`
-- non-runtime adapter skeleton code design target: `docs/design/non_runtime_adapter_skeleton_code_design_v1.md`
-- GitHub Release was not created or edited for the refreshed checkpoint
-- prior checkpoint tag was not moved
-- release refresh after post-skeleton checkpoint is recorded separately below
-- release refresh consolidation is recorded separately below
-- no direct Python skeleton implementation
-- no direct adapter implementation
-- no external tool control
-- no additional GitHub Release creation or edit without a separate decision audit
+SEOS Creative Pipeline is a local-first AI/VFX/3D/video workflow control plane.
+It tracks assets, shots, DCC adapters, AI generations, render jobs, approvals,
+evidence, and replay across ComfyUI, Blender, Houdini, ZBrush, Unreal Engine,
+DaVinci Resolve, and After Effects.
 
-Release refresh after post-skeleton checkpoint:
+Fixture-backed creative quickstart:
 
-- current checkpoint: `release-refresh-after-post-skeleton-checkpoint-v1`
-- release refresh decision audit: `docs/decisions/release_refresh_decision_audit_after_post_skeleton_checkpoint_v1.md`
-- release refresh decision verdict: `APPROVE_RELEASE_REFRESH_NEXT`
-- new GitHub Release:
-  - release id: `321576116`
-  - release title: `SEOS narrow kernel post skeleton-code-design checkpoint v1`
-  - release target tag: `seos-narrow-kernel-post-skeleton-code-design-v1`
-  - release state: draft
-  - release latest status: not latest by draft state / published_at null
-  - release assets: none / assets count 0
-  - published_at: null
-- prior GitHub Release preserved:
-  - release id: `320261350`
-  - release title: `SEOS narrow kernel checkpoint v1`
-  - release target tag: `seos-narrow-kernel-checkpoint-v1`
-  - release state: draft
-  - release assets: none / assets count 0
-- refreshed checkpoint tag: `seos-narrow-kernel-post-skeleton-code-design-v1`
-- refreshed checkpoint tag target: `3e94fb89b68b8c9e739b987aa2eeeec5c0b79ce2`
-- prior checkpoint tag preserved: `seos-narrow-kernel-checkpoint-v1`
-- prior checkpoint tag target: `bb9e6f6bfe79d1d5a6aa14810b3a517fb6af6e58`
-- Python skeleton code: rejected for current phase
-- adapter implementation: not eligible by default
-- direct adapter implementation: rejected
-- runtime authority: not eligible
-- execution capability: not eligible
-- external tool control: not eligible
-- Business / Personal / Creative / Research OS: not eligible
-- release remains draft-only
-- no release assets were attached
-- prior GitHub Release was not edited or replaced
-- no git tag was created, moved, or deleted
-- no direct Python skeleton implementation
-- no direct adapter implementation
-- no external tool control
-- release refresh consolidation is recorded separately below
-- do not publish the release
+```bash
+python3 seos.py creative health --json
+python3 seos.py creative scan-assets --json
+python3 seos.py creative adapter list --json
+python3 seos.py creative dashboard build --json
+```
 
-Release refresh consolidation:
+Real local asset-library scan:
 
-- current checkpoint: `release-refresh-consolidation-audit-v1`
-- consolidation audit: `docs/decisions/release_refresh_consolidation_audit_v1.md`
-- consolidation verdict: `RELEASE_REFRESH_LINE_COMPLETE_STOP_BEFORE_PUBLICATION`
-- release `321576116`:
-  - release state: draft
-  - release target tag: `seos-narrow-kernel-post-skeleton-code-design-v1`
-  - release assets: none / assets count 0
-  - published_at: null
-  - release status: not published
-- prior release `320261350`:
-  - untouched by the consolidation audit
-  - release state: draft
-  - release target tag: `seos-narrow-kernel-checkpoint-v1`
-  - release assets: none / assets count 0
-- Python skeleton code: rejected for current phase
-- adapter implementation: not eligible by default
-- direct adapter implementation: rejected
-- runtime authority: not eligible
-- execution capability: not eligible
-- external tool control: not eligible
-- Business / Personal / Creative / Research OS: not eligible
-- no release publication by default
-- no implementation by default
-- next recommendation:
-  `repository-trajectory-audit-after-release-refresh-line-v1` or
-  stop/consolidation
+```bash
+ASSET_ROOT=./local_asset_library
+python3 seos.py creative scan-assets \
+  --root "$ASSET_ROOT" \
+  --mode public \
+  --output-json reports/creative/assets/local_asset_library.public.json \
+  --output-md reports/creative/assets/local_asset_library.public.md
+```
 
-Public overview alignment after release refresh:
+Use `--mode public` for sanitized artifacts that use relative asset references.
+Use `--mode local` only for operator-local reports that may include local
+absolute paths. The scan is read-only for the asset root and never moves,
+renames, deletes, deduplicates, extracts archives, or executes DCC tools.
 
-- current checkpoint: `public-overview-alignment-after-release-refresh-compound-v1`
-- alignment status: completed
-- current public overview:
-  `docs/overview/seos_narrow_kernel_public_overview_v1.md`
-- public overview now records post-skeleton checkpoint/release state
-- public overview records release `321576116` as draft, unpublished, and
-  assets 0
-- public overview records prior release `320261350` as draft, untouched, and
-  assets 0
-- public overview preserves no-publication/no-implementation/no-runtime
-  boundaries
-- Python skeleton code: rejected for current phase
-- adapter implementation: not eligible by default
-- direct adapter implementation: rejected
-- runtime authority: not eligible
-- execution capability: not eligible
-- external tool control: not eligible
-- Business / Personal / Creative / Research OS: not eligible
-- next recommendation: stop/consolidation by default
+Search a generated registry:
 
-Final stop-state consolidation:
+```bash
+python3 seos.py creative search-assets \
+  --registry-json reports/creative/assets/local_asset_library.public.json \
+  --query missing-texture-sets
+```
 
-- current checkpoint: `final-stop-state-consolidation-batch-v1`
-- final stop-state consolidation: completed
-- final repository trajectory: STOP_ONLY
-- final default next posture: stop/consolidation by default
-- completed closed lines:
-  - narrow kernel baseline line
-  - checkpoint/release line
-  - release refresh line
-  - public overview alignment line
-  - adapter non-authority classification line
-  - non-runtime adapter skeleton code design line
-  - controlled demo / replay / dry-run manifest evidence line
-  - current phase / README consistency line
-- current public overview: `docs/overview/seos_narrow_kernel_public_overview_v1.md`
-- current checkpoint tag: `seos-narrow-kernel-post-skeleton-code-design-v1`
-- current draft release: `321576116`
-- release state: draft, unpublished, assets 0
-- prior checkpoint/release: preserved
-- Python skeleton code: rejected for current phase
-- adapter implementation: not eligible by default
-- direct adapter implementation: rejected
-- runtime authority: not eligible
-- execution capability: not eligible
-- external tool control: not eligible
-- Business / Personal / Creative / Research OS: not eligible
-- no publication by default
-- no implementation by default
+Build a local production dashboard:
 
-Preserved verdicts:
+```bash
+python3 seos.py creative production-dashboard \
+  --registry-json reports/creative/assets/local_asset_library.public.json \
+  --output-md reports/creative/assets/local_production_dashboard.md \
+  --output-html reports/creative/assets/local_production_dashboard.html
+```
 
-- `STOP_BEFORE_ADAPTER_IMPLEMENTATION`
-- `APPROVE_DRY_RUN_MANIFEST_FIXTURE_NEXT`
-- `APPROVE_DRY_RUN_MANIFEST_FIXTURE_USAGE_DOC_NEXT`
-- `DRY_RUN_MANIFEST_LINE_COMPLETE_STOP_BEFORE_ADAPTER_IMPLEMENTATION`
-- `RECOMMEND_RELEASE_CHECKPOINT_CONSOLIDATION_NEXT`
-- `SEOS_NARROW_KERNEL_CHECKPOINT_CONSOLIDATED_STOP_BEFORE_ADAPTER_IMPLEMENTATION`
-- `APPROVE_PUBLIC_OVERVIEW_ALIGNMENT_NEXT`
-- `APPROVE_README_PUBLIC_OVERVIEW_LINK_NEXT`
-- `APPROVE_CHECKPOINT_TAG_NEXT`
-- `APPROVE_GITHUB_RELEASE_NEXT`
-- `SKELETON_CODE_DESIGN_LINE_COMPLETE_STOP_BEFORE_IMPLEMENTATION`
-- `APPROVE_CHECKPOINT_REFRESH_NEXT`
-- `APPROVE_RELEASE_REFRESH_NEXT`
-- `RELEASE_REFRESH_LINE_COMPLETE_STOP_BEFORE_PUBLICATION`
-- `FINAL_STOP_STATE_CONSOLIDATED`
-- `RECOMMEND_STOP_ONLY`
+Build a local tool-health dashboard:
 
-Current non-capabilities:
+```bash
+python3 seos.py creative tool-health-dashboard \
+  --mode public \
+  --output-json reports/creative/tool_health/local_tool_health_dashboard.json \
+  --output-md reports/creative/tool_health/local_tool_health_dashboard.md \
+  --output-html reports/creative/tool_health/local_tool_health_dashboard.html
+```
 
-- not a general runtime platform
-- not Python skeleton code
-- not an adapter runtime
-- not adapter skeleton code
-- not adapter implementation ready
-- not a service runtime
-- not a DB/repository/UoW runtime
-- not an evidence/audit append runtime
-- not an executor runtime
-- not a restore runtime
-- not a CLI/tool execution layer
-- not a shell/subprocess layer
-- not a network layer
-- not an external tool control layer
-- not a multi-file lifecycle
-- not broad physical I/O
-- not durable writes
-- not irreversible actions
-- not an autonomous agent runtime
-- not a production automation platform
-- not Business Delivery OS
-- not Personal AI Execution OS
-- not Creative Production OS
-- not Research Decision OS
+The tool-health dashboard reports Python, Python dependencies, Git, FFmpeg,
+Houdini/hython, ComfyUI, Blender, After Effects, DaVinci Resolve, Unreal Engine,
+and ZBrush availability without launching DCC or AI tools or requiring
+proprietary tools in default CI.
 
-Do not proceed directly to Python skeleton implementation.
-Do not proceed directly to adapter implementation.
-Do not create another GitHub release without a separate decision audit.
-Do not claim runtime authority or execution capability from the public overview.
-Do not claim runtime authority or execution capability from the README public overview link.
-Do not claim runtime authority or execution capability from the checkpoint tag.
-Do not claim runtime authority or execution capability from the GitHub Release.
-Do not change `kernel/adapters/` by default.
-Do not change relocated marker files by default.
+Run an approved local Houdini/hython smoke when available:
 
-Still not authorized:
+```bash
+python3 seos.py creative houdini-smoke \
+  --mode public \
+  --output-root work/creative_runs/houdini_smoke \
+  --approve-local-execution \
+  --approval-id approval-houdini-smoke-local-001 \
+  --result-json reports/creative/houdini/hython_smoke_result.local.json \
+  --materialization-json reports/creative/houdini/hython_smoke_materialization.local.json
+```
 
-- Python skeleton code
-- adapter implementation
-- adapter code
-- adapter interface code
-- adapter skeleton code
-- files under `kernel/adapters/`
-- relocated marker changes
-- CLI adapter
-- service runtime
-- service calls
-- DB/repository/UoW writes
-- evidence/audit append
-- executor dispatch
-- restore service execution
-- tool execution
-- shell/subprocess execution
-- network execution
-- external tool control
-- multi-file lifecycle
-- broad physical I/O
-- durable writes
-- irreversible actions
-- autonomous agent runtime
-- production automation platform
-- additional GitHub release creation without separate authorization
-- Business Delivery OS
-- Personal AI Execution OS
-- Creative Production OS
-- Research Decision OS
+Without Houdini, the same runner returns truthful `ENV_NOT_FOUND` evidence. If
+Houdini licensing blocks startup, it returns `LICENSE_BLOCKED` evidence.
 
-Canonical health command:
+Run an approved local ComfyUI workflow smoke against a running loopback service:
 
-```sh
+```bash
+python3 seos.py creative comfyui-smoke \
+  --workflow-json tests/fixtures/creative/comfyui/api_workflow_fixture_v1.json \
+  --endpoint http://127.0.0.1:8188 \
+  --output-root work/creative_runs/comfyui_smoke \
+  --approve-local-execution \
+  --approval-id approval-comfyui-smoke-local-001 \
+  --result-json reports/creative/comfyui/comfyui_smoke_result.local.json \
+  --materialization-json reports/creative/comfyui/comfyui_smoke_materialization.local.json
+```
+
+The default fixture is an API-format `EmptyImage` to `SaveImage` smoke that
+does not require model downloads. If no workflow is available, the runner
+returns `ENV_NOT_FOUND`; if local ComfyUI is not answering on loopback, it
+returns `SERVICE_UNAVAILABLE`; if approval is missing, it does not post to
+`/prompt`.
+
+Build optional adapter contracts for the remaining creative tools:
+
+```bash
+python3 seos.py creative optional-adapter-contracts \
+  --mode public \
+  --output-json reports/creative/adapters/optional_adapter_contracts.json \
+  --output-md reports/creative/adapters/optional_adapter_contracts.md
+```
+
+This reports Blender, After Effects, DaVinci Resolve, Unreal Engine, and ZBrush
+contract readiness without launching those tools or claiming execution support.
+
+Build a practical shot plan from scanned assets:
+
+```bash
+python3 seos.py creative shot plan \
+  --template energy-impact \
+  --shot-id SHOT_ENERGY_IMPACT_001 \
+  --registry-json reports/creative/assets/asset_library_report_v1.json \
+  --output-json reports/creative/shots/shot_plan_energy_impact.json \
+  --output-md reports/creative/shots/shot_plan_energy_impact.md
+```
+
+Shot templates report available candidates, missing required assets, manual
+steps, and optional approval-gated runner commands without rendering or
+launching creative tools.
+
+Pressure-test the practical project path:
+
+```bash
+python3 seos.py creative pressure-test \
+  --root tests/fixtures/creative/assets \
+  --template energy-impact \
+  --shot-id SHOT_PRESSURE_ENERGY_IMPACT_FIXTURE \
+  --tool-health-json tests/fixtures/creative/software_discovery/local_tool_health_doctor_fixture_v1.json \
+  --adapter-contracts-json reports/creative/adapters/optional_adapter_contracts_v1.json \
+  --output-json reports/creative/pressure/real_project_pressure_test_v1.json \
+  --output-md reports/creative/pressure/real_project_pressure_test_v1.md
+```
+
+The pressure test runs the scan/search/dashboard/shot-planner path and reports
+real blockers or repair work such as missing archive parts, duplicate review,
+incomplete packs, missing required shot assets, and unavailable optional local
+runners. It does not launch tools or submit jobs.
+
+Turn pressure findings into a production hardening plan:
+
+```bash
+python3 seos.py creative hardening-plan \
+  --pressure-json reports/creative/pressure/real_project_pressure_test_v1.json \
+  --output-json reports/creative/hardening/production_hardening_plan_v1.json \
+  --output-md reports/creative/hardening/production_hardening_plan_v1.md
+```
+
+The hardening plan creates prioritized repair actions and a manifest of public
+production reports with existence, size, digest, and local-path-leak checks. It
+does not copy files, build archives, mutate assets, launch tools, or submit
+jobs.
+
+Run the repeated real-works operation report:
+
+```bash
+python3 seos.py creative works-operation \
+  --registry-json reports/creative/assets/asset_library_report_v1.json \
+  --tool-health-json tests/fixtures/creative/software_discovery/local_tool_health_doctor_fixture_v1.json \
+  --adapter-contracts-json reports/creative/adapters/optional_adapter_contracts_v1.json \
+  --pressure-json reports/creative/pressure/real_project_pressure_test_v1.json \
+  --hardening-json reports/creative/hardening/production_hardening_plan_v1.json \
+  --output-json reports/creative/operation/real_works_operation_v1.json \
+  --output-md reports/creative/operation/real_works_operation_v1.md
+```
+
+The operation report checks repeated energy impact, smoke/dust,
+portal/lightning, asset-library, and editorial handoff workflows and keeps
+future development tied to workflow blockers, pressure findings, hardening
+actions, or real project needs.
+
+The creative pipeline defaults to read-only scans, dry-run adapter plans,
+fixture demos, and public/private separation. Real DCC execution, paid assets,
+and external adoption signals require real local evidence or verified external
+URLs; this repository does not claim external adoption.
+
+SEOS now includes a controlled local execution-plane foundation with fake-DCC
+CI smoke support and optional real DCC adapter contracts. Real DCC execution
+remains permit-gated, local-only, bounded by path and runtime policy, and does
+not convert SEOS into RPA or desktop automation.
+
+## Validation
+
+Baseline validation:
+
+```bash
+python3 scripts/observation_check_v1.py
+python3 scripts/identity_boundary_check_v1.py
+python3 scripts/creative_total_check_v3.py
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.tracer_bullet.test_identity_boundary_v1
 make ci
 ```
 
-The local reference interpreter for this phase is Python 3.14.4, and GitHub CI uses the hosted Python 3.14 line through `actions/setup-python`.
+`make ci` runs the canonical local health gate. It includes unit and acceptance
+tests plus a diff check that requires a clean worktree.
 
-Personal AI local pipeline MVP:
+## Observation Mode
 
-- checkpoint: `personal-ai-local-pipeline-mvp-v1`
-- Phase 2 selected lane: Personal AI Execution OS
-- implemented second local foundation MVP: end-to-end local review pipeline
-- pipeline stages: local intake ledger → artifact profile → work-order
-  proposal → human review packet → pipeline manifest
-- physical contact type: local filesystem read + SHA-256 hash +
-  deterministic JSONL/JSON output outside input directory
-- authority status: non-authority
-- execution status: no execution capability
-- runtime status: no runtime authority
-- external tool control: not introduced
-- network: not introduced
-- API calls: not introduced
-- adapter implementation: not introduced
-- AI classification: not introduced
-- input files: never modified / moved / deleted / renamed
-- output: deterministic JSONL / JSON artifacts
-- required human approval: true
-- kernel/adapters: unchanged
-- Business Delivery OS: not started
-- Creative Production OS: not started
-- Research Decision OS: not started
-- full Personal AI Execution OS: not implemented
+Observation mode is a no-expansion posture. It allows evidence, documentation,
+tests, audit reports, and narrow validation checks that improve external
+reviewability. It does not authorize feature expansion, uncontrolled runtime
+execution, live provider execution, browser control, OS automation, or
+unapproved patching.
 
-Next decision:
+The controlled execution-plane foundation is admitted only as a narrow evidence
+blocker closure: dry-run creative readiness cannot prove real local execution
+without a bounded worker, execution permit, output hash, result envelope, and
+materialization record. This does not weaken observation mode or authorize
+uncontrolled execution expansion.
 
-- `personal-ai-local-pipeline-review-audit-v1` or stop/consolidation
-- final repository trajectory: STOP_ONLY
-- no release publication by default
-- no additional implementation by default
-- no direct Python skeleton implementation
-- no direct adapter implementation
-- no external tool control
-- no additional GitHub Release creation or edit without a separate decision audit
-- no release publication
+The observation record is maintained in:
 
-Explicit stop rules:
+- `docs/runbooks/real_operation_observation_period_v1.md`
+- `reports/observation/real_operation_observation_log_v1.md`
+- `reports/observation/real_operation_observation_log_v1.json`
+- `governance/policy/observation_period_change_policy_v1.md`
 
-- no service/DB/executor by default
-- no Python skeleton code by default
-- no adapter implementation by default
-- no adapter interface code by default
-- no adapter skeleton code by default
-- no `kernel/adapters/` changes by default
-- no relocated marker changes by default
-- no CLI adapter by default
-- no tool, shell/subprocess, or network execution by default
-- no multi-file expansion by default
-- no broad physical I/O by default
-- no durable writes by default
-- no irreversible actions by default
-- no additional GitHub release without a separate decision audit
-- no release publication by default
-- no runtime authority or execution capability from the checkpoint tag
-- no runtime authority or execution capability from the GitHub Release
-- no new governance boundary family by default
-- Business / Creative / Research OS remain later
-- Personal AI beyond this bounded local-only foundation remains later and
-  requires separate authorization
+## Evidence Model
+
+Major claims should map to evidence:
+
+`claim -> risk -> control -> implementation -> validation command -> CI or script gate -> evidence artifact -> residual risk`
+
+Wave 1 public identity evidence is documented in:
+
+- `docs/identity/system_identity_v1.md`
+- `docs/identity/non_goals_v1.md`
+- `docs/quickstart/local_first_quickstart_v1.md`
+- `docs/architecture/seos_control_plane_v1.md`
+- `SECURITY.md`
+- `CHANGELOG.md`
+- `examples/README.md`
+
+## Security Boundary
+
+SEOS governs engineering workflow evidence. It does not reduce the authority of
+the host process and does not custody secrets. Operators must avoid placing
+secrets in task objectives, context bundles, receipts, examples, reports, or
+issue comments. Live AI providers remain disabled by default and must not be
+used to bypass proposal-first and human-approval requirements.
+
+Report suspected security issues with digest-only evidence. Do not paste real
+secrets, access tokens, private keys, `.env` contents, browser cookies, or
+credential-store values into an issue, PR, receipt, report, or model context.
+
+## Known Limitations
+
+- External audit has not yet been performed.
+- Global recognition is not confirmed.
+- Real-world 30-90 day operation evidence is still required before any stronger
+  recognition claim.
+- The CLI supports local governance flows; it is not a remote service or
+  automation platform.
+- Replay explanation is bounded by recorded evidence and must not claim
+  reconstruction when required evidence is missing.
+- Live provider admission is not enabled by default.
+- Host-level security controls remain the operator's responsibility.
+
+## External Audit Readiness
+
+This repository is being prepared for external engineering, security, SRE,
+supply-chain, and AI-governance review. The strongest valid Codex-prepared
+state is `GLOBAL_RECOGNITION_READINESS_READY_FOR_EXTERNAL_REVIEW`, which still
+requires independent external verification and human audit.
