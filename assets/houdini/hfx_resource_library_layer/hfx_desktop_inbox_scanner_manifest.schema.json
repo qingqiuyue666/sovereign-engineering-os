@@ -1,0 +1,100 @@
+{
+  "$id": "sovereign-engineering-os://assets/houdini/hfx_resource_library_layer/hfx_desktop_inbox_scanner_manifest.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Default schema for lightweight resource inbox scanning.",
+  "properties": {
+    "contract_layer": {
+      "const": "hfx_resource_library_layer",
+      "description": "Owning HFX contract layer.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "contract_status": {
+      "description": "Lifecycle state for the contract payload.",
+      "enum": [
+        "draft",
+        "ready_for_review",
+        "approved",
+        "blocked"
+      ],
+      "minLength": 1,
+      "type": "string"
+    },
+    "final_pixel_claim": {
+      "const": false,
+      "description": "Must remain false while this scaffold is not producing final pixels.",
+      "type": "boolean"
+    },
+    "inbox_roots": {
+      "description": "Logical inbox roots to inventory without payload reads.",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "max_metadata_probe_bytes": {
+      "default": 0,
+      "description": "Maximum bytes allowed for metadata-only probing.",
+      "minimum": 0,
+      "type": "integer"
+    },
+    "no_large_file_loading": {
+      "const": true,
+      "description": "Must remain true for this skeleton scanner.",
+      "type": "boolean"
+    },
+    "notes": {
+      "description": "Optional governance notes.",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "quarantine_rules": {
+      "description": "Named rules that send unknown resources to quarantine.",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "resource_classes": {
+      "description": "Allowed resource classes such as texture_ref, cache_ref, or hdri_ref.",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "scanner_id": {
+      "description": "Stable scanner manifest identifier.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "hfx-desktop-inbox-scanner-manifest-v1",
+      "description": "Exact schema version for this contract payload.",
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "contract_layer",
+    "contract_status",
+    "final_pixel_claim",
+    "scanner_id",
+    "inbox_roots",
+    "resource_classes",
+    "no_large_file_loading"
+  ],
+  "title": "HFX Desktop Inbox Scanner Manifest Schema",
+  "type": "object"
+}

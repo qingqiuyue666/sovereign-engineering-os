@@ -1,0 +1,89 @@
+{
+  "$id": "sovereign-engineering-os://assets/houdini/hfx_render_automation_layer/hfx_render_retry_policy.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Default schema for render retry and escalation policy.",
+  "properties": {
+    "backoff_seconds": {
+      "description": "Retry backoff intervals in seconds.",
+      "items": {
+        "minimum": 0,
+        "type": "integer"
+      },
+      "type": "array"
+    },
+    "contract_layer": {
+      "const": "hfx_render_automation_layer",
+      "description": "Owning HFX contract layer.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "contract_status": {
+      "description": "Lifecycle state for the contract payload.",
+      "enum": [
+        "draft",
+        "ready_for_review",
+        "approved",
+        "blocked"
+      ],
+      "minLength": 1,
+      "type": "string"
+    },
+    "escalation_owner": {
+      "description": "Owner paged when retries are exhausted.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "final_pixel_claim": {
+      "const": false,
+      "description": "Must remain false while this scaffold is not producing final pixels.",
+      "type": "boolean"
+    },
+    "max_attempts": {
+      "description": "Maximum attempts including the first try.",
+      "minimum": 1,
+      "type": "integer"
+    },
+    "notes": {
+      "description": "Optional governance notes.",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "policy_id": {
+      "description": "Stable retry policy identifier.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "retryable_failures": {
+      "description": "Failure classes that can be retried by automation.",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "schema_version": {
+      "const": "hfx-render-retry-policy-v1",
+      "description": "Exact schema version for this contract payload.",
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "contract_layer",
+    "contract_status",
+    "final_pixel_claim",
+    "policy_id",
+    "max_attempts",
+    "retryable_failures",
+    "escalation_owner"
+  ],
+  "title": "HFX Render Retry Policy Schema",
+  "type": "object"
+}

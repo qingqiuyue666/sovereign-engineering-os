@@ -1,291 +1,164 @@
 {
-  "client_delivery_allowed": false,
-  "delivery_policy": {
-    "client_delivery_allowed": false,
-    "reason": "Client delivery is blocked until final pixel claims pass real production validation."
+  "change_control": {
+    "bootstrap_schema_version": "hfx-pipeline-bootstrap-v1",
+    "requires_code_review": true,
+    "requires_validator_implementation_before_production": true,
+    "status_const": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS"
   },
+  "client_delivery_allowed": false,
+  "contract_layer": "hfx_master_pipeline_seal",
+  "contract_status": "approved",
+  "delivery_policy": {
+    "claim_policy": "fail_closed",
+    "client_delivery_allowed": false,
+    "delivery_policy": "blocked",
+    "final_pixels_authorized": false
+  },
+  "final_pixel_claim": false,
+  "final_pixel_execution": "BLOCKED",
   "final_pixel_gate": {
     "claim_policy": "fail_closed",
-    "current_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+    "client_delivery_allowed": false,
     "delivery_policy": "blocked",
-    "real_exr_required": true,
-    "reason": "The scaffold contains contracts and validators only; no real EXRs or production pixels exist."
+    "execution_policy": "blocked",
+    "final_pixel_claim_status": "FINAL_PIXEL_CLAIM_BLOCKED",
+    "final_pixels_authorized": false,
+    "real_exr_required": true
   },
   "final_pixels_authorized": false,
+  "generated_by": "kernel/vfx/bootstrap_hfx_pipeline.py",
+  "governed_root": "assets/houdini",
   "houdini_root": "assets/houdini",
+  "large_file_loading": "DISABLED",
+  "layer_count": 12,
   "layers": [
     {
+      "claim_policy": "fail_closed",
+      "client_delivery_allowed": false,
+      "delivery_policy": "blocked",
       "final_pixels_authorized": false,
       "index": 1,
       "name": "hfx_assetization_layer",
-      "required_files": [
-        "asset_publish_manifest.schema.json",
-        "parameter_interface_contract.schema.json",
-        "hda_readiness_report.schema.json",
-        "GLOBAL_SEAL.json",
-        "asset_publish_manifest.contract.md",
-        "parameter_interface_contract.contract.md",
-        "hda_readiness_report.contract.md",
-        "GLOBAL_SEAL.contract.md",
-        "asset_publish_manifest_validator.py",
-        "parameter_interface_validator.py",
-        "hda_readiness_validator.py",
-        "global_seal_validator.py",
-        "fixtures/pass_minimal_no_final_pixels.json",
-        "fixtures/fail_forbidden_final_pixel_claim.json",
-        "layer_manifest.json"
-      ],
-      "status": "CONTRACT_SCAFFOLDED",
-      "title": "HFX Assetization Layer"
+      "path": "assets/houdini/hfx_assetization_layer"
     },
     {
+      "claim_policy": "fail_closed",
+      "client_delivery_allowed": false,
+      "delivery_policy": "blocked",
       "final_pixels_authorized": false,
       "index": 2,
       "name": "hfx_aov_pass_contract_layer",
-      "required_files": [
-        "twelve_asset_aov_contract.schema.json",
-        "global_aov_matrix.schema.json",
-        "twelve_asset_aov_contract.contract.md",
-        "global_aov_matrix.contract.md",
-        "twelve_asset_aov_validator.py",
-        "global_aov_matrix_validator.py",
-        "GLOBAL_SEAL.json",
-        "GLOBAL_SEAL.contract.md",
-        "global_seal_validator.py",
-        "fixtures/pass_minimal_no_final_pixels.json",
-        "fixtures/fail_forbidden_final_pixel_claim.json",
-        "layer_manifest.json"
-      ],
-      "status": "CONTRACT_SCAFFOLDED",
-      "title": "HFX AOV Pass Contract Layer"
+      "path": "assets/houdini/hfx_aov_pass_contract_layer"
     },
     {
+      "claim_policy": "fail_closed",
+      "client_delivery_allowed": false,
+      "delivery_policy": "blocked",
       "final_pixels_authorized": false,
       "index": 3,
       "name": "hfx_resource_library_layer",
-      "required_files": [
-        "desktop_inbox_scan.schema.json",
-        "resource_manifest.schema.json",
-        "license_record.schema.json",
-        "desktop_inbox_scanner_logic.contract.md",
-        "resource_manifest.contract.md",
-        "license_validator.contract.md",
-        "desktop_inbox_scanner.py",
-        "resource_manifest_validator.py",
-        "license_validator.py",
-        "GLOBAL_SEAL.json",
-        "GLOBAL_SEAL.contract.md",
-        "global_seal_validator.py",
-        "fixtures/pass_minimal_no_final_pixels.json",
-        "fixtures/fail_forbidden_final_pixel_claim.json",
-        "layer_manifest.json"
-      ],
-      "status": "CONTRACT_SCAFFOLDED",
-      "title": "HFX Resource Library Layer"
+      "path": "assets/houdini/hfx_resource_library_layer"
     },
     {
+      "claim_policy": "fail_closed",
+      "client_delivery_allowed": false,
+      "delivery_policy": "blocked",
       "final_pixels_authorized": false,
       "index": 4,
       "name": "hfx_lookdev_shader_contract_layer",
-      "required_files": [
-        "shader_slot_registry.schema.json",
-        "material_binding.schema.json",
-        "shader_slot_registry.contract.md",
-        "material_binding.contract.md",
-        "shader_slot_registry_validator.py",
-        "material_binding_validator.py",
-        "GLOBAL_SEAL.json",
-        "GLOBAL_SEAL.contract.md",
-        "global_seal_validator.py",
-        "fixtures/pass_minimal_no_final_pixels.json",
-        "fixtures/fail_forbidden_final_pixel_claim.json",
-        "layer_manifest.json"
-      ],
-      "status": "CONTRACT_SCAFFOLDED",
-      "title": "HFX Lookdev Shader Contract Layer"
+      "path": "assets/houdini/hfx_lookdev_shader_contract_layer"
     },
     {
+      "claim_policy": "fail_closed",
+      "client_delivery_allowed": false,
+      "delivery_policy": "blocked",
       "final_pixels_authorized": false,
       "index": 5,
       "name": "hfx_plate_camera_integration_layer",
-      "required_files": [
-        "plate_camera_lens_hdri_binding.schema.json",
-        "tracking_validation_report.schema.json",
-        "plate_camera_lens_hdri_binding.contract.md",
-        "tracking_validation_report.contract.md",
-        "plate_camera_lens_hdri_binding_validator.py",
-        "tracking_validation_report_validator.py",
-        "GLOBAL_SEAL.json",
-        "GLOBAL_SEAL.contract.md",
-        "global_seal_validator.py",
-        "fixtures/pass_minimal_no_final_pixels.json",
-        "fixtures/fail_forbidden_final_pixel_claim.json",
-        "layer_manifest.json"
-      ],
-      "status": "CONTRACT_SCAFFOLDED",
-      "title": "HFX Plate Camera Integration Layer"
+      "path": "assets/houdini/hfx_plate_camera_integration_layer"
     },
     {
+      "claim_policy": "fail_closed",
+      "client_delivery_allowed": false,
+      "delivery_policy": "blocked",
       "final_pixels_authorized": false,
       "index": 6,
       "name": "hfx_render_automation_layer",
-      "required_files": [
-        "render_job.schema.json",
-        "render_validation.schema.json",
-        "failed_frame_retry.schema.json",
-        "render_job.contract.md",
-        "render_validation.contract.md",
-        "failed_frame_retry.contract.md",
-        "render_job_validator.py",
-        "render_validation_validator.py",
-        "failed_frame_retry_validator.py",
-        "GLOBAL_SEAL.json",
-        "GLOBAL_SEAL.contract.md",
-        "global_seal_validator.py",
-        "fixtures/pass_minimal_no_final_pixels.json",
-        "fixtures/fail_forbidden_final_pixel_claim.json",
-        "layer_manifest.json"
-      ],
-      "status": "CONTRACT_SCAFFOLDED",
-      "title": "HFX Render Automation Layer"
+      "path": "assets/houdini/hfx_render_automation_layer"
     },
     {
+      "claim_policy": "fail_closed",
+      "client_delivery_allowed": false,
+      "delivery_policy": "blocked",
       "final_pixels_authorized": false,
       "index": 7,
       "name": "hfx_comp_automation_layer",
-      "required_files": [
-        "nuke_instruction.schema.json",
-        "after_effects_instruction.schema.json",
-        "davinci_resolve_instruction.schema.json",
-        "nuke_instruction_generator.contract.md",
-        "after_effects_instruction_generator.contract.md",
-        "davinci_resolve_instruction_generator.contract.md",
-        "nuke_instruction_validator.py",
-        "after_effects_instruction_validator.py",
-        "davinci_resolve_instruction_validator.py",
-        "GLOBAL_SEAL.json",
-        "GLOBAL_SEAL.contract.md",
-        "global_seal_validator.py",
-        "fixtures/pass_minimal_no_final_pixels.json",
-        "fixtures/fail_forbidden_final_pixel_claim.json",
-        "layer_manifest.json"
-      ],
-      "status": "CONTRACT_SCAFFOLDED",
-      "title": "HFX Comp Automation Layer"
+      "path": "assets/houdini/hfx_comp_automation_layer"
     },
     {
+      "claim_policy": "fail_closed",
+      "client_delivery_allowed": false,
+      "delivery_policy": "blocked",
       "final_pixels_authorized": false,
       "index": 8,
       "name": "hfx_color_management_layer",
-      "required_files": [
-        "color_pipeline.schema.json",
-        "aces_ocio_placeholder.schema.json",
-        "color_pipeline.contract.md",
-        "aces_ocio_placeholder.contract.md",
-        "color_pipeline_validator.py",
-        "aces_ocio_placeholder_validator.py",
-        "GLOBAL_SEAL.json",
-        "GLOBAL_SEAL.contract.md",
-        "global_seal_validator.py",
-        "fixtures/pass_minimal_no_final_pixels.json",
-        "fixtures/fail_forbidden_final_pixel_claim.json",
-        "layer_manifest.json"
-      ],
-      "status": "CONTRACT_SCAFFOLDED",
-      "title": "HFX Color Management Layer"
+      "path": "assets/houdini/hfx_color_management_layer"
     },
     {
+      "claim_policy": "fail_closed",
+      "client_delivery_allowed": false,
+      "delivery_policy": "blocked",
       "final_pixels_authorized": false,
       "index": 9,
       "name": "hfx_review_dailies_layer",
-      "required_files": [
-        "review_package.schema.json",
-        "contact_sheet.schema.json",
-        "dailies_report.schema.json",
-        "review_package.contract.md",
-        "contact_sheet.contract.md",
-        "dailies_report.contract.md",
-        "review_package_validator.py",
-        "contact_sheet_validator.py",
-        "dailies_report_validator.py",
-        "GLOBAL_SEAL.json",
-        "GLOBAL_SEAL.contract.md",
-        "global_seal_validator.py",
-        "fixtures/pass_minimal_no_final_pixels.json",
-        "fixtures/fail_forbidden_final_pixel_claim.json",
-        "layer_manifest.json"
-      ],
-      "status": "CONTRACT_SCAFFOLDED",
-      "title": "HFX Review Dailies Layer"
+      "path": "assets/houdini/hfx_review_dailies_layer"
     },
     {
+      "claim_policy": "fail_closed",
+      "client_delivery_allowed": false,
+      "delivery_policy": "blocked",
       "final_pixels_authorized": false,
       "index": 10,
       "name": "hfx_final_pixel_gate_layer",
-      "required_files": [
-        "final_pixel_claim.schema.json",
-        "blocked_claim_registry.schema.json",
-        "blocked_claim_registry.json",
-        "final_pixel_gate.contract.md",
-        "blocked_claim_registry.contract.md",
-        "final_pixel_claim_validator.py",
-        "blocked_claim_registry_validator.py",
-        "GLOBAL_SEAL.json",
-        "GLOBAL_SEAL.contract.md",
-        "global_seal_validator.py",
-        "fixtures/pass_minimal_no_final_pixels.json",
-        "fixtures/fail_forbidden_final_pixel_claim.json",
-        "layer_manifest.json"
-      ],
-      "status": "BLOCKED_NO_FINAL_PIXELS",
-      "title": "HFX Final Pixel Gate Layer"
+      "path": "assets/houdini/hfx_final_pixel_gate_layer"
     },
     {
+      "claim_policy": "fail_closed",
+      "client_delivery_allowed": false,
+      "delivery_policy": "blocked",
       "final_pixels_authorized": false,
       "index": 11,
       "name": "hfx_delivery_package_layer",
-      "required_files": [
-        "delivery_manifest.schema.json",
-        "client_delivery_blocker.schema.json",
-        "delivery_manifest.contract.md",
-        "client_delivery_blocker.contract.md",
-        "delivery_manifest_validator.py",
-        "client_delivery_blocker.py",
-        "GLOBAL_SEAL.json",
-        "GLOBAL_SEAL.contract.md",
-        "global_seal_validator.py",
-        "fixtures/pass_minimal_no_final_pixels.json",
-        "fixtures/fail_forbidden_final_pixel_claim.json",
-        "layer_manifest.json"
-      ],
-      "status": "CONTRACT_SCAFFOLDED",
-      "title": "HFX Delivery Package Layer"
+      "path": "assets/houdini/hfx_delivery_package_layer"
     },
     {
+      "claim_policy": "fail_closed",
+      "client_delivery_allowed": false,
+      "delivery_policy": "blocked",
       "final_pixels_authorized": false,
       "index": 12,
       "name": "hfx_master_pipeline_seal",
-      "required_files": [
-        "master_pipeline_seal.schema.json",
-        "HFX_MASTER_PIPELINE_GLOBAL_SEAL.json",
-        "master_pipeline_seal.contract.md",
-        "master_pipeline_seal_validator.py",
-        "hfx_master_pipeline_validate.py",
-        "README_HFX_MASTER_PIPELINE_SEAL.md",
-        "GLOBAL_SEAL.json",
-        "GLOBAL_SEAL.contract.md",
-        "global_seal_validator.py",
-        "fixtures/pass_minimal_no_final_pixels.json",
-        "fixtures/fail_forbidden_final_pixel_claim.json",
-        "layer_manifest.json"
-      ],
-      "status": "CONTRACT_SCAFFOLDED",
-      "title": "HFX Master Pipeline Seal"
+      "path": "assets/houdini/hfx_master_pipeline_seal"
     }
   ],
+  "locked": true,
   "maximum_allowed_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+  "non_goals": [
+    "No EXR rendering",
+    "No compositing execution",
+    "No PBR texture loading",
+    "No VDB loading",
+    "No HDRI loading",
+    "No final-pixel claims"
+  ],
+  "notes": [
+    "Generated by the HFX bootstrapper.",
+    "No final-pixel production is authorized by this seal."
+  ],
   "output": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
   "pipeline_root": ".",
-  "seal_id": "HFX_MASTER_PIPELINE_GLOBAL_SEAL",
+  "real_asset_loading": "DISABLED",
+  "schema_version": "hfx-master-pipeline-global-seal-v1",
+  "status": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
   "system_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS"
 }

@@ -1,0 +1,120 @@
+{
+  "$id": "sovereign-engineering-os://assets/houdini/hfx_assetization_layer/hfx_publish_manifest.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Default schema for a lightweight Houdini publish manifest.",
+  "properties": {
+    "asset_id": {
+      "description": "Stable asset identifier.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "asset_type": {
+      "description": "Governed Houdini asset category.",
+      "enum": [
+        "hda",
+        "scene",
+        "shot_asset",
+        "fx_element",
+        "utility"
+      ],
+      "minLength": 1,
+      "type": "string"
+    },
+    "blocked_claims": {
+      "description": "Claims this publish explicitly cannot make.",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "contract_layer": {
+      "const": "hfx_assetization_layer",
+      "description": "Owning HFX contract layer.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "contract_status": {
+      "description": "Lifecycle state for the contract payload.",
+      "enum": [
+        "draft",
+        "ready_for_review",
+        "approved",
+        "blocked"
+      ],
+      "minLength": 1,
+      "type": "string"
+    },
+    "dependencies": {
+      "description": "Logical dependency references needed by the publish.",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "final_pixel_claim": {
+      "const": false,
+      "description": "Must remain false while this scaffold is not producing final pixels.",
+      "type": "boolean"
+    },
+    "notes": {
+      "description": "Optional governance notes.",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "owner": {
+      "description": "Responsible artist or automation owner.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "publish_version": {
+      "description": "Semantic publish version.",
+      "minLength": 1,
+      "pattern": "^v[0-9]{3,}$",
+      "type": "string"
+    },
+    "readiness_status": {
+      "description": "Assetization readiness state.",
+      "enum": [
+        "draft",
+        "ready_for_hda_review",
+        "approved",
+        "blocked"
+      ],
+      "minLength": 1,
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "hfx-publish-manifest-v1",
+      "description": "Exact schema version for this contract payload.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "source_scene_ref": {
+      "description": "Logical reference to the source scene or work order.",
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "contract_layer",
+    "contract_status",
+    "final_pixel_claim",
+    "asset_id",
+    "asset_type",
+    "publish_version",
+    "owner",
+    "readiness_status"
+  ],
+  "title": "HFX Publish Manifest Schema",
+  "type": "object"
+}

@@ -1,12 +1,12 @@
 {
   "checks": [
     {
-      "detail": "/Users/qqy/Documents/Codex/2026-05-20/system-override-hfx-render-automation-hardening/sovereign-engineering-os/assets/houdini/hfx_plate_camera_integration_layer/layer_manifest.json",
+      "detail": "/Users/qqy/Documents/GitHub/sovereign-engineering-os/assets/houdini/hfx_plate_camera_integration_layer/layer_manifest.json",
       "name": "layer_manifest_exists",
       "pass": true
     },
     {
-      "detail": "/Users/qqy/Documents/Codex/2026-05-20/system-override-hfx-render-automation-hardening/sovereign-engineering-os/assets/houdini/hfx_plate_camera_integration_layer/GLOBAL_SEAL.json",
+      "detail": "/Users/qqy/Documents/GitHub/sovereign-engineering-os/assets/houdini/hfx_plate_camera_integration_layer/GLOBAL_SEAL.json",
       "name": "global_seal_exists",
       "pass": true
     },

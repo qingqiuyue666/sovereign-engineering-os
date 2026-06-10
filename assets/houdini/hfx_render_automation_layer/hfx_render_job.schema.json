@@ -1,0 +1,133 @@
+{
+  "$id": "sovereign-engineering-os://assets/houdini/hfx_render_automation_layer/hfx_render_job.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Default schema for render automation job declarations.",
+  "properties": {
+    "aov_matrix_ref": {
+      "description": "Logical reference to the approved AOV matrix.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "contract_layer": {
+      "const": "hfx_render_automation_layer",
+      "description": "Owning HFX contract layer.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "contract_status": {
+      "description": "Lifecycle state for the contract payload.",
+      "enum": [
+        "draft",
+        "ready_for_review",
+        "approved",
+        "blocked"
+      ],
+      "minLength": 1,
+      "type": "string"
+    },
+    "dry_run_only": {
+      "const": true,
+      "description": "Must remain true in the no-final-pixels scaffold.",
+      "type": "boolean"
+    },
+    "final_pixel_claim": {
+      "const": false,
+      "description": "Must remain false while this scaffold is not producing final pixels.",
+      "type": "boolean"
+    },
+    "frame_range": {
+      "additionalProperties": false,
+      "description": "Frames the job would cover.",
+      "properties": {
+        "end": {
+          "description": "Last frame in the governed range.",
+          "minimum": 1,
+          "type": "integer"
+        },
+        "start": {
+          "description": "First frame in the governed range.",
+          "minimum": 1,
+          "type": "integer"
+        },
+        "step": {
+          "default": 1,
+          "description": "Frame increment.",
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "start",
+        "end",
+        "step"
+      ],
+      "type": "object"
+    },
+    "hip_manifest_ref": {
+      "description": "Logical HIP or scene manifest reference.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "job_id": {
+      "description": "Stable render job identifier.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "max_retries": {
+      "description": "Maximum retries allowed by job policy.",
+      "minimum": 0,
+      "type": "integer"
+    },
+    "notes": {
+      "description": "Optional governance notes.",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "output_intent": {
+      "description": "Declared output intent for downstream review.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "renderer": {
+      "description": "Renderer family intended by the contract.",
+      "enum": [
+        "karma",
+        "mantra",
+        "opengl",
+        "custom_contract"
+      ],
+      "minLength": 1,
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "hfx-render-job-v1",
+      "description": "Exact schema version for this contract payload.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "shot_id": {
+      "description": "Shot identifier.",
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "contract_layer",
+    "contract_status",
+    "final_pixel_claim",
+    "job_id",
+    "shot_id",
+    "hip_manifest_ref",
+    "renderer",
+    "frame_range",
+    "dry_run_only"
+  ],
+  "title": "HFX Render Job Schema",
+  "type": "object"
+}

@@ -1,0 +1,162 @@
+{
+  "$id": "sovereign-engineering-os://assets/houdini/hfx_master_pipeline_seal/hfx_master_pipeline_global_seal.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Default schema for the locked global no-final-pixels seal.",
+  "properties": {
+    "change_control": {
+      "additionalProperties": false,
+      "description": "Immutable change-control facts for the seal.",
+      "properties": {
+        "bootstrap_schema_version": {
+          "const": "hfx-pipeline-bootstrap-v1",
+          "description": "Bootstrapper schema version.",
+          "minLength": 1,
+          "type": "string"
+        },
+        "requires_code_review": {
+          "const": true,
+          "description": "Whether changes to the seal require review.",
+          "type": "boolean"
+        },
+        "requires_validator_implementation_before_production": {
+          "const": true,
+          "description": "Whether validators must exist before production use.",
+          "type": "boolean"
+        },
+        "status_const": {
+          "const": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+          "description": "Exact status constant required by the seal.",
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "bootstrap_schema_version",
+        "status_const",
+        "requires_code_review",
+        "requires_validator_implementation_before_production"
+      ],
+      "type": "object"
+    },
+    "contract_layer": {
+      "const": "hfx_master_pipeline_seal",
+      "description": "Owning HFX contract layer.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "contract_status": {
+      "description": "Lifecycle state for the contract payload.",
+      "enum": [
+        "draft",
+        "ready_for_review",
+        "approved",
+        "blocked"
+      ],
+      "minLength": 1,
+      "type": "string"
+    },
+    "final_pixel_claim": {
+      "const": false,
+      "description": "Must remain false while this scaffold is not producing final pixels.",
+      "type": "boolean"
+    },
+    "final_pixel_execution": {
+      "const": "BLOCKED",
+      "description": "Final-pixel execution state.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "generated_by": {
+      "const": "kernel/vfx/bootstrap_hfx_pipeline.py",
+      "description": "Bootstrapper responsible for generating the seal.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "governed_root": {
+      "const": "assets/houdini",
+      "description": "Governed Houdini asset root.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "large_file_loading": {
+      "const": "DISABLED",
+      "description": "Large file loading state.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "layer_count": {
+      "const": 12,
+      "description": "Number of governed HFX layers.",
+      "type": "integer"
+    },
+    "layers": {
+      "description": "All governed HFX layer directories.",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "locked": {
+      "const": true,
+      "description": "Seal lock flag.",
+      "type": "boolean"
+    },
+    "non_goals": {
+      "description": "Production actions explicitly outside this scaffold.",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "notes": {
+      "description": "Optional governance notes.",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "real_asset_loading": {
+      "const": "DISABLED",
+      "description": "Real asset loading state.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "hfx-master-pipeline-global-seal-v1",
+      "description": "Exact schema version for this contract payload.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "status": {
+      "const": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+      "description": "Permanently locked master pipeline status.",
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "contract_layer",
+    "contract_status",
+    "final_pixel_claim",
+    "status",
+    "locked",
+    "final_pixel_execution",
+    "real_asset_loading",
+    "large_file_loading",
+    "generated_by",
+    "governed_root",
+    "layer_count",
+    "layers",
+    "change_control"
+  ],
+  "title": "HFX Master Pipeline Global Seal Schema",
+  "type": "object"
+}

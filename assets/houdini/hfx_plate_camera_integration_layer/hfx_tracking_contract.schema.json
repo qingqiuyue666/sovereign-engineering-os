@@ -1,0 +1,128 @@
+{
+  "$id": "sovereign-engineering-os://assets/houdini/hfx_plate_camera_integration_layer/hfx_tracking_contract.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Default schema for a tracking and camera solution contract.",
+  "properties": {
+    "contract_layer": {
+      "const": "hfx_plate_camera_integration_layer",
+      "description": "Owning HFX contract layer.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "contract_status": {
+      "description": "Lifecycle state for the contract payload.",
+      "enum": [
+        "draft",
+        "ready_for_review",
+        "approved",
+        "blocked"
+      ],
+      "minLength": 1,
+      "type": "string"
+    },
+    "coordinate_system": {
+      "description": "World and unit coordinate declaration.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "final_pixel_claim": {
+      "const": false,
+      "description": "Must remain false while this scaffold is not producing final pixels.",
+      "type": "boolean"
+    },
+    "frame_range": {
+      "additionalProperties": false,
+      "description": "Governed shot frame range.",
+      "properties": {
+        "end": {
+          "description": "Last frame in the governed range.",
+          "minimum": 1,
+          "type": "integer"
+        },
+        "start": {
+          "description": "First frame in the governed range.",
+          "minimum": 1,
+          "type": "integer"
+        },
+        "step": {
+          "default": 1,
+          "description": "Frame increment.",
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "start",
+        "end",
+        "step"
+      ],
+      "type": "object"
+    },
+    "notes": {
+      "description": "Optional governance notes.",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "plate_ref": {
+      "description": "Logical plate reference.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "hfx-tracking-contract-v1",
+      "description": "Exact schema version for this contract payload.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "shot_id": {
+      "description": "Shot identifier.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "tracking_solution_ref": {
+      "description": "Logical reference to the camera tracking solution.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "undistortion_model": {
+      "description": "Declared undistortion model.",
+      "enum": [
+        "none",
+        "brown_conrady",
+        "stmap_ref",
+        "custom_contract"
+      ],
+      "minLength": 1,
+      "type": "string"
+    },
+    "validation_status": {
+      "description": "Tracking validation state.",
+      "enum": [
+        "draft",
+        "artist_review",
+        "approved",
+        "blocked"
+      ],
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "contract_layer",
+    "contract_status",
+    "final_pixel_claim",
+    "shot_id",
+    "plate_ref",
+    "frame_range",
+    "tracking_solution_ref",
+    "coordinate_system"
+  ],
+  "title": "HFX Tracking Contract Schema",
+  "type": "object"
+}
