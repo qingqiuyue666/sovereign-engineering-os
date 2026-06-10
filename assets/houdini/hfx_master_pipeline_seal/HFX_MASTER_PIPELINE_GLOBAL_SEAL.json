@@ -5,29 +5,144 @@
     "requires_validator_implementation_before_production": true,
     "status_const": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS"
   },
+  "client_delivery_allowed": false,
   "contract_layer": "hfx_master_pipeline_seal",
   "contract_status": "approved",
+  "delivery_policy": {
+    "claim_policy": "fail_closed",
+    "client_delivery_allowed": false,
+    "delivery_policy": "blocked",
+    "final_pixels_authorized": false
+  },
   "final_pixel_claim": false,
   "final_pixel_execution": "BLOCKED",
+  "final_pixel_gate": {
+    "claim_policy": "fail_closed",
+    "client_delivery_allowed": false,
+    "delivery_policy": "blocked",
+    "execution_policy": "blocked",
+    "final_pixel_claim_status": "FINAL_PIXEL_CLAIM_BLOCKED",
+    "final_pixels_authorized": false,
+    "real_exr_required": true
+  },
+  "final_pixels_authorized": false,
   "generated_by": "kernel/vfx/bootstrap_hfx_pipeline.py",
   "governed_root": "assets/houdini",
+  "houdini_root": "assets/houdini",
   "large_file_loading": "DISABLED",
   "layer_count": 12,
   "layers": [
-    "hfx_assetization_layer",
-    "hfx_aov_pass_contract_layer",
-    "hfx_resource_library_layer",
-    "hfx_lookdev_shader_contract_layer",
-    "hfx_plate_camera_integration_layer",
-    "hfx_render_automation_layer",
-    "hfx_comp_automation_layer",
-    "hfx_color_management_layer",
-    "hfx_review_dailies_layer",
-    "hfx_final_pixel_gate_layer",
-    "hfx_delivery_package_layer",
-    "hfx_master_pipeline_seal"
+    {
+      "claim_policy": "fail_closed",
+      "client_delivery_allowed": false,
+      "delivery_policy": "blocked",
+      "final_pixels_authorized": false,
+      "index": 1,
+      "name": "hfx_assetization_layer",
+      "path": "assets/houdini/hfx_assetization_layer"
+    },
+    {
+      "claim_policy": "fail_closed",
+      "client_delivery_allowed": false,
+      "delivery_policy": "blocked",
+      "final_pixels_authorized": false,
+      "index": 2,
+      "name": "hfx_aov_pass_contract_layer",
+      "path": "assets/houdini/hfx_aov_pass_contract_layer"
+    },
+    {
+      "claim_policy": "fail_closed",
+      "client_delivery_allowed": false,
+      "delivery_policy": "blocked",
+      "final_pixels_authorized": false,
+      "index": 3,
+      "name": "hfx_resource_library_layer",
+      "path": "assets/houdini/hfx_resource_library_layer"
+    },
+    {
+      "claim_policy": "fail_closed",
+      "client_delivery_allowed": false,
+      "delivery_policy": "blocked",
+      "final_pixels_authorized": false,
+      "index": 4,
+      "name": "hfx_lookdev_shader_contract_layer",
+      "path": "assets/houdini/hfx_lookdev_shader_contract_layer"
+    },
+    {
+      "claim_policy": "fail_closed",
+      "client_delivery_allowed": false,
+      "delivery_policy": "blocked",
+      "final_pixels_authorized": false,
+      "index": 5,
+      "name": "hfx_plate_camera_integration_layer",
+      "path": "assets/houdini/hfx_plate_camera_integration_layer"
+    },
+    {
+      "claim_policy": "fail_closed",
+      "client_delivery_allowed": false,
+      "delivery_policy": "blocked",
+      "final_pixels_authorized": false,
+      "index": 6,
+      "name": "hfx_render_automation_layer",
+      "path": "assets/houdini/hfx_render_automation_layer"
+    },
+    {
+      "claim_policy": "fail_closed",
+      "client_delivery_allowed": false,
+      "delivery_policy": "blocked",
+      "final_pixels_authorized": false,
+      "index": 7,
+      "name": "hfx_comp_automation_layer",
+      "path": "assets/houdini/hfx_comp_automation_layer"
+    },
+    {
+      "claim_policy": "fail_closed",
+      "client_delivery_allowed": false,
+      "delivery_policy": "blocked",
+      "final_pixels_authorized": false,
+      "index": 8,
+      "name": "hfx_color_management_layer",
+      "path": "assets/houdini/hfx_color_management_layer"
+    },
+    {
+      "claim_policy": "fail_closed",
+      "client_delivery_allowed": false,
+      "delivery_policy": "blocked",
+      "final_pixels_authorized": false,
+      "index": 9,
+      "name": "hfx_review_dailies_layer",
+      "path": "assets/houdini/hfx_review_dailies_layer"
+    },
+    {
+      "claim_policy": "fail_closed",
+      "client_delivery_allowed": false,
+      "delivery_policy": "blocked",
+      "final_pixels_authorized": false,
+      "index": 10,
+      "name": "hfx_final_pixel_gate_layer",
+      "path": "assets/houdini/hfx_final_pixel_gate_layer"
+    },
+    {
+      "claim_policy": "fail_closed",
+      "client_delivery_allowed": false,
+      "delivery_policy": "blocked",
+      "final_pixels_authorized": false,
+      "index": 11,
+      "name": "hfx_delivery_package_layer",
+      "path": "assets/houdini/hfx_delivery_package_layer"
+    },
+    {
+      "claim_policy": "fail_closed",
+      "client_delivery_allowed": false,
+      "delivery_policy": "blocked",
+      "final_pixels_authorized": false,
+      "index": 12,
+      "name": "hfx_master_pipeline_seal",
+      "path": "assets/houdini/hfx_master_pipeline_seal"
+    }
   ],
   "locked": true,
+  "maximum_allowed_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
   "non_goals": [
     "No EXR rendering",
     "No compositing execution",
@@ -40,7 +155,10 @@
     "Generated by the HFX bootstrapper.",
     "No final-pixel production is authorized by this seal."
   ],
+  "output": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+  "pipeline_root": ".",
   "real_asset_loading": "DISABLED",
   "schema_version": "hfx-master-pipeline-global-seal-v1",
-  "status": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS"
+  "status": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS",
+  "system_state": "HFX_MASTER_PIPELINE_SYSTEM_READY_NO_FINAL_PIXELS"
 }
