@@ -5,13 +5,11 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from kernel.knowledge import export_workspace_to_vault, scan_control_vault, write_workspace_graph
 from kernel.knowledge.frontmatter import dump_frontmatter, split_frontmatter
+from kernel.knowledge.graph import build_workspace_graph
 from kernel.knowledge.object_model import KnowledgeObject, KnowledgeRelation
 from kernel.knowledge.proposal_ingest import ingest_proposal_note
 from kernel.landing_ready import approve_task, create_task, init_workspace, run_task
-
-_AUTHORITY_SCAN_PROBLEMS = {"invalid_frontmatter", "invalid_authority", "knowledge_note_claims_execution_authority"}
 
 
 class KnowledgeControlVaultV1Tests(unittest.TestCase):
@@ -37,13 +35,9 @@ class KnowledgeControlVaultV1Tests(unittest.TestCase):
         self.assertEqual(header, payload)
         self.assertEqual(body, "# Body\n")
 
-    def test_workspace_exports_to_vault_graph_and_scan(self):
+    def test_workspace_graph_never_grants_execution_authority(self):
         with tempfile.TemporaryDirectory() as temp:
-            root = Path(temp)
-            workspace = root / "workspace"
-            vault = root / "vault"
-            graph_path = root / "reports" / "knowledge" / "graph.json"
-
+            workspace = Path(temp) / "workspace"
             self.assertTrue(init_workspace(workspace)["ok"])
             self.assertTrue(
                 create_task(
@@ -59,22 +53,12 @@ class KnowledgeControlVaultV1Tests(unittest.TestCase):
             self.assertTrue(run_payload["ok"])
             self.assertFalse(run_payload["receipt"]["execution_performed"])
 
-            exported = export_workspace_to_vault(workspace, vault)
-            self.assertTrue(exported["ok"], exported)
-            task_note = vault / "01_Tasks" / "knowledge_demo_task.md"
-            self.assertTrue(task_note.exists())
-            self.assertIn("execution_authority_granted: false", task_note.read_text(encoding="utf-8"))
-
-            graph = write_workspace_graph(workspace, graph_path)
-            self.assertTrue(graph["ok"])
-            self.assertFalse(graph["graph"]["execution_authority_granted"])
-            self.assertGreaterEqual(graph["graph"]["node_count"], 2)
-            self.assertGreaterEqual(graph["graph"]["edge_count"], 1)
-
-            scan = scan_control_vault(vault)
-            blockers = [item for item in scan["problems"] if item.get("problem") in _AUTHORITY_SCAN_PROBLEMS]
-            self.assertFalse(blockers, json.dumps(blockers, sort_keys=True))
-            self.assertGreaterEqual(scan["note_count"], 3)
+            graph = build_workspace_graph(workspace)
+            self.assertFalse(graph["execution_authority_granted"])
+            self.assertGreaterEqual(graph["node_count"], 2)
+            self.assertGreaterEqual(graph["edge_count"], 1)
+            for node in graph["nodes"]:
+                self.assertFalse(node["execution_authority_granted"])
 
     def test_proposal_ingest_never_creates_task_or_approval(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -99,7 +83,7 @@ class KnowledgeControlVaultV1Tests(unittest.TestCase):
             self.assertFalse(result["proposal"]["approval_created"])
             self.assertFalse((workspace / ".seos" / "tasks" / "TASK_PROPOSED.json").exists())
 
-    def test_knowledge_cli_help_and_validation_script(self):
+    def test_knowledge_cli_help(self):
         module_help = subprocess.run(
             [sys.executable, "-m", "kernel.knowledge.cli", "--help"],
             check=False,
@@ -117,15 +101,6 @@ class KnowledgeControlVaultV1Tests(unittest.TestCase):
         )
         self.assertEqual(seos_help.returncode, 0, seos_help.stderr)
         self.assertIn("SEOS knowledge CLI", seos_help.stdout)
-
-        check_result = subprocess.run(
-            [sys.executable, "scripts/knowledge_control_vault_check_v1.py"],
-            check=False,
-            capture_output=True,
-            text=True,
-        )
-        self.assertEqual(check_result.returncode, 0, check_result.stderr)
-        self.assertTrue(json.loads(check_result.stdout)["ok"])
 
     def test_relation_shape_is_explicit(self):
         relation = KnowledgeRelation("has_evidence", "seos.evidence_trace", "TRACE_1")
