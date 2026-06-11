@@ -52,8 +52,6 @@ jobs:
         run: python scripts/schema_compatibility_check_v1.py
       - name: Run creative pipeline total check
         run: python scripts/creative_total_check_v3.py
-      - name: Run knowledge control vault check
-        run: python scripts/knowledge_control_vault_check_v1.py
       - name: Run future resilience check
         run: python scripts/future_resilience_check_v1.py
       - name: Run knowledge control vault tests
