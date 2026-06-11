@@ -6,7 +6,11 @@ from pathlib import Path
 import json
 import sys
 
+from kernel.knowledge.adapters.anytype import export_anytype_object_bundle
+from kernel.knowledge.adapters.logseq import export_workspace_to_logseq
+from kernel.knowledge.adapters.notion import build_notion_readonly_dashboard
 from kernel.knowledge.graph import write_workspace_graph
+from kernel.knowledge.proposal_ingest import ingest_proposal_note
 from kernel.knowledge.vault import export_task_to_vault, export_workspace_to_vault, init_control_vault
 from kernel.knowledge.vault_scanner import scan_control_vault
 
@@ -20,6 +24,10 @@ Usage:
   python3 -m kernel.knowledge.cli export-task TASK_ID --workspace PATH --vault PATH [--profile obsidian] [--private]
   python3 -m kernel.knowledge.cli graph build --workspace PATH --output PATH [--private]
   python3 -m kernel.knowledge.cli scan --vault PATH [--private] [--output-json PATH]
+  python3 -m kernel.knowledge.cli ingest-proposal --note PATH --workspace PATH [--private]
+  python3 -m kernel.knowledge.cli export-logseq --workspace PATH --root PATH [--private]
+  python3 -m kernel.knowledge.cli export-anytype --workspace PATH --output PATH [--private]
+  python3 -m kernel.knowledge.cli notion-dashboard --workspace PATH --output PATH [--private]
 
 Authority boundary:
   Knowledge artifacts are proposal/mirror/receipt summaries only. They do not
@@ -45,6 +53,14 @@ def main(argv: list[str] | None = None) -> int:
             return _graph(rest)
         if command == "scan":
             return _scan(rest)
+        if command == "ingest-proposal":
+            return _ingest_proposal(rest)
+        if command == "export-logseq":
+            return _export_logseq(rest)
+        if command == "export-anytype":
+            return _export_anytype(rest)
+        if command == "notion-dashboard":
+            return _notion_dashboard(rest)
     except Exception as exc:
         _emit({"ok": False, "error": "knowledge_command_failed", "detail": exc.__class__.__name__, "message": str(exc)})
         return 1
@@ -120,6 +136,40 @@ def _scan(args: list[str]) -> int:
     return _output(payload, _json_requested(args), _format_scan)
 
 
+def _ingest_proposal(args: list[str]) -> int:
+    note = _option(args, "--note") or _positional(args, skip_values_for={"--workspace", "--note"})
+    workspace = _option(args, "--workspace", ".")
+    if not note:
+        _emit({"ok": False, "error": "knowledge_ingest_proposal_requires_note"})
+        return 2
+    payload = ingest_proposal_note(note, workspace, public="--private" not in args)
+    return _output(payload, _json_requested(args), _format_ingest_proposal)
+
+
+def _export_logseq(args: list[str]) -> int:
+    workspace = _option(args, "--workspace", ".")
+    root = _option(args, "--root")
+    if not root:
+        _emit({"ok": False, "error": "knowledge_export_logseq_requires_root"})
+        return 2
+    payload = export_workspace_to_logseq(workspace, root, public="--private" not in args)
+    return _output(payload, _json_requested(args), _format_generic_pathless)
+
+
+def _export_anytype(args: list[str]) -> int:
+    workspace = _option(args, "--workspace", ".")
+    output = _option(args, "--output", "reports/knowledge/anytype_object_bundle.json")
+    payload = export_anytype_object_bundle(workspace, output, public="--private" not in args)
+    return _output(payload, _json_requested(args), _format_generic_path)
+
+
+def _notion_dashboard(args: list[str]) -> int:
+    workspace = _option(args, "--workspace", ".")
+    output = _option(args, "--output", "reports/knowledge/notion_readonly_dashboard.json")
+    payload = build_notion_readonly_dashboard(workspace, output, public="--private" not in args)
+    return _output(payload, _json_requested(args), _format_generic_path)
+
+
 def _emit(payload: dict[str, object]) -> None:
     print(json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")))
 
@@ -181,6 +231,19 @@ def _format_graph(payload: dict[str, object]) -> str:
 
 def _format_scan(payload: dict[str, object]) -> str:
     return f"Control vault scan ok={payload.get('ok')} notes={payload.get('note_count')} problems={payload.get('problem_count')}"
+
+
+def _format_ingest_proposal(payload: dict[str, object]) -> str:
+    proposal = payload.get("proposal", {}) if isinstance(payload.get("proposal"), dict) else {}
+    return f"Proposal ingest ok={payload.get('ok')} proposal={proposal.get('proposal_id')} path={payload.get('path')}"
+
+
+def _format_generic_path(payload: dict[str, object]) -> str:
+    return f"Knowledge artifact ok={payload.get('ok')} path={payload.get('path')}"
+
+
+def _format_generic_pathless(payload: dict[str, object]) -> str:
+    return f"Knowledge export ok={payload.get('ok')} written={len(payload.get('written', []))}"
 
 
 if __name__ == "__main__":
