@@ -9,6 +9,7 @@ import json
 REQUIRED_FILES = [
     "docs/roadmaps/seos_future_resilience_master_plan_v1.md",
     "docs/architecture/seos_knowledge_layer_v1.md",
+    "docs/architecture/seos_agent_intake_boundary_v1.md",
     "docs/runbooks/knowledge_control_vault_v1.md",
     "docs/reports/knowledge_layer_delivery_v1.md",
     "kernel/knowledge/object_model.py",
@@ -19,8 +20,13 @@ REQUIRED_FILES = [
     "kernel/knowledge/adapters/logseq.py",
     "kernel/knowledge/adapters/anytype.py",
     "kernel/knowledge/adapters/notion.py",
+    "kernel/agent_intake/boundary.py",
+    "kernel/agent_intake/proposals.py",
+    "kernel/agent_intake/mcp_manifest.py",
+    "kernel/agent_intake/cli.py",
     "scripts/knowledge_control_vault_check_v1.py",
     "tests/tracer_bullet/test_knowledge_control_vault_v1.py",
+    "tests/tracer_bullet/test_agent_intake_boundary_v1.py",
 ]
 
 REQUIRED_TEXT = {
@@ -38,15 +44,31 @@ REQUIRED_TEXT = {
         "receipt",
         "never become an execution permit",
     ],
+    "docs/architecture/seos_agent_intake_boundary_v1.md": [
+        "SEOS_AGENT_INTAKE_BOUNDARY_READY_FOR_REVIEW",
+        "resources",
+        "tools",
+        "ACCEPTED_AS_PROPOSAL",
+        "REJECTED_BY_AGENT_BOUNDARY",
+    ],
     "docs/reports/knowledge_layer_delivery_v1.md": [
-        "SEOS_KNOWLEDGE_LAYER_P0_OBSIDIAN_READY_FOR_REVIEW",
+        "SEOS_KNOWLEDGE_AND_AGENT_INTAKE_READY_FOR_REVIEW",
         "Obsidian-compatible",
         "Logseq",
         "Anytype",
         "Notion",
+        "MCP-inspired manifest",
     ],
-    "pyproject.toml": ["seos-knowledge = \"kernel.knowledge.cli:main\""],
-    "seos.py": ["sys.argv[1] == \"knowledge\"", "kernel.knowledge.cli"],
+    "pyproject.toml": [
+        "seos-agent = \"kernel.agent_intake.cli:main\"",
+        "seos-knowledge = \"kernel.knowledge.cli:main\"",
+    ],
+    "seos.py": [
+        "sys.argv[1] == \"agent\"",
+        "sys.argv[1] == \"knowledge\"",
+        "kernel.agent_intake.cli",
+        "kernel.knowledge.cli",
+    ],
 }
 
 FORBIDDEN_TEXT = {
@@ -54,6 +76,11 @@ FORBIDDEN_TEXT = {
         "note becomes approval",
         "cloud tool is authority",
         "execute without approval",
+    ],
+    "docs/architecture/seos_agent_intake_boundary_v1.md": [
+        "agent request creates approval",
+        "agent request creates permit",
+        "agent request executes command",
     ],
 }
 
