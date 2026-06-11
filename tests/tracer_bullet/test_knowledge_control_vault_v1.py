@@ -97,14 +97,23 @@ class KnowledgeControlVaultV1Tests(unittest.TestCase):
             self.assertFalse((workspace / ".seos" / "tasks" / "TASK_PROPOSED.json").exists())
 
     def test_knowledge_cli_help_and_validation_script(self):
-        help_result = subprocess.run(
+        module_help = subprocess.run(
             [sys.executable, "-m", "kernel.knowledge.cli", "--help"],
             check=False,
             capture_output=True,
             text=True,
         )
-        self.assertEqual(help_result.returncode, 0, help_result.stderr)
-        self.assertIn("SEOS knowledge CLI", help_result.stdout)
+        self.assertEqual(module_help.returncode, 0, module_help.stderr)
+        self.assertIn("SEOS knowledge CLI", module_help.stdout)
+
+        seos_help = subprocess.run(
+            [sys.executable, "seos.py", "knowledge", "--help"],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(seos_help.returncode, 0, seos_help.stderr)
+        self.assertIn("SEOS knowledge CLI", seos_help.stdout)
 
         check_result = subprocess.run(
             [sys.executable, "scripts/knowledge_control_vault_check_v1.py"],
