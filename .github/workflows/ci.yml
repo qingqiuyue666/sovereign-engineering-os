@@ -52,6 +52,12 @@ jobs:
         run: python scripts/schema_compatibility_check_v1.py
       - name: Run creative pipeline total check
         run: python scripts/creative_total_check_v3.py
+      - name: Run future resilience check
+        run: python scripts/future_resilience_check_v1.py
+      - name: Run knowledge control vault tests
+        run: PYTHONDONTWRITEBYTECODE=1 python -m unittest tests.tracer_bullet.test_knowledge_control_vault_v1 -v
+      - name: Run agent intake boundary tests
+        run: PYTHONDONTWRITEBYTECODE=1 python -m unittest tests.tracer_bullet.test_agent_intake_boundary_v1 -v
       - name: Run external audit packet static check
         run: python scripts/external_audit_packet_check_v1.py
       - name: Run failure path smoke

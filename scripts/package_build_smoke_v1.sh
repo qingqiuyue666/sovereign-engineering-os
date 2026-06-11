@@ -31,6 +31,8 @@ if project.get("requires-python") != ">=3.13":
 scripts = project.get("scripts", {})
 expected_scripts = {
     "seos": "apps.operator_cli.main:main",
+    "seos-agent": "kernel.agent_intake.cli:main",
+    "seos-knowledge": "kernel.knowledge.cli:main",
     "seos-local": "kernel.personal_ai.local_mvp_cli:main",
 }
 if scripts != expected_scripts:
@@ -51,7 +53,11 @@ PY
 (
   cd "$REPO_ROOT"
   python3 seos.py --help >/dev/null
+  python3 seos.py agent --help >/dev/null
+  python3 seos.py knowledge --help >/dev/null
   python3 -m apps.operator_cli.main --help >/dev/null
+  python3 -m kernel.agent_intake.cli --help >/dev/null
+  python3 -m kernel.knowledge.cli --help >/dev/null
 )
 
 echo "package_build_smoke_v1: PASS"
