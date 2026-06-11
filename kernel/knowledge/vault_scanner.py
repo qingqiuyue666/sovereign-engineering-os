@@ -38,8 +38,11 @@ def scan_control_vault(vault: str | Path, *, public: bool = True) -> dict[str, o
             problems.append({"path_ref": rel, "problem": "invalid_frontmatter", "message": str(exc)})
             frontmatter = {"authority": "invalid"}
         authority = str(frontmatter.get("authority") or "proposal")
+        execution_claim = bool(frontmatter.get("execution_authority_granted", False))
         if authority not in _ALLOWED_AUTHORITIES:
             problems.append({"path_ref": rel, "problem": "invalid_authority", "authority": authority})
+        if execution_claim:
+            problems.append({"path_ref": rel, "problem": "knowledge_note_claims_execution_authority"})
         if scan.clean is False:
             problems.append({"path_ref": rel, "problem": "sensitive_content_detected", "finding_kinds": sorted({item.kind for item in scan.findings})})
         notes.append(
@@ -51,7 +54,8 @@ def scan_control_vault(vault: str | Path, *, public: bool = True) -> dict[str, o
                 "authority": authority,
                 "public": frontmatter.get("public"),
                 "local_path_redacted": frontmatter.get("local_path_redacted"),
-                "execution_authority_granted": frontmatter.get("execution_authority_granted", False),
+                "execution_authority_granted": False,
+                "claimed_execution_authority": execution_claim,
                 "sensitive_content_detected": not scan.clean,
             }
         )
