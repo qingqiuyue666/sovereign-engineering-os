@@ -8,6 +8,9 @@ import json
 import tempfile
 
 from kernel.knowledge import export_workspace_to_vault, scan_control_vault, write_workspace_graph
+from kernel.knowledge.adapters.anytype import export_anytype_object_bundle
+from kernel.knowledge.adapters.logseq import export_workspace_to_logseq
+from kernel.knowledge.adapters.notion import build_notion_readonly_dashboard
 from kernel.knowledge.proposal_ingest import ingest_proposal_note
 from kernel.landing_ready import approve_task, create_task, init_workspace, run_task
 
@@ -18,6 +21,9 @@ def main() -> int:
         workspace = root / "workspace"
         vault = root / "SEOS-Control-Vault"
         graph_path = root / "reports" / "knowledge" / "seos_control_graph.json"
+        anytype_path = root / "reports" / "knowledge" / "anytype_object_bundle.json"
+        notion_path = root / "reports" / "knowledge" / "notion_readonly_dashboard.json"
+        logseq_root = root / "Logseq-SEOS"
         proposal_note = root / "proposal.md"
 
         _require(init_workspace(workspace).get("ok"), "workspace init failed")
@@ -47,6 +53,18 @@ def main() -> int:
         scan_payload = scan_control_vault(vault)
         _require(scan_payload.get("ok"), json.dumps(scan_payload.get("problems", []), sort_keys=True))
 
+        logseq_payload = export_workspace_to_logseq(workspace, logseq_root)
+        _require(logseq_payload.get("ok"), "logseq export failed")
+        _require(logseq_payload["execution_authority_granted"] is False, "logseq export changed authority")
+
+        anytype_payload = export_anytype_object_bundle(workspace, anytype_path)
+        _require(anytype_payload.get("ok"), "anytype bundle failed")
+        _require(anytype_payload["bundle"]["execution_authority_granted"] is False, "anytype bundle changed authority")
+
+        notion_payload = build_notion_readonly_dashboard(workspace, notion_path)
+        _require(notion_payload.get("ok"), "notion dashboard failed")
+        _require(notion_payload["dashboard"]["network_call_performed"] is False, "notion builder performed network call")
+
         proposal_note.write_text(
             "---\n"
             "seos_type: \"task\"\n"
@@ -70,6 +88,9 @@ def main() -> int:
                     "vault_note_count": scan_payload["note_count"],
                     "graph_node_count": graph_payload["graph"]["node_count"],
                     "graph_edge_count": graph_payload["graph"]["edge_count"],
+                    "logseq_written": len(logseq_payload["written"]),
+                    "anytype_object_count": anytype_payload["bundle"]["object_count"],
+                    "notion_task_count": notion_payload["dashboard"]["task_count"],
                 },
                 indent=2,
                 sort_keys=True,
