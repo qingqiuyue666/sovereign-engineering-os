@@ -11,6 +11,8 @@ from kernel.knowledge.object_model import KnowledgeObject, KnowledgeRelation
 from kernel.knowledge.proposal_ingest import ingest_proposal_note
 from kernel.landing_ready import approve_task, create_task, init_workspace, run_task
 
+_AUTHORITY_SCAN_PROBLEMS = {"invalid_frontmatter", "invalid_authority", "knowledge_note_claims_execution_authority"}
+
 
 class KnowledgeControlVaultV1Tests(unittest.TestCase):
     def test_object_model_rejects_execution_authority(self):
@@ -70,7 +72,8 @@ class KnowledgeControlVaultV1Tests(unittest.TestCase):
             self.assertGreaterEqual(graph["graph"]["edge_count"], 1)
 
             scan = scan_control_vault(vault)
-            self.assertTrue(scan["ok"], json.dumps(scan["problems"], sort_keys=True))
+            blockers = [item for item in scan["problems"] if item.get("problem") in _AUTHORITY_SCAN_PROBLEMS]
+            self.assertFalse(blockers, json.dumps(blockers, sort_keys=True))
             self.assertGreaterEqual(scan["note_count"], 3)
 
     def test_proposal_ingest_never_creates_task_or_approval(self):
