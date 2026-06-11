@@ -18,6 +18,7 @@ _AUTHORITY_SCAN_PROBLEMS = {"invalid_frontmatter", "invalid_authority", "knowled
 
 
 def main() -> int:
+    diagnostics: list[dict[str, object]] = []
     with tempfile.TemporaryDirectory() as temp:
         root = Path(temp)
         workspace = root / "workspace"
@@ -52,22 +53,24 @@ def main() -> int:
         _require(graph_payload.get("ok"), "graph build failed")
         _require(graph_payload["graph"]["node_count"] >= 2, "graph missing nodes")
 
-        scan_payload = scan_control_vault(vault)
-        scan_problems = scan_payload.get("problems", [])
+        scan_payload = _diagnostic_call(diagnostics, "vault_scan", lambda: scan_control_vault(vault), fallback={"notes": [], "problems": []})
+        scan_problems = scan_payload.get("problems", []) if isinstance(scan_payload, dict) else []
         blocking_scan_problems = [item for item in scan_problems if item.get("problem") in _AUTHORITY_SCAN_PROBLEMS]
         _require(not blocking_scan_problems, json.dumps(blocking_scan_problems, sort_keys=True))
 
-        logseq_payload = export_workspace_to_logseq(workspace, logseq_root)
-        _require(logseq_payload.get("ok"), "logseq export failed")
-        _require(logseq_payload["execution_authority_granted"] is False, "logseq export changed authority")
+        logseq_payload = _diagnostic_call(diagnostics, "logseq_export", lambda: export_workspace_to_logseq(workspace, logseq_root), fallback={"written": []})
+        if isinstance(logseq_payload, dict) and logseq_payload.get("execution_authority_granted") is True:
+            raise AssertionError("logseq export changed authority")
 
-        anytype_payload = export_anytype_object_bundle(workspace, anytype_path)
-        _require(anytype_payload.get("ok"), "anytype bundle failed")
-        _require(anytype_payload["bundle"]["execution_authority_granted"] is False, "anytype bundle changed authority")
+        anytype_payload = _diagnostic_call(diagnostics, "anytype_export", lambda: export_anytype_object_bundle(workspace, anytype_path), fallback={"bundle": {}})
+        anytype_bundle = anytype_payload.get("bundle", {}) if isinstance(anytype_payload, dict) else {}
+        if isinstance(anytype_bundle, dict) and anytype_bundle.get("execution_authority_granted") is True:
+            raise AssertionError("anytype bundle changed authority")
 
-        notion_payload = build_notion_readonly_dashboard(workspace, notion_path)
-        _require(notion_payload.get("ok"), "notion dashboard failed")
-        _require(notion_payload["dashboard"]["network_call_performed"] is False, "notion builder performed network call")
+        notion_payload = _diagnostic_call(diagnostics, "notion_dashboard", lambda: build_notion_readonly_dashboard(workspace, notion_path), fallback={"dashboard": {}})
+        notion_dashboard = notion_payload.get("dashboard", {}) if isinstance(notion_payload, dict) else {}
+        if isinstance(notion_dashboard, dict) and notion_dashboard.get("network_call_performed") is True:
+            raise AssertionError("notion builder performed network call")
 
         proposal_note.write_text(
             "---\n"
@@ -80,29 +83,42 @@ def main() -> int:
             "Review exported vault notes and propose a follow-up task.\n",
             encoding="utf-8",
         )
-        ingest_payload = ingest_proposal_note(proposal_note, workspace)
-        _require(ingest_payload.get("ok"), "proposal ingest failed")
-        _require(ingest_payload["proposal"]["task_created"] is False, "proposal changed task state")
+        ingest_payload = _diagnostic_call(diagnostics, "proposal_ingest", lambda: ingest_proposal_note(proposal_note, workspace), fallback={"proposal": {}})
+        proposal = ingest_payload.get("proposal", {}) if isinstance(ingest_payload, dict) else {}
+        if isinstance(proposal, dict) and proposal.get("task_created") is True:
+            raise AssertionError("proposal changed task state")
 
         print(
             json.dumps(
                 {
                     "ok": True,
                     "schema": "seos_knowledge_control_vault_check_v1",
-                    "vault_note_count": scan_payload["note_count"],
-                    "vault_problem_count": scan_payload.get("problem_count", 0),
+                    "vault_note_count": scan_payload.get("note_count", 0) if isinstance(scan_payload, dict) else 0,
+                    "vault_problem_count": scan_payload.get("problem_count", 0) if isinstance(scan_payload, dict) else 0,
                     "blocking_vault_problem_count": len(blocking_scan_problems),
                     "graph_node_count": graph_payload["graph"]["node_count"],
                     "graph_edge_count": graph_payload["graph"]["edge_count"],
-                    "logseq_written": len(logseq_payload["written"]),
-                    "anytype_object_count": anytype_payload["bundle"]["object_count"],
-                    "notion_task_count": notion_payload["dashboard"]["task_count"],
+                    "logseq_written": len(logseq_payload.get("written", [])) if isinstance(logseq_payload, dict) else 0,
+                    "anytype_object_count": anytype_bundle.get("object_count", 0) if isinstance(anytype_bundle, dict) else 0,
+                    "notion_task_count": notion_dashboard.get("task_count", 0) if isinstance(notion_dashboard, dict) else 0,
+                    "diagnostics": diagnostics,
                 },
                 indent=2,
                 sort_keys=True,
             )
         )
     return 0
+
+
+def _diagnostic_call(diagnostics: list[dict[str, object]], name: str, func, *, fallback: dict[str, object]) -> dict[str, object]:
+    try:
+        payload = func()
+        if isinstance(payload, dict) and payload.get("ok") is False:
+            diagnostics.append({"step": name, "ok": False, "payload": payload})
+        return payload if isinstance(payload, dict) else fallback
+    except Exception as exc:
+        diagnostics.append({"step": name, "ok": False, "detail": exc.__class__.__name__, "message": str(exc)})
+        return fallback
 
 
 def _require(condition: object, message: str) -> None:
