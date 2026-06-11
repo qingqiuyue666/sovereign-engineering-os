@@ -6,8 +6,7 @@ from pathlib import Path
 from typing import Iterable
 
 from kernel.knowledge.frontmatter import split_frontmatter
-from kernel.knowledge.redaction import digest_text, public_path_ref
-from kernel.security.secret_scanner import CoreSecretScanner
+from kernel.knowledge.redaction import digest_text, public_path_ref, scan_knowledge_text
 
 __all__ = ["scan_control_vault"]
 
@@ -27,11 +26,10 @@ def scan_control_vault(vault: str | Path, *, public: bool = True) -> dict[str, o
         return {"ok": False, "error": "vault_not_found", "vault": root.as_posix()}
     notes: list[dict[str, object]] = []
     problems: list[dict[str, object]] = []
-    scanner = CoreSecretScanner()
     for path in _iter_markdown(root):
         rel = public_path_ref(path, root=root) if public else path.as_posix()
         text = path.read_text(encoding="utf-8", errors="replace")
-        scan = scanner.scan_text(text, path=rel)
+        scan = scan_knowledge_text(text, path=rel)
         try:
             frontmatter, _body = split_frontmatter(text)
         except ValueError as exc:
