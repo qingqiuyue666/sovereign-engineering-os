@@ -48,7 +48,9 @@ def build_workspace_graph(workspace: str | Path, *, public: bool = True) -> dict
             local_path_redacted=public,
         )
         nodes.append(task_object.as_dict(include_digest=True))
-        for evidence_ref in task.get("evidence_refs", []) if isinstance(task.get("evidence_refs", []), list) else []:
+        raw_evidence_refs = task.get("evidence_refs", [])
+        evidence_refs = raw_evidence_refs if isinstance(raw_evidence_refs, list) else []
+        for evidence_ref in evidence_refs:
             evidence_id = safe_id(f"{task_id}:{evidence_ref}", fallback=f"{task_id}:evidence")
             edges.append(_edge("seos.task", task_id, "has_evidence_ref", "seos.evidence_ref", evidence_id))
             nodes.append(
