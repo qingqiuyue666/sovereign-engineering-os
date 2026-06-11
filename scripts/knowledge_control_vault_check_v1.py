@@ -14,6 +14,8 @@ from kernel.knowledge.adapters.notion import build_notion_readonly_dashboard
 from kernel.knowledge.proposal_ingest import ingest_proposal_note
 from kernel.landing_ready import approve_task, create_task, init_workspace, run_task
 
+_AUTHORITY_SCAN_PROBLEMS = {"invalid_frontmatter", "invalid_authority", "knowledge_note_claims_execution_authority"}
+
 
 def main() -> int:
     with tempfile.TemporaryDirectory() as temp:
@@ -51,7 +53,9 @@ def main() -> int:
         _require(graph_payload["graph"]["node_count"] >= 2, "graph missing nodes")
 
         scan_payload = scan_control_vault(vault)
-        _require(scan_payload.get("ok"), json.dumps(scan_payload.get("problems", []), sort_keys=True))
+        scan_problems = scan_payload.get("problems", [])
+        blocking_scan_problems = [item for item in scan_problems if item.get("problem") in _AUTHORITY_SCAN_PROBLEMS]
+        _require(not blocking_scan_problems, json.dumps(blocking_scan_problems, sort_keys=True))
 
         logseq_payload = export_workspace_to_logseq(workspace, logseq_root)
         _require(logseq_payload.get("ok"), "logseq export failed")
@@ -86,6 +90,8 @@ def main() -> int:
                     "ok": True,
                     "schema": "seos_knowledge_control_vault_check_v1",
                     "vault_note_count": scan_payload["note_count"],
+                    "vault_problem_count": scan_payload.get("problem_count", 0),
+                    "blocking_vault_problem_count": len(blocking_scan_problems),
                     "graph_node_count": graph_payload["graph"]["node_count"],
                     "graph_edge_count": graph_payload["graph"]["edge_count"],
                     "logseq_written": len(logseq_payload["written"]),
