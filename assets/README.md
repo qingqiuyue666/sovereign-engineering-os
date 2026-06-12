@@ -51,3 +51,7 @@ post-delivery review:
 
 These updates require real delivery evidence and remain `EVIDENCE_PENDING`
 until an accepted client delivery occurs.
+
+Milestone 5 routes case material and registry updates through
+`delivery-loops/case-study-capture-template.md` and
+`delivery-loops/final-handoff-template.md`.

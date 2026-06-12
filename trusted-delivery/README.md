@@ -41,3 +41,7 @@ The first wedge delivery process is specified in
 human approval for high-risk and external claims, executor/auditor
 separation when risk is material, rollback/remediation records, audit logs,
 failure records, client handoff, and post-delivery review.
+
+Milestone 5 adds the first complete delivery loop in `delivery-loops/`,
+which should be used only after a real buyer accepts scope and evidence
+access.

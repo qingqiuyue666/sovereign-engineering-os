@@ -30,6 +30,9 @@ that should not be forced in this pass.
 - Added real-world validation kit templates and policies for target lists,
   outreach, discovery, objections, pricing feedback, close/loss review,
   paid-signal criteria, market-proof rules, and no-fake-traction controls.
+- Added first delivery loop templates for intake, current state, risk,
+  governance gaps, recommendations, evidence, ROI/risk reduction, final
+  handoff, and case-study/asset capture.
 
 ## Deferred Fixes
 
@@ -45,6 +48,7 @@ that should not be forced in this pass.
 | Validate first wedge with buyers | Requires outreach and discovery | Use `first-wedge/` pack and record outcomes in Milestone 4 validation logs |
 | Prove trusted delivery | Requires a real accepted delivery | Use the Milestone 3 playbook on the first real audit and record evidence |
 | Fill validation records | Requires human outreach | Execute the first 10 conversation plan and update validation logs |
+| Execute first delivery loop | Requires accepted buyer scope | Use `delivery-loops/first-ai-production-governance-audit-loop.md` after paid or high-commitment signal |
 | Full `make ci` | Current pass intentionally leaves a dirty worktree and `make ci` includes diff checking | Run after review/staging or in clean CI |
 
 ## Approval Needed

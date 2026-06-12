@@ -103,3 +103,10 @@ Use `validation/` before treating the wedge as proven. The required next
 step is to build a target list, track outreach, capture discovery notes,
 record objections and pricing feedback, and apply the paid-signal and
 market-proof rules before changing any real-world status.
+
+## Delivery Loop
+
+Use `delivery-loops/first-ai-production-governance-audit-loop.md` after a
+buyer accepts a real audit scope. The loop turns intake, current-state
+mapping, risk mapping, governance gaps, recommendations, evidence, handoff,
+case capture, and asset updates into one controlled delivery path.

@@ -44,3 +44,8 @@ Milestone 3 adds `first-wedge/evidence-package-template.md`,
 `first-wedge/audit-log-template.md`, and `first-wedge/client-handoff-template.md`
 so proof assets can be reviewed before any buyer-facing or public claim is
 made.
+
+Milestone 5 adds `delivery-loops/evidence-matrix-template.md`,
+`delivery-loops/roi-and-risk-reduction-template.md`, and
+`delivery-loops/case-study-capture-template.md`. These templates prepare
+proof capture but do not create proof without real delivery evidence.

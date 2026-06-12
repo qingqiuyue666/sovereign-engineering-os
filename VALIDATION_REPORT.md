@@ -170,6 +170,25 @@ Milestone 4 focused validation passed:
 `python3 scripts/observation_check_v1.py`,
 `python3 scripts/creative_total_check_v3.py`, and `git diff --check`.
 
+## Milestone 5 First Delivery Loop Template
+
+Status label: `FIRST_DELIVERY_LOOP_TEMPLATE_READY`.
+
+Repository status: `EXECUTION_KIT_READY`. The repository now contains a
+first real-project loop for the AI Production Governance Readiness Audit,
+including client intake, current-state map, risk map, governance gap map,
+recommendation report, evidence matrix, ROI/risk-reduction hypothesis, final
+handoff, and case-study capture.
+
+Real-world status remains `REAL_DELIVERY_PENDING`. The loop is ready to use
+when a buyer accepts scope, but no actual delivery, case study, ROI, or proof
+asset is claimed.
+
+Milestone 5 focused validation passed:
+`python3 scripts/identity_boundary_check_v1.py`,
+`python3 scripts/observation_check_v1.py`,
+`python3 scripts/creative_total_check_v3.py`, and `git diff --check`.
+
 ## What Should Be Executed Next
 
 - Run discovery for AI Engineering Production Governance.
