@@ -39,6 +39,8 @@ comps/
 ComfyUI/input/
 ComfyUI/output/
 reports/creative/private/*.local.*
+reports/creative/production_spine_v1/asset_scan.json
+reports/creative/production_spine_v1/production_dashboard.json
 *.blend
 *.hip
 *.hiplc
