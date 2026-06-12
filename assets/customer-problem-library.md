@@ -32,3 +32,14 @@
     - Attach real delivery records, buyer objections, pricing outcomes, acceptance results, and failure records.
     - Convert repeated decisions into scorecards, policy gates, schemas, tests, and evidence packages.
     - Promote only after proof exists for the maturity stage being claimed.
+
+## Problem Entry Template
+
+| Date | Segment | Buyer Role | Problem | Trigger | Budget Source | Evidence | Offer Implication |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+|  |  |  |  |  |  | discovery / delivery / loss / win |  |
+
+## Problem Rule
+
+A customer problem is stronger when it appears across multiple buyers with a
+named trigger and budget path. One anecdote remains a hypothesis.

@@ -32,3 +32,15 @@
     - Attach real delivery records, buyer objections, pricing outcomes, acceptance results, and failure records.
     - Convert repeated decisions into scorecards, policy gates, schemas, tests, and evidence packages.
     - Promote only after proof exists for the maturity stage being claimed.
+
+## Failure Entry Template
+
+| Date | Project | Failure | Cause | Impact | Detection | Prevention Rule | Asset Updated |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+|  |  |  |  |  |  |  |  |
+
+## Failure Rule
+
+A failure becomes leverage only when it changes a rule, gate, template,
+scope boundary, rejection rule, or evidence requirement. Do not hide failures
+inside successful delivery summaries.

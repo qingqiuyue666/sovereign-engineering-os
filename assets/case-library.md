@@ -32,3 +32,15 @@
     - Attach real delivery records, buyer objections, pricing outcomes, acceptance results, and failure records.
     - Convert repeated decisions into scorecards, policy gates, schemas, tests, and evidence packages.
     - Promote only after proof exists for the maturity stage being claimed.
+
+## Case Entry Template
+
+| Date | Segment | Trigger | Workflow | Intervention | Acceptance | Permission | Limitation |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+|  |  |  |  |  | accepted / incomplete / rejected | internal / redacted / public / denied |  |
+
+## Case Rule
+
+A delivery becomes a case only after handoff, acceptance status, evidence,
+redaction, and permission are recorded. No case entry may imply customer
+success, ROI, certification, or market proof beyond the actual record.

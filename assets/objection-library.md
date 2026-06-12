@@ -32,3 +32,15 @@
     - Attach real delivery records, buyer objections, pricing outcomes, acceptance results, and failure records.
     - Convert repeated decisions into scorecards, policy gates, schemas, tests, and evidence packages.
     - Promote only after proof exists for the maturity stage being claimed.
+
+## Objection Entry Template
+
+| Date | Segment | Buyer Role | Objection | Category | Outcome | Update Made |
+| --- | --- | --- | --- | --- | --- | --- |
+|  |  |  |  | budget / trigger / trust / scope / evidence / timing / safety | won / lost / no decision / rejected |  |
+
+## Objection-To-Offer Rule
+
+Repeated objections should change one of: pricing, service-page language,
+discovery questions, rejection rules, delivery scope, or proof requirements.
+Do not answer objections by overstating evidence.

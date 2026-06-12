@@ -35,3 +35,10 @@ Status label: `FIRST_DELIVERY_LOOP_TEMPLATE_READY`.
 
 A delivery loop template is not a completed delivery, proof asset, case
 study, ROI record, or customer adoption claim.
+
+## Asset Conversion
+
+After each real loop, apply `assets/delivery-to-asset-conversion-rules.md`.
+The loop should produce at least one create/update/reject/defer decision for
+case, failure, problem, objection, pricing, benchmark, ROI, tool reliability,
+template reuse, or standardization candidate records.

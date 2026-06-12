@@ -189,6 +189,24 @@ Milestone 5 focused validation passed:
 `python3 scripts/observation_check_v1.py`,
 `python3 scripts/creative_total_check_v3.py`, and `git diff --check`.
 
+## Milestone 6 Asset Compounding System
+
+Status label: `ASSET_COMPOUNDING_SYSTEM_READY`.
+
+Repository status: `EXECUTION_KIT_READY`. The asset layer now defines how
+deliveries become cases, failures become rules, objections change pricing and
+service-page language, repeated patterns become SOPs, repeated SOPs become
+standards, and standards may later support certification, protocol, credit,
+rights, clearing, or capital-allocation gates.
+
+Real-world status remains `EVIDENCE_PENDING` because the registries contain
+templates and rules, not real delivery records.
+
+Milestone 6 focused validation passed:
+`python3 scripts/identity_boundary_check_v1.py`,
+`python3 scripts/observation_check_v1.py`,
+`python3 scripts/creative_total_check_v3.py`, and `git diff --check`.
+
 ## What Should Be Executed Next
 
 - Run discovery for AI Engineering Production Governance.

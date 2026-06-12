@@ -55,3 +55,11 @@ until an accepted client delivery occurs.
 Milestone 5 routes case material and registry updates through
 `delivery-loops/case-study-capture-template.md` and
 `delivery-loops/final-handoff-template.md`.
+
+## Milestone 6 Asset System
+
+Use `asset-compounding-doctrine.md` and
+`delivery-to-asset-conversion-rules.md` after every accepted, incomplete, or
+failed delivery. Track reuse in `template-reuse-ledger.md` and possible
+standards in `standardization-candidate-ledger.md`. No registry entry should
+be described as proof without a source, date, limitation, and evidence link.

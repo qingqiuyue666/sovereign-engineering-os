@@ -32,3 +32,14 @@
     - Attach real delivery records, buyer objections, pricing outcomes, acceptance results, and failure records.
     - Convert repeated decisions into scorecards, policy gates, schemas, tests, and evidence packages.
     - Promote only after proof exists for the maturity stage being claimed.
+
+## Pricing Entry Template
+
+| Date | Segment | Buyer Role | Scope | Price | Budget Source | Outcome | Lesson |
+| --- | --- | --- | --- | ---: | --- | --- | --- |
+|  |  |  |  |  |  | won / lost / no decision / deferred |  |
+
+## Pricing Rule
+
+Pricing is not validated until a buyer accepts, rejects, defers, or gives a
+specific objection with context. Proposed prices are hypotheses.
