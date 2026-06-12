@@ -32,3 +32,9 @@
     - Attach real delivery records, buyer objections, pricing outcomes, acceptance results, and failure records.
     - Convert repeated decisions into scorecards, policy gates, schemas, tests, and evidence packages.
     - Promote only after proof exists for the maturity stage being claimed.
+
+## Milestone 8 Gate
+
+Use `product/protocol-readiness-gates.md` before protocol language. Current
+protocol files are pre-structure and do not claim adoption, standard status,
+or ecosystem traction.

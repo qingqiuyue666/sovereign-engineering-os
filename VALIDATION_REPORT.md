@@ -225,6 +225,25 @@ Milestone 7 focused validation passed:
 `python3 scripts/observation_check_v1.py`,
 `python3 scripts/creative_total_check_v3.py`, and `git diff --check`.
 
+## Milestone 8 Productization / Deployment Roadmap
+
+Status label: `PRODUCTIZATION_ROADMAP_READY`.
+
+Repository status: `EXECUTION_KIT_READY`. The repository now defines
+evidence-gated paths for service-to-product transition, private deployment,
+SaaS, template marketplace, certification, protocol readiness,
+credit/clearing/rights readiness, and capital-allocation readiness.
+
+Real-world status remains `EVIDENCE_PENDING`. No public SaaS, private
+deployment, marketplace, certification, protocol, credit, clearing, rights,
+capital allocation, product launch, revenue, or Stage 9-16 maturity claim is
+made.
+
+Milestone 8 focused validation passed:
+`python3 scripts/identity_boundary_check_v1.py`,
+`python3 scripts/observation_check_v1.py`,
+`python3 scripts/creative_total_check_v3.py`, and `git diff --check`.
+
 ## What Should Be Executed Next
 
 - Run discovery for AI Engineering Production Governance.

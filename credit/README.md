@@ -32,3 +32,9 @@
     - Attach real delivery records, buyer objections, pricing outcomes, acceptance results, and failure records.
     - Convert repeated decisions into scorecards, policy gates, schemas, tests, and evidence packages.
     - Promote only after proof exists for the maturity stage being claimed.
+
+## Milestone 8 Gate
+
+Use `product/credit-clearing-rights-readiness-gates.md` before credit,
+clearing, or rights language. Current credit files remain placeholders and
+do not implement a ledger, clearing system, or rights market.

@@ -39,6 +39,9 @@ that should not be forced in this pass.
 - Added internal workbench app specification, AI brain routing boundaries,
   security/permission boundaries, and MVP not-now list without implementing
   a runtime.
+- Added productization and deployment roadmap gates for private deployment,
+  SaaS, templates, certification, protocol, credit/clearing/rights, and
+  capital allocation.
 
 ## Deferred Fixes
 
@@ -57,6 +60,7 @@ that should not be forced in this pass.
 | Execute first delivery loop | Requires accepted buyer scope | Use `delivery-loops/first-ai-production-governance-audit-loop.md` after paid or high-commitment signal |
 | Populate asset registries | Requires real delivery records | Apply `assets/delivery-to-asset-conversion-rules.md` after each delivery |
 | Implement internal workbench | Requires repeated workflow patterns or explicit approval | Keep as `APP_IMPLEMENTATION_PENDING` until evidence supports build |
+| Productize beyond service | Requires repeated paid delivery evidence | Follow `product/service-to-product-transition-rules.md` and `product/do-not-productize-yet.md` |
 | Full `make ci` | Current pass intentionally leaves a dirty worktree and `make ci` includes diff checking | Run after review/staging or in clean CI |
 
 ## Approval Needed
