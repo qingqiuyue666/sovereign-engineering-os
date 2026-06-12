@@ -322,6 +322,23 @@ portal/lightning, asset-library, and editorial handoff workflows and keeps
 future development tied to workflow blockers, pressure findings, hardening
 actions, or real project needs.
 
+Run the complete read-only production inspection spine:
+
+```bash
+python3 seos.py production inspect \
+  --root tests/fixtures/creative/assets \
+  --doctor-json tests/fixtures/creative/software_discovery/local_tool_health_doctor_fixture_v1.json \
+  --output-dir reports/creative/production_spine_v1 \
+  --json
+```
+
+This single command writes the asset scan, production dashboard, tool health,
+optional adapter contracts, shot plan, pressure test, hardening plan, works
+operation report, action list, knowledge graph, and an Obsidian-compatible
+Markdown vault. The vault and graph are mirrors only. The command does not
+launch DCC tools, move assets, call cloud services, create approvals or
+permits, or grant execution authority.
+
 The creative pipeline defaults to read-only scans, dry-run adapter plans,
 fixture demos, and public/private separation. Real DCC execution, paid assets,
 and external adoption signals require real local evidence or verified external
