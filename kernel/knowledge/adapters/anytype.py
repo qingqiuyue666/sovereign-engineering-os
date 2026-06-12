@@ -14,7 +14,7 @@ from kernel.knowledge.graph import build_workspace_graph
 from kernel.knowledge.object_model import digest_payload, now_utc
 from kernel.knowledge.redaction import public_path_ref
 
-__all__ = ["export_anytype_object_bundle"]
+__all__ = ["export_anytype_object_bundle", "import_anytype_object_bundle"]
 
 
 def export_anytype_object_bundle(workspace: str | Path, output: str | Path, *, public: bool = True) -> dict[str, object]:
@@ -55,3 +55,72 @@ def export_anytype_object_bundle(workspace: str | Path, output: str | Path, *, p
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(json.dumps(bundle, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return {"ok": True, "bundle": bundle, "path": output_path.as_posix()}
+
+
+def import_anytype_object_bundle(source: str | Path, output: str | Path, *, public: bool = True) -> dict[str, object]:
+    """Validate a neutral Anytype-style object bundle as non-authority intent.
+
+    Import means "record a reviewable object-model proposal." It never creates
+    SEOS tasks, approvals, permits, receipts, or execution authority.
+    """
+
+    source_path = Path(source).expanduser().resolve()
+    output_path = Path(output)
+    try:
+        bundle = json.loads(source_path.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        return {"ok": False, "error": "anytype_bundle_not_found", "path": source_path.as_posix()}
+    except json.JSONDecodeError as exc:
+        return {"ok": False, "error": "anytype_bundle_invalid_json", "message": str(exc)}
+
+    objects = bundle.get("objects", [])
+    relations = bundle.get("relations", [])
+    problems: list[str] = []
+    if not isinstance(objects, list):
+        problems.append("objects_must_be_list")
+        objects = []
+    if not isinstance(relations, list):
+        problems.append("relations_must_be_list")
+        relations = []
+    for index, item in enumerate(objects):
+        if not isinstance(item, dict):
+            problems.append(f"object_{index}_must_be_object")
+            continue
+        if item.get("execution_authority_granted") is True:
+            problems.append(f"object_{index}_claims_execution_authority")
+        if item.get("authority") not in {None, "proposal", "mirror", "receipt", "invalid"}:
+            problems.append(f"object_{index}_invalid_authority")
+
+    record = {
+        "schema": "seos_anytype_import_record_v1",
+        "created_at": now_utc(),
+        "source_ref": public_path_ref(source_path) if public else source_path.as_posix(),
+        "source_digest": digest_payload(bundle),
+        "public": public,
+        "authority": "proposal",
+        "accepted_as": "object_model_proposal_only",
+        "execution_authority_granted": False,
+        "task_created": False,
+        "approval_created": False,
+        "permit_created": False,
+        "network_call_performed": False,
+        "object_count": len(objects),
+        "relation_count": len(relations),
+        "problems": problems,
+        "objects": [
+            {
+                "object_type": item.get("object_type"),
+                "object_id": item.get("object_id"),
+                "name": item.get("name"),
+                "authority": item.get("authority", "proposal"),
+                "digest": item.get("digest") or digest_payload(item),
+                "execution_authority_granted": False,
+            }
+            for item in objects
+            if isinstance(item, dict)
+        ],
+    }
+    record["digest"] = digest_payload(record)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(json.dumps(record, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return {"ok": not problems, "record": record, "path": output_path.as_posix()}

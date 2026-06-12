@@ -101,7 +101,21 @@ Recommended order:
 1. Obsidian-compatible Markdown vault
 2. Logseq Markdown/Org journal adapter
 3. Anytype object export/import adapter, without source or license coupling
-4. Notion read-only public/team mirror
+4. Notion read-only public/team mirror payload
 
 The order keeps local-first control and avoids making cloud collaboration tools
 part of the execution chain.
+
+## Adapter Commands
+
+```bash
+python3 seos.py knowledge export-logseq --workspace .seos-workspace --root ~/Logseq-SEOS --json
+python3 seos.py knowledge export-anytype --workspace .seos-workspace --output reports/knowledge/anytype_object_bundle.json --json
+python3 seos.py knowledge import-anytype --source reports/knowledge/anytype_object_bundle.json --output reports/knowledge/anytype_import_record.json --json
+python3 seos.py knowledge sync-notion --mode readonly --source reports/knowledge/anytype_import_record.json --output reports/knowledge/notion_readonly_sync_payload.json --json
+```
+
+The Logseq adapter writes Markdown pages and journals. The Anytype adapter uses
+a neutral object bundle and import record, not Anytype source code. The Notion
+adapter writes a local readonly payload only; it performs no network call and
+requires no credential.

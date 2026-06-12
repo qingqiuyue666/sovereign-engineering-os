@@ -335,9 +335,22 @@ python3 seos.py production inspect \
 This single command writes the asset scan, production dashboard, tool health,
 optional adapter contracts, shot plan, pressure test, hardening plan, works
 operation report, action list, knowledge graph, and an Obsidian-compatible
-Markdown vault. The vault and graph are mirrors only. The command does not
-launch DCC tools, move assets, call cloud services, create approvals or
-permits, or grant execution authority.
+Markdown vault. The vault notes use the same SEOS knowledge frontmatter schema
+as `seos.py knowledge` exports. The vault and graph are mirrors only. The
+command does not launch DCC tools, move assets, call cloud services, create
+approvals or permits, or grant execution authority.
+
+Knowledge-layer adapters:
+
+```bash
+python3 seos.py knowledge export-logseq --workspace .seos-workspace --root ~/Logseq-SEOS --json
+python3 seos.py knowledge export-anytype --workspace .seos-workspace --output reports/knowledge/anytype_object_bundle.json --json
+python3 seos.py knowledge import-anytype --source reports/knowledge/anytype_object_bundle.json --output reports/knowledge/anytype_import_record.json --json
+python3 seos.py knowledge sync-notion --mode readonly --source reports/knowledge/anytype_import_record.json --output reports/knowledge/notion_readonly_sync_payload.json --json
+```
+
+These adapters create local mirror/proposal artifacts only. They do not turn
+Obsidian, Logseq, Anytype, or Notion into SEOS execution or authority layers.
 
 The creative pipeline defaults to read-only scans, dry-run adapter plans,
 fixture demos, and public/private separation. Real DCC execution, paid assets,

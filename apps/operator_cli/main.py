@@ -79,6 +79,7 @@ Commands:
   pattern report
   dogfood run
   ai bundle|repo-map|token-roi
+  knowledge init|export-workspace|export-task|graph|scan|ingest-proposal|export-logseq|export-anytype|import-anytype|notion-dashboard|sync-notion
   production inspect
   creative init|scan-assets|search-assets|pressure-test|hardening-plan|works-operation|archive-check|asset|shot|adapter|comfyui|blender|houdini|evidence|dashboard|production-dashboard|tool-health-dashboard|houdini-smoke|comfyui-smoke|optional-adapter-contracts|doctor|launch-check|health|adoption-status
 """
@@ -146,6 +147,10 @@ def main(argv: list[str] | None = None) -> int:
             return _dogfood(args[1:])
         if command == "ai":
             return _ai(args[1:])
+        if command == "knowledge":
+            from kernel.knowledge.cli import main as knowledge_main
+
+            return knowledge_main(args[1:])
         if command == "production":
             return _production(args[1:])
         if command == "creative":

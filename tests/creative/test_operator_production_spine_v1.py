@@ -71,8 +71,9 @@ class OperatorProductionSpineV1Tests(unittest.TestCase):
             vault_index = output_dir / "obsidian_vault/00_Index.md"
             self.assertTrue(vault_index.exists())
             vault_text = vault_index.read_text(encoding="utf-8")
-            self.assertIn("authority: mirror", vault_text)
-            self.assertIn("execution_authority: false", vault_text)
+            self.assertIn('authority: "mirror"', vault_text)
+            self.assertIn("schema: \"seos_knowledge_object_v1\"", vault_text)
+            self.assertIn("execution_authority_granted: false", vault_text)
             self.assertIn("approval_or_permit_created: false", vault_text)
             self.assertTrue((output_dir / "manifest.json").exists())
             self.assertTrue((output_dir / "manifest.md").exists())

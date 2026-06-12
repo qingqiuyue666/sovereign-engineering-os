@@ -31,6 +31,7 @@ python3 seos.py knowledge export-workspace --workspace .seos-workspace --vault ~
 python3 seos.py knowledge scan --vault ~/SEOS-Control-Vault --json
 ```
 
-Templates in `templates/` document the expected Markdown frontmatter shape. The
-actual exporter is implemented in `kernel/knowledge/vault.py` so the integration
-stays local-first and dependency-free.
+Templates in `templates/` document the expected Markdown frontmatter shape for
+task, approval, permit, evidence, asset, shot, and release notes. The actual
+exporter is implemented in `kernel/knowledge/vault.py` so the integration stays
+local-first and dependency-free.

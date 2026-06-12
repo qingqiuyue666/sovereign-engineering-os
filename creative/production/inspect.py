@@ -16,6 +16,8 @@ from creative.pressure.real_project import build_real_project_pressure_test
 from creative.reports.local_production_dashboard import build_local_production_dashboard
 from creative.reports.local_tool_health_dashboard import build_local_tool_health_dashboard
 from creative.shots.shot_planner import build_shot_plan
+from kernel.knowledge.frontmatter import dump_frontmatter
+from kernel.knowledge.object_model import digest_payload
 
 SPINE_ID: Final[str] = "operator-production-spine-v1"
 DEFAULT_OUTPUT_DIR: Final[Path] = Path("reports/creative/production_spine_v1")
@@ -824,18 +826,20 @@ def _safety_summary() -> dict[str, bool]:
 
 
 def _frontmatter(run_id: str) -> str:
-    return "\n".join(
-        [
-            "---",
-            "seos_type: production_inspection_mirror",
-            f"seos_id: {run_id}",
-            "authority: mirror",
-            "execution_authority: false",
-            "approval_or_permit_created: false",
-            "public: true",
-            "---",
-            "",
-        ]
+    return dump_frontmatter(
+        {
+            "schema": "seos_knowledge_object_v1",
+            "seos_type": "production_inspection_mirror",
+            "seos_id": run_id,
+            "title": "SEOS production spine mirror",
+            "authority": "mirror",
+            "source": "seos",
+            "digest": digest_payload({"spine_id": SPINE_ID, "run_id": run_id}),
+            "public": True,
+            "local_path_redacted": True,
+            "execution_authority_granted": False,
+            "approval_or_permit_created": False,
+        }
     )
 
 
