@@ -6,9 +6,9 @@ from pathlib import Path
 import json
 import sys
 
-from kernel.knowledge.adapters.anytype import export_anytype_object_bundle
+from kernel.knowledge.adapters.anytype import export_anytype_object_bundle, import_anytype_object_bundle
 from kernel.knowledge.adapters.logseq import export_workspace_to_logseq
-from kernel.knowledge.adapters.notion import build_notion_readonly_dashboard
+from kernel.knowledge.adapters.notion import build_notion_readonly_dashboard, build_notion_readonly_source_mirror
 from kernel.knowledge.graph import write_workspace_graph
 from kernel.knowledge.proposal_ingest import ingest_proposal_note
 from kernel.knowledge.vault import export_task_to_vault, export_workspace_to_vault, init_control_vault
@@ -27,7 +27,9 @@ Usage:
   python3 -m kernel.knowledge.cli ingest-proposal --note PATH --workspace PATH [--private]
   python3 -m kernel.knowledge.cli export-logseq --workspace PATH --root PATH [--private]
   python3 -m kernel.knowledge.cli export-anytype --workspace PATH --output PATH [--private]
+  python3 -m kernel.knowledge.cli import-anytype --source PATH --output PATH [--private]
   python3 -m kernel.knowledge.cli notion-dashboard --workspace PATH --output PATH [--private]
+  python3 -m kernel.knowledge.cli sync-notion --mode readonly (--workspace PATH|--source PATH) --output PATH [--private]
 
 Authority boundary:
   Knowledge artifacts are proposal/mirror/receipt summaries only. They do not
@@ -59,8 +61,12 @@ def main(argv: list[str] | None = None) -> int:
             return _export_logseq(rest)
         if command == "export-anytype":
             return _export_anytype(rest)
+        if command == "import-anytype":
+            return _import_anytype(rest)
         if command == "notion-dashboard":
             return _notion_dashboard(rest)
+        if command == "sync-notion":
+            return _sync_notion(rest)
     except Exception as exc:
         _emit({"ok": False, "error": "knowledge_command_failed", "detail": exc.__class__.__name__, "message": str(exc)})
         return 1
@@ -163,10 +169,34 @@ def _export_anytype(args: list[str]) -> int:
     return _output(payload, _json_requested(args), _format_generic_path)
 
 
+def _import_anytype(args: list[str]) -> int:
+    source = _option(args, "--source") or _positional(args, skip_values_for={"--output", "--source"})
+    output = _option(args, "--output", "reports/knowledge/anytype_import_record.json")
+    if not source:
+        _emit({"ok": False, "error": "knowledge_import_anytype_requires_source"})
+        return 2
+    payload = import_anytype_object_bundle(source, output, public="--private" not in args)
+    return _output(payload, _json_requested(args), _format_generic_path)
+
+
 def _notion_dashboard(args: list[str]) -> int:
     workspace = _option(args, "--workspace", ".")
     output = _option(args, "--output", "reports/knowledge/notion_readonly_dashboard.json")
     payload = build_notion_readonly_dashboard(workspace, output, public="--private" not in args)
+    return _output(payload, _json_requested(args), _format_generic_path)
+
+
+def _sync_notion(args: list[str]) -> int:
+    mode = _option(args, "--mode", "readonly")
+    if mode != "readonly":
+        _emit({"ok": False, "error": "knowledge_sync_notion_readonly_mode_required"})
+        return 2
+    output = _option(args, "--output", "reports/knowledge/notion_readonly_sync_payload.json")
+    source = _option(args, "--source")
+    if source:
+        payload = build_notion_readonly_source_mirror(source, output, public="--private" not in args)
+    else:
+        payload = build_notion_readonly_dashboard(_option(args, "--workspace", "."), output, public="--private" not in args)
     return _output(payload, _json_requested(args), _format_generic_path)
 
 

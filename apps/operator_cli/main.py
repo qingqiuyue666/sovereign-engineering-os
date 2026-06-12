@@ -79,6 +79,8 @@ Commands:
   pattern report
   dogfood run
   ai bundle|repo-map|token-roi
+  knowledge init|export-workspace|export-task|graph|scan|ingest-proposal|export-logseq|export-anytype|import-anytype|notion-dashboard|sync-notion
+  production inspect
   creative init|scan-assets|search-assets|pressure-test|hardening-plan|works-operation|archive-check|asset|shot|adapter|comfyui|blender|houdini|evidence|dashboard|production-dashboard|tool-health-dashboard|houdini-smoke|comfyui-smoke|optional-adapter-contracts|doctor|launch-check|health|adoption-status
 """
 
@@ -145,6 +147,12 @@ def main(argv: list[str] | None = None) -> int:
             return _dogfood(args[1:])
         if command == "ai":
             return _ai(args[1:])
+        if command == "knowledge":
+            from kernel.knowledge.cli import main as knowledge_main
+
+            return knowledge_main(args[1:])
+        if command == "production":
+            return _production(args[1:])
         if command == "creative":
             from creative.cli import main as creative_main
 
@@ -385,6 +393,29 @@ def _ai(args: list[str]) -> int:
         return _output(payload, _json_requested(rest), _format_token_roi)
     _emit({"ok": False, "error": "unknown_ai_subcommand", "subcommand": subcommand})
     return 2
+
+
+def _production(args: list[str]) -> int:
+    if args[:1] != ["inspect"]:
+        _emit({"ok": False, "error": "production_inspect_required"})
+        return 2
+    from creative.production.inspect import build_operator_production_spine_inspection, load_doctor_report
+
+    rest = args[1:]
+    doctor_json = _option(rest, "--doctor-json")
+    payload = build_operator_production_spine_inspection(
+        asset_root=Path(_option(rest, "--root", "tests/fixtures/creative/assets")),
+        output_dir=Path(_option(rest, "--output-dir", "reports/creative/production_spine_v1")),
+        mode=_option(rest, "--mode", "public"),
+        template_name=_option(rest, "--template", "energy-impact"),
+        shot_id=_option(rest, "--shot-id", "SHOT_OPERATOR_PRODUCTION_SPINE_V1"),
+        scenario_id=_option(rest, "--scenario-id", "OPERATOR_PRODUCTION_SPINE_V1"),
+        scenario_label=_option(rest, "--scenario-label", "Operator production spine v1"),
+        doctor_report=load_doctor_report(Path(doctor_json)) if doctor_json else None,
+        max_depth=int(_option(rest, "--max-depth", "12")),
+    )
+    _emit(payload)
+    return 0 if payload.get("ok") else 1
 
 
 def _rpc(args: list[str]) -> int:
