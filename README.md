@@ -27,9 +27,9 @@ Release candidate `v0.1.0-rc3` remains an audit checkpoint. External
 recognition, external certification, customer revenue, and Stage 16
 completion are not claimed.
 
-## What SEOS Solves
+## What SEIS Solves
 
-SEIS/SEOS narrows the gap between economic strategy and trusted execution:
+SEIS narrows the gap between economic strategy and trusted execution:
 
 - it asks who controls budget, what pressure forces action, and what
   trigger can make a buyer move now
@@ -45,9 +45,9 @@ The current executable substrate remains local-first and evidence-first.
 Its creative pipeline and controlled execution components are integrated as
 proof, runtime, and failure-record assets, not as the full strategy.
 
-## What SEOS Is Not
+## What SEIS Is Not
 
-SEOS must not be interpreted as:
+SEIS must not be interpreted as:
 
 - not an OS-level sandbox
 - not RPA
@@ -61,7 +61,7 @@ SEOS must not be interpreted as:
 
 Host permissions, process isolation, credential custody, endpoint defense,
 containers, virtual machines, cloud controls, and legal authority remain
-outside the SEOS boundary.
+outside the SEIS boundary.
 
 ## Quickstart
 
@@ -165,7 +165,7 @@ acceptance record.
 
 ## Security Boundary
 
-SEOS governs strategic and engineering workflow evidence. It does not
+SEIS governs strategic and engineering workflow evidence. It does not
 reduce the authority of the host process and does not custody secrets.
 Operators must avoid placing secrets in task objectives, context bundles,
 receipts, examples, reports, or issue comments. Live AI providers remain

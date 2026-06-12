@@ -47,7 +47,10 @@ incomplete, and validated.
 - No external audit, external certification, or market adoption has been
   confirmed.
 - The first wedge is recommended but still pending discovery and paid proof.
+- No public app, internal workbench implementation, SaaS product, provider
+  integration, or live production deployment is claimed by this assembly.
 - Stage 9-16 structures are pre-structure only.
+- Stage 16 remains a compass and has not been completed.
 - Real protocol, rights, clearing, credit, and capital allocation systems
   require repeated delivery evidence before implementation.
 
@@ -70,6 +73,35 @@ incomplete, and validated.
 - `git diff --check` passed.
 - SEIS section check passed for 124 new strategic/policy docs.
 - Claim-safety scan passed for 129 SEIS docs.
+
+## Milestone 1 Hardening
+
+Status label: `SEIS_V1_HARDENED`.
+
+Repository status: `SCAFFOLD_COMPLETE`. The current SEIS v1 assembly is
+ready for review as repository strategy, policy, templates, and validation
+reports. Real-world status remains `MARKET_PROOF_PENDING` and
+`EVIDENCE_PENDING`.
+
+Boundaries verified:
+
+- Current-facing root naming uses `SEIS`; `SEOS` is retained only for
+  earlier-line or legacy/runtime context.
+- `scripts/identity_boundary_check_v1.py` now validates the current SEIS
+  headings while continuing to block unsupported capability claims for both
+  SEIS and legacy SEOS wording.
+- Scaffold completion is not market proof, paid traction, external
+  certification, customer adoption, or revenue.
+- External audit remains pending.
+- App/workbench and product/SaaS implementation remain unbuilt.
+- Stage 16 remains a long-term compass, not a completed maturity claim.
+- `.gitignore` keeps the production-spine exclusions narrow to:
+  `reports/creative/production_spine_v1/asset_scan.json` and
+  `reports/creative/production_spine_v1/production_dashboard.json`.
+- Milestone 1 focused validation passed:
+  `python3 scripts/identity_boundary_check_v1.py`,
+  `python3 scripts/observation_check_v1.py`,
+  `python3 scripts/creative_total_check_v3.py`, and `git diff --check`.
 
 ## What Should Be Executed Next
 
