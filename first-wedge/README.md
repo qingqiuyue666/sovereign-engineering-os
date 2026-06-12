@@ -96,3 +96,10 @@ approval:
 
 These assets remain `EVIDENCE_PENDING` until a real buyer, real scope, and
 real acceptance record exist.
+
+## Validation Kit
+
+Use `validation/` before treating the wedge as proven. The required next
+step is to build a target list, track outreach, capture discovery notes,
+record objections and pricing feedback, and apply the paid-signal and
+market-proof rules before changing any real-world status.

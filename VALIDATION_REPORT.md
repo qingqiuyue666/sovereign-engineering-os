@@ -152,6 +152,24 @@ Milestone 3 focused validation passed:
 `python3 scripts/observation_check_v1.py`,
 `python3 scripts/creative_total_check_v3.py`, and `git diff --check`.
 
+## Milestone 4 Real-World Validation Kit
+
+Status label: `REAL_WORLD_VALIDATION_KIT_READY`.
+
+Repository status: `EXECUTION_KIT_READY`. The repository now includes a
+validation kit for target lists, outreach tracking, discovery notes, buyer
+objections, pricing feedback, close/loss review, paid-signal criteria,
+market-proof rules, no-fake-traction policy, and first 10 conversations.
+
+Real-world status remains `MARKET_PROOF_PENDING` and `EVIDENCE_PENDING`.
+No discovery, buyer commitment, paid signal, rejection, or market proof is
+claimed until real records are captured.
+
+Milestone 4 focused validation passed:
+`python3 scripts/identity_boundary_check_v1.py`,
+`python3 scripts/observation_check_v1.py`,
+`python3 scripts/creative_total_check_v3.py`, and `git diff --check`.
+
 ## What Should Be Executed Next
 
 - Run discovery for AI Engineering Production Governance.

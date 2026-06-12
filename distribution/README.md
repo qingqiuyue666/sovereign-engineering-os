@@ -40,3 +40,7 @@ Use `first-wedge/service-page-draft.md`,
 `first-wedge/close-loss-log-template.md` for the first validation motion.
 Do not publish traction, revenue, certification, ROI, or customer-success
 claims without external evidence.
+
+Use `validation/outreach-tracker.md` and
+`validation/first-10-conversation-plan.md` to track channel learning. Sent
+messages and booked calls are activity, not market proof.

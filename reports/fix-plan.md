@@ -27,6 +27,9 @@ that should not be forced in this pass.
 - Added first-wedge trusted-delivery playbook assets for evidence packages,
   risk tiering, review gates, human approvals, rollback/remediation, audit
   logs, failure records, handoff, post-delivery review, and maintenance.
+- Added real-world validation kit templates and policies for target lists,
+  outreach, discovery, objections, pricing feedback, close/loss review,
+  paid-signal criteria, market-proof rules, and no-fake-traction controls.
 
 ## Deferred Fixes
 
@@ -41,6 +44,7 @@ that should not be forced in this pass.
 | Market proof claims | Requires external buyer evidence | Run first-wedge discovery |
 | Validate first wedge with buyers | Requires outreach and discovery | Use `first-wedge/` pack and record outcomes in Milestone 4 validation logs |
 | Prove trusted delivery | Requires a real accepted delivery | Use the Milestone 3 playbook on the first real audit and record evidence |
+| Fill validation records | Requires human outreach | Execute the first 10 conversation plan and update validation logs |
 | Full `make ci` | Current pass intentionally leaves a dirty worktree and `make ci` includes diff checking | Run after review/staging or in clean CI |
 
 ## Approval Needed

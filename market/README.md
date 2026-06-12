@@ -38,3 +38,7 @@ The first market hypothesis is packaged in `first-wedge/target-customer-profile.
 `first-wedge/budget-source-map.md`, `first-wedge/buying-trigger-map.md`, and
 `first-wedge/trust-gap-analysis.md`. These files remain hypotheses until
 validated by outreach, discovery, paid signal, or rejection records.
+
+Milestone 4 validation records live in `validation/`. Market proof requires
+logged buyer role, trigger, budget path, objection, evidence access, pricing
+response, and outcome.
