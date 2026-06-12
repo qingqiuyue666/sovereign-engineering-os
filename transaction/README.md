@@ -32,3 +32,11 @@
     - Attach real delivery records, buyer objections, pricing outcomes, acceptance results, and failure records.
     - Convert repeated decisions into scorecards, policy gates, schemas, tests, and evidence packages.
     - Promote only after proof exists for the maturity stage being claimed.
+
+## Milestone 2 Connection
+
+The concrete first transaction pack lives in `first-wedge/`. Use
+`first-wedge/ai-production-governance-readiness-audit.md`,
+`first-wedge/pricing-ladder.md`, `first-wedge/acceptance-criteria.md`, and
+`first-wedge/rejection-rules.md` before offering the AI Production
+Governance Readiness Audit to a real buyer.

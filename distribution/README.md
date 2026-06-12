@@ -32,3 +32,11 @@
     - Attach real delivery records, buyer objections, pricing outcomes, acceptance results, and failure records.
     - Convert repeated decisions into scorecards, policy gates, schemas, tests, and evidence packages.
     - Promote only after proof exists for the maturity stage being claimed.
+
+## Milestone 2 Connection
+
+Use `first-wedge/service-page-draft.md`,
+`first-wedge/outreach-message-bank.md`, and
+`first-wedge/close-loss-log-template.md` for the first validation motion.
+Do not publish traction, revenue, certification, ROI, or customer-success
+claims without external evidence.

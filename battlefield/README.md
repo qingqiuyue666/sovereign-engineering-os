@@ -32,3 +32,10 @@
     - Attach real delivery records, buyer objections, pricing outcomes, acceptance results, and failure records.
     - Convert repeated decisions into scorecards, policy gates, schemas, tests, and evidence packages.
     - Promote only after proof exists for the maturity stage being claimed.
+
+## Milestone 2 Connection
+
+The selected battlefield is AI Engineering Production Governance. The entry
+transaction package in `first-wedge/` turns that selection into a bounded
+readiness audit, while keeping all market proof and paid traction claims
+pending until real buyer evidence exists.

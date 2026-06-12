@@ -21,6 +21,9 @@ that should not be forced in this pass.
   language.
 - Clarified that scaffold completion is not paid traction, market proof,
   external audit, app/product launch, SaaS readiness, or Stage 16 completion.
+- Packaged the first wedge as a bounded readiness-audit transaction with
+  buyer, budget, trigger, trust-gap, pricing, acceptance, rejection,
+  discovery, outreach, delivery-scope, objection, and close/loss assets.
 
 ## Deferred Fixes
 
@@ -33,6 +36,7 @@ that should not be forced in this pass.
 | Build internal app/workbench runtime | Premature for this pass | Specify after execution kits exist; implement only after safe approval |
 | Launch product/SaaS | Evidence not present | Wait for paid delivery, repeated workflow patterns, and support readiness |
 | Market proof claims | Requires external buyer evidence | Run first-wedge discovery |
+| Validate first wedge with buyers | Requires outreach and discovery | Use `first-wedge/` pack and record outcomes in Milestone 4 validation logs |
 | Full `make ci` | Current pass intentionally leaves a dirty worktree and `make ci` includes diff checking | Run after review/staging or in clean CI |
 
 ## Approval Needed

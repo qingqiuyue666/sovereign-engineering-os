@@ -103,6 +103,30 @@ Boundaries verified:
   `python3 scripts/observation_check_v1.py`,
   `python3 scripts/creative_total_check_v3.py`, and `git diff --check`.
 
+## Milestone 2 Transaction Pack
+
+Status label: `FIRST_WEDGE_TRANSACTION_PACK_READY`.
+
+Repository status: `EXECUTION_KIT_READY`. The AI Engineering Production
+Governance wedge is packaged as the AI Production Governance Readiness Audit
+with buyer profile, budget source map, buying triggers, trust gap, service
+page draft, outreach bank, discovery script, pricing ladder, acceptance
+criteria, rejection rules, delivery scope, objection handling, and close/loss
+capture.
+
+Real-world status remains `MARKET_PROOF_PENDING`. No paid traction,
+customer adoption, real delivery, external certification, ROI, or market
+validation is claimed by this milestone.
+
+Layer connections added to `transaction/`, `market/`, `battlefield/`,
+`proof/`, and `distribution/` README files so the first wedge pack can be
+found from the existing SEIS architecture.
+
+Milestone 2 focused validation passed:
+`python3 scripts/identity_boundary_check_v1.py`,
+`python3 scripts/observation_check_v1.py`,
+`python3 scripts/creative_total_check_v3.py`, and `git diff --check`.
+
 ## What Should Be Executed Next
 
 - Run discovery for AI Engineering Production Governance.

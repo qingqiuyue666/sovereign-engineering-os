@@ -12,6 +12,7 @@ Record known gaps after SEIS assembly.
 | No external audit | High | Independent review packet and findings |
 | Historical docs still large and mixed | Medium | Deprecation index and cleanup branch |
 | First wedge distribution untested | High | Channel tests and response metrics |
+| First wedge transaction pack unvalidated by buyers | High | Outreach tracker, discovery notes, objections, quote outcomes |
 | Protocol/credit/capital are placeholders | Expected | Repeated delivery standards before implementation |
 | Case library is empty for SEIS wedge | High | First accepted delivery and proof package |
 | Pricing ladder unvalidated | Medium | Real quote, objection, close/loss reason |

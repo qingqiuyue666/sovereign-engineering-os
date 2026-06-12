@@ -32,3 +32,10 @@
     - Attach real delivery records, buyer objections, pricing outcomes, acceptance results, and failure records.
     - Convert repeated decisions into scorecards, policy gates, schemas, tests, and evidence packages.
     - Promote only after proof exists for the maturity stage being claimed.
+
+## Milestone 2 Connection
+
+The first wedge defines proof assets in `first-wedge/README.md` and
+`first-wedge/delivery-scope.md`: governance scorecard, evidence matrix,
+workflow map, risk-tier map, rollback/remediation plan, and redacted case
+note. These remain `EVIDENCE_PENDING` until generated from real delivery.
