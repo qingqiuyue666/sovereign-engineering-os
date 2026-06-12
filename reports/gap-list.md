@@ -17,6 +17,7 @@ Record known gaps after SEIS assembly.
 | Validation kit has no real records yet | High | First 10 conversations, paid-signal evidence, close/loss outcomes |
 | First delivery loop not executed | High | Completed intake, evidence matrix, handoff, case capture, asset updates |
 | Asset registries have no first-wedge delivery records | High | Case, failure, problem, objection, pricing, benchmark, ROI, reuse records |
+| Internal workbench not implemented | Expected | Repeated workflow evidence or explicit prototype approval |
 | Protocol/credit/capital are placeholders | Expected | Repeated delivery standards before implementation |
 | Case library is empty for SEIS wedge | High | First accepted delivery and proof package |
 | Pricing ladder unvalidated | Medium | Real quote, objection, close/loss reason |

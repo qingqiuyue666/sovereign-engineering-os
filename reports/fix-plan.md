@@ -36,6 +36,9 @@ that should not be forced in this pass.
 - Added asset compounding doctrine, delivery-to-asset conversion rules,
   registry templates, template reuse ledger, and standardization candidate
   ledger.
+- Added internal workbench app specification, AI brain routing boundaries,
+  security/permission boundaries, and MVP not-now list without implementing
+  a runtime.
 
 ## Deferred Fixes
 
@@ -53,6 +56,7 @@ that should not be forced in this pass.
 | Fill validation records | Requires human outreach | Execute the first 10 conversation plan and update validation logs |
 | Execute first delivery loop | Requires accepted buyer scope | Use `delivery-loops/first-ai-production-governance-audit-loop.md` after paid or high-commitment signal |
 | Populate asset registries | Requires real delivery records | Apply `assets/delivery-to-asset-conversion-rules.md` after each delivery |
+| Implement internal workbench | Requires repeated workflow patterns or explicit approval | Keep as `APP_IMPLEMENTATION_PENDING` until evidence supports build |
 | Full `make ci` | Current pass intentionally leaves a dirty worktree and `make ci` includes diff checking | Run after review/staging or in clean CI |
 
 ## Approval Needed

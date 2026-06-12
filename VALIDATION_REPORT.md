@@ -207,6 +207,24 @@ Milestone 6 focused validation passed:
 `python3 scripts/observation_check_v1.py`,
 `python3 scripts/creative_total_check_v3.py`, and `git diff --check`.
 
+## Milestone 7 Internal App / Workbench Specification
+
+Status label: `INTERNAL_WORKBENCH_SPEC_READY`.
+
+Repository status: `APP_SPEC_READY`. The repository now specifies an
+internal workbench shell for workflow diagnosis, opportunity scoring,
+delivery command center, evidence/audit logs, asset library, human approval
+flow, AI brain routing, security boundaries, and MVP not-now items.
+
+Real-world status remains `APP_IMPLEMENTATION_PENDING`. No app runtime,
+public SaaS, live provider integration, secret manager, customer portal, or
+production control system is built or claimed.
+
+Milestone 7 focused validation passed:
+`python3 scripts/identity_boundary_check_v1.py`,
+`python3 scripts/observation_check_v1.py`,
+`python3 scripts/creative_total_check_v3.py`, and `git diff --check`.
+
 ## What Should Be Executed Next
 
 - Run discovery for AI Engineering Production Governance.
