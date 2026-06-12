@@ -274,6 +274,11 @@ Milestone 9 focused validation passed:
 `python3 scripts/creative_total_check_v3.py`, `git diff --check`, and a
 final artifact presence check.
 
+`make ci` was attempted during final PR-body update. Test phases reached in
+that run reported `OK`; the Makefile then failed at `diff-check` because
+`git status --short` is not empty due to the preserved untracked
+`reports/creative/production_spine_v1/` local artifacts.
+
 ## What Should Be Executed Next
 
 - Run discovery for AI Engineering Production Governance.

@@ -23,19 +23,21 @@
 | Broad app/runtime/API/provider additions avoided | Pass | Spec-only app; no new runtime, provider integration, secret manager, or production authority. |
 | Secrets/configs untouched | Pass | No credential, environment, or account config changes made. |
 | `.gitignore` changes narrow | Pass | Existing production-spine ignores remain limited to the two intended generated JSON outputs. |
-| Validation commands run or documented | Pass | Focused checks run after each milestone; `make ci` not run for documented clean-worktree gate reason. |
+| Validation commands run or documented | Pass | Focused checks run after each milestone; `make ci` attempted and failed only at the documented clean-worktree gate. |
 
-## Make CI Decision
+## Make CI Result
 
-`make ci` was not run because the Makefile `diff-check` target includes:
+`make ci` was attempted during final PR-body update. Test phases reached in
+that run reported `OK`. The Makefile then failed at the `diff-check` target,
+which includes:
 
 - `git diff --check`
 - `test -z "$$(git status --short)"`
 
 The repository still has a pre-existing untracked local artifact directory:
 `reports/creative/production_spine_v1/`. The prompt requires preserving it
-and forbids broad `.gitignore` changes, so `make ci` would fail the
-clean-worktree status gate even though focused validation passes.
+and forbids broad `.gitignore` changes, so `make ci` fails the clean-worktree
+status gate even though focused validation passes.
 
 ## Final Boundary
 

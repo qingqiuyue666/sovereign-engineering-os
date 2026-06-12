@@ -31,9 +31,10 @@ None.
 - `git diff --check` - passed.
 - Final artifact presence check - passed.
 
-`make ci` was not run because the Makefile `diff-check` target requires an
-empty `git status --short`, while the prompt requires preserving the
-pre-existing untracked `reports/creative/production_spine_v1/` artifacts.
+`make ci` was attempted. Test phases reached in that run reported `OK`, then
+the Makefile failed at `diff-check` because the target requires an empty
+`git status --short`, while the prompt requires preserving the pre-existing
+untracked `reports/creative/production_spine_v1/` artifacts.
 
 ## Status Label
 

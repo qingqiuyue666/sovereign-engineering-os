@@ -36,8 +36,9 @@ Created or strengthened files across:
 - `git diff --check` - passed.
 - Final artifact presence check - passed.
 
-`make ci` was not run because the Makefile clean-worktree gate would fail on
-the preserved untracked `reports/creative/production_spine_v1/` artifacts.
+`make ci` was attempted. Test phases reached in that run reported `OK`, then
+the Makefile failed at the clean-worktree `diff-check` gate because of the
+preserved untracked `reports/creative/production_spine_v1/` artifacts.
 
 ## Final Status Label
 

@@ -26,7 +26,7 @@
 | Build internal workbench | Requires repeated workflow evidence or approval | Keep `APP_IMPLEMENTATION_PENDING`. |
 | Productize/SaaS | Requires repeated paid delivery and support/security evidence | Follow `product/do-not-productize-yet.md`. |
 | Certification/protocol/credit/capital | Requires repeated standards and external evidence | Keep placeholder gates only. |
-| Full `make ci` | Clean-worktree gate conflicts with preserved untracked production-spine artifacts | Run after user handles those local artifacts or in a clean clone/CI context. |
+| Full `make ci` clean pass | Attempted run reached test phases that reported `OK`, then failed at Makefile `diff-check` because preserved untracked production-spine artifacts keep `git status --short` non-empty | Run after user handles those local artifacts or in a clean clone/CI context. |
 
 ## Approval Required Later
 
