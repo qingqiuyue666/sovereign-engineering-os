@@ -24,6 +24,9 @@ that should not be forced in this pass.
 - Packaged the first wedge as a bounded readiness-audit transaction with
   buyer, budget, trigger, trust-gap, pricing, acceptance, rejection,
   discovery, outreach, delivery-scope, objection, and close/loss assets.
+- Added first-wedge trusted-delivery playbook assets for evidence packages,
+  risk tiering, review gates, human approvals, rollback/remediation, audit
+  logs, failure records, handoff, post-delivery review, and maintenance.
 
 ## Deferred Fixes
 
@@ -37,6 +40,7 @@ that should not be forced in this pass.
 | Launch product/SaaS | Evidence not present | Wait for paid delivery, repeated workflow patterns, and support readiness |
 | Market proof claims | Requires external buyer evidence | Run first-wedge discovery |
 | Validate first wedge with buyers | Requires outreach and discovery | Use `first-wedge/` pack and record outcomes in Milestone 4 validation logs |
+| Prove trusted delivery | Requires a real accepted delivery | Use the Milestone 3 playbook on the first real audit and record evidence |
 | Full `make ci` | Current pass intentionally leaves a dirty worktree and `make ci` includes diff checking | Run after review/staging or in clean CI |
 
 ## Approval Needed

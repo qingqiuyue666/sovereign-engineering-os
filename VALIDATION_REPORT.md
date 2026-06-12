@@ -127,6 +127,31 @@ Milestone 2 focused validation passed:
 `python3 scripts/observation_check_v1.py`,
 `python3 scripts/creative_total_check_v3.py`, and `git diff --check`.
 
+## Milestone 3 Trusted Delivery Playbook
+
+Status label: `TRUSTED_DELIVERY_PLAYBOOK_READY`.
+
+Repository status: `EXECUTION_KIT_READY`. The first-wedge audit now has a
+delivery playbook, evidence package template, risk tiering, review gates,
+human approval points, rollback/remediation plan, audit log, failure record,
+client handoff, post-delivery review, and maintenance options.
+
+Controls enforced:
+
+- AI/Codex/Claude/GPT outputs are claims until verified.
+- Human approval is required for high-risk claims, external claims, secrets,
+  production changes, and client-facing readiness claims.
+- Executor and auditor roles are separated when risk is material.
+- Every delivery produces evidence, not just output.
+
+Real-world status remains `REAL_DELIVERY_PENDING`; no live production
+authority, customer delivery, external audit, or certification is claimed.
+
+Milestone 3 focused validation passed:
+`python3 scripts/identity_boundary_check_v1.py`,
+`python3 scripts/observation_check_v1.py`,
+`python3 scripts/creative_total_check_v3.py`, and `git diff --check`.
+
 ## What Should Be Executed Next
 
 - Run discovery for AI Engineering Production Governance.

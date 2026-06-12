@@ -37,3 +37,17 @@ production asset tree under `assets/houdini/`.
 
 After repeated deliveries, convert the strongest registries into schemas and
 validation checks.
+
+## Milestone 3 Connection
+
+Every readiness audit should update the relevant registries after
+post-delivery review:
+
+- failure patterns to `assets/failure-library.md`
+- reusable workflow patterns to `assets/workflow-registry.md`
+- reusable templates to `assets/template-registry.md`
+- delivery traces to `assets/delivery-trace-registry.md`
+- audit traces to `assets/audit-trace-registry.md`
+
+These updates require real delivery evidence and remain `EVIDENCE_PENDING`
+until an accepted client delivery occurs.
