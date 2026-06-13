@@ -8,7 +8,7 @@
 
 | Criterion | Result | Evidence |
 | --- | --- | --- |
-| SEIS v1 hardened | Pass | PR #570 branch hardening commit and `reports/checkpoints/seis-9-step-milestone-01-2026-06-13.md`. |
+| SEIS v1 hardened | Pass | PR #570 branch hardening, `reports/checkpoints/seis-total-assembly-checkpoint-2026-06-13.md`, and the PR #570 review report. |
 | First wedge packaged | Pass | `first-wedge/` transaction pack. |
 | Trusted delivery executable | Pass | `first-wedge/delivery-playbook.md` and related evidence/review/approval templates. |
 | Validation kit ready | Pass | `validation/` kit and no-fake-traction policy. |
