@@ -80,8 +80,9 @@ Start with the strategic operating layer:
 4. Read `STOP_BUILDING_AND_VALIDATE_GATE.md`.
 5. Read `SEIS_DOCTRINE.md`.
 6. Read `EIGHT_ENGINES.md`.
-7. Use `BATTLEFIELD_SCORECARD.md` and `FIRST_WEDGE_SELECTION.md` to choose
-   a wedge for a bounded 90-day paid-signal test.
+7. Use `BATTLEFIELD_SCORECARD.md` and
+   `battlefield/first-wedge-selection.md` to choose a wedge for a bounded
+   90-day paid-signal test.
 8. Use `transaction/entry-offer-template.md`,
    `transaction/discovery-script.md`, and
    `transaction/acceptance-criteria.md` to package the first transaction.
@@ -104,7 +105,7 @@ documented permission, approval, and evidence boundaries.
 - `EIGHT_ENGINES.md` -- operating architecture
 - `CONTROL_POINT_TAXONOMY.md` -- economic control-point logic
 - `BATTLEFIELD_SCORECARD.md` -- wedge scoring model
-- `FIRST_WEDGE_SELECTION.md` -- provisional first wedge
+- `battlefield/first-wedge-selection.md` -- provisional first wedge
 - `BRAIN_GOVERNANCE.md` -- human/model/tool authority hierarchy
 - `MIGRATION_MAP.md` -- legacy asset classification and replacement map
 - `VALIDATION_REPORT.md` -- completion and residual-risk report

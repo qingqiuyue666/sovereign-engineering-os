@@ -27,7 +27,7 @@ This condition is satisfied at repository level by:
 - `SEIS_STRATEGIC_OPERATING_SYSTEM_V1.md`
 - `SEIS_16_STAGE_EXECUTION_GATES.md`
 - `REAL_WORLD_VALIDATION_COMMAND_LAYER_V1.md`
-- `FIRST_WEDGE_SELECTION.md`
+- `battlefield/first-wedge-selection.md`
 - `first-wedge/`
 - `delivery-loops/`
 - `validation/`
