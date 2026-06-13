@@ -21,12 +21,12 @@ audience validation, external audit, or product-market fit.
 - PR inspected: #575, `Agent operating protocol v1`
 - PR state: open draft, mergeable at inspection time
 - PR head: `agent-operating-protocol-v1`
-- PR head commit inspected before the Node.js 24 CI migration:
-  `afd374329c7f13acf865ac96df1473926d82075a`
+- PR head commit inspected before this checkpoint evidence refresh:
+  `8d3eaa93b472d13521c95502cbde9e1130930e44`
 - PR base: `main`
 - Remote check inspected: `canonical-health`
-- Remote check state at inspection time: passed on run `27476927642`
-  (`https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/actions/runs/27476927642`).
+- Remote check state at inspection time: passed on run `27477537554`
+  (`https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/actions/runs/27477537554`).
 - Prior failure observed on run `27476509947`:
   `tests/tracer_bullet/test_os_engine_worker_registry.py` failed
   `test_command_worker_records_watchdog_receipt_artifact` because
@@ -177,13 +177,19 @@ map, and template set that sits behind the existing `AGENTS.md` and
   `actions/setup-python` to `v6.2.0`, both verified through the GitHub API as
   Node.js 24 actions. The pushed PR CI run is the authoritative validation for
   this migration commit, avoiding a self-referential checkpoint hash.
+- Workflow migration commit `c1c5e1c` passed remote CI run `27477133795` on
+  head `c1c5e1cd506c437b09c7171d8cd7465e74cb54dc`.
+- Failure/threat interface commit `7b63dc9` passed remote CI run `27477354737`
+  on head `7b63dc92744b6ac8c84648a31a0d3b55a279eb50`.
+- Mission brief template commit `8d3eaa9` passed remote CI run `27477537554`
+  on head `8d3eaa93b472d13521c95502cbde9e1130930e44`.
 
 ## Risks And Blockers
 
 - PR #575 remains a draft PR and still requires human review before merge or
   any stronger repository acceptance claim.
-- The Node.js 24 CI migration is now included in this PR and must be judged by
-  the latest GitHub Actions run on the pushed workflow migration commit.
+- The Node.js 24 CI migration is included in this PR and has passed remote CI;
+  future claims must still use the latest PR check result, not a stale run.
 - The untracked `reports/creative/production_spine_v1/` directory is preserved
   and intentionally not staged.
 - AOOS Stage 5 interfaces are documentation/contracts only; no live evaluator,
@@ -203,15 +209,15 @@ After this checkpoint, the next safe checkpoint is:
 `AOOS_STAGE_4_5_HUMAN_REVIEW_GATE`.
 
 That checkpoint requires a human reviewer decision on draft PR #575 after the
-latest pushed workflow migration commit has a green `canonical-health` run.
+latest pushed PR head has a green `canonical-health` run.
 
 ## Continuation Packet
 
 - Continue from PR #575 on branch `agent-operating-protocol-v1`.
-- Latest verified head before the Node.js 24 CI migration:
-  `afd374329c7f13acf865ac96df1473926d82075a`.
-- Latest verified remote CI before the Node.js 24 CI migration:
-  `canonical-health` passed on run `27476927642`.
+- Latest verified head before this checkpoint evidence refresh:
+  `8d3eaa93b472d13521c95502cbde9e1130930e44`.
+- Latest verified remote CI before this checkpoint evidence refresh:
+  `canonical-health` passed on run `27477537554`.
 - Stage reached: AOOS Stage 4/5 executable skeleton is repository-ready for
   human review. It is not Stage 6/7 operation and has no L5 evidence.
 - Key branch contents: AOOS docs under `docs/aoos/`, templates under
@@ -226,9 +232,11 @@ latest pushed workflow migration commit has a green `canonical-health` run.
 - Do not stage or delete `reports/creative/production_spine_v1/`.
 - Do not claim Stage 6/7, production operation, customer validation, delivery
   acceptance, paid signal, product-market fit, or L5 evidence.
-- Next actions: verify the workflow migration, commit and push it, wait for the
-  new PR CI run, update the PR body with the latest head/run, then stop at the
-  human review gate unless explicitly authorized to continue.
+- Next actions: push this checkpoint evidence refresh, wait for the new PR CI
+  run, update the PR body with the latest head/run, then stop at the human
+  review gate unless explicitly authorized to continue.
+- Avoid creating another checkpoint-only commit solely to refresh this packet
+  unless a material artifact, check, PR state, or evidence boundary changes.
 
 ## What Is Not Proven
 
