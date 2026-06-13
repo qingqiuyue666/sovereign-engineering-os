@@ -16,12 +16,12 @@ Current stack:
 The stack is correctly ordered for review. No PR should be merged out of
 order. The correct review path is #570, then #571, then #572, then #573.
 
-PR #570 and PR #571 are open and ready for review. PR #572 and PR #573 remain
-draft. This run does not mark any PR ready, retarget any PR, or merge any PR.
+PR #570, PR #571, and PR #572 are open and ready for review. PR #573 remains
+draft. This run does not mark #573 ready, retarget any PR, or merge any PR.
 
-PR #572 has a newer review-report commit, `10d3f77`, that is not in the
-current #573 branch history. Keep #573 draft and refresh it after #572 is
-finalized.
+PR #572 includes review-report commit `10d3f77`. PR #573 remains correctly
+stacked on #572 by base branch and should be refreshed/revalidated if #572
+changes again or is merged.
 
 ## PR #570
 
@@ -76,11 +76,11 @@ Residual risks:
 | URL | `https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/pull/572` |
 | Head branch | `seis-16-stage-strategic-os-v1` |
 | Base branch | `seis-9-step-continuous-execution-v1` |
-| Status | open, draft |
+| Status | open, ready for review |
 | Latest review commit | `10d3f77` |
 | Validation status | `canonical-health` SUCCESS for review commit `10d3f77`. |
 | Changed-file scope | 16-stage strategic OS, execution gates, status table, real-world validation command layer, stop-building gate, audit and checkpoint reports, root navigation updates, PR stack review report |
-| Merge recommendation | Keep draft until lower PRs are approved and a human decides readiness. |
+| Merge recommendation | Do not merge from this run; wait for lower-stack human approval. |
 
 Residual risks:
 
@@ -102,14 +102,15 @@ Residual risks:
 | Current merge state | `CLEAN` |
 | Validation status | `canonical-health` SUCCESS |
 | Purpose | Prepare real-world validation execution package and stop at human-action boundary. |
-| Merge recommendation | Keep stacked on #572; do not merge until #572 is finalized, this branch is refreshed if needed, and a human approves readiness. |
+| Merge recommendation | Keep stacked on #572; keep draft until a human approves readiness. |
 
 ## Final Merge Order
 
 1. Review and approve #570.
 2. Review and approve #571 after #570 is accepted.
-3. Review #572 after #571 is accepted and a human decides readiness.
-4. Review #573 after #572 is stable and #573 is refreshed/revalidated.
+3. Review #572 after #571 is accepted.
+4. Review #573 after #572 readiness is accepted; refresh/revalidate #573 if
+   #572 changes again or is merged.
 
 No merge, close, ready-for-review, or retarget action was performed by this
 run.

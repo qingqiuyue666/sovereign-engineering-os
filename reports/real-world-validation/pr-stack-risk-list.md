@@ -14,15 +14,15 @@ Current condition:
 - #571 targets `seis-total-assembly-v1`.
 - #572 targets `seis-9-step-continuous-execution-v1`.
 - #573 targets `seis-16-stage-strategic-os-v1`.
-- #572 now includes review commit `10d3f77`; #573 has not been refreshed onto
-  that commit.
+- #572 is ready for review at review commit `10d3f77`.
+- #573 is still correctly stacked on #572 by base branch.
 
 Control:
 
 - Review and merge only from the bottom of the stack upward.
 - Keep #573 stacked on #572 unless #572 is merged or an explicit retarget
   decision is recorded.
-- Refresh #573 after #572 is finalized.
+- Refresh/revalidate #573 if #572 changes again or is merged.
 
 ## CI / Canonical-Health Risk
 
@@ -39,9 +39,8 @@ Current condition:
 
 Control:
 
-- Keep #572 draft until human readiness approval.
-- Keep #573 draft until #572 is finalized and human readiness approval is
-  recorded.
+- Do not merge #572 from this run.
+- Keep #573 draft until human readiness approval is recorded.
 - Do not claim full stack readiness until all current branch tips are green.
 
 ## Untracked Artifact Risk
@@ -92,5 +91,5 @@ Recommended order:
 3. #572
 4. #573
 
-Keep #572 and #573 draft until their review and validation status is
-explicitly accepted.
+Keep #573 draft until its review and validation status is explicitly
+accepted.

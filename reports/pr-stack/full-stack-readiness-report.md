@@ -8,7 +8,7 @@ Status date: 2026-06-13
 | --- | --- | --- | --- |
 | #570 | `seis-total-assembly-v1` | `main` | Open, ready for review, `canonical-health` SUCCESS |
 | #571 | `seis-9-step-continuous-execution-v1` | `seis-total-assembly-v1` | Open, ready for review, `canonical-health` SUCCESS |
-| #572 | `seis-16-stage-strategic-os-v1` | `seis-9-step-continuous-execution-v1` | Open draft; `canonical-health` SUCCESS for `10d3f77` |
+| #572 | `seis-16-stage-strategic-os-v1` | `seis-9-step-continuous-execution-v1` | Open, ready for review, `canonical-health` SUCCESS for `10d3f77` |
 | #573 | `seis-real-world-validation-continuous-v1` | `seis-16-stage-strategic-os-v1` | Open draft; `canonical-health` SUCCESS |
 
 ## Stack Dependency
@@ -17,8 +17,8 @@ The stack is correctly ordered by base branch:
 
 `#570 -> #571 -> #572 -> #573`
 
-Do not merge out of order. Do not retarget during this review run. Keep #572
-and #573 draft.
+Do not merge out of order. Do not retarget during this review run. Keep #573
+draft.
 
 ## Boundary Findings
 
@@ -38,8 +38,8 @@ and #573 draft.
 | Item | Status |
 | --- | --- |
 | #572 post-review CI | PASS |
-| #573 refresh | Pending after #572 finalization |
-| Human approval | Required before marking #572 or #573 ready |
+| #573 refresh | Not required for this metadata-only update; revalidate if #572 changes again or is merged |
+| Human approval | Required before marking #573 ready |
 
 ## Recommendation
 
@@ -47,7 +47,7 @@ The stack is structurally coherent, but the full stack is not ready to merge.
 
 Recommended next gate:
 
-1. Keep #572 and #573 draft until a human decides readiness.
-2. Refresh #573 after #572 is finalized.
+1. Keep #573 draft until a human decides readiness.
+2. Refresh/revalidate #573 if #572 changes again or is merged.
 3. Start real-world outreach only after human approval; do not create more
    repository strategy layers as a substitute for evidence.

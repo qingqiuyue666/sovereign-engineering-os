@@ -21,8 +21,8 @@ performed.
 | CI | `canonical-health` SUCCESS |
 | Stack dependency | #570 -> #571 -> #572 -> #573 |
 
-PR #573 is correctly stacked on PR #572 by base branch. PR #572 now includes
-review commit `10d3f77`; #573 should be refreshed after #572 is finalized.
+PR #573 is correctly stacked on PR #572 by base branch. PR #572 is now ready
+for review at review commit `10d3f77`; PR #573 remains draft.
 
 ## Files Reviewed
 
@@ -68,7 +68,7 @@ review commit `10d3f77`; #573 should be refreshed after #572 is finalized.
 | Status-label use | `SEIS_REAL_WORLD_VALIDATION_READY` is used as repository-readiness language and paired with `HUMAN_ACTION_REQUIRED`. | Pass |
 | Boundary discipline | The diff creates templates, scripts, checkpoints, and evidence-ingestion rules only. It does not perform outreach, delivery, provider integration, app/runtime work, or secret handling. | Pass |
 | Path/reference consistency | Key referenced files exist. Stack reports had stale lower-PR health/draft metadata. | Fixed |
-| Stack dependency | PR #573 targets #572 correctly but should be refreshed after #572's review commit is finalized. | Note |
+| Stack dependency | PR #573 targets #572 correctly. Refresh/revalidate #573 if #572 changes again or is merged. | Note |
 | Broad unrelated expansion | The PR is broad in documentation volume but scoped to the real-world validation execution package; no unrelated runtime or product layer was added. | Pass |
 
 ## Fix Applied
@@ -97,6 +97,5 @@ App/SaaS, outreach result, delivery result, or evidence claim was added.
 ## Recommendation
 
 PR #573 should remain draft. It is not blocked by fake-completion or boundary
-issues after the metadata cleanup, but it should not be marked ready until
-#572 is finalized, #573 is refreshed if needed, and a human approves
-readiness.
+issues after the metadata cleanup, but it should remain draft until a human
+explicitly approves readiness.

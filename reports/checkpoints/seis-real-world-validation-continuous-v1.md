@@ -86,8 +86,8 @@ Status date: 2026-06-13
 
 ## Risks
 
-- PR #572 has a newer review-report commit, `10d3f77`, and #573 should be
-  refreshed after #572 is finalized.
+- PR #572 is now ready for review at review-report commit `10d3f77`; #573
+  remains draft and correctly stacked on #572.
 - The local `reports/creative/production_spine_v1/` tree remains untracked and
   must be preserved.
 - No real-world validation evidence has been collected.
@@ -101,5 +101,5 @@ back. Do not expand strategy further before evidence exists.
 ## Merge Recommendation
 
 Keep this branch stacked on `seis-16-stage-strategic-os-v1`. Do not merge.
-Keep PR #573 draft until #572 is stable, this branch is refreshed if needed,
-and a human explicitly approves readiness.
+Keep PR #573 draft until a human explicitly approves readiness. Refresh and
+revalidate #573 if #572 changes again or is merged.
