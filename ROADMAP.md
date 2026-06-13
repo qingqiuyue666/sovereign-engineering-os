@@ -21,6 +21,7 @@ creative-pipeline-only roadmap is archived under `archive/`.
 
 | Horizon | Objective | Evidence Required |
 | --- | --- | --- |
+| Current agent protocol pass | Review the AI-agent operating protocol layer | `AGENTS.md`, `CLAUDE.md`, `docs/agent-protocols/`, `playbooks/`, `checklists/agent-final-report-checklist.md`, `reports/checkpoints/agent-operating-protocol-v1.md` |
 | Current repository pass | Review the real-world validation execution package | `reports/real-world-validation/`, `validation/real-world-validation-battle-plan-v1.md`, `validation/target-list-v1.md`, `delivery-loops/first-bounded-delivery-package-v1.md`, `assets/evidence-to-asset-conversion-v1.md` |
 | 0-14 days | Fill 10 target slots and run manual outreach for Trusted AI Workflow Transformation | Real targets, outreach log, response classifications |
 | 15-45 days | Run discovery, test pricing, and attempt one bounded delivery only after accepted scope | Discovery notes, pricing reaction, accepted scope, evidence package |
@@ -31,6 +32,8 @@ creative-pipeline-only roadmap is archived under `archive/`.
 
 - Stage claims remain below evidence.
 - Existing local runtime remains governed and fail-closed.
+- Agent workflows follow `AGENTS.md` and `docs/agent-protocols/` before
+  crossing any human approval gate.
 - The first wedge is provisional until paid signal exists.
 - After the 16-stage strategic OS layer is reviewable, do not add more
   strategy layers to avoid market contact. Execute

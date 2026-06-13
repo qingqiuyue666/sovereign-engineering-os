@@ -361,6 +361,29 @@ strategy expansion.
 - No clearing, rights, marketplace, or capital allocation runtime before
   repeated delivery evidence.
 
+## Agent Operating Protocol v1
+
+Status label: `AGENT_OPERATING_PROTOCOL_READY_FOR_REVIEW`.
+
+Repository status: `PROTOCOL_LAYER_READY_FOR_REVIEW`. The repository now
+includes a concise root agent instruction layer, Claude-compatible memory,
+detailed continuous stage-gated execution protocols, high-risk human gates,
+evidence and no-fake-completion rules, failure handling, PR stack migration
+guidance, tool-selection governance, memory governance, reusable playbooks,
+an agent final-report checklist, and this checkpoint:
+
+- `AGENTS.md`
+- `CLAUDE.md`
+- `docs/agent-protocols/`
+- `playbooks/`
+- `checklists/agent-final-report-checklist.md`
+- `reports/checkpoints/agent-operating-protocol-v1.md`
+
+Real-world status remains `HUMAN_ACTION_REQUIRED`. This protocol layer does
+not add a new SEIS strategy layer, expand business scope, perform outreach,
+deploy software, handle secrets, claim customer validation, claim paid signal,
+or claim delivery completion.
+
 ## Deliverable Status
 
 All required SEIS assembly deliverables have corresponding repository files.

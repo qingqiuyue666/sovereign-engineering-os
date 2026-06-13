@@ -81,21 +81,22 @@ outside the SEIS boundary.
 
 Start with the strategic operating layer:
 
-1. Read `SEIS_STRATEGIC_OPERATING_SYSTEM_V1.md`.
-2. Read `SEIS_16_STAGE_EXECUTION_GATES.md`.
-3. Read `REAL_WORLD_VALIDATION_COMMAND_LAYER_V1.md`.
-4. Read `STOP_BUILDING_AND_VALIDATE_GATE.md`.
-5. Read `reports/real-world-validation/human-action-required-checkpoint.md`.
-6. Read `validation/real-world-validation-battle-plan-v1.md`.
-7. Read `SEIS_DOCTRINE.md`.
-8. Read `EIGHT_ENGINES.md`.
-9. Use `BATTLEFIELD_SCORECARD.md` and
+1. Read `AGENTS.md` before agent-assisted repository work.
+2. Read `SEIS_STRATEGIC_OPERATING_SYSTEM_V1.md`.
+3. Read `SEIS_16_STAGE_EXECUTION_GATES.md`.
+4. Read `REAL_WORLD_VALIDATION_COMMAND_LAYER_V1.md`.
+5. Read `STOP_BUILDING_AND_VALIDATE_GATE.md`.
+6. Read `reports/real-world-validation/human-action-required-checkpoint.md`.
+7. Read `validation/real-world-validation-battle-plan-v1.md`.
+8. Read `SEIS_DOCTRINE.md`.
+9. Read `EIGHT_ENGINES.md`.
+10. Use `BATTLEFIELD_SCORECARD.md` and
    `battlefield/first-wedge-selection.md` to choose a wedge for a bounded
    90-day paid-signal test.
-10. Use `transaction/entry-offer-template.md`,
+11. Use `transaction/entry-offer-template.md`,
    `transaction/discovery-script.md`, and
    `transaction/acceptance-criteria.md` to package the first transaction.
-11. Use `trusted-delivery/delivery-sop.md` and
+12. Use `trusted-delivery/delivery-sop.md` and
    `proof/proof-asset-spec.md` before any delivery is claimed complete.
 
 Existing local runtime quickstart remains available through the archived
@@ -104,6 +105,10 @@ documented permission, approval, and evidence boundaries.
 
 ## Strategic Navigation
 
+- `AGENTS.md` -- default AI-agent repository instructions
+- `CLAUDE.md` -- Claude-compatible project memory and boundaries
+- `docs/agent-protocols/` -- detailed stage-gated agent execution protocols
+- `playbooks/` and `checklists/` -- reusable agent execution playbooks and final-report checks
 - `SEIS_DOCTRINE.md` -- doctrine and no-fake-completion policy
 - `SEIS_STRATEGIC_OPERATING_SYSTEM_V1.md` -- highest 16-stage strategic OS
 - `SEIS_16_STAGE_EXECUTION_GATES.md` -- repository and real-world gates for all 16 stages
@@ -160,6 +165,7 @@ Validation artifacts:
 - `reports/real-world-validation/pr-stack-merge-readiness.md`
 - `reports/real-world-validation/next-decision-gate-v1.md`
 - `reports/checkpoints/seis-real-world-validation-continuous-v1.md`
+- `reports/checkpoints/agent-operating-protocol-v1.md`
 - `reports/gap-list.md`
 - `reports/fix-plan.md`
 - `reports/repo-reality-inspection.md`

@@ -50,6 +50,8 @@ Covers the first 90 days after assembly.
 
 ## Operating Rules
 
+- Agent-assisted repository work must begin with `AGENTS.md` and the detailed
+  protocols under `docs/agent-protocols/`.
 - Every action must update a registry or report.
 - Every claim must have an evidence link.
 - Every delivery must produce proof and distribution material.
@@ -109,3 +111,13 @@ Current real-world status: `HUMAN_ACTION_REQUIRED`.
 
 The next action is manual outreach and evidence capture, not more repository
 strategy expansion.
+
+## Agent Protocol Stop Point
+
+Proposed agent protocol status: `AGENT_OPERATING_PROTOCOL_READY_FOR_REVIEW`.
+It becomes mainline repository policy only after the protocol branch is reviewed
+and merged.
+
+Agent execution must stop at the human review gate for merges, direct `main`
+pushes, production deployment, real-world outreach, secret handling, new
+service or dependency introduction, and stronger evidence claims.
