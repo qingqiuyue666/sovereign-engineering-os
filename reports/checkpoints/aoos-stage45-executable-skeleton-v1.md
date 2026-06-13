@@ -21,11 +21,12 @@ audience validation, external audit, or product-market fit.
 - PR inspected: #575, `Agent operating protocol v1`
 - PR state: open draft, mergeable at inspection time
 - PR head: `agent-operating-protocol-v1`
-- PR head commit: `341e608a9908aaae14708740609dcbad0fb0badd`
+- PR head commit inspected before the Node.js 24 CI migration:
+  `afd374329c7f13acf865ac96df1473926d82075a`
 - PR base: `main`
 - Remote check inspected: `canonical-health`
-- Remote check state at inspection time: passed on run `27476703420`
-  (`https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/actions/runs/27476703420`).
+- Remote check state at inspection time: passed on run `27476927642`
+  (`https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/actions/runs/27476927642`).
 - Prior failure observed on run `27476509947`:
   `tests/tracer_bullet/test_os_engine_worker_registry.py` failed
   `test_command_worker_records_watchdog_receipt_artifact` because
@@ -163,14 +164,20 @@ map, and template set that sits behind the existing `AGENTS.md` and
 - Commit `341e608` narrowed the fixture resource boundary and remote CI run
   `27476703420` passed `canonical-health` on head
   `341e608a9908aaae14708740609dcbad0fb0badd`.
+- Checkpoint evidence commit `afd3743` updated this report and remote CI run
+  `27476927642` passed `canonical-health` on head
+  `afd374329c7f13acf865ac96df1473926d82075a`.
+- The CI workflow now migrates `actions/checkout` to `v6.0.3` and
+  `actions/setup-python` to `v6.2.0`, both verified through the GitHub API as
+  Node.js 24 actions. The pushed PR CI run is the authoritative validation for
+  this migration commit, avoiding a self-referential checkpoint hash.
 
 ## Risks And Blockers
 
 - PR #575 remains a draft PR and still requires human review before merge or
   any stronger repository acceptance claim.
-- CI currently emits a GitHub Actions Node.js 20 deprecation warning. Treat the
-  Node.js 24 migration as a separate follow-up unless the current PR is
-  explicitly expanded.
+- The Node.js 24 CI migration is now included in this PR and must be judged by
+  the latest GitHub Actions run on the pushed workflow migration commit.
 - The untracked `reports/creative/production_spine_v1/` directory is preserved
   and intentionally not staged.
 - AOOS Stage 5 interfaces are documentation/contracts only; no live evaluator,
@@ -189,32 +196,32 @@ After this checkpoint, the next safe checkpoint is:
 
 `AOOS_STAGE_4_5_HUMAN_REVIEW_GATE`.
 
-That checkpoint requires a human reviewer decision on draft PR #575. A separate
-low-risk follow-up may address the GitHub Actions Node.js 20 deprecation warning
-before the platform migration dates.
+That checkpoint requires a human reviewer decision on draft PR #575 after the
+latest pushed workflow migration commit has a green `canonical-health` run.
 
 ## Continuation Packet
 
 - Continue from PR #575 on branch `agent-operating-protocol-v1`.
-- Latest verified head before this checkpoint update:
-  `341e608a9908aaae14708740609dcbad0fb0badd`.
-- Latest verified remote CI before this checkpoint update:
-  `canonical-health` passed on run `27476703420`.
+- Latest verified head before the Node.js 24 CI migration:
+  `afd374329c7f13acf865ac96df1473926d82075a`.
+- Latest verified remote CI before the Node.js 24 CI migration:
+  `canonical-health` passed on run `27476927642`.
 - Stage reached: AOOS Stage 4/5 executable skeleton is repository-ready for
   human review. It is not Stage 6/7 operation and has no L5 evidence.
 - Key branch contents: AOOS docs under `docs/aoos/`, templates under
   `templates/aoos/`, JSON Schemas under `docs/aoos/schemas/`, fixture
   `examples/aoos/stage45-interface-fixture-v1.json`, static checker
   `scripts/aoos_stage45_check_v1.py`, root navigation updates, CI inclusion,
-  and worker-registry watchdog fixture stabilization.
+  worker-registry watchdog fixture stabilization, and the Node.js 24 CI action
+  migration.
 - Do not recreate a parallel protocol authority layer. `AGENTS.md` and
   `docs/agent-protocols/` remain the execution authority.
 - Do not stage or delete `reports/creative/production_spine_v1/`.
 - Do not claim Stage 6/7, production operation, customer validation, delivery
   acceptance, paid signal, product-market fit, or L5 evidence.
-- Next actions: verify this checkpoint update, commit and push it, wait for the
-  new PR CI run, update the PR body if the head changes, then stop at the human
-  review gate unless explicitly authorized to continue.
+- Next actions: verify the workflow migration, commit and push it, wait for the
+  new PR CI run, update the PR body with the latest head/run, then stop at the
+  human review gate unless explicitly authorized to continue.
 
 ## What Is Not Proven
 
