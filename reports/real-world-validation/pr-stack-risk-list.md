@@ -2,27 +2,25 @@
 
 Status date: 2026-06-13
 
-## Stack-Order Risk
+## Migration-Diff Risk
 
-Risk: later PRs depend on prior stacked branches. Merging, rebasing, or
-retargeting out of order could hide conflicts, duplicate commits, or remove
-the intended review context.
+Risk: #573 previously depended on lower stacked branches. After #570, #574,
+and #572 were squash-merged into `main`, #573 can show duplicate lower-stack
+changes unless the branch is reconciled against current `main`.
 
 Current condition:
 
-- #570 targets `main`.
-- #571 targets `seis-total-assembly-v1`.
-- #572 targets `seis-9-step-continuous-execution-v1`.
-- #573 targets `seis-16-stage-strategic-os-v1`.
-- #572 is ready for review at review commit `10d3f77`.
-- #573 is still correctly stacked on #572 by base branch.
+- #570 is merged into `main`.
+- #574 replaced #571 and is merged into `main`.
+- #572 is merged into `main`.
+- #573 targets `main` and is the final remaining PR.
 
 Control:
 
-- Review and merge only from the bottom of the stack upward.
-- Keep #573 stacked on #572 unless #572 is merged or an explicit retarget
-  decision is recorded.
-- Refresh/revalidate #573 if #572 changes again or is merged.
+- Merge current `origin/main` into `seis-real-world-validation-continuous-v1`.
+- Keep the final PR diff limited to the intended real-world validation
+  continuous execution package.
+- Do not delete branches or push directly to `main`.
 
 ## CI / Canonical-Health Risk
 
@@ -32,16 +30,14 @@ be considered stable.
 
 Current condition:
 
-- #570: `canonical-health` SUCCESS.
-- #571: `canonical-health` SUCCESS.
-- #572: `canonical-health` SUCCESS for review commit `10d3f77`.
-- #573: `canonical-health` SUCCESS.
+- Old #573 `canonical-health` may refer to the pre-migration head.
+- A refreshed head requires a new GitHub Actions result.
 
 Control:
 
-- Do not merge #572 from this run.
-- Keep #573 draft until human readiness approval is recorded.
-- Do not claim full stack readiness until all current branch tips are green.
+- Run the focused local checks before push.
+- Push only `seis-real-world-validation-continuous-v1`.
+- Wait for GitHub `canonical-health` on the new head.
 
 ## Untracked Artifact Risk
 
@@ -84,12 +80,5 @@ Control:
 
 ## Merge-Order Recommendation
 
-Recommended order:
-
-1. #570
-2. #571
-3. #572
-4. #573
-
-Keep #573 draft until its review and validation status is explicitly
-accepted.
+Only #573 remains. Stop at the human merge gate after the refreshed branch is
+clean and GitHub `canonical-health` succeeds.

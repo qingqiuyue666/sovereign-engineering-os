@@ -34,9 +34,10 @@ Stage 16 milestone has been achieved.
 
 | Gap | Current Status | Fix |
 | --- | --- | --- |
-| Strategic OS needs human review. | `READY_FOR_REVIEW` pending PR review. | Review draft PR and confirm scope/base. |
-| Validation commands must be recorded for this branch. | Pending validation run. | Run required commands and update reports/checkpoint. |
-| Branch/PR link must be recorded after push. | Pending PR creation/update. | Push branch and create draft PR. |
+| Strategic OS needs human review. | `DRAFT_REVIEW_GATE` for PR #572. | Review draft PR #572 and decide whether to keep draft or mark ready; do not merge before lower stack PRs are resolved. |
+| Validation commands must remain current. | `CANONICAL_HEALTH_SUCCESS`; focused checks recorded. | Rerun focused checks after any branch change. |
+| Stack refresh should wait for lower PR finalization. | `STACK_REFRESH_PENDING_AFTER_LOWER_PRS`. | Refresh PR #572 after #570 and #571 are finalized so lower review-report commits are included. |
+| Branch/PR link must be recorded after push. | Complete. | PR #572 link is recorded; no push to `main` was made. |
 
 ## Not A Gap
 

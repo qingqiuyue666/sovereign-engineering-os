@@ -7,8 +7,10 @@ Status date: 2026-06-13
 | Field | Value |
 | --- | --- |
 | Branch | `seis-real-world-validation-continuous-v1` |
-| Base branch | `seis-16-stage-strategic-os-v1` |
-| Draft PR | `https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/pull/573` |
+| Base branch | `main` |
+| Pull request | `https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/pull/573` |
+| Draft state | `non-draft` |
+| Stack state | #570 merged, #574 replacement for #571 merged, #572 merged, #573 final remaining PR |
 | Repository status | `SEIS_REAL_WORLD_VALIDATION_READY` |
 | Real-world status | `HUMAN_ACTION_REQUIRED` |
 
@@ -16,6 +18,11 @@ Status date: 2026-06-13
 
 - `0c5f51b` - `Prepare SEIS real-world validation`
 - `c638a0d` - `Record real-world validation PR metadata`
+- `de2bda6` - `Review PR 573 stack readiness`
+- `9712db5` - `Record PR 573 CI pass`
+- `288d894` - `Refresh PR 573 stack metadata`
+- Current migration pass - reconcile #573 against current `main` after #570,
+  #574, and #572 squash merges.
 
 ## Phase Completion
 
@@ -86,8 +93,10 @@ Status date: 2026-06-13
 
 ## Risks
 
-- PR #572 is now ready for review at review-report commit `10d3f77`; #573
-  remains draft and correctly stacked on #572.
+- PR #573 was retargeted to `main` after #570, #574, and #572 were merged.
+  The branch must stay limited to the real-world validation execution package.
+- The old #573 `canonical-health` status must not be reused after this branch
+  update; the pushed head must be revalidated by GitHub Actions.
 - The local `reports/creative/production_spine_v1/` tree remains untracked and
   must be preserved.
 - No real-world validation evidence has been collected.
@@ -100,6 +109,6 @@ back. Do not expand strategy further before evidence exists.
 
 ## Merge Recommendation
 
-Keep this branch stacked on `seis-16-stage-strategic-os-v1`. Do not merge.
-Keep PR #573 draft until a human explicitly approves readiness. Refresh and
-revalidate #573 if #572 changes again or is merged.
+Keep PR #573 open and non-draft on base `main` after this refresh. Do not
+merge from this run. Stop at the human approval gate after GitHub
+`canonical-health` passes on the refreshed head.

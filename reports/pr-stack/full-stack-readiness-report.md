@@ -6,19 +6,20 @@ Status date: 2026-06-13
 
 | PR | Branch | Base | Current review status |
 | --- | --- | --- | --- |
-| #570 | `seis-total-assembly-v1` | `main` | Open, ready for review, `canonical-health` SUCCESS |
-| #571 | `seis-9-step-continuous-execution-v1` | `seis-total-assembly-v1` | Open, ready for review, `canonical-health` SUCCESS |
-| #572 | `seis-16-stage-strategic-os-v1` | `seis-9-step-continuous-execution-v1` | Open, ready for review, `canonical-health` SUCCESS for `10d3f77` |
-| #573 | `seis-real-world-validation-continuous-v1` | `seis-16-stage-strategic-os-v1` | Open draft; `canonical-health` SUCCESS |
+| #570 | `seis-total-assembly-v1` | `main` | Squash-merged into `main` |
+| #574 | `seis-9-step-continuous-execution-v1` | `main` | Replacement for #571; squash-merged into `main` |
+| #572 | `seis-16-stage-strategic-os-v1` | `main` | Squash-merged into `main` |
+| #573 | `seis-real-world-validation-continuous-v1` | `main` | Open, non-draft; final remaining PR; requires refreshed-head `canonical-health` |
 
 ## Stack Dependency
 
-The stack is correctly ordered by base branch:
+The lower stack has been collapsed into `main` by squash merges:
 
-`#570 -> #571 -> #572 -> #573`
+`#570 -> #574 replacement for #571 -> #572 -> main`
 
-Do not merge out of order. Do not retarget during this review run. Keep #573
-draft.
+PR #573 now targets `main` directly and should contain only the intended
+real-world validation continuous execution package. Do not merge it from this
+run.
 
 ## Boundary Findings
 
@@ -37,17 +38,20 @@ draft.
 
 | Item | Status |
 | --- | --- |
-| #572 post-review CI | PASS |
-| #573 refresh | Not required for this metadata-only update; revalidate if #572 changes again or is merged |
-| Human approval | Required before marking #573 ready |
+| Lower-stack migration | #570, #574, and #572 are merged into `main` |
+| #573 branch refresh | Required against current `main` |
+| #573 GitHub CI | Must be revalidated on the refreshed head |
+| Human approval | Required before merging #573 |
 
 ## Recommendation
 
-The stack is structurally coherent, but the full stack is not ready to merge.
+The lower stack has been integrated into `main`. PR #573 is the final
+remaining review gate for the real-world validation execution package.
 
 Recommended next gate:
 
-1. Keep #573 draft until a human decides readiness.
-2. Refresh/revalidate #573 if #572 changes again or is merged.
-3. Start real-world outreach only after human approval; do not create more
+1. Reconcile #573 against current `main`.
+2. Revalidate #573 on the refreshed head.
+3. Stop at the human merge gate.
+4. Start real-world outreach only after human approval; do not create more
    repository strategy layers as a substitute for evidence.

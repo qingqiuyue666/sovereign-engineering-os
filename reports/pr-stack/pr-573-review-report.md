@@ -2,12 +2,11 @@
 
 ## Scope
 
-Reviewed PR #573, `seis-real-world-validation-continuous-v1`, stacked on
-`seis-16-stage-strategic-os-v1`.
+Reviewed PR #573, `seis-real-world-validation-continuous-v1`, retargeted to
+`main` after the lower stack was squash-merged.
 
-This review did not touch PR #570, PR #571, or PR #572 except to read stack
-status and dependency. No merge, retarget, or ready-for-review action was
-performed.
+This migration does not touch PR #570, PR #574, or PR #572 except to account
+for their merged status. No merge to `main` is performed.
 
 ## Current PR Status
 
@@ -15,14 +14,14 @@ performed.
 | --- | --- |
 | PR | #573 |
 | Branch reviewed | `seis-real-world-validation-continuous-v1` |
-| Base branch | `seis-16-stage-strategic-os-v1` |
-| Draft state | Draft |
-| Merge state | `CLEAN` |
-| CI | `canonical-health` SUCCESS |
-| Stack dependency | #570 -> #571 -> #572 -> #573 |
+| Base branch | `main` |
+| Draft state | Non-draft |
+| Merge state | Requires refreshed GitHub evaluation after push |
+| CI | Requires refreshed-head `canonical-health` after push |
+| Stack dependency | #570, #574 replacement for #571, and #572 are merged into `main`; #573 is final remaining PR |
 
-PR #573 is correctly stacked on PR #572 by base branch. PR #572 is now ready
-for review at review commit `10d3f77`; PR #573 remains draft.
+PR #573 now targets `main` directly. The branch must preserve only the
+real-world validation continuous execution changes.
 
 ## Files Reviewed
 
@@ -68,19 +67,20 @@ for review at review commit `10d3f77`; PR #573 remains draft.
 | Status-label use | `SEIS_REAL_WORLD_VALIDATION_READY` is used as repository-readiness language and paired with `HUMAN_ACTION_REQUIRED`. | Pass |
 | Boundary discipline | The diff creates templates, scripts, checkpoints, and evidence-ingestion rules only. It does not perform outreach, delivery, provider integration, app/runtime work, or secret handling. | Pass |
 | Path/reference consistency | Key referenced files exist. Stack reports had stale lower-PR health/draft metadata. | Fixed |
-| Stack dependency | PR #573 targets #572 correctly. Refresh/revalidate #573 if #572 changes again or is merged. | Note |
+| Stack dependency | Lower-stack changes from #570, #574, and #572 are already in `main`; #573 should not reintroduce them as PR diff. | Fixed by migration |
 | Broad unrelated expansion | The PR is broad in documentation volume but scoped to the real-world validation execution package; no unrelated runtime or product layer was added. | Pass |
 
 ## Fix Applied
 
-Applied a narrow reporting/status correction:
+Applied a narrow reporting/status correction and migration refresh:
 
+- Reconciled #573 against current `main`.
 - Updated `reports/real-world-validation/pr-stack-merge-readiness.md`.
 - Updated `reports/real-world-validation/pr-stack-risk-list.md`.
 - Updated `reports/real-world-validation/pr-stack-next-actions.md`.
 - Updated `reports/checkpoints/seis-real-world-validation-continuous-v1.md`.
-- Added this review report.
-- Added `reports/pr-stack/full-stack-readiness-report.md`.
+- Updated this review report.
+- Updated `reports/pr-stack/full-stack-readiness-report.md`.
 
 No strategy layer, product layer, protocol, credit, clearing, rights, capital,
 App/SaaS, outreach result, delivery result, or evidence claim was added.
@@ -96,6 +96,6 @@ App/SaaS, outreach result, delivery result, or evidence claim was added.
 
 ## Recommendation
 
-PR #573 should remain draft. It is not blocked by fake-completion or boundary
-issues after the metadata cleanup, but it should remain draft until a human
-explicitly approves readiness.
+PR #573 can proceed to the human merge gate only after the refreshed branch
+has GitHub `canonical-health` SUCCESS and mergeability is `CLEAN` or
+`UNKNOWN`. Do not merge from this run.

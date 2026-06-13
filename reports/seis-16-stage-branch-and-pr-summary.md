@@ -4,15 +4,21 @@
 
 Current branch: `seis-16-stage-strategic-os-v1`
 
-Branch base: local `seis-9-step-continuous-execution-v1` head `cd0d44b`.
+Original branch base: local `seis-9-step-continuous-execution-v1` head
+`cd0d44b`.
+
+Current stack note: PR #571 has since received review-report commit
+`204a1a3`. PR #572 remains correctly targeted at
+`seis-9-step-continuous-execution-v1` and should be refreshed after lower
+stack PRs are finalized.
 
 ## PR Stack
 
 | PR | Title | Head | Base | State |
 | --- | --- | --- | --- | --- |
-| #570 | SEIS total assembly v1 | `seis-total-assembly-v1` | `main` | Open draft at inspection time. |
-| #571 | SEIS 9-step continuous execution v1 | `seis-9-step-continuous-execution-v1` | `seis-total-assembly-v1` | Open draft at inspection time. |
-| #572 | SEIS 16-stage strategic operating system v1 | `seis-16-stage-strategic-os-v1` | `seis-9-step-continuous-execution-v1` | Open draft at publication time. |
+| #570 | SEIS total assembly v1 | `seis-total-assembly-v1` | `main` | Open, ready for review, `canonical-health` SUCCESS. |
+| #571 | SEIS 9-step continuous execution v1 | `seis-9-step-continuous-execution-v1` | `seis-total-assembly-v1` | Open, ready for review, `canonical-health` SUCCESS. |
+| #572 | SEIS 16-stage strategic operating system v1 | `seis-16-stage-strategic-os-v1` | `seis-9-step-continuous-execution-v1` | Open draft, `canonical-health` SUCCESS. |
 
 ## Scope
 
@@ -42,6 +48,7 @@ All required validation commands passed in this branch:
 - `python3 scripts/identity_boundary_check_v1.py` - PASS
 - `python3 scripts/observation_check_v1.py` - PASS
 - `python3 scripts/creative_total_check_v3.py` - PASS
+- `python3 scripts/secret_context_safety_check_v1.py` - PASS
 - `git diff --check` - PASS
 - `git diff --cached --check` - PASS
 

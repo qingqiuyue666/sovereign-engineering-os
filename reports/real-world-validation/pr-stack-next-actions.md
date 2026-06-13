@@ -4,52 +4,42 @@ Status date: 2026-06-13
 
 ## Current Status
 
-PR #570, PR #571, and PR #572 are already open and ready for review. This run
-does not change their state.
+PR #570 has been squash-merged into `main`.
 
-PR #573 should remain draft until a human explicitly decides to mark it ready.
+PR #574 replaced original PR #571 and has been squash-merged into `main`.
 
-Do not mark PR #573 ready for review from this run.
+PR #572 has been squash-merged into `main`.
+
+PR #573 is open, non-draft, targets `main`, and is the final remaining PR in
+this migration workflow.
 
 ## Review Order
 
-Review #570 first because it is the stack base.
+The lower stack review order has completed through merge:
 
-Review #571 next after #570 is accepted as the base for continued stacked
-review.
-
-Review #572 after #571 because it adds the 16-stage strategic OS and the
-stop-building gate on top of the 9-step execution system.
-
-Review #573 after #572 because it operationalizes the stop-building gate and
-prepares the human validation boundary.
+1. #570 merged.
+2. #574 replacement for #571 merged.
+3. #572 merged.
+4. #573 remains for final human review and merge approval.
 
 ## Retargeting
 
-Do not retarget the current stack during this run.
-
-Retarget only if:
-
-- a lower PR is merged and GitHub no longer needs the branch as a base, or
-- a lower PR is abandoned and the retarget decision is documented, or
-- a reviewer explicitly asks for a different stack shape.
-
-Any retarget should be followed by validation and a new checkpoint.
+#573 has already been retargeted to `main`. Keep it on `main` for this
+migration pass. Do not create a new stack branch or strategy layer.
 
 ## Refresh Dependency
 
-PR #572 now includes review commit `10d3f77`.
-
-PR #573 should remain stacked on #572. Refresh/revalidate #573 if #572 changes
-again or is merged.
+Refresh #573 against current `main`, remove duplicate lower-stack changes from
+the PR diff, and revalidate the pushed head with GitHub `canonical-health`.
 
 ## Human Review Actions
 
-1. Confirm #570 is accepted as the base.
-2. Confirm #571 evidence-boundary language and app/productization limits.
-3. Confirm #572 Stage 16 and stop-building claim boundaries during review.
-4. Confirm #573 real-world validation package stays at
+1. Confirm #573 real-world validation package stays at
    `HUMAN_ACTION_REQUIRED`.
-5. Decide whether #573 should remain draft or be marked ready.
+2. Confirm no fake paid signal, buyer response, delivery acceptance, revenue,
+   testimonial, deployment, or customer evidence has been added.
+3. Confirm no App/SaaS/protocol/credit/clearing/rights/capital layer has been
+   implemented.
+4. Approve or reject the final merge of #573.
 
-No merge action is safe until the lower stack is accepted.
+No merge action is performed by this run.
