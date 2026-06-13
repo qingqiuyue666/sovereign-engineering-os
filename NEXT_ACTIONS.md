@@ -61,3 +61,28 @@ Covers the first 90 days after assembly.
 
 After two accepted deliveries, create a versioned delivery standard and
 stage-claim ledger.
+
+## 9-Step Execution Roadmap
+
+Immediate repository review:
+
+- Review PR #570 for SEIS v1 hardening.
+- Review PR #571 for the stacked 9-step execution system.
+- Confirm whether PR #571 should remain stacked on `seis-total-assembly-v1`
+  or be retargeted after PR #570 merges.
+
+Immediate real-world execution:
+
+- Build the first 25-target list using `validation/target-list-template.md`.
+- Run the first 10 conversations using
+  `validation/first-10-conversation-plan.md`.
+- Track outreach, discovery, buyer objections, pricing feedback, and
+  close/loss outcomes in `validation/`.
+- Apply `validation/paid-signal-criteria.md` before claiming any paid signal.
+- If a buyer accepts scope, run
+  `delivery-loops/first-ai-production-governance-audit-loop.md`.
+- After delivery, apply `assets/delivery-to-asset-conversion-rules.md`.
+
+Do not build the internal workbench, private deployment, SaaS, marketplace,
+certification, protocol, credit, clearing, rights, or capital-allocation
+systems until the evidence gates in `app/` and `product/` are satisfied.

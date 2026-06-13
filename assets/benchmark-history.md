@@ -32,3 +32,14 @@
     - Attach real delivery records, buyer objections, pricing outcomes, acceptance results, and failure records.
     - Convert repeated decisions into scorecards, policy gates, schemas, tests, and evidence packages.
     - Promote only after proof exists for the maturity stage being claimed.
+
+## Benchmark Entry Template
+
+| Date | Workflow | Metric | Baseline | After | Method | Limitation | Status |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+|  |  |  |  |  |  |  | hypothesis / measured / rejected |
+
+## Benchmark Rule
+
+Benchmarks require method, scope, and limitation. Do not generalize a single
+workflow benchmark across markets.

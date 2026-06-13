@@ -32,3 +32,15 @@
     - Attach real delivery records, buyer objections, pricing outcomes, acceptance results, and failure records.
     - Convert repeated decisions into scorecards, policy gates, schemas, tests, and evidence packages.
     - Promote only after proof exists for the maturity stage being claimed.
+
+## Tool Reliability Entry Template
+
+| Date | Tool / Model | Task | Failure Or Strength | Impact | Mitigation | Reuse Rule |
+| --- | --- | --- | --- | --- | --- | --- |
+|  |  |  |  |  |  |  |
+
+## Reliability Rule
+
+Tool outputs are claims until verified. Reliability records should change
+routing, review gates, or approval requirements when material patterns
+appear.

@@ -103,6 +103,182 @@ Boundaries verified:
   `python3 scripts/observation_check_v1.py`,
   `python3 scripts/creative_total_check_v3.py`, and `git diff --check`.
 
+## Milestone 2 Transaction Pack
+
+Status label: `FIRST_WEDGE_TRANSACTION_PACK_READY`.
+
+Repository status: `EXECUTION_KIT_READY`. The AI Engineering Production
+Governance wedge is packaged as the AI Production Governance Readiness Audit
+with buyer profile, budget source map, buying triggers, trust gap, service
+page draft, outreach bank, discovery script, pricing ladder, acceptance
+criteria, rejection rules, delivery scope, objection handling, and close/loss
+capture.
+
+Real-world status remains `MARKET_PROOF_PENDING`. No paid traction,
+customer adoption, real delivery, external certification, ROI, or market
+validation is claimed by this milestone.
+
+Layer connections added to `transaction/`, `market/`, `battlefield/`,
+`proof/`, and `distribution/` README files so the first wedge pack can be
+found from the existing SEIS architecture.
+
+Milestone 2 focused validation passed:
+`python3 scripts/identity_boundary_check_v1.py`,
+`python3 scripts/observation_check_v1.py`,
+`python3 scripts/creative_total_check_v3.py`, and `git diff --check`.
+
+## Milestone 3 Trusted Delivery Playbook
+
+Status label: `TRUSTED_DELIVERY_PLAYBOOK_READY`.
+
+Repository status: `EXECUTION_KIT_READY`. The first-wedge audit now has a
+delivery playbook, evidence package template, risk tiering, review gates,
+human approval points, rollback/remediation plan, audit log, failure record,
+client handoff, post-delivery review, and maintenance options.
+
+Controls enforced:
+
+- AI/Codex/Claude/GPT outputs are claims until verified.
+- Human approval is required for high-risk claims, external claims, secrets,
+  production changes, and client-facing readiness claims.
+- Executor and auditor roles are separated when risk is material.
+- Every delivery produces evidence, not just output.
+
+Real-world status remains `REAL_DELIVERY_PENDING`; no live production
+authority, customer delivery, external audit, or certification is claimed.
+
+Milestone 3 focused validation passed:
+`python3 scripts/identity_boundary_check_v1.py`,
+`python3 scripts/observation_check_v1.py`,
+`python3 scripts/creative_total_check_v3.py`, and `git diff --check`.
+
+## Milestone 4 Real-World Validation Kit
+
+Status label: `REAL_WORLD_VALIDATION_KIT_READY`.
+
+Repository status: `EXECUTION_KIT_READY`. The repository now includes a
+validation kit for target lists, outreach tracking, discovery notes, buyer
+objections, pricing feedback, close/loss review, paid-signal criteria,
+market-proof rules, no-fake-traction policy, and first 10 conversations.
+
+Real-world status remains `MARKET_PROOF_PENDING` and `EVIDENCE_PENDING`.
+No discovery, buyer commitment, paid signal, rejection, or market proof is
+claimed until real records are captured.
+
+Milestone 4 focused validation passed:
+`python3 scripts/identity_boundary_check_v1.py`,
+`python3 scripts/observation_check_v1.py`,
+`python3 scripts/creative_total_check_v3.py`, and `git diff --check`.
+
+## Milestone 5 First Delivery Loop Template
+
+Status label: `FIRST_DELIVERY_LOOP_TEMPLATE_READY`.
+
+Repository status: `EXECUTION_KIT_READY`. The repository now contains a
+first real-project loop for the AI Production Governance Readiness Audit,
+including client intake, current-state map, risk map, governance gap map,
+recommendation report, evidence matrix, ROI/risk-reduction hypothesis, final
+handoff, and case-study capture.
+
+Real-world status remains `REAL_DELIVERY_PENDING`. The loop is ready to use
+when a buyer accepts scope, but no actual delivery, case study, ROI, or proof
+asset is claimed.
+
+Milestone 5 focused validation passed:
+`python3 scripts/identity_boundary_check_v1.py`,
+`python3 scripts/observation_check_v1.py`,
+`python3 scripts/creative_total_check_v3.py`, and `git diff --check`.
+
+## Milestone 6 Asset Compounding System
+
+Status label: `ASSET_COMPOUNDING_SYSTEM_READY`.
+
+Repository status: `EXECUTION_KIT_READY`. The asset layer now defines how
+deliveries become cases, failures become rules, objections change pricing and
+service-page language, repeated patterns become SOPs, repeated SOPs become
+standards, and standards may later support certification, protocol, credit,
+rights, clearing, or capital-allocation gates.
+
+Real-world status remains `EVIDENCE_PENDING` because the registries contain
+templates and rules, not real delivery records.
+
+Milestone 6 focused validation passed:
+`python3 scripts/identity_boundary_check_v1.py`,
+`python3 scripts/observation_check_v1.py`,
+`python3 scripts/creative_total_check_v3.py`, and `git diff --check`.
+
+## Milestone 7 Internal App / Workbench Specification
+
+Status label: `INTERNAL_WORKBENCH_SPEC_READY`.
+
+Repository status: `APP_SPEC_READY`. The repository now specifies an
+internal workbench shell for workflow diagnosis, opportunity scoring,
+delivery command center, evidence/audit logs, asset library, human approval
+flow, AI brain routing, security boundaries, and MVP not-now items.
+
+Real-world status remains `APP_IMPLEMENTATION_PENDING`. No app runtime,
+public SaaS, live provider integration, secret manager, customer portal, or
+production control system is built or claimed.
+
+Milestone 7 focused validation passed:
+`python3 scripts/identity_boundary_check_v1.py`,
+`python3 scripts/observation_check_v1.py`,
+`python3 scripts/creative_total_check_v3.py`, and `git diff --check`.
+
+## Milestone 8 Productization / Deployment Roadmap
+
+Status label: `PRODUCTIZATION_ROADMAP_READY`.
+
+Repository status: `EXECUTION_KIT_READY`. The repository now defines
+evidence-gated paths for service-to-product transition, private deployment,
+SaaS, template marketplace, certification, protocol readiness,
+credit/clearing/rights readiness, and capital-allocation readiness.
+
+Real-world status remains `EVIDENCE_PENDING`. No public SaaS, private
+deployment, marketplace, certification, protocol, credit, clearing, rights,
+capital allocation, product launch, revenue, or Stage 9-16 maturity claim is
+made.
+
+Milestone 8 focused validation passed:
+`python3 scripts/identity_boundary_check_v1.py`,
+`python3 scripts/observation_check_v1.py`,
+`python3 scripts/creative_total_check_v3.py`, and `git diff --check`.
+
+## Milestone 9 Final Audit
+
+Status label: `SEIS_9_STEP_REPOSITORY_SYSTEM_READY`.
+
+Repository status: `READY_FOR_REVIEW`. All repository-executable work from
+Milestones 1-9 is represented by files, reports, checkpoints, and commits.
+
+Real-world status remains mixed across `MARKET_PROOF_PENDING`,
+`REAL_DELIVERY_PENDING`, `EVIDENCE_PENDING`, and `HUMAN_ACTION_REQUIRED`.
+No paid signal, customer adoption, delivery, external audit, certification,
+app implementation, product launch, protocol adoption, credit/clearing/rights
+system, capital-allocation system, or Stage 16 completion is claimed.
+
+Final artifacts:
+
+- `SEIS_9_STEP_STATUS.md`
+- `NEXT_ACTIONS.md`
+- `reports/seis-9-step-final-audit.md`
+- `reports/seis-9-step-gap-list.md`
+- `reports/seis-9-step-fix-plan.md`
+- `reports/seis-9-step-checkpoint-final.md`
+- `reports/branch-and-pr-summary.md`
+- `reports/checkpoints/seis-9-step-milestone-09-2026-06-13.md`
+
+Milestone 9 focused validation passed:
+`python3 scripts/identity_boundary_check_v1.py`,
+`python3 scripts/observation_check_v1.py`,
+`python3 scripts/creative_total_check_v3.py`, `git diff --check`, and a
+final artifact presence check.
+
+`make ci` was attempted during final PR-body update. Test phases reached in
+that run reported `OK`; the Makefile then failed at `diff-check` because
+`git status --short` is not empty due to the preserved untracked
+`reports/creative/production_spine_v1/` local artifacts.
+
 ## What Should Be Executed Next
 
 - Run discovery for AI Engineering Production Governance.

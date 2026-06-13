@@ -21,6 +21,27 @@ that should not be forced in this pass.
   language.
 - Clarified that scaffold completion is not paid traction, market proof,
   external audit, app/product launch, SaaS readiness, or Stage 16 completion.
+- Packaged the first wedge as a bounded readiness-audit transaction with
+  buyer, budget, trigger, trust-gap, pricing, acceptance, rejection,
+  discovery, outreach, delivery-scope, objection, and close/loss assets.
+- Added first-wedge trusted-delivery playbook assets for evidence packages,
+  risk tiering, review gates, human approvals, rollback/remediation, audit
+  logs, failure records, handoff, post-delivery review, and maintenance.
+- Added real-world validation kit templates and policies for target lists,
+  outreach, discovery, objections, pricing feedback, close/loss review,
+  paid-signal criteria, market-proof rules, and no-fake-traction controls.
+- Added first delivery loop templates for intake, current state, risk,
+  governance gaps, recommendations, evidence, ROI/risk reduction, final
+  handoff, and case-study/asset capture.
+- Added asset compounding doctrine, delivery-to-asset conversion rules,
+  registry templates, template reuse ledger, and standardization candidate
+  ledger.
+- Added internal workbench app specification, AI brain routing boundaries,
+  security/permission boundaries, and MVP not-now list without implementing
+  a runtime.
+- Added productization and deployment roadmap gates for private deployment,
+  SaaS, templates, certification, protocol, credit/clearing/rights, and
+  capital allocation.
 
 ## Deferred Fixes
 
@@ -33,6 +54,13 @@ that should not be forced in this pass.
 | Build internal app/workbench runtime | Premature for this pass | Specify after execution kits exist; implement only after safe approval |
 | Launch product/SaaS | Evidence not present | Wait for paid delivery, repeated workflow patterns, and support readiness |
 | Market proof claims | Requires external buyer evidence | Run first-wedge discovery |
+| Validate first wedge with buyers | Requires outreach and discovery | Use `first-wedge/` pack and record outcomes in Milestone 4 validation logs |
+| Prove trusted delivery | Requires a real accepted delivery | Use the Milestone 3 playbook on the first real audit and record evidence |
+| Fill validation records | Requires human outreach | Execute the first 10 conversation plan and update validation logs |
+| Execute first delivery loop | Requires accepted buyer scope | Use `delivery-loops/first-ai-production-governance-audit-loop.md` after paid or high-commitment signal |
+| Populate asset registries | Requires real delivery records | Apply `assets/delivery-to-asset-conversion-rules.md` after each delivery |
+| Implement internal workbench | Requires repeated workflow patterns or explicit approval | Keep as `APP_IMPLEMENTATION_PENDING` until evidence supports build |
+| Productize beyond service | Requires repeated paid delivery evidence | Follow `product/service-to-product-transition-rules.md` and `product/do-not-productize-yet.md` |
 | Full `make ci` | Current pass intentionally leaves a dirty worktree and `make ci` includes diff checking | Run after review/staging or in clean CI |
 
 ## Approval Needed

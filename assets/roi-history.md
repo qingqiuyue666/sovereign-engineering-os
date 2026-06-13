@@ -32,3 +32,15 @@
     - Attach real delivery records, buyer objections, pricing outcomes, acceptance results, and failure records.
     - Convert repeated decisions into scorecards, policy gates, schemas, tests, and evidence packages.
     - Promote only after proof exists for the maturity stage being claimed.
+
+## ROI Entry Template
+
+| Date | Project | ROI Hypothesis | Measurement | Evidence | Limitation | Status |
+| --- | --- | --- | --- | --- | --- | --- |
+|  |  |  |  |  |  | hypothesis / measured / rejected |
+
+## ROI Rule
+
+Risk reduction, time saved, or incident avoidance may be recorded as a
+hypothesis. Do not claim proven ROI without before/after measurement and
+buyer acceptance.

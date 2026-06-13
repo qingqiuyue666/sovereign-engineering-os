@@ -33,3 +33,15 @@
     - Attach real delivery records, buyer objections, pricing outcomes, acceptance results, and failure records.
     - Convert repeated decisions into scorecards, policy gates, schemas, tests, and evidence packages.
     - Promote only after proof exists for the maturity stage being claimed.
+
+## Milestone 3 Connection
+
+The first wedge delivery process is specified in
+`first-wedge/delivery-playbook.md`. It requires verified evidence,
+human approval for high-risk and external claims, executor/auditor
+separation when risk is material, rollback/remediation records, audit logs,
+failure records, client handoff, and post-delivery review.
+
+Milestone 5 adds the first complete delivery loop in `delivery-loops/`,
+which should be used only after a real buyer accepts scope and evidence
+access.

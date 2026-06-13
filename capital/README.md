@@ -32,3 +32,10 @@
     - Attach real delivery records, buyer objections, pricing outcomes, acceptance results, and failure records.
     - Convert repeated decisions into scorecards, policy gates, schemas, tests, and evidence packages.
     - Promote only after proof exists for the maturity stage being claimed.
+
+## Milestone 8 Gate
+
+Use `product/capital-allocation-readiness-gates.md` before any capital
+allocation language. Current capital files remain pre-structure and do not
+create an investment product, fund, allocation engine, or financial
+recommendation.

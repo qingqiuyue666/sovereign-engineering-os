@@ -31,3 +31,14 @@
     - Attach real delivery records, buyer objections, pricing outcomes, acceptance results, and failure records.
     - Convert repeated decisions into scorecards, policy gates, schemas, tests, and evidence packages.
     - Promote only after proof exists for the maturity stage being claimed.
+
+## Milestone 2 Connection
+
+The first market hypothesis is packaged in `first-wedge/target-customer-profile.md`,
+`first-wedge/budget-source-map.md`, `first-wedge/buying-trigger-map.md`, and
+`first-wedge/trust-gap-analysis.md`. These files remain hypotheses until
+validated by outreach, discovery, paid signal, or rejection records.
+
+Milestone 4 validation records live in `validation/`. Market proof requires
+logged buyer role, trigger, budget path, objection, evidence access, pricing
+response, and outcome.

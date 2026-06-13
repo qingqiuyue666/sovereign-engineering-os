@@ -32,3 +32,10 @@
     - Attach real delivery records, buyer objections, pricing outcomes, acceptance results, and failure records.
     - Convert repeated decisions into scorecards, policy gates, schemas, tests, and evidence packages.
     - Promote only after proof exists for the maturity stage being claimed.
+
+## Milestone 8 Gate
+
+Use `product/certification-path.md` and
+`product/template-marketplace-path.md` before ecosystem language. Current
+ecosystem files remain placeholders until repeated standards and external
+trust evidence exist.
