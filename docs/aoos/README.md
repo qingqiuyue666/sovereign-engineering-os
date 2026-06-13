@@ -41,8 +41,8 @@ operation, recovery, learning, and cross-domain repetition records exist.
   interface records.
 - `examples/aoos/stage45-interface-fixture-v1.json` is the minimal fixture
   checked against those contracts.
-- `templates/aoos/` contains reusable evidence, failure, incident, reality,
-  tool ROI, routing, and acceptance-rubric templates.
+- `templates/aoos/` contains reusable mission brief, evidence, failure,
+  incident, reality, tool ROI, routing, and acceptance-rubric templates.
 - `scripts/aoos_stage45_check_v1.py` verifies the required Stage 4/5 anchors
   exist, contain the minimum safety terms, and have schema/fixture coverage.
 

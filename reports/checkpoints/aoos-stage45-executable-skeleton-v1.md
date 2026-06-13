@@ -76,6 +76,7 @@ map, and template set that sits behind the existing `AGENTS.md` and
 - `docs/aoos/schemas/threat-model-record.schema.json`
 - `examples/aoos/stage45-interface-fixture-v1.json`
 - `templates/aoos/README.md`
+- `templates/aoos/mission-brief-template.md`
 - `templates/aoos/evidence-report-template.md`
 - `templates/aoos/failure-learning-log-template.md`
 - `templates/aoos/incident-record-template.md`
@@ -102,6 +103,7 @@ map, and template set that sits behind the existing `AGENTS.md` and
 | Gap | Current state | Next evidence needed |
 | --- | --- | --- |
 | AOOS core module map | Added as repository documentation. | Human review and repeated task records. |
+| Mission templates | Added mission brief template covering current state, scope, authority, evidence, stop conditions, rollback, and continuation. | Real task records completed from the template. |
 | Domain packs | Added initial 10-pack structure and acceptance rubric. | Domain-specific real runs and pack refinement. |
 | Evidence schema | Added template, JSON Schema, fixture, and linked existing evidence/no-fake rules. | Ledger runtime or reviewed evidence records. |
 | Failure taxonomy and learning log | Added template, taxonomy schema, fixture record, and promotion path. | Real failure records promoted to durable controls. |
@@ -129,8 +131,8 @@ map, and template set that sits behind the existing `AGENTS.md` and
 
 - L1: local command output inspected repository, PR, and latest CI success
   state.
-- L2: repository diff adds AOOS documents, templates, checkpoint, and check
-  script.
+- L2: repository diff adds AOOS documents, mission/evidence templates,
+  checkpoint, and check script.
 - L3: local validation passed for the focused AOOS/static checks and the full
   local tracer-bullet suite listed below.
 - L4: pending human review.
@@ -216,8 +218,9 @@ latest pushed workflow migration commit has a green `canonical-health` run.
   `templates/aoos/`, JSON Schemas under `docs/aoos/schemas/`, fixture
   `examples/aoos/stage45-interface-fixture-v1.json`, static checker
   `scripts/aoos_stage45_check_v1.py`, root navigation updates, CI inclusion,
-  failure taxonomy and threat-model schema records, worker-registry watchdog
-  fixture stabilization, and the Node.js 24 CI action migration.
+  mission brief template, failure taxonomy and threat-model schema records,
+  worker-registry watchdog fixture stabilization, and the Node.js 24 CI action
+  migration.
 - Do not recreate a parallel protocol authority layer. `AGENTS.md` and
   `docs/agent-protocols/` remain the execution authority.
 - Do not stage or delete `reports/creative/production_spine_v1/`.
