@@ -12,7 +12,7 @@ Branch base: local `seis-9-step-continuous-execution-v1` head `cd0d44b`.
 | --- | --- | --- | --- | --- |
 | #570 | SEIS total assembly v1 | `seis-total-assembly-v1` | `main` | Open draft at inspection time. |
 | #571 | SEIS 9-step continuous execution v1 | `seis-9-step-continuous-execution-v1` | `seis-total-assembly-v1` | Open draft at inspection time. |
-| Pending | SEIS 16-stage strategic operating system v1 | `seis-16-stage-strategic-os-v1` | `seis-9-step-continuous-execution-v1` | Draft PR to be created after validation and push. |
+| #572 | SEIS 16-stage strategic operating system v1 | `seis-16-stage-strategic-os-v1` | `seis-9-step-continuous-execution-v1` | Open draft at publication time. |
 
 ## Scope
 
@@ -47,4 +47,4 @@ All required validation commands passed in this branch:
 
 ## PR Link
 
-Pending draft PR creation.
+https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/pull/572

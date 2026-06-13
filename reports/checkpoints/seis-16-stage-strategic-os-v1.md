@@ -6,7 +6,8 @@
 
 ## PR
 
-Pending draft PR creation.
+Draft PR #572:
+`https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/pull/572`
 
 ## Files Created
 
