@@ -19,7 +19,7 @@ audience validation, external audit, or product-market fit.
 - Branch: `agent-operating-protocol-v1`
 - Base branch: `main`
 - PR inspected: #575, `Agent operating protocol v1`
-- PR state: open draft, mergeable at inspection time
+- PR state: open, ready for review, mergeable at inspection time
 - PR head: `agent-operating-protocol-v1`
 - PR head commit inspected before this checkpoint evidence refresh:
   `8d3eaa93b472d13521c95502cbde9e1130930e44`
@@ -186,8 +186,8 @@ map, and template set that sits behind the existing `AGENTS.md` and
 
 ## Risks And Blockers
 
-- PR #575 remains a draft PR and still requires human review before merge or
-  any stronger repository acceptance claim.
+- PR #575 is ready for review and still requires human review plus explicit
+  merge authorization before merge or any stronger repository acceptance claim.
 - The Node.js 24 CI migration is included in this PR and has passed remote CI;
   future claims must still use the latest PR check result, not a stale run.
 - The untracked `reports/creative/production_spine_v1/` directory is preserved
@@ -208,8 +208,8 @@ After this checkpoint, the next safe checkpoint is:
 
 `AOOS_STAGE_4_5_HUMAN_REVIEW_GATE`.
 
-That checkpoint requires a human reviewer decision on draft PR #575 after the
-latest pushed PR head has a green `canonical-health` run.
+That checkpoint requires a human reviewer decision on ready-for-review PR #575
+after the latest pushed PR head has a green `canonical-health` run.
 
 ## Continuation Packet
 
@@ -232,9 +232,9 @@ latest pushed PR head has a green `canonical-health` run.
 - Do not stage or delete `reports/creative/production_spine_v1/`.
 - Do not claim Stage 6/7, production operation, customer validation, delivery
   acceptance, paid signal, product-market fit, or L5 evidence.
-- Next actions: push this checkpoint evidence refresh, wait for the new PR CI
-  run, update the PR body with the latest head/run, then stop at the human
-  review gate unless explicitly authorized to continue.
+- Next actions: wait for human review or explicit merge authorization on PR
+  #575. If PR state, review feedback, checks, or evidence boundaries change,
+  inspect the new state before acting.
 - Avoid creating another checkpoint-only commit solely to refresh this packet
   unless a material artifact, check, PR state, or evidence boundary changes.
 
