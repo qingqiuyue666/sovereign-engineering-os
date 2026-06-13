@@ -108,6 +108,8 @@ documented permission, approval, and evidence boundaries.
 - `AGENTS.md` -- default AI-agent repository instructions
 - `CLAUDE.md` -- Claude-compatible project memory and boundaries
 - `docs/agent-protocols/` -- detailed stage-gated agent execution protocols
+- `docs/aoos/` -- cross-domain Agentic Organization Operating System module map, domain packs, and Stage 5 interfaces
+- `templates/aoos/` -- AOOS evidence, failure, incident, reality, tool ROI, routing, and acceptance templates
 - `playbooks/` and `checklists/` -- reusable agent execution playbooks and final-report checks
 - `SEIS_DOCTRINE.md` -- doctrine and no-fake-completion policy
 - `SEIS_STRATEGIC_OPERATING_SYSTEM_V1.md` -- highest 16-stage strategic OS
@@ -166,6 +168,7 @@ Validation artifacts:
 - `reports/real-world-validation/next-decision-gate-v1.md`
 - `reports/checkpoints/seis-real-world-validation-continuous-v1.md`
 - `reports/checkpoints/agent-operating-protocol-v1.md`
+- `reports/checkpoints/aoos-stage45-executable-skeleton-v1.md`
 - `reports/gap-list.md`
 - `reports/fix-plan.md`
 - `reports/repo-reality-inspection.md`
@@ -175,6 +178,7 @@ Validation artifacts:
 Existing repository checks remain relevant for the runtime substrate:
 
 ```bash
+python3 scripts/aoos_stage45_check_v1.py
 python3 scripts/identity_boundary_check_v1.py
 python3 scripts/observation_check_v1.py
 python3 scripts/creative_total_check_v3.py

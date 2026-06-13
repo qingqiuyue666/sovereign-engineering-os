@@ -53,3 +53,8 @@ Detailed rules live under `docs/agent-protocols/`. Start with:
 - `docs/agent-protocols/high-risk-human-gates.md`
 - `docs/agent-protocols/evidence-and-no-fake-completion.md`
 - `docs/agent-protocols/failure-handling-if-then.md`
+
+Cross-domain AOOS module routing, domain packs, Stage 5 interfaces, and
+templates live under `docs/aoos/` and `templates/aoos/`. Use them after the
+agent execution protocol has established current state, authority, and evidence
+boundaries.

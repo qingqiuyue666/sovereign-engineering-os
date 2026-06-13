@@ -384,6 +384,33 @@ not add a new SEIS strategy layer, expand business scope, perform outreach,
 deploy software, handle secrets, claim customer validation, claim paid signal,
 or claim delivery completion.
 
+## AOOS Stage 4/5 Executable Skeleton
+
+Status label: `AOOS_STAGE_4_5_EXECUTABLE_SKELETON_READY_FOR_REVIEW`.
+
+Repository status: `CROSS_DOMAIN_INTERFACE_READY_FOR_REVIEW`. The branch now
+adds an AOOS navigation layer that reuses the existing agent protocols instead
+of duplicating them:
+
+- `docs/aoos/README.md`
+- `docs/aoos/core-module-map.md`
+- `docs/aoos/domain-packs.md`
+- `docs/aoos/stage-5-interfaces.md`
+- `templates/aoos/`
+- `scripts/aoos_stage45_check_v1.py`
+- `reports/checkpoints/aoos-stage45-executable-skeleton-v1.md`
+
+This adds Stage 4/5 repository interfaces for strategy, truth/evidence,
+authority/risk, execution state, observability/audit, evaluator metrics,
+learning/memory, tool complexity, security threat modeling, reality
+validation, incident response, anti-Goodhart controls, cross-domain packs,
+evidence templates, failure learning logs, incident records, real-world
+validation logs, model/tool routing, and domain acceptance rubrics.
+
+Real-world status remains `HUMAN_ACTION_REQUIRED`. No Stage 6/7 operation,
+production deployment, customer validation, paid signal, delivery acceptance,
+audience validation, external audit, or product-market fit is claimed.
+
 ## Deliverable Status
 
 All required SEIS assembly deliverables have corresponding repository files.

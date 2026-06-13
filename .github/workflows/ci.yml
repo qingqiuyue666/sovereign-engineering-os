@@ -54,6 +54,8 @@ jobs:
         run: python scripts/creative_total_check_v3.py
       - name: Run future resilience check
         run: python scripts/future_resilience_check_v1.py
+      - name: Run AOOS Stage 4/5 static check
+        run: python scripts/aoos_stage45_check_v1.py
       - name: Run knowledge control vault tests
         run: PYTHONDONTWRITEBYTECODE=1 python -m unittest tests.tracer_bullet.test_knowledge_control_vault_v1 -v
       - name: Run agent intake boundary tests

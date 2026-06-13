@@ -11,6 +11,11 @@ large local-first governance and runtime substrate. Current repository
 readiness does not equal real-world validation, paid signal, production
 deployment, customer acceptance, or Stage 16 completion.
 
+The AOOS layer under `docs/aoos/` extends this into cross-domain human-AI
+organization operations. It is a Stage 4/5 review skeleton until repeated
+operating evidence, human acceptance, and real-world source records support
+stronger claims.
+
 ## Agent Behavior Defaults
 
 - Start from current repository state, not prior chat memory.
@@ -21,6 +26,9 @@ deployment, customer acceptance, or Stage 16 completion.
   change them.
 - Prefer narrow documentation, checkpoint, and validation fixes over broad
   rewrites.
+- Use `docs/aoos/` only as the cross-domain routing and interface layer; do
+  not create duplicate protocol authorities beside `AGENTS.md` and
+  `docs/agent-protocols/`.
 - Stop at the human review gate after opening a draft PR unless explicitly
   authorized to continue.
 

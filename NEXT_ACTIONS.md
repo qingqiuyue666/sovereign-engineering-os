@@ -121,3 +121,13 @@ and merged.
 Agent execution must stop at the human review gate for merges, direct `main`
 pushes, production deployment, real-world outreach, secret handling, new
 service or dependency introduction, and stronger evidence claims.
+
+## AOOS Stage 4/5 Stop Point
+
+Proposed AOOS repository status:
+`AOOS_STAGE_4_5_EXECUTABLE_SKELETON_READY_FOR_REVIEW`.
+
+The next safe repository action is to review the AOOS module map, domain packs,
+Stage 5 interfaces, templates, and `scripts/aoos_stage45_check_v1.py`. Stronger
+claims require CI, human review, and real operating or real-world source
+records at the matching evidence level.
