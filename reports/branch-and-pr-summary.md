@@ -4,7 +4,7 @@
 
 | Branch | Purpose | Status |
 | --- | --- | --- |
-| `seis-total-assembly-v1` | SEIS v1 assembly and Milestone 1 hardening. | Pushed; draft PR #570 updated. |
+| `seis-total-assembly-v1` | SEIS v1 assembly and Milestone 1 hardening. | Pushed; draft PR #570 reviewed; canonical-health passed. |
 | `seis-9-step-continuous-execution-v1` | Milestones 2-9 continuous execution system. | Pushed; draft PR #571 opened. |
 
 ## Pull Requests
@@ -18,7 +18,7 @@
 
 | Milestone | Commit |
 | --- | --- |
-| 1. SEIS v1 hardening | `9222362` |
+| 1. SEIS v1 hardening | `9222362`; PR #570 review readiness `6fa06fc` |
 | 2. First wedge transaction pack | `deabd2d` |
 | 3. Trusted delivery playbook | `26f93e9` |
 | 4. Real-world validation kit | `447896b` |
