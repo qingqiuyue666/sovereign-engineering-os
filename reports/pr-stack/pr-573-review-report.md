@@ -17,8 +17,8 @@ performed.
 | Branch reviewed | `seis-real-world-validation-continuous-v1` |
 | Base branch | `seis-16-stage-strategic-os-v1` |
 | Draft state | Draft |
-| Merge state | `UNKNOWN` after lower base movement |
-| CI | Previous `canonical-health` SUCCESS; recheck required after this review commit |
+| Merge state | `CLEAN` |
+| CI | `canonical-health` SUCCESS |
 | Stack dependency | #570 -> #571 -> #572 -> #573 |
 
 PR #573 is correctly stacked on PR #572 by base branch. PR #572 now includes
@@ -98,5 +98,5 @@ App/SaaS, outreach result, delivery result, or evidence claim was added.
 
 PR #573 should remain draft. It is not blocked by fake-completion or boundary
 issues after the metadata cleanup, but it should not be marked ready until
-#572 is stable, #573 is refreshed if needed, current CI is green, and a human
-approves readiness.
+#572 is finalized, #573 is refreshed if needed, and a human approves
+readiness.

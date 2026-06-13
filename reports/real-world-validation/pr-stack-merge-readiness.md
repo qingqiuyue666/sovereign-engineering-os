@@ -99,10 +99,10 @@ Residual risks:
 | Head branch | `seis-real-world-validation-continuous-v1` |
 | Base branch | `seis-16-stage-strategic-os-v1` |
 | Status | open, draft |
-| Current merge state | `UNKNOWN` after lower base movement |
-| Validation status | Previous `canonical-health` SUCCESS; recheck required after this review commit. |
+| Current merge state | `CLEAN` |
+| Validation status | `canonical-health` SUCCESS |
 | Purpose | Prepare real-world validation execution package and stop at human-action boundary. |
-| Merge recommendation | Keep stacked on #572; do not merge until #572 is stable and this branch is refreshed/revalidated. |
+| Merge recommendation | Keep stacked on #572; do not merge until #572 is finalized, this branch is refreshed if needed, and a human approves readiness. |
 
 ## Final Merge Order
 

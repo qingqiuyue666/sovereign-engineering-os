@@ -35,12 +35,13 @@ Current condition:
 - #570: `canonical-health` SUCCESS.
 - #571: `canonical-health` SUCCESS.
 - #572: `canonical-health` SUCCESS for review commit `10d3f77`.
-- #573: previous `canonical-health` SUCCESS before this review-report commit.
+- #573: `canonical-health` SUCCESS.
 
 Control:
 
 - Keep #572 draft until human readiness approval.
-- Recheck #573 after this report commit is pushed.
+- Keep #573 draft until #572 is finalized and human readiness approval is
+  recorded.
 - Do not claim full stack readiness until all current branch tips are green.
 
 ## Untracked Artifact Risk
