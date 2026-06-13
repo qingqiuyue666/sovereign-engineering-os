@@ -44,8 +44,8 @@ REQUIRED_STATUS_ANCHORS = (
 )
 
 REQUIRED_README_TOPICS = (
-    "What SEOS Solves",
-    "What SEOS Is Not",
+    "What SEIS Solves",
+    "What SEIS Is Not",
     "Quickstart",
     "Validation",
     "Observation Mode",
@@ -88,6 +88,17 @@ POSITIVE_FORBIDDEN_CLAIMS = (
     "seos is an autonomous ai executor",
     "seos is a commercial saas",
     "seos is a secret manager",
+    "seis is an os-level sandbox",
+    "seis is an os sandbox",
+    "seis provides os-level isolation",
+    "seis provides an os-level sandbox",
+    "seis is rpa",
+    "seis is a rpa",
+    "seis is a computer-control framework",
+    "seis is a computer control framework",
+    "seis is an autonomous ai executor",
+    "seis is a commercial saas",
+    "seis is a secret manager",
 )
 
 REQUIRED_NON_GOAL_PHRASES = (

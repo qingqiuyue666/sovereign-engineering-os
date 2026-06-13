@@ -1,41 +1,20 @@
-# Sovereign Engineering OS
+# Sovereign Economic Intelligence System
 
-Sovereign Engineering OS (SEOS) is being refocused into a local-first AI/VFX
-production assistant and controlled execution/evidence system. Its practical
-job is to help an operator scan local assets, classify what exists, detect
-broken or duplicated production inputs, plan shots, inspect local tool
-availability, run approved local tools where available, and record useful
-outputs or truthful failure reports.
+Sovereign Engineering OS is now assembled as SEIS: a strategic operating
+system for identifying, occupying, defending, and compounding real economic
+control points. AI is the engine, not the strategy. The strategy is to bind
+world structure, market pressure, buyer budgets, buying triggers, trust
+gaps, delivery standards, distribution, risk, rights, credit, clearing, and
+capital allocation into an execution system.
 
-SEOS still records task intent, approval state, dry-run execution receipts,
-evidence traces, replay explanations, failure bundles, and release checks. Those
-controls now serve the production workflow rather than replacing it.
-
-Product boundary:
-
-- SEOS is a local-first AI/VFX production assistant and controlled
-  execution/evidence system.
-- SEOS is not an operating-system sandbox and not an OS-level sandbox.
-- SEOS is not uncontrolled RPA, desktop automation, or computer control.
-- SEOS is not RPA.
-- SEOS is not a computer-control framework.
-- SEOS is not a cloud production platform.
-- SEOS is not a commercial SaaS platform.
-- SEOS is not externally certified.
-- Host permissions, process isolation, credential custody, EDR, containers,
-  VMs, and cloud controls remain outside the SEOS boundary.
+The repository already contains a large local-first governance, evidence,
+runtime, creative-pipeline, audit, WAL, approval, failure, replay, and
+validation substrate. This assembly does not delete that work. It promotes
+it into the trusted-delivery and proof substrate for SEIS.
 
 ## Current Status
 
-The repository contains a large amount of historical governance and readiness
-work. Active development should now be judged by real production usefulness:
-asset scans, readable reports, adapter truthfulness, shot plans, local outputs,
-hashes, materialization evidence, and actionable failure records.
-
-The repository still preserves `REAL_OPERATION_OBSERVATION_PERIOD_ACTIVE`
-artifacts as historical evidence.
-
-Historical validated facts recorded in the repository:
+Current repository facts preserved from the earlier SEOS line:
 
 - `SYSTEM_LANDED`
 - `REAL_OPERATION_OBSERVATION_PERIOD_ACTIVE`
@@ -44,404 +23,179 @@ Historical validated facts recorded in the repository:
 - `CLEAN_CLONE_VALIDATED`
 - `NO_HARD_EVIDENCE_BLOCKER_RECORDED`
 
-Release candidate `v0.1.0-rc3` is preserved as an audit checkpoint. External
-recognition has not been confirmed, and external verification is still
-required.
+Release candidate `v0.1.0-rc3` remains an audit checkpoint. External
+recognition, external certification, customer revenue, and Stage 16
+completion are not claimed.
 
-## What SEOS Solves
+## What SEIS Solves
 
-AI-assisted engineering often leaves a gap between a human request and a
-reviewable engineering record. SEOS narrows that gap by making the governance
-objects explicit:
+SEIS narrows the gap between economic strategy and trusted execution:
 
-- task contracts describe requested work without granting hidden authority
-- approval and rejection receipts make human decisions inspectable
-- dry-run execution receipts bind outcomes to policy, inputs, and code state
-- evidence traces connect claims to artifacts and validation commands
-- replay explanations state what can and cannot be reconstructed
-- failure bundles preserve bounded, digest-oriented failure context
+- it asks who controls budget, what pressure forces action, and what
+  trigger can make a buyer move now
+- it selects market wedges by control-point quality, not by feature novelty
+- it converts delivery into evidence, case material, workflow assets,
+  objections, pricing records, audit traces, and standards
+- it keeps AI, humans, tools, and local runtimes inside permission,
+  evidence, rollback, and review boundaries
+- it preserves a Stage-16-compatible path without pretending the stage has
+  been reached
 
-The design goal is not to let AI do more by default. The goal is to reduce
-manual production work while keeping local engineering and creative workflows
-reviewable, reproducible, and fail-closed.
+The current executable substrate remains local-first and evidence-first.
+Its creative pipeline and controlled execution components are integrated as
+proof, runtime, and failure-record assets, not as the full strategy.
 
-## What SEOS Is Not
+## What SEIS Is Not
 
-SEOS must not be interpreted as any of the following:
+SEIS must not be interpreted as:
 
-- an operating-system sandbox or isolation layer
-- a filesystem permission system
-- an EDR, VM, container, or secret custody system
-- RPA, browser automation, desktop automation, or computer control
-- a live-provider AI execution runtime
+- not an OS-level sandbox
+- not RPA
+- not a computer-control framework
 - not an autonomous AI executor
+- not a commercial SaaS platform
 - not a secret manager
-- a way for AI to patch files without human-gated proposal, approval, and
-  validation
-- a commercial SaaS or hosted production service
-- proof that global recognition or external signoff has happened
+- not a claim of external certification, paid adoption, or global
+  recognition
+- not proof that Stage 16 has been completed
 
-## Install
-
-Requirements:
-
-- Python `>=3.13`
-- `openpyxl>=3.1,<4`
-- Git
-
-Local editable install:
-
-```bash
-python3 -m venv .venv
-. .venv/bin/activate
-python -m pip install -e .
-seos --help
-```
-
-Without installing, the module entrypoint is available from the repository
-root:
-
-```bash
-python3 -m apps.operator_cli.main --help
-```
+Host permissions, process isolation, credential custody, endpoint defense,
+containers, virtual machines, cloud controls, and legal authority remain
+outside the SEIS boundary.
 
 ## Quickstart
 
-Create a local workspace:
+Start with the strategic operating layer:
 
-```bash
-seos init --workspace .seos-workspace
-seos status --workspace .seos-workspace --human
-```
+1. Read `SEIS_DOCTRINE.md`.
+2. Read `EIGHT_ENGINES.md`.
+3. Use `BATTLEFIELD_SCORECARD.md` and `FIRST_WEDGE_SELECTION.md` to choose
+   a wedge for a bounded 90-day paid-signal test.
+4. Use `transaction/entry-offer-template.md`,
+   `transaction/discovery-script.md`, and
+   `transaction/acceptance-criteria.md` to package the first transaction.
+5. Use `trusted-delivery/delivery-sop.md` and
+   `proof/proof-asset-spec.md` before any delivery is claimed complete.
 
-Create a governed task:
+Existing local runtime quickstart remains available through the archived
+README and the current CLI/docs files. It should be used only inside the
+documented permission, approval, and evidence boundaries.
 
-```bash
-seos task create \
-  --workspace .seos-workspace \
-  --title "review local validation" \
-  --objective "Run the local validation plan and record evidence"
-```
+## Strategic Navigation
 
-Approve and dry-run the task:
+- `SEIS_DOCTRINE.md` -- doctrine and no-fake-completion policy
+- `MATURITY_16_STAGES.md` -- long-term maturity compass
+- `EIGHT_ENGINES.md` -- operating architecture
+- `CONTROL_POINT_TAXONOMY.md` -- economic control-point logic
+- `BATTLEFIELD_SCORECARD.md` -- wedge scoring model
+- `FIRST_WEDGE_SELECTION.md` -- provisional first wedge
+- `BRAIN_GOVERNANCE.md` -- human/model/tool authority hierarchy
+- `MIGRATION_MAP.md` -- legacy asset classification and replacement map
+- `VALIDATION_REPORT.md` -- completion and residual-risk report
+- `NEXT_ACTIONS.md` -- execution plan after assembly
 
-```bash
-seos approve TASK_ID --workspace .seos-workspace --reason "operator approved"
-seos run TASK_ID --workspace .seos-workspace --dry-run
-```
+## Engine Directories
 
-Inspect evidence and replay context:
-
-```bash
-seos evidence trace TASK_ID --workspace .seos-workspace
-seos replay explain TASK_ID --workspace .seos-workspace
-seos receipt list --workspace .seos-workspace
-```
-
-Generate deterministic AI-governance support artifacts without calling a live
-provider:
-
-```bash
-seos ai bundle TASK_ID --workspace .seos-workspace
-seos ai repo-map --workspace .seos-workspace
-seos ai token-roi TASK_ID --workspace .seos-workspace
-```
-
-## SEOS Creative Pipeline
-
-SEOS Creative Pipeline is a local-first AI/VFX/3D/video workflow control plane.
-It tracks assets, shots, DCC adapters, AI generations, render jobs, approvals,
-evidence, and replay across ComfyUI, Blender, Houdini, ZBrush, Unreal Engine,
-DaVinci Resolve, and After Effects.
-
-Fixture-backed creative quickstart:
-
-```bash
-python3 seos.py creative health --json
-python3 seos.py creative scan-assets --json
-python3 seos.py creative adapter list --json
-python3 seos.py creative dashboard build --json
-```
-
-Real local asset-library scan:
-
-```bash
-ASSET_ROOT=./local_asset_library
-python3 seos.py creative scan-assets \
-  --root "$ASSET_ROOT" \
-  --mode public \
-  --output-json reports/creative/assets/local_asset_library.public.json \
-  --output-md reports/creative/assets/local_asset_library.public.md
-```
-
-Use `--mode public` for sanitized artifacts that use relative asset references.
-Use `--mode local` only for operator-local reports that may include local
-absolute paths. The scan is read-only for the asset root and never moves,
-renames, deletes, deduplicates, extracts archives, or executes DCC tools.
-
-Search a generated registry:
-
-```bash
-python3 seos.py creative search-assets \
-  --registry-json reports/creative/assets/local_asset_library.public.json \
-  --query missing-texture-sets
-```
-
-Build a local production dashboard:
-
-```bash
-python3 seos.py creative production-dashboard \
-  --registry-json reports/creative/assets/local_asset_library.public.json \
-  --output-md reports/creative/assets/local_production_dashboard.md \
-  --output-html reports/creative/assets/local_production_dashboard.html
-```
-
-Build a local tool-health dashboard:
-
-```bash
-python3 seos.py creative tool-health-dashboard \
-  --mode public \
-  --output-json reports/creative/tool_health/local_tool_health_dashboard.json \
-  --output-md reports/creative/tool_health/local_tool_health_dashboard.md \
-  --output-html reports/creative/tool_health/local_tool_health_dashboard.html
-```
-
-The tool-health dashboard reports Python, Python dependencies, Git, FFmpeg,
-Houdini/hython, ComfyUI, Blender, After Effects, DaVinci Resolve, Unreal Engine,
-and ZBrush availability without launching DCC or AI tools or requiring
-proprietary tools in default CI.
-
-Run an approved local Houdini/hython smoke when available:
-
-```bash
-python3 seos.py creative houdini-smoke \
-  --mode public \
-  --output-root work/creative_runs/houdini_smoke \
-  --approve-local-execution \
-  --approval-id approval-houdini-smoke-local-001 \
-  --result-json reports/creative/houdini/hython_smoke_result.local.json \
-  --materialization-json reports/creative/houdini/hython_smoke_materialization.local.json
-```
-
-Without Houdini, the same runner returns truthful `ENV_NOT_FOUND` evidence. If
-Houdini licensing blocks startup, it returns `LICENSE_BLOCKED` evidence.
-
-Run an approved local ComfyUI workflow smoke against a running loopback service:
-
-```bash
-python3 seos.py creative comfyui-smoke \
-  --workflow-json tests/fixtures/creative/comfyui/api_workflow_fixture_v1.json \
-  --endpoint http://127.0.0.1:8188 \
-  --output-root work/creative_runs/comfyui_smoke \
-  --approve-local-execution \
-  --approval-id approval-comfyui-smoke-local-001 \
-  --result-json reports/creative/comfyui/comfyui_smoke_result.local.json \
-  --materialization-json reports/creative/comfyui/comfyui_smoke_materialization.local.json
-```
-
-The default fixture is an API-format `EmptyImage` to `SaveImage` smoke that
-does not require model downloads. If no workflow is available, the runner
-returns `ENV_NOT_FOUND`; if local ComfyUI is not answering on loopback, it
-returns `SERVICE_UNAVAILABLE`; if approval is missing, it does not post to
-`/prompt`.
-
-Build optional adapter contracts for the remaining creative tools:
-
-```bash
-python3 seos.py creative optional-adapter-contracts \
-  --mode public \
-  --output-json reports/creative/adapters/optional_adapter_contracts.json \
-  --output-md reports/creative/adapters/optional_adapter_contracts.md
-```
-
-This reports Blender, After Effects, DaVinci Resolve, Unreal Engine, and ZBrush
-contract readiness without launching those tools or claiming execution support.
-
-Build a practical shot plan from scanned assets:
-
-```bash
-python3 seos.py creative shot plan \
-  --template energy-impact \
-  --shot-id SHOT_ENERGY_IMPACT_001 \
-  --registry-json reports/creative/assets/asset_library_report_v1.json \
-  --output-json reports/creative/shots/shot_plan_energy_impact.json \
-  --output-md reports/creative/shots/shot_plan_energy_impact.md
-```
-
-Shot templates report available candidates, missing required assets, manual
-steps, and optional approval-gated runner commands without rendering or
-launching creative tools.
-
-Pressure-test the practical project path:
-
-```bash
-python3 seos.py creative pressure-test \
-  --root tests/fixtures/creative/assets \
-  --template energy-impact \
-  --shot-id SHOT_PRESSURE_ENERGY_IMPACT_FIXTURE \
-  --tool-health-json tests/fixtures/creative/software_discovery/local_tool_health_doctor_fixture_v1.json \
-  --adapter-contracts-json reports/creative/adapters/optional_adapter_contracts_v1.json \
-  --output-json reports/creative/pressure/real_project_pressure_test_v1.json \
-  --output-md reports/creative/pressure/real_project_pressure_test_v1.md
-```
-
-The pressure test runs the scan/search/dashboard/shot-planner path and reports
-real blockers or repair work such as missing archive parts, duplicate review,
-incomplete packs, missing required shot assets, and unavailable optional local
-runners. It does not launch tools or submit jobs.
-
-Turn pressure findings into a production hardening plan:
-
-```bash
-python3 seos.py creative hardening-plan \
-  --pressure-json reports/creative/pressure/real_project_pressure_test_v1.json \
-  --output-json reports/creative/hardening/production_hardening_plan_v1.json \
-  --output-md reports/creative/hardening/production_hardening_plan_v1.md
-```
-
-The hardening plan creates prioritized repair actions and a manifest of public
-production reports with existence, size, digest, and local-path-leak checks. It
-does not copy files, build archives, mutate assets, launch tools, or submit
-jobs.
-
-Run the repeated real-works operation report:
-
-```bash
-python3 seos.py creative works-operation \
-  --registry-json reports/creative/assets/asset_library_report_v1.json \
-  --tool-health-json tests/fixtures/creative/software_discovery/local_tool_health_doctor_fixture_v1.json \
-  --adapter-contracts-json reports/creative/adapters/optional_adapter_contracts_v1.json \
-  --pressure-json reports/creative/pressure/real_project_pressure_test_v1.json \
-  --hardening-json reports/creative/hardening/production_hardening_plan_v1.json \
-  --output-json reports/creative/operation/real_works_operation_v1.json \
-  --output-md reports/creative/operation/real_works_operation_v1.md
-```
-
-The operation report checks repeated energy impact, smoke/dust,
-portal/lightning, asset-library, and editorial handoff workflows and keeps
-future development tied to workflow blockers, pressure findings, hardening
-actions, or real project needs.
-
-Run the complete read-only production inspection spine:
-
-```bash
-python3 seos.py production inspect \
-  --root tests/fixtures/creative/assets \
-  --doctor-json tests/fixtures/creative/software_discovery/local_tool_health_doctor_fixture_v1.json \
-  --output-dir reports/creative/production_spine_v1 \
-  --json
-```
-
-This single command writes the asset scan, production dashboard, tool health,
-optional adapter contracts, shot plan, pressure test, hardening plan, works
-operation report, action list, knowledge graph, and an Obsidian-compatible
-Markdown vault. The vault notes use the same SEOS knowledge frontmatter schema
-as `seos.py knowledge` exports. The vault and graph are mirrors only. The
-command does not launch DCC tools, move assets, call cloud services, create
-approvals or permits, or grant execution authority.
-
-Knowledge-layer adapters:
-
-```bash
-python3 seos.py knowledge export-logseq --workspace .seos-workspace --root ~/Logseq-SEOS --json
-python3 seos.py knowledge export-anytype --workspace .seos-workspace --output reports/knowledge/anytype_object_bundle.json --json
-python3 seos.py knowledge import-anytype --source reports/knowledge/anytype_object_bundle.json --output reports/knowledge/anytype_import_record.json --json
-python3 seos.py knowledge sync-notion --mode readonly --source reports/knowledge/anytype_import_record.json --output reports/knowledge/notion_readonly_sync_payload.json --json
-```
-
-These adapters create local mirror/proposal artifacts only. They do not turn
-Obsidian, Logseq, Anytype, or Notion into SEOS execution or authority layers.
-
-The creative pipeline defaults to read-only scans, dry-run adapter plans,
-fixture demos, and public/private separation. Real DCC execution, paid assets,
-and external adoption signals require real local evidence or verified external
-URLs; this repository does not claim external adoption.
-
-SEOS now includes a controlled local execution-plane foundation with fake-DCC
-CI smoke support and optional real DCC adapter contracts. Real DCC execution
-remains permit-gated, local-only, bounded by path and runtime policy, and does
-not convert SEOS into RPA or desktop automation.
+- `world/` -- macro forces, platform power, regulation, compute, labor,
+  and institutional risk
+- `market/` -- industries, buyers, budgets, triggers, channels, and trust
+  thresholds
+- `control-points/` -- control-point taxonomy, scorecards, and anti-
+  commodity strategy
+- `battlefield/` -- candidate wedges, kill zones, not-now list, and first
+  wedge logic
+- `transaction/` -- offers, pricing, screening, discovery, acceptance,
+  contracts, rejection, margin, and risk pricing
+- `proof/` and `distribution/` -- proof assets, cases, ROI, demos, service
+  pages, channel tests, and referral loops
+- `trusted-delivery/` and `brain/` -- audit, approvals, rollback,
+  evidence, review separation, and model hierarchy
+- `assets/`, `ecosystem/`, `protocol/`, `credit/`, and `capital/` --
+  compounding registries and Stage 9-16 pre-structure
 
 ## Validation
 
-Baseline validation:
+This assembly is documentation and policy heavy by design. It does not add
+broad runtime code, provider integrations, external APIs, secret handling,
+or heavy dependencies.
+
+Validation artifacts:
+
+- `VALIDATION_REPORT.md`
+- `reports/seis-total-assembly-audit.md`
+- `reports/gap-list.md`
+- `reports/fix-plan.md`
+- `reports/repo-reality-inspection.md`
+- `reports/legacy-asset-map.md`
+- `reports/checkpoints/seis-total-assembly-checkpoint-2026-06-13.md`
+
+Existing repository checks remain relevant for the runtime substrate:
 
 ```bash
-python3 scripts/observation_check_v1.py
 python3 scripts/identity_boundary_check_v1.py
+python3 scripts/observation_check_v1.py
 python3 scripts/creative_total_check_v3.py
-PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.tracer_bullet.test_identity_boundary_v1
-make ci
 ```
-
-`make ci` runs the canonical local health gate. It includes unit and acceptance
-tests plus a diff check that requires a clean worktree.
 
 ## Observation Mode
 
-Observation mode is a no-expansion posture. It allows evidence, documentation,
-tests, audit reports, and narrow validation checks that improve external
-reviewability. It does not authorize feature expansion, uncontrolled runtime
-execution, live provider execution, browser control, OS automation, or
-unapproved patching.
+Observation mode remains a no-expansion posture for runtime capability. It
+allows evidence, documentation, tests, audit reports, and narrow validation
+checks. It does not authorize uncontrolled execution, live provider
+execution, secret access, browser control, OS automation, or unapproved
+patching.
 
-The controlled execution-plane foundation is admitted only as a narrow evidence
-blocker closure: dry-run creative readiness cannot prove real local execution
-without a bounded worker, execution permit, output hash, result envelope, and
-materialization record. This does not weaken observation mode or authorize
-uncontrolled execution expansion.
-
-The observation record is maintained in:
-
-- `docs/runbooks/real_operation_observation_period_v1.md`
-- `reports/observation/real_operation_observation_log_v1.md`
-- `reports/observation/real_operation_observation_log_v1.json`
-- `governance/policy/observation_period_change_policy_v1.md`
+SEIS assembly adds market and control-point doctrine above the existing
+runtime. It does not weaken the existing approval, evidence, rollback, or
+failure boundaries.
 
 ## Evidence Model
 
-Major claims should map to evidence:
+Major claims must map to evidence:
 
-`claim -> risk -> control -> implementation -> validation command -> CI or script gate -> evidence artifact -> residual risk`
+`Claim -> Risk -> Control -> Implementation -> Validation command -> Gate -> Evidence artifact -> Residual risk`
 
-Wave 1 public identity evidence is documented in:
+SEIS adds economic evidence requirements:
 
-- `docs/identity/system_identity_v1.md`
-- `docs/identity/non_goals_v1.md`
-- `docs/quickstart/local_first_quickstart_v1.md`
-- `docs/architecture/seos_control_plane_v1.md`
-- `SECURITY.md`
-- `CHANGELOG.md`
-- `examples/README.md`
+`Buyer -> Budget source -> Buying trigger -> Trust gap -> Acceptance criteria -> Delivery proof -> Distribution asset -> Asset registry entry -> Maturity-stage claim`
+
+A stage is not complete because a template exists. A stage claim requires
+repository evidence or external evidence with source, date, actor, and
+acceptance record.
 
 ## Security Boundary
 
-SEOS governs engineering workflow evidence. It does not reduce the authority of
-the host process and does not custody secrets. Operators must avoid placing
-secrets in task objectives, context bundles, receipts, examples, reports, or
-issue comments. Live AI providers remain disabled by default and must not be
-used to bypass proposal-first and human-approval requirements.
+SEIS governs strategic and engineering workflow evidence. It does not
+reduce the authority of the host process and does not custody secrets.
+Operators must avoid placing secrets in task objectives, context bundles,
+receipts, examples, reports, or issue comments. Live AI providers remain
+disabled by default and must not be used to bypass proposal-first and
+human-approval requirements.
 
-Report suspected security issues with digest-only evidence. Do not paste real
-secrets, access tokens, private keys, `.env` contents, browser cookies, or
-credential-store values into an issue, PR, receipt, report, or model context.
+Report suspected security issues with digest-only evidence. Do not paste
+real secrets, access tokens, private keys, environment contents, browser
+cookies, or credential-store values into issues, pull requests, receipts,
+reports, or model context.
 
 ## Known Limitations
 
-- External audit has not yet been performed.
-- Global recognition is not confirmed.
-- Real-world 30-90 day operation evidence is still required before any stronger
-  recognition claim.
-- The CLI supports local governance flows; it is not a remote service or
-  automation platform.
-- Replay explanation is bounded by recorded evidence and must not claim
-  reconstruction when required evidence is missing.
-- Live provider admission is not enabled by default.
-- Host-level security controls remain the operator's responsibility.
+- No real customer payment is recorded by this assembly.
+- No external audit or certification is claimed.
+- The first wedge is a provisional strategic recommendation until paid
+  signal and delivery proof exist.
+- Stage 16 is a compass, not a current repository state.
+- The local runtime remains bounded by existing approvals, evidence, and
+  fail-closed policies.
+- The repository still contains historical creative-pipeline and governance
+  material that is classified rather than physically deleted.
 
 ## External Audit Readiness
 
-This repository is being prepared for external engineering, security, SRE,
-supply-chain, and AI-governance review. The strongest valid Codex-prepared
-state is `GLOBAL_RECOGNITION_READINESS_READY_FOR_EXTERNAL_REVIEW`, which still
-requires independent external verification and human audit.
+This repository is prepared for external engineering, security, market, and
+delivery review. The correct claim after this pass is:
+
+`SEIS_STRATEGIC_ASSEMBLY_READY_FOR_PAID_SIGNAL_AND_EXTERNAL_REVIEW`
+
+That claim still requires real market execution, independent verification,
+customer feedback, and human approval before any stronger recognition or
+institutional claim is made.

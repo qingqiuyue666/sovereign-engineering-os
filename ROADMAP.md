@@ -1,22 +1,44 @@
 # Roadmap
 
-Roadmap defines the V3 local-first creative pipeline policy, evidence, and validation path.
+## Purpose
 
-## Operating Boundary
+Define the current SEIS roadmap after the strategic assembly pass.
 
-- Local-first execution is the default.
-- Private assets stay out of tracked public artifacts.
-- Long render, simulation, generation, and DCC jobs require budget gates and default to dry-run plans.
-- External adoption is recorded only from real verifiable URLs and real actors.
+## Scope
 
-## Validation
+This roadmap covers market execution, delivery standardization, proof
+production, and evidence-backed maturity advancement. The previous
+creative-pipeline-only roadmap is archived under `archive/`.
 
-Run `python3 scripts/creative_total_check_v3.py` and the narrower gate for this area before public release.
+## Non-goals
 
-## Evidence
+- Do not expand runtime capability before market proof requires it.
+- Do not claim external adoption or Stage 16 completion.
+- Do not replace human approval, security boundaries, or observation-mode
+  constraints.
 
-Evidence is repository-local, schema-backed, and fixture-backed unless a real external signal is explicitly recorded.
+## Roadmap
 
-## Residual Risk
+| Horizon | Objective | Evidence Required |
+| --- | --- | --- |
+| 0-14 days | Run paid-signal discovery for AI Engineering Production Governance | Buyer list, discovery notes, objections |
+| 15-45 days | Deliver one bounded readiness audit | Evidence package, acceptance criteria, proof asset |
+| 46-90 days | Decide standardize/revise/kill | Pricing signal, buyer feedback, delivery trace |
+| 90+ days | Promote only repeated patterns | Case library, SOP, scorecard updates, standard candidate |
 
-Live DCC installations, paid asset licenses, and real community adoption require human or external confirmation.
+## Operating Rules
+
+- Stage claims remain below evidence.
+- Existing local runtime remains governed and fail-closed.
+- The first wedge is provisional until paid signal exists.
+
+## Failure Modes
+
+- Building credit, rights, clearing, or marketplace systems before evidence.
+- Treating internal docs as market validation.
+- Letting older creative-only framing obscure the economic strategy.
+
+## Upgrade Path
+
+Replace this roadmap with an evidence-backed operating plan after the first
+paid delivery or after the first wedge is killed.
