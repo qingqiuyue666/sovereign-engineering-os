@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "docs/aoos/schemas/failure-taxonomy-entry.schema.json",
+  "title": "AOOS Failure Taxonomy Entry",
+  "schema_version": "aoos-stage5-interface-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "failure_class",
+    "description",
+    "domain_pack",
+    "triggers",
+    "evidence_required",
+    "severity_hint",
+    "repair_policy",
+    "promotion_path",
+    "forbidden_claims"
+  ],
+  "properties": {
+    "failure_class": {"type": "string"},
+    "description": {"type": "string"},
+    "domain_pack": {"type": "string"},
+    "triggers": {"type": "array", "items": {"type": "string"}},
+    "evidence_required": {"type": "array", "items": {"type": "string"}},
+    "severity_hint": {"type": "string"},
+    "repair_policy": {"type": "string"},
+    "promotion_path": {"type": "string"},
+    "forbidden_claims": {"type": "array", "items": {"type": "string"}}
+  }
+}

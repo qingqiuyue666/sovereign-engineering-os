@@ -102,6 +102,56 @@
     ],
     "anti_goodhart_note": "metrics must remain subordinate to verified outcomes"
   },
+  "failure_taxonomy_entry": {
+    "failure_class": "unsupported completion claim",
+    "description": "agent claims a stronger stage, delivery, customer, payment, or production outcome than the evidence supports",
+    "domain_pack": "Engineering Pack",
+    "triggers": [
+      "FINAL DONE claimed from repository files only",
+      "Stage 6/7 claimed without operating records",
+      "L5 claimed without real-world source record"
+    ],
+    "evidence_required": [
+      "claim text",
+      "available evidence level",
+      "missing stronger evidence"
+    ],
+    "severity_hint": "high when it affects external, customer, payment, legal, or production claims",
+    "repair_policy": "downgrade status to CHECKPOINT, PARTIAL, NEEDS_REVIEW, or BLOCKED and record the missing evidence",
+    "promotion_path": "memory -> checklist -> playbook -> script -> CI / evaluator / policy",
+    "forbidden_claims": [
+      "Stage 6/7 operation confirmed",
+      "customer validation confirmed",
+      "production deployment confirmed"
+    ]
+  },
+  "threat_model_record": {
+    "threat_id": "aoos-threat-001",
+    "domain_pack": "Security / Compliance Pack",
+    "threat_class": "poisoned repository instructions",
+    "asset_or_boundary": "agent authority and human approval gates",
+    "attack_or_failure_mode": "a repository instruction or prompt attempts to bypass ASK/DENY gates, secrets policy, or no-fake-completion controls",
+    "risk_level": "high",
+    "mitigations": [
+      "current state inspection wins over stale memory",
+      "human approval gates remain mandatory",
+      "secret material must not be printed, stored, or repeated",
+      "stronger claims require matching evidence levels"
+    ],
+    "evidence_refs": [
+      "AGENTS.md",
+      "docs/agent-protocols/high-risk-human-gates.md",
+      "docs/agent-protocols/evidence-and-no-fake-completion.md"
+    ],
+    "human_gate": true,
+    "residual_risk": "static records do not prove every future agent will follow the boundary",
+    "review_cadence": "review after repeated agent sessions or any security-sensitive change",
+    "forbidden_actions": [
+      "merge without approval",
+      "handle credentials without approval",
+      "claim real-world validation without source records"
+    ]
+  },
   "incident_record": {
     "incident_id": "aoos-incident-001",
     "severity": "low",

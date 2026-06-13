@@ -68,10 +68,12 @@ map, and template set that sits behind the existing `AGENTS.md` and
 - `docs/aoos/schemas/domain-pack-manifest.schema.json`
 - `docs/aoos/schemas/evaluator-metrics-snapshot.schema.json`
 - `docs/aoos/schemas/evidence-ledger-entry.schema.json`
+- `docs/aoos/schemas/failure-taxonomy-entry.schema.json`
 - `docs/aoos/schemas/incident-record.schema.json`
 - `docs/aoos/schemas/memory-lifecycle-entry.schema.json`
 - `docs/aoos/schemas/model-tool-routing-decision.schema.json`
 - `docs/aoos/schemas/observability-event.schema.json`
+- `docs/aoos/schemas/threat-model-record.schema.json`
 - `examples/aoos/stage45-interface-fixture-v1.json`
 - `templates/aoos/README.md`
 - `templates/aoos/evidence-report-template.md`
@@ -102,13 +104,14 @@ map, and template set that sits behind the existing `AGENTS.md` and
 | AOOS core module map | Added as repository documentation. | Human review and repeated task records. |
 | Domain packs | Added initial 10-pack structure and acceptance rubric. | Domain-specific real runs and pack refinement. |
 | Evidence schema | Added template, JSON Schema, fixture, and linked existing evidence/no-fake rules. | Ledger runtime or reviewed evidence records. |
-| Failure/learning log | Added template and promotion path. | Real failure records promoted to durable controls. |
+| Failure taxonomy and learning log | Added template, taxonomy schema, fixture record, and promotion path. | Real failure records promoted to durable controls. |
 | Incident protocol | Linked existing incident response and added AOOS record template plus schema. | Drill or real incident evidence. |
 | Tool/ROI governance | Linked existing tool-selection gate and added ROI template. | Tool review records and exit decisions. |
 | Memory lifecycle | Linked existing memory governance and Stage 5 fields. | Memory registry or reviewed promotion records. |
 | Reality validation | Added log template and linked validation program. | Human-run real-world source records. |
 | Model/tool routing | Added routing decision template, schema, and pack. | Reviewed routing decisions and evaluator outcomes. |
 | Evaluator metrics | Added metric placeholders, schema, fixture, and required fields. | Numerators, denominators, and operating history. |
+| Security threat model | Added Stage 5 threat-model schema and fixture record linked to repository gates. | Reviewed threat-model cycles and real security findings. |
 
 ## Stage 4/5 Upgrade Plan
 
@@ -137,7 +140,8 @@ map, and template set that sits behind the existing `AGENTS.md` and
 
 - `python3 scripts/aoos_stage45_check_v1.py` passed.
   This check now validates the AOOS Markdown anchors, JSON Schema contracts,
-  and `examples/aoos/stage45-interface-fixture-v1.json`.
+  failure taxonomy, threat-model record, and
+  `examples/aoos/stage45-interface-fixture-v1.json`.
 - `python3 scripts/identity_boundary_check_v1.py` passed.
 - `python3 scripts/observation_check_v1.py` passed.
 - `python3 scripts/secret_context_safety_check_v1.py` passed.
@@ -212,8 +216,8 @@ latest pushed workflow migration commit has a green `canonical-health` run.
   `templates/aoos/`, JSON Schemas under `docs/aoos/schemas/`, fixture
   `examples/aoos/stage45-interface-fixture-v1.json`, static checker
   `scripts/aoos_stage45_check_v1.py`, root navigation updates, CI inclusion,
-  worker-registry watchdog fixture stabilization, and the Node.js 24 CI action
-  migration.
+  failure taxonomy and threat-model schema records, worker-registry watchdog
+  fixture stabilization, and the Node.js 24 CI action migration.
 - Do not recreate a parallel protocol authority layer. `AGENTS.md` and
   `docs/agent-protocols/` remain the execution authority.
 - Do not stage or delete `reports/creative/production_spine_v1/`.

@@ -100,6 +100,46 @@ Minimum failure classes:
 - domain acceptance failure
 - real-world validation missing
 
+Machine-readable failure entries must state the failure class, description,
+domain pack, triggers, evidence required, severity hint, repair policy,
+promotion path, and forbidden claims.
+
+Schema: `docs/aoos/schemas/failure-taxonomy-entry.schema.json`.
+
+Fixture key: `failure_taxonomy_entry`.
+
+## Threat Model Interface
+
+Required fields:
+
+- threat id
+- domain pack
+- threat class
+- asset or boundary
+- attack or failure mode
+- risk level
+- mitigations
+- evidence refs
+- human gate
+- residual risk
+- review cadence
+- forbidden actions
+
+Minimum threat classes:
+
+- secret or credential exposure
+- prompt injection or malicious instructions
+- poisoned repository instructions
+- dependency or supply-chain compromise
+- unsafe shell command
+- platform or account boundary violation
+- private data exfiltration
+- legal, payment, customer, or market-claim overreach
+
+Schema: `docs/aoos/schemas/threat-model-record.schema.json`.
+
+Fixture key: `threat_model_record`.
+
 ## Incident Interface
 
 Use `templates/aoos/incident-record-template.md` for AOOS incidents and link
