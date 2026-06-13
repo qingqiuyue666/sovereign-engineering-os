@@ -34,6 +34,13 @@ exist for review. It does not claim real-world validation, paid signal,
 delivery, App implementation, SaaS, protocol adoption, credit, clearing,
 rights, capital allocation, or Stage 16 maturity.
 
+The real-world validation execution package adds the current repository
+readiness label: `SEIS_REAL_WORLD_VALIDATION_READY`. That label means the PR
+stack review, validation battle plan, target/outreach system,
+discovery/pricing evidence system, bounded delivery package, evidence
+ingestion rules, asset-compounding templates, and next decision gate exist.
+The real-world status remains `HUMAN_ACTION_REQUIRED`.
+
 ## What SEIS Solves
 
 SEIS narrows the gap between economic strategy and trusted execution:
@@ -78,15 +85,17 @@ Start with the strategic operating layer:
 2. Read `SEIS_16_STAGE_EXECUTION_GATES.md`.
 3. Read `REAL_WORLD_VALIDATION_COMMAND_LAYER_V1.md`.
 4. Read `STOP_BUILDING_AND_VALIDATE_GATE.md`.
-5. Read `SEIS_DOCTRINE.md`.
-6. Read `EIGHT_ENGINES.md`.
-7. Use `BATTLEFIELD_SCORECARD.md` and
+5. Read `reports/real-world-validation/human-action-required-checkpoint.md`.
+6. Read `validation/real-world-validation-battle-plan-v1.md`.
+7. Read `SEIS_DOCTRINE.md`.
+8. Read `EIGHT_ENGINES.md`.
+9. Use `BATTLEFIELD_SCORECARD.md` and
    `battlefield/first-wedge-selection.md` to choose a wedge for a bounded
    90-day paid-signal test.
-8. Use `transaction/entry-offer-template.md`,
+10. Use `transaction/entry-offer-template.md`,
    `transaction/discovery-script.md`, and
    `transaction/acceptance-criteria.md` to package the first transaction.
-9. Use `trusted-delivery/delivery-sop.md` and
+11. Use `trusted-delivery/delivery-sop.md` and
    `proof/proof-asset-spec.md` before any delivery is claimed complete.
 
 Existing local runtime quickstart remains available through the archived
@@ -101,6 +110,11 @@ documented permission, approval, and evidence boundaries.
 - `REAL_WORLD_VALIDATION_COMMAND_LAYER_V1.md` -- human validation actions and evidence routing
 - `STOP_BUILDING_AND_VALIDATE_GATE.md` -- stop-building rule after repository readiness
 - `SEIS_16_STAGE_STATUS.md` -- current stage-by-stage status table
+- `reports/real-world-validation/` -- PR stack review, evidence ingestion, decision gate, and human-action checkpoint
+- `validation/real-world-validation-battle-plan-v1.md` -- first human validation campaign plan
+- `validation/target-list-v1.md` -- 10 privacy-safe target slots for manual outreach
+- `delivery-loops/first-bounded-delivery-package-v1.md` -- one-workflow delivery package for accepted scope
+- `assets/evidence-to-asset-conversion-v1.md` -- real-evidence-to-asset rules
 - `MATURITY_16_STAGES.md` -- long-term maturity compass
 - `EIGHT_ENGINES.md` -- operating architecture
 - `CONTROL_POINT_TAXONOMY.md` -- economic control-point logic
@@ -143,6 +157,9 @@ Validation artifacts:
 - `reports/seis-16-stage-strategic-audit.md`
 - `reports/seis-16-stage-gap-list.md`
 - `reports/seis-16-stage-fix-plan.md`
+- `reports/real-world-validation/pr-stack-merge-readiness.md`
+- `reports/real-world-validation/next-decision-gate-v1.md`
+- `reports/checkpoints/seis-real-world-validation-continuous-v1.md`
 - `reports/gap-list.md`
 - `reports/fix-plan.md`
 - `reports/repo-reality-inspection.md`

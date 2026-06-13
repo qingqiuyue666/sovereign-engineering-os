@@ -18,10 +18,15 @@ Covers the first 90 days after assembly.
 
 ## 0-14 Days
 
-- Build a target list of 25 teams likely to have AI-written code entering
-  production.
-- Create one service page from `distribution/service-page-template.md`.
-- Send discovery using `transaction/discovery-script.md`.
+- Confirm or override the selected first validation battlefield in
+  `validation/first-battlefield-decision-record.md`.
+- Fill the 10 target slots in `validation/target-list-v1.md` with real
+  privacy-safe targets.
+- Send manual outreach using `validation/outreach-message-pack-v1.md`.
+- Record every response in `validation/outreach-log-template-v1.md`.
+- Classify responses with `validation/outreach-response-classifier.md`.
+- Run discovery using `validation/discovery-script-v1.md`.
+- Test pricing using `validation/pricing-test-script-v1.md`.
 - Reject prospects that seek uncontrolled automation or secret handling.
 - Update `market/buyer-map.md` and `market/buying-trigger-map.md` from real
   responses.
@@ -29,7 +34,8 @@ Covers the first 90 days after assembly.
 ## 15-45 Days
 
 - Close one paid or equivalent high-commitment readiness audit.
-- Deliver the audit using `trusted-delivery/delivery-sop.md`.
+- Deliver one accepted workflow using
+  `delivery-loops/first-bounded-delivery-package-v1.md`.
 - Produce evidence package, acceptance record, failure record, and proof
   assets.
 - Record objections, pricing, buyer trigger, and ROI hypothesis in
@@ -88,9 +94,18 @@ Immediate real-world execution:
   close/loss outcomes in `validation/`.
 - Apply `validation/paid-signal-criteria.md` before claiming any paid signal.
 - If a buyer accepts scope, run
-  `delivery-loops/first-ai-production-governance-audit-loop.md`.
-- After delivery, apply `assets/delivery-to-asset-conversion-rules.md`.
+  `delivery-loops/first-bounded-delivery-package-v1.md`.
+- After delivery, apply `assets/evidence-to-asset-conversion-v1.md`.
 
 Do not build the internal workbench, private deployment, SaaS, marketplace,
 certification, protocol, credit, clearing, rights, or capital-allocation
 systems until the evidence gates in `app/` and `product/` are satisfied.
+
+## Real-World Validation Stop Point
+
+Current repository status: `SEIS_REAL_WORLD_VALIDATION_READY`.
+
+Current real-world status: `HUMAN_ACTION_REQUIRED`.
+
+The next action is manual outreach and evidence capture, not more repository
+strategy expansion.
