@@ -2,26 +2,29 @@
 
 Status date: 2026-06-13
 
-## Draft Status
+## Current Status
 
-Keep #570, #571, #572, and the new real-world validation PR as draft until the
-stack is reviewed and checks are accepted.
+PR #570 and PR #571 are already open and ready for review. This run does not
+change their state.
+
+PR #572 and PR #573 should remain draft until the current review commits are
+checked, the lower stack is accepted, and a human explicitly decides to mark
+them ready.
 
 Do not mark any PR ready for review from this run.
 
 ## Review Order
 
-Review #570 first because it is the stack base and currently has an unstable
-merge/check state.
+Review #570 first because it is the stack base.
 
-Review #571 next after #570 is stable, merged, or explicitly accepted as the
-base for continued stacked review.
+Review #571 next after #570 is accepted as the base for continued stacked
+review.
 
 Review #572 after #571 because it adds the 16-stage strategic OS and the
 stop-building gate on top of the 9-step execution system.
 
-Review the new real-world validation PR after #572 because it operationalizes
-the stop-building gate and prepares the human validation boundary.
+Review #573 after #572 because it operationalizes the stop-building gate and
+prepares the human validation boundary.
 
 ## Retargeting
 
@@ -35,22 +38,20 @@ Retarget only if:
 
 Any retarget should be followed by validation and a new checkpoint.
 
-## New PR Placement
+## Refresh Dependency
 
-The new PR should remain stacked on #572:
+PR #572 now includes review commit `10d3f77`.
 
-- Base: `seis-16-stage-strategic-os-v1`
-- Head: `seis-real-world-validation-continuous-v1`
-
-This keeps the real-world validation package attached to the 16-stage
-strategic OS and avoids mixing it directly into #571 or #570.
+PR #573 should remain stacked on #572, but it should be refreshed after #572
+is finalized so the final branch history contains the lower review reports.
 
 ## Human Review Actions
 
-1. Inspect #570's failed `canonical-health` job.
-2. Decide whether #570 needs a fix commit or documented acceptance.
-3. Review #571 for evidence-boundary language and app/productization limits.
-4. Review #572 for Stage 16 and stop-building claim boundaries.
-5. Review this PR for real-world validation readiness.
+1. Confirm #570 is accepted as the base.
+2. Confirm #571 evidence-boundary language and app/productization limits.
+3. Confirm #572 Stage 16 and stop-building claim boundaries.
+4. Confirm #573 real-world validation package stays at
+   `HUMAN_ACTION_REQUIRED`.
+5. Decide whether #572 and #573 should remain draft or be marked ready.
 
-No merge action is safe until the lower stack is understood.
+No merge action is safe until the lower stack is accepted.

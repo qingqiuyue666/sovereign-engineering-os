@@ -4,35 +4,44 @@ Status date: 2026-06-13
 
 ## Stack-Order Risk
 
-Risk: later PRs depend on prior stacked branches. Merging or retargeting out
-of order could hide conflicts, duplicate commits, or remove the intended
-review context.
+Risk: later PRs depend on prior stacked branches. Merging, rebasing, or
+retargeting out of order could hide conflicts, duplicate commits, or remove
+the intended review context.
 
 Current condition:
 
 - #570 targets `main`.
 - #571 targets `seis-total-assembly-v1`.
 - #572 targets `seis-9-step-continuous-execution-v1`.
-- This branch targets `seis-16-stage-strategic-os-v1`.
+- #573 targets `seis-16-stage-strategic-os-v1`.
+- #572 now includes review commit `10d3f77`; #573 has not been refreshed onto
+  that commit.
 
 Control:
 
 - Review and merge only from the bottom of the stack upward.
-- Keep this PR stacked on #572 unless #572 is merged or an explicit retarget
+- Keep #573 stacked on #572 unless #572 is merged or an explicit retarget
   decision is recorded.
+- Refresh #573 after #572 is finalized.
 
 ## CI / Canonical-Health Risk
 
-Risk: #570 currently reports `canonical-health` failure while #571 and #572
-report success. A failing base PR can invalidate confidence in higher stacked
-PRs even when their own checks pass.
+Risk: current status can drift when a lower stacked branch receives a review
+commit. A newer lower-branch check must complete before higher stacked PRs can
+be considered stable.
+
+Current condition:
+
+- #570: `canonical-health` SUCCESS.
+- #571: `canonical-health` SUCCESS.
+- #572: `canonical-health` SUCCESS for review commit `10d3f77`.
+- #573: previous `canonical-health` SUCCESS before this review-report commit.
 
 Control:
 
-- Investigate #570 before merge.
-- Do not claim full stack readiness until the base PR health is understood.
-- Record any known clean-worktree gate issue separately from a real test
-  failure.
+- Keep #572 draft until human readiness approval.
+- Recheck #573 after this report commit is pushed.
+- Do not claim full stack readiness until all current branch tips are green.
 
 ## Untracked Artifact Risk
 
@@ -43,13 +52,13 @@ or broadly ignoring it would mix unrelated generated artifacts into this PR.
 Control:
 
 - Preserve the directory.
-- Stage only files created or modified by this run.
+- Stage only files created or modified by this review run.
 - Keep any `.gitignore` handling narrow unless explicitly requested.
 
 ## Fake-Completion Risk
 
-Risk: strategic and validation files can look like proof even when no buyer,
-pricing, delivery, adoption, or revenue evidence exists.
+Risk: validation files can look like proof even when no buyer, pricing,
+delivery, adoption, or revenue evidence exists.
 
 Control:
 
@@ -57,7 +66,7 @@ Control:
 - Use `HUMAN_ACTION_REQUIRED`, `MARKET_PROOF_PENDING`,
   `REAL_DELIVERY_PENDING`, and `EVIDENCE_PENDING` where evidence is missing.
 - Do not write fake case studies, fake testimonials, fake outreach results,
-  fake pricing feedback, or fake customer commitments.
+  fake pricing feedback, fake customer commitments, or fake delivery proof.
 
 ## Path / Reference Consistency Risk
 
@@ -80,7 +89,7 @@ Recommended order:
 1. #570
 2. #571
 3. #572
-4. `seis-real-world-validation-continuous-v1`
+4. #573
 
-Keep all PRs draft until their review and validation status is explicitly
-accepted.
+Keep #572 and #573 draft until their review and validation status is
+explicitly accepted.
