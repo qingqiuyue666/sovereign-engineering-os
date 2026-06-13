@@ -27,6 +27,13 @@ Release candidate `v0.1.0-rc3` remains an audit checkpoint. External
 recognition, external certification, customer revenue, and Stage 16
 completion are not claimed.
 
+The 16-stage strategic OS layer adds the current highest repository control
+claim: `SEIS_16_STAGE_STRATEGIC_OS_READY`. That label means the strategic
+OS, gates, validation command layer, stop-building rule, and status table
+exist for review. It does not claim real-world validation, paid signal,
+delivery, App implementation, SaaS, protocol adoption, credit, clearing,
+rights, capital allocation, or Stage 16 maturity.
+
 ## What SEIS Solves
 
 SEIS narrows the gap between economic strategy and trusted execution:
@@ -67,14 +74,19 @@ outside the SEIS boundary.
 
 Start with the strategic operating layer:
 
-1. Read `SEIS_DOCTRINE.md`.
-2. Read `EIGHT_ENGINES.md`.
-3. Use `BATTLEFIELD_SCORECARD.md` and `FIRST_WEDGE_SELECTION.md` to choose
-   a wedge for a bounded 90-day paid-signal test.
-4. Use `transaction/entry-offer-template.md`,
+1. Read `SEIS_STRATEGIC_OPERATING_SYSTEM_V1.md`.
+2. Read `SEIS_16_STAGE_EXECUTION_GATES.md`.
+3. Read `REAL_WORLD_VALIDATION_COMMAND_LAYER_V1.md`.
+4. Read `STOP_BUILDING_AND_VALIDATE_GATE.md`.
+5. Read `SEIS_DOCTRINE.md`.
+6. Read `EIGHT_ENGINES.md`.
+7. Use `BATTLEFIELD_SCORECARD.md` and
+   `battlefield/first-wedge-selection.md` to choose a wedge for a bounded
+   90-day paid-signal test.
+8. Use `transaction/entry-offer-template.md`,
    `transaction/discovery-script.md`, and
    `transaction/acceptance-criteria.md` to package the first transaction.
-5. Use `trusted-delivery/delivery-sop.md` and
+9. Use `trusted-delivery/delivery-sop.md` and
    `proof/proof-asset-spec.md` before any delivery is claimed complete.
 
 Existing local runtime quickstart remains available through the archived
@@ -84,11 +96,16 @@ documented permission, approval, and evidence boundaries.
 ## Strategic Navigation
 
 - `SEIS_DOCTRINE.md` -- doctrine and no-fake-completion policy
+- `SEIS_STRATEGIC_OPERATING_SYSTEM_V1.md` -- highest 16-stage strategic OS
+- `SEIS_16_STAGE_EXECUTION_GATES.md` -- repository and real-world gates for all 16 stages
+- `REAL_WORLD_VALIDATION_COMMAND_LAYER_V1.md` -- human validation actions and evidence routing
+- `STOP_BUILDING_AND_VALIDATE_GATE.md` -- stop-building rule after repository readiness
+- `SEIS_16_STAGE_STATUS.md` -- current stage-by-stage status table
 - `MATURITY_16_STAGES.md` -- long-term maturity compass
 - `EIGHT_ENGINES.md` -- operating architecture
 - `CONTROL_POINT_TAXONOMY.md` -- economic control-point logic
 - `BATTLEFIELD_SCORECARD.md` -- wedge scoring model
-- `FIRST_WEDGE_SELECTION.md` -- provisional first wedge
+- `battlefield/first-wedge-selection.md` -- provisional first wedge
 - `BRAIN_GOVERNANCE.md` -- human/model/tool authority hierarchy
 - `MIGRATION_MAP.md` -- legacy asset classification and replacement map
 - `VALIDATION_REPORT.md` -- completion and residual-risk report
@@ -123,6 +140,9 @@ Validation artifacts:
 
 - `VALIDATION_REPORT.md`
 - `reports/seis-total-assembly-audit.md`
+- `reports/seis-16-stage-strategic-audit.md`
+- `reports/seis-16-stage-gap-list.md`
+- `reports/seis-16-stage-fix-plan.md`
 - `reports/gap-list.md`
 - `reports/fix-plan.md`
 - `reports/repo-reality-inspection.md`
