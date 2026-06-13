@@ -49,6 +49,10 @@ Covers the first 90 days after assembly.
 - Every delivery must produce proof and distribution material.
 - Every risky operation must follow trusted-delivery and brain-governance
   rules.
+- The 16-stage strategic OS is a control layer, not evidence of market
+  validation, delivery, productization, or Stage 16 maturity.
+- Once `SEIS_16_STAGE_STRATEGIC_OS_READY` is reviewable, stop adding new
+  strategy layers and execute the real-world validation command layer.
 
 ## Failure Modes
 
@@ -68,11 +72,15 @@ Immediate repository review:
 
 - Review PR #570 for SEIS v1 hardening.
 - Review PR #571 for the stacked 9-step execution system.
+- Review the stacked 16-stage strategic OS branch/PR for the high-control
+  operating layer and stop-building gate.
 - Confirm whether PR #571 should remain stacked on `seis-total-assembly-v1`
   or be retargeted after PR #570 merges.
 
 Immediate real-world execution:
 
+- Start from `REAL_WORLD_VALIDATION_COMMAND_LAYER_V1.md`.
+- Keep `SEIS_16_STAGE_STATUS.md` below the evidence actually captured.
 - Build the first 25-target list using `validation/target-list-template.md`.
 - Run the first 10 conversations using
   `validation/first-10-conversation-plan.md`.
