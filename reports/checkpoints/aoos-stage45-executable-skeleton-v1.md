@@ -128,6 +128,8 @@ map, and template set that sits behind the existing `AGENTS.md` and
 ## Checks
 
 - `python3 scripts/aoos_stage45_check_v1.py` passed.
+  This check now validates the AOOS Markdown anchors, JSON Schema contracts,
+  and `examples/aoos/stage45-interface-fixture-v1.json`.
 - `python3 scripts/identity_boundary_check_v1.py` passed.
 - `python3 scripts/observation_check_v1.py` passed.
 - `python3 scripts/secret_context_safety_check_v1.py` passed.
@@ -149,14 +151,17 @@ map, and template set that sits behind the existing `AGENTS.md` and
   passed locally.
 - `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/tracer_bullet`
   passed locally: 8363 tests, 4 skipped.
+- After a remote CI retry on the schema commit, `canonical-health` failed in
+  `test_command_worker_records_watchdog_receipt_artifact`. The local focused
+  test passed, and the test fixture was narrowed so the watchdog receipt test
+  no longer doubles as a GitHub-runner git memory-boundary test.
 
 ## Risks And Blockers
 
-- PR #575 remote CI was failing before this AOOS upgrade because of a
-  tracer-bullet test failure in the worker registry path. The focused worker
-  registry test and full local tracer-bullet suite passed locally after this
-  upgrade, so the old remote failure still requires a fresh CI run before
-  claiming remote engineering completion.
+- PR #575 remote CI has shown a repeated tracer-bullet failure in the worker
+  registry receipt test under the full GitHub `make ci` path. The narrow local
+  repair is staged as a test-fixture resource-boundary correction and still
+  requires a fresh CI run before claiming remote engineering completion.
 - The untracked `reports/creative/production_spine_v1/` directory is preserved
   and intentionally not staged.
 - AOOS Stage 5 interfaces are documentation/contracts only; no live evaluator,
@@ -172,10 +177,10 @@ creative production-spine files.
 
 After this checkpoint, the next safe checkpoint is:
 
-`AOOS_STAGE_4_5_REVIEWED_WITH_GREEN_LOCAL_CHECKS`.
+`AOOS_STAGE_4_5_REVIEWED_WITH_GREEN_LOCAL_AND_REMOTE_CHECKS`.
 
 That checkpoint requires local AOOS/static checks, `git diff --check`, current
-PR status, and explicit handling of the existing `canonical-health` failure.
+PR status, and a green `canonical-health` result on the latest commit.
 
 ## What Is Not Proven
 
