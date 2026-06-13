@@ -396,6 +396,8 @@ of duplicating them:
 - `docs/aoos/core-module-map.md`
 - `docs/aoos/domain-packs.md`
 - `docs/aoos/stage-5-interfaces.md`
+- `docs/aoos/schemas/`
+- `examples/aoos/stage45-interface-fixture-v1.json`
 - `templates/aoos/`
 - `scripts/aoos_stage45_check_v1.py`
 - `reports/checkpoints/aoos-stage45-executable-skeleton-v1.md`
@@ -405,7 +407,8 @@ authority/risk, execution state, observability/audit, evaluator metrics,
 learning/memory, tool complexity, security threat modeling, reality
 validation, incident response, anti-Goodhart controls, cross-domain packs,
 evidence templates, failure learning logs, incident records, real-world
-validation logs, model/tool routing, and domain acceptance rubrics.
+validation logs, model/tool routing, domain acceptance rubrics, and
+machine-checkable Stage 5 interface schemas.
 
 Real-world status remains `HUMAN_ACTION_REQUIRED`. No Stage 6/7 operation,
 production deployment, customer validation, paid signal, delivery acceptance,

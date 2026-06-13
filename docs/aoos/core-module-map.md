@@ -46,6 +46,8 @@ The AOOS Stage 4/5 skeleton is ready for review only when:
   validation, tool ROI, model/tool routing, and domain acceptance
 - the Stage 5 interface map defines event, audit, metric, incident, memory,
   evaluator, and routing fields
+- `docs/aoos/schemas/` and `examples/aoos/stage45-interface-fixture-v1.json`
+  provide a machine-checkable interface fixture
 - `scripts/aoos_stage45_check_v1.py` passes locally
 - checkpoint reporting states what is not proven
 

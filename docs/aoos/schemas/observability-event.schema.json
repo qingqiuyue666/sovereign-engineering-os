@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "docs/aoos/schemas/observability-event.schema.json",
+  "title": "AOOS Observability Event",
+  "schema_version": "aoos-stage5-interface-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event_id",
+    "timestamp_utc",
+    "agent_or_operator",
+    "domain_pack",
+    "goal_id",
+    "task_class",
+    "state_gate",
+    "action_taken",
+    "authority_level",
+    "risk_level",
+    "evidence_refs",
+    "decision_refs",
+    "rollback_path",
+    "next_gate"
+  ],
+  "properties": {
+    "event_id": {"type": "string"},
+    "timestamp_utc": {"type": "string"},
+    "agent_or_operator": {"type": "string"},
+    "domain_pack": {"type": "string"},
+    "goal_id": {"type": "string"},
+    "task_class": {"type": "string"},
+    "state_gate": {"type": "string"},
+    "action_taken": {"type": "string"},
+    "authority_level": {"type": "string"},
+    "risk_level": {"type": "string"},
+    "evidence_refs": {"type": "array", "items": {"type": "string"}},
+    "decision_refs": {"type": "array", "items": {"type": "string"}},
+    "rollback_path": {"type": "string"},
+    "next_gate": {"type": "string"}
+  }
+}

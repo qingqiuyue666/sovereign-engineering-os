@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "docs/aoos/schemas/evidence-ledger-entry.schema.json",
+  "title": "AOOS Evidence Ledger Entry",
+  "schema_version": "aoos-stage5-interface-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "evidence_id",
+    "claim_supported",
+    "evidence_level",
+    "source_ref",
+    "actor",
+    "timestamp_utc",
+    "validation_command",
+    "limitations",
+    "forbidden_stronger_claim"
+  ],
+  "properties": {
+    "evidence_id": {"type": "string"},
+    "claim_supported": {"type": "string"},
+    "evidence_level": {"type": "string"},
+    "source_ref": {"type": "string"},
+    "actor": {"type": "string"},
+    "timestamp_utc": {"type": "string"},
+    "validation_command": {"type": "string"},
+    "limitations": {"type": "array", "items": {"type": "string"}},
+    "forbidden_stronger_claim": {"type": "string"}
+  }
+}

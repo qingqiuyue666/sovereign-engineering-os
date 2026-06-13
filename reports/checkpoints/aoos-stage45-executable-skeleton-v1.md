@@ -58,6 +58,15 @@ map, and template set that sits behind the existing `AGENTS.md` and
 - `docs/aoos/core-module-map.md`
 - `docs/aoos/domain-packs.md`
 - `docs/aoos/stage-5-interfaces.md`
+- `docs/aoos/schemas/decision-log-entry.schema.json`
+- `docs/aoos/schemas/domain-pack-manifest.schema.json`
+- `docs/aoos/schemas/evaluator-metrics-snapshot.schema.json`
+- `docs/aoos/schemas/evidence-ledger-entry.schema.json`
+- `docs/aoos/schemas/incident-record.schema.json`
+- `docs/aoos/schemas/memory-lifecycle-entry.schema.json`
+- `docs/aoos/schemas/model-tool-routing-decision.schema.json`
+- `docs/aoos/schemas/observability-event.schema.json`
+- `examples/aoos/stage45-interface-fixture-v1.json`
 - `templates/aoos/README.md`
 - `templates/aoos/evidence-report-template.md`
 - `templates/aoos/failure-learning-log-template.md`
@@ -85,14 +94,14 @@ map, and template set that sits behind the existing `AGENTS.md` and
 | --- | --- | --- |
 | AOOS core module map | Added as repository documentation. | Human review and repeated task records. |
 | Domain packs | Added initial 10-pack structure and acceptance rubric. | Domain-specific real runs and pack refinement. |
-| Evidence schema | Added template and linked existing evidence/no-fake rules. | Ledger runtime or reviewed evidence records. |
+| Evidence schema | Added template, JSON Schema, fixture, and linked existing evidence/no-fake rules. | Ledger runtime or reviewed evidence records. |
 | Failure/learning log | Added template and promotion path. | Real failure records promoted to durable controls. |
-| Incident protocol | Linked existing incident response and added AOOS record template. | Drill or real incident evidence. |
+| Incident protocol | Linked existing incident response and added AOOS record template plus schema. | Drill or real incident evidence. |
 | Tool/ROI governance | Linked existing tool-selection gate and added ROI template. | Tool review records and exit decisions. |
 | Memory lifecycle | Linked existing memory governance and Stage 5 fields. | Memory registry or reviewed promotion records. |
 | Reality validation | Added log template and linked validation program. | Human-run real-world source records. |
-| Model/tool routing | Added routing decision template and pack. | Reviewed routing decisions and evaluator outcomes. |
-| Evaluator metrics | Added metric placeholders and required fields. | Numerators, denominators, and operating history. |
+| Model/tool routing | Added routing decision template, schema, and pack. | Reviewed routing decisions and evaluator outcomes. |
+| Evaluator metrics | Added metric placeholders, schema, fixture, and required fields. | Numerators, denominators, and operating history. |
 
 ## Stage 4/5 Upgrade Plan
 
@@ -100,8 +109,10 @@ map, and template set that sits behind the existing `AGENTS.md` and
    authority.
 2. Use `docs/aoos/` for cross-domain module routing and domain-pack structure.
 3. Use `templates/aoos/` for evidence capture before stronger claims.
-4. Run `scripts/aoos_stage45_check_v1.py` as the minimum static validation.
-5. Keep Stage 6/7 and real-world claims blocked until evidence exceeds
+4. Use `docs/aoos/schemas/` and `examples/aoos/stage45-interface-fixture-v1.json`
+   for the minimum machine-checkable Stage 5 interface.
+5. Run `scripts/aoos_stage45_check_v1.py` as the minimum static validation.
+6. Keep Stage 6/7 and real-world claims blocked until evidence exceeds
    repository documentation.
 
 ## Evidence Level

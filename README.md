@@ -109,6 +109,8 @@ documented permission, approval, and evidence boundaries.
 - `CLAUDE.md` -- Claude-compatible project memory and boundaries
 - `docs/agent-protocols/` -- detailed stage-gated agent execution protocols
 - `docs/aoos/` -- cross-domain Agentic Organization Operating System module map, domain packs, and Stage 5 interfaces
+- `docs/aoos/schemas/` -- machine-readable AOOS Stage 5 interface contracts
+- `examples/aoos/stage45-interface-fixture-v1.json` -- minimal AOOS interface fixture validated by CI
 - `templates/aoos/` -- AOOS evidence, failure, incident, reality, tool ROI, routing, and acceptance templates
 - `playbooks/` and `checklists/` -- reusable agent execution playbooks and final-report checks
 - `SEIS_DOCTRINE.md` -- doctrine and no-fake-completion policy

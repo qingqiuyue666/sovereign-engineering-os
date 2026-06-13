@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "docs/aoos/schemas/incident-record.schema.json",
+  "title": "AOOS Incident Record",
+  "schema_version": "aoos-stage5-interface-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "incident_id",
+    "severity",
+    "domain_pack",
+    "detected_by",
+    "detected_at_utc",
+    "summary",
+    "evidence_refs",
+    "containment",
+    "rollback",
+    "root_cause",
+    "remediation",
+    "prevention",
+    "promotion_target",
+    "human_approval_required"
+  ],
+  "properties": {
+    "incident_id": {"type": "string"},
+    "severity": {"type": "string"},
+    "domain_pack": {"type": "string"},
+    "detected_by": {"type": "string"},
+    "detected_at_utc": {"type": "string"},
+    "summary": {"type": "string"},
+    "evidence_refs": {"type": "array", "items": {"type": "string"}},
+    "containment": {"type": "string"},
+    "rollback": {"type": "string"},
+    "root_cause": {"type": "string"},
+    "remediation": {"type": "string"},
+    "prevention": {"type": "string"},
+    "promotion_target": {"type": "string"},
+    "human_approval_required": {"type": "boolean"}
+  }
+}

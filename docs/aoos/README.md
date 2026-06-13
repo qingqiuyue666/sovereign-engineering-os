@@ -37,10 +37,14 @@ operation, recovery, learning, and cross-domain repetition records exist.
   the initial cross-domain pack set.
 - `docs/aoos/stage-5-interfaces.md` defines observability, evaluator, audit,
   incident, memory, and routing interfaces.
+- `docs/aoos/schemas/` contains JSON Schema contracts for the Stage 5
+  interface records.
+- `examples/aoos/stage45-interface-fixture-v1.json` is the minimal fixture
+  checked against those contracts.
 - `templates/aoos/` contains reusable evidence, failure, incident, reality,
   tool ROI, routing, and acceptance-rubric templates.
 - `scripts/aoos_stage45_check_v1.py` verifies the required Stage 4/5 anchors
-  exist and contain the minimum safety terms.
+  exist, contain the minimum safety terms, and have schema/fixture coverage.
 
 ## Existing Protocol Reuse
 

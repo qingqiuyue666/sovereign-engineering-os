@@ -1,0 +1,215 @@
+{
+  "fixture_version": "aoos-stage45-interface-fixture-v1",
+  "real_world_claimed": false,
+  "observability_event": {
+    "event_id": "aoos-event-001",
+    "timestamp_utc": "2026-06-13T19:13:33Z",
+    "agent_or_operator": "repository-agent",
+    "domain_pack": "Engineering Pack",
+    "goal_id": "aoos-stage45-checkpoint",
+    "task_class": "ENGINEERING",
+    "state_gate": "VERIFY",
+    "action_taken": "ran AOOS Stage 4/5 static check",
+    "authority_level": "ALLOW",
+    "risk_level": "low",
+    "evidence_refs": [
+      "reports/checkpoints/aoos-stage45-executable-skeleton-v1.md"
+    ],
+    "decision_refs": [
+      "docs/aoos/core-module-map.md"
+    ],
+    "rollback_path": "revert the scoped AOOS commit",
+    "next_gate": "human review"
+  },
+  "decision_log_entry": {
+    "decision_id": "aoos-decision-001",
+    "date": "2026-06-13",
+    "domain_pack": "Engineering Pack",
+    "options_considered": [
+      "Markdown-only templates",
+      "Stage 5 interface schemas plus fixture"
+    ],
+    "chosen_option": "Stage 5 interface schemas plus fixture",
+    "rejected_alternatives": [
+      "new dependency-based schema validator",
+      "live evaluator service"
+    ],
+    "opportunity_cost": "adds small maintenance surface but improves executable verification",
+    "evidence_level": "L3",
+    "counterevidence": [
+      "schemas do not prove real operating cycles"
+    ],
+    "review_date": "2026-06-20",
+    "kill_or_revise_condition": "remove or revise if schemas do not reduce review ambiguity"
+  },
+  "evidence_ledger_entry": {
+    "evidence_id": "aoos-evidence-001",
+    "claim_supported": "AOOS Stage 4/5 interface anchors are present",
+    "evidence_level": "L3",
+    "source_ref": "scripts/aoos_stage45_check_v1.py",
+    "actor": "repository-agent",
+    "timestamp_utc": "2026-06-13T19:13:33Z",
+    "validation_command": "python3 scripts/aoos_stage45_check_v1.py",
+    "limitations": [
+      "does not prove Stage 6/7 operation",
+      "does not prove customer validation"
+    ],
+    "forbidden_stronger_claim": "AOOS Stage 6/7 complete"
+  },
+  "evaluator_metrics_snapshot": {
+    "snapshot_id": "aoos-metrics-001",
+    "time_window": "repository checkpoint only",
+    "metrics": {
+      "false_done_rate": {
+        "numerator": 0,
+        "denominator": 0,
+        "gaming_risk": "absence of repeated runs makes the metric not yet meaningful"
+      },
+      "manual_intervention_rate": {
+        "numerator": 0,
+        "denominator": 0,
+        "gaming_risk": "could be gamed by avoiding human gates"
+      },
+      "retry_success_rate": {
+        "numerator": 0,
+        "denominator": 0,
+        "gaming_risk": "could hide repeated narrow failures"
+      },
+      "repeated_failure_rate": {
+        "numerator": 0,
+        "denominator": 0,
+        "gaming_risk": "requires consistent failure taxonomy"
+      },
+      "cost_per_verified_task": {
+        "numerator": 0,
+        "denominator": 0,
+        "gaming_risk": "cost can be undercounted without full logs"
+      },
+      "time_to_verified_done": {
+        "numerator": 0,
+        "denominator": 0,
+        "gaming_risk": "can be gamed by narrowing task scope"
+      },
+      "real_world_validation_rate": {
+        "numerator": 0,
+        "denominator": 0,
+        "gaming_risk": "repository checks cannot substitute for real source records"
+      }
+    },
+    "limitations": [
+      "placeholder metrics only",
+      "no repeated AOOS operating history"
+    ],
+    "anti_goodhart_note": "metrics must remain subordinate to verified outcomes"
+  },
+  "incident_record": {
+    "incident_id": "aoos-incident-001",
+    "severity": "low",
+    "domain_pack": "Engineering Pack",
+    "detected_by": "repository-agent",
+    "detected_at_utc": "2026-06-13T19:13:33Z",
+    "summary": "example record for interface validation only",
+    "evidence_refs": [
+      "templates/aoos/incident-record-template.md"
+    ],
+    "containment": "do not escalate example into real incident claim",
+    "rollback": "remove fixture if it creates confusion",
+    "root_cause": "fixture demonstrates required fields",
+    "remediation": "use real incident records only when incidents occur",
+    "prevention": "AOOS check validates required fields",
+    "promotion_target": "none",
+    "human_approval_required": false
+  },
+  "memory_lifecycle_entry": {
+    "memory_id": "aoos-memory-001",
+    "source": "docs/agent-protocols/memory-governance.md",
+    "confidence": "medium",
+    "expiry": "review after repeated AOOS sessions",
+    "conflict_status": "repository files win over chat memory",
+    "owner": "repository",
+    "promotion_candidate": "failure repeated across sessions",
+    "promoted_artifact": "checklist, playbook, script, CI, evaluator, or policy",
+    "stale_removal_rule": "remove when contradicted by current repository state"
+  },
+  "model_tool_routing_decision": {
+    "routing_id": "aoos-routing-001",
+    "candidate_model_or_tool": "standard-library AOOS check script",
+    "classification": "USE_NOW",
+    "exact_bottleneck_removed": "verifies AOOS Stage 4/5 interface anchors without new dependency",
+    "authority_boundary": "local repository validation only",
+    "permission_or_credential_risk": "none",
+    "reviewer_separation": "human review still required for merge",
+    "fallback_policy": "manual file inspection",
+    "exit_plan": "delete script and fixture if they stop reducing review ambiguity",
+    "evidence_that_routing_worked": "CI step passes on PR branch"
+  },
+  "domain_pack_manifest": {
+    "pack_id": "engineering-pack",
+    "scope": "GitHub, PR, CI, review, release, security scan, branch protection, evidence report",
+    "non_goals": [
+      "customer validation",
+      "production deployment"
+    ],
+    "state_inspection_checklist": [
+      "branch",
+      "git status",
+      "PR state",
+      "CI state"
+    ],
+    "allow_ask_deny_report": {
+      "allow": [
+        "inspect repository",
+        "run local checks"
+      ],
+      "ask": [
+        "merge PR"
+      ],
+      "deny": [
+        "fake evidence"
+      ],
+      "report": [
+        "missing CI evidence"
+      ]
+    },
+    "expected_inputs": [
+      "user request",
+      "repository state"
+    ],
+    "expected_outputs": [
+      "diff",
+      "checkpoint report",
+      "verification results"
+    ],
+    "evidence_records": [
+      "local command output",
+      "CI run",
+      "commit hash"
+    ],
+    "acceptance_rubric": {
+      "L2": "diff or commit exists",
+      "L3": "checks pass",
+      "L4": "human review accepts"
+    },
+    "failure_triggers": [
+      "CI failure",
+      "unrelated dirty worktree",
+      "missing evidence"
+    ],
+    "rollback_path": "revert scoped commit",
+    "observability_events": [
+      "state inspection",
+      "check run",
+      "checkpoint"
+    ],
+    "evaluator_metrics": [
+      "false_done_rate",
+      "retry_success_rate",
+      "time_to_verified_done"
+    ],
+    "learning_promotion_path": "memory -> checklist -> playbook -> script -> CI / evaluator / policy",
+    "forbidden_claims": [
+      "production deployment confirmed",
+      "customer validation confirmed"
+    ]
+  }
+}

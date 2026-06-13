@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "docs/aoos/schemas/memory-lifecycle-entry.schema.json",
+  "title": "AOOS Memory Lifecycle Entry",
+  "schema_version": "aoos-stage5-interface-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "memory_id",
+    "source",
+    "confidence",
+    "expiry",
+    "conflict_status",
+    "owner",
+    "promotion_candidate",
+    "promoted_artifact",
+    "stale_removal_rule"
+  ],
+  "properties": {
+    "memory_id": {"type": "string"},
+    "source": {"type": "string"},
+    "confidence": {"type": "string"},
+    "expiry": {"type": "string"},
+    "conflict_status": {"type": "string"},
+    "owner": {"type": "string"},
+    "promotion_candidate": {"type": "string"},
+    "promoted_artifact": {"type": "string"},
+    "stale_removal_rule": {"type": "string"}
+  }
+}

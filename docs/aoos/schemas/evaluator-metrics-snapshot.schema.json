@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "docs/aoos/schemas/evaluator-metrics-snapshot.schema.json",
+  "title": "AOOS Evaluator Metrics Snapshot",
+  "schema_version": "aoos-stage5-interface-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "snapshot_id",
+    "time_window",
+    "metrics",
+    "limitations",
+    "anti_goodhart_note"
+  ],
+  "properties": {
+    "snapshot_id": {"type": "string"},
+    "time_window": {"type": "string"},
+    "metrics": {"type": "object"},
+    "limitations": {"type": "array", "items": {"type": "string"}},
+    "anti_goodhart_note": {"type": "string"}
+  }
+}

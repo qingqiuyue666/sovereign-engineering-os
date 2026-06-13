@@ -6,6 +6,11 @@ Define the interfaces required for observability, evaluation, audit, incidents,
 memory, routing, and reality validation. These are interface contracts and
 templates, not proof of a live Stage 5 operating system.
 
+Machine-readable interface contracts live under `docs/aoos/schemas/`. The
+minimum fixture is `examples/aoos/stage45-interface-fixture-v1.json`, and
+`scripts/aoos_stage45_check_v1.py` validates the fixture without adding a new
+dependency.
+
 ## Observability Event
 
 Required fields:
@@ -25,6 +30,8 @@ Required fields:
 - `rollback_path`
 - `next_gate`
 
+Schema: `docs/aoos/schemas/observability-event.schema.json`.
+
 ## Decision Log
 
 Required fields:
@@ -41,6 +48,8 @@ Required fields:
 - review date
 - kill or revise condition
 
+Schema: `docs/aoos/schemas/decision-log-entry.schema.json`.
+
 ## Evidence Ledger
 
 Required fields:
@@ -54,6 +63,8 @@ Required fields:
 - validation command when applicable
 - limitations
 - stronger claim explicitly forbidden
+
+Schema: `docs/aoos/schemas/evidence-ledger-entry.schema.json`.
 
 ## Evaluator Metrics
 
@@ -69,6 +80,8 @@ Initial metrics are placeholders until repeated task records exist:
 
 Each metric must state numerator, denominator, time window, exclusions, and
 known gaming risk. Metrics must not replace the underlying goal.
+
+Schema: `docs/aoos/schemas/evaluator-metrics-snapshot.schema.json`.
 
 ## Failure Taxonomy
 
@@ -91,6 +104,8 @@ Minimum failure classes:
 
 Use `templates/aoos/incident-record-template.md` for AOOS incidents and link
 the record to `docs/operations/incident_response_v1.md`.
+
+Schema: `docs/aoos/schemas/incident-record.schema.json`.
 
 Minimum incident stages:
 
@@ -119,6 +134,8 @@ Required fields:
 - stale-removal rule
 
 Repository files win over chat memory when conflicts exist.
+
+Schema: `docs/aoos/schemas/memory-lifecycle-entry.schema.json`.
 
 ## Reality Validation Interface
 
@@ -149,6 +166,18 @@ Required fields:
 - fallback policy
 - exit plan
 - evidence that the routing worked
+
+Schema: `docs/aoos/schemas/model-tool-routing-decision.schema.json`.
+
+## Domain Pack Manifest Interface
+
+Each domain pack can be represented as a manifest with scope, non-goals,
+inspection checklist, ALLOW / ASK / DENY / REPORT boundaries, inputs, outputs,
+evidence records, acceptance rubric, failure triggers, rollback path,
+observability events, evaluator metrics, learning promotion path, and forbidden
+claims.
+
+Schema: `docs/aoos/schemas/domain-pack-manifest.schema.json`.
 
 ## Audit Boundary
 

@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "docs/aoos/schemas/domain-pack-manifest.schema.json",
+  "title": "AOOS Domain Pack Manifest",
+  "schema_version": "aoos-stage5-interface-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "pack_id",
+    "scope",
+    "non_goals",
+    "state_inspection_checklist",
+    "allow_ask_deny_report",
+    "expected_inputs",
+    "expected_outputs",
+    "evidence_records",
+    "acceptance_rubric",
+    "failure_triggers",
+    "rollback_path",
+    "observability_events",
+    "evaluator_metrics",
+    "learning_promotion_path",
+    "forbidden_claims"
+  ],
+  "properties": {
+    "pack_id": {"type": "string"},
+    "scope": {"type": "string"},
+    "non_goals": {"type": "array", "items": {"type": "string"}},
+    "state_inspection_checklist": {"type": "array", "items": {"type": "string"}},
+    "allow_ask_deny_report": {"type": "object"},
+    "expected_inputs": {"type": "array", "items": {"type": "string"}},
+    "expected_outputs": {"type": "array", "items": {"type": "string"}},
+    "evidence_records": {"type": "array", "items": {"type": "string"}},
+    "acceptance_rubric": {"type": "object"},
+    "failure_triggers": {"type": "array", "items": {"type": "string"}},
+    "rollback_path": {"type": "string"},
+    "observability_events": {"type": "array", "items": {"type": "string"}},
+    "evaluator_metrics": {"type": "array", "items": {"type": "string"}},
+    "learning_promotion_path": {"type": "string"},
+    "forbidden_claims": {"type": "array", "items": {"type": "string"}}
+  }
+}
