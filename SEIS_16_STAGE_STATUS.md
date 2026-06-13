@@ -17,7 +17,7 @@ outcomes.
 | 4. Buyer / Budget / Trigger System | `EXECUTION_KIT_READY` | `MARKET_PROOF_PENDING` | Real discovery records identify buyer, budget, trigger, blocker, and evidence access. | Run outreach and record discovery notes. |
 | 5. Transaction Package | `EXECUTION_KIT_READY` | `MARKET_PROOF_PENDING` | A real buyer accepts, rejects, or negotiates the offer in a recorded context. | Send the bounded offer and capture objections/pricing feedback. |
 | 6. Trusted Delivery System | `EXECUTION_KIT_READY` | `REAL_DELIVERY_PENDING` | A real project uses the delivery playbook, approvals, evidence package, handoff, and failure record. | Use only after accepted scope or equivalent high commitment. |
-| 7. Real-World Validation | `EXECUTION_KIT_READY` | `HUMAN_ACTION_REQUIRED` | Real outreach, responses, discovery outcomes, price feedback, and close/loss records. | Execute `REAL_WORLD_VALIDATION_COMMAND_LAYER_V1.md`. |
+| 7. Real-World Validation | `SEIS_REAL_WORLD_VALIDATION_READY` | `HUMAN_ACTION_REQUIRED` | Real outreach, responses, discovery outcomes, price feedback, and close/loss records. | Execute `reports/real-world-validation/human-action-required-checkpoint.md`. |
 | 8. First Delivery Loop | `EXECUTION_KIT_READY` | `REAL_DELIVERY_PENDING` | A real workflow is diagnosed, delivered, reviewed, and recorded. | Attempt one bounded delivery if a buyer accepts scope. |
 | 9. Asset Compounding | `EXECUTION_KIT_READY` | `EVIDENCE_PENDING` | Delivery artifacts converted into reusable assets with source, date, limitation, and reuse condition. | Convert actual delivery outputs into registries after delivery. |
 | 10. Internal Workbench | `APP_SPEC_READY` | `HUMAN_ACTION_REQUIRED` | Repeated real workflow demand justifies a narrow internal prototype. | Keep app/workbench spec-only until evidence or explicit prototype approval. |
@@ -30,9 +30,17 @@ outcomes.
 
 ## Current Final Status Label
 
-`SEIS_16_STAGE_STRATEGIC_OS_READY`
+`SEIS_REAL_WORLD_VALIDATION_READY`
 
-This is a repository status label for the strategic OS layer. It does not
-claim real-world validation, paid signal, real delivery, App
-implementation, SaaS, protocol adoption, credit, clearing, rights, capital
-allocation, or Stage 16 maturity.
+This is a repository status label for the real-world validation execution
+package. It means PR stack review, battle plan, target/outreach system,
+discovery/pricing evidence system, bounded delivery package, evidence
+ingestion rules, asset conversion templates, and decision gates are ready for
+human execution. It does not claim outreach was sent, discovery happened,
+pricing was validated, paid signal exists, real delivery occurred, App
+implementation exists, SaaS exists, protocol adoption exists, credit,
+clearing, rights, capital allocation, or Stage 16 maturity.
+
+Current real-world status:
+
+`HUMAN_ACTION_REQUIRED`

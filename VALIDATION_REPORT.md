@@ -44,6 +44,9 @@ incomplete, and validated.
 ## What Remains Incomplete
 
 - No paid customer signal has been recorded.
+- No outreach has been performed by this run.
+- No discovery conversation, pricing response, accepted scope, delivery
+  acceptance, or customer feedback has been recorded by this run.
 - No external audit, external certification, or market adoption has been
   confirmed.
 - The first wedge is recommended but still pending discovery and paid proof.
@@ -62,6 +65,33 @@ incomplete, and validated.
   than expected.
 - Untracked creative production-spine files were preserved and not audited
   as owned changes in this pass.
+
+## Real-World Validation Continuous Execution
+
+Status label: `SEIS_REAL_WORLD_VALIDATION_READY`.
+
+Repository status: `SEIS_REAL_WORLD_VALIDATION_READY`.
+
+Real-world status: `HUMAN_ACTION_REQUIRED`.
+
+This pass prepares the repository for real-world validation and stops at the
+human-action boundary. It adds:
+
+- PR stack merge-readiness, risk, and next-action reports under
+  `reports/real-world-validation/`
+- `Trusted AI Workflow Transformation` battle plan with `AI Engineering
+  Production Governance` preserved as secondary/high-trust wedge
+- target slots, outreach messages, response classifier, and outreach log
+- discovery, pricing, buyer/budget/trigger, objection, and close/loss systems
+- one-workflow bounded delivery package and acceptance/failure/maintenance
+  templates
+- evidence ingestion, evidence-to-asset conversion, and feedback update map
+- next decision gate, Stage 7 to Stage 8 transition rules, and human-action
+  checkpoint
+
+No real-world proof is claimed. The next required action is for a human to
+choose or confirm the battlefield, fill real targets, send outreach, record
+responses, run discovery, test pricing, and bring evidence back.
 
 ## Verification Run
 
@@ -313,10 +343,15 @@ strategy expansion.
 
 ## What Should Be Executed Next
 
-- Run discovery for AI Engineering Production Governance.
-- Produce one paid-signal target list and one outreach/service page.
-- Run a bounded readiness audit with evidence package if a buyer accepts.
-- Update scorecards from actual buyer objections and acceptance criteria.
+- Confirm or override `Trusted AI Workflow Transformation` as the first
+  validation battlefield.
+- Fill the 10 target slots in `validation/target-list-v1.md`.
+- Send manual outreach and record responses.
+- Run discovery and pricing tests.
+- Run one bounded delivery only after accepted scope, evidence access, and
+  human review owner exist.
+- Update scorecards from actual buyer objections, price reactions, and
+  acceptance criteria.
 
 ## What Should Not Be Built Yet
 

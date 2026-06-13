@@ -21,9 +21,9 @@ creative-pipeline-only roadmap is archived under `archive/`.
 
 | Horizon | Objective | Evidence Required |
 | --- | --- | --- |
-| Current repository pass | Review the 16-stage strategic OS layer | `SEIS_STRATEGIC_OPERATING_SYSTEM_V1.md`, `SEIS_16_STAGE_EXECUTION_GATES.md`, `REAL_WORLD_VALIDATION_COMMAND_LAYER_V1.md`, `STOP_BUILDING_AND_VALIDATE_GATE.md`, `SEIS_16_STAGE_STATUS.md` |
-| 0-14 days | Run paid-signal discovery for AI Engineering Production Governance | Buyer list, discovery notes, objections |
-| 15-45 days | Deliver one bounded readiness audit | Evidence package, acceptance criteria, proof asset |
+| Current repository pass | Review the real-world validation execution package | `reports/real-world-validation/`, `validation/real-world-validation-battle-plan-v1.md`, `validation/target-list-v1.md`, `delivery-loops/first-bounded-delivery-package-v1.md`, `assets/evidence-to-asset-conversion-v1.md` |
+| 0-14 days | Fill 10 target slots and run manual outreach for Trusted AI Workflow Transformation | Real targets, outreach log, response classifications |
+| 15-45 days | Run discovery, test pricing, and attempt one bounded delivery only after accepted scope | Discovery notes, pricing reaction, accepted scope, evidence package |
 | 46-90 days | Decide standardize/revise/kill | Pricing signal, buyer feedback, delivery trace |
 | 90+ days | Promote only repeated patterns | Case library, SOP, scorecard updates, standard candidate |
 
@@ -34,7 +34,8 @@ creative-pipeline-only roadmap is archived under `archive/`.
 - The first wedge is provisional until paid signal exists.
 - After the 16-stage strategic OS layer is reviewable, do not add more
   strategy layers to avoid market contact. Execute
-  `REAL_WORLD_VALIDATION_COMMAND_LAYER_V1.md`.
+  `REAL_WORLD_VALIDATION_COMMAND_LAYER_V1.md` and
+  `reports/real-world-validation/human-action-required-checkpoint.md`.
 
 ## Failure Modes
 
