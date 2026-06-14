@@ -63,8 +63,8 @@
         "python3 scripts/claim_to_evidence_check_v1.py"
       ],
       "rollback_path": "revert the scoped evidence-ledger seed commit",
-      "status": "ready_for_review",
-      "next_action": "Push the PR branch and use CI plus human review as the next evidence gate.",
+      "status": "completed",
+      "next_action": "Use the evidence ledger seed to attach durable evidence refs to future AOOS fixtures.",
       "owner_role": "Evidence Agent",
       "evaluator_required": "claim_to_evidence_check_v1 plus AOOS ledger fixture validation",
       "promotion_rule_if_repeated_failure": "If evidence levels are misstated twice, promote a stricter claim-to-evidence fixture into CI."
@@ -86,8 +86,8 @@
         "python3 scripts/security_control_check_v1.py"
       ],
       "rollback_path": "revert the scoped classifier fixture commit",
-      "status": "pending_after_human_review",
-      "next_action": "Add only after the backlog contract is accepted enough to avoid another parallel policy surface.",
+      "status": "ready_for_review",
+      "next_action": "Push the PR branch and use CI plus human review as the next evidence gate.",
       "owner_role": "Policy Agent",
       "evaluator_required": "AOOS risk-classifier fixture validation",
       "promotion_rule_if_repeated_failure": "If agents misclassify the same gate twice, promote that case into the classifier fixture and high-risk gate docs."

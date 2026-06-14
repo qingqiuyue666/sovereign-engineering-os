@@ -22,6 +22,19 @@ that records priority, dependencies, A0-A6 risk, evidence requirement,
 acceptance gate, checks, rollback path, owner role, evaluator requirement, and
 failure-promotion rule for each item.
 
+## Risk Classifier Fixture
+
+The task-risk classifier fixture is
+`reports/aoos/risk-classifier-fixture-v1.json`. It is governed by existing
+authority sources, especially `AGENTS.md` and
+`docs/agent-protocols/high-risk-human-gates.md`.
+
+The fixture covers A0 through A6 task classes with authority decision, human
+gate, evidence requirement, acceptance gate, rollback path, forbidden actions,
+and rationale references. It does not replace the existing high-risk gate
+protocol and does not grant merge, production, credential, or real-world
+authority.
+
 ## Observability Event
 
 Required fields:

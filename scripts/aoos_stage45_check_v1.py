@@ -15,6 +15,7 @@ REQUIRED_FILES = (
     Path("docs/aoos/domain-packs.md"),
     Path("docs/aoos/runtime-backlog.md"),
     Path("docs/aoos/stage-5-interfaces.md"),
+    Path("docs/aoos/schemas/risk-classifier-fixture.schema.json"),
     Path("docs/aoos/schemas/runtime-backlog.schema.json"),
     Path("templates/aoos/README.md"),
     Path("templates/aoos/mission-brief-template.md"),
@@ -26,6 +27,7 @@ REQUIRED_FILES = (
     Path("templates/aoos/tool-roi-review-template.md"),
     Path("templates/aoos/model-tool-routing-decision-template.md"),
     Path("reports/aoos/evidence-ledger-v1.jsonl"),
+    Path("reports/aoos/risk-classifier-fixture-v1.json"),
     Path("reports/aoos/runtime-backlog-v1.json"),
     Path("reports/checkpoints/aoos-stage45-executable-skeleton-v1.md"),
 )
@@ -46,6 +48,7 @@ REQUIRED_TERMS = (
     "AOOS Mission Brief Template",
     "AOOS Runtime Backlog",
     "evidence-ledger-v1.jsonl",
+    "risk-classifier-fixture-v1.json",
     "runtime-backlog-v1.json",
     "A0-A6",
     "failure_taxonomy_entry",
@@ -110,9 +113,12 @@ SCHEMA_FIXTURE_MAP = (
 
 FIXTURE_PATH = Path("examples/aoos/stage45-interface-fixture-v1.json")
 EVIDENCE_LEDGER_PATH = Path("reports/aoos/evidence-ledger-v1.jsonl")
+RISK_CLASSIFIER_PATH = Path("reports/aoos/risk-classifier-fixture-v1.json")
+RISK_CLASSIFIER_SCHEMA_PATH = Path("docs/aoos/schemas/risk-classifier-fixture.schema.json")
 BACKLOG_PATH = Path("reports/aoos/runtime-backlog-v1.json")
 BACKLOG_SCHEMA_PATH = Path("docs/aoos/schemas/runtime-backlog.schema.json")
 SCHEMA_VERSION = "aoos-stage5-interface-v1"
+RISK_CLASSIFIER_SCHEMA_VERSION = "aoos-risk-classifier-fixture-v1"
 BACKLOG_SCHEMA_VERSION = "aoos-runtime-backlog-v1"
 JSON_SCHEMA_DRAFT = "https://json-schema.org/draft/2020-12/schema"
 
@@ -162,6 +168,7 @@ def main() -> int:
 
     _check_schema_interfaces(errors)
     _check_evidence_ledger_records(errors)
+    _check_risk_classifier_fixture(errors)
     _check_backlog_record(errors)
 
     if errors:
@@ -278,6 +285,114 @@ def _check_evidence_ledger_records(errors: list[str]) -> None:
                     f"AOOS evidence ledger {evidence_id or '<unknown>'} source_ref missing: "
                     f"{source_ref}"
                 )
+
+
+def _check_risk_classifier_fixture(errors: list[str]) -> None:
+    schema = _load_json(RISK_CLASSIFIER_SCHEMA_PATH, errors)
+    if schema is not None:
+        _check_schema_shape(RISK_CLASSIFIER_SCHEMA_PATH, schema, errors)
+    fixture = _load_json(RISK_CLASSIFIER_PATH, errors)
+    if fixture is None:
+        return
+    _check_json_text_safety(RISK_CLASSIFIER_PATH, errors)
+
+    if fixture.get("schema_version") != RISK_CLASSIFIER_SCHEMA_VERSION:
+        errors.append("AOOS risk classifier fixture schema_version mismatch")
+    if not fixture.get("claim_boundary"):
+        errors.append("AOOS risk classifier fixture must state claim_boundary")
+
+    authority_refs = fixture.get("authority_source_refs")
+    if not isinstance(authority_refs, list) or not authority_refs:
+        errors.append("AOOS risk classifier fixture must include authority_source_refs")
+    else:
+        for source_ref in authority_refs:
+            if not isinstance(source_ref, str) or not (REPO_ROOT / source_ref).exists():
+                errors.append(f"AOOS risk classifier authority ref missing: {source_ref}")
+
+    cases = fixture.get("cases")
+    if not isinstance(cases, list):
+        errors.append("AOOS risk classifier cases must be array")
+        return
+    required_classes = {
+        "A0_READ_ONLY",
+        "A1_SAFE_EDIT",
+        "A2_SAFE_PUSH",
+        "A3_AUTO_MERGE_ALLOWED",
+        "A4_SANDBOX_OPERATION",
+        "A5_PROPOSE_REAL_WORLD_ACTION",
+        "A6_HUMAN_AUTHORIZED_REAL_WORLD_ACTION",
+    }
+    required_case_fields = (
+        "case_id",
+        "action_summary",
+        "domain",
+        "expected_risk_class",
+        "authority_decision",
+        "human_gate_required",
+        "evidence_requirement",
+        "acceptance_gate",
+        "rollback_path",
+        "forbidden_actions",
+        "rationale_refs",
+    )
+    seen_cases: set[str] = set()
+    seen_classes: set[str] = set()
+    for index, case in enumerate(cases, start=1):
+        if not isinstance(case, dict):
+            errors.append(f"AOOS risk classifier case {index} must be object")
+            continue
+        for field in required_case_fields:
+            if field not in case:
+                errors.append(f"AOOS risk classifier case {index} missing field: {field}")
+        case_id = case.get("case_id")
+        if not isinstance(case_id, str) or not case_id:
+            errors.append(f"AOOS risk classifier case {index} id must be non-empty string")
+        elif case_id in seen_cases:
+            errors.append(f"AOOS risk classifier duplicate case_id: {case_id}")
+        else:
+            seen_cases.add(case_id)
+        risk_class = case.get("expected_risk_class")
+        if risk_class not in required_classes:
+            errors.append(
+                f"AOOS risk classifier case {case_id or index} invalid class: {risk_class}"
+            )
+        elif isinstance(risk_class, str):
+            seen_classes.add(risk_class)
+        evidence = case.get("evidence_requirement")
+        if not isinstance(evidence, str) or not evidence.startswith("L"):
+            errors.append(
+                f"AOOS risk classifier case {case_id or index} evidence_requirement must start with L"
+            )
+        if not isinstance(case.get("human_gate_required"), bool):
+            errors.append(
+                f"AOOS risk classifier case {case_id or index} human_gate_required must be boolean"
+            )
+        for list_field in ("forbidden_actions", "rationale_refs"):
+            value = case.get(list_field)
+            if not isinstance(value, list) or not value:
+                errors.append(
+                    f"AOOS risk classifier case {case_id or index} {list_field} "
+                    "must be non-empty array"
+                )
+                continue
+            if any(not isinstance(entry, str) or not entry for entry in value):
+                errors.append(
+                    f"AOOS risk classifier case {case_id or index} {list_field} "
+                    "entries must be strings"
+                )
+        for source_ref in case.get("rationale_refs", []):
+            if isinstance(source_ref, str) and not (REPO_ROOT / source_ref).exists():
+                errors.append(
+                    f"AOOS risk classifier case {case_id or index} rationale ref missing: "
+                    f"{source_ref}"
+                )
+
+    missing_classes = sorted(required_classes - seen_classes)
+    if missing_classes:
+        errors.append(
+            "AOOS risk classifier fixture missing classes: "
+            + ", ".join(missing_classes)
+        )
 
 
 def _check_backlog_record(errors: list[str]) -> None:

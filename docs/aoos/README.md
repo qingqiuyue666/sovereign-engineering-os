@@ -44,6 +44,8 @@ operation, recovery, learning, and cross-domain repetition records exist.
 - `reports/aoos/evidence-ledger-v1.jsonl` is the initial AOOS evidence ledger
   seed mapping repository claims to evidence levels and forbidden stronger
   claims.
+- `reports/aoos/risk-classifier-fixture-v1.json` is the A0-A6 task-risk
+  classification fixture checked against existing human-gate authority rules.
 - `reports/aoos/runtime-backlog-v1.json` is the current machine-checkable AOOS
   backlog record.
 - `examples/aoos/stage45-interface-fixture-v1.json` is the minimal fixture

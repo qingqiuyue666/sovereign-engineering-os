@@ -111,6 +111,7 @@ documented permission, approval, and evidence boundaries.
 - `docs/aoos/` -- cross-domain Agentic Organization Operating System module map, domain packs, and Stage 5 interfaces
 - `docs/aoos/schemas/` -- machine-readable AOOS Stage 5 interface contracts
 - `reports/aoos/evidence-ledger-v1.jsonl` -- AOOS evidence seed records checked by the AOOS validator
+- `reports/aoos/risk-classifier-fixture-v1.json` -- AOOS A0-A6 task-risk classification fixture
 - `reports/aoos/runtime-backlog-v1.json` -- persistent AOOS runtime backlog record checked by the AOOS validator
 - `examples/aoos/stage45-interface-fixture-v1.json` -- minimal AOOS interface fixture validated by CI
 - `templates/aoos/` -- AOOS evidence, failure, incident, reality, tool ROI, routing, and acceptance templates
