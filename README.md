@@ -115,6 +115,7 @@ documented permission, approval, and evidence boundaries.
 - `reports/aoos/runtime-backlog-v1.json` -- persistent AOOS runtime backlog record checked by the AOOS validator
 - `reports/aoos/task-router-fixture-v1.json` -- non-executing AOOS task-router fixture
 - `reports/aoos/learning-promotion-fixture-v1.json` -- AOOS failure-to-control promotion fixture
+- `reports/aoos/real-world-feedback-ingestion-packet-v1.json` -- A5 proposal-only feedback ingestion packet
 - `examples/aoos/stage45-interface-fixture-v1.json` -- minimal AOOS interface fixture validated by CI
 - `templates/aoos/` -- AOOS evidence, failure, incident, reality, tool ROI, routing, and acceptance templates
 - `playbooks/` and `checklists/` -- reusable agent execution playbooks and final-report checks

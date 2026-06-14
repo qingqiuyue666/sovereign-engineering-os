@@ -154,11 +154,39 @@
         "python3 scripts/claim_to_evidence_check_v1.py"
       ],
       "rollback_path": "remove the proposal packet before merge if it blurs the real-world boundary",
-      "status": "human_gate_required",
-      "next_action": "Draft only when requested or after human review; do not contact users, customers, platforms, or accounts.",
+      "status": "completed",
+      "next_action": "Use the proposal packet only after explicit human authorization supplies or authorizes source records.",
       "owner_role": "Reality Agent",
       "evaluator_required": "claim-to-evidence review for L5 source-record boundaries",
       "promotion_rule_if_repeated_failure": "If real-world claims are overstated twice, promote the missing-source-record rule into CI and final-report checks."
+    },
+    {
+      "id": "AOOS-BL-007",
+      "title": "Human review, merge authorization, and any real-world execution gate",
+      "domain": "Operator / Reality Gate",
+      "maturity_target": "Human-gated repository acceptance and future L8/L9 source-record intake",
+      "priority": 7,
+      "dependencies": [
+        "AOOS-BL-001",
+        "AOOS-BL-002",
+        "AOOS-BL-003",
+        "AOOS-BL-004",
+        "AOOS-BL-005",
+        "AOOS-BL-006"
+      ],
+      "risk_class": "A6_HUMAN_AUTHORIZED_REAL_WORLD_ACTION",
+      "evidence_requirement": "L4 explicit owner authorization before merge or real-world action; L5 source records only after real-world outcome",
+      "acceptance_gate": "Repository owner explicitly authorizes merge or a bounded real-world action with scope, rollback, and evidence requirements.",
+      "checks_required": [
+        "GitHub PR review or explicit owner authorization",
+        "latest CI success on PR head"
+      ],
+      "rollback_path": "revert merge commit or do not execute the proposed real-world action if authorization is absent or scope is unclear",
+      "status": "human_gate_required",
+      "next_action": "Human owner reviews PR #575 and decides whether to authorize merge or any future real-world feedback source review.",
+      "owner_role": "Operator Agent",
+      "evaluator_required": "human review plus no-fake-completion evidence audit",
+      "promotion_rule_if_repeated_failure": "If agents attempt to cross this gate without approval, promote the gate into policy, checklist, and CI wording checks."
     }
   ]
 }

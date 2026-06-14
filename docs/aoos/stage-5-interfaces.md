@@ -54,6 +54,18 @@ or backlog updates.
 It does not mutate CI, policy, or memory automatically. Promotion still
 requires scoped implementation and checks.
 
+## Real-World Feedback Ingestion Packet
+
+The feedback-ingestion packet is
+`reports/aoos/real-world-feedback-ingestion-packet-v1.json`. It is an A5
+proposal-only packet for classifying future human-provided customer, payment,
+delivery, production, or usage source records.
+
+It has `actions_executed: false` and requires human authorization before any
+real-world action, source review, outreach, account access, or external system
+interaction. The packet does not prove L5 evidence, L8/L9 operation, or
+self-evolving real-world execution.
+
 ## Observability Event
 
 Required fields:

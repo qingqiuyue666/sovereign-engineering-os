@@ -75,6 +75,7 @@ map, and template set that sits behind the existing `AGENTS.md` and
 - `docs/aoos/schemas/memory-lifecycle-entry.schema.json`
 - `docs/aoos/schemas/model-tool-routing-decision.schema.json`
 - `docs/aoos/schemas/observability-event.schema.json`
+- `docs/aoos/schemas/real-world-feedback-ingestion-packet.schema.json`
 - `docs/aoos/schemas/risk-classifier-fixture.schema.json`
 - `docs/aoos/schemas/runtime-backlog.schema.json`
 - `docs/aoos/schemas/task-router-fixture.schema.json`
@@ -82,6 +83,7 @@ map, and template set that sits behind the existing `AGENTS.md` and
 - `examples/aoos/stage45-interface-fixture-v1.json`
 - `reports/aoos/evidence-ledger-v1.jsonl`
 - `reports/aoos/learning-promotion-fixture-v1.json`
+- `reports/aoos/real-world-feedback-ingestion-packet-v1.json`
 - `reports/aoos/risk-classifier-fixture-v1.json`
 - `reports/aoos/task-router-fixture-v1.json`
 - `templates/aoos/README.md`
@@ -120,6 +122,7 @@ map, and template set that sits behind the existing `AGENTS.md` and
 | Risk classifier fixture | Added A0-A6 task-risk fixture with authority decision, evidence level, human gate, rollback path, forbidden actions, and rationale refs. | Repeated task records proving agents classify correctly under pressure. |
 | Task router fixture | Added non-executing task-router fixture mapping task classes to owner roles, risk classes, evidence requirements, records, refs, and next gates. | Live scheduler, task runner, or repeated routing records. |
 | Learning promotion fixture | Added failure-to-control promotion fixture for checklists, scripts, evaluators, policies, and backlog updates. | Real recurring failure records promoted into durable controls. |
+| Real-world feedback ingestion packet | Added A5 proposal-only packet for mapping human-provided source records to evidence levels and forbidden stronger claims. | Explicit human authorization and L5 source records. |
 | Failure taxonomy and learning log | Added template, taxonomy schema, fixture record, and promotion path. | Real failure records promoted to durable controls. |
 | Incident protocol | Linked existing incident response and added AOOS record template plus schema. | Drill or real incident evidence. |
 | Tool/ROI governance | Linked existing tool-selection gate and added ROI template. | Tool review records and exit decisions. |
@@ -147,7 +150,8 @@ map, and template set that sits behind the existing `AGENTS.md` and
   state.
 - L2: repository diff adds AOOS documents, mission/evidence templates,
   checkpoint, runtime backlog record, evidence ledger seed, risk-classifier
-  fixture, task-router fixture, learning-promotion fixture, and check script.
+  fixture, task-router fixture, learning-promotion fixture, A5 feedback
+  ingestion packet, and check script.
 - L3: local validation passed for the focused AOOS/static checks and the full
   local tracer-bullet suite listed below.
 - L4: pending human review.
@@ -158,8 +162,8 @@ map, and template set that sits behind the existing `AGENTS.md` and
 - `python3 scripts/aoos_stage45_check_v1.py` passed.
   This check now validates the AOOS Markdown anchors, JSON Schema contracts,
   evidence ledger seed, risk-classifier fixture, runtime backlog record,
-  task-router fixture, learning-promotion fixture, failure taxonomy,
-  threat-model record, and
+  task-router fixture, learning-promotion fixture, feedback-ingestion packet,
+  failure taxonomy, threat-model record, and
   `examples/aoos/stage45-interface-fixture-v1.json`.
 - `python3 scripts/identity_boundary_check_v1.py` passed.
 - `python3 scripts/observation_check_v1.py` passed.
@@ -223,6 +227,8 @@ map, and template set that sits behind the existing `AGENTS.md` and
   agent launcher.
 - The AOOS learning promotion fixture does not mutate CI, policy, or memory
   automatically.
+- The AOOS real-world feedback ingestion packet is proposal-only and does not
+  execute outreach, source review, account access, or L5 evidence ingestion.
 
 ## Rollback Path
 
@@ -251,15 +257,17 @@ after the latest pushed PR head has a green `canonical-health` run.
 - Stage reached: AOOS Stage 4/5 executable skeleton is repository-ready for
   human review with a schema-backed runtime backlog record, evidence ledger
   seed, risk-classifier fixture, task-router fixture, and learning-promotion
-  fixture. It is not Stage 6/7 operation and has no L5 evidence.
+  fixture plus an A5 feedback-ingestion proposal packet. It is not Stage 6/7
+  operation and has no L5 evidence.
 - Key branch contents: AOOS docs under `docs/aoos/`, templates under
   `templates/aoos/`, JSON Schemas under `docs/aoos/schemas/`, fixture
   `examples/aoos/stage45-interface-fixture-v1.json`, static checker
   `scripts/aoos_stage45_check_v1.py`, root navigation updates, CI inclusion,
   mission brief template, failure taxonomy and threat-model schema records,
   runtime backlog record, evidence ledger seed, risk-classifier fixture,
-  task-router fixture, learning-promotion fixture, worker-registry watchdog
-  fixture stabilization, and the Node.js 24 CI action migration.
+  task-router fixture, learning-promotion fixture, feedback-ingestion proposal
+  packet, worker-registry watchdog fixture stabilization, and the Node.js 24 CI
+  action migration.
 - Do not recreate a parallel protocol authority layer. `AGENTS.md` and
   `docs/agent-protocols/` remain the execution authority.
 - Do not stage or delete `reports/creative/production_spine_v1/`.

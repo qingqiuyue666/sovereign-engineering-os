@@ -16,6 +16,7 @@ REQUIRED_FILES = (
     Path("docs/aoos/runtime-backlog.md"),
     Path("docs/aoos/stage-5-interfaces.md"),
     Path("docs/aoos/schemas/learning-promotion-fixture.schema.json"),
+    Path("docs/aoos/schemas/real-world-feedback-ingestion-packet.schema.json"),
     Path("docs/aoos/schemas/risk-classifier-fixture.schema.json"),
     Path("docs/aoos/schemas/runtime-backlog.schema.json"),
     Path("docs/aoos/schemas/task-router-fixture.schema.json"),
@@ -30,6 +31,7 @@ REQUIRED_FILES = (
     Path("templates/aoos/model-tool-routing-decision-template.md"),
     Path("reports/aoos/evidence-ledger-v1.jsonl"),
     Path("reports/aoos/learning-promotion-fixture-v1.json"),
+    Path("reports/aoos/real-world-feedback-ingestion-packet-v1.json"),
     Path("reports/aoos/risk-classifier-fixture-v1.json"),
     Path("reports/aoos/runtime-backlog-v1.json"),
     Path("reports/aoos/task-router-fixture-v1.json"),
@@ -53,6 +55,7 @@ REQUIRED_TERMS = (
     "AOOS Runtime Backlog",
     "evidence-ledger-v1.jsonl",
     "learning-promotion-fixture-v1.json",
+    "real-world-feedback-ingestion-packet-v1.json",
     "risk-classifier-fixture-v1.json",
     "runtime-backlog-v1.json",
     "task-router-fixture-v1.json",
@@ -121,6 +124,8 @@ FIXTURE_PATH = Path("examples/aoos/stage45-interface-fixture-v1.json")
 EVIDENCE_LEDGER_PATH = Path("reports/aoos/evidence-ledger-v1.jsonl")
 LEARNING_PROMOTION_PATH = Path("reports/aoos/learning-promotion-fixture-v1.json")
 LEARNING_PROMOTION_SCHEMA_PATH = Path("docs/aoos/schemas/learning-promotion-fixture.schema.json")
+REAL_WORLD_FEEDBACK_PATH = Path("reports/aoos/real-world-feedback-ingestion-packet-v1.json")
+REAL_WORLD_FEEDBACK_SCHEMA_PATH = Path("docs/aoos/schemas/real-world-feedback-ingestion-packet.schema.json")
 RISK_CLASSIFIER_PATH = Path("reports/aoos/risk-classifier-fixture-v1.json")
 RISK_CLASSIFIER_SCHEMA_PATH = Path("docs/aoos/schemas/risk-classifier-fixture.schema.json")
 BACKLOG_PATH = Path("reports/aoos/runtime-backlog-v1.json")
@@ -129,6 +134,7 @@ TASK_ROUTER_PATH = Path("reports/aoos/task-router-fixture-v1.json")
 TASK_ROUTER_SCHEMA_PATH = Path("docs/aoos/schemas/task-router-fixture.schema.json")
 SCHEMA_VERSION = "aoos-stage5-interface-v1"
 LEARNING_PROMOTION_SCHEMA_VERSION = "aoos-learning-promotion-fixture-v1"
+REAL_WORLD_FEEDBACK_SCHEMA_VERSION = "aoos-real-world-feedback-ingestion-packet-v1"
 RISK_CLASSIFIER_SCHEMA_VERSION = "aoos-risk-classifier-fixture-v1"
 BACKLOG_SCHEMA_VERSION = "aoos-runtime-backlog-v1"
 TASK_ROUTER_SCHEMA_VERSION = "aoos-task-router-fixture-v1"
@@ -184,6 +190,7 @@ def main() -> int:
     _check_backlog_record(errors)
     _check_task_router_fixture(errors)
     _check_learning_promotion_fixture(errors)
+    _check_real_world_feedback_packet(errors)
 
     if errors:
         print("aoos_stage45_check_v1: FAIL")
@@ -679,6 +686,85 @@ def _check_learning_promotion_fixture(errors: list[str]) -> None:
 
     if "script" not in seen_targets or "policy" not in seen_targets or "evaluator" not in seen_targets:
         errors.append("AOOS learning promotion fixture must cover script, policy, and evaluator targets")
+
+
+def _check_real_world_feedback_packet(errors: list[str]) -> None:
+    schema = _load_json(REAL_WORLD_FEEDBACK_SCHEMA_PATH, errors)
+    if schema is not None:
+        _check_schema_shape(REAL_WORLD_FEEDBACK_SCHEMA_PATH, schema, errors)
+    packet = _load_json(REAL_WORLD_FEEDBACK_PATH, errors)
+    if packet is None:
+        return
+    _check_json_text_safety(REAL_WORLD_FEEDBACK_PATH, errors)
+
+    if packet.get("schema_version") != REAL_WORLD_FEEDBACK_SCHEMA_VERSION:
+        errors.append("AOOS real-world feedback packet schema_version mismatch")
+    if packet.get("status") != "proposal_only":
+        errors.append("AOOS real-world feedback packet must remain proposal_only")
+    if packet.get("actions_executed") is not False:
+        errors.append("AOOS real-world feedback packet must not execute actions")
+    if packet.get("human_authorization_required") is not True:
+        errors.append("AOOS real-world feedback packet must require human authorization")
+
+    for list_field in (
+        "claim_boundary",
+        "accepted_source_types",
+        "ingestion_flow",
+        "evidence_mapping",
+        "redaction_rules",
+        "forbidden_actions",
+        "forbidden_claims",
+    ):
+        value = packet.get(list_field)
+        if not isinstance(value, list) or not value:
+            errors.append(f"AOOS real-world feedback packet {list_field} must be non-empty array")
+
+    source_types = packet.get("accepted_source_types", [])
+    if isinstance(source_types, list):
+        for index, source in enumerate(source_types, start=1):
+            if not isinstance(source, dict):
+                errors.append(f"AOOS feedback source type {index} must be object")
+                continue
+            for field in (
+                "source_type",
+                "minimum_fields",
+                "evidence_level_after_review",
+                "human_gate",
+            ):
+                if field not in source:
+                    errors.append(f"AOOS feedback source type {index} missing field: {field}")
+            if source.get("human_gate") is not True:
+                errors.append(f"AOOS feedback source type {index} must require human gate")
+            minimum_fields = source.get("minimum_fields")
+            if not isinstance(minimum_fields, list) or not minimum_fields:
+                errors.append(f"AOOS feedback source type {index} minimum_fields must be non-empty array")
+
+    mappings = packet.get("evidence_mapping", [])
+    if isinstance(mappings, list):
+        for index, mapping in enumerate(mappings, start=1):
+            if not isinstance(mapping, dict):
+                errors.append(f"AOOS feedback evidence mapping {index} must be object")
+                continue
+            for field in ("claim_type", "required_source", "allowed_wording", "forbidden_wording"):
+                value = mapping.get(field)
+                if not isinstance(value, str) or not value.strip():
+                    errors.append(f"AOOS feedback evidence mapping {index} {field} must be non-empty string")
+
+    forbidden_text = " ".join(packet.get("forbidden_actions", []) + packet.get("forbidden_claims", [])).lower()
+    for required_phrase in (
+        "claiming real-world validation",
+        "customer validation",
+        "paid signal",
+        "production deployment",
+    ):
+        if required_phrase not in forbidden_text:
+            errors.append(
+                f"AOOS real-world feedback packet forbidden boundaries missing: {required_phrase}"
+            )
+
+    rollback = packet.get("rollback_path")
+    if not isinstance(rollback, str) or not rollback.strip():
+        errors.append("AOOS real-world feedback packet rollback_path must be non-empty string")
 
 
 def _load_json(relative_path: Path, errors: list[str]) -> dict | None:

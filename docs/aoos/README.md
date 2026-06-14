@@ -53,6 +53,9 @@ operation, recovery, learning, and cross-domain repetition records exist.
 - `reports/aoos/learning-promotion-fixture-v1.json` is the failure-to-control
   promotion fixture for checklist, script, evaluator, policy, and backlog
   updates.
+- `reports/aoos/real-world-feedback-ingestion-packet-v1.json` is an A5
+  proposal-only packet for mapping human-provided real-world feedback records
+  into evidence levels without executing outreach or claiming L5 evidence.
 - `examples/aoos/stage45-interface-fixture-v1.json` is the minimal fixture
   checked against those contracts.
 - `templates/aoos/` contains reusable mission brief, evidence, failure,
