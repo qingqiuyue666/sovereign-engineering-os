@@ -398,8 +398,10 @@ of duplicating them:
 - `docs/aoos/stage-5-interfaces.md`
 - `docs/aoos/schemas/`
 - `reports/aoos/evidence-ledger-v1.jsonl`
+- `reports/aoos/learning-promotion-fixture-v1.json`
 - `reports/aoos/risk-classifier-fixture-v1.json`
 - `reports/aoos/runtime-backlog-v1.json`
+- `reports/aoos/task-router-fixture-v1.json`
 - `examples/aoos/stage45-interface-fixture-v1.json`
 - `templates/aoos/`
 - `scripts/aoos_stage45_check_v1.py`
@@ -412,8 +414,9 @@ validation, incident response, anti-Goodhart controls, cross-domain packs,
 evidence templates, failure learning logs, incident records, real-world
 validation logs, model/tool routing, domain acceptance rubrics, and
 machine-checkable Stage 5 interface schemas, an evidence ledger seed, an A0-A6
-risk-classifier fixture, and a persistent backlog record for selecting the next
-safe AOOS runtime increments.
+risk-classifier fixture, a non-executing task-router fixture, a learning
+promotion fixture, and a persistent backlog record for selecting the next safe
+AOOS runtime increments.
 
 Real-world status remains `HUMAN_ACTION_REQUIRED`. No Stage 6/7 operation,
 production deployment, customer validation, paid signal, delivery acceptance,

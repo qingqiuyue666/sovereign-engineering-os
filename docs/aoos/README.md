@@ -48,6 +48,11 @@ operation, recovery, learning, and cross-domain repetition records exist.
   classification fixture checked against existing human-gate authority rules.
 - `reports/aoos/runtime-backlog-v1.json` is the current machine-checkable AOOS
   backlog record.
+- `reports/aoos/task-router-fixture-v1.json` is the non-executing task-router
+  fixture for owner roles, evidence requirements, next gates, and refs.
+- `reports/aoos/learning-promotion-fixture-v1.json` is the failure-to-control
+  promotion fixture for checklist, script, evaluator, policy, and backlog
+  updates.
 - `examples/aoos/stage45-interface-fixture-v1.json` is the minimal fixture
   checked against those contracts.
 - `templates/aoos/` contains reusable mission brief, evidence, failure,

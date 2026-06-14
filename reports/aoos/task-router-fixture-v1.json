@@ -1,0 +1,156 @@
+{
+  "schema_version": "aoos-task-router-fixture-v1",
+  "fixture_id": "aoos-task-router-fixture-v1",
+  "recorded_at_utc": "2026-06-14T06:01:31Z",
+  "claim_boundary": [
+    "non-executing router fixture only",
+    "does not schedule or execute tasks",
+    "does not launch agents",
+    "does not grant merge, production, credential, or real-world authority"
+  ],
+  "routing_rules": [
+    {
+      "route_id": "AOOS-ROUTE-001",
+      "task_class": "CURRENT_STATE_INSPECTION",
+      "domain": "Engineering Pack",
+      "owner_role": "Operator Agent",
+      "risk_class": "A0_READ_ONLY",
+      "evidence_requirement": "L1 local or connector output",
+      "required_inputs": [
+        "repository root",
+        "branch",
+        "PR number when relevant"
+      ],
+      "output_records": [
+        "observability_event",
+        "evidence_ledger_entry"
+      ],
+      "next_gate": "select backlog item or stop at human gate",
+      "observability_event_refs": [
+        "examples/aoos/stage45-interface-fixture-v1.json"
+      ],
+      "decision_refs": [
+        "reports/aoos/runtime-backlog-v1.json"
+      ],
+      "forbidden_claims": [
+        "completion without checks",
+        "real-world validation confirmed"
+      ]
+    },
+    {
+      "route_id": "AOOS-ROUTE-002",
+      "task_class": "AOOS_SAFE_INTERFACE_INCREMENT",
+      "domain": "Engineering Pack",
+      "owner_role": "Builder Agent",
+      "risk_class": "A1_SAFE_EDIT",
+      "evidence_requirement": "L2 diff and L3 checks",
+      "required_inputs": [
+        "accepted backlog item",
+        "existing AOOS anchors",
+        "rollback path"
+      ],
+      "output_records": [
+        "schema",
+        "fixture",
+        "validator update",
+        "evidence_ledger_entry"
+      ],
+      "next_gate": "local checks, commit, push, CI",
+      "observability_event_refs": [
+        "reports/aoos/evidence-ledger-v1.jsonl"
+      ],
+      "decision_refs": [
+        "reports/aoos/risk-classifier-fixture-v1.json"
+      ],
+      "forbidden_claims": [
+        "live runtime confirmed",
+        "Stage 6/7 operation confirmed"
+      ]
+    },
+    {
+      "route_id": "AOOS-ROUTE-003",
+      "task_class": "AUTHORITY_OR_RISK_CLASSIFICATION",
+      "domain": "Authority / Risk Governance",
+      "owner_role": "Policy Agent",
+      "risk_class": "A1_SAFE_EDIT",
+      "evidence_requirement": "L3 fixture validation",
+      "required_inputs": [
+        "task description",
+        "authority refs",
+        "human-gate refs"
+      ],
+      "output_records": [
+        "risk_classifier_case",
+        "decision_log_entry"
+      ],
+      "next_gate": "block A5/A6 execution or allow A0-A4 repository work",
+      "observability_event_refs": [
+        "reports/aoos/risk-classifier-fixture-v1.json"
+      ],
+      "decision_refs": [
+        "docs/agent-protocols/high-risk-human-gates.md"
+      ],
+      "forbidden_claims": [
+        "authority granted by fixture",
+        "merge authorization implied"
+      ]
+    },
+    {
+      "route_id": "AOOS-ROUTE-004",
+      "task_class": "RECURRING_FAILURE_PROMOTION",
+      "domain": "Learning / Memory Lifecycle",
+      "owner_role": "Reviewer Agent",
+      "risk_class": "A1_SAFE_EDIT",
+      "evidence_requirement": "L3 fixture validation",
+      "required_inputs": [
+        "failure record",
+        "occurrence count",
+        "evidence refs"
+      ],
+      "output_records": [
+        "learning_promotion_rule",
+        "backlog_update"
+      ],
+      "next_gate": "promote to checklist, playbook, script, CI, evaluator, policy, or backlog",
+      "observability_event_refs": [
+        "reports/aoos/learning-promotion-fixture-v1.json"
+      ],
+      "decision_refs": [
+        "docs/agent-protocols/memory-governance.md"
+      ],
+      "forbidden_claims": [
+        "memory proves completion",
+        "unverified failure pattern promoted to CI"
+      ]
+    },
+    {
+      "route_id": "AOOS-ROUTE-005",
+      "task_class": "REAL_WORLD_FEEDBACK_PACKET",
+      "domain": "Reality Validation",
+      "owner_role": "Reality Agent",
+      "risk_class": "A5_PROPOSE_REAL_WORLD_ACTION",
+      "evidence_requirement": "L0 proposal until L5 source records exist",
+      "required_inputs": [
+        "feedback source type",
+        "permission boundary",
+        "redaction requirement"
+      ],
+      "output_records": [
+        "proposal_packet",
+        "forbidden_claims"
+      ],
+      "next_gate": "explicit human authorization before real-world action",
+      "observability_event_refs": [
+        "templates/aoos/reality-validation-log-template.md"
+      ],
+      "decision_refs": [
+        "docs/agent-protocols/evidence-and-no-fake-completion.md"
+      ],
+      "forbidden_claims": [
+        "claiming customer validation without L5 source records",
+        "claiming paid signal without payment evidence",
+        "claiming delivery completion without acceptance evidence"
+      ]
+    }
+  ]
+}

@@ -15,8 +15,10 @@ REQUIRED_FILES = (
     Path("docs/aoos/domain-packs.md"),
     Path("docs/aoos/runtime-backlog.md"),
     Path("docs/aoos/stage-5-interfaces.md"),
+    Path("docs/aoos/schemas/learning-promotion-fixture.schema.json"),
     Path("docs/aoos/schemas/risk-classifier-fixture.schema.json"),
     Path("docs/aoos/schemas/runtime-backlog.schema.json"),
+    Path("docs/aoos/schemas/task-router-fixture.schema.json"),
     Path("templates/aoos/README.md"),
     Path("templates/aoos/mission-brief-template.md"),
     Path("templates/aoos/evidence-report-template.md"),
@@ -27,8 +29,10 @@ REQUIRED_FILES = (
     Path("templates/aoos/tool-roi-review-template.md"),
     Path("templates/aoos/model-tool-routing-decision-template.md"),
     Path("reports/aoos/evidence-ledger-v1.jsonl"),
+    Path("reports/aoos/learning-promotion-fixture-v1.json"),
     Path("reports/aoos/risk-classifier-fixture-v1.json"),
     Path("reports/aoos/runtime-backlog-v1.json"),
+    Path("reports/aoos/task-router-fixture-v1.json"),
     Path("reports/checkpoints/aoos-stage45-executable-skeleton-v1.md"),
 )
 
@@ -48,8 +52,10 @@ REQUIRED_TERMS = (
     "AOOS Mission Brief Template",
     "AOOS Runtime Backlog",
     "evidence-ledger-v1.jsonl",
+    "learning-promotion-fixture-v1.json",
     "risk-classifier-fixture-v1.json",
     "runtime-backlog-v1.json",
+    "task-router-fixture-v1.json",
     "A0-A6",
     "failure_taxonomy_entry",
     "threat_model_record",
@@ -113,13 +119,19 @@ SCHEMA_FIXTURE_MAP = (
 
 FIXTURE_PATH = Path("examples/aoos/stage45-interface-fixture-v1.json")
 EVIDENCE_LEDGER_PATH = Path("reports/aoos/evidence-ledger-v1.jsonl")
+LEARNING_PROMOTION_PATH = Path("reports/aoos/learning-promotion-fixture-v1.json")
+LEARNING_PROMOTION_SCHEMA_PATH = Path("docs/aoos/schemas/learning-promotion-fixture.schema.json")
 RISK_CLASSIFIER_PATH = Path("reports/aoos/risk-classifier-fixture-v1.json")
 RISK_CLASSIFIER_SCHEMA_PATH = Path("docs/aoos/schemas/risk-classifier-fixture.schema.json")
 BACKLOG_PATH = Path("reports/aoos/runtime-backlog-v1.json")
 BACKLOG_SCHEMA_PATH = Path("docs/aoos/schemas/runtime-backlog.schema.json")
+TASK_ROUTER_PATH = Path("reports/aoos/task-router-fixture-v1.json")
+TASK_ROUTER_SCHEMA_PATH = Path("docs/aoos/schemas/task-router-fixture.schema.json")
 SCHEMA_VERSION = "aoos-stage5-interface-v1"
+LEARNING_PROMOTION_SCHEMA_VERSION = "aoos-learning-promotion-fixture-v1"
 RISK_CLASSIFIER_SCHEMA_VERSION = "aoos-risk-classifier-fixture-v1"
 BACKLOG_SCHEMA_VERSION = "aoos-runtime-backlog-v1"
+TASK_ROUTER_SCHEMA_VERSION = "aoos-task-router-fixture-v1"
 JSON_SCHEMA_DRAFT = "https://json-schema.org/draft/2020-12/schema"
 
 REQUIRED_METRICS = (
@@ -170,6 +182,8 @@ def main() -> int:
     _check_evidence_ledger_records(errors)
     _check_risk_classifier_fixture(errors)
     _check_backlog_record(errors)
+    _check_task_router_fixture(errors)
+    _check_learning_promotion_fixture(errors)
 
     if errors:
         print("aoos_stage45_check_v1: FAIL")
@@ -444,7 +458,7 @@ def _check_backlog_record(errors: list[str]) -> None:
         "blocked",
     }
     seen_ids: set[str] = set()
-    has_ready_item = False
+    has_open_or_gate_item = False
     for index, item in enumerate(items, start=1):
         if not isinstance(item, dict):
             errors.append(f"AOOS backlog item {index} must be object")
@@ -479,8 +493,8 @@ def _check_backlog_record(errors: list[str]) -> None:
         status = item.get("status")
         if status not in allowed_statuses:
             errors.append(f"AOOS backlog item {item_id or index} has unsupported status: {status}")
-        if status == "ready_for_review":
-            has_ready_item = True
+        if status != "completed":
+            has_open_or_gate_item = True
         for text_field in (
             "title",
             "domain",
@@ -496,8 +510,175 @@ def _check_backlog_record(errors: list[str]) -> None:
             if not isinstance(value, str) or not value.strip():
                 errors.append(f"AOOS backlog item {item_id or index} {text_field} must be non-empty string")
 
-    if not has_ready_item:
-        errors.append("AOOS backlog must include at least one ready_for_review item")
+    if not has_open_or_gate_item:
+        errors.append("AOOS backlog must include at least one open item or human gate")
+
+
+def _check_task_router_fixture(errors: list[str]) -> None:
+    schema = _load_json(TASK_ROUTER_SCHEMA_PATH, errors)
+    if schema is not None:
+        _check_schema_shape(TASK_ROUTER_SCHEMA_PATH, schema, errors)
+    fixture = _load_json(TASK_ROUTER_PATH, errors)
+    if fixture is None:
+        return
+    _check_json_text_safety(TASK_ROUTER_PATH, errors)
+
+    if fixture.get("schema_version") != TASK_ROUTER_SCHEMA_VERSION:
+        errors.append("AOOS task router fixture schema_version mismatch")
+    if not fixture.get("claim_boundary"):
+        errors.append("AOOS task router fixture must state claim_boundary")
+
+    rules = fixture.get("routing_rules")
+    if not isinstance(rules, list) or len(rules) < 5:
+        errors.append("AOOS task router fixture must contain at least five routing rules")
+        return
+
+    required_fields = (
+        "route_id",
+        "task_class",
+        "domain",
+        "owner_role",
+        "risk_class",
+        "evidence_requirement",
+        "required_inputs",
+        "output_records",
+        "next_gate",
+        "observability_event_refs",
+        "decision_refs",
+        "forbidden_claims",
+    )
+    seen_routes: set[str] = set()
+    owner_roles: set[str] = set()
+    for index, rule in enumerate(rules, start=1):
+        if not isinstance(rule, dict):
+            errors.append(f"AOOS task router rule {index} must be object")
+            continue
+        for field in required_fields:
+            if field not in rule:
+                errors.append(f"AOOS task router rule {index} missing field: {field}")
+        route_id = rule.get("route_id")
+        if not isinstance(route_id, str) or not route_id:
+            errors.append(f"AOOS task router rule {index} route_id must be non-empty string")
+        elif route_id in seen_routes:
+            errors.append(f"AOOS task router duplicate route_id: {route_id}")
+        else:
+            seen_routes.add(route_id)
+        risk_class = rule.get("risk_class")
+        if not isinstance(risk_class, str) or not risk_class.startswith(("A0_", "A1_", "A2_", "A3_", "A4_", "A5_", "A6_")):
+            errors.append(f"AOOS task router rule {route_id or index} risk_class must start with A0_ through A6_")
+        evidence = rule.get("evidence_requirement")
+        if not isinstance(evidence, str) or not evidence.startswith("L"):
+            errors.append(f"AOOS task router rule {route_id or index} evidence_requirement must start with L")
+        owner_role = rule.get("owner_role")
+        if isinstance(owner_role, str) and owner_role:
+            owner_roles.add(owner_role)
+        else:
+            errors.append(f"AOOS task router rule {route_id or index} owner_role must be non-empty string")
+        for list_field in (
+            "required_inputs",
+            "output_records",
+            "observability_event_refs",
+            "decision_refs",
+            "forbidden_claims",
+        ):
+            value = rule.get(list_field)
+            if not isinstance(value, list) or not value:
+                errors.append(
+                    f"AOOS task router rule {route_id or index} {list_field} must be non-empty array"
+                )
+                continue
+            if any(not isinstance(entry, str) or not entry for entry in value):
+                errors.append(
+                    f"AOOS task router rule {route_id or index} {list_field} entries must be strings"
+                )
+        for ref_field in ("observability_event_refs", "decision_refs"):
+            for source_ref in rule.get(ref_field, []):
+                if isinstance(source_ref, str) and not (REPO_ROOT / source_ref).exists():
+                    errors.append(
+                        f"AOOS task router rule {route_id or index} {ref_field} missing: {source_ref}"
+                    )
+
+    required_roles = {"Builder Agent", "Reviewer Agent", "Policy Agent", "Reality Agent", "Operator Agent"}
+    missing_roles = sorted(required_roles - owner_roles)
+    if missing_roles:
+        errors.append(f"AOOS task router fixture missing owner roles: {', '.join(missing_roles)}")
+
+
+def _check_learning_promotion_fixture(errors: list[str]) -> None:
+    schema = _load_json(LEARNING_PROMOTION_SCHEMA_PATH, errors)
+    if schema is not None:
+        _check_schema_shape(LEARNING_PROMOTION_SCHEMA_PATH, schema, errors)
+    fixture = _load_json(LEARNING_PROMOTION_PATH, errors)
+    if fixture is None:
+        return
+    _check_json_text_safety(LEARNING_PROMOTION_PATH, errors)
+
+    if fixture.get("schema_version") != LEARNING_PROMOTION_SCHEMA_VERSION:
+        errors.append("AOOS learning promotion fixture schema_version mismatch")
+    if not fixture.get("claim_boundary"):
+        errors.append("AOOS learning promotion fixture must state claim_boundary")
+
+    rules = fixture.get("promotion_rules")
+    if not isinstance(rules, list) or len(rules) < 5:
+        errors.append("AOOS learning promotion fixture must contain at least five promotion rules")
+        return
+
+    required_fields = (
+        "rule_id",
+        "failure_pattern",
+        "occurrence_threshold",
+        "promotion_target",
+        "owner_role",
+        "evidence_required",
+        "next_action",
+        "rollback_path",
+        "forbidden_claims",
+    )
+    allowed_targets = {"checklist", "playbook", "script", "CI", "evaluator", "policy", "backlog"}
+    seen_rules: set[str] = set()
+    seen_targets: set[str] = set()
+    for index, rule in enumerate(rules, start=1):
+        if not isinstance(rule, dict):
+            errors.append(f"AOOS learning promotion rule {index} must be object")
+            continue
+        for field in required_fields:
+            if field not in rule:
+                errors.append(f"AOOS learning promotion rule {index} missing field: {field}")
+        rule_id = rule.get("rule_id")
+        if not isinstance(rule_id, str) or not rule_id:
+            errors.append(f"AOOS learning promotion rule {index} rule_id must be non-empty string")
+        elif rule_id in seen_rules:
+            errors.append(f"AOOS learning promotion duplicate rule_id: {rule_id}")
+        else:
+            seen_rules.add(rule_id)
+        threshold = rule.get("occurrence_threshold")
+        if not isinstance(threshold, int) or threshold < 1:
+            errors.append(f"AOOS learning promotion rule {rule_id or index} threshold must be positive integer")
+        target = rule.get("promotion_target")
+        if target not in allowed_targets:
+            errors.append(f"AOOS learning promotion rule {rule_id or index} invalid target: {target}")
+        elif isinstance(target, str):
+            seen_targets.add(target)
+        for list_field in ("evidence_required", "forbidden_claims"):
+            value = rule.get(list_field)
+            if not isinstance(value, list) or not value:
+                errors.append(
+                    f"AOOS learning promotion rule {rule_id or index} {list_field} must be non-empty array"
+                )
+                continue
+            if any(not isinstance(entry, str) or not entry for entry in value):
+                errors.append(
+                    f"AOOS learning promotion rule {rule_id or index} {list_field} entries must be strings"
+                )
+        for text_field in ("failure_pattern", "owner_role", "next_action", "rollback_path"):
+            value = rule.get(text_field)
+            if not isinstance(value, str) or not value.strip():
+                errors.append(
+                    f"AOOS learning promotion rule {rule_id or index} {text_field} must be non-empty string"
+                )
+
+    if "script" not in seen_targets or "policy" not in seen_targets or "evaluator" not in seen_targets:
+        errors.append("AOOS learning promotion fixture must cover script, policy, and evaluator targets")
 
 
 def _load_json(relative_path: Path, errors: list[str]) -> dict | None:

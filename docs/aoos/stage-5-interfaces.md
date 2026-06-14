@@ -35,6 +35,25 @@ and rationale references. It does not replace the existing high-risk gate
 protocol and does not grant merge, production, credential, or real-world
 authority.
 
+## Task Router Fixture
+
+The non-executing task-router fixture is
+`reports/aoos/task-router-fixture-v1.json`. It maps task classes to AOOS owner
+roles, risk classes, evidence requirements, output records, next gates,
+observability refs, decision refs, and forbidden claims.
+
+It does not schedule work, launch agents, or execute tasks.
+
+## Learning Promotion Fixture
+
+The learning-promotion fixture is
+`reports/aoos/learning-promotion-fixture-v1.json`. It maps recurring failure
+patterns to durable controls such as checklists, scripts, evaluators, policies,
+or backlog updates.
+
+It does not mutate CI, policy, or memory automatically. Promotion still
+requires scoped implementation and checks.
+
 ## Observability Event
 
 Required fields:

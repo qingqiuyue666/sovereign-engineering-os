@@ -86,8 +86,8 @@
         "python3 scripts/security_control_check_v1.py"
       ],
       "rollback_path": "revert the scoped classifier fixture commit",
-      "status": "ready_for_review",
-      "next_action": "Push the PR branch and use CI plus human review as the next evidence gate.",
+      "status": "completed",
+      "next_action": "Use the A0-A6 classifier fixture before selecting or executing future AOOS backlog items.",
       "owner_role": "Policy Agent",
       "evaluator_required": "AOOS risk-classifier fixture validation",
       "promotion_rule_if_repeated_failure": "If agents misclassify the same gate twice, promote that case into the classifier fixture and high-risk gate docs."
@@ -109,8 +109,8 @@
         "python3 scripts/aoos_stage45_check_v1.py"
       ],
       "rollback_path": "revert the scoped router scaffold commit",
-      "status": "pending_after_human_review",
-      "next_action": "Keep as fixture-only until human review accepts the AOOS interface direction.",
+      "status": "completed",
+      "next_action": "Use the task-router fixture as a non-executing routing reference for future AOOS task records.",
       "owner_role": "Builder Agent",
       "evaluator_required": "AOOS router fixture validation",
       "promotion_rule_if_repeated_failure": "If routing contradictions repeat, promote the route into a script-backed evaluator rather than another prose protocol."
@@ -131,8 +131,8 @@
         "python3 scripts/aoos_stage45_check_v1.py"
       ],
       "rollback_path": "revert the scoped promotion fixture commit",
-      "status": "pending_after_human_review",
-      "next_action": "Add after evidence-ledger seed records exist so failures can point to durable evidence refs.",
+      "status": "completed",
+      "next_action": "Use the learning-promotion fixture to convert repeated failures into durable controls.",
       "owner_role": "Reviewer Agent",
       "evaluator_required": "AOOS learning-promotion fixture validation",
       "promotion_rule_if_repeated_failure": "If the same failure is handled manually twice, add a script or CI check for that invariant."

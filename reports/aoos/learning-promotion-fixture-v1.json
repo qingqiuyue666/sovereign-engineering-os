@@ -1,0 +1,106 @@
+{
+  "schema_version": "aoos-learning-promotion-fixture-v1",
+  "fixture_id": "aoos-learning-promotion-fixture-v1",
+  "recorded_at_utc": "2026-06-14T06:01:31Z",
+  "claim_boundary": [
+    "promotion fixture only",
+    "does not mutate CI automatically",
+    "does not write memory automatically",
+    "does not replace human review for policy or production boundaries"
+  ],
+  "promotion_rules": [
+    {
+      "rule_id": "AOOS-PROMOTE-001",
+      "failure_pattern": "unsupported completion claim",
+      "occurrence_threshold": 1,
+      "promotion_target": "checklist",
+      "owner_role": "Evidence Agent",
+      "evidence_required": [
+        "claim text",
+        "available evidence level",
+        "missing stronger evidence"
+      ],
+      "next_action": "downgrade claim language and add a final-report checklist item",
+      "rollback_path": "remove the checklist item if the pattern is disproven by source records",
+      "forbidden_claims": [
+        "claiming customer validation without L5 source records",
+        "claiming production deployment without deployment records",
+        "Stage 6/7 operation confirmed"
+      ]
+    },
+    {
+      "rule_id": "AOOS-PROMOTE-002",
+      "failure_pattern": "same validation failure repeats twice",
+      "occurrence_threshold": 2,
+      "promotion_target": "script",
+      "owner_role": "Reviewer Agent",
+      "evidence_required": [
+        "two failed command outputs",
+        "narrow fix attempts",
+        "file or fixture path"
+      ],
+      "next_action": "promote the invariant into a local validator before adding CI coverage",
+      "rollback_path": "revert the validator commit if it is too broad or blocks unrelated work",
+      "forbidden_claims": [
+        "CI coverage added before local validator exists",
+        "failure resolved without rerun evidence"
+      ]
+    },
+    {
+      "rule_id": "AOOS-PROMOTE-003",
+      "failure_pattern": "risk classification disagreement repeats",
+      "occurrence_threshold": 2,
+      "promotion_target": "evaluator",
+      "owner_role": "Policy Agent",
+      "evidence_required": [
+        "task description",
+        "initial classification",
+        "corrected classification",
+        "human-gate reference"
+      ],
+      "next_action": "add or revise a risk-classifier fixture case and validator assertion",
+      "rollback_path": "revert fixture case if it conflicts with AGENTS.md or high-risk gates",
+      "forbidden_claims": [
+        "fixture grants authority",
+        "A5/A6 action can proceed without owner authorization"
+      ]
+    },
+    {
+      "rule_id": "AOOS-PROMOTE-004",
+      "failure_pattern": "stale memory conflicts with repository state",
+      "occurrence_threshold": 1,
+      "promotion_target": "policy",
+      "owner_role": "Operator Agent",
+      "evidence_required": [
+        "current file state",
+        "stale memory text",
+        "conflict explanation"
+      ],
+      "next_action": "prefer repository state and update memory governance or continuation packet guidance",
+      "rollback_path": "remove the policy note if it duplicates existing memory governance",
+      "forbidden_claims": [
+        "chat memory overrides repository files",
+        "old CI status proves new head"
+      ]
+    },
+    {
+      "rule_id": "AOOS-PROMOTE-005",
+      "failure_pattern": "real-world boundary blurred",
+      "occurrence_threshold": 1,
+      "promotion_target": "policy",
+      "owner_role": "Reality Agent",
+      "evidence_required": [
+        "claim or action text",
+        "missing L5 source record",
+        "human gate reference"
+      ],
+      "next_action": "move the item to A5 proposal or A6 human authorization gate",
+      "rollback_path": "remove or revise the packet before merge if it implies execution",
+      "forbidden_claims": [
+        "claiming paid signal without payment evidence",
+        "customer acceptance confirmed",
+        "delivery completed"
+      ]
+    }
+  ]
+}
