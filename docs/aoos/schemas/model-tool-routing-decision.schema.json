@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "docs/aoos/schemas/model-tool-routing-decision.schema.json",
+  "title": "AOOS Model Tool Routing Decision",
+  "schema_version": "aoos-stage5-interface-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "routing_id",
+    "candidate_model_or_tool",
+    "classification",
+    "exact_bottleneck_removed",
+    "authority_boundary",
+    "permission_or_credential_risk",
+    "reviewer_separation",
+    "fallback_policy",
+    "exit_plan",
+    "evidence_that_routing_worked"
+  ],
+  "properties": {
+    "routing_id": {"type": "string"},
+    "candidate_model_or_tool": {"type": "string"},
+    "classification": {"type": "string"},
+    "exact_bottleneck_removed": {"type": "string"},
+    "authority_boundary": {"type": "string"},
+    "permission_or_credential_risk": {"type": "string"},
+    "reviewer_separation": {"type": "string"},
+    "fallback_policy": {"type": "string"},
+    "exit_plan": {"type": "string"},
+    "evidence_that_routing_worked": {"type": "string"}
+  }
+}

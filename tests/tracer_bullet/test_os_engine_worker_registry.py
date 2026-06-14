@@ -121,7 +121,7 @@ class OsEngineWorkerRegistryTests(unittest.IsolatedAsyncioTestCase):
             crash_dir=Path(tempfile.mkdtemp()),
         )
 
-        result = await worker.run(_job(), context)
+        result = await worker.run(_job(memory_limit_mb=1024), context)
 
         self.assertTrue(result.succeeded)
         receipt_path = Path(str(result.metadata["watchdog_receipt_path"]))

@@ -1,0 +1,123 @@
+{
+  "schema_version": "aoos-real-world-feedback-ingestion-packet-v1",
+  "packet_id": "aoos-real-world-feedback-ingestion-packet-v1",
+  "recorded_at_utc": "2026-06-14T06:12:20Z",
+  "status": "proposal_only",
+  "actions_executed": false,
+  "human_authorization_required": true,
+  "claim_boundary": [
+    "A5 proposal packet only",
+    "does not contact users, customers, auditors, platforms, or accounts",
+    "does not ingest private data",
+    "does not claim L5 evidence",
+    "does not prove L8/L9 operation"
+  ],
+  "accepted_source_types": [
+    {
+      "source_type": "human-provided customer feedback record",
+      "minimum_fields": [
+        "date",
+        "actor or redacted actor class",
+        "scope",
+        "verbatim or summarized feedback",
+        "permission or redaction status"
+      ],
+      "evidence_level_after_review": "L5 if source authenticity and permission are sufficient",
+      "human_gate": true
+    },
+    {
+      "source_type": "payment or signed-scope record",
+      "minimum_fields": [
+        "date",
+        "amount or commitment class",
+        "scope",
+        "counterparty redaction status",
+        "acceptance condition"
+      ],
+      "evidence_level_after_review": "L5 for commercial signal only within the recorded scope",
+      "human_gate": true
+    },
+    {
+      "source_type": "delivery acceptance record",
+      "minimum_fields": [
+        "date",
+        "delivered artifact",
+        "accepting actor or redacted actor class",
+        "acceptance language",
+        "limitations"
+      ],
+      "evidence_level_after_review": "L5 for delivery acceptance only within the accepted scope",
+      "human_gate": true
+    },
+    {
+      "source_type": "platform, production, or usage telemetry excerpt",
+      "minimum_fields": [
+        "date range",
+        "system or platform",
+        "metric definition",
+        "sample size or denominator",
+        "privacy and permission status"
+      ],
+      "evidence_level_after_review": "L5 for observed usage only when source and denominator are adequate",
+      "human_gate": true
+    }
+  ],
+  "ingestion_flow": [
+    "Human owner supplies a source record or authorizes a bounded source review.",
+    "Reality Agent classifies the source type and redaction requirement.",
+    "Evidence Agent maps the claim to L0-L5 and records limitations.",
+    "Policy Agent confirms whether A6 authorization is required before any external action.",
+    "Reviewer Agent rejects claims that exceed source scope.",
+    "Operator Agent updates backlog, evidence ledger, and checkpoint only after source review."
+  ],
+  "evidence_mapping": [
+    {
+      "claim_type": "customer feedback exists",
+      "required_source": "human-provided customer feedback record",
+      "allowed_wording": "feedback record received for the stated scope",
+      "forbidden_wording": "customer validation or market proof without repeated source records"
+    },
+    {
+      "claim_type": "paid signal exists",
+      "required_source": "payment or signed-scope record",
+      "allowed_wording": "paid or committed signal exists for the recorded scope",
+      "forbidden_wording": "commercial validation or product-market fit from one record"
+    },
+    {
+      "claim_type": "delivery accepted",
+      "required_source": "delivery acceptance record",
+      "allowed_wording": "delivery accepted for the named artifact and scope",
+      "forbidden_wording": "repeatable delivery system proven without repeated acceptance records"
+    },
+    {
+      "claim_type": "production or usage evidence exists",
+      "required_source": "platform, production, or usage telemetry excerpt",
+      "allowed_wording": "usage observed for the defined metric and window",
+      "forbidden_wording": "production readiness, retention, or adoption proof without adequate denominator"
+    }
+  ],
+  "redaction_rules": [
+    "Do not store direct personal contact details in AOOS public records.",
+    "Do not store payment identifiers, account secrets, tokens, or credentials.",
+    "Use redacted actor classes when permission for named attribution is absent.",
+    "Keep raw source records outside public repository paths unless explicitly approved.",
+    "Record limitations when only summarized or redacted source evidence is available."
+  ],
+  "forbidden_actions": [
+    "contacting users, customers, auditors, partners, or communities",
+    "opening production systems or accounts",
+    "reading, storing, or transforming credentials",
+    "publishing customer, payment, or private platform data",
+    "claiming real-world validation from this proposal packet"
+  ],
+  "forbidden_claims": [
+    "L8 or L9 operation proven",
+    "self-evolving real-world organization proven",
+    "customer validation proven",
+    "paid signal proven",
+    "delivery completion proven",
+    "production deployment proven",
+    "product-market fit proven"
+  ],
+  "rollback_path": "remove or revise this proposal packet if it blurs the A5/A6 boundary, stores private source data, or implies real-world execution."
+}

@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "docs/aoos/schemas/threat-model-record.schema.json",
+  "title": "AOOS Threat Model Record",
+  "schema_version": "aoos-stage5-interface-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "threat_id",
+    "domain_pack",
+    "threat_class",
+    "asset_or_boundary",
+    "attack_or_failure_mode",
+    "risk_level",
+    "mitigations",
+    "evidence_refs",
+    "human_gate",
+    "residual_risk",
+    "review_cadence",
+    "forbidden_actions"
+  ],
+  "properties": {
+    "threat_id": {"type": "string"},
+    "domain_pack": {"type": "string"},
+    "threat_class": {"type": "string"},
+    "asset_or_boundary": {"type": "string"},
+    "attack_or_failure_mode": {"type": "string"},
+    "risk_level": {"type": "string"},
+    "mitigations": {"type": "array", "items": {"type": "string"}},
+    "evidence_refs": {"type": "array", "items": {"type": "string"}},
+    "human_gate": {"type": "boolean"},
+    "residual_risk": {"type": "string"},
+    "review_cadence": {"type": "string"},
+    "forbidden_actions": {"type": "array", "items": {"type": "string"}}
+  }
+}

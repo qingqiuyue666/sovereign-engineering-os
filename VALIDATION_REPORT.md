@@ -361,6 +361,68 @@ strategy expansion.
 - No clearing, rights, marketplace, or capital allocation runtime before
   repeated delivery evidence.
 
+## Agent Operating Protocol v1
+
+Status label: `AGENT_OPERATING_PROTOCOL_READY_FOR_REVIEW`.
+
+Repository status: `PROTOCOL_LAYER_READY_FOR_REVIEW`. The repository now
+includes a concise root agent instruction layer, Claude-compatible memory,
+detailed continuous stage-gated execution protocols, high-risk human gates,
+evidence and no-fake-completion rules, failure handling, PR stack migration
+guidance, tool-selection governance, memory governance, reusable playbooks,
+an agent final-report checklist, and this checkpoint:
+
+- `AGENTS.md`
+- `CLAUDE.md`
+- `docs/agent-protocols/`
+- `playbooks/`
+- `checklists/agent-final-report-checklist.md`
+- `reports/checkpoints/agent-operating-protocol-v1.md`
+
+Real-world status remains `HUMAN_ACTION_REQUIRED`. This protocol layer does
+not add a new SEIS strategy layer, expand business scope, perform outreach,
+deploy software, handle secrets, claim customer validation, claim paid signal,
+or claim delivery completion.
+
+## AOOS Stage 4/5 Executable Skeleton
+
+Status label: `AOOS_STAGE_4_5_EXECUTABLE_SKELETON_READY_FOR_REVIEW`.
+
+Repository status: `CROSS_DOMAIN_INTERFACE_READY_FOR_REVIEW`. The branch now
+adds an AOOS navigation layer that reuses the existing agent protocols instead
+of duplicating them:
+
+- `docs/aoos/README.md`
+- `docs/aoos/core-module-map.md`
+- `docs/aoos/domain-packs.md`
+- `docs/aoos/stage-5-interfaces.md`
+- `docs/aoos/schemas/`
+- `reports/aoos/evidence-ledger-v1.jsonl`
+- `reports/aoos/learning-promotion-fixture-v1.json`
+- `reports/aoos/real-world-feedback-ingestion-packet-v1.json`
+- `reports/aoos/risk-classifier-fixture-v1.json`
+- `reports/aoos/runtime-backlog-v1.json`
+- `reports/aoos/task-router-fixture-v1.json`
+- `examples/aoos/stage45-interface-fixture-v1.json`
+- `templates/aoos/`
+- `scripts/aoos_stage45_check_v1.py`
+- `reports/checkpoints/aoos-stage45-executable-skeleton-v1.md`
+
+This adds Stage 4/5 repository interfaces for strategy, truth/evidence,
+authority/risk, execution state, observability/audit, evaluator metrics,
+learning/memory, tool complexity, security threat modeling, reality
+validation, incident response, anti-Goodhart controls, cross-domain packs,
+evidence templates, failure learning logs, incident records, real-world
+validation logs, model/tool routing, domain acceptance rubrics, and
+machine-checkable Stage 5 interface schemas, an evidence ledger seed, an A0-A6
+risk-classifier fixture, a non-executing task-router fixture, a learning
+promotion fixture, an A5 feedback-ingestion proposal packet, and a persistent
+backlog record for selecting the next safe AOOS runtime increments.
+
+Real-world status remains `HUMAN_ACTION_REQUIRED`. No Stage 6/7 operation,
+production deployment, customer validation, paid signal, delivery acceptance,
+audience validation, external audit, or product-market fit is claimed.
+
 ## Deliverable Status
 
 All required SEIS assembly deliverables have corresponding repository files.

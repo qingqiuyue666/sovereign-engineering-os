@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "docs/aoos/schemas/learning-promotion-fixture.schema.json",
+  "title": "AOOS Learning Promotion Fixture",
+  "schema_version": "aoos-stage5-interface-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "fixture_id",
+    "recorded_at_utc",
+    "claim_boundary",
+    "promotion_rules"
+  ],
+  "properties": {
+    "schema_version": {"type": "string"},
+    "fixture_id": {"type": "string"},
+    "recorded_at_utc": {"type": "string"},
+    "claim_boundary": {"type": "array", "items": {"type": "string"}},
+    "promotion_rules": {"type": "array", "items": {"type": "object"}}
+  }
+}

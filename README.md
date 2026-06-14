@@ -81,21 +81,22 @@ outside the SEIS boundary.
 
 Start with the strategic operating layer:
 
-1. Read `SEIS_STRATEGIC_OPERATING_SYSTEM_V1.md`.
-2. Read `SEIS_16_STAGE_EXECUTION_GATES.md`.
-3. Read `REAL_WORLD_VALIDATION_COMMAND_LAYER_V1.md`.
-4. Read `STOP_BUILDING_AND_VALIDATE_GATE.md`.
-5. Read `reports/real-world-validation/human-action-required-checkpoint.md`.
-6. Read `validation/real-world-validation-battle-plan-v1.md`.
-7. Read `SEIS_DOCTRINE.md`.
-8. Read `EIGHT_ENGINES.md`.
-9. Use `BATTLEFIELD_SCORECARD.md` and
+1. Read `AGENTS.md` before agent-assisted repository work.
+2. Read `SEIS_STRATEGIC_OPERATING_SYSTEM_V1.md`.
+3. Read `SEIS_16_STAGE_EXECUTION_GATES.md`.
+4. Read `REAL_WORLD_VALIDATION_COMMAND_LAYER_V1.md`.
+5. Read `STOP_BUILDING_AND_VALIDATE_GATE.md`.
+6. Read `reports/real-world-validation/human-action-required-checkpoint.md`.
+7. Read `validation/real-world-validation-battle-plan-v1.md`.
+8. Read `SEIS_DOCTRINE.md`.
+9. Read `EIGHT_ENGINES.md`.
+10. Use `BATTLEFIELD_SCORECARD.md` and
    `battlefield/first-wedge-selection.md` to choose a wedge for a bounded
    90-day paid-signal test.
-10. Use `transaction/entry-offer-template.md`,
+11. Use `transaction/entry-offer-template.md`,
    `transaction/discovery-script.md`, and
    `transaction/acceptance-criteria.md` to package the first transaction.
-11. Use `trusted-delivery/delivery-sop.md` and
+12. Use `trusted-delivery/delivery-sop.md` and
    `proof/proof-asset-spec.md` before any delivery is claimed complete.
 
 Existing local runtime quickstart remains available through the archived
@@ -104,6 +105,20 @@ documented permission, approval, and evidence boundaries.
 
 ## Strategic Navigation
 
+- `AGENTS.md` -- default AI-agent repository instructions
+- `CLAUDE.md` -- Claude-compatible project memory and boundaries
+- `docs/agent-protocols/` -- detailed stage-gated agent execution protocols
+- `docs/aoos/` -- cross-domain Agentic Organization Operating System module map, domain packs, and Stage 5 interfaces
+- `docs/aoos/schemas/` -- machine-readable AOOS Stage 5 interface contracts
+- `reports/aoos/evidence-ledger-v1.jsonl` -- AOOS evidence seed records checked by the AOOS validator
+- `reports/aoos/risk-classifier-fixture-v1.json` -- AOOS A0-A6 task-risk classification fixture
+- `reports/aoos/runtime-backlog-v1.json` -- persistent AOOS runtime backlog record checked by the AOOS validator
+- `reports/aoos/task-router-fixture-v1.json` -- non-executing AOOS task-router fixture
+- `reports/aoos/learning-promotion-fixture-v1.json` -- AOOS failure-to-control promotion fixture
+- `reports/aoos/real-world-feedback-ingestion-packet-v1.json` -- A5 proposal-only feedback ingestion packet
+- `examples/aoos/stage45-interface-fixture-v1.json` -- minimal AOOS interface fixture validated by CI
+- `templates/aoos/` -- AOOS evidence, failure, incident, reality, tool ROI, routing, and acceptance templates
+- `playbooks/` and `checklists/` -- reusable agent execution playbooks and final-report checks
 - `SEIS_DOCTRINE.md` -- doctrine and no-fake-completion policy
 - `SEIS_STRATEGIC_OPERATING_SYSTEM_V1.md` -- highest 16-stage strategic OS
 - `SEIS_16_STAGE_EXECUTION_GATES.md` -- repository and real-world gates for all 16 stages
@@ -160,6 +175,8 @@ Validation artifacts:
 - `reports/real-world-validation/pr-stack-merge-readiness.md`
 - `reports/real-world-validation/next-decision-gate-v1.md`
 - `reports/checkpoints/seis-real-world-validation-continuous-v1.md`
+- `reports/checkpoints/agent-operating-protocol-v1.md`
+- `reports/checkpoints/aoos-stage45-executable-skeleton-v1.md`
 - `reports/gap-list.md`
 - `reports/fix-plan.md`
 - `reports/repo-reality-inspection.md`
@@ -169,6 +186,7 @@ Validation artifacts:
 Existing repository checks remain relevant for the runtime substrate:
 
 ```bash
+python3 scripts/aoos_stage45_check_v1.py
 python3 scripts/identity_boundary_check_v1.py
 python3 scripts/observation_check_v1.py
 python3 scripts/creative_total_check_v3.py

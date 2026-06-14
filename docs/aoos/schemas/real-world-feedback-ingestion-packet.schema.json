@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "docs/aoos/schemas/real-world-feedback-ingestion-packet.schema.json",
+  "title": "AOOS Real-World Feedback Ingestion Packet",
+  "schema_version": "aoos-stage5-interface-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "packet_id",
+    "recorded_at_utc",
+    "status",
+    "actions_executed",
+    "human_authorization_required",
+    "claim_boundary",
+    "accepted_source_types",
+    "ingestion_flow",
+    "evidence_mapping",
+    "redaction_rules",
+    "forbidden_actions",
+    "forbidden_claims",
+    "rollback_path"
+  ],
+  "properties": {
+    "schema_version": {"type": "string"},
+    "packet_id": {"type": "string"},
+    "recorded_at_utc": {"type": "string"},
+    "status": {"type": "string"},
+    "actions_executed": {"type": "boolean"},
+    "human_authorization_required": {"type": "boolean"},
+    "claim_boundary": {"type": "array", "items": {"type": "string"}},
+    "accepted_source_types": {"type": "array", "items": {"type": "object"}},
+    "ingestion_flow": {"type": "array", "items": {"type": "string"}},
+    "evidence_mapping": {"type": "array", "items": {"type": "object"}},
+    "redaction_rules": {"type": "array", "items": {"type": "string"}},
+    "forbidden_actions": {"type": "array", "items": {"type": "string"}},
+    "forbidden_claims": {"type": "array", "items": {"type": "string"}},
+    "rollback_path": {"type": "string"}
+  }
+}

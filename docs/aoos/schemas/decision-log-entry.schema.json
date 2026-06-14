@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "docs/aoos/schemas/decision-log-entry.schema.json",
+  "title": "AOOS Decision Log Entry",
+  "schema_version": "aoos-stage5-interface-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "decision_id",
+    "date",
+    "domain_pack",
+    "options_considered",
+    "chosen_option",
+    "rejected_alternatives",
+    "opportunity_cost",
+    "evidence_level",
+    "counterevidence",
+    "review_date",
+    "kill_or_revise_condition"
+  ],
+  "properties": {
+    "decision_id": {"type": "string"},
+    "date": {"type": "string"},
+    "domain_pack": {"type": "string"},
+    "options_considered": {"type": "array", "items": {"type": "string"}},
+    "chosen_option": {"type": "string"},
+    "rejected_alternatives": {"type": "array", "items": {"type": "string"}},
+    "opportunity_cost": {"type": "string"},
+    "evidence_level": {"type": "string"},
+    "counterevidence": {"type": "array", "items": {"type": "string"}},
+    "review_date": {"type": "string"},
+    "kill_or_revise_condition": {"type": "string"}
+  }
+}

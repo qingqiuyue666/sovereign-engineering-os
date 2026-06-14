@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "docs/aoos/schemas/risk-classifier-fixture.schema.json",
+  "title": "AOOS Risk Classifier Fixture",
+  "schema_version": "aoos-stage5-interface-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "fixture_id",
+    "recorded_at_utc",
+    "authority_source_refs",
+    "claim_boundary",
+    "cases"
+  ],
+  "properties": {
+    "schema_version": {"type": "string"},
+    "fixture_id": {"type": "string"},
+    "recorded_at_utc": {"type": "string"},
+    "authority_source_refs": {"type": "array", "items": {"type": "string"}},
+    "claim_boundary": {"type": "array", "items": {"type": "string"}},
+    "cases": {"type": "array", "items": {"type": "object"}}
+  }
+}
