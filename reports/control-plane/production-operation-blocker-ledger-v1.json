@@ -1,0 +1,70 @@
+{
+  "schema_version": "ai_agent_control_plane_production_operation_blocker_ledger_v1",
+  "status": "production_operation_blocked_external_evidence_required",
+  "blockers": [
+    {
+      "blocker_id": "ACP-PROD-BL-001",
+      "blocker": "hosting/deployment mode",
+      "why_codex_cannot_solve_alone": "requires owner-approved environment and deployment boundary",
+      "safe_substitute": "local readiness and deployment-mode tracker",
+      "resume_point": "obtain approved deployment mode"
+    },
+    {
+      "blocker_id": "ACP-PROD-BL-002",
+      "blocker": "secrets management",
+      "why_codex_cannot_solve_alone": "secrets must not be accessed, printed, moved, or modified by Codex",
+      "safe_substitute": "secret handling remains forbidden",
+      "resume_point": "human provides secret management evidence without exposing secrets"
+    },
+    {
+      "blocker_id": "ACP-PROD-BL-003",
+      "blocker": "auth/access control",
+      "why_codex_cannot_solve_alone": "production identity and access require owner approval",
+      "safe_substitute": "pilot data boundary and compliance map",
+      "resume_point": "approved auth design"
+    },
+    {
+      "blocker_id": "ACP-PROD-BL-004",
+      "blocker": "audit retention",
+      "why_codex_cannot_solve_alone": "retention period and storage policy require owner/legal decision",
+      "safe_substitute": "local audit export contract",
+      "resume_point": "retention policy approval"
+    },
+    {
+      "blocker_id": "ACP-PROD-BL-005",
+      "blocker": "backups and recovery",
+      "why_codex_cannot_solve_alone": "requires production environment and operational drill",
+      "safe_substitute": "rollback/recovery note",
+      "resume_point": "run approved recovery drill"
+    },
+    {
+      "blocker_id": "ACP-PROD-BL-006",
+      "blocker": "incident response",
+      "why_codex_cannot_solve_alone": "real incident communication and ownership require human owner",
+      "safe_substitute": "incident operation workflow",
+      "resume_point": "owner-approved incident plan"
+    },
+    {
+      "blocker_id": "ACP-PROD-BL-007",
+      "blocker": "monitoring and telemetry",
+      "why_codex_cannot_solve_alone": "live traces and telemetry require production runtime",
+      "safe_substitute": "local audit export fields",
+      "resume_point": "approved telemetry run"
+    },
+    {
+      "blocker_id": "ACP-PROD-BL-008",
+      "blocker": "customer data handling",
+      "why_codex_cannot_solve_alone": "requires customer permission and legal boundary",
+      "safe_substitute": "pilot allowed data boundary",
+      "resume_point": "customer-approved data handling artifact"
+    },
+    {
+      "blocker_id": "ACP-PROD-BL-009",
+      "blocker": "legal/compliance",
+      "why_codex_cannot_solve_alone": "requires human legal/compliance review and possible auditor",
+      "safe_substitute": "compliance readiness map",
+      "resume_point": "legal/compliance approval or auditor artifact"
+    }
+  ]
+}
+

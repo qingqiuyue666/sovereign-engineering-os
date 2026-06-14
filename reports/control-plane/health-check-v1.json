@@ -1,0 +1,30 @@
+{
+  "schema_version": "ai_agent_control_plane_health_check_v1",
+  "status": "local_health_package_initialized",
+  "workspace_gate": {
+    "repo_root": "/Users/qqy/Documents/GitHub/sovereign-engineering-os",
+    "remote": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os.git",
+    "branch": "rework/end-to-end-execution-system-v1-internal",
+    "pr": 576,
+    "observed_pr_head": "a743d14ef8325d399747a4d74c969992489f6811",
+    "preserved_untracked_path": "reports/creative/production_spine_v1/",
+    "unrelated_user_work_staged_or_modified": false
+  },
+  "control_plane_state": {
+    "registry_exists": true,
+    "task_model_exists": true,
+    "classifier_policy_exists": true,
+    "external_matrix_exists": true,
+    "tool_risk_registry_exists": true,
+    "ledgers_exist": true,
+    "queue_exists": true,
+    "non_claim_audit_exists": true
+  },
+  "claim_boundary": {
+    "allowed_local_claim_recorded": true,
+    "unsupported_external_claims_blocked": true,
+    "empty_external_ledger_allowed": true,
+    "fabricated_external_ledger_forbidden": true
+  }
+}
+

@@ -1,0 +1,19 @@
+{
+  "schema_version": "ai_agent_control_plane_pricing_packaging_iteration_tracker_v1",
+  "status": "hypothesis_initialized_external_feedback_pending",
+  "hypotheses": [
+    {
+      "hypothesis_id": "ACP-PRICE-001",
+      "package_tier": "pilot readiness package",
+      "target_customer": "engineering or platform team adopting coding agents",
+      "value_metric": "governed agent execution cycles with evidence and recovery",
+      "pricing_position": "paid pilot after demo and evidence review",
+      "feedback": [],
+      "objections": [],
+      "revision": "none until real buyer feedback",
+      "paid_pilot_readiness": "gate_prepared_external_payment_pending"
+    }
+  ],
+  "no_fake_revenue_rule": true
+}
+

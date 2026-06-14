@@ -1,0 +1,107 @@
+{
+  "schema_version": "ai_agent_control_plane_first_controlled_cycle_v1",
+  "cycle_id": "ACP-CYCLE-001",
+  "run_id": "ACP-RUN-2026-06-15-001",
+  "branch": "rework/end-to-end-execution-system-v1-internal",
+  "observed_pr": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/pull/576",
+  "observed_head_before_cycle": "a743d14ef8325d399747a4d74c969992489f6811",
+  "product_category": "AI Agent Execution Control Plane",
+  "allowed_local_claim": "AI Agent Execution Control Plane with controlled local low-risk execution, evidence-backed safety gates, commercial validation package, real-world validation workflow, and commercial operation readiness.",
+  "final_report_lock": {
+    "v4_local_core": "implemented_local",
+    "v5_commercial_package": "implemented_local",
+    "v6_real_world_validation_track": "implemented_local_external_evidence_pending",
+    "v7_commercial_operation_track": "implemented_local_external_evidence_pending",
+    "external_reality_gaps_are_blockers_with_resume_points": true,
+    "unsupported_external_claims_blocked": true
+  },
+  "tasks": [
+    {
+      "task_id": "ACP-TASK-001",
+      "classifier_output": {
+        "task_type": "documentation",
+        "risk": "low"
+      },
+      "policy_decision": "ALLOW",
+      "command_summary": "record bounded local readiness artifacts",
+      "file_paths": [
+        "docs/control-plane/",
+        "reports/control-plane/"
+      ],
+      "checks": [
+        {
+          "command": "python3 scripts/real_world_operation_readiness_check_v1.py --stage v4",
+          "result": "pending_until_validator_added"
+        }
+      ],
+      "result": "local_evidence_recorded",
+      "evidence_links": [
+        "reports/control-plane/evidence-ledger-v1.jsonl"
+      ]
+    },
+    {
+      "task_id": "ACP-TASK-002",
+      "classifier_output": {
+        "task_type": "forbidden",
+        "risk": "forbidden"
+      },
+      "policy_decision": "DENY",
+      "command_summary": "blocked destructive/release-like action before execution",
+      "file_paths": [],
+      "checks": [
+        {
+          "command": "policy gate static fixture",
+          "result": "denied"
+        }
+      ],
+      "result": "denied_no_side_effect",
+      "evidence_links": [
+        "reports/control-plane/failure-ledger-v1.jsonl"
+      ]
+    },
+    {
+      "task_id": "ACP-TASK-003",
+      "classifier_output": {
+        "task_type": "test",
+        "risk": "medium"
+      },
+      "policy_decision": "DRY_RUN_ONLY",
+      "command_summary": "simulated failed validation and resume packet",
+      "file_paths": [
+        "reports/control-plane/"
+      ],
+      "checks": [
+        {
+          "command": "simulated-check --expected-fail",
+          "result": "failed_as_fixture"
+        }
+      ],
+      "result": "failure_recorded_resume_available",
+      "evidence_links": [
+        "reports/control-plane/failure-ledger-v1.jsonl",
+        "reports/control-plane/resume-point-v1.json"
+      ]
+    },
+    {
+      "task_id": "ACP-TASK-004",
+      "classifier_output": {
+        "task_type": "external_tool",
+        "risk": "high"
+      },
+      "policy_decision": "DENY",
+      "command_summary": "blocked untrusted tool instruction before execution",
+      "file_paths": [],
+      "checks": [
+        {
+          "command": "prompt-injection/tool-poisoning fixture",
+          "result": "denied"
+        }
+      ],
+      "result": "denied_no_side_effect",
+      "evidence_links": [
+        "reports/control-plane/failure-ledger-v1.jsonl"
+      ]
+    }
+  ]
+}
+

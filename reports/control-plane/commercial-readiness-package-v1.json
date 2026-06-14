@@ -1,0 +1,129 @@
+{
+  "schema_version": "ai_agent_control_plane_commercial_readiness_package_v1",
+  "status": "CONTROLLED_AUTONOMOUS_ENGINEERING_OS_COMMERCIAL_VALIDATION_READY_LOCAL",
+  "allowed_v5_local_claim": "AI Agent Execution Control Plane with controlled local low-risk execution, evidence-backed safety gates, and commercial pilot readiness package.",
+  "components": [
+    {
+      "id": "V5-001",
+      "name": "V4 status audit",
+      "path": "reports/control-plane/first-controlled-cycle-v1.json",
+      "status": "implemented_local"
+    },
+    {
+      "id": "V5-002",
+      "name": "commercial/product registry",
+      "path": "docs/control-plane/full-stack-operation-registry-v1.md",
+      "status": "implemented_local"
+    },
+    {
+      "id": "V5-003",
+      "name": "external maturity absorption matrix",
+      "path": "docs/control-plane/external-absorption-operation-matrix-v1.md",
+      "status": "implemented_local"
+    },
+    {
+      "id": "V5-004",
+      "name": "production-readiness gap ledger",
+      "path": "reports/control-plane/production-operation-blocker-ledger-v1.json",
+      "status": "implemented_local_external_evidence_pending"
+    },
+    {
+      "id": "V5-005",
+      "name": "deployment-readiness package",
+      "path": "reports/control-plane/production-operation-blocker-ledger-v1.json",
+      "status": "blockers_recorded"
+    },
+    {
+      "id": "V5-006",
+      "name": "operator runbook",
+      "path": "docs/control-plane/operator-runbook-v1.md",
+      "status": "implemented_local"
+    },
+    {
+      "id": "V5-007",
+      "name": "demo scenario pack",
+      "path": "docs/control-plane/demo-operation-workflow-v1.md",
+      "status": "implemented_local"
+    },
+    {
+      "id": "V5-008",
+      "name": "customer pilot package",
+      "path": "docs/control-plane/pilot-operation-workflow-v1.md",
+      "status": "implemented_local"
+    },
+    {
+      "id": "V5-009",
+      "name": "enterprise buyer one-pager",
+      "path": "docs/control-plane/buyer-one-pager-v1.md",
+      "status": "implemented_local"
+    },
+    {
+      "id": "V5-010",
+      "name": "pricing/package hypothesis",
+      "path": "reports/control-plane/pricing-packaging-iteration-tracker-v1.json",
+      "status": "implemented_local_external_feedback_pending"
+    },
+    {
+      "id": "V5-011",
+      "name": "security review pack",
+      "path": "docs/control-plane/security-review-response-workflow-v1.md",
+      "status": "implemented_local_external_reviewer_pending"
+    },
+    {
+      "id": "V5-012",
+      "name": "compliance readiness map without certification claim",
+      "path": "docs/control-plane/compliance-readiness-map-v1.md",
+      "status": "implemented_local_no_certification_claim"
+    },
+    {
+      "id": "V5-013",
+      "name": "incident response plan",
+      "path": "docs/control-plane/incident-operation-workflow-v1.md",
+      "status": "implemented_local"
+    },
+    {
+      "id": "V5-014",
+      "name": "audit log export path",
+      "path": "docs/control-plane/audit-log-export-v1.md",
+      "status": "implemented_local"
+    },
+    {
+      "id": "V5-015",
+      "name": "external benchmark readiness path",
+      "path": "docs/control-plane/benchmark-operation-workflow-v1.md",
+      "status": "implemented_local_external_benchmark_pending"
+    },
+    {
+      "id": "V5-016",
+      "name": "long-running stability tracker",
+      "path": "reports/control-plane/long-running-operation-tracker-v1.json",
+      "status": "implemented_local_elapsed_time_pending"
+    },
+    {
+      "id": "V5-017",
+      "name": "human/independent review gate",
+      "path": "reports/control-plane/external-evidence-ledger-v1.json",
+      "status": "external_actor_pending"
+    },
+    {
+      "id": "V5-018",
+      "name": "security/supply-chain checks or blockers",
+      "path": "reports/control-plane/recurring-queue-v1.json",
+      "status": "queued"
+    },
+    {
+      "id": "V5-019",
+      "name": "commercial-readiness validation target",
+      "path": "Makefile",
+      "status": "implemented_local"
+    },
+    {
+      "id": "V5-020",
+      "name": "non-claim audit and commercial scorecard",
+      "path": "reports/control-plane/non-claim-audit-v1.json",
+      "status": "implemented_local"
+    }
+  ],
+  "unsupported_claims_blocked": true
+}
+

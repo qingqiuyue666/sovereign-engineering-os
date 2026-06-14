@@ -56,6 +56,8 @@ jobs:
         run: python scripts/future_resilience_check_v1.py
       - name: Run Codex execution system check
         run: python scripts/codex_execution_system_check_v1.py
+      - name: Run AI Agent Control Plane full-stack operation readiness check
+        run: python scripts/real_world_operation_readiness_check_v1.py --stage all
       - name: Run AOOS Stage 4/5 static check
         run: python scripts/aoos_stage45_check_v1.py
       - name: Run knowledge control vault tests

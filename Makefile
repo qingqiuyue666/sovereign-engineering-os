@@ -1,4 +1,4 @@
-.PHONY: ci test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-real-runtime-provider-transport-execution test-production-autonomy-final-gate test-runtime-sealed-receipt test-generic-payload-shadow test-protected-evidence-storage test-protected-evidence-storage-implementation test-real-hmac-policy-realization test-real-merkle-proof-realization test-generic-payload-full-enforcement test-schemas test-tracer-bullet test-acceptance diff-check health local-bootstrap local-smoke local-stop local-reset identity-check public-grade-check execution-permit-check test-execution-permit controlled-executor-smoke test-controlled-executor creative-real-execution-evidence-check codex-execution-system-check
+.PHONY: ci test-root-integrity test-sealed-evidence-coverage test-evidence-proof-contract test-evidence-proof-fixtures test-final-runtime-contracts test-gated-provider-transport test-real-runtime-provider-transport-execution test-production-autonomy-final-gate test-runtime-sealed-receipt test-generic-payload-shadow test-protected-evidence-storage test-protected-evidence-storage-implementation test-real-hmac-policy-realization test-real-merkle-proof-realization test-generic-payload-full-enforcement test-schemas test-tracer-bullet test-acceptance diff-check health local-bootstrap local-smoke local-stop local-reset identity-check public-grade-check execution-permit-check test-execution-permit controlled-executor-smoke test-controlled-executor creative-real-execution-evidence-check codex-execution-system-check controlled-execution-check commercial-readiness-check real-world-validation-check real-world-operation-check full-stack-operation-readiness-check test-real-world-operation-readiness
 .PHONY: test-runtime-execution-descriptor test-dry-run-orchestrator test-runtime-integration-trace test-completion-audit test-runtime-integration-hardening
 .PHONY: test-security-classification test-secret-scanner test-environment-sanitizer test-anti-exfiltration-gate test-ai-context-firewall test-repository-hygiene test-leak-prevention-foundation
 .PHONY: test-wal-integrity-guard test-taint-propagation test-artifact-provenance test-wal-integrity-contract test-capability-token-policy test-security-truth-substrate
@@ -65,6 +65,23 @@ claim-to-evidence-check:
 
 codex-execution-system-check:
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/codex_execution_system_check_v1.py
+
+controlled-execution-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/real_world_operation_readiness_check_v1.py --stage v4
+
+commercial-readiness-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/real_world_operation_readiness_check_v1.py --stage v5
+
+real-world-validation-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/real_world_operation_readiness_check_v1.py --stage v6
+
+real-world-operation-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/real_world_operation_readiness_check_v1.py --stage all
+
+test-real-world-operation-readiness:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_real_world_operation_readiness_v1 -v
+
+full-stack-operation-readiness-check: controlled-execution-check commercial-readiness-check real-world-validation-check real-world-operation-check test-real-world-operation-readiness
 
 test-contracts:
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest tests.tracer_bullet.test_contracts_v1 -v

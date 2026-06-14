@@ -1,0 +1,36 @@
+{
+  "schema_version": "ai_agent_control_plane_long_running_operation_tracker_v1",
+  "status": "initialized_elapsed_time_evidence_pending",
+  "cycles": [
+    {
+      "cycle_id": "ACP-LONG-001",
+      "timestamp_utc": "2026-06-15T00:00:00Z",
+      "duration": "single local initialization cycle",
+      "attempted_tasks": 4,
+      "passed_tasks": 1,
+      "failed_tasks": 1,
+      "denied_tasks": 2,
+      "blocked_gates": [
+        "external customer evidence",
+        "external benchmark evidence",
+        "production trial evidence",
+        "paid pilot evidence"
+      ],
+      "human_interventions": [],
+      "recovery_actions": [
+        "failure ledger written",
+        "resume point written",
+        "recurring queue initialized"
+      ],
+      "next_cycle": "Run after real external artifact or next PR validation cycle."
+    }
+  ],
+  "long_term_stability_claim_supported": false,
+  "minimum_future_evidence": [
+    "multiple dated cycles",
+    "failed and recovered cycles",
+    "human interventions when required",
+    "repeated validation results over time"
+  ]
+}
+
