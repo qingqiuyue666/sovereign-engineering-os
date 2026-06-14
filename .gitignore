@@ -56,3 +56,7 @@ reports/creative/production_spine_v1/production_dashboard.json
 *.rar
 *.7z
 *.zip
+
+# Local creative production archives
+/local_archives/
+/reports/creative/production_spine_v1/
