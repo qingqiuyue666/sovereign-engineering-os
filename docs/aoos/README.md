@@ -35,10 +35,14 @@ operation, recovery, learning, and cross-domain repetition records exist.
   repository anchors and missing evidence.
 - `docs/aoos/domain-packs.md` defines the replaceable domain-pack contract and
   the initial cross-domain pack set.
+- `docs/aoos/runtime-backlog.md` defines the persistent AOOS backlog selection
+  policy and required item fields.
 - `docs/aoos/stage-5-interfaces.md` defines observability, evaluator, audit,
   incident, memory, and routing interfaces.
 - `docs/aoos/schemas/` contains JSON Schema contracts for the Stage 5
   interface records.
+- `reports/aoos/runtime-backlog-v1.json` is the current machine-checkable AOOS
+  backlog record.
 - `examples/aoos/stage45-interface-fixture-v1.json` is the minimal fixture
   checked against those contracts.
 - `templates/aoos/` contains reusable mission brief, evidence, failure,

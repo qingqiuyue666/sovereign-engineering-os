@@ -63,6 +63,7 @@ map, and template set that sits behind the existing `AGENTS.md` and
 - `docs/aoos/README.md`
 - `docs/aoos/core-module-map.md`
 - `docs/aoos/domain-packs.md`
+- `docs/aoos/runtime-backlog.md`
 - `docs/aoos/stage-5-interfaces.md`
 - `docs/aoos/schemas/decision-log-entry.schema.json`
 - `docs/aoos/schemas/domain-pack-manifest.schema.json`
@@ -73,6 +74,7 @@ map, and template set that sits behind the existing `AGENTS.md` and
 - `docs/aoos/schemas/memory-lifecycle-entry.schema.json`
 - `docs/aoos/schemas/model-tool-routing-decision.schema.json`
 - `docs/aoos/schemas/observability-event.schema.json`
+- `docs/aoos/schemas/runtime-backlog.schema.json`
 - `docs/aoos/schemas/threat-model-record.schema.json`
 - `examples/aoos/stage45-interface-fixture-v1.json`
 - `templates/aoos/README.md`
@@ -85,6 +87,7 @@ map, and template set that sits behind the existing `AGENTS.md` and
 - `templates/aoos/tool-roi-review-template.md`
 - `templates/aoos/model-tool-routing-decision-template.md`
 - `scripts/aoos_stage45_check_v1.py`
+- `reports/aoos/runtime-backlog-v1.json`
 - `reports/checkpoints/aoos-stage45-executable-skeleton-v1.md`
 
 ## Files Modified
@@ -105,6 +108,7 @@ map, and template set that sits behind the existing `AGENTS.md` and
 | AOOS core module map | Added as repository documentation. | Human review and repeated task records. |
 | Mission templates | Added mission brief template covering current state, scope, authority, evidence, stop conditions, rollback, and continuation. | Real task records completed from the template. |
 | Domain packs | Added initial 10-pack structure and acceptance rubric. | Domain-specific real runs and pack refinement. |
+| Runtime backlog | Added a persistent, schema-backed AOOS backlog record with priority, dependency, A0-A6 risk, evidence, acceptance, checks, rollback, owner, evaluator, and promotion fields. | Human review, CI on the pushed head, and repeated backlog operating history. |
 | Evidence schema | Added template, JSON Schema, fixture, and linked existing evidence/no-fake rules. | Ledger runtime or reviewed evidence records. |
 | Failure taxonomy and learning log | Added template, taxonomy schema, fixture record, and promotion path. | Real failure records promoted to durable controls. |
 | Incident protocol | Linked existing incident response and added AOOS record template plus schema. | Drill or real incident evidence. |
@@ -132,7 +136,7 @@ map, and template set that sits behind the existing `AGENTS.md` and
 - L1: local command output inspected repository, PR, and latest CI success
   state.
 - L2: repository diff adds AOOS documents, mission/evidence templates,
-  checkpoint, and check script.
+  checkpoint, runtime backlog record, and check script.
 - L3: local validation passed for the focused AOOS/static checks and the full
   local tracer-bullet suite listed below.
 - L4: pending human review.
@@ -142,7 +146,7 @@ map, and template set that sits behind the existing `AGENTS.md` and
 
 - `python3 scripts/aoos_stage45_check_v1.py` passed.
   This check now validates the AOOS Markdown anchors, JSON Schema contracts,
-  failure taxonomy, threat-model record, and
+  runtime backlog record, failure taxonomy, threat-model record, and
   `examples/aoos/stage45-interface-fixture-v1.json`.
 - `python3 scripts/identity_boundary_check_v1.py` passed.
 - `python3 scripts/observation_check_v1.py` passed.
@@ -194,13 +198,16 @@ map, and template set that sits behind the existing `AGENTS.md` and
   and intentionally not staged.
 - AOOS Stage 5 interfaces are documentation/contracts only; no live evaluator,
   dashboard, approval queue, scheduler, or real-world workflow is proven.
+- The runtime backlog is a persistent repository record, not a live task runner
+  or proof of repeated operating cycles.
 
 ## Rollback Path
 
 Revert the scoped branch commits that introduced the AOOS skeleton, interface
-schemas, and worker-registry fixture correction, or remove the files listed in
-"Files Added" and undo the AOOS references in "Files Modified". Do not delete
-preserved untracked local creative production-spine files.
+schemas, runtime backlog record, and worker-registry fixture correction, or
+remove the files listed in "Files Added" and undo the AOOS references in
+"Files Modified". Do not delete preserved untracked local creative
+production-spine files.
 
 ## Next Checkpoint
 
@@ -219,14 +226,15 @@ after the latest pushed PR head has a green `canonical-health` run.
 - Latest verified remote CI before this checkpoint evidence refresh:
   `canonical-health` passed on run `27477537554`.
 - Stage reached: AOOS Stage 4/5 executable skeleton is repository-ready for
-  human review. It is not Stage 6/7 operation and has no L5 evidence.
+  human review with a schema-backed runtime backlog record. It is not Stage 6/7
+  operation and has no L5 evidence.
 - Key branch contents: AOOS docs under `docs/aoos/`, templates under
   `templates/aoos/`, JSON Schemas under `docs/aoos/schemas/`, fixture
   `examples/aoos/stage45-interface-fixture-v1.json`, static checker
   `scripts/aoos_stage45_check_v1.py`, root navigation updates, CI inclusion,
   mission brief template, failure taxonomy and threat-model schema records,
-  worker-registry watchdog fixture stabilization, and the Node.js 24 CI action
-  migration.
+  runtime backlog record, worker-registry watchdog fixture stabilization, and
+  the Node.js 24 CI action migration.
 - Do not recreate a parallel protocol authority layer. `AGENTS.md` and
   `docs/agent-protocols/` remain the execution authority.
 - Do not stage or delete `reports/creative/production_spine_v1/`.

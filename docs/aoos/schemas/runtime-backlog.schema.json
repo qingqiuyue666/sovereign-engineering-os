@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "docs/aoos/schemas/runtime-backlog.schema.json",
+  "title": "AOOS Runtime Backlog",
+  "schema_version": "aoos-stage5-interface-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "backlog_id",
+    "recorded_at_utc",
+    "maturity_assessment",
+    "claim_boundary",
+    "selection_policy",
+    "items"
+  ],
+  "properties": {
+    "schema_version": {"type": "string"},
+    "backlog_id": {"type": "string"},
+    "recorded_at_utc": {"type": "string"},
+    "maturity_assessment": {"type": "object"},
+    "claim_boundary": {"type": "array", "items": {"type": "string"}},
+    "selection_policy": {"type": "string"},
+    "items": {"type": "array", "items": {"type": "object"}}
+  }
+}

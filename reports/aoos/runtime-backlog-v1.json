@@ -1,0 +1,164 @@
+{
+  "schema_version": "aoos-runtime-backlog-v1",
+  "backlog_id": "aoos-runtime-backlog-v1",
+  "recorded_at_utc": "2026-06-14T05:30:17Z",
+  "maturity_assessment": {
+    "current_level": "L4/L5 repository-interface backlog record",
+    "target_level": "L7 runtime with task router, evaluator, evidence ledger, and learning promotion records",
+    "evidence_level": "L2 after commit and L3 after local or CI checks",
+    "not_proven": [
+      "live scheduler",
+      "live approval queue",
+      "live dashboard",
+      "Stage 6/7 operating cycles",
+      "L8/L9 real-world operation"
+    ]
+  },
+  "claim_boundary": [
+    "repository backlog readiness only",
+    "no customer acceptance claimed",
+    "no paid signal claimed",
+    "no production deployment claimed",
+    "no delivery completion claimed",
+    "no real-world validation claimed"
+  ],
+  "selection_policy": "Select the highest-priority item with satisfied dependencies, A0-A4 risk, checkable acceptance gate, explicit rollback path, and no real-world, credential, production, external-service, merge, or direct-main boundary crossing. A5 packets may be drafted only. A6 stops at the human gate.",
+  "items": [
+    {
+      "id": "AOOS-BL-001",
+      "title": "Add persistent AOOS runtime backlog contract",
+      "domain": "Engineering Pack",
+      "maturity_target": "L4 backlog-driven execution",
+      "priority": 1,
+      "dependencies": [],
+      "risk_class": "A1_SAFE_EDIT",
+      "evidence_requirement": "L3 local and CI checks",
+      "acceptance_gate": "Schema-backed backlog record exists, is linked from AOOS navigation, and aoos_stage45_check_v1 validates required fields.",
+      "checks_required": [
+        "python3 scripts/aoos_stage45_check_v1.py",
+        "python3 scripts/claim_to_evidence_check_v1.py",
+        "git diff --check"
+      ],
+      "rollback_path": "revert the scoped backlog commit and remove the AOOS backlog navigation link",
+      "status": "ready_for_review",
+      "next_action": "Push the PR branch and use CI plus human review as the next evidence gate.",
+      "owner_role": "Operator Agent",
+      "evaluator_required": "aoos_stage45_check_v1 backlog validator",
+      "promotion_rule_if_repeated_failure": "If backlog records drift twice, promote required-field checks into CI and the final-report checklist."
+    },
+    {
+      "id": "AOOS-BL-002",
+      "title": "Seed append-only evidence ledger records for AOOS task outcomes",
+      "domain": "Truth / Evidence Governance",
+      "maturity_target": "L5 evidence-governed execution",
+      "priority": 2,
+      "dependencies": [
+        "AOOS-BL-001"
+      ],
+      "risk_class": "A1_SAFE_EDIT",
+      "evidence_requirement": "L2 diff or L3 check output",
+      "acceptance_gate": "A minimal AOOS evidence ledger seed record maps repository claims to evidence levels without claiming real-world validation.",
+      "checks_required": [
+        "python3 scripts/aoos_stage45_check_v1.py",
+        "python3 scripts/claim_to_evidence_check_v1.py"
+      ],
+      "rollback_path": "revert the scoped evidence-ledger seed commit",
+      "status": "pending_after_human_review",
+      "next_action": "Implement after PR #575 review confirms the backlog shape should remain in this protocol branch.",
+      "owner_role": "Evidence Agent",
+      "evaluator_required": "claim_to_evidence_check_v1 plus AOOS ledger fixture validation",
+      "promotion_rule_if_repeated_failure": "If evidence levels are misstated twice, promote a stricter claim-to-evidence fixture into CI."
+    },
+    {
+      "id": "AOOS-BL-003",
+      "title": "Add risk classifier fixture for A0-A6 authority decisions",
+      "domain": "Authority / Risk Governance",
+      "maturity_target": "L5 policy-driven autonomy",
+      "priority": 3,
+      "dependencies": [
+        "AOOS-BL-001"
+      ],
+      "risk_class": "A1_SAFE_EDIT",
+      "evidence_requirement": "L3 local checker output",
+      "acceptance_gate": "Representative tasks classify into A0-A6 with explicit human gates and forbidden stronger actions.",
+      "checks_required": [
+        "python3 scripts/aoos_stage45_check_v1.py",
+        "python3 scripts/security_control_check_v1.py"
+      ],
+      "rollback_path": "revert the scoped classifier fixture commit",
+      "status": "pending_after_human_review",
+      "next_action": "Add only after the backlog contract is accepted enough to avoid another parallel policy surface.",
+      "owner_role": "Policy Agent",
+      "evaluator_required": "AOOS risk-classifier fixture validation",
+      "promotion_rule_if_repeated_failure": "If agents misclassify the same gate twice, promote that case into the classifier fixture and high-risk gate docs."
+    },
+    {
+      "id": "AOOS-BL-004",
+      "title": "Add task-router scaffold that emits observability and decision references",
+      "domain": "Execution State Machine",
+      "maturity_target": "L7 AOOS runtime interface",
+      "priority": 4,
+      "dependencies": [
+        "AOOS-BL-001",
+        "AOOS-BL-003"
+      ],
+      "risk_class": "A1_SAFE_EDIT",
+      "evidence_requirement": "L3 local checker output",
+      "acceptance_gate": "A non-executing router fixture maps task class to owner role, risk class, evidence requirement, and next gate.",
+      "checks_required": [
+        "python3 scripts/aoos_stage45_check_v1.py"
+      ],
+      "rollback_path": "revert the scoped router scaffold commit",
+      "status": "pending_after_human_review",
+      "next_action": "Keep as fixture-only until human review accepts the AOOS interface direction.",
+      "owner_role": "Builder Agent",
+      "evaluator_required": "AOOS router fixture validation",
+      "promotion_rule_if_repeated_failure": "If routing contradictions repeat, promote the route into a script-backed evaluator rather than another prose protocol."
+    },
+    {
+      "id": "AOOS-BL-005",
+      "title": "Add failure-to-memory promotion evaluator fixture",
+      "domain": "Learning / Memory Lifecycle",
+      "maturity_target": "L7 learning promotion loop",
+      "priority": 5,
+      "dependencies": [
+        "AOOS-BL-001"
+      ],
+      "risk_class": "A1_SAFE_EDIT",
+      "evidence_requirement": "L3 local checker output",
+      "acceptance_gate": "Recurring failures map to checklist, playbook, script, CI, evaluator, policy, or backlog promotion without relying on chat memory.",
+      "checks_required": [
+        "python3 scripts/aoos_stage45_check_v1.py"
+      ],
+      "rollback_path": "revert the scoped promotion fixture commit",
+      "status": "pending_after_human_review",
+      "next_action": "Add after evidence-ledger seed records exist so failures can point to durable evidence refs.",
+      "owner_role": "Reviewer Agent",
+      "evaluator_required": "AOOS learning-promotion fixture validation",
+      "promotion_rule_if_repeated_failure": "If the same failure is handled manually twice, add a script or CI check for that invariant."
+    },
+    {
+      "id": "AOOS-BL-006",
+      "title": "Prepare real-world feedback ingestion packet",
+      "domain": "Reality Validation",
+      "maturity_target": "L8 interface without L8 claim",
+      "priority": 6,
+      "dependencies": [
+        "AOOS-BL-001",
+        "AOOS-BL-002"
+      ],
+      "risk_class": "A5_PROPOSE_REAL_WORLD_ACTION",
+      "evidence_requirement": "L0 proposal until human-provided source records exist",
+      "acceptance_gate": "A proposal packet defines how user, customer, payment, delivery, or platform feedback would enter the evidence ledger without executing outreach.",
+      "checks_required": [
+        "python3 scripts/claim_to_evidence_check_v1.py"
+      ],
+      "rollback_path": "remove the proposal packet before merge if it blurs the real-world boundary",
+      "status": "human_gate_required",
+      "next_action": "Draft only when requested or after human review; do not contact users, customers, platforms, or accounts.",
+      "owner_role": "Reality Agent",
+      "evaluator_required": "claim-to-evidence review for L5 source-record boundaries",
+      "promotion_rule_if_repeated_failure": "If real-world claims are overstated twice, promote the missing-source-record rule into CI and final-report checks."
+    }
+  ]
+}

@@ -11,6 +11,17 @@ minimum fixture is `examples/aoos/stage45-interface-fixture-v1.json`, and
 `scripts/aoos_stage45_check_v1.py` validates the fixture without adding a new
 dependency.
 
+## Runtime Backlog
+
+The persistent backlog record is `reports/aoos/runtime-backlog-v1.json`.
+It is governed by `docs/aoos/runtime-backlog.md` and the schema
+`docs/aoos/schemas/runtime-backlog.schema.json`.
+
+The backlog is not a live scheduler. It is a repository-level queue contract
+that records priority, dependencies, A0-A6 risk, evidence requirement,
+acceptance gate, checks, rollback path, owner role, evaluator requirement, and
+failure-promotion rule for each item.
+
 ## Observability Event
 
 Required fields:

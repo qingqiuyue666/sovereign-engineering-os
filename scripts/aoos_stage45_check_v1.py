@@ -13,7 +13,9 @@ REQUIRED_FILES = (
     Path("docs/aoos/README.md"),
     Path("docs/aoos/core-module-map.md"),
     Path("docs/aoos/domain-packs.md"),
+    Path("docs/aoos/runtime-backlog.md"),
     Path("docs/aoos/stage-5-interfaces.md"),
+    Path("docs/aoos/schemas/runtime-backlog.schema.json"),
     Path("templates/aoos/README.md"),
     Path("templates/aoos/mission-brief-template.md"),
     Path("templates/aoos/evidence-report-template.md"),
@@ -23,6 +25,7 @@ REQUIRED_FILES = (
     Path("templates/aoos/domain-acceptance-rubric-template.md"),
     Path("templates/aoos/tool-roi-review-template.md"),
     Path("templates/aoos/model-tool-routing-decision-template.md"),
+    Path("reports/aoos/runtime-backlog-v1.json"),
     Path("reports/checkpoints/aoos-stage45-executable-skeleton-v1.md"),
 )
 
@@ -40,6 +43,9 @@ REQUIRED_TERMS = (
     "Incident Response",
     "Anti-Goodhart / Anti-Delusion",
     "AOOS Mission Brief Template",
+    "AOOS Runtime Backlog",
+    "runtime-backlog-v1.json",
+    "A0-A6",
     "failure_taxonomy_entry",
     "threat_model_record",
     "Engineering Pack",
@@ -101,7 +107,10 @@ SCHEMA_FIXTURE_MAP = (
 )
 
 FIXTURE_PATH = Path("examples/aoos/stage45-interface-fixture-v1.json")
+BACKLOG_PATH = Path("reports/aoos/runtime-backlog-v1.json")
+BACKLOG_SCHEMA_PATH = Path("docs/aoos/schemas/runtime-backlog.schema.json")
 SCHEMA_VERSION = "aoos-stage5-interface-v1"
+BACKLOG_SCHEMA_VERSION = "aoos-runtime-backlog-v1"
 JSON_SCHEMA_DRAFT = "https://json-schema.org/draft/2020-12/schema"
 
 REQUIRED_METRICS = (
@@ -149,6 +158,7 @@ def main() -> int:
             errors.append(f"AOOS docs contain local path marker: {marker}")
 
     _check_schema_interfaces(errors)
+    _check_backlog_record(errors)
 
     if errors:
         print("aoos_stage45_check_v1: FAIL")
@@ -194,6 +204,110 @@ def _check_schema_interfaces(errors: list[str]) -> None:
             for field in ("numerator", "denominator", "gaming_risk"):
                 if field not in item:
                     errors.append(f"AOOS metric {metric} missing field: {field}")
+
+
+def _check_backlog_record(errors: list[str]) -> None:
+    schema = _load_json(BACKLOG_SCHEMA_PATH, errors)
+    if schema is not None:
+        _check_schema_shape(BACKLOG_SCHEMA_PATH, schema, errors)
+    backlog = _load_json(BACKLOG_PATH, errors)
+    if backlog is None:
+        return
+    _check_json_text_safety(BACKLOG_PATH, errors)
+
+    if backlog.get("schema_version") != BACKLOG_SCHEMA_VERSION:
+        errors.append("AOOS backlog schema_version mismatch")
+    if not backlog.get("claim_boundary"):
+        errors.append("AOOS backlog must state claim_boundary")
+    if not backlog.get("selection_policy"):
+        errors.append("AOOS backlog must state selection_policy")
+
+    items = backlog.get("items")
+    if not isinstance(items, list) or len(items) < 3:
+        errors.append("AOOS backlog must contain at least three items")
+        return
+
+    required_fields = (
+        "id",
+        "title",
+        "domain",
+        "maturity_target",
+        "priority",
+        "dependencies",
+        "risk_class",
+        "evidence_requirement",
+        "acceptance_gate",
+        "checks_required",
+        "rollback_path",
+        "status",
+        "next_action",
+        "owner_role",
+        "evaluator_required",
+        "promotion_rule_if_repeated_failure",
+    )
+    risk_prefixes = ("A0_", "A1_", "A2_", "A3_", "A4_", "A5_", "A6_")
+    allowed_statuses = {
+        "ready_for_review",
+        "pending",
+        "pending_after_human_review",
+        "human_gate_required",
+        "blocked",
+    }
+    seen_ids: set[str] = set()
+    has_ready_item = False
+    for index, item in enumerate(items, start=1):
+        if not isinstance(item, dict):
+            errors.append(f"AOOS backlog item {index} must be object")
+            continue
+        for field in required_fields:
+            if field not in item:
+                errors.append(f"AOOS backlog item {index} missing field: {field}")
+        item_id = item.get("id")
+        if not isinstance(item_id, str) or not item_id:
+            errors.append(f"AOOS backlog item {index} id must be non-empty string")
+        elif item_id in seen_ids:
+            errors.append(f"AOOS backlog duplicate id: {item_id}")
+        else:
+            seen_ids.add(item_id)
+        priority = item.get("priority")
+        if not isinstance(priority, int) or priority < 1:
+            errors.append(f"AOOS backlog item {item_id or index} priority must be positive integer")
+        for list_field in ("dependencies", "checks_required"):
+            value = item.get(list_field)
+            if not isinstance(value, list):
+                errors.append(f"AOOS backlog item {item_id or index} {list_field} must be array")
+            elif any(not isinstance(entry, str) or not entry for entry in value):
+                errors.append(
+                    f"AOOS backlog item {item_id or index} {list_field} entries must be strings"
+                )
+        risk_class = item.get("risk_class")
+        if not isinstance(risk_class, str) or not risk_class.startswith(risk_prefixes):
+            errors.append(f"AOOS backlog item {item_id or index} risk_class must start with A0_ through A6_")
+        evidence = item.get("evidence_requirement")
+        if not isinstance(evidence, str) or not evidence.startswith("L"):
+            errors.append(f"AOOS backlog item {item_id or index} evidence_requirement must start with L")
+        status = item.get("status")
+        if status not in allowed_statuses:
+            errors.append(f"AOOS backlog item {item_id or index} has unsupported status: {status}")
+        if status == "ready_for_review":
+            has_ready_item = True
+        for text_field in (
+            "title",
+            "domain",
+            "maturity_target",
+            "acceptance_gate",
+            "rollback_path",
+            "next_action",
+            "owner_role",
+            "evaluator_required",
+            "promotion_rule_if_repeated_failure",
+        ):
+            value = item.get(text_field)
+            if not isinstance(value, str) or not value.strip():
+                errors.append(f"AOOS backlog item {item_id or index} {text_field} must be non-empty string")
+
+    if not has_ready_item:
+        errors.append("AOOS backlog must include at least one ready_for_review item")
 
 
 def _load_json(relative_path: Path, errors: list[str]) -> dict | None:

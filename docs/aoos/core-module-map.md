@@ -27,6 +27,7 @@ overstating evidence.
 | Truth / Evidence Governance | Separate verified facts, assumptions, stale memory, AI inference, source hierarchy, and evidence levels. | Evidence ledger row with level, source, actor, timestamp, and claim boundary. | `docs/agent-protocols/evidence-and-no-fake-completion.md`, `SEIS_DOCTRINE.md` | No central AOOS evidence ledger runtime yet. |
 | Authority / Risk Governance | Enforce ALLOW / ASK / DENY / REPORT, risk matrix, human gates, irreversible-action gates, and credential boundaries. | Approval event with requested authority, risk tier, human gate, and rollback path. | `AGENTS.md`, `docs/agent-protocols/high-risk-human-gates.md`, `BRAIN_GOVERNANCE.md` | Human approval queue is interface-only. |
 | Execution State Machine | Run classify, inspect, define, plan, act, verify, repair, escalate, report. | Task state snapshot with current gate, evidence, retries, and stop condition. | `docs/agent-protocols/continuous-stage-gated-execution.md` | No centralized scheduler or dashboard claim. |
+| Runtime Backlog / Queue | Preserve the next executable AOOS increments with priority, dependency, A0-A6 risk, evidence, checks, rollback, owner role, evaluator, and promotion rules. | Backlog item record with status, next action, acceptance gate, and stop boundary. | `docs/aoos/runtime-backlog.md`, `reports/aoos/runtime-backlog-v1.json`, `docs/aoos/schemas/runtime-backlog.schema.json` | No live scheduler, approval queue, or repeated backlog operating history yet. |
 | Observability / Audit | Log event, decision, task state, checkpoint, and traceability from goal to evidence. | Append-only audit event schema and checkpoint report template. | `docs/contracts/evidence_trace_v1.md`, `docs/operations/real_world_operation_evidence_program_v1.md` | Cross-domain dashboard remains unimplemented. |
 | Evaluator / Metrics | Define false_done_rate, manual_intervention_rate, retry_success_rate, repeated_failure_rate, cost_per_verified_task, time_to_verified_done, and real_world_validation_rate. | Metrics snapshot with numerator, denominator, time window, and limitations. | `docs/aoos/stage-5-interfaces.md` | Metrics are placeholders until repeated runs exist. |
 | Learning / Memory Lifecycle | Govern memory source, confidence, expiry, conflict resolution, and promotion path from memory to checklist, playbook, script, CI, evaluator, or policy. | Learning promotion event with source failure and promoted control. | `docs/agent-protocols/memory-governance.md` | No AOOS-wide memory registry runtime yet. |
@@ -42,6 +43,8 @@ The AOOS Stage 4/5 skeleton is ready for review only when:
 
 - the root agent instructions link to AOOS without weakening existing gates
 - domain packs exist with acceptance rubrics and evidence boundaries
+- a persistent runtime backlog record exists with A0-A6, evidence, acceptance,
+  check, rollback, evaluator, owner-role, and promotion fields
 - templates exist for evidence, failure learning, incidents, real-world
   validation, tool ROI, model/tool routing, and domain acceptance
 - the Stage 5 interface map defines event, audit, metric, incident, memory,

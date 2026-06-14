@@ -397,6 +397,7 @@ of duplicating them:
 - `docs/aoos/domain-packs.md`
 - `docs/aoos/stage-5-interfaces.md`
 - `docs/aoos/schemas/`
+- `reports/aoos/runtime-backlog-v1.json`
 - `examples/aoos/stage45-interface-fixture-v1.json`
 - `templates/aoos/`
 - `scripts/aoos_stage45_check_v1.py`
@@ -408,7 +409,8 @@ learning/memory, tool complexity, security threat modeling, reality
 validation, incident response, anti-Goodhart controls, cross-domain packs,
 evidence templates, failure learning logs, incident records, real-world
 validation logs, model/tool routing, domain acceptance rubrics, and
-machine-checkable Stage 5 interface schemas.
+machine-checkable Stage 5 interface schemas, plus a persistent backlog record
+for selecting the next safe AOOS runtime increments.
 
 Real-world status remains `HUMAN_ACTION_REQUIRED`. No Stage 6/7 operation,
 production deployment, customer validation, paid signal, delivery acceptance,
