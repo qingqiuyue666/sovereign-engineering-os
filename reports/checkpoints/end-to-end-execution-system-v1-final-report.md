@@ -6,10 +6,13 @@
 
 ## Final Status
 
-`PENDING_PUBLICATION`
+`ACHIEVED`
 
-This report is created before the first commit and will be updated after the
-branch is pushed and the draft PR URL exists.
+The repository now contains a durable internal Codex execution system with
+resume queues, validation rules, skipped-risk records, execution and recovery
+samples, a static validator, local validation evidence, a dedicated branch, and
+a draft PR. Remote CI is reported after the final report update because another
+report commit would retrigger CI.
 
 ## Branch
 
@@ -17,11 +20,14 @@ branch is pushed and the draft PR URL exists.
 
 ## Commits
 
-Pending publication.
+- `e284c79` - Add Codex execution system v1
+- Final report update commit - the latest PR head after this report update;
+  inspect with `git log --oneline origin/main..HEAD`.
 
 ## PR
 
-Pending draft PR creation.
+Draft PR #576:
+`https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/pull/576`
 
 ## Files Created
 
@@ -59,9 +65,9 @@ Pending draft PR creation.
 | Phase 5: Execution Sample | DONE | `reports/checkpoints/execution-sample-v1.md` |
 | Phase 6: Failure / Recovery Sample | DONE | `reports/checkpoints/failure-recovery-sample-v1.md` |
 | Phase 7: Claim Reduction And Navigation Cleanup | DONE | README/AGENTS navigation; no broad claim rewrite needed |
-| Phase 8: Final Validation | PENDING | Commands listed below |
-| Phase 9: Branch / Commit / Draft PR | PENDING | Commit, push, draft PR |
-| Phase 10: Final Report | PENDING | This report will be updated after publication |
+| Phase 8: Final Validation | DONE | Commands listed below |
+| Phase 9: Branch / Commit / Draft PR | DONE | `e284c79`; draft PR #576 |
+| Phase 10: Final Report | DONE | This report |
 
 ## Evidence Collected
 
@@ -70,14 +76,29 @@ Pending draft PR creation.
 - Existing authority files inspected.
 - Required execution-system files created.
 - Preserved untracked creative directory recorded and left unstaged.
+- Implementation commit `e284c79` pushed to the dedicated branch.
+- Draft PR #576 opened against `main`.
 
 ## Checks Run
 
-Pending final validation.
+- `python3 scripts/codex_execution_system_check_v1.py` passed.
+- `python3 -m py_compile scripts/codex_execution_system_check_v1.py` passed.
+- `python3 scripts/identity_boundary_check_v1.py` passed.
+- `python3 scripts/claim_to_evidence_check_v1.py` passed.
+- `python3 scripts/secret_context_safety_check_v1.py` passed.
+- `python3 scripts/aoos_stage45_check_v1.py` passed.
+- `python3 scripts/observation_check_v1.py` passed.
+- `make codex-execution-system-check` passed.
+- `git diff --check` passed.
+- `git diff --cached --check` passed.
 
 ## Checks Skipped
 
-Pending final validation.
+- Full `make ci` was not run locally because it is broad and already runs in
+  GitHub Actions for the PR. The new check is wired into both Makefile health
+  and the CI workflow.
+- Remote CI status is observed after this final report update is pushed, to
+  avoid recursively changing the report for every CI run.
 
 ## Skipped-Risk Items
 
@@ -88,6 +109,7 @@ See `reports/checkpoints/skipped-risk-register.md`.
 - Merge to `main` requires human review and explicit merge authorization.
 - Production deployment, real-world outreach, live paid APIs, secret handling,
   and stronger external validation claims remain outside this target.
+- Existing untracked `reports/creative/production_spine_v1/` remains unstaged.
 
 ## Human-Responsibility Items
 

@@ -17,8 +17,8 @@
 | Phase 6: Failure / Recovery Sample | DONE | `reports/checkpoints/failure-recovery-sample-v1.md` |
 | Phase 7: Claim Reduction And Navigation Cleanup | DONE | README/AGENTS navigation update; claim scan recorded in final report |
 | Phase 8: Final Validation | DONE | `scripts/codex_execution_system_check_v1.py`; `git diff --check`; focused repository checks recorded in final report |
-| Phase 9: Branch / Commit / Draft PR | IN_PROGRESS | Branch created; commit, push, and draft PR evidence are recorded after publication |
-| Phase 10: Final Report | IN_PROGRESS | `reports/checkpoints/end-to-end-execution-system-v1-final-report.md` |
+| Phase 9: Branch / Commit / Draft PR | DONE | Branch `rework/end-to-end-execution-system-v1-internal`, implementation commit `e284c79`, draft PR #576 |
+| Phase 10: Final Report | DONE | `reports/checkpoints/end-to-end-execution-system-v1-final-report.md` |
 
 ## Resume Rule
 
