@@ -89,14 +89,23 @@ Draft PR #576:
 - `python3 scripts/aoos_stage45_check_v1.py` passed.
 - `python3 scripts/observation_check_v1.py` passed.
 - `make codex-execution-system-check` passed.
+- `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.tracer_bullet.test_root_integrity_verifier -v` passed after updating the root manifest for the scoped Makefile change.
+- `make test-final-runtime-contracts` passed after keeping the aggregate `health` target unchanged and exposing the new check as a separate Makefile target plus CI step.
 - `git diff --check` passed.
 - `git diff --cached --check` passed.
 
 ## Checks Skipped
 
-- Full `make ci` was not run locally because it is broad and already runs in
-  GitHub Actions for the PR. The new check is wired into both Makefile health
-  and the CI workflow.
+- Full local `make ci` was attempted after the first CI failure and exposed the
+  final-runtime-contract expected-health mismatch caused by adding the new
+  target to aggregate `health`. The branch was corrected by keeping aggregate
+  `health` unchanged and running the new check as a separate Makefile target
+  plus explicit CI workflow step.
+- Full local `make ci` is not final local evidence because it ends with a
+  clean-worktree assertion, and this checkout intentionally preserves the
+  pre-existing untracked `reports/creative/production_spine_v1/` directory.
+  Clean GitHub CI is the authoritative full canonical gate for the pushed PR
+  head.
 - Remote CI status is observed after this final report update is pushed, to
   avoid recursively changing the report for every CI run.
 
