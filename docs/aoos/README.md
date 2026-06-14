@@ -41,6 +41,9 @@ operation, recovery, learning, and cross-domain repetition records exist.
   incident, memory, and routing interfaces.
 - `docs/aoos/schemas/` contains JSON Schema contracts for the Stage 5
   interface records.
+- `reports/aoos/evidence-ledger-v1.jsonl` is the initial AOOS evidence ledger
+  seed mapping repository claims to evidence levels and forbidden stronger
+  claims.
 - `reports/aoos/runtime-backlog-v1.json` is the current machine-checkable AOOS
   backlog record.
 - `examples/aoos/stage45-interface-fixture-v1.json` is the minimal fixture

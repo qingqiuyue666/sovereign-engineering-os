@@ -63,6 +63,14 @@ Schema: `docs/aoos/schemas/decision-log-entry.schema.json`.
 
 ## Evidence Ledger
 
+The current seed ledger is `reports/aoos/evidence-ledger-v1.jsonl`. It uses one
+JSON object per line, with each line validated against
+`docs/aoos/schemas/evidence-ledger-entry.schema.json` by
+`scripts/aoos_stage45_check_v1.py`.
+
+This seed ledger is not a sealed evidence vault, append-only runtime, or
+real-world evidence ingestion system.
+
 Required fields:
 
 - evidence id

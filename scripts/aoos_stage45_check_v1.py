@@ -25,6 +25,7 @@ REQUIRED_FILES = (
     Path("templates/aoos/domain-acceptance-rubric-template.md"),
     Path("templates/aoos/tool-roi-review-template.md"),
     Path("templates/aoos/model-tool-routing-decision-template.md"),
+    Path("reports/aoos/evidence-ledger-v1.jsonl"),
     Path("reports/aoos/runtime-backlog-v1.json"),
     Path("reports/checkpoints/aoos-stage45-executable-skeleton-v1.md"),
 )
@@ -44,6 +45,7 @@ REQUIRED_TERMS = (
     "Anti-Goodhart / Anti-Delusion",
     "AOOS Mission Brief Template",
     "AOOS Runtime Backlog",
+    "evidence-ledger-v1.jsonl",
     "runtime-backlog-v1.json",
     "A0-A6",
     "failure_taxonomy_entry",
@@ -107,6 +109,7 @@ SCHEMA_FIXTURE_MAP = (
 )
 
 FIXTURE_PATH = Path("examples/aoos/stage45-interface-fixture-v1.json")
+EVIDENCE_LEDGER_PATH = Path("reports/aoos/evidence-ledger-v1.jsonl")
 BACKLOG_PATH = Path("reports/aoos/runtime-backlog-v1.json")
 BACKLOG_SCHEMA_PATH = Path("docs/aoos/schemas/runtime-backlog.schema.json")
 SCHEMA_VERSION = "aoos-stage5-interface-v1"
@@ -158,6 +161,7 @@ def main() -> int:
             errors.append(f"AOOS docs contain local path marker: {marker}")
 
     _check_schema_interfaces(errors)
+    _check_evidence_ledger_records(errors)
     _check_backlog_record(errors)
 
     if errors:
@@ -206,6 +210,76 @@ def _check_schema_interfaces(errors: list[str]) -> None:
                     errors.append(f"AOOS metric {metric} missing field: {field}")
 
 
+def _check_evidence_ledger_records(errors: list[str]) -> None:
+    path = REPO_ROOT / EVIDENCE_LEDGER_PATH
+    if not path.exists():
+        errors.append(f"missing AOOS evidence ledger: {EVIDENCE_LEDGER_PATH.as_posix()}")
+        return
+    _check_json_text_safety(EVIDENCE_LEDGER_PATH, errors)
+
+    schema = _load_json(Path("docs/aoos/schemas/evidence-ledger-entry.schema.json"), errors)
+    if schema is None:
+        return
+
+    records: list[dict] = []
+    for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+        if not line.strip():
+            continue
+        try:
+            payload = json.loads(line)
+        except json.JSONDecodeError as exc:
+            errors.append(
+                f"{EVIDENCE_LEDGER_PATH.as_posix()} line {line_number} invalid JSON: {exc}"
+            )
+            continue
+        if not isinstance(payload, dict):
+            errors.append(
+                f"{EVIDENCE_LEDGER_PATH.as_posix()} line {line_number} must be object"
+            )
+            continue
+        _check_payload_against_schema(
+            f"evidence_ledger_record[{line_number}]",
+            payload,
+            Path("docs/aoos/schemas/evidence-ledger-entry.schema.json"),
+            schema,
+            errors,
+        )
+        records.append(payload)
+
+    if len(records) < 3:
+        errors.append("AOOS evidence ledger must contain at least three seed records")
+
+    seen_ids: set[str] = set()
+    allowed_levels = {"L0", "L1", "L2", "L3", "L4", "L5"}
+    for record in records:
+        evidence_id = record.get("evidence_id")
+        if evidence_id in seen_ids:
+            errors.append(f"AOOS evidence ledger duplicate evidence_id: {evidence_id}")
+        elif isinstance(evidence_id, str):
+            seen_ids.add(evidence_id)
+        evidence_level = record.get("evidence_level")
+        if evidence_level not in allowed_levels:
+            errors.append(
+                f"AOOS evidence ledger {evidence_id or '<unknown>'} invalid evidence_level: "
+                f"{evidence_level}"
+            )
+        limitations = record.get("limitations")
+        if not isinstance(limitations, list) or not limitations:
+            errors.append(f"AOOS evidence ledger {evidence_id or '<unknown>'} needs limitations")
+        forbidden = record.get("forbidden_stronger_claim")
+        if not isinstance(forbidden, str) or not forbidden:
+            errors.append(
+                f"AOOS evidence ledger {evidence_id or '<unknown>'} needs forbidden stronger claim"
+            )
+        source_ref = record.get("source_ref")
+        if isinstance(source_ref, str) and not source_ref.startswith("https://"):
+            if not (REPO_ROOT / source_ref).exists():
+                errors.append(
+                    f"AOOS evidence ledger {evidence_id or '<unknown>'} source_ref missing: "
+                    f"{source_ref}"
+                )
+
+
 def _check_backlog_record(errors: list[str]) -> None:
     schema = _load_json(BACKLOG_SCHEMA_PATH, errors)
     if schema is not None:
@@ -248,6 +322,7 @@ def _check_backlog_record(errors: list[str]) -> None:
     risk_prefixes = ("A0_", "A1_", "A2_", "A3_", "A4_", "A5_", "A6_")
     allowed_statuses = {
         "ready_for_review",
+        "completed",
         "pending",
         "pending_after_human_review",
         "human_gate_required",

@@ -21,12 +21,12 @@ audience validation, external audit, or product-market fit.
 - PR inspected: #575, `Agent operating protocol v1`
 - PR state: open, ready for review, mergeable at inspection time
 - PR head: `agent-operating-protocol-v1`
-- PR head commit inspected before this checkpoint evidence refresh:
-  `8d3eaa93b472d13521c95502cbde9e1130930e44`
+- PR head commit inspected before the evidence-ledger seed increment:
+  `09073df8bbae5cc141d4ab2946847ed3eb18f929`
 - PR base: `main`
 - Remote check inspected: `canonical-health`
-- Remote check state at inspection time: passed on run `27477537554`
-  (`https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/actions/runs/27477537554`).
+- Remote check state at inspection time: passed on run `27489633162`
+  (`https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/actions/runs/27489633162`).
 - Prior failure observed on run `27476509947`:
   `tests/tracer_bullet/test_os_engine_worker_registry.py` failed
   `test_command_worker_records_watchdog_receipt_artifact` because
@@ -77,6 +77,7 @@ map, and template set that sits behind the existing `AGENTS.md` and
 - `docs/aoos/schemas/runtime-backlog.schema.json`
 - `docs/aoos/schemas/threat-model-record.schema.json`
 - `examples/aoos/stage45-interface-fixture-v1.json`
+- `reports/aoos/evidence-ledger-v1.jsonl`
 - `templates/aoos/README.md`
 - `templates/aoos/mission-brief-template.md`
 - `templates/aoos/evidence-report-template.md`
@@ -109,7 +110,7 @@ map, and template set that sits behind the existing `AGENTS.md` and
 | Mission templates | Added mission brief template covering current state, scope, authority, evidence, stop conditions, rollback, and continuation. | Real task records completed from the template. |
 | Domain packs | Added initial 10-pack structure and acceptance rubric. | Domain-specific real runs and pack refinement. |
 | Runtime backlog | Added a persistent, schema-backed AOOS backlog record with priority, dependency, A0-A6 risk, evidence, acceptance, checks, rollback, owner, evaluator, and promotion fields. | Human review, CI on the pushed head, and repeated backlog operating history. |
-| Evidence schema | Added template, JSON Schema, fixture, and linked existing evidence/no-fake rules. | Ledger runtime or reviewed evidence records. |
+| Evidence schema | Added template, JSON Schema, fixture, seed JSONL ledger, and linked existing evidence/no-fake rules. | Sealed ledger runtime or reviewed real-world evidence records. |
 | Failure taxonomy and learning log | Added template, taxonomy schema, fixture record, and promotion path. | Real failure records promoted to durable controls. |
 | Incident protocol | Linked existing incident response and added AOOS record template plus schema. | Drill or real incident evidence. |
 | Tool/ROI governance | Linked existing tool-selection gate and added ROI template. | Tool review records and exit decisions. |
@@ -136,7 +137,7 @@ map, and template set that sits behind the existing `AGENTS.md` and
 - L1: local command output inspected repository, PR, and latest CI success
   state.
 - L2: repository diff adds AOOS documents, mission/evidence templates,
-  checkpoint, runtime backlog record, and check script.
+  checkpoint, runtime backlog record, evidence ledger seed, and check script.
 - L3: local validation passed for the focused AOOS/static checks and the full
   local tracer-bullet suite listed below.
 - L4: pending human review.
@@ -146,7 +147,8 @@ map, and template set that sits behind the existing `AGENTS.md` and
 
 - `python3 scripts/aoos_stage45_check_v1.py` passed.
   This check now validates the AOOS Markdown anchors, JSON Schema contracts,
-  runtime backlog record, failure taxonomy, threat-model record, and
+  evidence ledger seed, runtime backlog record, failure taxonomy,
+  threat-model record, and
   `examples/aoos/stage45-interface-fixture-v1.json`.
 - `python3 scripts/identity_boundary_check_v1.py` passed.
 - `python3 scripts/observation_check_v1.py` passed.
@@ -187,6 +189,8 @@ map, and template set that sits behind the existing `AGENTS.md` and
   on head `7b63dc92744b6ac8c84648a31a0d3b55a279eb50`.
 - Mission brief template commit `8d3eaa9` passed remote CI run `27477537554`
   on head `8d3eaa93b472d13521c95502cbde9e1130930e44`.
+- Runtime backlog commit `09073df` passed remote CI run `27489633162` on head
+  `09073df8bbae5cc141d4ab2946847ed3eb18f929`.
 
 ## Risks And Blockers
 
@@ -200,6 +204,8 @@ map, and template set that sits behind the existing `AGENTS.md` and
   dashboard, approval queue, scheduler, or real-world workflow is proven.
 - The runtime backlog is a persistent repository record, not a live task runner
   or proof of repeated operating cycles.
+- The AOOS evidence ledger is a seed JSONL record, not a sealed vault,
+  append-only runtime, or proof of real-world evidence ingestion.
 
 ## Rollback Path
 
@@ -221,20 +227,20 @@ after the latest pushed PR head has a green `canonical-health` run.
 ## Continuation Packet
 
 - Continue from PR #575 on branch `agent-operating-protocol-v1`.
-- Latest verified head before this checkpoint evidence refresh:
-  `8d3eaa93b472d13521c95502cbde9e1130930e44`.
-- Latest verified remote CI before this checkpoint evidence refresh:
-  `canonical-health` passed on run `27477537554`.
+- Latest verified head before this evidence-ledger seed increment:
+  `09073df8bbae5cc141d4ab2946847ed3eb18f929`.
+- Latest verified remote CI before this evidence-ledger seed increment:
+  `canonical-health` passed on run `27489633162`.
 - Stage reached: AOOS Stage 4/5 executable skeleton is repository-ready for
-  human review with a schema-backed runtime backlog record. It is not Stage 6/7
-  operation and has no L5 evidence.
+  human review with a schema-backed runtime backlog record and evidence ledger
+  seed. It is not Stage 6/7 operation and has no L5 evidence.
 - Key branch contents: AOOS docs under `docs/aoos/`, templates under
   `templates/aoos/`, JSON Schemas under `docs/aoos/schemas/`, fixture
   `examples/aoos/stage45-interface-fixture-v1.json`, static checker
   `scripts/aoos_stage45_check_v1.py`, root navigation updates, CI inclusion,
   mission brief template, failure taxonomy and threat-model schema records,
-  runtime backlog record, worker-registry watchdog fixture stabilization, and
-  the Node.js 24 CI action migration.
+  runtime backlog record, evidence ledger seed, worker-registry watchdog
+  fixture stabilization, and the Node.js 24 CI action migration.
 - Do not recreate a parallel protocol authority layer. `AGENTS.md` and
   `docs/agent-protocols/` remain the execution authority.
 - Do not stage or delete `reports/creative/production_spine_v1/`.

@@ -40,8 +40,8 @@
         "git diff --check"
       ],
       "rollback_path": "revert the scoped backlog commit and remove the AOOS backlog navigation link",
-      "status": "ready_for_review",
-      "next_action": "Push the PR branch and use CI plus human review as the next evidence gate.",
+      "status": "completed",
+      "next_action": "Use the completed backlog contract to select the next safe A0-A4 item.",
       "owner_role": "Operator Agent",
       "evaluator_required": "aoos_stage45_check_v1 backlog validator",
       "promotion_rule_if_repeated_failure": "If backlog records drift twice, promote required-field checks into CI and the final-report checklist."
@@ -56,15 +56,15 @@
         "AOOS-BL-001"
       ],
       "risk_class": "A1_SAFE_EDIT",
-      "evidence_requirement": "L2 diff or L3 check output",
+      "evidence_requirement": "L3 local and CI checks",
       "acceptance_gate": "A minimal AOOS evidence ledger seed record maps repository claims to evidence levels without claiming real-world validation.",
       "checks_required": [
         "python3 scripts/aoos_stage45_check_v1.py",
         "python3 scripts/claim_to_evidence_check_v1.py"
       ],
       "rollback_path": "revert the scoped evidence-ledger seed commit",
-      "status": "pending_after_human_review",
-      "next_action": "Implement after PR #575 review confirms the backlog shape should remain in this protocol branch.",
+      "status": "ready_for_review",
+      "next_action": "Push the PR branch and use CI plus human review as the next evidence gate.",
       "owner_role": "Evidence Agent",
       "evaluator_required": "claim_to_evidence_check_v1 plus AOOS ledger fixture validation",
       "promotion_rule_if_repeated_failure": "If evidence levels are misstated twice, promote a stricter claim-to-evidence fixture into CI."
