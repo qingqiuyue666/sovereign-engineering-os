@@ -77,8 +77,19 @@ The internal execution-system target requires:
 ```bash
 python3 scripts/codex_execution_system_check_v1.py
 python3 -m py_compile scripts/codex_execution_system_check_v1.py
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.tracer_bullet.test_codex_execution_system_check_v1 -v
+make codex-execution-system-check
 git diff --check
 ```
 
 CI should be reported after the draft PR is pushed. If CI is pending or
 unavailable, the final report must say so directly.
+
+## Eleven-Layer Evidence Pack
+
+`ELEVEN_CORE_DELIVERY_LAYERS_V1_READY` also requires the source freshness audit,
+frontier gap search audit, external project absorption shortlist, real task
+throughput ledger, runtime state ledger, table-review residue closure,
+real-world proof gap ledger, 100-point maturity ladder, continuous maturity
+iteration queue, whole-content completion checklist, final report, and scorecard
+to pass `scripts/codex_execution_system_check_v1.py`.

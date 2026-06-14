@@ -4,6 +4,10 @@
 
 `END_TO_END_EXECUTION_SYSTEM_V1_INTERNAL_READY`
 
+Current extension target:
+
+`ELEVEN_CORE_DELIVERY_LAYERS_V1_READY`
+
 This target means the repository has a durable internal execution system that
 future Codex runs can resume from repository state. It does not mean
 production readiness, external validation, customer validation, paid signal,
@@ -52,6 +56,36 @@ Codex runs must use current-state-first execution:
 - `reports/checkpoints/execution-sample-v1.md`
 - `reports/checkpoints/failure-recovery-sample-v1.md`
 - `reports/checkpoints/end-to-end-execution-system-v1-final-report.md`
+- `CODEX_EXTERNAL_SOURCE_INTAKE_REGISTRY.md`
+- `CODEX_REAL_TASK_THROUGHPUT_LAYER.md`
+- `CODEX_ACCEPTANCE_CASE_LIBRARY.md`
+- `CODEX_STRONG_VALIDATION_LAYER.md`
+- `CODEX_EXTERNAL_PATTERN_ABSORPTION_LAYER.md`
+- `CODEX_PERMISSION_SECURITY_LAYER.md`
+- `CODEX_PRODUCT_DELIVERY_LAYER.md`
+- `CODEX_RUNTIME_STATE_MEMORY_LAYER.md`
+- `CODEX_REVIEW_ANTI_HYPE_LAYER.md`
+- `CODEX_ORGANIZATIONAL_OPERATING_LAYER.md`
+- `CODEX_OPERABILITY_READINESS_LAYER.md`
+- `reports/checkpoints/eleven-core-delivery-layers-v1-final-report.md`
+- `reports/checkpoints/eleven-core-delivery-layers-scorecard-v1.md`
+
+## Eleven-Layer Delivery Loop
+
+The `ELEVEN_CORE_DELIVERY_LAYERS_V1_READY` extension wires these flows:
+
+- external source intake -> frontier gap search
+- frontier gap search -> project absorption shortlist
+- project absorption shortlist -> benchmark criteria
+- benchmark criteria -> acceptance cases
+- acceptance cases -> validation
+- real task ledger -> runtime state ledger
+- permission/security policy -> delivery protocol
+- product delivery layer -> validation matrix
+- review/anti-hype -> final report
+- organizational operating -> reviewer/security/data/release/human responsibility queues
+- operability readiness -> rollback
+- 100-point maturity ladder -> continuous maturity iteration queue
 
 ## Acceptance Criteria
 

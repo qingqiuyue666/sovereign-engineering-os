@@ -63,3 +63,7 @@ The final chat response must report only:
 - checks skipped and why
 - skipped or blocked items
 - whether `END_TO_END_EXECUTION_SYSTEM_V1_INTERNAL_READY` is achieved
+- for `ELEVEN_CORE_DELIVERY_LAYERS_V1_READY`, the source intake summary,
+  frontier gap search summary, external absorption decisions, Run 01 result,
+  second safe micro-task result, maturity verdicts, whole-content checklist
+  result, and explicit non-claim statement

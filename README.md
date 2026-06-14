@@ -109,6 +109,16 @@ documented permission, approval, and evidence boundaries.
 - `CLAUDE.md` -- Claude-compatible project memory and boundaries
 - `CODEX_EXECUTION_SYSTEM.md` -- Codex internal end-to-end execution-system
   map for current-state-first, terminal-state repository work
+- `CODEX_EXTERNAL_SOURCE_INTAKE_REGISTRY.md` -- bounded source intake registry
+  for benchmarks, runtimes, security, supply-chain, observability, and protocol
+  references
+- `CODEX_REAL_TASK_THROUGHPUT_LAYER.md`,
+  `CODEX_ACCEPTANCE_CASE_LIBRARY.md`,
+  `CODEX_STRONG_VALIDATION_LAYER.md`, and the remaining `CODEX_*_LAYER.md`
+  files -- eleven-layer Codex delivery loop for reviewable internal execution
+- `reports/checkpoints/eleven-core-delivery-layers-v1-final-report.md` and
+  `reports/checkpoints/eleven-core-delivery-layers-scorecard-v1.md` --
+  final report and scorecard for `ELEVEN_CORE_DELIVERY_LAYERS_V1_READY`
 - `CODEX_TASK_QUEUE.md` and `CODEX_PHASE_QUEUE.md` -- repository-state resume
   queues for Codex execution work
 - `CODEX_VALIDATION_MATRIX.md` and `CODEX_DELIVERY_PROTOCOL.md` -- validation
