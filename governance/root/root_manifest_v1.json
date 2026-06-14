@@ -38,7 +38,7 @@
       "role": "model_provider_manual_smoke_planner"
     },
     {
-      "git_blob_sha1": "ea06ec8a161e13aeacd6268355808cbea92cc334",
+      "git_blob_sha1": "6e0af999802a330238a06309d1a2e39da50365f6",
       "path": "Makefile",
       "role": "canonical_ci_gate"
     },
@@ -60,7 +60,7 @@
   "runtime_execution_performed": false,
   "secret_value_persisted": false,
   "secret_value_read": false,
-  "status": "production_autonomy_final_gate_health_gate_wiring",
+  "status": "codex_execution_system_health_gate_wiring",
   "version": "v1",
   "next_allowed_action_on_failure": "read_only_seed_recovery_required"
 }

@@ -1,0 +1,56 @@
+{
+  "schema_version": "ai_agent_control_plane_issue_pr_operating_queue_v1",
+  "status": "initialized",
+  "queue": [
+    {
+      "queue_id": "ACP-ISSUE-001",
+      "source": "customer feedback",
+      "trigger": "real feedback artifact arrives",
+      "next_action": "convert feedback to issue with severity and claim boundary",
+      "status": "external_actor_pending"
+    },
+    {
+      "queue_id": "ACP-ISSUE-002",
+      "source": "benchmark issue",
+      "trigger": "external benchmark setup or result exists",
+      "next_action": "record environment, command, logs, result, and claim policy",
+      "status": "external_benchmark_pending"
+    },
+    {
+      "queue_id": "ACP-ISSUE-003",
+      "source": "security finding",
+      "trigger": "reviewer finding arrives",
+      "next_action": "intake severity, mitigation, regression, residual risk, reviewer signoff blocker",
+      "status": "external_reviewer_pending"
+    },
+    {
+      "queue_id": "ACP-ISSUE-004",
+      "source": "stability failure",
+      "trigger": "long-running cycle fails",
+      "next_action": "record failure ledger and recovery action",
+      "status": "ready"
+    },
+    {
+      "queue_id": "ACP-ISSUE-005",
+      "source": "commercial docs sync",
+      "trigger": "buyer material changes",
+      "next_action": "run non-claim audit and update buyer one-pager",
+      "status": "ready"
+    },
+    {
+      "queue_id": "ACP-ISSUE-006",
+      "source": "pricing revision",
+      "trigger": "pricing objection or paid-pilot discussion",
+      "next_action": "update pricing tracker with real feedback source",
+      "status": "external_actor_pending"
+    },
+    {
+      "queue_id": "ACP-ISSUE-007",
+      "source": "deployment blocker",
+      "trigger": "production owner provides environment or policy",
+      "next_action": "update production blocker ledger and rerun operation check",
+      "status": "external_owner_pending"
+    }
+  ]
+}
+

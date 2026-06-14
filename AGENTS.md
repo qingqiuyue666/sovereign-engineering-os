@@ -58,3 +58,21 @@ Cross-domain AOOS module routing, domain packs, Stage 5 interfaces, and
 templates live under `docs/aoos/` and `templates/aoos/`. Use them after the
 agent execution protocol has established current state, authority, and evidence
 boundaries.
+
+## End-To-End Execution System
+
+For 0-to-100 Codex delivery requests, use `CODEX_EXECUTION_SYSTEM.md` as the
+repository-state resume map. It links the root instructions, continuous
+execution protocol, done criteria, risk downgrade policy, queues, validation
+matrix, delivery protocol, samples, skipped-risk register, and final report
+requirements without replacing the authority files above.
+
+For eleven-layer Codex delivery requests, start from
+`CODEX_EXTERNAL_SOURCE_INTAKE_REGISTRY.md`,
+`CODEX_REAL_TASK_THROUGHPUT_LAYER.md`,
+`CODEX_ACCEPTANCE_CASE_LIBRARY.md`, and
+`CODEX_STRONG_VALIDATION_LAYER.md`, then use
+`reports/checkpoints/eleven-core-delivery-layers-v1-final-report.md` as the
+current review report. Keep external sources reference-only unless a
+human/license/security review authorizes copying, dependency adoption, or
+benchmark execution.

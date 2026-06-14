@@ -1,0 +1,65 @@
+{
+  "schema_version": "ai_agent_control_plane_real_world_validation_tracker_v1",
+  "status": "CONTROLLED_AUTONOMOUS_ENGINEERING_OS_REAL_WORLD_VALIDATION_READY_LOCAL_EXTERNAL_EVIDENCE_PENDING",
+  "no_fabrication_rule": true,
+  "empty_external_entries_allowed": true,
+  "external_tracks": [
+    {
+      "track": "external_demo",
+      "required_actor": "real buyer, operator, or reviewer",
+      "required_evidence": "dated demo record, participant/source artifact, scope, feedback, supported and unsupported claims",
+      "current_entries": [],
+      "blocker": "missing real external actor and demo artifact",
+      "safe_substitute": "demo workflow prepared locally",
+      "resume_point": "docs/control-plane/demo-operation-workflow-v1.md"
+    },
+    {
+      "track": "customer_conversation",
+      "required_actor": "real customer or target buyer",
+      "required_evidence": "source feedback artifact with permission to record",
+      "current_entries": [],
+      "blocker": "missing customer permission and source artifact",
+      "safe_substitute": "feedback intake form and issue conversion workflow",
+      "resume_point": "docs/control-plane/customer-feedback-intake-v1.md"
+    },
+    {
+      "track": "external_benchmark_attempt",
+      "required_actor": "benchmark operator or reviewer",
+      "required_evidence": "environment, command, logs, result, contamination review",
+      "current_entries": [],
+      "blocker": "missing benchmark authorization and environment",
+      "safe_substitute": "repo-local benchmark workflow",
+      "resume_point": "docs/control-plane/benchmark-operation-workflow-v1.md"
+    },
+    {
+      "track": "security_review",
+      "required_actor": "independent security reviewer or auditor",
+      "required_evidence": "finding record, mitigation, regression test, residual risk, signoff",
+      "current_entries": [],
+      "blocker": "missing external security reviewer",
+      "safe_substitute": "security review response workflow",
+      "resume_point": "docs/control-plane/security-review-response-workflow-v1.md"
+    },
+    {
+      "track": "production_trial",
+      "required_actor": "production owner",
+      "required_evidence": "deployment mode, approval, telemetry, rollback, incident response, data handling",
+      "current_entries": [],
+      "blocker": "missing production environment and owner approval",
+      "safe_substitute": "production operation blocker ledger",
+      "resume_point": "reports/control-plane/production-operation-blocker-ledger-v1.json"
+    },
+    {
+      "track": "paid_pilot",
+      "required_actor": "buyer and payment owner",
+      "required_evidence": "paid scope, success metrics, payment or signed paid pilot artifact",
+      "current_entries": [],
+      "blocker": "missing buyer payment evidence",
+      "safe_substitute": "paid-pilot readiness gate",
+      "resume_point": "docs/control-plane/paid-pilot-readiness-gate-v1.md"
+    }
+  ],
+  "feedback_to_issue_conversion": "docs/control-plane/customer-feedback-intake-v1.md",
+  "benchmark_claim_policy": "docs/control-plane/benchmark-operation-workflow-v1.md"
+}
+

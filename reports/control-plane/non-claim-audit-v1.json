@@ -1,0 +1,56 @@
+{
+  "schema_version": "ai_agent_control_plane_non_claim_audit_v1",
+  "status": "passed_local",
+  "allowed_local_claim": "AI Agent Execution Control Plane with controlled local low-risk execution, evidence-backed safety gates, commercial validation package, real-world validation workflow, and commercial operation readiness.",
+  "unsupported_claims": [
+    {
+      "claim": "customer-validated",
+      "supported": false,
+      "required_evidence": "real customer feedback artifact"
+    },
+    {
+      "claim": "production-ready",
+      "supported": false,
+      "required_evidence": "production owner approval, deployment, telemetry, rollback, and incident evidence"
+    },
+    {
+      "claim": "enterprise-ready",
+      "supported": false,
+      "required_evidence": "enterprise procurement, security, compliance, support, and legal artifacts"
+    },
+    {
+      "claim": "paid customer",
+      "supported": false,
+      "required_evidence": "payment, invoice, or signed paid pilot"
+    },
+    {
+      "claim": "certified",
+      "supported": false,
+      "required_evidence": "formal auditor certification artifact"
+    },
+    {
+      "claim": "external benchmark-proven",
+      "supported": false,
+      "required_evidence": "authorized external benchmark environment, command, logs, result, and contamination review"
+    },
+    {
+      "claim": "long-term stability",
+      "supported": false,
+      "required_evidence": "multiple dated operation cycles over time"
+    },
+    {
+      "claim": "commercially deployed",
+      "supported": false,
+      "required_evidence": "deployment and production owner artifact"
+    },
+    {
+      "claim": "global maturity",
+      "supported": false,
+      "required_evidence": "external long-running, benchmark, customer, security, compliance, and production evidence"
+    }
+  ],
+  "audit_result": "unsupported external claims are blocked",
+  "final_report_allowed": true,
+  "final_report_boundary": "local V4-V7 package is implemented and external gaps are blockers with resume points"
+}
+

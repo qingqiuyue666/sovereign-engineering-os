@@ -1,0 +1,22 @@
+{
+  "schema_version": "ai_agent_control_plane_resume_point_v1",
+  "resume_id": "ACP-RESUME-001",
+  "branch": "rework/end-to-end-execution-system-v1-internal",
+  "pr_url": "https://github.com/qqyqqyqqy666-wq/sovereign-engineering-os/pull/576",
+  "last_safe_stage": "V7_LOCAL_OPERATION_TRACK_ASSEMBLED",
+  "next_validation_commands": [
+    "python3 scripts/real_world_operation_readiness_check_v1.py --stage all",
+    "python3 -m unittest tests.tracer_bullet.test_real_world_operation_readiness_v1 -v",
+    "git diff --check"
+  ],
+  "external_blockers": [
+    "real customer or buyer feedback",
+    "external benchmark environment and authorization",
+    "independent security reviewer or auditor",
+    "production deployment owner and telemetry",
+    "paid pilot buyer and payment evidence"
+  ],
+  "next_smallest_safe_action_after_unblock": "append the external evidence artifact to reports/control-plane/external-evidence-ledger-v1.json and rerun make real-world-operation-check",
+  "chat_memory_required": false
+}
+

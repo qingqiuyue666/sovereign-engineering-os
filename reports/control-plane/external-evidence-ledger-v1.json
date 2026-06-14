@@ -1,0 +1,29 @@
+{
+  "schema_version": "ai_agent_control_plane_external_evidence_ledger_v1",
+  "status": "initialized_empty_no_external_claims",
+  "required_fields": [
+    "source",
+    "actor",
+    "date",
+    "artifact",
+    "claim_supported",
+    "claim_not_supported",
+    "confidence",
+    "next_action"
+  ],
+  "entries": [],
+  "empty_ledger_is_allowed": true,
+  "fabricated_ledger_is_forbidden": true,
+  "claims_not_supported_by_current_ledger": [
+    "customer-validated",
+    "externally benchmark-proven",
+    "independently security-certified",
+    "commercially deployed",
+    "paid by enterprise customer",
+    "long-term production autonomy-proven",
+    "production-observability-proven",
+    "enterprise procurement-approved"
+  ],
+  "next_action": "Append only real external artifacts with actor/date/source after human-authorized demo, benchmark, review, production trial, or paid pilot."
+}
+

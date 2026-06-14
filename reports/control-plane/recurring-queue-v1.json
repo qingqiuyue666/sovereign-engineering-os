@@ -1,0 +1,55 @@
+{
+  "schema_version": "ai_agent_control_plane_recurring_queue_v1",
+  "queue_status": "initialized",
+  "items": [
+    {
+      "queue_id": "ACP-Q-001",
+      "cadence": "per_pr",
+      "task": "run full-stack operation readiness check",
+      "command": "make real-world-operation-check",
+      "owner": "local agent",
+      "status": "ready"
+    },
+    {
+      "queue_id": "ACP-Q-002",
+      "cadence": "per_cycle",
+      "task": "run repo-local benchmark fixture cycle",
+      "command": "python3 scripts/real_world_operation_readiness_check_v1.py --stage v6",
+      "owner": "local agent",
+      "status": "ready"
+    },
+    {
+      "queue_id": "ACP-Q-003",
+      "cadence": "weekly_or_before_pilot",
+      "task": "security and supply-chain gap review",
+      "command": "make security-check supply-chain-check secret-context-safety-check",
+      "owner": "local agent",
+      "status": "ready"
+    },
+    {
+      "queue_id": "ACP-Q-004",
+      "cadence": "after_external_contact",
+      "task": "ingest customer or reviewer feedback without fabrication",
+      "command": "manual evidence append then make real-world-validation-check",
+      "owner": "human plus local agent",
+      "status": "external_actor_pending"
+    },
+    {
+      "queue_id": "ACP-Q-005",
+      "cadence": "before_buyer_material_change",
+      "task": "commercial material sync and non-claim audit",
+      "command": "make commercial-readiness-check",
+      "owner": "local agent",
+      "status": "ready"
+    },
+    {
+      "queue_id": "ACP-Q-006",
+      "cadence": "per_cleanup",
+      "task": "cleanup only scoped generated residue and preserve known local path",
+      "command": "git status --short",
+      "owner": "local agent",
+      "status": "human_gate_if_unrelated_changes"
+    }
+  ]
+}
+

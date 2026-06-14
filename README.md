@@ -107,6 +107,22 @@ documented permission, approval, and evidence boundaries.
 
 - `AGENTS.md` -- default AI-agent repository instructions
 - `CLAUDE.md` -- Claude-compatible project memory and boundaries
+- `CODEX_EXECUTION_SYSTEM.md` -- Codex internal end-to-end execution-system
+  map for current-state-first, terminal-state repository work
+- `CODEX_EXTERNAL_SOURCE_INTAKE_REGISTRY.md` -- bounded source intake registry
+  for benchmarks, runtimes, security, supply-chain, observability, and protocol
+  references
+- `CODEX_REAL_TASK_THROUGHPUT_LAYER.md`,
+  `CODEX_ACCEPTANCE_CASE_LIBRARY.md`,
+  `CODEX_STRONG_VALIDATION_LAYER.md`, and the remaining `CODEX_*_LAYER.md`
+  files -- eleven-layer Codex delivery loop for reviewable internal execution
+- `reports/checkpoints/eleven-core-delivery-layers-v1-final-report.md` and
+  `reports/checkpoints/eleven-core-delivery-layers-scorecard-v1.md` --
+  final report and scorecard for `ELEVEN_CORE_DELIVERY_LAYERS_V1_READY`
+- `CODEX_TASK_QUEUE.md` and `CODEX_PHASE_QUEUE.md` -- repository-state resume
+  queues for Codex execution work
+- `CODEX_VALIDATION_MATRIX.md` and `CODEX_DELIVERY_PROTOCOL.md` -- validation
+  and draft-PR delivery rules for Codex execution work
 - `docs/agent-protocols/` -- detailed stage-gated agent execution protocols
 - `docs/aoos/` -- cross-domain Agentic Organization Operating System module map, domain packs, and Stage 5 interfaces
 - `docs/aoos/schemas/` -- machine-readable AOOS Stage 5 interface contracts
@@ -187,6 +203,7 @@ Existing repository checks remain relevant for the runtime substrate:
 
 ```bash
 python3 scripts/aoos_stage45_check_v1.py
+python3 scripts/codex_execution_system_check_v1.py
 python3 scripts/identity_boundary_check_v1.py
 python3 scripts/observation_check_v1.py
 python3 scripts/creative_total_check_v3.py
